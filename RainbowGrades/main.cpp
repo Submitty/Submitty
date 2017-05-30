@@ -4,16 +4,13 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
 #include <iomanip>
 #include <map>
 #include <algorithm>
 #include <ctime>
-#include <sstream>
 #include <cmath>
 #include "benchmark.h"
 
-std::vector<std::vector<std::string> > HACKMAXPROJECTS;
 std::string GLOBAL_sort_order;
 
 
@@ -24,8 +21,6 @@ int GLOBAL_ACTIVE_TEST_ZONE = 0;
 #include "gradeable.h"
 #include "grade.h"
 #include "json.hpp"
-
-//using nlohmann::json; //TODO: REMOVE COMMENTED LINE ENTIRELY.
 
 // defined in iclicker.cpp
 std::string ReadQuoted(std::istream &istr);
@@ -475,8 +470,8 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
     int count = one_gradeable_type.value("count",-1);
 
     nlohmann::json ids_list = one_gradeable_type["ids"];
-    for (unsigned int i = 0; i < ids_list.size(); i++) {
-      nlohmann::json ids = ids_list[i];
+    for (unsigned int k = 0; k < ids_list.size(); k++) {
+      nlohmann::json ids = ids_list[k];
       std::string gradeable_id = ids.value("id","");
       assert (gradeable_id != "");
     }
@@ -544,8 +539,8 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
     }
     nlohmann::json ids_list = one_gradeable_type["ids"];
 
-    for (unsigned int i = 0; i < ids_list.size(); i++) {
-      nlohmann::json grade_id = ids_list[i];
+    for (unsigned int k = 0; k < ids_list.size(); k++) {
+      nlohmann::json grade_id = ids_list[k];
       std::string token_key = grade_id.value("id","");
       assert (token_key != "");
 
@@ -561,11 +556,11 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 
       if (!curve.empty()) {
         assert(curve.size() == benchmark_percents.size());
-        for (std::size_t i = 0; i < benchmark_percents.size(); i++) {
-          if (benchmark_percents[i] == "lowest_a-") a_score = curve[i];
-          if (benchmark_percents[i] == "lowest_b-") b_score = curve[i];
-          if (benchmark_percents[i] == "lowest_c-") c_score = curve[i];
-          if (benchmark_percents[i] == "lowest_d") d_score = curve[i];
+        for (std::size_t x = 0; x < benchmark_percents.size(); x++) {
+          if (benchmark_percents[x] == "lowest_a-") a_score = curve[x];
+          if (benchmark_percents[x] == "lowest_b-") b_score = curve[x];
+          if (benchmark_percents[x] == "lowest_c-") c_score = curve[x];
+          if (benchmark_percents[x] == "lowest_d") d_score = curve[x];
         }
       }
 
@@ -700,14 +695,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   }
   
   //std::cout << "7" << std::endl;
-  
-  nlohmann::json::iterator itr = j.find("hackmaxprojects");
-  if (itr != j.end()) {
-    std::vector<std::string> items = j["hackmaxprojects"].get<std::vector<std::string> >();
-    std::cout << "HACK MAX " << items.size() << std::endl;
-    std::cout <<  "   HMP=" << HACKMAXPROJECTS.size() << std::endl;
-    HACKMAXPROJECTS.push_back(items);
-  }
+
   //std::cout << "8" << std::endl;
   
   nlohmann::json useJSON = j["use"];
@@ -1303,10 +1291,10 @@ void processcustomizationfile(std::vector<Student*> &students) {
               float v = 0;
               for (std::size_t k = 0; k < ids.size(); k++) {
                 GRADEABLE_ENUM g;
-                int i;
-                //std::cout << "GRADEABLE_ENUM " << (int)g << i << std::endl;
-                LookupGradeable(ids[k],g,i);
-                v += s->getGradeableItemGrade(g,i).getValue();
+                int item;
+                //std::cout << "GRADEABLE_ENUM " << (int)g << " " << item << std::endl;
+                LookupGradeable(ids[k],g,item);
+                v += s->getGradeableItemGrade(g,item).getValue();
               }
 
               if (v < value) {
@@ -1713,7 +1701,7 @@ void output_helper(std::vector<Student*> &students,  std::string &GLOBAL_sort_or
   int last_section = -1;
 
   for (int S = 0; S < (int)students.size(); S++) {
-    int rank = next_rank;
+    //int rank = next_rank;
     if (students[S] == sp ||
         students[S] == student_average ||
         students[S] == student_stddev ||
@@ -1723,12 +1711,13 @@ void output_helper(std::vector<Student*> &students,  std::string &GLOBAL_sort_or
         students[S] == sd ||
         //        students[S]->getUserName() == "" ||
         !validSection(students[S]->getSection())) {
-      rank = -1;
+      //rank = -1;
     } else {
       if (GLOBAL_sort_order == std::string("by_section") &&
           last_section != students[S]->getSection()) {
         last_section = students[S]->getSection();
-        next_rank = rank = 1;
+        //next_rank = rank = 1;
+        next_rank = 1;
       }
       next_rank++;
     }
@@ -1974,9 +1963,9 @@ void suggest_curves(std::vector<Student*> &students) {
   for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
 
-    for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
+    for (int item = 0; item < GRADEABLES[g].getCount(); item++) {
       
-      std::string gradeable_id = GRADEABLES[g].getID(i);
+      std::string gradeable_id = GRADEABLES[g].getID(item);
       if (gradeable_id == "") continue;
       
       const std::string& gradeable_name = GRADEABLES[g].getCorrespondence(gradeable_id).second;
@@ -1987,8 +1976,8 @@ void suggest_curves(std::vector<Student*> &students) {
       std::map<int, int> section_counts;
       
       for (unsigned int S = 0; S < students.size(); S++) {
-        if (students[S]->getSection() > 0 && students[S]->getGradeableItemGrade(g,i).getValue() > 0) {
-          scores.push_back(students[S]->getGradeableItemGrade(g,i).getValue());
+        if (students[S]->getSection() > 0 && students[S]->getGradeableItemGrade(g,item).getValue() > 0) {
+          scores.push_back(students[S]->getGradeableItemGrade(g,item).getValue());
           section_counts[students[S]->getSection()]++;
         }
       }
@@ -1996,21 +1985,21 @@ void suggest_curves(std::vector<Student*> &students) {
         //std::cout << "   " << scores.size() << " submitted" << std::endl;
         std::sort(scores.begin(),scores.end());
         float sum = 0;
-        for (unsigned int i = 0; i < scores.size(); i++) {
-          sum+=scores[i];
+        for (unsigned int x = 0; x < scores.size(); x++) {
+          sum+=scores[x];
         }
         float average = sum / float(scores.size());
         std::cout << "    average=" << std::setprecision(2) << std::fixed << average;
 
-        student_average->setGradeableItemGrade(g,i,average);
+        student_average->setGradeableItemGrade(g,item,average);
 
         sum = 0;
-        for (unsigned int i = 0; i < scores.size(); i++) {
-          sum+=(average-scores[i])*(average-scores[i]);
+        for (unsigned int x = 0; x < scores.size(); x++) {
+          sum+=(average-scores[x])*(average-scores[x]);
         }
         float stddev = sqrt(sum/float(scores.size()));
         std::cout << "    stddev=" << std::setprecision(2) << std::fixed << stddev;
-        student_stddev->setGradeableItemGrade(g,i,stddev);
+        student_stddev->setGradeableItemGrade(g,item,stddev);
 
         std::cout << "    suggested curve:";
         

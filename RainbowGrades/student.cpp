@@ -93,8 +93,6 @@ void Student::setGradeableItemGrade(GRADEABLE_ENUM g, int i, float value,
 // =============================================================================================
 // GRADER CALCULATION HELPER FUNCTIONS
 
-extern std::vector<std::vector<std::string> > HACKMAXPROJECTS;
-
 float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   if (GRADEABLES[g].getCount() == 0) return 0;
   if (GRADEABLES[g].getMaximum() == 0) return 0;
@@ -112,45 +110,8 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   }
 
   if (g == GRADEABLE_ENUM::TEST && LOWEST_TEST_COUNTS_HALF) {
-    return lowest_test_counts_half_pct();
+      return lowest_test_counts_half_pct();
   }
-
-
-  // ============================================================================
-  // end special rule for projects for op sys
-  // HACK, NOT PERMANENT!
-
-  if (g == GRADEABLE_ENUM::PROJECT && HACKMAXPROJECTS.size() > 0) {
-
-    // collect the scores in a vector
-    std::map<std::string,float> scores;
-
-    for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
-      float my_value = getGradeableItemGrade(g,i).getValue();
-      std::string my_id = GRADEABLES[g].getID(i);
-      //std::cout << "PROJECT THING val=" << my_value << " id=" << my_id << std::endl;
-      scores[my_id] = my_value;
-    }
-
-    // sum the projects
-    float sum = 0;
-    for (unsigned int i = 0; i < HACKMAXPROJECTS.size(); i++) {
-      float my_max = 0;
-      for (unsigned int j = 0; j < HACKMAXPROJECTS[i].size(); j++) {
-        my_max = std::max(my_max,scores[HACKMAXPROJECTS[i][j]]);
-      }
-      //std::cout << "i=" << i << " max=" << my_max << std::endl;
-      sum += my_max;
-    }
-    //std::cout << "sum=" << sum << std::endl;
-
-    return 100*GRADEABLES[g].getPercent()*sum/GRADEABLES[g].getMaximum();
-
-  }
-  // HACK, NOT PERMANENT!
-  // end special rule for projects for op sys
-  // ============================================================================
-
 
   // collect the scores in a vector
   std::vector<float> scores;
