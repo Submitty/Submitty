@@ -601,7 +601,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	    int active = exam_data["active"].get<int>();
 		if (active == 1) {
 
-                  GLOBAL_ACTIVE_TEST_ZONE = i;
+                  GLOBAL_ACTIVE_TEST_ZONE = k;
 
 	      for (nlohmann::json::iterator itr2 = (exam_data).begin(); itr2 != (exam_data).end(); itr2++) {
 	        std::string token2 = itr2.key();
