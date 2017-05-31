@@ -179,6 +179,7 @@ apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql postgresql-contrib postgresql-client postgresql-client-common postgresql-client-9.5
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup
 apt-get install -qqy php7.0 php7.0-cli php-xdebug libapache2-mod-fastcgi php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt
+apt-get install -qqy php7.0-zip
 
 # Check to make sure you got the right setup by typing:
 #   apache2ctl -V | grep MPM
