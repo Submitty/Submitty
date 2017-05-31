@@ -197,7 +197,35 @@ hardening-includes p7zip-full patchutils \
 libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
 javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp junit cmake flex bison spim poppler-utils
+g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils
+
+#CMAKE
+echo "installing cmake" 
+apt-get install -qqy cmake
+
+#GLEW and GLM
+echo "installing graphics libraries"
+apt-get install -qqy glew-utils libglew-dev libglm-dev
+apt-get install -qqy libxrandr-dev xorg-dev
+
+#GLFW
+wget https://github.com/glfw/glfw/releases/download/3.2.1/glfw-3.2.1.zip
+unzip glfw-3.2.1.zip
+cd glfw-3.2.1
+mkdir build 
+cd build                              
+cmake .. 
+make 
+sudo make install 
+cd ../..
+rm -R glfw-3.2.1
+rm glfw-3.2.1.zip
+
+#CMAKE permissions
+#These permissions are necessary so that untrusted user can use pkgconfig with cmake.
+#Note that pkgconfig does not appear until after graphics installs (Section above)
+chmod -R o+rx /usr/local/lib/pkgconfig 
+chmod -R o+rx /usr/local/lib/cmake
 
 # Packages necessary for static analysis
 # graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
