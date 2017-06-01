@@ -216,7 +216,7 @@ class Gradeable extends AbstractModel {
 
         $this->ta_instructions = $details['g_overall_ta_instructions'];
         $this->instructions_url = $details['g_instructions_url'];
-        $this->team_assignment = isset($details['g_team_assignment']) ? $details['team_assignment'] === true : false;
+        $this->team_assignment = isset($details['g_team_assignment']) ? $details['g_team_assignment'] === true : false;
         $this->type = $details['g_gradeable_type'];
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);

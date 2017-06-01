@@ -10,7 +10,7 @@ use app\libraries\GradeableType;
 class TeamListController extends AbstractController {
 	public function __construct(Core $core) {
         parent::__construct($core);
-        $this->gradeables_list = $this->core->loadModel("GradeableList", $this->core, true);
+        $this->gradeables_list = $this->core->loadModel("GradeableList", $this->core);
     }
 
     public function run() {
