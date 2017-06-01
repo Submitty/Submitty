@@ -661,6 +661,11 @@ if (isset($eg->original_grader)) {
     </div>
 HTML;
 }
+else { //Adding this checkbox to simplify checking for grader overwrite.  It's hidden from view so that the first time someone grades, $_POST['overwrite'] is guarenteed to exist
+	$output .= <<<HTML
+	<input type='checkbox' class='hidden' name='overwrite' value='1' checked='checked' style='display:none;' /> 
+HTML;
+}
                 
 if (!($now < new DateTime($eg->eg_details['g_grade_start_date'])) && $eg->eg_details['eg_total'] > 0) {
     if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded)) {
