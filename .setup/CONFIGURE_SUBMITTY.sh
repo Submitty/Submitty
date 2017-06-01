@@ -129,60 +129,69 @@ mkdir -p $SUBMITTY_INSTALL_DIR/.setup
 chown root:root $SUBMITTY_INSTALL_DIR/.setup
 chmod 700 $SUBMITTY_INSTALL_DIR/.setup
 
-# copy the submitty installation script
-rm $SUBMITTY_REPOSITORY/.setup/INSTALL_SUBMITTY.sh > /dev/null 2>&1
-cp $SUBMITTY_REPOSITORY/.setup/INSTALL_SUBMITTY_template.sh $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 
-# set the permissions of this file
-chown root:root $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-chmod 500 $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+########################################################################################################################
+########################################################################################################################
 
-# fillin the necessary variables
-sed -i -e "s|__CONFIGURE__FILLIN__SUBMITTY_REPOSITORY__|$SUBMITTY_REPOSITORY|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__SVN_PATH__|$SVN_PATH|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWCGI_USER__|$HWCGI_USER|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+# WRITE THE VARIABLES TO A FILE
 
-sed -i -e "s|__CONFIGURE__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+CONFIGURATION_FILE=${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh
 
-sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+echo "#!/bin/bash"                                                                            >  $CONFIGURATION_FILE
+echo ""                                                                                       >> $CONFIGURATION_FILE
 
-sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_USER__|$DATABASE_USER|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+echo "# Variables prepared by CONFIGURE_SUBMITTY.sh"                                          >> $CONFIGURATION_FILE
+echo "# Manual editing is allowed (but will be clobbered if CONFIGURE_SUBMITTY.sh is re-run)" >> $CONFIGURATION_FILE
+echo ""                                                                                       >> $CONFIGURATION_FILE
 
-sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__CGI_URL__|$CGI_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+echo "SUBMITTY_REPOSITORY="${SUBMITTY_REPOSITORY}                                             >> $CONFIGURATION_FILE
+echo "SUBMITTY_INSTALL_DIR="${SUBMITTY_INSTALL_DIR}                                           >> $CONFIGURATION_FILE
+echo "SUBMITTY_DATA_DIR="${SUBMITTY_DATA_DIR}                                                 >> $CONFIGURATION_FILE
+echo "SVN_PATH="${SVN_PATH}                                                                   >> $CONFIGURATION_FILE
+echo "HWPUP_USER="${HWPUP_USER}                                                               >> $CONFIGURATION_FILE
+echo "HWCGI_USER="${HWCGI_USER}                                                               >> $CONFIGURATION_FILE
+echo "HWCRON_USER="${HWCRON_USER}                                                             >> $CONFIGURATION_FILE
+echo "HWCRONPHP_GROUP="${HWCRONPHP_GROUP}                                                     >> $CONFIGURATION_FILE
+echo "COURSE_BUILDERS_GROUP="${COURSE_BUILDERS_GROUP}                                         >> $CONFIGURATION_FILE
 
-sed -i -e "s|__CONFIGURE__FILLIN__DEBUGGING_ENABLED__|$DEBUGGING_ENABLED|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+echo "NUM_UNTRUSTED="${NUM_UNTRUSTED}                                                         >> $CONFIGURATION_FILE
+echo "FIRST_UNTRUSTED_UID="${FIRST_UNTRUSTED_UID}                                             >> $CONFIGURATION_FILE
+echo "FIRST_UNTRUSTED_GID="${FIRST_UNTRUSTED_GID}                                             >> $CONFIGURATION_FILE
 
-sed -i -e "s|__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+echo "HWCRON_UID="${HWCRON_UID}                                                               >> $CONFIGURATION_FILE
+echo "HWCRON_GID="${HWCRON_GID}                                                               >> $CONFIGURATION_FILE
+echo "HWPHP_UID="${HWPHP_UID}                                                                 >> $CONFIGURATION_FILE
+echo "HWPHP_GID="${HWPHP_GID}                                                                 >> $CONFIGURATION_FILE
 
+echo "DATABASE_HOST="${DATABASE_HOST}                                                         >> $CONFIGURATION_FILE
+echo "DATABASE_USER="${DATABASE_USER}                                                         >> $CONFIGURATION_FILE
+echo "DATABASE_PASSWORD="${DATABASE_PASSWORD}                                                 >> $CONFIGURATION_FILE
 
-sed -i -e "s|__CONFIGURE__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__|$MAX_INSTANCES_OF_GRADE_STUDENTS|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__|$GRADE_STUDENTS_IDLE_SECONDS|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__|$GRADE_STUDENTS_IDLE_TOTAL_MINUTES|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
-sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__|$GRADE_STUDENTS_STARTS_PER_HOUR|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+echo "TAGRADING_URL="${TAGRADING_URL}                                                         >> $CONFIGURATION_FILE
+echo "SUBMISSION_URL="${SUBMISSION_URL}                                                       >> $CONFIGURATION_FILE
+echo "CGI_URL="${CGI_URL}                                                                     >> $CONFIGURATION_FILE
+echo "TAGRADING_LOG_PATH="${TAGRADING_LOG_PATH}                                               >> $CONFIGURATION_FILE
 
+echo "DEBUGGING_ENABLED="${DEBUGGING_ENABLED}                                                 >> $CONFIGURATION_FILE
+echo "AUTOGRADING_LOG_PATH="${AUTOGRADING_LOG_PATH}                                           >> $CONFIGURATION_FILE
 
-# FIXME: Add some error checking to make sure those values were filled in correctly
+echo "MAX_INSTANCES_OF_GRADE_STUDENTS="${MAX_INSTANCES_OF_GRADE_STUDENTS}                     >> $CONFIGURATION_FILE
+echo "GRADE_STUDENTS_IDLE_SECONDS="${GRADE_STUDENTS_IDLE_SECONDS}                             >> $CONFIGURATION_FILE
+echo "GRADE_STUDENTS_IDLE_TOTAL_MINUTES="${GRADE_STUDENTS_IDLE_TOTAL_MINUTES}                 >> $CONFIGURATION_FILE
+echo "GRADE_STUDENTS_STARTS_PER_HOUR="${GRADE_STUDENTS_STARTS_PER_HOUR}                       >> $CONFIGURATION_FILE
+
+echo ""                                                                                       >> $CONFIGURATION_FILE
+echo "# Now actually run the installation script"                                             >> $CONFIGURATION_FILE
+echo "source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER.sh  \"\$@\""               >> $CONFIGURATION_FILE
+
+chmod u+x ${CONFIGURATION_FILE}
+chmod g-r ${CONFIGURATION_FILE}
+
 
 ########################################################################################################################
 ########################################################################################################################
 
 echo -e "Configuration completed.  Now you may run the installation script"
-echo -e "   sudo $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh"
+echo -e "   sudo ${CONFIGURATION_FILE}"
 echo -e "          or"
-echo -e "   sudo $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh clean\n\n"
+echo -e "   sudo ${CONFIGURATION_FILE} clean\n\n"
