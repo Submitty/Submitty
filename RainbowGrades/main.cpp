@@ -1284,7 +1284,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
             }
 
             std::cout << "search for " << message << std::endl;
-            for (int S = 0; S < (int)students.size(); S++) { //TODO: See if there's a reason this was int / cast .size() to int instead of std::size_t S
+            for (std::size_t S = 0; S < students.size(); S++) {
               Student *s = students[S];
               if (!validSection(students[S]->getSection())) continue;
               //std::cout << "student " << s->getUserName() << std::endl;
@@ -1558,15 +1558,9 @@ void load_student_grades(std::vector<Student*> &students) {
 
                   std::string other_note = "";
                   //                  nlohmann::json obj = (*itr2).value("text",nlohmann::json::object());
-                  //FIXME: itr3 defined in nlohmann scope, itr2 isn't. itr2 above uses (*itr2)., below we use itr2-> which is driving CLion nuts
-                  //FIXME: (cont'd) have to look into the why to understand, but we should be consistent one way or another.
-                  //FIXME: Also, different versions of the library in grading/json.hpp and RainbowGrades/json.hpp why?
-                  //FIXME: (cont'd) Why is the json library in two different places, regardless of version? (with the same namespace)
-
-                  //TODO: Figure out what the underlying object/type is to determine if std::size_t makes sense here or not (esp. long term)
                   nlohmann::json::iterator itr3 = itr2->find("text");
                   if (itr3 != itr2->end()) {
-                    for (int i = 0; i < itr3->size(); i++) {
+                    for (std::size_t i = 0; i < itr3->size(); i++) {
                       other_note += (*itr3)[i].value("Notes","");
                     }  
                   }
@@ -1595,10 +1589,9 @@ void load_student_grades(std::vector<Student*> &students) {
 		  }
 		  
                   if (gradeable_id == GLOBAL_recommend_id) {
-                    //TODO: FIXME: See comments on L1573-1578
                     nlohmann::json::iterator rec = itr2->find("text");
                     if (rec != itr2->end()) {
-                      for (int i = 0; i < (*rec).size(); i++) {
+                      for (std::size_t i = 0; i < (*rec).size(); i++) {
                         for (auto itr8 = (*rec)[i].begin(); itr8 != (*rec)[i].end(); itr8++) {
                           std::string r = itr8.value();
                           s->addRecommendation(std::string(" ") + r);

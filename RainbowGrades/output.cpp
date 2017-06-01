@@ -1,5 +1,3 @@
-//TODO: TEST EXAM SEATING
-
 #include <iostream>
 #include <cassert>
 #include <fstream>
@@ -11,7 +9,6 @@
 #include <map>
 #include <algorithm>
 #include <ctime>
-#include <sstream>
 #include <cmath>
 
 #include "student.h"
