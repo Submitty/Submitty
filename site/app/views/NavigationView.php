@@ -160,7 +160,7 @@ HTML;
                 }
 
                 /** @var Gradeable $g_data */
-                $date = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
+                $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
                 if($g_data->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$this->core->getUser()->accessAdmin()){
                     continue;
                 }

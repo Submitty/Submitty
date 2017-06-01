@@ -646,7 +646,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
   // since we get a "collect2 ld not found" error from g++ otherwise
   char* my_path = getenv("PATH");
   if (my_path == NULL) {
-    setenv("PATH", "/usr/bin", 1);
+    setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
   }
   else {
     std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
