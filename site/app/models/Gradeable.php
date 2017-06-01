@@ -37,8 +37,8 @@ abstract class Gradeable extends AbstractModel {
     /** @var string Instructions to give to TA for grading */
     protected $ta_instructions = "";
     
-    /** @var bool Is this a team gradeable */
-    protected $team_gradeable = false;
+    /** @var bool Is this a team assignment */
+    protected $team_assignment = false;
     
     /** @var string Iris Bucket to place gradeable */
     protected $bucket = null;
@@ -496,6 +496,10 @@ abstract class Gradeable extends AbstractModel {
 
     public function getType() {
         return $this->type;
+    }
+
+    public function getTeamAssignment() {
+        return $this->team_assignment;
     }
 
     public function getNumParts() {

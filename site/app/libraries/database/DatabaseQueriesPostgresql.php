@@ -10,6 +10,7 @@ use app\models\GradeableComponent;
 use app\models\GradeableDb;
 use app\models\GradeableVersion;
 use app\models\User;
+use app\models\Team;
 
 class DatabaseQueriesPostgresql implements IDatabaseQueries{
     /** @var Core */
@@ -163,23 +164,35 @@ ORDER BY egd.g_version", array($g_id, $user_id));
     public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section") {
         $return = array();
         $g_ids_query = "";
-        $users_query = "$1";
+        $users_query = "";
         $params = array();
-        if ($g_ids !== null && !is_array($g_ids)) {
-            $g_ids = array($g_ids);
-            $g_ids_query = implode(",", array_fill(0, count($g_ids), "?"));
-            $params = $g_ids;
+        if ($g_ids !== null) {
+            if (!is_array($g_ids)) {
+                $g_ids = array($g_ids);
+            }
+            if (count($g_ids) > 0) {
+                $g_ids_query = implode(",", array_fill(0, count($g_ids), "?"));
+                $params = $g_ids;
+            }
+            else {
+                return $return;
+            }
         }
 
-        if ($user_ids !== null && !is_array($user_ids)) {
-            $user_ids = array($user_ids);
+        if ($user_ids !== null) {
+            if (!is_array($user_ids)) {
+                $user_ids = array($user_ids);
+            }
+            if (count($user_ids) > 0) {
+                $users_query = implode(",", array_fill(0, count($user_ids), "?"));
+                $params = array_merge($params, $user_ids);
+            }
+            else {
+                return $return;
+            }
         }
         $keys = array("registration_section", "rotating_section");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
-        if ($user_ids !== null && count($user_ids) > 0) {
-            $users_query = implode(",", array_fill(0, count($user_ids), "?"));
-            $params = array_merge($params, $user_ids);
-        }
         $query = "
 SELECT";
         if ($user_ids !== null) {
@@ -674,5 +687,45 @@ VALUES (?, ?, ?, ?)", $params);
     public function getAllGradeablesIds() {
         $this->database->query("SELECT g_id FROM gradeable ORDER BY g_id");
         return $this->database->rows();
+    }
+
+    public function newTeam($g_id, $user_id) {
+        $this->database->query("SELECT * FROM gradeable_teams ORDER BY team_id");
+        $team_id_prefix = count($this->database->rows());
+        $team_id = "{$team_id_prefix}_{$user_id}";
+        $this->database->query("INSERT INTO gradeable_teams (team_id, g_id) VALUES(?,?)", array($team_id, $g_id));
+        $this->database->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
+    }
+
+    public function newTeamInvite($team_id, $user_id) {
+        $this->database->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,0)", array($team_id, $user_id,));
+    }
+
+    public function newTeamMember($team_id, $user_id) {
+        $this->database->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id,));
+    }
+
+    public function removeTeamUser($g_id, $user_id) {
+        $team_ids = array();
+        $this->database->query("SELECT * FROM gradeable_teams WHERE g_id=? ORDER BY team_id", array($g_id));
+        foreach($this->database->rows() as $row) {
+            $team_ids[] = $row['team_id'];
+        }
+        foreach($team_ids as $team_id) {
+            $this->database->query("DELETE FROM teams WHERE team_id=? AND user_id=?", array($team_id, $user_id));
+        }
+    }
+
+    public function getTeamsByGradeableId($g_id) {
+        $teams = array();
+        $this->database->query("SELECT * FROM gradeable_teams WHERE g_id=? ORDER BY team_id", array($g_id));
+        foreach($this->database->rows() as $row) {
+            $teams[] = new Team($row);
+        }
+        for($i = 0; $i < count($teams); $i++) {
+            $this->database->query("SELECT * FROM teams WHERE team_id=? ORDER BY user_id", array($teams[$i]->getId()));
+            $teams[$i]->addUsers($this->database->rows());
+        }
+        return $teams;
     }
 }
