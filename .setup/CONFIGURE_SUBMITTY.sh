@@ -25,7 +25,7 @@ read SUBMISSION_URL
 #echo "What is the url for the Grading Server? (ex: http://localhost/TAGrading/ or https://submitty.cs.rpi.edu/hwgrading/)"
 #read TAGRADING_URL
 
-TAGRADING_URL=${SUBMISSION_URL}hwgrading/
+TAGRADING_URL=${SUBMISSION_URL}/hwgrading/
 
 echo "What is the url for the CGI scripts (cgi-bin)? (ex: http://localhost/cgi-bin/ or https://submitty-cgi.cs.rpi.edu/)"
 read CGI_URL
