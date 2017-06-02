@@ -110,7 +110,7 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   }
 
   if (g == GRADEABLE_ENUM::TEST && LOWEST_TEST_COUNTS_HALF) {
-      return lowest_test_counts_half_pct();
+    return lowest_test_counts_half_pct();
   }
 
   // collect the scores in a vector
