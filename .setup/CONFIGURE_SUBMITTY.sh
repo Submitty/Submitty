@@ -19,12 +19,12 @@ read DATABASE_USER
 echo "What is the database password for the database user $DATABASE_USER?"
 read DATABASE_PASSWORD
 
-echo "What is the url for submission? (ex: http://localhost or https://submitty.cs.rpi.edu/)"
+echo "What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)"
 read SUBMISSION_URL
 
 TAGRADING_URL=${SUBMISSION_URL}/hwgrading
 
-echo "What is the url for the CGI scripts (cgi-bin)? (ex: http://localhost/cgi-bin or https://submitty-cgi.cs.rpi.edu/)"
+echo "What is the url for the CGI scripts (cgi-bin)? (ex: http://localhost/cgi-bin or https://submitty-cgi.cs.rpi.edu)"
 read CGI_URL
 
 echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.103 or file:///var/lib/svn/csci2600)"
