@@ -283,6 +283,7 @@ find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
 # all course builders (instructors & head TAs) need read/execute access to these scripts
 chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
+chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
 chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
@@ -290,6 +291,7 @@ chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/get_version_deta
 chown ${HWCRON_USER}:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
@@ -459,6 +461,8 @@ echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"  
 minutes=0
 while [ $minutes -lt 60 ]; do
     printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
+    minutes2=$(($minutes + 1))
+    printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py > /dev/null\n"                 $minutes2          >> ${HWCRON_CRONTAB_FILE}
     minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
 done
 
