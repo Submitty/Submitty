@@ -101,6 +101,14 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     echo -e "\nDeleting directories for a clean installation\n"
 
+    # save the course index page
+    originalcurrentcourses=/usr/local/submitty/site/app/views/current_courses.php
+    if [ -f $originalcurrentcourses ]; then
+        mytempcurrentcourses=`mktemp`
+        echo "save this file! ${originalcurrentcourses} ${mytempcurrentcourses}"
+        mv ${originalcurrentcourses} ${mytempcurrentcourses}
+    fi
+
     rm -rf ${SUBMITTY_INSTALL_DIR}/hwgrading_website
     rm -rf ${SUBMITTY_INSTALL_DIR}/site
     rm -rf ${SUBMITTY_INSTALL_DIR}/src
@@ -405,6 +413,14 @@ find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
 
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini
 mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DIR}/site/config/master.ini
+
+
+# return the course index page (only necessary when 'clean' option is used)
+if [ -f $mytempcurrentcourses ]; then
+    echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
+    mv ${mytempcurrentcourses} ${originalcurrentcourses}
+fi
+
 
 ################################################################################################################
 ################################################################################################################
