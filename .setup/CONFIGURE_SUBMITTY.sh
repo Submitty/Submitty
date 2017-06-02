@@ -22,8 +22,9 @@ read DATABASE_PASSWORD
 echo "What is the url for submission? (ex: http://localhost or https://submitty.cs.rpi.edu/)"
 read SUBMISSION_URL
 
-echo "What is the url for the Grading Server? (ex: http://localhost/TAGrading or https://submitty.cs.rpi.edu/hwgrading/)"
-read TAGRADING_URL
+#echo "What is the url for the Grading Server? (ex: http://localhost/hwgrading or https://submitty.cs.rpi.edu/hwgrading/)"
+#read TAGRADING_URL
+TAGRADING_URL=SUBMISSION_URL/hwgrading
 
 echo "What is the url for the CGI scripts (cgi-bin)? (ex: http://localhost/cgi-bin or https://submitty-cgi.cs.rpi.edu/)"
 read CGI_URL
@@ -148,7 +149,7 @@ echo "SUBMITTY_REPOSITORY="${SUBMITTY_REPOSITORY}                               
 echo "SUBMITTY_INSTALL_DIR="${SUBMITTY_INSTALL_DIR}                                           >> $CONFIGURATION_FILE
 echo "SUBMITTY_DATA_DIR="${SUBMITTY_DATA_DIR}                                                 >> $CONFIGURATION_FILE
 echo "SVN_PATH="${SVN_PATH}                                                                   >> $CONFIGURATION_FILE
-echo "HWPUP_USER="${HWPUP_USER}                                                               >> $CONFIGURATION_FILE
+echo "HWPHP_USER="${HWPHP_USER}                                                               >> $CONFIGURATION_FILE
 echo "HWCGI_USER="${HWCGI_USER}                                                               >> $CONFIGURATION_FILE
 echo "HWCRON_USER="${HWCRON_USER}                                                             >> $CONFIGURATION_FILE
 echo "HWCRONPHP_GROUP="${HWCRONPHP_GROUP}                                                     >> $CONFIGURATION_FILE
