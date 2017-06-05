@@ -58,7 +58,6 @@ sudo echo -e "localhost
 hsdbu
 hsdbu
 http://localhost
-http://localhost/TAGrading
 http://localhost/cgi-bin
 svn+ssh:192.168.56.103" | sudo bash ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 

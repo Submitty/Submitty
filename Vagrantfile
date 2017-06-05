@@ -9,7 +9,7 @@ SCRIPT
 
 Vagrant.configure(2) do |config|
     # Ubuntu 14.04 (Trusty Tahr) - 64bit
-    config.vm.box = 'ubuntu/xenial64'
+    config.vm.box = 'bento/ubuntu-16.04'
 
     config.vm.network 'private_network', ip: '192.168.56.101', auto_config: false
 
@@ -28,6 +28,10 @@ Vagrant.configure(2) do |config|
     end
 
     config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true
+
+    # FIXME:  Attempted this to fix the symlink permissions problems, but didn't work
+    # (hwcron needs to write the log directories)
+    # config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=777", "fmode=664"]
 
     config.vm.provision 'shell', inline: $script
 

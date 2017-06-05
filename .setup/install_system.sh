@@ -58,10 +58,10 @@ if [ ${VAGRANT} == 1 ]; then
 ##    hsdbu, postgres, root, vagrant                      ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
-##    https://192.168.56.101 (submission)                 ##
-##    https://192.168.56.102 (cgi-bin scripts)            ##
-##    https://192.168.56.103 (svn)                        ##
-##    https://192.168.56.101/hwgrading (tagrading)        ##
+##    http://192.168.56.101 (submission)                  ##
+##    http://192.168.56.102 (cgi-bin scripts)             ##
+##    http://192.168.56.103 (svn)                         ##
+##    http://192.168.56.101/hwgrading (tagrading)         ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##
@@ -101,7 +101,7 @@ addgroup hwcronphp
 addgroup course_builders
 
 if [ ${VAGRANT} == 1 ]; then
-	adduser ubuntu sudo
+	adduser vagrant sudo
 fi
 
 # change the default user umask (was 002)
@@ -117,8 +117,8 @@ adduser hwcgi shadow
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
 	echo "hwcgi:hwcgi" | sudo chpasswd
-	adduser hwphp ubuntu
-	adduser hwcgi ubuntu
+	adduser hwphp vagrant
+	adduser hwcgi vagrant
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
@@ -179,6 +179,7 @@ apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql postgresql-contrib postgresql-client postgresql-client-common postgresql-client-9.5
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup
 apt-get install -qqy php7.0 php7.0-cli php-xdebug libapache2-mod-fastcgi php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt
+apt-get install -qqy php7.0-zip
 
 # Check to make sure you got the right setup by typing:
 #   apache2ctl -V | grep MPM
@@ -197,7 +198,35 @@ hardening-includes p7zip-full patchutils \
 libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
 javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp junit cmake flex bison spim poppler-utils
+g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils
+
+#CMAKE
+echo "installing cmake" 
+apt-get install -qqy cmake
+
+#GLEW and GLM
+echo "installing graphics libraries"
+apt-get install -qqy glew-utils libglew-dev libglm-dev
+apt-get install -qqy libxrandr-dev xorg-dev
+
+#GLFW
+wget https://github.com/glfw/glfw/releases/download/3.2.1/glfw-3.2.1.zip
+unzip glfw-3.2.1.zip
+cd glfw-3.2.1
+mkdir build 
+cd build                              
+cmake .. 
+make 
+sudo make install 
+cd ../..
+rm -R glfw-3.2.1
+rm glfw-3.2.1.zip
+
+#CMAKE permissions
+#These permissions are necessary so that untrusted user can use pkgconfig with cmake.
+#Note that pkgconfig does not appear until after graphics installs (Section above)
+chmod -R o+rx /usr/local/lib/pkgconfig 
+chmod -R o+rx /usr/local/lib/cmake
 
 # Packages necessary for static analysis
 # graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
@@ -230,6 +259,9 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
+# Used by Network Programming class
+apt-get install -qqy libssl-dev
+
 apt-get -qqy autoremove
 
 
@@ -248,6 +280,7 @@ pip3 install PyYAML
 pip3 install psycopg2
 pip3 install sqlalchemy
 pip3 install pylint
+pip3 install psutil
 
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
@@ -414,9 +447,6 @@ chmod 0640 /etc/apache2/suexec/www-data
 a2ensite submitty
 a2ensite cgi
 
-service apache2 restart
-
-
 #################################################################
 # PHP SETUP
 #################
@@ -534,7 +564,6 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 http://192.168.56.101
-http://192.168.56.101/hwgrading
 http://192.168.56.102
 svn+ssh:192.168.56.103
 y" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
@@ -552,18 +581,43 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
 fi
 
+sudo mkdir -p /usr/lib/cgi-bin
+sudo chown -R www-data:www-data /usr/lib/cgi-bin
+
 apache2ctl -t
-service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
+    # Disable OPCache for development purposes as we don't care about the efficiency as much
+    echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
+
+    #
+    # FIXME: commented out since symlink permissions aren't allowing
+    # hwcron to write the shared directory (new virtualbox or vagrant
+    # spec?)
+    #
+    #rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
+    #rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    #mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    #ln -s ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
+    #chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/autograding_logs
+    #chmod 770 ${SUBMITTY_DATA_DIR}/autograding_logs
+
+
+    # don't make it a shared directory
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
-    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
+    mkdir ${SUBMITTY_DATA_DIR}/autograding_logs
+    chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/autograding_logs
+    chmod 750 ${SUBMITTY_DATA_DIR}/autograding_logs
+
+
+    # this probably doesn't work either...
     rm -r ${SUBMITTY_DATA_DIR}/tagrading_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
     mkdir ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
     ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
+    chown hwphp:course_builders ${SUBMITTY_DATA_DIR}/tagrading_logs
+    chmod 770 ${SUBMITTY_DATA_DIR}/tagrading_logs
+
 
     # Call helper script that makes the courses and refreshes the database
     ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py
@@ -576,7 +630,7 @@ if [[ ${VAGRANT} == 1 ]]; then
 
     # Other Universities will need to rerun /bin/setcsvfields to match their
     # classlist csv data.  See wiki for details.
-    ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py 13 12 15 7
+    ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
 # Deferred ownership change
@@ -609,5 +663,14 @@ chmod 2771 ${SUBMITTY_INSTALL_DIR}
 #	rm password.txt
 #	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
 #fi
+
+#################################################################
+# RESTART SERVICES
+###################
+
+service apache2 restart
+service php7.0-fpm restart
+service postgresql restart
+
 echo "Done."
 exit 0
