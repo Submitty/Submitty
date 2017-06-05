@@ -110,7 +110,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $this->assertFalse($config->shouldZeroRubricGrades());
         $this->assertEquals($this->temp_dir, $config->getConfigPath());
         $this->assertEquals("PamAuthentication", $config->getAuthentication());
-        $this->assertEquals("America/Chicago", $config->getTimezone());
+        $this->assertEquals("America/Chicago", $config->getTimezone()->getName());
         $this->assertEquals("", $config->getUploadMessage());
         $this->assertFalse($config->displayCustomMessage());
         $this->assertFalse($config->keepPreviousFiles());
@@ -139,7 +139,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'config_path' => $this->temp_dir,
             'course_ini' => $this->temp_dir.'/courses/s17/csci0000/config/config.ini',
             'authentication' => 'PamAuthentication',
-            'timezone' => 'America/Chicago',
+            'timezone' => 'DateTimeZone',
             'course_home_url' => '',
             'default_hw_late_days' => 2,
             'default_student_late_days' => 3,
@@ -156,12 +156,10 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
 
         ksort($expected);
         ksort($actual);
-        var_dump($expected);
-        var_dump($actual);
         $this->assertEquals($expected, $actual);
     }
 
-    public function testCourseUrl() {
+    public function testHiddenCourseUrl() {
         $extra = array('hidden_details' => array('course_url' => 'http://example.com/course'));
         $this->createConfigFile($extra);
         $config = new Config("s17", "csci0000", $this->master);
@@ -169,11 +167,19 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals("http://example.com/course", $config->getHiddenDetails()['course_url']);
     }
 
+    public function testHiddenTABaseUrl() {
+        $extra = array('hidden_details' => array('ta_base_url' => 'http://example.com/hwgrading'));
+        $this->createConfigFile($extra);
+        $config = new Config("s17", "csci0000", $this->master);
+        $this->assertEquals("http://example.com/hwgrading/", $config->getTABaseUrl());
+        $this->assertEquals("http://example.com/hwgrading", $config->getHiddenDetails()['ta_base_url']);
+    }
+
     public function testDefaultTimezone() {
         $extra = array('site_details' => array('timezone' => null));
         $this->createConfigFile($extra);
         $config = new Config("s17", "csci0000", $this->master);
-        $this->assertEquals("America/New_York", $config->getTimezone());
+        $this->assertEquals("America/New_York", $config->getTimezone()->getName());
     }
 
     public function testDebugTrue() {

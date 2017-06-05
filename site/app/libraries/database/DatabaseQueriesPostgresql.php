@@ -7,7 +7,6 @@ use app\libraries\Database;
 use app\libraries\Utils;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
-use app\models\GradeableDb;
 use app\models\GradeableVersion;
 use app\models\User;
 
@@ -138,7 +137,8 @@ WHERE egd.g_id=? AND egd.user_id=?
 ORDER BY egd.g_version", array($g_id, $user_id));
         $return = array();
         foreach ($this->database->rows() as $row) {
-            $return[$row['g_version']] = new GradeableVersion($row, $due_date, new \DateTimeZone($this->core->getConfig()->getTimezone()));
+            $row['submission_time'] = new \DateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
+            $return[$row['g_version']] = new GradeableVersion($row, $due_date);
         }
 
         return $return;
@@ -165,21 +165,33 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         $g_ids_query = "";
         $users_query = "";
         $params = array();
-        if ($g_ids !== null && !is_array($g_ids)) {
-            $g_ids = array($g_ids);
-            $g_ids_query = implode(",", array_fill(0, count($g_ids), "?"));
-            $params = $g_ids;
+        if ($g_ids !== null) {
+            if (!is_array($g_ids)) {
+                $g_ids = array($g_ids);
+            }
+            if (count($g_ids) > 0) {
+                $g_ids_query = implode(",", array_fill(0, count($g_ids), "?"));
+                $params = $g_ids;
+            }
+            else {
+                return $return;
+            }
         }
 
-        if ($user_ids !== null && !is_array($user_ids)) {
-            $user_ids = array($user_ids);
+        if ($user_ids !== null) {
+            if (!is_array($user_ids)) {
+                $user_ids = array($user_ids);
+            }
+            if (count($user_ids) > 0) {
+                $users_query = implode(",", array_fill(0, count($user_ids), "?"));
+                $params = array_merge($params, $user_ids);
+            }
+            else {
+                return $return;
+            }
         }
         $keys = array("registration_section", "rotating_section", "registration_section_by_first", "registration_section_by_last");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
-        if ($user_ids !== null && count($user_ids) > 0) {
-            $users_query = implode(",", array_fill(0, count($user_ids), "?"));
-            $params = array_merge($params, $user_ids);
-        }
         $query = "
 SELECT";
         if ($user_ids !== null) {
@@ -313,7 +325,7 @@ ORDER BY u.{$section_key}, u.user_id";
 
         foreach ($this->database->rows() as $row) {
             $user = (isset($row['user_id']) && $row['user_id'] !== null) ? new User($row) : null;
-            $return[] = new GradeableDb($this->core, $row, $user);
+            $return[] = new Gradeable($this->core, $row, $user);
         }
 
         return $return;

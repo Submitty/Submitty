@@ -8,7 +8,11 @@ namespace app\models;
  * Model for the GradeableComponent which is a join of the gradeable_component and gradeable_component_data
  * tables for a particular student's gradeable. As we're doing a join with the _data table, the gcd_*
  * fields can be null if this particular gradeable has not yet been graded so we have to give them default
- * values so that we're not propagating nulls around
+ * values so that we're not propagating nulls around.
+ *
+ * The gradeable can either have a max score that is either positive or negative. If it's positive, we
+ * can clamp the earned score between 0 and the max score, and if it's negative, we clamp from the
+ * max score to 0.
  */
 class GradeableComponent extends AbstractModel {
     /** @var int Unique identifier for the component */
@@ -47,15 +51,22 @@ class GradeableComponent extends AbstractModel {
             $this->graded = true;
             $this->score = floatval($details['gcd_score']);
             if (!$this->is_text) {
-              if ($this->max_value > 0) {
-                if ($this->max_value < $this->score) {
-                  $this->score = $this->max_value;
-                } if ($this->score < 0) {
-                  $this->score = 0;
+                if ($this->max_value > 0) {
+                    if ($this->max_value < $this->score) {
+                        $this->score = $this->max_value;
+                    }
+                    elseif ($this->score < 0) {
+                        $this->score = 0;
+                    }
                 }
-              } else {
-                // it's a penalty (negative) item
-              }
+                else {
+                    if ($this->max_value > $this->score) {
+                        $this->score = $this->max_value;
+                    }
+                    elseif ($this->score > 0) {
+                        $this->score = 0;
+                    }
+                }
             }
             $this->comment = $details['gcd_component_comment'];
             if ($this->comment === null) {
