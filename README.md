@@ -1,17 +1,19 @@
-![Submitty Log](http://submitty.org/images/submitty_logo.png)
-
-System instructions here: [HOME](http://submitty.org/)
+<img src="http://submitty.org/images/submitty_logo.png" alt="Submitty Logo" style="width: 500px;"/>
 
 [![Build Status](https://travis-ci.org/Submitty/Submitty.svg?branch=master)](https://travis-ci.org/Submitty/Submitty)
 
-# BACKGROUND
+# Usage
+
+System instructions located at http://submitty.org/
+
+# Background
 
 Submitty is an open source programming assignment submission system
 from the 
 [Rensselaer Center for Open Source Software (RCOS)](https://rcos.io/), launched
 by the [Department of Computer Science](http://www.cs.rpi.edu/) at 
 [Rensselaer Polytechnic Institute (RPI)](http://rpi.edu/).
-The Submitty project is hosted on GitHub.
+The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 
 
 # Key Features
@@ -34,5 +36,6 @@ If you have a question or would like access to our demo site, please contact us 
 
 
 ### LICENSING
-All non 3rd party code in Submitty is under the BSD "3-Clause" License.
+Submitty is licensed under BSD "3-Clause" which can be viewed in [LICENSE](LICENSE.md)  
+Licenses for the 3rd party components can be viewed in [LICENSE-THIRD-PARTY](LICENSE-THIRD-PARTY.md)
 
