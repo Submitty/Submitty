@@ -1642,11 +1642,14 @@ void start_table_open_file(bool full_details,
                  const std::vector<Student*> &students, int S, int month, int day, int year,
                  enum GRADEABLE_ENUM which_gradeable_enum);
 
-void start_table_output(bool full_details, 
+/*void start_table_output(bool full_details,
                  const std::vector<Student*> &students, int S, int month, int day, int year,
                         enum GRADEABLE_ENUM which_gradeable_enum,
-                 Student *sp, Student *sa, Student *sb, Student *sc, Student *sd);
+                 Student *sp, Student *sa, Student *sb, Student *sc, Student *sd);*/
 
+void start_table_output(bool full_details,
+                        const std::vector<Student*> &students, int S, int month, int day, int year,
+                        Student *sp, Student *sa, Student *sb, Student *sc, Student *sd);
 
 void end_table(std::ofstream &ostr,  bool full_details, Student *s);
 
@@ -1688,7 +1691,8 @@ void output_helper(std::vector<Student*> &students,  std::string &GLOBAL_sort_or
   int year = now2->tm_year+1900;
 
   start_table_open_file(true,students,-1,month,day,year,GRADEABLE_ENUM::NONE);
-  start_table_output(true,students,-1,month,day,year,GRADEABLE_ENUM::NONE, sp,sa,sb,sc,sd);
+  //start_table_output(true,students,-1,month,day,year,GRADEABLE_ENUM::NONE, sp,sa,sb,sc,sd);
+  start_table_output(true,students,-1,month,day,year, sp,sa,sb,sc,sd);
 
   int next_rank = 1;
   int last_section = -1;
