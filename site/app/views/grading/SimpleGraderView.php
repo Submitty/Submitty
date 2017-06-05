@@ -18,37 +18,42 @@ class SimpleGraderView extends AbstractView {
     public function checkpointForm($gradeable, $rows, $graders) {
         $return = <<<HTML
 <div class="content">
-            <div style="float: right; margin-bottom: 10px; margin-left: 20px">
+    <div style="float: right; margin-bottom: 10px; margin-left: 20px">
 HTML;
 
+        // Default is viewing your sections sorted by id
+        // Limited grader does not have "View All"
+        // If nothing to grade, Instuctor will see all sections
         if(!isset($_GET['sort'])){
-            $sort = 'first';
+            $sort = 'id';
         }
         else{
             $sort = $_GET['sort'];
         }
-
-        // Default is viewing your sections
-        // Limited grader does not have "View All"
-        // If nothing to grade, Instuctor will see all sections
         if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
-            if($this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || count($this->core->getUser()->getGradingRegistrationSections()) !== 0)){
-                $return .= <<<HTML
-        <a class="btn btn-default"
-            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'sort' => $sort, 'view' => 'all'))}">
-                View All
-        </a>
-HTML;
-            }
+            $text = 'View All';
+            $view = 'all';
         }
         else{
+            $text = 'View Your Sections';
+            $view = null;
+        }
+        if($gradeable->isGradeByRegistration()){
+            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
+        }
+        else{
+            $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),$this->core->getUser()->getId()));
+        }
+
+        if($this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0)){
             $return .= <<<HTML
         <a class="btn btn-default"
-            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'sort' => $sort))}">
-                View Your Sections
+            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'sort' => $sort, 'view' => $view))}">
+                $text
         </a>
 HTML;
         }
+
         $return .= <<<HTML
         </div>
 HTML;
@@ -76,9 +81,9 @@ Red - [SAVE ERROR] Refresh Page
             <tr>
                 <td width="1%"></td>
                 <td width="3%">Section</td>
-                <td width="10%" style="text-align: left"> <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'sort' => 'id', 'view' => $view))}"><span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID</span></a> </td>
-                <td width="10%" style="text-align: left"> <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'sort' => 'first', 'view' => $view))}"><span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name</span></a> </td>
-                <td width="10%" style="text-align: left"> <a colspan="1" href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'sort' => 'last', 'view' => $view))}"><span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name</span></a> </td>
+                <td width="10%" style="text-align: left"><a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'sort' => 'id', 'view' => $view))}"><span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fa fa-sort"></i></a></td>
+                <td width="10%" style="text-align: left"> <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'sort' => 'first', 'view' => $view))}"><span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fa fa-sort"></i></a></td>
+                <td width="10%" style="text-align: left"> <a colspan="1" href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'sort' => 'last', 'view' => $view))}"><span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i></a></td>
 HTML;
         foreach ($gradeable->getComponents() as $component) {
             $return .= <<<HTML
@@ -98,9 +103,9 @@ HTML;
         $colspan = 5 + count($gradeable->getComponents());
         if(count($rows) == 0){
             $return .= <<<HTML
-                <tr class="info">
-                    <td colspan="{$colspan}" style="text-align: center">No Grading To Be Done! :)</td>
-                </tr>
+            <tr class="info">
+                <td colspan="{$colspan}" style="text-align: center">No Grading To Be Done! :)</td>
+            </tr>
 HTML;
         }
         foreach ($rows as $gradeable_row) {
@@ -125,21 +130,11 @@ HTML;
                 else {
                     $section_graders = "Nobody";
                 }
-                if (!isset($_GET['sort']) || $_GET['sort'] === "first") {
-                    $sortby = 0;
-                }
-                elseif($_GET['sort'] === "last") {
-                    $sortby = 1;
-                }
-                else{
-                    $sortby = 2;
-                }
-
                 $return .= <<<HTML
         <tr class="info persist-header">
             <td colspan="{$colspan}" style="text-align: center">
                 Students Enrolled in Section {$display_section}
-                <a target=_blank href="{$this->core->getConfig()->getTABaseUrl()}/account/print/print_checkpoints_gradeable.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&g_id={$gradeable->getId()}&section_id={$display_section}&grade_by_reg_section={$gradeable->isGradeByRegistration()}&sort_by={$sortby}">
+                <a target=_blank href="{$this->core->getConfig()->getTABaseUrl()}/account/print/print_checkpoints_gradeable.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&g_id={$gradeable->getId()}&section_id={$display_section}&grade_by_reg_section={$gradeable->isGradeByRegistration()}&sort_by={$sort}">
                     <i class="fa fa-print"></i>
                 </a>
             </td>

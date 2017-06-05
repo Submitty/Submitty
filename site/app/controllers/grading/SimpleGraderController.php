@@ -32,15 +32,7 @@ class SimpleGraderController extends AbstractController  {
 
         $students = array();
         if ($gradeable->isGradeByRegistration()) {
-            if(!isset($_GET['sort']) || $_GET['sort'] === "first"){
-                $section_key = "registration_section_by_first";
-            }
-            else if($_GET['sort'] === "last"){
-                $section_key = "registration_section_by_last";
-            }
-            else{
-                $section_key = "registration_section";
-            }
+            $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
             if (!isset($_GET['view']) || $_GET['view'] !== "all") {
                 $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
@@ -56,6 +48,15 @@ class SimpleGraderController extends AbstractController  {
             }
             $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
         }
+        if(!isset($_GET['sort']) || $_GET['sort'] === "id"){
+            $sort_key = "u.user_id";
+        }
+        else if($_GET['sort'] === "first"){
+            $sort_key = "u.user_firstname";
+        }
+        else{
+            $sort_key = "u.user_lastname";
+        }
         if(count($sections) === 0 && (!isset($_GET['view']) || $_GET['view'] !== "all") && !$this->core->getUser()->accessAdmin()){
             $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'checkpointForm', $gradeable, $sections, $graders);
             return;
@@ -64,7 +65,7 @@ class SimpleGraderController extends AbstractController  {
             $students = $this->core->getQueries()->getAllUsers($section_key);
         }
         $student_ids = array_map(function(User $user) { return $user->getId(); }, $students);
-        $rows = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids, $section_key);
+        $rows = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids, $section_key, $sort_key);
         $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'checkpointForm', $gradeable, $rows, $graders);
     }
 

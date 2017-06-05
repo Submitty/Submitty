@@ -64,20 +64,20 @@ HTML;
         Graders:
         <div style="margin-left: 20px">
 HTML;
-        foreach ($sections as $key => $section) {
-            if ($key === "NULL") {
-                continue;
-            }
-            if (count($section['graders']) > 0) {
-                $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
-            }
-            else {
-                $graders = "Nobody";
-            }
-            $return .= <<<HTML
+            foreach ($sections as $key => $section) {
+                if ($key === "NULL") {
+                    continue;
+                }
+                if (count($section['graders']) > 0) {
+                    $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
+                }
+                else {
+                    $graders = "Nobody";
+                }
+                $return .= <<<HTML
             Section {$key}: {$graders}<br />
 HTML;
-        }
+            }
         }
         // {$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
         $return .= <<<HTML
@@ -85,14 +85,14 @@ HTML;
         <div style="margin-top: 20px">
 HTML;
         if($percentage !== -1 || $this->core->getUser()->accessFullGrading()){
-        $return .= <<<HTML
+            $return .= <<<HTML
             <a class="btn btn-primary" 
                 href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
                 Grading Homework Overview
             </a>
 HTML;
-        if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
-        $return .= <<<HTML
+            if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
+                $return .= <<<HTML
             <a class="btn btn-primary"
                 href="{$this->core->getConfig()->getTABaseUrl()}account/index.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}">
                 Grade Next Student
@@ -101,7 +101,7 @@ HTML;
     </div>
 </div>
 HTML;
-        }
+            }
         }
         return $return;
     }
@@ -133,7 +133,7 @@ HTML;
             }
             else {
                 if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
-                $return .= <<<HTML
+                    $return .= <<<HTML
         <a class="btn btn-default"
             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId()))}">
             View Your Sections    

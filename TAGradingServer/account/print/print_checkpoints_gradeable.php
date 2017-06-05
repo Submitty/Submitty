@@ -41,20 +41,24 @@ print <<<HTML
     </tr>
 HTML;
 
+$query = "SELECT * FROM users WHERE ";
 if($grade_by_reg_section){
-    if($sort_by == 0){
-        $query = "SELECT * FROM users WHERE registration_section=? AND user_group=? ORDER BY user_firstname, user_lastname, user_id";
-    }
-    elseif($sort_by == 1){
-        $query = "SELECT * FROM users WHERE registration_section=? AND user_group=? ORDER BY user_lastname, user_id";
-    }
-    else{
-        $query = "SELECT * FROM users WHERE registration_section=? AND user_group=? ORDER BY user_id";
-    }
+    $query .= "registration_section=?";
 }
 else{
-    $query = "SELECT * FROM users WHERE rotating_section=? AND user_group=? ORDER BY user_id";
+    $query .= "rotating_section=?";
 }
+$query .= " AND user_group=? ORDER BY ";
+if($sort_by === 'first'){
+    $query .= "user_firstname";
+}
+elseif($sort_by === 'last'){
+    $query .= "user_lastname";
+}
+else{
+    $query .= "user_id";
+}
+
 $db->query($query, array($section,4));
 
 $j = 0;
