@@ -170,12 +170,12 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
         std::cout << "OOPS!  we ran out of exam seating" << std::endl;
       }
       assert (next_za < (int)randomized_available.size());
-      ZoneInfo &zi = zones.find(randomized_available[next_za])->second;
-      s->setExamRoom(zi.building+std::string(" ")+zi.room);
-      s->setExamZone(zi.zone);
+      ZoneInfo &next_zi = zones.find(randomized_available[next_za])->second;
+      s->setExamRoom(next_zi.building+std::string(" ")+next_zi.room);
+      s->setExamZone(next_zi.zone);
       next_za++;
       new_zone_assign++;
-      zi.count++;
+      next_zi.count++;
     }
   }
   
