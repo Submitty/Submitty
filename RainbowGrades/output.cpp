@@ -527,11 +527,6 @@ void SelectBenchmarks(std::vector<int> &select_students, const std::vector<Stude
 }
 
 
-/*void start_table_output( bool for_instructor,
-                 const std::vector<Student*> &students, int rank, int month, int day, int year,
-                        enum GRADEABLE_ENUM g,
-                        Student *sp, Student *sa, Student *sb, Student *sc, Student *sd) {*/
-
 void start_table_output( bool for_instructor,
                          const std::vector<Student*> &students, int rank, int month, int day, int year,
                          Student *sp, Student *sa, Student *sb, Student *sc, Student *sd) {
