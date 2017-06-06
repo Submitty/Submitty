@@ -52,7 +52,6 @@ def main():
         if dirs[0:len(data_dirs)] != data_dirs:
             print("ERROR: BAD REGRADE SUBMISSIONS PATH",input_path)
             raise SystemExit("You need to point to a directory within {}".format(data_dir))
-            continue
 
         # Extract directories from provided pattern path (path may be incomplete)
         pattern_semester="*"
@@ -61,7 +60,6 @@ def main():
         pattern_course="*"
         if len(dirs) > len(data_dirs)+1:
             pattern_course=dirs[len(data_dirs)+1]
-        submissions_folder="submissions"
         if len(dirs) > len(data_dirs)+2:
             if (dirs[len(data_dirs)+2] != "submissions"):
                 raise SystemExit("You must specify the submissions directory within the course")
