@@ -27,14 +27,14 @@ BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 # some error checking on the queues (& permissions of this user)
 
 if not os.path.isdir(INTERACTIVE_QUEUE):
-    raise SystemError("ERROR: interactive queue {} does not exist".format(INTERACTIVE_QUEUE))
+    raise SystemExit("ERROR: interactive queue {} does not exist".format(INTERACTIVE_QUEUE))
 if not os.path.isdir(BATCH_QUEUE):
-    raise SystemError("ERROR: batch queue {} does not exist".format(BATCH_QUEUE))
+    raise SystemExit("ERROR: batch queue {} does not exist".format(BATCH_QUEUE))
 if not os.access(INTERACTIVE_QUEUE, os.R_OK):
     # most instructors do not have read access to the interactive queue
     print("WARNING: interactive queue {} is not readable".format(INTERACTIVE_QUEUE))
 if not os.access(BATCH_QUEUE, os.R_OK):
-    raise SystemError("ERROR: batch queue {} is not readeable".format(BATCH_QUEUE))
+    raise SystemExit("ERROR: batch queue {} is not readeable".format(BATCH_QUEUE))
 
 
 # ======================================================================

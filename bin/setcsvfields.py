@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from __future__ import print_function
 import argparse
 import os
 
@@ -9,7 +8,7 @@ INI_FILE = "student_csv_fields.ini"
 INI_OWNER = "__INSTALL__FILLIN__HWPHP_USER__"
 
 if os.geteuid() != 0:
-    raise SystemError("Only root is allowed to run this script.")
+    raise SystemExit("Only root is allowed to run this script.")
 
 
 def parse_args():
@@ -24,7 +23,7 @@ def parse_args():
 def main():
     args = parse_args()
     if len({args.first_name, args.last_name, args.email, args.section}) != 4:
-        raise SystemError("All passed arguments must be unique.")
+        raise SystemExit("All passed arguments must be unique.")
     ini_file = os.path.join(INI_PATH, INI_FILE)
     with open(ini_file, "w") as open_file:
         open_file.write("""; This sets the CSV fields from a student class list that relate to course DB
