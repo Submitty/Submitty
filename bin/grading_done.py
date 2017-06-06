@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 
-# ======================================================================
-# This script is used to monitor the contents of the two grading
-# queues (interactive & batch).
+"""
+This script is used to monitor the contents of the two grading
+queues (interactive & batch).
 
-# USAGE:
-# ./grading_done.py
-#     [or]
-# ./grading_done.sh --continuous
-
-# ======================================================================
+USAGE:
+./grading_done.py
+    [or]
+./grading_done.py --continuous
+"""
 
 import argparse
 import os
 import subprocess
 import time
 
-# these variables will be replaced by INSTALL.sh
+# these variables will be replaced by INSTALL_SUBMITTY.sh
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
 BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
+
 
 # ======================================================================
 # some error checking on the queues (& permissions of this user)
@@ -35,6 +35,7 @@ if not os.access(INTERACTIVE_QUEUE, os.R_OK):
     print("WARNING: interactive queue {} is not readable".format(INTERACTIVE_QUEUE))
 if not os.access(BATCH_QUEUE, os.R_OK):
     raise SystemError("ERROR: batch queue {} is not readeable".format(BATCH_QUEUE))
+
 
 # ======================================================================
 
@@ -61,29 +62,23 @@ def main():
 
         proc = subprocess.Popen(["pgrep", "grade_students"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, _ = proc.communicate()
+        out = out.decode("utf-8")
+        procs = out.split('\n')
+        # extra newline creates an empty process (also needed when no matching grade processes)
+        procs = [s for s in procs if len(s) > 0]
 
-        if len(str(out)) == 3:
-            # special case, no matching processes
+        # count the processes
+        num_procs = len(procs)
+        if num_procs == 0:
             print ("WARNING: No matching grade_students.sh processes!")
-            grading_processes = 0
-        else:
-            # convert to string
-            out = str(out)
-            # chop of first 2 and last 1 character
-            out = out[2:len(out)-3]
-            # split on escaped newline characters
-            after = out.split('\\n')
-            #print ("after: ",after)
-            grading_processes = len(after)
 
         done = True
-
         batch_queue = os.listdir(BATCH_QUEUE)
         grading_batch_queue = list(filter(lambda x: x.startswith("GRADING"), batch_queue))
         if len(batch_queue) != 0:
             done = False
 
-        print("GRADING PROCESSES:{:3d}       ".format(grading_processes), end="")
+        print("GRADING PROCESSES:{:3d}       ".format(num_procs), end="")
 
         if os.access(INTERACTIVE_QUEUE, os.R_OK):
             # most instructors do not have read access to the interactive queue
@@ -94,7 +89,6 @@ def main():
                 print("                 ", end="")
             else:
                 print("(grading:{:3d})    ".format(len(grading_interactive_queue)), end="")
-
             if len(interactive_queue) != 0:
                 done = False
 

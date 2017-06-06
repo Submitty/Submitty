@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
 
+"""
 Expected directory structure:
 <BASE_PATH>/courses/<SEMESTER>/<COURSES>/submissions/<HW>/<USERNAME>/<VERSION#>
 
@@ -8,90 +8,114 @@ This script will find all submissions that match the provided
 pattern and add them to the grading queue.
 
 USAGE:
-    regrade.sh  <(absolute or relative) PATTERN PATH>
-    regrade.sh  <(absolute or relative) PATTERN PATH>  interactive
+    regrade.py  <one or more (absolute or relative) PATTERN PATH>
+    regrade.py  <one or more (absolute or relative) PATTERN PATH>  --interactive
 """
 
 import argparse
 import json
 import os
 import sys
+import glob
 
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
-
-
-class StoreQueue(argparse.Action):
-    def __call__(self, parser, args, values, option_string=None):
-        if values.lower() not in ["interactive", "batch"]:
-            raise SystemExit("Invalid choice: '{}' (choose from 'INTERACTIVE' or 'BATCH')".format(values))
-        setattr(args, self.dest, values.lower())
 
 
 def arg_parse():
     parser = argparse.ArgumentParser(description="Re-adds any submission folders found in the given path and adds"
                                                  "them to a queue (default batch) for regrading")
-    parser.add_argument("path", metavar="PATH", help="Path (absolute or relative) to submissions to regrade")
-    parser.add_argument("queue", nargs="?", metavar="QUEUE", default="batch",
-                        action=StoreQueue, help="What queue (INTERACTIVE or BATCH) to use for the regrading. Default "
-                                                "is batch.")
+    parser.add_argument("path", nargs="+", metavar="PATH", help="Path (absolute or relative) to submissions to regrade")
+    parser.add_argument("--interactive", dest="interactive", action='store_const', const=True, default=False,
+                        help="What queue (INTERACTIVE or BATCH) to use for the regrading. Default "
+                        "is batch.")
     return parser.parse_args()
-
-
-def check_path(check, user_path):
-    if not os.path.isdir(check):
-        return False
-    return check == user_path[:len(check)] if len(check) <= len(user_path) else check[:len(user_path)] == user_path
 
 
 def main():
     args = arg_parse()
-    input_path = os.path.abspath(args.path)
     data_dir = os.path.join(SUBMITTY_DATA_DIR, "courses")
+    data_dirs = data_dir.split(os.sep)
     grade_queue = []
-    if not os.path.isdir(input_path) or data_dir not in input_path:
-        raise SystemExit("You need to point to a directory within {}".format(data_dir))
-    for semester in os.listdir(data_dir):
-        semester_path = os.path.join(data_dir, semester)
-        if not check_path(semester_path, input_path):
-            continue
-        print("Matching semester: {}".format(semester))
-        for course in os.listdir(semester_path):
-            course_path = os.path.join(semester_path, course)
-            submissions_path = os.path.join(course_path, "submissions")
-            if not check_path(submissions_path, input_path):
-                continue
-            print("Matching course: {}".format(course))
-            for assignment in os.listdir(submissions_path):
-                assignment_path = os.path.join(submissions_path, assignment)
-                if not check_path(assignment_path, input_path):
-                    continue
-                print("Matching assignment: {}".format(assignment))
-                for user in os.listdir(assignment_path):
-                    user_path = os.path.join(assignment_path, user)
-                    if not check_path(user_path, input_path):
-                        continue
-                    print("Matching user: {}".format(user))
-                    for version in os.listdir(user_path):
-                        version_path = os.path.join(user_path, version)
-                        if not check_path(version_path, input_path) or version in ["ACTIVE", "LAST"]:
-                            continue
-                        grade_queue.append({"semester": semester, "course": course, "assignment": assignment,
-                                            "user": user, "version": version})
-                        print("Grade this: {}".format("__".join([semester, course, assignment, user, version])))
 
+    for input_path in args.path:
+        # handle relative path
+        if input_path == '.':
+            input_path = os.getcwd()
+        if input_path[0] != '/':
+            input_path = os.getcwd() + '/' + input_path
+        # remove trailing slash (if any)
+        input_path = input_path.rstrip('/')
+        # split the path into directories
+        dirs = input_path.split(os.sep)
+
+        # must be in the known submitty base data directory
+        if dirs[0:len(data_dirs)] != data_dirs:
+            print("ERROR: BAD REGRADE SUBMISSIONS PATH",input_path)
+            raise SystemExit("You need to point to a directory within {}".format(data_dir))
+            continue
+
+        # Extract directories from provided pattern path (path may be incomplete)
+        pattern_semester="*"
+        if len(dirs) > len(data_dirs):
+            pattern_semester=dirs[len(data_dirs)]
+        pattern_course="*"
+        if len(dirs) > len(data_dirs)+1:
+            pattern_course=dirs[len(data_dirs)+1]
+        submissions_folder="submissions"
+        if len(dirs) > len(data_dirs)+2:
+            if (dirs[len(data_dirs)+2] != "submissions"):
+                raise SystemExit("You must specify the submissions directory within the course")
+        pattern_gradeable="*"
+        if len(dirs) > len(data_dirs)+3:
+            pattern_gradeable=dirs[len(data_dirs)+3]
+        pattern_user="*"
+        if len(dirs) > len(data_dirs)+4:
+            pattern_user=dirs[len(data_dirs)+4]
+        pattern_version="*"
+        if len(dirs) > len(data_dirs)+5:
+            pattern_version=dirs[len(data_dirs)+5]
+
+        # full pattern may include wildcards!
+        pattern = os.path.join(data_dir,pattern_semester,pattern_course,"submissions",pattern_gradeable,pattern_user,pattern_version)
+        print("pattern: ",pattern)
+
+        # Find all matching submissions
+        for d in glob.glob(pattern):
+            if os.path.isdir(d):
+                print("match: ",d)
+                my_dirs = d.split(os.sep)
+                if len(my_dirs) != len(data_dirs)+6:
+                    raise SystemExit("ERROR: directory length not as expected")
+                my_semester=my_dirs[len(data_dirs)]
+                my_course=my_dirs[len(data_dirs)+1]
+                my_gradeable=my_dirs[len(data_dirs)+3]
+                my_user=my_dirs[len(data_dirs)+4]
+                my_version=my_dirs[len(data_dirs)+5]
+                my_path=os.path.join(data_dir,my_semester,my_course,"submissions",my_gradeable,my_user,my_version)
+                if my_path != d:
+                    raise SystemExit("ERROR: path reconstruction failed")
+                # add them to the queue
+                grade_queue.append({"semester": my_semester, "course": my_course, "assignment": my_gradeable,
+                                    "user": my_user, "version": my_version})
+
+    # Check before adding a very large number of systems to the queue
     if len(grade_queue) > 50:
         inp = input("Found {:d} matching submissions. Add to queue? [y/n]".format(len(grade_queue)))
         if inp.lower() not in ["yes", "y"]:
             raise SystemExit("Aborting...")
 
+    which_queue="batch"
+    if args.interactive:
+        which_queue="interactive"
+
     for item in grade_queue:
         file_name = "__".join([item['semester'], item['course'], item['assignment'], item['user'], item['version']])
-        file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_" + args.queue, file_name)
+        file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_"+which_queue, file_name)
         with open(file_name, "w") as open_file:
             json.dump(item, open_file)
         os.system("chmod o+rw {}".format(file_name))
 
-    print("Added {:d} to the {} queue for regrading.".format(len(grade_queue), args.queue.upper()))
+    print("Added {:d} to the {} queue for regrading.".format(len(grade_queue), which_queue.upper()))
 
 
 if __name__ == "__main__":
