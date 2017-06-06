@@ -259,6 +259,9 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
+# Used by Network Programming class
+apt-get install -qqy libssl-dev
+
 apt-get -qqy autoremove
 
 
@@ -277,6 +280,7 @@ pip3 install PyYAML
 pip3 install psycopg2
 pip3 install sqlalchemy
 pip3 install pylint
+pip3 install psutil
 
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
@@ -560,7 +564,6 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 http://192.168.56.101
-http://192.168.56.101/hwgrading
 http://192.168.56.102
 svn+ssh:192.168.56.103
 y" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
@@ -578,7 +581,7 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
 fi
 
-sudo mkdir /usr/lib/cgi-bin
+sudo mkdir -p /usr/lib/cgi-bin
 sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
 apache2ctl -t
@@ -587,14 +590,34 @@ if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much
     echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
 
+    #
+    # FIXME: commented out since symlink permissions aren't allowing
+    # hwcron to write the shared directory (new virtualbox or vagrant
+    # spec?)
+    #
+    #rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
+    #rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    #mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    #ln -s ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
+    #chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/autograding_logs
+    #chmod 770 ${SUBMITTY_DATA_DIR}/autograding_logs
+
+
+    # don't make it a shared directory
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
-    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
+    mkdir ${SUBMITTY_DATA_DIR}/autograding_logs
+    chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/autograding_logs
+    chmod 750 ${SUBMITTY_DATA_DIR}/autograding_logs
+
+
+    # this probably doesn't work either...
     rm -r ${SUBMITTY_DATA_DIR}/tagrading_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
     mkdir ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
     ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
+    chown hwphp:course_builders ${SUBMITTY_DATA_DIR}/tagrading_logs
+    chmod 770 ${SUBMITTY_DATA_DIR}/tagrading_logs
+
 
     # Call helper script that makes the courses and refreshes the database
     ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py
