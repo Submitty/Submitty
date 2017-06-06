@@ -642,7 +642,7 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
             }
             else {
                 $params = array($component->getId(), $gradeable->getGdId(), $component->getScore(),
-                                $component->getComment(), component->getGrader());
+                                $component->getComment(), $component->getGrader());
                 $this->database->query("
 INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id) 
 VALUES (?, ?, ?, ?, ?)", $params);

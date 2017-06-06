@@ -51,7 +51,9 @@ class GradeableComponent extends AbstractModel {
         $this->order = $details['gc_order'];
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->graded = true;
-            $this->grader_id = $details['gcd_grader_id'];
+            if (isset($details['gcd_grader_id'])) {
+                $this->grader_id = $details['gcd_grader_id'];
+            }
             $this->score = floatval($details['gcd_score']);
             if (!$this->is_text) {
                 if ($this->max_value > 0) {
