@@ -205,6 +205,7 @@ CREATE TABLE gradeable_component (
 CREATE TABLE gradeable_component_data (
     gc_id integer NOT NULL,
     gd_id integer NOT NULL,
+    gcd_grader_id character varying(255) NOT NULL,
     gcd_score numeric NOT NULL,
     gcd_component_comment character varying NOT NULL,
     CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id))

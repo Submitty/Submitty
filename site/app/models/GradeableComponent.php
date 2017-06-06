@@ -37,6 +37,8 @@ class GradeableComponent extends AbstractModel {
     protected $comment = "";
 
     protected $graded = false;
+    
+    protected $grader_id;
 
     public function __construct($details) {
         $this->id = $details['gc_id'];
@@ -49,6 +51,7 @@ class GradeableComponent extends AbstractModel {
         $this->order = $details['gc_order'];
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->graded = true;
+            $this->grader_id = $details['gcd_grader_id'];
             $this->score = floatval($details['gcd_score']);
             if (!$this->is_text) {
                 if ($this->max_value > 0) {
@@ -121,5 +124,13 @@ class GradeableComponent extends AbstractModel {
 
     public function hasGrade() {
         return $this->graded;
+    }
+    
+    public function getGrader() {
+        return $this->grader_id;
+    }
+    
+    public function setGrader($new_grader) {
+        return $this->grader_id = $new_grader;
     }
 }

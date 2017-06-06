@@ -636,16 +636,16 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
 
         foreach ($gradeable->getComponents() as $component) {
             if ($component->hasGrade()) {
-                $params = array($component->getScore(), $component->getComment(), $component->getId(), $gradeable->getGdId());
+                $params = array($component->getScore(), $component->getComment(), $component->getGrader(), $component->getId(), $gradeable->getGdId());
                 $this->database->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=? WHERE gc_id=? AND gd_id=?", $params);
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=? WHERE gc_id=? AND gd_id=?", $params);
             }
             else {
                 $params = array($component->getId(), $gradeable->getGdId(), $component->getScore(),
-                                $component->getComment());
+                                $component->getComment(), component->getGrader());
                 $this->database->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment) 
-VALUES (?, ?, ?, ?)", $params);
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id) 
+VALUES (?, ?, ?, ?, ?)", $params);
             }
 
         }

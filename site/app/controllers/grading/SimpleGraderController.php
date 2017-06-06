@@ -91,6 +91,7 @@ class SimpleGraderController extends AbstractController  {
         foreach ($gradeable->getComponents() as $component) {
             if (isset($_POST['scores'][$component->getId()])) {
                 $component->setScore($_POST['scores'][$component->getId()]);
+                $component->setGrader($this->core->getUser()->getId());
             }
         }
 
