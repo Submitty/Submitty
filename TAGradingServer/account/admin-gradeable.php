@@ -542,7 +542,7 @@ HTML;
             </div>
             <div class="gradeable_type_options numeric" id="numeric">
                 <br />
-                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val"/> 
+                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" onchange="calculateTotalScore();" class="int_val"/> 
                 &emsp;&emsp;
                 
                 How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val"/>
@@ -559,6 +559,14 @@ HTML;
                                 <th> Extra Credit?</th>
                             </tr>
                         </thead>
+                        <!-- Footers -->
+                        <tfoot style="background: #E1E1E1;">
+                            <tr>
+                                <th> Max Points </th>
+                                <th><strong id="totalScore"></strong></th>
+                                <th>(<strong id="totalEC"></strong>)</th>
+                            </tr>
+                        </tfoot>
                         <tbody style="background: #f9f9f9;">
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
@@ -1156,6 +1164,14 @@ HTML;
                 $('#mult-field-'+numNumeric,'.numerics-table').remove();
             }
             --numNumeric;
+        }
+
+        function calculateTotalScore(){
+            var score = 0;
+            var ec = 0;
+
+            document.getElementById("totalScore").innerHTML = score;
+            document.getElementById("totalEC").innerHTML = ec;
         }
         
         function addText(label){
