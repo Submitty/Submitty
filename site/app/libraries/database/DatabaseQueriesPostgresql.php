@@ -194,6 +194,19 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         $section_key = (in_array($section_key, $section_keys)) ? $section_key : "registration_section";
         $sort_keys = array("u.user_firstname", "u.user_lastname", "u.user_id");
         $sort_key = (in_array($sort_key, $sort_keys)) ? $sort_key : "u.user_id";
+        $sort = array();
+        switch ($sort_key) {
+            case 'u.user_firstname':
+                $sort[] = 'u.user_firstname';
+            case 'u.user_lastname':
+                $sort[] = 'u.user_lastname';
+            case 'u.user_id':
+                $sort[] = 'u.user_id';
+                break;
+            default:
+                $sort[] = 'u.user_firstname';
+        }
+        $sort_key = implode(', ', $sort);
         $query = "
 SELECT";
         if ($user_ids !== null) {

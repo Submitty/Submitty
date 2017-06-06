@@ -49,15 +49,16 @@ else{
     $query .= "rotating_section=?";
 }
 $query .= " AND user_group=? ORDER BY ";
+$sort = array();
 if($sort_by === 'first'){
-    $query .= "user_firstname";
+    $sort[] = 'user_firstname';
+    $sort[] = 'user_lastname';
 }
 elseif($sort_by === 'last'){
-    $query .= "user_lastname";
+    $sort[] = 'user_lastname';
 }
-else{
-    $query .= "user_id";
-}
+$sort[] = 'user_id';
+$query .= implode(', ', $sort);
 
 $db->query($query, array($section,4));
 
