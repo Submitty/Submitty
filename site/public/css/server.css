@@ -480,6 +480,17 @@ table tr.table-header {
     width: 95%;
 }
 
+.option-small-input {
+    float: left;
+    /*margin-top: 10px;*/
+    width: 10%;
+}
+
+.option-small-input > textarea,
+.option-small-input > input[type="text"] {
+    width: 20%;
+}
+
 .post-panel-btn {
     height: 20px;
     padding-right: 10px;

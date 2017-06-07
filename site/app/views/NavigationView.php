@@ -229,10 +229,11 @@ HTML;
                 {$gradeable_grade_range}</button>
 HTML;
                     }
+                    // onclick="location.href='{$ta_base_url}/account/account-numerictext-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                     elseif($g_data->getType() == GradeableType::NUMERIC_TEXT){
                         $gradeable_grade_range = <<<HTML
                 <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
-                onclick="location.href='{$ta_base_url}/account/account-numerictext-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
+                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'numeric', 'action' => 'data_entry', 'g_id' => $gradeable))}'">
                 {$gradeable_grade_range}</button>
 HTML;
                     }

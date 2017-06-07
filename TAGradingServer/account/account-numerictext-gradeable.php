@@ -17,7 +17,7 @@ if (!User::$is_administrator) {
       // FIXME  : THIS SHOULD ONLY BE AVAILABLE TO FULL ACCESS GRADERS
       //
 
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-numerictext-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&all=true'>View All Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-numerictext-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&all=true'>View All Sections THIS IS ACCOUNT-NUMERICTEXT-GRADEABLE.PHP</a>";
     }
 }
 

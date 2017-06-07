@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\controllers\grading\ElectronicGraderController;
 use app\controllers\grading\SimpleGraderController;
+use app\controllers\grading\NumericGraderController;
 
 class GradingController extends AbstractController{
     public function run() {
@@ -18,6 +19,9 @@ class GradingController extends AbstractController{
                 break;
             case 'electronic':
                 $controller = new ElectronicGraderController($this->core);
+                break;
+            case 'numeric':
+                $controller = new NumericGraderController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));

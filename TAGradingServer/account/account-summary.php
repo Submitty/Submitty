@@ -264,7 +264,7 @@ HTML;
         if (isset($_GET['all']) && $_GET['all'] == "true") {
             $button = "<div class='btn all_sections'>View Your Sections</div>";
         } else {
-            $button = "<div class='btn all_sections'>View All Sections</div>";
+            $button = "<div class='btn all_sections'>View All Sections THIS IS ACCOUNT-SUMMARY.PHP</div>";
         }
     } else {
         $button = "";
