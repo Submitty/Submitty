@@ -27,12 +27,8 @@ Vagrant.configure(2) do |config|
       vb.customize ['guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 10000 ]
     end
 
-    config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true
-
-    # FIXME:  Attempted this to fix the symlink permissions problems, but didn't work
-    # (hwcron needs to write the log directories)
-    # config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=777", "fmode=664"]
-
+    config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
+    
     config.vm.provision 'shell', inline: $script
 
     config.vm.network 'forwarded_port', guest: 5432, host: 15432
