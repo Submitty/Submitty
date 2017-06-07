@@ -248,7 +248,7 @@ if($user_is_administrator){
     .required::-webkit-input-placeholder { color: red; }
     .required:-moz-placeholder { color: red; }
     .required::-moz-placeholder { color: red; }
-    .required:-ms-input-placeholder { color: red; 
+    .required:-ms-input-placeholder { color: red; }
         
 </style>
 
@@ -562,9 +562,9 @@ HTML;
                         <!-- Footers -->
                         <tfoot style="background: #E1E1E1;">
                             <tr>
-                                <th> Max Points </th>
-                                <th><strong id="totalScore"></strong></th>
-                                <th>(<strong id="totalEC"></strong>)</th>
+                                <td><strong> MAX POINTS </strong></td>
+                                <td><strong id="totalScore"></strong></td>
+                                <td><strong id="totalEC"></strong></td>
                             </tr>
                         </tfoot>
                         <tbody style="background: #f9f9f9;">
@@ -574,10 +574,10 @@ HTML;
                                <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0"/> 
                            </td>  
                             <td>     
-                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" /> 
+                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" onchange="calculateTotalScore();" value="0"/> 
                            </td>                           
                            <td>     
-                                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" />
+                                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" onclick="calculateTotalScore();" value=""/>
                            </td> 
                         </tr>
                     </table>
@@ -1107,6 +1107,25 @@ HTML;
          }
     });
 
+    function calculateTotalScore(){
+        var total_score = 0;
+        var total_ec = 0;
+
+        $('.numerics-table').find('.multi-field').each(function(){
+            max_score = 0;
+            extra_credit = false;
+
+            max_score = parseFloat($(this).find('.max_score').val());
+            extra_credit = $(this).find('.numeric_extra').is(':checked') == true;
+
+            if (extra_credit === true) total_ec += max_score;
+            else total_score += max_score;
+        });
+
+        document.getElementById("totalScore").innerHTML = total_score;
+        document.getElementById("totalEC").innerHTML = "(" + total_ec + ")";
+    }
+
     $(document).ready(function() {
         var numCheckpoints=1;
         
@@ -1164,14 +1183,6 @@ HTML;
                 $('#mult-field-'+numNumeric,'.numerics-table').remove();
             }
             --numNumeric;
-        }
-
-        function calculateTotalScore(){
-            var score = 0;
-            var ec = 0;
-
-            document.getElementById("totalScore").innerHTML = score;
-            document.getElementById("totalEC").innerHTML = ec;
         }
         
         function addText(label){
@@ -1590,6 +1601,7 @@ HTML;
         currentRow.children()[1].children[1].checked = newRow.children()[child].children[1].checked;
         newRow.children()[child].children[1].checked = temp;
     }
+    calculateTotalScore();
     calculatePercentageTotal();
     </script>
 HTML;
