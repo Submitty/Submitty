@@ -182,9 +182,9 @@ print <<<HTML
                             <th>User ID</th>
                             <th>Name</th>
 HTML;
-if ($colspan2 === 0){
+if ($colspan === 0){ //If I'm right, colspan2 should be colspan here and iff, then grades would not be displayed
     print <<<HTML
-                            <th width="80%"colspan="{$colspan}">Grades</th>
+                         <!--   <th width="80%"colspan="{$colspan}">Grades</th> -->
 HTML;
 }
 else{
