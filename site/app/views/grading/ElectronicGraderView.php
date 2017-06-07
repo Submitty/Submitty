@@ -12,7 +12,7 @@ class ElectronicGraderView extends AbstractView {
      * @param array     $sections
      * @return string
      */
-    public function overviewPage($gradeable, $sections) {
+    public function statusPage($gradeable, $sections) {
         $course = $this->core->getConfig()->getCourse();
         $semester = $this->core->getConfig()->getSemester();
         $graded = 0;
@@ -88,7 +88,7 @@ HTML;
             $return .= <<<HTML
             <a class="btn btn-primary" 
                 href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
-                Grading Homework Overview
+                Grading Details
             </a>
 HTML;
             if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
@@ -117,35 +117,34 @@ HTML;
 <div class="content">
     
 HTML;
-        if (!$this->core->getUser()->accessAdmin()) {
+        // Default is viewing your sections
+        // Limited grader does not have "View All" option
+        // If nothing to grade, Instructor will see all sections
+        if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
+            $text = 'View All';
+            $view = 'all';
+        }
+        else{
+            $text = 'View Your Sections';
+            $view = null;
+        }
+        if($gradeable->isGradeByRegistration()){
+            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
+        }
+        else{
+            $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),$this->core->getUser()->getId()));
+        }
+
+        if($this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0)){
             $return .= <<<HTML
     <div style="float: right; margin-bottom: 10px">
-HTML;
-            if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
-                if ($this->core->getUser()->accessFullGrading()){
-                $return .= <<<HTML
         <a class="btn btn-default"
-            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId(), 'view' => 'all'))}">
-            View All    
+            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}">
+            $text
         </a>
-HTML;
-                }
-            }
-            else {
-                if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
-                    $return .= <<<HTML
-        <a class="btn btn-default"
-            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId()))}">
-            View Your Sections    
-        </a>
-HTML;
-                }
-            }
-            $return .= <<<HTML
     </div>
 HTML;
         }
-
         $return .= <<<HTML
     <h2>Grade Details for {$gradeable->getName()}</h2>
     <table class="table table-striped table-bordered persist-area">
@@ -154,7 +153,8 @@ HTML;
                 <td width="3%"></td>
                 <td width="5%">Section</td>
                 <td width="20%" style="text-align: left">User ID</td>
-                <td width="30%" colspan="2">Name</td>
+                <td width="15%" colspan="1">First Name</td>
+                <td width="15%" colspan="1">Last Name</td>
                 <td width="14%">Autograding</td>
                 <td width="10%">TA Grading</td>
                 <td width="10%">Total</td>
