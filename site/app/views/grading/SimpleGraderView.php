@@ -142,9 +142,16 @@ HTML;
                     else {
                         $background_color = "";
                     }
-                    $return .= <<<HTML
-               <td class="cell-grade" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-score="{$component->getScore()}" style="{$background_color}"></td>
+                    if($component->hasGrade()) {
+                        $return .= <<<HTML
+                    <td class="cell-grade" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-score="{$component->getScore()}" style="{$background_color}">{$component->getGrader()}</td>
 HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+                    <td class="cell-grade" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-score="{$component->getScore()}" style="{$background_color}"></td>
+HTML;
+                    }
                 }
                 $gradeable_row++;
                 $col++;

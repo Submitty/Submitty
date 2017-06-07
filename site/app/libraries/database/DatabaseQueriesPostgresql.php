@@ -276,9 +276,11 @@ LEFT JOIN (
   LEFT JOIN (
     SELECT
       gd_id,
+      gcd_grade_time,
       array_agg(gc_id) AS array_gcd_gc_id,
       array_agg(gcd_score) as array_gcd_score,
-      array_agg(gcd_component_comment) as array_gcd_component_comment
+      array_agg(gcd_component_comment) as array_gcd_component_comment,
+      array_agg(gcd_grader_id) as array_gcd_grader_id
     FROM gradeable_component_data
     GROUP BY gd_id
   ) AS in_gcd ON in_gd.gd_id = in_gcd.gd_id
@@ -638,13 +640,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
             if ($component->hasGrade()) {
                 $params = array($component->getScore(), $component->getComment(), $component->getGrader(), $component->getId(), $gradeable->getGdId());
                 $this->database->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=? WHERE gc_id=? AND gd_id=?", $params);
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_grade_time=NOW() WHERE gc_id=? AND gd_id=?", $params);
             }
             else {
                 $params = array($component->getId(), $gradeable->getGdId(), $component->getScore(),
-                                $component->getComment(), $component->getGrader());
+                                $component->getComment(), $component->getGrader(), "NOW()");
                 $this->database->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id) 
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grade_time) 
 VALUES (?, ?, ?, ?, ?)", $params);
             }
 

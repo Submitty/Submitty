@@ -37,8 +37,10 @@ class GradeableComponent extends AbstractModel {
     protected $comment = "";
 
     protected $graded = false;
-    
+    /** @var string Contains the user_id of the ta or instructor who graded the component*/
     protected $grader_id;
+    /** @var timestamp Contains the date and time that the grade was given*/
+    protected $grade_time;
 
     public function __construct($details) {
         $this->id = $details['gc_id'];
@@ -53,6 +55,7 @@ class GradeableComponent extends AbstractModel {
             $this->graded = true;
             if (isset($details['gcd_grader_id'])) {
                 $this->grader_id = $details['gcd_grader_id'];
+                $this->grade_time = $details['gcd_grade_time'];
             }
             $this->score = floatval($details['gcd_score']);
             if (!$this->is_text) {
@@ -134,5 +137,8 @@ class GradeableComponent extends AbstractModel {
     
     public function setGrader($new_grader) {
         return $this->grader_id = $new_grader;
+    }
+    public function getGradeTime() {
+        return $this->grade_time;
     }
 }
