@@ -154,7 +154,7 @@ extern std::map<GRADEABLE_ENUM,Gradeable>  GRADEABLES;
 
 inline void LookupGradeable(const std::string &id,
                      GRADEABLE_ENUM &g_e, int &i) {
-  for (int k = 0; k < ALL_GRADEABLES.size(); k++) {
+  for (std::size_t k = 0; k < ALL_GRADEABLES.size(); k++) {
     GRADEABLE_ENUM e = ALL_GRADEABLES[k];
     Gradeable g = GRADEABLES[e];
     if (g.hasCorrespondence(id)) {
