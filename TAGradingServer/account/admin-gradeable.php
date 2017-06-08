@@ -64,7 +64,6 @@ if($user_is_administrator){
             $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
                         ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
             $num_text = $db->row()['cnt'];
-
         }
         
         //figure out if the gradeable has grades or not
@@ -267,7 +266,7 @@ HTML;
 if (!$have_old_edit){
   print <<<HTML
             <div style="padding-left: 200px;">
-              From Template: <select name="gradeable_template" style='width: 170px;' value=''>
+              From Template: <select name="gradeable_template" style='width: 170px;' value='' >
             </div>
             <option>--None--</option>
 HTML;
