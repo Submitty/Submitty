@@ -26,6 +26,9 @@ COURSE_BUILDERS_GROUP="__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__"
 
 ###########################################################################
 def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits):
+    if not os.path.exists(my_path):
+        print("ERROR! "+my_path+" does not exist\n", file=sys.stderr)
+        return False
     ret_val = True
     try:
         pwd.getpwnam(my_owner)
@@ -40,11 +43,8 @@ def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits):
     if is_dir and not os.path.isdir(my_path):
         print("ERROR! "+my_path+" should be a directory!\n", file=sys.stderr)
         ret_val = False
-    if not is_dir and os.path.isdir(my_path):
+    elif not is_dir and os.path.isdir(my_path):
         print("ERROR! "+my_path+" should not be a directory!\n", file=sys.stderr)
-        ret_val = False
-    if not os.path.exists(my_path):
-        print("ERROR! "+my_path+" does not exist\n", file=sys.stderr)
         ret_val = False
     if pwd.getpwuid(os.stat(my_path).st_uid).pw_name != my_owner:
         print("ERROR! "+my_path+" should be owned by "+my_owner+"\n", file=sys.stderr)
