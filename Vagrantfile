@@ -28,7 +28,7 @@ Vagrant.configure(2) do |config|
     end
 
     config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
-    
+
     config.vm.provision 'shell', inline: $script
 
     config.vm.network 'forwarded_port', guest: 5432, host: 15432
