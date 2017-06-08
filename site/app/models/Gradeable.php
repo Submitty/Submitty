@@ -264,10 +264,16 @@ class Gradeable extends AbstractModel {
                         if ($details['array_gcd_gc_id'][$j] === $component_details['gc_id']) {
                             $component_details['gcd_score'] = $details['array_gcd_score'][$j];
                             $component_details['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
-                            $component_details['gcd_grader_id'] = $details['array_gcd_grader_id'][$j];
                             break;
                         }
                     }
+                    
+                    $component_details['gcd_grader_id'] = explode(',', trim($details['array_gcd_grader_id'], "{}"))[$i];
+                    $component_details['gcd_grade_time'] = explode(',', trim($details['array_gcd_grade_time'], "{}"))[$i];
+                    /*
+                    $component_details['gcd_grader_id'] = $details['array_gcd_grader_id'];
+                    $component_details['gcd_grade_time'] = $details['array_gcd_grade_time'];
+                    */
                 }
                 $this->components[$component_details['gc_order']] = new GradeableComponent($component_details);
 

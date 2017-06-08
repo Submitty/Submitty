@@ -418,14 +418,21 @@ function setupCheckboxCells() {
             updateCheckpointCell(this);
             elems.push(this);
         }
+        
         var scores = {};
+        var graders = {};
         parent.children("td.cell-grade").each(function() {
             scores[$(this).data("id")] = $(this).data("score");
+            if(elems.indexOf(this) != -1) {
+                graders[$(this).data("id")] = true;
+            }
+            else {
+                graders[$(this).data("id")] = false;
+            }
         });
-
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_grade'}),
-            {'csrf_token': csrfToken, 'user_id': parent.data("user"), 'g_id': parent.data('gradeable'), 'scores': scores},
+            {'csrf_token': csrfToken, 'user_id': parent.data("user"), 'g_id': parent.data('gradeable'), 'scores': scores, 'graders': graders},
             function() {
                 elems.forEach(function(elem) {
                     $(elem).animate({"border-right-width": "0px"}, 400);
@@ -433,7 +440,6 @@ function setupCheckboxCells() {
             },
             function() {
                 elems.forEach(function(elem) {
-                    console.log(elem);
                     $(elem).css("border-right-width", "15px");
                     $(elem).stop(true, true).animate({"border-right-color": "#DA4F49"}, 400);
                 });

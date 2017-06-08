@@ -87,11 +87,19 @@ class SimpleGraderController extends AbstractController  {
             $this->core->getOutput()->renderJson($response);
             return $response;
         }
+        else if (!isset($_POST['graders']) || empty($_POST['graders'])) {
+            $response = array('status' => 'fail', 'message' => "Didn't submit which cells were graded");
+            $this->core->getOutput()->renderJson($response);
+            return $response;
+        }
 
         foreach ($gradeable->getComponents() as $component) {
             if (isset($_POST['scores'][$component->getId()])) {
                 $component->setScore($_POST['scores'][$component->getId()]);
+            }
+            if (isset($_POST['graders'][$component->getId()]) && $_POST['graders'][$component->getId()] == 'true') {
                 $component->setGrader($this->core->getUser()->getId());
+                $component->setGradeTime((new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s"));
             }
         }
 

@@ -38,9 +38,9 @@ class GradeableComponent extends AbstractModel {
 
     protected $graded = false;
     /** @var string Contains the user_id of the ta or instructor who graded the component*/
-    protected $grader_id;
+    protected $grader_id = "";
     /** @var timestamp Contains the date and time that the grade was given*/
-    protected $grade_time;
+    protected $grade_time = '1900-01-01 00:00:00';
 
     public function __construct($details) {
         $this->id = $details['gc_id'];
@@ -138,7 +138,12 @@ class GradeableComponent extends AbstractModel {
     public function setGrader($new_grader) {
         return $this->grader_id = $new_grader;
     }
+    
     public function getGradeTime() {
         return $this->grade_time;
+    }
+    
+    public function setGradeTime($new_time) {
+        $this->grade_time = $new_time;
     }
 }

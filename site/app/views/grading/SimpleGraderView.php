@@ -19,26 +19,89 @@ class SimpleGraderView extends AbstractView {
         $return = <<<HTML
 <div class="content">
 HTML;
+        $return .= <<<HTML
+    <div style="float: right; margin-bottom: 10px; margin-left: 20px">
+HTML;
+
+        $button_url_params = array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId());
+        if (isset($_GET['view'])) {
+            $button_url_params['view'] = $_GET['view'];
+        }
+        if (isset($_GET['time'])) {
+            $button_url_params['time'] = $_GET['time'];
+        }
+        if (isset($_GET['grader'])) {
+            $button_url_params['grader'] = $_GET['grader'];
+        }
+        
+        $previous = 'on';
+        if (!isset($_GET['time']) || $_GET['time'] !== 'on') {
+            $previous = 'off';
+            $button_url_params['time'] = 'on';
+            $return .= <<<HTML
+        <a class="btn btn-default" href="{$this->core->buildUrl($button_url_params)}">
+        View Grade Times
+        </a>
+HTML;
+        }
+        else {
+            $previous = 'on';
+            $button_url_params['time'] = 'off';
+            $return .= <<<HTML
+        <a class="btn btn-default" href="{$this->core->buildUrl($button_url_params)}">
+        Hide Grade Times
+        </a>
+HTML;
+        }
+        $button_url_params['time'] = $previous;
+        if (!isset($_GET['grader']) || $_GET['grader'] !== 'on') {
+            $previous = 'off';
+            $button_url_params['grader'] = 'on';
+            $return .= <<<HTML
+        <a class="btn btn-default" href="{$this->core->buildUrl($button_url_params)}">
+        View Graders
+        </a>
+HTML;
+        }
+        else {
+            $previous = 'on';
+            $button_url_params['grader'] = 'off';
+            $return .= <<<HTML
+        <a class="btn btn-default" href="{$this->core->buildUrl($button_url_params)}">
+        Hide Graders
+        </a>
+HTML;
+        }
+        $button_url_params['grader'] = $previous;
+        $return .= <<<HTML
+    </div>
+HTML;
+        
         if (!$this->core->getUser()->accessAdmin()) {
             $return .= <<<HTML
     <div style="float: right; margin-bottom: 10px; margin-left: 20px">
 HTML;
             if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
+                $previous = 'section';
+                $button_url_params['view'] = 'all';
                 $return .= <<<HTML
         <a class="btn btn-default"
-            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'view' => 'all'))}">
+            href="{$this->core->buildUrl($button_url_params)}">
             View All    
         </a>
 HTML;
             }
             else {
+                $previous = 'all';
+                $button_url_params['view'] = 'section';
                 $return .= <<<HTML
         <a class="btn btn-default"
-            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId()))}">
+            href="{$this->core->buildUrl($button_url_params)}">
             View Your Sections    
         </a>
 HTML;
             }
+            $button_url_params['view'] = $previous;
             $return .= <<<HTML
     </div>
 HTML;
@@ -143,8 +206,12 @@ HTML;
                         $background_color = "";
                     }
                     if($component->hasGrade()) {
+                        $specific_grade_time = (($_GET['time']== 'on' && $component->getGradeTime() != '"1900-01-01 00:00:00"') ? $component->getGradeTime() : "");
+                        $specific_grader_id = (($_GET['grader']=='on') ? $component->getGrader() : "").(($specific_grade_time != "" && $_GET['grader'] == 'on') ? ";" : "");
+                        $specific_grader_id = trim($specific_grader_id, '"');
                         $return .= <<<HTML
-                    <td class="cell-grade" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-score="{$component->getScore()}" style="{$background_color}">{$component->getGrader()}</td>
+                    <td class="cell-grade" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-score="{$component->getScore()}" style="{$background_color}">
+                    {$specific_grader_id} {$specific_grade_time}</td>
 HTML;
                     }
                     else {
