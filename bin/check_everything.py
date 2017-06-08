@@ -25,8 +25,24 @@ HWCRON_USER="__INSTALL__FILLIN__HWCRON_USER__"
 COURSE_BUILDERS_GROUP="__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__"
 
 ###########################################################################
-def CheckItemBits (my_path, my_owner, my_group, my_bits):
+def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits):
     ret_val = True
+    try:
+        pwd.getpwnam(my_owner)
+    except KeyError:
+        sys.stderr.write("ERROR! user "+my_owner+" does not exist\n")
+        ret_val = False
+    try:
+        grp.getgrnam(my_group)
+    except KeyError:
+        sys.stderr.write("ERROR! group "+my_group+" does not exist\n")
+        ret_val = False
+    if is_dir and not os.path.isdir(my_path):
+        sys.stderr.write("ERROR! "+my_path+" should be a directory!\n")
+        ret_val = False
+    if not is_dir and os.path.isdir(my_path):
+        sys.stderr.write("ERROR! "+my_path+" should not be a directory!\n")
+        ret_val = False
     if not os.path.exists(my_path):
         sys.stderr.write("ERROR! "+my_path+" does not exist\n")
         ret_val = False
@@ -39,7 +55,7 @@ def CheckItemBits (my_path, my_owner, my_group, my_bits):
     bits = os.stat(my_path)[stat.ST_MODE]
     bits &= 0o777
     if bits != my_bits:
-        sys.stderror.write("ERROR! "+my_path+" permission is "+oct(bits)+" should be "+oct(my_bits)+"\n")
+        sys.stderr.write("ERROR! "+my_path+" permission is "+oct(bits)+" should be "+oct(my_bits)+"\n")
         ret_val = False
     return ret_val
 
@@ -47,6 +63,16 @@ def CheckItemBits (my_path, my_owner, my_group, my_bits):
 ###########################################################################
 def CheckCourseInstructorAndGroup(my_instructor, my_group):
     ret_val = True
+    try:
+        pwd.getpwnam(my_instructor)
+    except KeyError:
+        sys.stderr.write("ERROR! user "+my_instructor+" does not exist\n")
+        ret_val = False
+    try:
+        grp.getgrnam(my_group)
+    except KeyError:
+        sys.stderr.write("ERROR! group "+my_group+" does not exist\n")
+        ret_val = False
     c_g = grp.getgrnam(my_group)
     cb_g = grp.getgrnam(COURSE_BUILDERS_GROUP)
     if not my_instructor in c_g.gr_mem:
@@ -71,13 +97,13 @@ global_success = True
 
 
 # CHECK THE INSTALLATION DIRECTORY
-global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR,"root","course_builders",0o751)
-global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR+"/bin/untrusted_execute","root","hwcron",0o550)
+global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR,True,"root","course_builders",0o751)
+global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR+"/bin/untrusted_execute",False,"root","hwcron",0o550)
 
 
 # CHECK THE DATA DIRECTORY
-global_success &= CheckItemBits(SUBMITTY_DATA_DIR,"root","course_builders",0o751)
-global_success &= CheckItemBits(SUBMITTY_DATA_DIR+"/courses","root","course_builders",0o751)
+global_success &= CheckItemBits(SUBMITTY_DATA_DIR,True,"root","course_builders",0o751)
+global_success &= CheckItemBits(SUBMITTY_DATA_DIR+"/courses",True,"root","course_builders",0o751)
 
 
 # CHECK EACH COURSE
@@ -93,13 +119,30 @@ for semester in os.listdir(SUBMITTY_DATA_DIR+"/courses"):
         c_group=grp.getgrgid(os.stat(course_path).st_gid).gr_name
         global_success &= CheckCourseInstructorAndGroup(c_instructor,c_group)
         print ("check course=", course, " inst=", c_instructor, " group=",c_group)
-        global_success &= CheckItemBits(course_path,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/ASSIGNMENTS.txt",c_instructor,c_group,0o660)
-        global_success &= CheckItemBits(course_path+"/test_input",c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/test_output",c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/test_code",c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/submissions","hwphp",c_group,0o750)
-        global_success &= CheckItemBits(course_path+"/results","hwcron",c_group,0o750)
+        global_success &= CheckItemBits(course_path,True,c_instructor,c_group,0o770)
+
+        global_success &= CheckItemBits(course_path+"/build",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/ASSIGNMENTS.txt",False,c_instructor,c_group,0o660)
+
+        global_success &= CheckItemBits(course_path+"/config",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/config/config.ini",False,"hwphp",c_group,0o660)
+        global_success &= CheckItemBits(course_path+"/config/build",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/config/complete_config",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/config/form",True,c_instructor,c_group,0o770)
+
+        global_success &= CheckItemBits(course_path+"/bin",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/test_input",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/test_output",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/test_code",True,c_instructor,c_group,0o770)
+
+        global_success &= CheckItemBits(course_path+"/submissions",True,"hwphp",c_group,0o750)
+        global_success &= CheckItemBits(course_path+"/config_upload",True,"hwphp",c_group,0o750)
+        global_success &= CheckItemBits(course_path+"/results",True,"hwcron",c_group,0o750)
+        global_success &= CheckItemBits(course_path+"/checkout",True,"hwcron",c_group,0o750)
+
+        global_success &= CheckItemBits(course_path+"/reports",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/reports/summary_html",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/reports/all_grades",True,"hwphp",c_group,0o770)
 
 
 ###########################################################################
