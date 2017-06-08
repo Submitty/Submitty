@@ -600,13 +600,19 @@ HTML;
 HTML;
                         }
                         $name = htmlentities($testcase->getName());
-                        $extra_credit = "";
+                        $test_message = "";
                         if($testcase->isExtraCredit()) {
-                          $extra_credit = "<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
+                          $test_message = "<span class='italics'><font color=\"#2d6987\">Extra Credit</font></span>";
+                        }
+                        else if($testcase->hasDetails()) {
+                          $test_message = "<span class='italics'><font color=\"#b94a48\">This test case has details.</font></span>";
+                        }
+                        else {
+                          $test_message = "<span class='italics'><font color=\"#468847\">Full points, no details.</font></span>";
                         }
                         $command = htmlentities($testcase->getDetails());
                         $return .= <<<HTML
-                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}</h4>
+                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$test_message}</h4>
             </div>
 HTML;
                         if ($testcase->hasDetails()) {
