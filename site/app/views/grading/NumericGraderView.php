@@ -66,16 +66,8 @@ HTML;
             $view = null;
         }
         $return .= <<<HTML
-    <i class="fa fa-question-circle tooltip" style="float: right" aria-hidden="true">
-        <span class="tooltiptext">
-No Color - No Credit<br />
-Dark Blue - Full Credit<br />
-Light Blue - Half Credit<br />
-Red - [SAVE ERROR] Refresh Page
-        </span>
-    </i>
 
-    <h2>Overview of {$gradeable->getName()}</h2>
+    <h2>{$gradeable->getName()}</h2>
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
@@ -86,8 +78,9 @@ Red - [SAVE ERROR] Refresh Page
                 <td width="10%" style="text-align: left"> <a colspan="1" href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'numeric', 'action' => 'data_entry', 'g_id' => $gradeable->getId(), 'sort' => 'last', 'view' => $view))}"><span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i></a></td>
 HTML;
         foreach ($gradeable->getComponents() as $component) {
+/////////////////////////////////////////////HARD CODED COME BACK AND FIX ///////////////////////////////////////////////////////////////////////////////////
             $return .= <<<HTML
-                <td style="text-align: left">{$component->getTitle()}</td>
+                <td width="10%" style="text-align: center">{$component->getTitle()}</td>
 HTML;
         }
         $return .= <<<HTML
@@ -158,54 +151,17 @@ HTML;
             foreach ($gradeable_row->getComponents() as $component) {
                 if ($component->isText()) {
                     $return .= <<<HTML
-                <td>{$component->getComment()}</td>
+                <td class="option-small-input" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-value="{$component->getComment()}"><input type="text" value="{$component->getComment()}"/></td>
 HTML;
                 }
                 else {
                     $return .= <<<HTML
-                <td class="option-small-input" style="text-align: left"><input type="text" value="{$component->getScore()}" /></td>
+                <td class="option-small-input" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-value="{$component->getScore()}"><input type="text" value="{$component->getScore()}"/></td>
 HTML;
-
-
-
-
-
-
-
-
-//         return <<<HTML
-//             <td class="option-input"><input type="text" name="course_name" value="myfillintext?" /></td>
-
-// HTML;
-
-
-
-
-
-
-
-
-
-
-
-//                     if($component->getScore() === 1.0) {
-//                         $background_color = "background-color: #149bdf";
-//                     }
-//                     else if($component->getScore() === 0.5) {
-//                         $background_color = "background-color: #88d0f4";
-//                     }
-//                     else {
-//                         $background_color = "";
-//                     }
-//                     $return .= <<<HTML
-//                <td class="cell-grade" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-score="{$component->getScore()}" style="{$background_color}"></td>
-// HTML;
                 }
                 $gradeable_row++;
                 $col++;
             }
-
-
 
             $return .= <<<HTML
             </tr>
