@@ -24,19 +24,12 @@ HTML;
 HTML;
 
         $button_url_params = array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId());
-        if (isset($_GET['view'])) {
-            $button_url_params['view'] = $_GET['view'];
-        }
-        if (isset($_GET['time'])) {
-            $button_url_params['time'] = $_GET['time'];
-        }
-        if (isset($_GET['grader'])) {
-            $button_url_params['grader'] = $_GET['grader'];
-        }
+        $button_url_params['view'] = (isset($_GET['view']) ? $_GET['view'] : 'section');
+        $button_url_params['grader'] = (isset($_GET['grader']) ? $_GET['grader'] : 'off');
+        $button_url_params['time'] = (isset($_GET['time']) ? $_GET['time'] : 'off');
         
-        $previous = 'on';
-        if (!isset($_GET['time']) || $_GET['time'] !== 'on') {
-            $previous = 'off';
+        $previous = $button_url_params['time'];
+        if ($previous !== 'on') {
             $button_url_params['time'] = 'on';
             $return .= <<<HTML
         <a class="btn btn-default" href="{$this->core->buildUrl($button_url_params)}">
@@ -45,7 +38,6 @@ HTML;
 HTML;
         }
         else {
-            $previous = 'on';
             $button_url_params['time'] = 'off';
             $return .= <<<HTML
         <a class="btn btn-default" href="{$this->core->buildUrl($button_url_params)}">
@@ -54,8 +46,8 @@ HTML;
 HTML;
         }
         $button_url_params['time'] = $previous;
-        if (!isset($_GET['grader']) || $_GET['grader'] !== 'on') {
-            $previous = 'off';
+        $previous = $button_url_params['grader'];
+        if ($previous !== 'on') {
             $button_url_params['grader'] = 'on';
             $return .= <<<HTML
         <a class="btn btn-default" href="{$this->core->buildUrl($button_url_params)}">
@@ -64,7 +56,6 @@ HTML;
 HTML;
         }
         else {
-            $previous = 'on';
             $button_url_params['grader'] = 'off';
             $return .= <<<HTML
         <a class="btn btn-default" href="{$this->core->buildUrl($button_url_params)}">
@@ -81,8 +72,8 @@ HTML;
             $return .= <<<HTML
     <div style="float: right; margin-bottom: 10px; margin-left: 20px">
 HTML;
-            if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
-                $previous = 'section';
+            $previous = $button_url_params['view'];
+            if ($previous !== 'all') {
                 $button_url_params['view'] = 'all';
                 $return .= <<<HTML
         <a class="btn btn-default"
@@ -92,7 +83,6 @@ HTML;
 HTML;
             }
             else {
-                $previous = 'all';
                 $button_url_params['view'] = 'section';
                 $return .= <<<HTML
         <a class="btn btn-default"
@@ -206,8 +196,9 @@ HTML;
                         $background_color = "";
                     }
                     if($component->hasGrade()) {
-                        $specific_grade_time = (($_GET['time']== 'on' && $component->getGradeTime() != '"1900-01-01 00:00:00"') ? $component->getGradeTime() : "");
-                        $specific_grader_id = (($_GET['grader']=='on') ? $component->getGrader() : "").(($specific_grade_time != "" && $_GET['grader'] == 'on') ? ";" : "");
+                        $specific_grade_time = (($button_url_params['time'] == 'on' && $component->getGradeTime() != '"1900-01-01 00:00:00"') ? $component->getGradeTime() : "");
+                        $specific_grader_id = (($button_url_params['grader'] == 'on') ? $component->getGrader() : "").(($specific_grade_time != "" && $button_url_params['grader'] == 'on') ? ";" : "");
+                        $specific_grade_time = trim($specific_grade_time, '"');
                         $specific_grader_id = trim($specific_grader_id, '"');
                         $return .= <<<HTML
                     <td class="cell-grade" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-score="{$component->getScore()}" style="{$background_color}">
