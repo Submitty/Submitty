@@ -152,7 +152,7 @@ HTML;
             <tr>
                 <td width="3%"></td>
                 <td width="5%">Section</td>
-                <td width="20%" style="text-align: left">User ID</td>
+                <td width="20%">User ID</td>
                 <td width="15%" colspan="1">First Name</td>
                 <td width="15%" colspan="1">Last Name</td>
                 <td width="14%">Autograding</td>
