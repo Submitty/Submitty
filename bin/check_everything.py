@@ -30,32 +30,32 @@ def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits):
     try:
         pwd.getpwnam(my_owner)
     except KeyError:
-        sys.stderr.write("ERROR! user "+my_owner+" does not exist\n")
+        print("ERROR! user "+my_owner+" does not exist\n", file=sys.stderr)
         ret_val = False
     try:
         grp.getgrnam(my_group)
     except KeyError:
-        sys.stderr.write("ERROR! group "+my_group+" does not exist\n")
+        print("ERROR! group "+my_group+" does not exist\n", file=sys.stderr)
         ret_val = False
     if is_dir and not os.path.isdir(my_path):
-        sys.stderr.write("ERROR! "+my_path+" should be a directory!\n")
+        print("ERROR! "+my_path+" should be a directory!\n", file=sys.stderr)
         ret_val = False
     if not is_dir and os.path.isdir(my_path):
-        sys.stderr.write("ERROR! "+my_path+" should not be a directory!\n")
+        print("ERROR! "+my_path+" should not be a directory!\n", file=sys.stderr)
         ret_val = False
     if not os.path.exists(my_path):
-        sys.stderr.write("ERROR! "+my_path+" does not exist\n")
+        print("ERROR! "+my_path+" does not exist\n", file=sys.stderr)
         ret_val = False
     if pwd.getpwuid(os.stat(my_path).st_uid).pw_name != my_owner:
-        sys.stderr.write("ERROR! "+my_path+" should be owned by "+my_owner+"\n")
+        print("ERROR! "+my_path+" should be owned by "+my_owner+"\n", file=sys.stderr)
         ret_val = False
     if grp.getgrgid(os.stat(my_path).st_gid).gr_name != my_group:
-        sys.stderr.write("ERROR! "+my_path+" should be group "+my_group+"\n")
+        print("ERROR! "+my_path+" should be group "+my_group+"\n", file=sys.stderr)
         ret_val = False
     bits = os.stat(my_path)[stat.ST_MODE]
     bits &= 0o777
     if bits != my_bits:
-        sys.stderr.write("ERROR! "+my_path+" permission is "+oct(bits)+" should be "+oct(my_bits)+"\n")
+        print("ERROR! "+my_path+" permission is "+oct(bits)+" should be "+oct(my_bits)+"\n", file=sys.stderr)
         ret_val = False
     return ret_val
 
@@ -63,29 +63,29 @@ def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits):
 ###########################################################################
 def CheckCourseInstructorAndGroup(my_instructor, my_group):
     ret_val = True
-    try:
-        pwd.getpwnam(my_instructor)
-    except KeyError:
-        sys.stderr.write("ERROR! user "+my_instructor+" does not exist\n")
-        ret_val = False
-    try:
-        grp.getgrnam(my_group)
-    except KeyError:
-        sys.stderr.write("ERROR! group "+my_group+" does not exist\n")
-        ret_val = False
-    c_g = grp.getgrnam(my_group)
+
     cb_g = grp.getgrnam(COURSE_BUILDERS_GROUP)
-    if not my_instructor in c_g.gr_mem:
-        sys.stderr.write("ERROR! "+my_instructor+" should be group "+my_group+"\n")
-        ret_val = False
-    if not HWPHP_USER in c_g.gr_mem:
-        sys.stderr.write("ERROR! hwphp should be group "+my_group+"\n")
-        ret_val = False
-    if not HWCRON_USER in c_g.gr_mem:
-        sys.stderr.write("ERROR! hwcron should be group "+my_group+"\n")
-        ret_val = False
-    if not my_instructor in cb_g.gr_mem:
-        sys.stderr.write("ERROR! "+my_instructor+" should be group "+COURSE_BUILDERS_GROUP+"\n")
+    try:
+        c_g = grp.getgrnam(my_group)
+        try:
+            pwd.getpwnam(my_instructor)
+            if not my_instructor in c_g.gr_mem:
+                print("ERROR! "+my_instructor+" should be group "+my_group+"\n", file=sys.stderr)
+                ret_val = False
+            if not my_instructor in cb_g.gr_mem:
+                print("ERROR! "+my_instructor+" should be group "+COURSE_BUILDERS_GROUP+"\n", file=sys.stderr)
+                ret_val = False
+        except KeyError:
+            print("ERROR! user "+my_instructor+" does not exist\n", file=sys.stderr)
+            ret_val = False
+        if not HWPHP_USER in c_g.gr_mem:
+            print("ERROR! hwphp should be group "+my_group+"\n", file=sys.stderr)
+            ret_val = False
+        if not HWCRON_USER in c_g.gr_mem:
+            print("ERROR! hwcron should be group "+my_group+"\n", file=sys.stderr)
+            ret_val = False
+    except KeyError:
+        print("ERROR! group "+my_group+" does not exist\n", file=sys.stderr)
         ret_val = False
     return ret_val
 
