@@ -271,8 +271,6 @@ replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/fake_submit_button_press.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/fake_submit_button_press.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
