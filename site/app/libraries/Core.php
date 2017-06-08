@@ -251,11 +251,12 @@ class Core {
      * in separately so that we do not worry about those being leaked via the stack trace that might get thrown
      * from this method. Returns True/False whether or not the authenication attempt succeeded/failed.
      *
+     * @param bool $persistent_cookie should we store this for some amount of time (true) or till browser closure (false)
      * @return bool
      *
      * @throws AuthenticationException
      */
-    public function authenticate() {
+    public function authenticate($persistent_cookie = true) {
         $auth = false;
         $user_id = $this->authentication->getUserId();
         try {
@@ -264,7 +265,9 @@ class Core {
                 $session_id = $this->session_manager->newSession($user_id);
                 $cookie_id = $this->getConfig()->getSemester()."_".$this->getConfig()->getCourse()."_session_id";
                 // Set the cookie to last for 7 days
-                if (setcookie($cookie_id, $session_id, time() + (7 * 24 * 60 * 60), "/") === false) {
+                $cookie_data = array('session_id' => $session_id);
+                $cookie_data['expire_time'] = ($persistent_cookie === true) ? time() + (7 * 24 * 60 * 60) : 0;
+                if (Utils::setCookie($cookie_id, $cookie_data, $cookie_data['expire_time']) === false) {
                     return false;
                 }
             }
