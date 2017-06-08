@@ -12,22 +12,19 @@ class ElectronicGraderController extends AbstractController {
                 $this->showSummary();
                 break;
             default:
-                $this->showOverview();
+                $this->showStatus();
                 break;
         }
     }
 
     /**
-     * Shows an overview of the grading status of a given electronic submission. This is shown to all graders showing
-     * only their sections that they've been assigned to, unless their an administrator in which case it'll either
-     * show only the sections they're assigned to (if any) or if not assigned to any, all sections.
-     *
-     * Additionally, there's an optional flag that can be used to always show all sections
+     * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
+     * graders. Limited access graders will only see statistics for the sections they are assigned to.
      */
-    public function showOverview() {
+    public function showStatus() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        $this->core->getOutput()->addBreadcrumb("Overview {$gradeable->getName()}");
+        $this->core->getOutput()->addBreadcrumb("Status {$gradeable->getName()}");
 
         /*
          * we need number of students per section
@@ -35,18 +32,22 @@ class ElectronicGraderController extends AbstractController {
         $total = array();
         $graded = array();
         $graders = array();
+        $sections = array();
         if ($gradeable->isGradeByRegistration()) {
-            $sections = $this->core->getUser()->getGradingRegistrationSections();
-            if (count($sections) > 0 || (count($sections) === 0 && $this->core->getUser()->accessAdmin())) {
+            if(!$this->core->getUser()->accessFullGrading()){
+                $sections = $this->core->getUser()->getGradingRegistrationSections();
+            }
+            if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
                 $total = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
                 $graded = $this->core->getQueries()->getGradedUserCountByRegistrationSections($gradeable->getId(), $sections);
                 $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
             }
         }
         else {
-            $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
-                $this->core->getUser()->getId());
-            if (count($sections) > 0 || (count($sections) === 0 && $this->core->getUser()->accessAdmin())) {
+            if(!$this->core->getUser()->accessFullGrading()){
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+            }
+            if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
                 $total = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
                 $graded = $this->core->getQueries()->getGradedUserCountByRotatingSections($gradeable_id, $sections);
                 $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
@@ -70,7 +71,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'overviewPage', $gradeable, $sections);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections);
     }
 
     /**
@@ -102,7 +103,7 @@ class ElectronicGraderController extends AbstractController {
             }
             $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
         }
-        if ((isset($_GET['view']) && $_GET['view'] === "all") || $this->core->getUser()->accessAdmin()) {
+        if ((isset($_GET['view']) && $_GET['view'] === "all") || ($this->core->getUser()->accessAdmin() && count($sections) === 0)) {
             $students = $this->core->getQueries()->getAllUsers($section_key);
         }
 
