@@ -182,12 +182,12 @@ print <<<HTML
                             <th>User ID</th>
                             <th>Name</th>
 HTML;
-if ($colspan2 === 0){
+if ($colspan2 === 0){ 
     print <<<HTML
-                            <th width="80%"colspan="{$colspan}">Grades</th>
+                            <th width="80%"colspan="{$colspan}">Grades</th> 
 HTML;
 }
-else{
+else if($colspan !== 0){
     print <<<HTML
                             <th width="30%"colspan="{$colspan}">Grades</th>
 HTML;
@@ -470,6 +470,7 @@ echo <<<HTML
 
             for (var j = questions; j < questions+text_fields; ++j){
                 var text = $("#cell-"+nt_gradeable+"-"+user_id+"-t"+j).val();
+                text = encodeURIComponent(text); //this makes it so & don't get deleted when entered by user
                 extra += "&t"+j+"="+text;
             }
 

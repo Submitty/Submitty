@@ -43,6 +43,7 @@ function standard()
     $j = 0;
     for ($i = $num_numeric; $i < $num_numeric + $num_text; ++$i) {
         $text[$j] = htmlentities($_GET['t' . $i]);
+        $text[$j] = urldecode($text[$j]); //decodes the & and possibly other things
         ++$j;
     }
 
