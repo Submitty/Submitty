@@ -4,6 +4,7 @@ include "../../toolbox/functions.php";
 $g_id = $_GET['g_id'];
 $section = intval($_GET['section_id']);
 $grade_by_reg_section = $_GET['grade_by_reg_section'];
+$sort_by = $_GET['sort_by'];
 
 $db->query("SELECT * FROM gradeable WHERE g_id=?", array($g_id));
 $check_g = $db->row();
@@ -40,8 +41,25 @@ print <<<HTML
     </tr>
 HTML;
 
-$query = ($grade_by_reg_section) ? "SELECT * FROM users WHERE registration_section=? AND user_group=? ORDER BY user_id"
-                                 : "SELECT * FROM users WHERE rotating_section=? AND user_group=? ORDER BY user_id";
+$query = "SELECT * FROM users WHERE ";
+if($grade_by_reg_section){
+    $query .= "registration_section=?";
+}
+else{
+    $query .= "rotating_section=?";
+}
+$query .= " AND user_group=? ORDER BY ";
+$sort = array();
+if($sort_by === 'first'){
+    $sort[] = 'user_firstname';
+    $sort[] = 'user_lastname';
+}
+elseif($sort_by === 'last'){
+    $sort[] = 'user_lastname';
+}
+$sort[] = 'user_id';
+$query .= implode(', ', $sort);
+
 $db->query($query, array($section,4));
 
 $j = 0;
