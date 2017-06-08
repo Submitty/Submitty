@@ -297,7 +297,7 @@ HTML;
 </div>
 
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
-            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id"class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
+            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
             <br />
             What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' class="required" value="{$gradeable_name}" placeholder="(Required)" />
             <br />
@@ -1576,13 +1576,6 @@ HTML;
         newRow.children()[child].children[1].checked = temp;
     }
 
-    /*
-    function nowButton(id_of_time) {
-
-    	$(id_of_time).val(createCrossBrowserJSDate(new Date()));
-    }
-    */
-
     //checks the form to see if it is valid
     function checkForm()
     {
@@ -1650,23 +1643,6 @@ HTML;
             alert("A type of gradeable must be selected");
             return false;
         }
-
-        /*
-        if (window.XMLHttpRequest) {
-            // code for IE7+, Firefox, Chrome, Opera, Safari
-            xmlhttp = new XMLHttpRequest();
-        } else {
-            // code for IE6, IE5
-            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-        }
-        xmlhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                unique_gradeable = this.responseText;
-            }
-        };
-        xmlhttp.open("GET","getuser.php?gradeID="+gradeable_id,true);
-        xmlhttp.send();
-        */
     }
     calculatePercentageTotal();
     </script>
