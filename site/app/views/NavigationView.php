@@ -7,6 +7,7 @@ use app\models\Gradeable;
 
 class NavigationView extends AbstractView {
     public function showGradeables($sections_to_list) {
+
         $return = "";
 
         $ta_base_url = $this->core->getConfig()->getTABaseUrl();
@@ -92,15 +93,14 @@ HTML;
             "ITEMS BEING GRADED" => "btn-primary",
             "GRADED" => 'btn-danger');
         $title_to_prefix = array(
-            "FUTURE" => "ALPHA SUBMIT<br>",
-            "BETA" => "BETA SUBMIT<br>",
-            "OPEN" => "SUBMIT<br>",
-            "CLOSED" => "LATE SUBMIT<br>",
+            "FUTURE" => "ALPHA SUBMIT",
+            "BETA" => "BETA SUBMIT",
+            "OPEN" => "SUBMIT",
+            "CLOSED" => "LATE SUBMIT",
             "ITEMS BEING GRADED" => "VIEW SUBMISSION",
             "GRADED" => "VIEW GRADE"
         );
-
-
+        
         $found_assignment = false;
 
         foreach ($sections_to_list as $title => $gradeable_list) {
@@ -141,8 +141,63 @@ HTML;
             $title_save = $title;
             $btn_title_save = $title_to_button_type_submission[$title];
             foreach ($gradeable_list as $gradeable => $g_data) {
+                if (!$this->core->getUser()->accessGrading()){
+                    
+                    if ($g_data->getActiveVersion() === 0 && $g_data->getCurrentVersionNumber() != 0){
+                        $submission_status = array(
+                            "SUBMITTED" => "<em style='font-size: .8em;'>(NOT SUMBITTED)</em><br>",
+                            "AUTOGRADE" => ""
+                        );
+                    }
+                    else if ($g_data->getActiveVersion() === 0 && $g_data->getCurrentVersionNumber() === 0){
+                        $submission_status = array(
+                            "SUBMITTED" => "<em style='font-size: .8em;'>(SUBMIT CANCELLED)</em><br>",
+                            "AUTOGRADE" => ""
+                        );
+                    }
+                    else{
+
+                        if ($g_data->getTotalNonHiddenNonExtraCreditPoints() == array() && ($title_save != "GRADED" && $title_save != "ITEMS BEING GRADED")){
+                            $submission_status = array(
+                                "SUBMITTED" => "<em style='font-size: .8em;'>(AGAIN)</em><br>",
+                                "AUTOGRADE" => ""
+                            ); 
+                        }
+                        else if ($g_data->getTotalNonHiddenNonExtraCreditPoints() != array() && ($title_save != "GRADED" && $title_save != "ITEMS BEING GRADED")){
+                            $autograde_points_earned = $g_data->getGradedNonHiddenPoints(); 
+                            $autograde_points_total = $g_data->getTotalNonHiddenNonExtraCreditPoints();
+                            $submission_status = array(
+                                "SUBMITTED" => "(AGAIN) ",
+                                "AUTOGRADE" => "<em style='font-size: .8em;'>(" . $autograde_points_earned . "/" . $autograde_points_total . ")</em><br>"
+                            );
+                        }
+                        else if ($g_data->getTotalNonHiddenNonExtraCreditPoints() != array() && ($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED")){
+                            $submission_status = array(
+                                "SUBMITTED" => "",
+                                "AUTOGRADE" => ""
+                            );
+                        }
+                        else{
+                            $autograde_points_earned = $g_data->getGradedNonHiddenPoints(); 
+                            $autograde_points_total = $g_data->getTotalNonHiddenNonExtraCreditPoints();
+                            $submission_status = array(
+                                "SUBMITTED" => "",
+                                "AUTOGRADE" => "<em style='font-size: .8em;'>(" . $autograde_points_earned . "/" . $autograde_points_total . ")</em><br>"
+                            );
+                            
+                        }
+                    }
+                }
+                else{ //don't show submission_status to instructors
+                    $submission_status = array(
+                        "SUBMITTED" => "<br>",
+                        "AUTOGRADE" => ""
+                    );
+                }
+
                 $title = $title_save;
                 $title_to_button_type_submission[$title_save] = $btn_title_save;
+
                 // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
                 if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
                     continue;
@@ -159,7 +214,7 @@ HTML;
                 }
 
                 /** @var Gradeable $g_data */
-                $date = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
+                $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
                 if($g_data->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$this->core->getUser()->accessAdmin()){
                     continue;
                 }
@@ -187,7 +242,7 @@ HTML;
 
                     $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getOpenDate()->format("m/d/y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getDueDate()->format("m/d/y{$time}")."</span>)";
                     if ($title=="GRADED" || $title=="ITEMS BEING GRADED") { $display_date = ""; }
-                    $button_text = "{$title_to_prefix[$title]} {$display_date}";
+                    $button_text = "{$title_to_prefix[$title]} {$submission_status["SUBMITTED"]} {$submission_status["AUTOGRADE"]} {$display_date}";
                     if ($g_data->hasConfig()) {
                         $gradeable_open_range = <<<HTML
                  <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">

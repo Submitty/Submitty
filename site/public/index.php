@@ -5,6 +5,7 @@ use app\libraries\AutoLoader;
 use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
+use app\libraries\Utils;
 
 /*
  * The user's umask is ignored for the user running php, so we need
@@ -99,7 +100,7 @@ $core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()
 $core->getOutput()->addBreadcrumb("Submitty", $core->buildUrl());
 
 
-date_default_timezone_set($core->getConfig()->getTimezone());
+date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
@@ -118,13 +119,17 @@ if($core->getConfig()->isDebug()) {
 $logged_in = false;
 $cookie_key = $semester."_".$course."_session_id";
 if (isset($_COOKIE[$cookie_key])) {
-    $logged_in = $core->getSession($_COOKIE[$cookie_key]);
+    $cookie = json_decode($_COOKIE[$cookie_key], true);
+    $logged_in = $core->getSession($cookie['session_id']);
     if (!$logged_in) {
         // delete the stale and invalid cookie
-        setcookie($cookie_key, "", time() - 3600);
+        Utils::setCookie($cookie_key, "", time() - 3600);
     }
     else {
-        setcookie($cookie_key, $_COOKIE[$cookie_key], time() + (7 * 24 * 60 * 60), "/");
+        if ($cookie['expire_time'] > 0) {
+            $cookie['expire_time'] = time() + (7 * 24 * 60 * 60);
+            Utils::setCookie($cookie_key, $cookie, $cookie['expire_time']);
+        }
     }
 }
 
