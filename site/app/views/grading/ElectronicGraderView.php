@@ -153,8 +153,8 @@ HTML;
                 <td width="3%"></td>
                 <td width="5%">Section</td>
                 <td width="20%">User ID</td>
-                <td width="15%" colspan="1">First Name</td>
-                <td width="15%" colspan="1">Last Name</td>
+                <td width="15%">First Name</td>
+                <td width="15%">Last Name</td>
                 <td width="14%">Autograding</td>
                 <td width="10%">TA Grading</td>
                 <td width="10%">Total</td>
