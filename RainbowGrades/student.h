@@ -31,10 +31,10 @@ public:
 
     float adjusted_value = value;
     if (late_days_used > 0) {
-      std::cout << "LATE DAYS! " << late_days_used << std::endl;
+      //std::cout << "LATE DAYS! " << late_days_used << std::endl;
       // FIXME:  Currently a flat penalty no matter how many days used
       adjusted_value = (1-LATE_DAY_PERCENTAGE_PENALTY)*value;
-      std::cout << "value " << value << "-> " << adjusted_value << std::endl;
+      //std::cout << "value " << value << "-> " << adjusted_value << std::endl;
     }
     
     /*
