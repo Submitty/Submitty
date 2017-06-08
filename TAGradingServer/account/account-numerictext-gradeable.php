@@ -470,6 +470,7 @@ echo <<<HTML
 
             for (var j = questions; j < questions+text_fields; ++j){
                 var text = $("#cell-"+nt_gradeable+"-"+user_id+"-t"+j).val();
+                text = encodeURIComponent(text); //this makes it so & don't get deleted when entered by user
                 extra += "&t"+j+"="+text;
             }
 
