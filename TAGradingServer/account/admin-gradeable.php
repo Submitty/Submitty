@@ -64,7 +64,6 @@ if($user_is_administrator){
             $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
                         ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
             $num_text = $db->row()['cnt'];
-
         }
         
         //figure out if the gradeable has grades or not
@@ -267,7 +266,7 @@ HTML;
 if (!$have_old_edit){
   print <<<HTML
             <div style="padding-left: 200px;">
-              From Template: <select name="gradeable_template" style='width: 170px;' value=''>
+              From Template: <select name="gradeable_template" style='width: 170px;' value='' >
             </div>
             <option>--None--</option>
 HTML;
@@ -1123,8 +1122,8 @@ HTML;
             else total_score += max_score;
         });
 
-        document.getElementById("totalScore").innerHTML = total_score;
-        document.getElementById("totalEC").innerHTML = "(" + total_ec + ")";
+        $("#totalScore").html(total_score);
+        $("#totalEC").html("(" + total_ec + ")");
     }
 
     $(document).ready(function() {
@@ -1473,7 +1472,7 @@ HTML;
                 <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" placeholder="Rubric Item Title"></textarea> \
                 <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
-                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs"  onkeyup="autoResizeComment(event);" \
+                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
