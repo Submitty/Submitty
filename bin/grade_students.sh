@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# ======================================================================
+# check user...
+
+HWCRON_UID=__INSTALL__FILLIN__HWCRON_UID__
+if [[ "$UID" -ne "$HWCRON_UID" ]] ; then
+    echo "ERROR: This script must be run by hwcron"
+    exit
+fi
 
 # ======================================================================
 # this script takes 1 required parameter (which 'untrusted' user to use)
