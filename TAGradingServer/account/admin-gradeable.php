@@ -257,7 +257,7 @@ if($user_is_administrator){
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
     </form>
     <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action={$action}&id={$old_gradeable['g_id']}" 
-          method="post" enctype="multipart/form-data"> 
+          method="post" enctype="multipart/form-data" onsubmit="return checkForm()"> 
 
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header" style="overflow: auto;">
@@ -297,7 +297,7 @@ HTML;
 </div>
 
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
-            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px' type='text' name='gradeable_id' class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
+            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
             <br />
             What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' class="required" value="{$gradeable_name}" placeholder="(Required)" />
             <br />
@@ -880,6 +880,7 @@ HTML;
                 <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-top:10px; margin-right: 10px; float: right;">Delete Gradeable</button>
 HTML;
     }
+    
     print <<<HTML
         </div>
     </form>
@@ -1489,7 +1490,7 @@ HTML;
         </tr>');
     }
     
-    // autoresize the comment box
+    // autoresize the comment
     function autoResizeComment(e){
         e.target.style.height ="";
         e.target.style.height = e.target.scrollHeight + "px";
@@ -1602,9 +1603,95 @@ HTML;
         currentRow.children()[1].children[1].checked = newRow.children()[child].children[1].checked;
         newRow.children()[child].children[1].checked = temp;
     }
+
+	$(function () {
+     	$("#alert-message").dialog({
+         	modal: true,
+         	autoOpen: false,
+         	buttons: {
+             	Ok: function () {
+                	 $(this).dialog("close");
+            	 }
+        	 }
+    	 });
+ 	});
+
+    //checks the form to see if it is valid
+    function checkForm()
+    {
+        var gradeable_id = $('#gradeable_id').val();
+        var date_submit = Date.parse($('#date_submit').val());
+        var date_due = Date.parse($('#date_due').val());
+        var date_ta_view = Date.parse($('#date_ta_view').val());
+        var date_grade = Date.parse($('#date_grade').val());
+        var date_released = Date.parse($('#date_released').val());
+        var config_path = $('input[name=config_path]').val();
+        var has_space = gradeable_id.includes(" ");
+        var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
+        var unique_gradeable = false;
+        var check1 = document.getElementById('radio_electronic_file').checked;
+        var check2 = document.getElementById('radio_checkpoints').checked;
+        var check3 = document.getElementById('radio_numeric').checked;
+
+        if (!test || has_space || gradeable_id == "" || gradeable_id === null) {
+            $( "#alert-message" ).dialog( "open" );
+            return false;
+        }
+        if(check1) {
+            if(date_submit < date_ta_view) {
+                alert("DATE CONSISTENCY:  Submission Open Date must be >= TA Beta Testing Date");
+                return false;
+            }   
+            if(date_due < date_submit) {
+                alert("DATE CONSISTENCY:  Due Date must be >= Submission Open Date");
+                return false;
+            }
+            if(config_path == "" || config_path === null) {
+                alert("The config path should not be empty");
+                return false;
+            }
+        }
+        if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'true') {
+            if(date_grade < date_due) {
+                alert("DATE CONSISTENCY:  TA Grading Open Date must be >= Due Date");
+                return false;
+            }
+            if(date_released < date_due) {
+                alert("DATE CONSISTENCY:  Grades Released Date must be >= TA Grading Open Date");
+                return false;
+            }
+        }
+        else {
+            if(check1) {
+                if(date_released < date_due) {
+                    alert("DATE CONSISTENCY:  Grades Released Date must be >= Due Date");
+                    return false;
+                }
+            }
+        }
+        if($('input:radio[name="ta_grading"]:checked').attr('value') === 'true' || check2 || check3) {
+            if(date_grade < date_ta_view) {
+                alert("DATE CONSISTENCY:  TA Grading Open Date must be >= TA Beta Testing Date");
+                return false;
+            }
+            if(date_released < date_grade) {
+                alert("DATE CONSISTENCY:  Grade Released Date must be >= TA Grading Open Date");
+                return false;
+            }
+        }
+        if(!check1 && !check2 && !check3) {
+            alert("A type of gradeable must be selected");
+            return false;
+        }
+    }
     calculateTotalScore();
     calculatePercentageTotal();
     </script>
+HTML;
+	print <<<HTML
+<div id="alert-message" title="WARNING">
+  <p>Gradeable ID must not be blank and only contain characters <strong> a-z A-Z 0-9 _ - </strong> </p>
+</div>
 HTML;
 
 }
