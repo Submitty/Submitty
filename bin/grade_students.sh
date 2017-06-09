@@ -240,6 +240,7 @@ function grade_this_item {
     course=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .course | tr -d '"'`
     assignment=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .gradeable| tr -d '"'`
     user=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .user | tr -d '"'`
+    team=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .team | tr -d '"'`
     version=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .version | tr -d '"'`
 
     # error checking (make sure nothing is null)
@@ -262,6 +263,11 @@ function grade_this_item {
     then
 	echo "ERROR IN USER: $NEXT_TO_GRADE" >&2
 	return
+    fi
+    if [ -z "$team" ]
+    then
+    echo "ERROR IN TEAM: $NEXT_TO_GRADE" >&2
+    return
     fi
     if [ -z "$version" ]
     then
@@ -844,7 +850,10 @@ while true; do
         "${course}" \
         "${assignment}" \
         "${user}" \
+        "${team}" \
         ${version}
+
+    echo "${team}"
 
 	echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
 

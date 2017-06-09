@@ -136,13 +136,16 @@ CREATE TABLE electronic_gradeable (
 
 CREATE TABLE electronic_gradeable_data (
     g_id character varying(255) NOT NULL,
-    user_id character varying(255) NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
     g_version integer NOT NULL,
     autograding_non_hidden_non_extra_credit numeric DEFAULT 0 NOT NULL,
     autograding_non_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
     autograding_hidden_non_extra_credit numeric DEFAULT 0 NOT NULL,
     autograding_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
-    submission_time timestamp(6) without time zone NOT NULL
+    submission_time timestamp(6) without time zone NOT NULL,
+    CONSTRAINT egd_user_team_id_check CHECK (user_id IS NOT NULL OR team_id IS NOT NULL),
+    CONSTRAINT egd_g_user_team_id_unique UNIQUE (g_id, user_id, team_id)
 );
 
 
@@ -152,8 +155,11 @@ CREATE TABLE electronic_gradeable_data (
 
 CREATE TABLE electronic_gradeable_version (
     g_id character varying(255) NOT NULL,
-    user_id character varying(255) NOT NULL,
-    active_version integer
+    user_id character varying(255),
+    team_id character varying(255),
+    active_version integer,
+    CONSTRAINT egv_user_team_id_check CHECK (user_id IS NOT NULL OR team_id IS NOT NULL),
+    CONSTRAINT egv_g_user_team_id_unique UNIQUE (g_id, user_id, team_id)
 );
 
 
@@ -405,27 +411,11 @@ ALTER TABLE ONLY gradeable_data ALTER COLUMN gd_id SET DEFAULT nextval('gradeabl
 
 
 --
--- Name: electronic_gradeable_data_pk; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY electronic_gradeable_data
-    ADD CONSTRAINT electronic_gradeable_data_pk PRIMARY KEY (g_id, user_id, g_version);
-
-
---
 -- Name: electronic_gradeable_g_id_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
-
-
---
--- Name: electronic_gradeable_pk; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY electronic_gradeable_version
-    ADD CONSTRAINT electronic_gradeable_pk PRIMARY KEY (g_id, user_id);
 
 
 --
@@ -573,6 +563,14 @@ ALTER TABLE ONLY electronic_gradeable_data
 
 
 --
+-- Name: electronic_gradeable_data_team; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable_data
+    ADD CONSTRAINT electronic_gradeable_data_team FOREIGN KEY (team_id) REFERENCES gradeable_teams(team_id) ON UPDATE CASCADE;
+
+
+--
 -- Name: electronic_gradeable_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -585,7 +583,7 @@ ALTER TABLE ONLY electronic_gradeable
 --
 
 ALTER TABLE ONLY electronic_gradeable_version
-    ADD CONSTRAINT electronic_gradeable_gid FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+    ADD CONSTRAINT electronic_gradeable_version_g_id FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
 
 --
@@ -593,7 +591,15 @@ ALTER TABLE ONLY electronic_gradeable_version
 --
 
 ALTER TABLE ONLY electronic_gradeable_version
-    ADD CONSTRAINT electronic_gradeable_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT electronic_gradeable_version_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: electronic_gradeable_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable_version
+    ADD CONSTRAINT electronic_gradeable_version_team FOREIGN KEY (team_id) REFERENCES gradeable_teams(team_id) ON UPDATE CASCADE;
 
 
 --
@@ -601,7 +607,7 @@ ALTER TABLE ONLY electronic_gradeable_version
 --
 
 ALTER TABLE ONLY electronic_gradeable_version
-    ADD CONSTRAINT electronic_gradeable_version FOREIGN KEY (g_id, user_id, active_version) REFERENCES electronic_gradeable_data(g_id, user_id, g_version) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT electronic_gradeable_version FOREIGN KEY (g_id, user_id, team_id, active_version) REFERENCES electronic_gradeable_data(g_id, user_id, team_id, g_version) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

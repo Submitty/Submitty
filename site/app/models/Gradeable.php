@@ -386,9 +386,17 @@ class Gradeable extends AbstractModel {
         $interactive_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive";
         $batch_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_batch";
 
+        $user_id = $this->core->getUser()->getId();
+        if ($this->team_assignment) {
+            $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
+            if ($team !== null) {
+                $user_id = $team->getId();
+            }
+        }
+
         $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
                                           $this->core->getConfig()->getCourse(), $this->id,
-                                          $this->core->getUser()->getId(), $this->current));
+                                          $user_id, $this->current));
         $grade_file = "GRADING_".$queue_file;
 
         $this->in_interactive_queue = file_exists($interactive_queue."/".$queue_file);
@@ -495,15 +503,26 @@ class Gradeable extends AbstractModel {
             return;
         }
 
+        $user_id = $this->core->getUser()->getId();
+        if ($this->team_assignment) {
+            $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
+            if ($team !== null) {
+                $user_id = $team->getId();
+            }
+            $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, null, $user_id, $this->getDueDate());
+        }
+        else {
+            $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $user_id, null, $this->getDueDate());
+        }
+        
+
         $course_path = $this->core->getConfig()->getCoursePath();
 
-        $submission_path = $course_path."/submissions/".$this->id."/".$this->core->getUser()->getId();
-        $svn_path = $course_path."/checkout/".$this->id."/".$this->core->getUser()->getId();
-        $results_path = $course_path."/results/".$this->id."/".$this->core->getUser()->getId();
+        $submission_path = $course_path."/submissions/".$this->id."/".$user_id;
+        $svn_path = $course_path."/checkout/".$this->id."/".$user_id;
+        $results_path = $course_path."/results/".$this->id."/".$user_id;
 
         //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
-        $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $this->core->getUser()->getId(), $this->getDueDate());
-
         if (count($this->versions) > 0) {
             $this->highest = Utils::getLastArrayElement($this->versions)->getVersion();
         }
@@ -518,6 +537,9 @@ class Gradeable extends AbstractModel {
             $this->current = $this->active_version;
         }
         else if ($this->current > $this->submissions) {
+            $this->current = $this->active_version;
+        }
+        else if (!isset($this->versions[$this->current]) && $this->active_version > 0) {
             $this->current = $this->active_version;
         }
 
@@ -572,7 +594,7 @@ class Gradeable extends AbstractModel {
             }
         }
 
-        $grade_file = $this->core->getConfig()->getCoursePath()."/reports/".$this->getId()."/".$this->core->getUser()->getId().".txt";
+        $grade_file = $this->core->getConfig()->getCoursePath()."/reports/".$this->getId()."/".$user_id.".txt";
         if (is_file($grade_file)) {
             $this->grade_file = htmlentities(file_get_contents($grade_file));
         }
@@ -590,7 +612,7 @@ class Gradeable extends AbstractModel {
         return $this->type;
     }
 
-    public function getTeamAssignment() {
+    public function isTeamAssignment() {
         return $this->team_assignment;
     }
 

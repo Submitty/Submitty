@@ -88,7 +88,7 @@ interface IDatabaseQueries {
      * @param \DateTime $due_date
      * @return GradeableVersion[]
      */
-    public function getGradeableVersions($g_id, $user_id, $due_date);
+    public function getGradeableVersions($g_id, $user_id, $team_id, $due_date);
 
     public function getUsersByRegistrationSections($sections);
 
@@ -168,7 +168,7 @@ interface IDatabaseQueries {
      * @param $user_id
      * @param $version
      */
-    public function insertVersionDetails($g_id, $user_id, $version, $timestamp);
+    public function insertVersionDetails($g_id, $user_id, $team_id, $version, $timestamp);
 
     /**
      * Updates the row in electronic_gradeable_version table for a given gradeable and student. This function should
@@ -179,7 +179,7 @@ interface IDatabaseQueries {
      * @param $user_id
      * @param $version
      */
-    public function updateActiveVersion($g_id, $user_id, $version);
+    public function updateActiveVersion($g_id, $user_id, $team_id, $version);
 
     /**
      * Given a gradeable objec, this updates all gradeable_component_data rows that are associated, updating the scores

@@ -126,8 +126,20 @@ WHERE gc.g_id=?
         return $return;
     }
 
-    public function getGradeableVersions($g_id, $user_id, $due_date) {
-        $this->database->query("
+    public function getGradeableVersions($g_id, $user_id, $team_id, $due_date) {
+        if ($user_id === null) {
+            $this->database->query("
+SELECT egd.*, egv.active_version = egd.g_version as active_version
+FROM electronic_gradeable_data AS egd
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_version
+) AS egv ON egv.active_version = egd.g_version AND egv.team_id = egd.team_id AND egv.g_id = egd.g_id
+WHERE egd.g_id=? AND egd.team_id=?
+ORDER BY egd.g_version", array($g_id, $team_id));
+        }
+        else {
+            $this->database->query("
 SELECT egd.*, egv.active_version = egd.g_version as active_version
 FROM electronic_gradeable_data AS egd
 LEFT JOIN (
@@ -136,6 +148,8 @@ LEFT JOIN (
 ) AS egv ON egv.active_version = egd.g_version AND egv.user_id = egd.user_id AND egv.g_id = egd.g_id
 WHERE egd.g_id=? AND egd.user_id=?
 ORDER BY egd.g_version", array($g_id, $user_id));
+        }
+        
         $return = array();
         foreach ($this->database->rows() as $row) {
             $row['submission_time'] = new \DateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
@@ -232,7 +246,8 @@ SELECT";
   CASE WHEN egd.active_version IS NULL THEN 
     0 ELSE 
     egd.active_version 
-  END AS active_version, 
+  END AS active_version,
+  egd.team_id,
   egd.g_version,
   egd.autograding_non_hidden_non_extra_credit,
   egd.autograding_non_hidden_extra_credit,
@@ -289,8 +304,12 @@ LEFT JOIN (
     egd.*,
     egv.active_version
   FROM electronic_gradeable_version AS egv, electronic_gradeable_data AS egd
-  WHERE egv.active_version = egd.g_version AND egv.g_id = egd.g_id AND egv.user_id = egd.user_id
-) AS egd ON g.g_id = egd.g_id AND u.user_id = egd.user_id";
+  WHERE egv.active_version = egd.g_version AND egv.g_id = egd.g_id AND (egv.user_id = egd.user_id OR egv.team_id = egd.team_id)
+) AS egd ON g.g_id = egd.g_id AND (u.user_id = egd.user_id OR u.user_id IN ( 
+    SELECT
+      t.user_id
+    FROM gradeable_teams AS gt, teams AS t
+    WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egd.team_id AND t.state = 1))";
         }
 
         $where = array();
@@ -597,27 +616,39 @@ ORDER BY user_id ASC");
         $this->database->query("UPDATE users SET rotating_section=? WHERE user_id IN ({$update_string})", $update_array);
     }
 
-    public function insertVersionDetails($g_id, $user_id, $version, $timestamp) {
+    public function insertVersionDetails($g_id, $user_id, $team_id, $version, $timestamp) {
         $this->database->query("
 INSERT INTO electronic_gradeable_data 
-(g_id, user_id, g_version, autograding_non_hidden_non_extra_credit, autograding_non_hidden_extra_credit, 
+(g_id, user_id, team_id, g_version, autograding_non_hidden_non_extra_credit, autograding_non_hidden_extra_credit, 
 autograding_hidden_non_extra_credit, autograding_hidden_extra_credit, submission_time) 
-VALUES(?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $version, $timestamp));
-        $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND user_id=?",
-            array($g_id, $user_id));
-        $row = $this->database->row();
-        if (!empty($row)) {
-            $this->updateActiveVersion($g_id, $user_id, $version);
+VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $timestamp));
+        if ($user_id === null) {
+            $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND team_id=?",
+            array($g_id, $team_id));
         }
         else {
-            $this->database->query("INSERT INTO electronic_gradeable_version (g_id, user_id, active_version) VALUES(?, ?, ?)",
-                array($g_id, $user_id, $version));
+            $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND user_id=?",
+            array($g_id, $user_id));
+        }
+        $row = $this->database->row();
+        if (!empty($row)) {
+            $this->updateActiveVersion($g_id, $user_id, $team_id, $version);
+        }
+        else {
+            $this->database->query("INSERT INTO electronic_gradeable_version (g_id, user_id, team_id, active_version) VALUES(?, ?, ?, ?)",
+                array($g_id, $user_id, $team_id, $version));
         }
     }
 
-    public function updateActiveVersion($g_id, $user_id, $version) {
-        $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND user_id=?",
+    public function updateActiveVersion($g_id, $user_id, $team_id, $version) {
+        if ($user_id === null) {
+            $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND team_id=?",
+            array($version, $g_id, $team_id));
+        }
+        else {
+            $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND user_id=?",
             array($version, $g_id, $user_id));
+        }  
     }
 
     public function updateGradeableData(Gradeable $gradeable) {
@@ -720,12 +751,30 @@ VALUES (?, ?, ?, ?)", $params);
         $teams = array();
         $this->database->query("SELECT * FROM gradeable_teams WHERE g_id=? ORDER BY team_id", array($g_id));
         foreach($this->database->rows() as $row) {
-            $teams[] = new Team($row);
+            $teams[] = new Team($row['team_id']);
         }
         for($i = 0; $i < count($teams); $i++) {
             $this->database->query("SELECT * FROM teams WHERE team_id=? ORDER BY user_id", array($teams[$i]->getId()));
             $teams[$i]->addUsers($this->database->rows());
         }
         return $teams;
+    }
+
+    public function getTeamByUserId($g_id, $user_id) {
+        $team_ids = array();
+        $this->database->query("SELECT * FROM gradeable_teams WHERE g_id=? ORDER BY team_id", array($g_id));
+        foreach($this->database->rows() as $row) {
+            $team_ids[] = $row['team_id'];
+        }
+        for($i = 0; $i < count($team_ids); $i++) {
+            $this->database->query("SELECT * FROM teams WHERE team_id=? AND user_id=? AND state=? ORDER BY user_id", array($team_ids[$i], $user_id, 1));
+            if (count($this->database->rows()) === 1) {
+                $this->database->query("SELECT * FROM teams WHERE team_id=? ORDER BY user_id", array($team_ids[$i]));
+                $team = new Team($team_ids[$i]);
+                $team->addUsers($this->database->rows());
+                return $team;
+            }
+        }
+        return null;
     }
 }

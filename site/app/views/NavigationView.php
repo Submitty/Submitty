@@ -242,7 +242,7 @@ HTML;
                 // Team management button, only visible on team assignments
                 $gradeable_team_range = '';
                 $admin_team_list = '';
-                if (($g_data->getTeamAssignment()) && ($title == "OPEN")) {
+                if (($g_data->isTeamAssignment()) && ($title == "OPEN")) {
                     $gradeable_team_range = <<<HTML
                  <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable, 'page' => 'team'))}'"> MANAGE TEAM
                  </button>
