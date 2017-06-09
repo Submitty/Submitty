@@ -252,7 +252,7 @@ if($user_is_administrator){
     .required::-webkit-input-placeholder { color: red; }
     .required:-moz-placeholder { color: red; }
     .required::-moz-placeholder { color: red; }
-    .required:-ms-input-placeholder { color: red; 
+    .required:-ms-input-placeholder { color: red; }
         
 </style>
 
@@ -555,7 +555,7 @@ HTML;
             </div>
             <div class="gradeable_type_options numeric" id="numeric">
                 <br />
-                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val"/> 
+                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" onchange="calculateTotalScore();" class="int_val"/> 
                 &emsp;&emsp;
                 
                 How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val"/>
@@ -572,6 +572,14 @@ HTML;
                                 <th> Extra Credit?</th>
                             </tr>
                         </thead>
+                        <!-- Footers -->
+                        <tfoot style="background: #E1E1E1;">
+                            <tr>
+                                <td><strong> MAX SCORE </strong></td>
+                                <td><strong id="totalScore"></strong></td>
+                                <td><strong id="totalEC"></strong></td>
+                            </tr>
+                        </tfoot>
                         <tbody style="background: #f9f9f9;">
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
@@ -579,10 +587,10 @@ HTML;
                                <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0"/> 
                            </td>  
                             <td>     
-                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" /> 
+                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" onchange="calculateTotalScore();" value="0"/> 
                            </td>                           
                            <td>     
-                                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" />
+                                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" onclick="calculateTotalScore();" value=""/>
                            </td> 
                         </tr>
                     </table>
@@ -1112,6 +1120,25 @@ HTML;
          }
     });
 
+    function calculateTotalScore(){
+        var total_score = 0;
+        var total_ec = 0;
+
+        $('.numerics-table').find('.multi-field').each(function(){
+            max_score = 0;
+            extra_credit = false;
+
+            max_score = parseFloat($(this).find('.max_score').val());
+            extra_credit = $(this).find('.numeric_extra').is(':checked') == true;
+
+            if (extra_credit === true) total_ec += max_score;
+            else total_score += max_score;
+        });
+
+        $("#totalScore").html(total_score);
+        $("#totalEC").html("(" + total_ec + ")");
+    }
+
     $(document).ready(function() {
         var numCheckpoints=1;
         
@@ -1162,6 +1189,7 @@ HTML;
                 $('#mult-field-' + numNumeric,wrapper).find('.numeric_extra').attr('checked',true); 
             }
             $('#mult-field-' + numNumeric,wrapper).show();
+            calculateTotalScore();
         }
         
         function removeNumeric(){
@@ -1477,7 +1505,7 @@ HTML;
                 <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" placeholder="Rubric Item Title"></textarea> \
                 <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
-                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs"  onkeyup="autoResizeComment(event);" \
+                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
@@ -1607,6 +1635,7 @@ HTML;
         currentRow.children()[1].children[1].checked = newRow.children()[child].children[1].checked;
         newRow.children()[child].children[1].checked = temp;
     }
+    calculateTotalScore();
     calculatePercentageTotal();
     </script>
 HTML;

@@ -12,7 +12,7 @@ class ElectronicGraderView extends AbstractView {
      * @param array     $sections
      * @return string
      */
-    public function overviewPage($gradeable, $sections) {
+    public function statusPage($gradeable, $sections) {
         $course = $this->core->getConfig()->getCourse();
         $semester = $this->core->getConfig()->getSemester();
         $graded = 0;
@@ -24,15 +24,27 @@ class ElectronicGraderView extends AbstractView {
             $graded += $section['graded_students'];
             $total += $section['total_students'];
         }
-        if ($total === 0) {
-            $percentage = 0;
+        if ($total === 0){
+            $percentage = -1;
         }
-        else {
+        else{
             $percentage = round(($graded / $total) * 100);
         }
         $return = <<<HTML
 <div class="content">
-    <h2>Overview of {$gradeable->getName()}</h2>
+    <h2>Status of {$gradeable->getName()}</h2>
+HTML;
+    if($percentage === -1){
+        $view = 'all';
+        $return .= <<<HTML
+    <div class="sub">
+        No Grading To Be Done! :)
+HTML;
+
+    }
+    else{
+        $view = null;
+        $return .= <<<HTML
     <div class="sub">
         Current percentage of grading done: {$percentage}% ({$graded}/{$total})
         <br />
@@ -52,28 +64,35 @@ HTML;
         Graders:
         <div style="margin-left: 20px">
 HTML;
-        foreach ($sections as $key => $section) {
-            if ($key === "NULL") {
-                continue;
-            }
-            if (count($section['graders']) > 0) {
-                $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
-            }
-            else {
-                $graders = "Nobody";
-            }
-            $return .= <<<HTML
+            foreach ($sections as $key => $section) {
+                if ($key === "NULL") {
+                    continue;
+                }
+                if (count($section['graders']) > 0) {
+                    $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
+                }
+                else {
+                    $graders = "Nobody";
+                }
+                $return .= <<<HTML
             Section {$key}: {$graders}<br />
 HTML;
+            }
         }
         // {$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
         $return .= <<<HTML
         </div>
         <div style="margin-top: 20px">
+HTML;
+        if($percentage !== -1 || $this->core->getUser()->accessFullGrading()){
+            $return .= <<<HTML
             <a class="btn btn-primary" 
-                href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId()))}"">
-                Grading Homework Overview
+                href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
+                Grading Details
             </a>
+HTML;
+            if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
+                $return .= <<<HTML
             <a class="btn btn-primary"
                 href="{$this->core->getConfig()->getTABaseUrl()}account/index.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}">
                 Grade Next Student
@@ -82,6 +101,8 @@ HTML;
     </div>
 </div>
 HTML;
+            }
+        }
         return $return;
     }
 
@@ -96,40 +117,44 @@ HTML;
 <div class="content">
     
 HTML;
-        if (!$this->core->getUser()->accessAdmin()) {
+        // Default is viewing your sections
+        // Limited grader does not have "View All" option
+        // If nothing to grade, Instructor will see all sections
+        if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
+            $text = 'View All';
+            $view = 'all';
+        }
+        else{
+            $text = 'View Your Sections';
+            $view = null;
+        }
+        if($gradeable->isGradeByRegistration()){
+            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
+        }
+        else{
+            $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),$this->core->getUser()->getId()));
+        }
+
+        if($this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0)){
             $return .= <<<HTML
     <div style="float: right; margin-bottom: 10px">
-HTML;
-            if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
-                $return .= <<<HTML
         <a class="btn btn-default"
-            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId(), 'view' => 'all'))}">
-            View All    
+            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}">
+            $text
         </a>
-HTML;
-            }
-            else {
-                $return .= <<<HTML
-        <a class="btn btn-default"
-            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId()))}">
-            View Your Sections    
-        </a>
-HTML;
-            }
-            $return .= <<<HTML
     </div>
 HTML;
         }
-
         $return .= <<<HTML
-    <h2>Summary Page for {$gradeable->getName()}</h2>
+    <h2>Grade Details for {$gradeable->getName()}</h2>
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
                 <td width="3%"></td>
                 <td width="5%">Section</td>
-                <td width="20%" style="text-align: left">User ID</td>
-                <td width="30%" colspan="2">Name</td>
+                <td width="20%">User ID</td>
+                <td width="15%">First Name</td>
+                <td width="15%">Last Name</td>
                 <td width="14%">Autograding</td>
                 <td width="10%">TA Grading</td>
                 <td width="10%">Total</td>
@@ -137,16 +162,6 @@ HTML;
             </tr>
         </thead>
 HTML;
-        if (count($rows) === 0) {
-            $return .= <<<HTML
-        <tbody>
-            <tr>
-                <td colspan="9">No students found for grading</td>
-            </tr>
-        </tbody>
-HTML;
-        }
-        else {
             $return .= <<<HTML
 HTML;
             $count = 1;
@@ -237,7 +252,6 @@ HTML;
             $return .= <<<HTML
         </tbody>
 HTML;
-        }
         $return .= <<<HTML
     </table>
 </div>
