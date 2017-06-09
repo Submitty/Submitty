@@ -543,7 +543,7 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         $version = $_REQUEST['gradeable_version'];
-        $g_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $g_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->gradeables_list->getGradeable($g_id, GradeableType::ELECTRONIC_FILE);
 
         $user_id = $this->core->getUser()->getId();

@@ -1220,6 +1220,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testCheckRefreshSuccess() {
         $_REQUEST['action'] = 'check_refresh';
         $_REQUEST['gradeable_version'] = 1;
+        $_REQUEST['gradeable_id'] = 'test';
         $tmp = FileUtils::joinPaths($this->config['course_path'], "results", "test", "testUser", "1");
         FileUtils::createDir($tmp, null, true);
         touch(FileUtils::joinPaths($tmp, "results.json"));
@@ -1231,6 +1232,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testCheckRefreshFailed() {
         $_REQUEST['action'] = 'check_refresh';
         $_REQUEST['gradeable_version'] = 1;
+        $_REQUEST['gradeable_id'] = 'test';
         $return = $this->runController();
         $this->assertFalse($return['refresh']);
         $this->assertEquals("NO_REFRESH", $return['string']);
