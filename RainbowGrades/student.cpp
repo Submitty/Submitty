@@ -93,8 +93,6 @@ void Student::setGradeableItemGrade(GRADEABLE_ENUM g, int i, float value,
 // =============================================================================================
 // GRADER CALCULATION HELPER FUNCTIONS
 
-extern std::vector<std::vector<std::string> > HACKMAXPROJECTS;
-
 float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   if (GRADEABLES[g].getCount() == 0) return 0;
   if (GRADEABLES[g].getMaximum() == 0) return 0;
@@ -114,43 +112,6 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   if (g == GRADEABLE_ENUM::TEST && LOWEST_TEST_COUNTS_HALF) {
     return lowest_test_counts_half_pct();
   }
-
-
-  // ============================================================================
-  // end special rule for projects for op sys
-  // HACK, NOT PERMANENT!
-
-  if (g == GRADEABLE_ENUM::PROJECT && HACKMAXPROJECTS.size() > 0) {
-
-    // collect the scores in a vector
-    std::map<std::string,float> scores;
-
-    for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
-      float my_value = getGradeableItemGrade(g,i).getValue();
-      std::string my_id = GRADEABLES[g].getID(i);
-      //std::cout << "PROJECT THING val=" << my_value << " id=" << my_id << std::endl;
-      scores[my_id] = my_value;
-    }
-
-    // sum the projects
-    float sum = 0;
-    for (unsigned int i = 0; i < HACKMAXPROJECTS.size(); i++) {
-      float my_max = 0;
-      for (unsigned int j = 0; j < HACKMAXPROJECTS[i].size(); j++) {
-        my_max = std::max(my_max,scores[HACKMAXPROJECTS[i][j]]);
-      }
-      //std::cout << "i=" << i << " max=" << my_max << std::endl;
-      sum += my_max;
-    }
-    //std::cout << "sum=" << sum << std::endl;
-
-    return 100*GRADEABLES[g].getPercent()*sum/GRADEABLES[g].getMaximum();
-
-  }
-  // HACK, NOT PERMANENT!
-  // end special rule for projects for op sys
-  // ============================================================================
-
 
   // collect the scores in a vector
   std::vector<float> scores;
@@ -219,14 +180,14 @@ float Student::quiz_normalize_and_drop(int num) const {
     scores.push_back(v/p);
   }
 
-  assert (scores.size() > num);
+  assert (scores.size() > std::size_t(num)); //Relies on the assert(num > 0) at the top of this function.
 
   // sort the scores
   sort(scores.begin(),scores.end());
 
   // sum up all but the lowest "num" scores
   float sum = 0;
-  for (int i = num; i < scores.size(); i++) {
+  for (std::size_t i = num; i < scores.size(); i++) {
     sum += scores[i];
   }
 
@@ -300,7 +261,7 @@ int Student::getAllowedLateDays(int which_lecture) const {
 int Student::getUsedLateDays() const {
   int answer = 0;
   for (std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::const_iterator itr = all_item_grades.begin(); itr != all_item_grades.end(); itr++) {
-    for (int i = 0; i < itr->second.size(); i++) {
+    for (std::size_t i = 0; i < itr->second.size(); i++) {
       answer += itr->second[i].getLateDaysUsed();
     }
   }
@@ -321,8 +282,6 @@ float Student::overall_b4_moss() const {
 std::string Student::grade(bool flag_b4_moss, Student *lowest_d) const {
 
   if (section == 0) return "";
-  if (section == 11) return "";  // fake section
-  if (section == 12) return "";  // fake section
 
   if (!flag_b4_moss && manual_grade != "") return manual_grade;
   
