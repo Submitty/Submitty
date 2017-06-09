@@ -542,12 +542,13 @@ class SubmissionController extends AbstractController {
     public function checkRefresh() {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        $g_id = $_REQUEST['gradeable_id'];
         $version = $_REQUEST['gradeable_version'];
+        $g_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable = $this->gradeables_list->getGradeable($g_id, GradeableType::ELECTRONIC_FILE);
 
         $user_id = $this->core->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            $team = $this->core->getQueries()->getTeamByUserId($g_id, $user_id);
             if ($team !== null) {
                 $user_id = $team->getId();
             }
