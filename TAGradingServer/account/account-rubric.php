@@ -541,13 +541,13 @@ HTML;
     if($question['gc_is_extra_credit'] == true) {
         $output .= <<<HTML
                             <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-                                <b>{$message}</b> <i class="icon-plus"></i> {$note}
+                                <i class="icon-plus"></i> <b>{$message}</b> {$note}
 HTML;
     }
     else if($penalty) {
         $output .= <<<HTML
                             <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-                                <b>{$message}</b> <i class="icon-minus"></i> {$note}
+                                <i class="icon-minus"></i> <b>{$message}</b> {$note}
 HTML;
     }
     else {
