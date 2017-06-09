@@ -520,7 +520,7 @@ HTML;
         </div>
 HTML;
                     }
-
+                    ///// START FOR EACH TEST CASE
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
                     foreach ($gradeable->getTestcases() as $testcase) {
@@ -599,24 +599,21 @@ HTML;
                 <div class="no-badge"></div>
 HTML;
                         }
+                        ///// the testcase header
                         $name = htmlentities($testcase->getName());
                         $test_message = "";
                         if($testcase->isExtraCredit()) {
-                          $test_message = "<span class='italics'><font color=\"#2d6987\">Extra Credit</font></span>";
-                        }
-                        else if($testcase->hasDetails()) {
-                          $test_message = "<span class='italics'><font color=\"#b94a48\">This test case has details.</font></span>";
-                        }
-                        else {
-                          $test_message = "<span class='italics'><font color=\"#468847\">Full points, no details.</font></span>";
+                          $test_message .= "<span class='italics'><font color=\"#2d6987\">Extra Credit</font></span>";
                         }
                         $command = htmlentities($testcase->getDetails());
-                        $return .= <<<HTML
-                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$test_message}</h4>
-            </div>
+                        $testcase_header = <<<HTML
+                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>
 HTML;
+                        $flag = false;
+                        $testcase_body = "";
+
                         if ($testcase->hasDetails()) {
-                            $return .= <<<HTML
+                            $testcase_body .= <<<HTML
             <div id="testcase_{$count}" style="display: {$display_box};">
 HTML;
                             if (!$testcase->isHidden()) {
@@ -626,23 +623,50 @@ HTML;
                                     $description = $autocheck->getDescription();
                                     $diff_viewer = $autocheck->getDiffViewer();
 
-                                    $return .= <<<HTML
+                                    $testcase_body .= <<<HTML
                 <div class="box-block">
 HTML;
 
                                     $title = "";
-                                    $return .= <<<HTML
+                                    $testcase_body .= <<<HTML
                             <div class='diff-element'>
 HTML;
                                     if ($diff_viewer->hasDisplayExpected()) {
                                         $title = "Student ";
                                     }
                                     $title .= $description;
-                                    $return .= <<<HTML
+                                    $testcase_body .= <<<HTML
                                 <h4>{$title}</h4>
 HTML;
+                                    ///// README missing
+                                    if (strpos($testcase->getName(),"README") && $autocheck->hasMessages() && (!$flag)) {
+                                        $test_message .= "<span class='italics'><font color=\"#c00000\">README missing.</font></span>";
+                                        $flag = true;
+                                    }
+                                    ///// README submitted
+                                    else if (strpos($testcase->getName(),"README") && (!$flag)) {
+                                        $test_message .= "<span class='italics'><font color=\"#006600\">README submitted.</font></span>";
+                                        $flag = true;
+                                    }
+
+                                    ///// Compilation success, no messages
+                                    if (strpos($testcase->getName(),"Compilation") && ($testcase->getPointsAwarded() >= $testcase->getPoints()) && (!$autocheck->hasMessages()) && (!$flag)) {
+                                        $test_message .= "<span class='italics'><font color=\"#006600\">Compilation Success.</font></span>";
+                                        $flag = true;
+                                    }
+                                    ///// Compilation sucesss, some messages
+                                    else if (strpos($testcase->getName(),"Compilation") && ($testcase->getPointsAwarded() >= $testcase->getPoints()) && $autocheck->hasMessages() && (!$flag)) {
+                                        $test_message .= "<span class='italics'><font color=\"#eac73d\">Compilation Success but with ERROR/WARNING. See output below.</font></span>";
+                                        $flag = true;
+                                    }
+                                    ///// compilation failure, some messages
+                                    else if (strpos($testcase->getName(),"Compilation") && (!$flag)) {
+                                        $test_message .= "<span class='italics'><font color=\"#c00000\">Compilation Failure. ERROR/WARNING. See output below.</font></span>";
+                                        $flag = true;
+                                    }
+
                                     foreach ($autocheck->getMessages() as $message) {
-                                        $return .= <<<HTML
+                                        $testcase_body .= <<<HTML
                                 <span class="red-message">{$message}</span><br />
 HTML;
                                     }
@@ -657,53 +681,60 @@ HTML;
                                            // Format the image SRC:  data:{mime};base64,{data};
                                            $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
                                            // insert the sample image data
-                                           $return .= '<img src="'.$myimagesrc.'">';
+                                           $testcase_body .= '<img src="'.$myimagesrc.'">';
                                         }
                                     }
                                     else if ($diff_viewer->hasDisplayActual()) {
-                                        $return .= <<<HTML
+                                        $testcase_body .= <<<HTML
                                 {$diff_viewer->getDisplayActual()}
 HTML;
                                     }
-                                    $return .= <<<HTML
+                                    $testcase_body .= <<<HTML
                             </div>
 HTML;
 
                                     if ($diff_viewer->hasDisplayExpected()) {
-                                        $return .= <<<HTML
+                                        $testcase_body .= <<<HTML
                             <div class='diff-element'>
                                 <h4>Expected {$description}</h4>
 HTML;
                                         for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
-                                            $return .= <<<HTML
+                                            $testcase_body .= <<<HTML
                                 <br />
 HTML;
                                         }
-                                        $return .= <<<HTML
+                                        $testcase_body .= <<<HTML
                                 {$diff_viewer->getDisplayExpected()}
                             </div>
 HTML;
                                     }
 
-                                    $return .= <<<HTML
+                                    $testcase_body .= <<<HTML
                 </div>
 HTML;
                                     if (++$autocheck_cnt < $autocheck_len) {
-                                        $return .= <<<HTML
+                                        $testcase_body .= <<<HTML
                 <div class="clear"></div>
 HTML;
                                     }
                                 }
                             }
-                            $return .= <<<HTML
+                            $testcase_body .= <<<HTML
             </div>
 HTML;
                         }
-                        $return .= <<<HTML
+                        $testcase_body .= <<<HTML
         </div>
 HTML;
                         $count++;
-                    }
+                        $testcase_header .= <<<HTML
+                        &nbsp;&nbsp;{$test_message}</h4>
+        </div>
+HTML;
+                        ///// combine the header and body for each
+                        $return .= $testcase_header;
+                        $return .= $testcase_body;
+                    } ///// end of for loop for each testcase
                 }
                 $return .= <<<HTML
     </div>

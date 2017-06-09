@@ -84,4 +84,11 @@ class GradeableAutocheck extends AbstractModel {
     public function getMessages() {
         return $this->messages;
     }
+
+    /**
+     * @return boolean
+     */
+    public function hasMessages() {
+      return (count($this->messages) > 0);
+    }
 }
