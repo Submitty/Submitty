@@ -93,7 +93,7 @@ def main():
                 if my_path != d:
                     raise SystemExit("ERROR: path reconstruction failed")
                 # add them to the queue
-                grade_queue.append({"semester": my_semester, "course": my_course, "assignment": my_gradeable,
+                grade_queue.append({"semester": my_semester, "course": my_course, "gradeable": my_gradeable,
                                     "user": my_user, "version": my_version})
 
     # Check before adding a very large number of systems to the queue
@@ -107,7 +107,7 @@ def main():
         which_queue="interactive"
 
     for item in grade_queue:
-        file_name = "__".join([item['semester'], item['course'], item['assignment'], item['user'], item['version']])
+        file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['user'], item['version']])
         file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_"+which_queue, file_name)
         with open(file_name, "w") as open_file:
             json.dump(item, open_file)
