@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "========================================================" << std::endl;
 
-    TestCase my_testcase((*tc)[i]);
+    TestCase my_testcase((*tc)[i],config_json);
 
     if (my_testcase.isFileCheck()) {
 
@@ -174,10 +174,11 @@ int main(int argc, char *argv[]) {
 	      if (special_flag) {
 		new_filename += ".txt";
 	      }
-              execute ("/bin/cp "+old_filename+" "+new_filename,
-                       "/dev/null",
-                       my_testcase.get_test_case_limits(),
-                       config_json.value("resource_limits",nlohmann::json()));
+              execute("/bin/cp "+old_filename+" "+new_filename,
+                      "/dev/null",
+                      my_testcase.get_test_case_limits(),
+                      config_json.value("resource_limits",nlohmann::json()),
+                      config_json);
               
             }
           }
@@ -209,7 +210,8 @@ int main(int argc, char *argv[]) {
                               " 2>" + my_testcase.getPrefix() + "_STDERR" + which + ".txt",
                               my_testcase.getPrefix() + "_execute_logfile.txt",
                               my_testcase.get_test_case_limits(),
-                              config_json.value("resource_limits",nlohmann::json()));
+                              config_json.value("resource_limits",nlohmann::json()),
+                              config_json);
 
         std::cout<< "FINISHED COMMAND, exited with exit_no: "<<exit_no<<std::endl;
       }
