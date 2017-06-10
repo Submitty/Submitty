@@ -59,9 +59,9 @@ if [ ${VAGRANT} == 1 ]; then
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
 ##    http://192.168.56.101 (submission)                  ##
-##    http://192.168.56.102 (cgi-bin scripts)             ##
-##    http://192.168.56.103 (svn)                         ##
+##    http://192.168.56.101/cgi-bin (cgi-bin scripts)     ##
 ##    http://192.168.56.101/hwgrading (tagrading)         ##
+##    http://192.168.56.103 (svn)                         ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##
@@ -70,10 +70,6 @@ if [ ${VAGRANT} == 1 ]; then
 ############################################################
 ' > /etc/motd
     chmod +rx /etc/motd
-
-    echo "192.168.56.101    test-submit test-submit.cs.rpi.edu" >> /etc/hosts
-    echo "192.168.56.102    test-cgi test-cgi.cs.rpi.edu" >> /etc/hosts
-    echo "192.168.56.103    test-svn test-svn.cs.rpi.edu" >> /etc/hosts
 fi
 
 #################################################################
@@ -563,7 +559,6 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 http://192.168.56.101
-http://192.168.56.102
 svn+ssh:192.168.56.103
 y" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else
