@@ -87,6 +87,7 @@ public:
 
   friend std::ostream& operator<< (std::ostream& ostr, const TestResultsFixedSize &tr) {
     ostr << "TR grade=" << tr.grade << " messages='" << tr.messages << "'";
+    return ostr;
   }
 
 private:

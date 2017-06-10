@@ -267,7 +267,8 @@ void VerifyGraderDeductions(nlohmann::json &json_graders) {
 void AddDefaultGrader(const std::string &command,
                       const std::set<std::string> &files_covered,
                       nlohmann::json& json_graders,
-                      const std::string &filename) {
+                      const std::string &filename,
+                      const nlohmann::json &whole_config) {
   if (files_covered.find(filename) != files_covered.end())
     return;
   //std::cout << "ADD GRADER WarnIfNotEmpty test for " << filename << std::endl;
@@ -277,7 +278,7 @@ void AddDefaultGrader(const std::string &command,
   if (filename.find("STDOUT") != std::string::npos) {
     j["description"] = "Standard Output (STDOUT)";
   } else if (filename.find("STDERR") != std::string::npos) {
-    std::string program_name = get_program_name(command);
+    std::string program_name = get_program_name(command,whole_config);
     if (program_name == "/usr/bin/python") {
       j["description"] = "syntax error output from running python";
     } else if (program_name == "/usr/bin/java") {
@@ -300,7 +301,8 @@ void AddDefaultGrader(const std::string &command,
 // Every command sends standard output and standard error to two
 // files.  Make sure those files are sent to a grader.
 void AddDefaultGraders(const std::vector<std::string> &commands,
-                       nlohmann::json &json_graders) {
+                       nlohmann::json &json_graders,
+                       const nlohmann::json &whole_config) {
   std::set<std::string> files_covered;
   assert (json_graders.is_array());
   for (int i = 0; i < json_graders.size(); i++) {
@@ -310,12 +312,12 @@ void AddDefaultGraders(const std::vector<std::string> &commands,
     }
   }
   if (commands.size() == 1) {
-    AddDefaultGrader(commands[0],files_covered,json_graders,"STDOUT.txt");
-    AddDefaultGrader(commands[0],files_covered,json_graders,"STDERR.txt");
+    AddDefaultGrader(commands[0],files_covered,json_graders,"STDOUT.txt",whole_config);
+    AddDefaultGrader(commands[0],files_covered,json_graders,"STDERR.txt",whole_config);
   } else {
     for (int i = 0; i < commands.size(); i++) {
-      AddDefaultGrader(commands[i],files_covered,json_graders,"STDOUT_"+std::to_string(i)+".txt");
-      AddDefaultGrader(commands[i],files_covered,json_graders,"STDERR_"+std::to_string(i)+".txt");
+      AddDefaultGrader(commands[i],files_covered,json_graders,"STDOUT_"+std::to_string(i)+".txt",whole_config);
+      AddDefaultGrader(commands[i],files_covered,json_graders,"STDERR_"+std::to_string(i)+".txt",whole_config);
     }
   }
 }
@@ -332,7 +334,7 @@ bool validShowValue(const nlohmann::json& v) {
            v == "on_success"));
 }
 
-TestCase::TestCase (nlohmann::json& input) : _json(input) {
+TestCase::TestCase (nlohmann::json& input,const nlohmann::json &whole_config) : _json(input) {
   test_case_id = next_test_case_id;
   next_test_case_id++;
   General_Helper();
@@ -351,7 +353,7 @@ TestCase::TestCase (nlohmann::json& input) : _json(input) {
     assert (itr->is_array());
     VerifyGraderDeductions(*itr);
     std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
-    AddDefaultGraders(commands,*itr);
+    AddDefaultGraders(commands,*itr,whole_config);
 
      for (int i = 0; i < (*itr).size(); i++) {
       nlohmann::json& grader = (*itr)[i];
@@ -513,13 +515,12 @@ void TestCase::Compilation_Helper() {
       v["deduction"] = 1.0/executable_names.size();
       _json["validation"].push_back(v);
     }
-    _json.erase(f_itr);
   }
 
-  f_itr = _json.find("executable_name");
+  //f_itr = _json.find("executable_name");
   v_itr = _json.find("validation");
 
-  assert (f_itr == _json.end());
+  //assert (f_itr == _json.end());
   assert (v_itr != _json.end());
   //assert (commands.size() > 0);
 }
@@ -761,7 +762,7 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
   nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
-    TestCase my_testcase((*tc)[i]);
+    TestCase my_testcase((*tc)[i],config_json);
     int points = (*tc)[i].value("points",0);
     if (points > 0) {
       total_points += points;

@@ -13,7 +13,7 @@ COURSE_BUILDERS_GROUP=course_builders
 # Ensure we have python and pip installed before doing anything else so we can use
 # python as our glue
 apt-get update
-apt-get install -qqy python python-pip python-dev python3 python3-pip python3-dev libpython3.5
+apt-get install -qqy python python-pip python-dev python3 python3.4 python3-pip python3-dev libpython3.4 libpython3.5
 pip2 install -U pip
 pip3 install -U pip
 
