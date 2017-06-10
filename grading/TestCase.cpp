@@ -482,8 +482,6 @@ bool HasActualFileCheck(const nlohmann::json &v_itr, const std::string &actual_f
 void TestCase::Compilation_Helper() {
   nlohmann::json::iterator f_itr,v_itr,w_itr;
 
-  std::cout << "COMPILATION HELPER" << std::endl;
-
   // Check the required fields for all test types
   f_itr = _json.find("executable_name");
   v_itr = _json.find("validation");
@@ -491,10 +489,7 @@ void TestCase::Compilation_Helper() {
   if (v_itr != _json.end()) {
     assert (v_itr->is_array());
     std::vector<nlohmann::json> tmp = v_itr->get<std::vector<nlohmann::json> >();
-    std::cout << "before VAL COUNT = " << tmp.size() << std::endl;
   }
-
-  assert (f_itr != _json.end());
 
   if (f_itr != _json.end()) {
 
@@ -548,18 +543,14 @@ void TestCase::Compilation_Helper() {
     }
   }
 
-  //f_itr = _json.find("executable_name");
   v_itr = _json.find("validation");
 
   if (v_itr != _json.end()) {
     assert (v_itr->is_array());
     std::vector<nlohmann::json> tmp = v_itr->get<std::vector<nlohmann::json> >();
-    std::cout << "after VAL COUNT = " << tmp.size() << std::endl;
   }
 
-  //assert (f_itr == _json.end());
   assert (v_itr != _json.end());
-  //assert (commands.size() > 0);
 }
 
 void TestCase::Execution_Helper() {
