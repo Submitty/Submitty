@@ -3,16 +3,21 @@
         {
             "autochecks": [
                 {
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                    ]
+                },
+                {
                     "description": "Create Executable",
                     "messages": [
                         "ERROR: required files not found:  a.out"
                     ]
                 },
                 {
-                    "actual_file": "test01_STDOUT.txt",
                     "description": "Standard Output (STDOUT)",
                     "messages": [
-                        "WARNING: This file should be empty"
+                        "ERROR!  Could not open student file: 'STDOUT.txt'"
                     ]
                 }
             ],
@@ -25,7 +30,7 @@
                     "actual_file": "test02_STDOUT.txt",
                     "description": "Standard OUTPUT (STDOUT)",
                     "difference_file": "test02_0_diff.json",
-                    "expected_file": "test_output/testassignment/test1_output.txt"
+                    "expected_file": "test_output/testassignment/test2_output.txt"
                 }
             ],
             "points_awarded": 10,
