@@ -468,12 +468,33 @@ void TestCase::FileCheck_Helper() {
   }
 }
 
+bool HasActualFileCheck(const nlohmann::json &v_itr, const std::string &actual_file) {
+  assert (actual_file != "");
+  const std::vector<nlohmann::json> tmp = v_itr.get<std::vector<nlohmann::json> >();
+  for (int i = 0; i < tmp.size(); i++) {
+    if (tmp[i].value("actual_file","") == actual_file) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void TestCase::Compilation_Helper() {
   nlohmann::json::iterator f_itr,v_itr,w_itr;
+
+  std::cout << "COMPILATION HELPER" << std::endl;
 
   // Check the required fields for all test types
   f_itr = _json.find("executable_name");
   v_itr = _json.find("validation");
+
+  if (v_itr != _json.end()) {
+    assert (v_itr->is_array());
+    std::vector<nlohmann::json> tmp = v_itr->get<std::vector<nlohmann::json> >();
+    std::cout << "before VAL COUNT = " << tmp.size() << std::endl;
+  }
+
+  assert (f_itr != _json.end());
 
   if (f_itr != _json.end()) {
 
@@ -499,7 +520,12 @@ void TestCase::Compilation_Helper() {
       v2["show_actual"] = "on_failure";
       v2["show_message"] = "on_failure";
       v2["deduction"] = warning_fraction;
-      _json["validation"].push_back(v2);
+
+      v_itr = _json.find("validation");
+      if (v_itr == _json.end() ||
+          !HasActualFileCheck(*v_itr,v2["actual_file"])) {
+        _json["validation"].push_back(v2);
+      }
     }
 
 
@@ -513,12 +539,23 @@ void TestCase::Compilation_Helper() {
       v["show_actual"] = "on_failure";
       v["show_message"] = "on_failure";
       v["deduction"] = 1.0/executable_names.size();
-      _json["validation"].push_back(v);
+
+      v_itr = _json.find("validation");
+      if (v_itr == _json.end() ||
+          !HasActualFileCheck(*v_itr,v["actual_file"])) {
+        _json["validation"].push_back(v);
+      }
     }
   }
 
   //f_itr = _json.find("executable_name");
   v_itr = _json.find("validation");
+
+  if (v_itr != _json.end()) {
+    assert (v_itr->is_array());
+    std::vector<nlohmann::json> tmp = v_itr->get<std::vector<nlohmann::json> >();
+    std::cout << "after VAL COUNT = " << tmp.size() << std::endl;
+  }
 
   //assert (f_itr == _json.end());
   assert (v_itr != _json.end());
