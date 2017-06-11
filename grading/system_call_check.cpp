@@ -45,13 +45,16 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
 
     // if it's a system call
     if (line.find("ALLOW_SYSCALL(") != std::string::npos) {
+      int startpoint = line.find("ALLOW_SYSCALL(");
       int endpoint = line.find(");");
+      assert (startpoint != std::string::npos);
       assert (endpoint != std::string::npos);
       assert (category != "");
       // there should be nothing else on this line
-      assert (line.size() == endpoint+2);
-      assert (endpoint-14 > 1);
-      std::string system_call = line.substr(14,endpoint-14);
+      //assert (line.size() == endpoint+2);
+      //assert (endpoint-14 > 1);
+      std::string system_call = line.substr(startpoint+14,endpoint-startpoint-14);
+      //std::cout << "found " << system_call << std::endl;
       // make sure there aren't duplicates
       assert (all_system_calls.find(system_call) == all_system_calls.end());
       all_system_calls[system_call] = category;
@@ -65,6 +68,10 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
       assert (in_preprocessor_if);
       in_preprocessor_if = false;
       category = "";
+    }
+
+    else if (line.find ("void allow_system_calls(") != std::string::npos) {
+      continue;
     } 
     
     else {
@@ -72,15 +79,8 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
       std::string token, type;
       ss >> token; 
 
-      /*
-      if (token == "#define") {
-	assert (in_preprocessor_if);
-	assert (category != "");
-	continue;
-      } 
-      */
-
       if (token == "}") {
+        category = "";
         continue;
       }
       
@@ -97,7 +97,7 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
         ss >> category;
         assert (category != "");
         assert (categories.find(category) == categories.end());
-        std::cout << "FOUND " << category << std::endl;
+        //std::cout << "FOUND " << category << std::endl;
         categories[category] = type;
         // make sure nothing else is on that line!
         assert (ss.rdbuf()->in_avail() == 0);
@@ -118,11 +118,16 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
         ss >> token;
         if (token == "(0)") continue;
         std::string foo = "(categories.find(\"";
-        std::cout << token.substr(0,18) << std::endl;
-        std::cout << foo << std::endl;
-        assert (token.substr(0,18) == foo);
+
+        assert (token.substr(0,18) == "(categories.find(\"");
+        assert (category != "");
+        //std::cout << token.substr(18,token.size()-20) << std::endl;
+        //std::cout << category << std::endl;
+        assert (token.substr(18,token.size()-20) == category);
+        assert (token.substr(token.size()-2,2) == "\")");
+
       } else {
-        std::cout << "LINE " << line << std::endl;
+        std::cout << "LINE '" << line << "'" << std::endl;
       }
     }
   }

@@ -14,7 +14,7 @@
 inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categories) {
 
   // ================================================================================
-  
+
   // WHITELIST : PROCESS_CONTROL
   ALLOW_SYSCALL(arch_prctl);
   ALLOW_SYSCALL(modify_ldt);
@@ -51,7 +51,7 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
 
   // RESTRICTED : PROCESS_CONTROL_NEW_PROCESS_THREAD
   if (categories.find("PROCESS_CONTROL_NEW_PROCESS_THREAD") != categories.end()) {
-    allow_syscall(sc, SCMP_SYS(clone),"clone");
+    ALLOW_SYSCALL(clone);
     ALLOW_SYSCALL(execve);
     ALLOW_SYSCALL(fork);
     ALLOW_SYSCALL(set_tid_address);
@@ -257,11 +257,11 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
   }
 
   // RESTRICTED : FILE_MANAGEMENT_CAPABILITIES
-  if (categories.find("ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_CAPABILITIES") != categories.end()) {
+  if (categories.find("FILE_MANAGEMENT_CAPABILITIES") != categories.end()) {
     ALLOW_SYSCALL(capget);
     ALLOW_SYSCALL(capset);
   }
-  
+
   // RESTRICTED : FILE_MANAGEMENT_EXTENDED_ATTRIBUTES
   if (categories.find("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES") != categories.end()) {
     ALLOW_SYSCALL(fgetxattr);
@@ -290,7 +290,7 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
 
   // WHITELIST : DEVICE_MANAGEMENT
   ALLOW_SYSCALL(ioctl);
-  
+
   // RESTRICTED : DEVICE_MANAGEMENT_ADVANCED
   if (categories.find("DEVICE_MANAGEMENT_ADVANCED") != categories.end()) {
     ALLOW_SYSCALL(gtty);
@@ -347,15 +347,15 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
     ALLOW_SYSCALL(clock_adjtime);
     ALLOW_SYSCALL(clock_settime);
   }
-  
+
   // ================================================================================
-  
+
   // RESTRICTED : COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL
   if (categories.find("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL") != categories.end()) {
     ALLOW_SYSCALL(connect);
     ALLOW_SYSCALL(socket);
   }
-    
+
   // RESTRICTED : COMMUNICATIONS_AND_NETWORKING_SOCKETS
   if (categories.find("COMMUNICATIONS_AND_NETWORKING_SOCKETS") != categories.end()) {
     ALLOW_SYSCALL(accept);
@@ -431,7 +431,7 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
   }
 
   // RESTRICTED : TGKILL
-  if (categories.find("TGKILL") != categories.end() 
+  if (categories.find("TGKILL") != categories.end()
     ALLOW_SYSCALL(tgkill);
   }
 
@@ -440,7 +440,7 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
     ALLOW_SYSCALL(kill);
     ALLOW_SYSCALL(tkill);
   }
-    
+
   // RESTRICTED : UNKNOWN
   // ================================================================================
   if (categories.find("UNKNOWN") != categories.end()) {
