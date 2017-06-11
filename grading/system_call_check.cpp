@@ -68,50 +68,67 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
     } 
     
     else {
-      //std::cout << "LINE " << line << std::endl;
       std::stringstream ss(line);
       std::string token, type;
       ss >> token; 
 
+      /*
       if (token == "#define") {
 	assert (in_preprocessor_if);
 	assert (category != "");
 	continue;
       } 
+      */
 
-      assert (token == "//");
-      ss >> type;
-      if (type != "WHITELIST" && type != "RESTRICTED" && type != "FORBIDDEN") {
-        // just a comment
+      if (token == "}") {
         continue;
-      };
-
-      // otherwise this is a category
-      ss >> token;
-      assert (token == ":");
-      ss >> category;
-      assert (category != "");
-      assert (categories.find(category) == categories.end());
-      categories[category] = type;
-      // make sure nothing else is on that line!
-      assert (ss.rdbuf()->in_avail() == 0);
-      assert (in_preprocessor_if == false);
-
-      if (type == "RESTRICTED") {
-        std::getline(system_call_categories_file,line);
-        assert (line == "#ifdef ALLOW_SYSTEM_CALL_CATEGORY_"+category);
-        in_preprocessor_if = true;
-      } else if (type == "FORBIDDEN") {
-        std::getline(system_call_categories_file,line);
-        assert (line == "#if 0");
-        in_preprocessor_if = true;
+      }
+      
+      if (token == "//") {
+        ss >> type;
+        if (type != "WHITELIST" && type != "RESTRICTED" && type != "FORBIDDEN") {
+          // just a comment
+          continue;
+        };
+        
+        // otherwise this is a category
+        ss >> token;
+        assert (token == ":");
+        ss >> category;
+        assert (category != "");
+        assert (categories.find(category) == categories.end());
+        std::cout << "FOUND " << category << std::endl;
+        categories[category] = type;
+        // make sure nothing else is on that line!
+        assert (ss.rdbuf()->in_avail() == 0);
+        assert (in_preprocessor_if == false);
+        /*
+        if (type == "RESTRICTED") {
+          std::getline(system_call_categories_file,line);
+          assert (line == "#ifdef ALLOW_SYSTEM_CALL_CATEGORY_"+category);
+          in_preprocessor_if = true;
+        } else if (type == "FORBIDDEN") {
+          std::getline(system_call_categories_file,line);
+          assert (line == "#if 0");
+          in_preprocessor_if = true;
+        } else {
+          
+        }*/
+      } else if (token == "if") {
+        ss >> token;
+        if (token == "(0)") continue;
+        std::string foo = "(categories.find(\"";
+        std::cout << token.substr(0,18) << std::endl;
+        std::cout << foo << std::endl;
+        assert (token.substr(0,18) == foo);
       } else {
-
+        std::cout << "LINE " << line << std::endl;
       }
     }
   }
 
   // verify that we have all of the linux system calls (32 & 64 bit)
+  std::cout << "all_system_calls.size() " <<  all_system_calls.size() << std::endl;
   assert (all_system_calls.size() == 385);
 }
 

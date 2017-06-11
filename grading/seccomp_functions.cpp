@@ -9,38 +9,25 @@
 
 // COMPILATION NOTE: Must pass -lseccomp to build
 #include <seccomp.h>
+#include <set>
+#include <string>
+#include <seccomp.h>
+#include <iostream>
+
+#define ALLOW_SYSCALL(name)  allow_syscall(sc,SCMP_SYS(name),#name)
+
+inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &syscall_string) {
+  //std::cout << "allow " << syscall_string << std::endl;
+  int res = seccomp_rule_add(sc, SCMP_ACT_ALLOW, syscall, 0);
+  if (res < 0) {
+    std::cerr << "WARNING:  Errno " << res << " installing seccomp rule for " << syscall_string << std::endl;
+  }
+}
+
+#include "system_call_categories.h"
 
 #include <vector>
 #include <string>
-
-//
-//
-// FIXME LONGTERM: config.h should be redesigned (cannot do this
-//     midsemester) In order to allow #including config.h in multiple
-//     files, do this hack to change the name.
-//    
-//
-#define default_limits IGNORE_DEFAULT_LIMITS
-#define testcases IGNORE_TESTCASES
-#define assignment_limits IGNORE_ASSIGNMENT_LIMITS
-#define drmemory_flags IGNORE_DR_MEMORY_FLAGS
-#define long_test IGNORE_LONG_TEST
-#define medium_test IGNORE_MEDIUM_TEST
-#define short_test IGNORE_SHORT_TEST
-#include "default_config.h"
-//
-// END FIXME LONGTERM
-//
-
-// ===========================================================================
-// ===========================================================================
-// Helper macro that disallows certain system calls using the seccomp library
-#define ALLOW_SYSCALL(name) do {\
-  int __res__ = seccomp_rule_add(sc, SCMP_ACT_ALLOW, SCMP_SYS(name), 0); \
-  if (__res__ < 0) {\
-    /*execute_logfile << "WARNING:  Errno " << __res__ << " installing seccomp rule for " << #name << std::endl;*/ \
-  }\
-} while (0)
 
 // ===========================================================================
 // ===========================================================================
@@ -64,145 +51,143 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // cannot pass them the number for the target: only for the source.
   // We could use raw seccomp-bpf instead.
 
+  std::set<std::string> categories;
 
   // C/C++ COMPILATION
   if (my_program == "/usr/bin/g++" ||
       my_program == "/usr/bin/clang++" ||
       my_program == "/usr/bin/gcc") {
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-#define ALLOW_SYSTEM_CALL_CATEGORY_TGKILL
+
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
+    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+    categories.insert("FILE_MANAGEMENT_RARE");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("TGKILL");
   }
 
   
   // SWI PROLOG
   if (my_program == "/usr/bin/swipl") {
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
+    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+    categories.insert("FILE_MANAGEMENT_RARE");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
   }
 
   // RACKET SCHEME
   if (my_program == "/usr/bin/plt-r5rs") {
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_GET_SET_USER_GROUP_ID
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SYNCHRONIZATION
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+    categories.insert("FILE_MANAGEMENT_RARE");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
   }
 
 
   // PYTHON 
   if (my_program == "/usr/bin/python") {
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_GET_SET_USER_GROUP_ID
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_MEMORY_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SCHEDULING
+    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_MEMORY_ADVANCED");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_SCHEDULING");
   }
 
 
   if (my_program == "/usr/bin/java") {
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SOCKETS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_GET_SET_USER_GROUP_ID
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_MEMORY_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SCHEDULING
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS");
+    categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
+    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+    categories.insert("FILE_MANAGEMENT_RARE");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+    categories.insert("PROCESS_CONTROL_MEMORY_ADVANCED");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_SCHEDULING");
   }
   
 
   // JAVA
-  if (my_program == "/usr/bin/javac") {
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_GET_SET_USER_GROUP_ID
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_MEMORY_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SCHEDULING
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SYNCHRONIZATION
+  if (1) {//my_program == "/usr/bin/javac") {
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+    categories.insert("FILE_MANAGEMENT_RARE");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+    categories.insert("PROCESS_CONTROL_MEMORY_ADVANCED");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_SCHEDULING");
+    categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
+
     // DESPERATE, WHITELIST EVERYTHING
     // FIXME: determine what is non-deterministic about system calls for compilation :(
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_MEMORY_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SYNCHRONIZATION
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SCHEDULING
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_GET_SET_USER_GROUP_ID
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_CAPABILITIES
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_EXTENDED_ATTRIBUTES
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
-#define ALLOW_SYSTEM_CALL_CATEGORY_DEVICE_MANAGEMENT_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_INFORMATION_MAINTENANCE_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SOCKETS
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION
-#define ALLOW_SYSTEM_CALL_CATEGORY_TGKILL
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_KILL
-#define ALLOW_SYSTEM_CALL_CATEGORY_UNKNOWN
-#define ALLOW_SYSTEM_CALL_CATEGORY_UNKNOWN_MODULE
-#define ALLOW_SYSTEM_CALL_CATEGORY_UNKNOWN_REMAP_PAGES
+    categories.insert("PROCESS_CONTROL_MEMORY_ADVANCED");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
+    categories.insert("PROCESS_CONTROL_SCHEDULING");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+    categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
+    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+    categories.insert("FILE_MANAGEMENT_CAPABILITIES");
+    categories.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
+    categories.insert("FILE_MANAGEMENT_RARE");
+    categories.insert("DEVICE_MANAGEMENT_ADVANCED");
+    categories.insert("DEVICE_MANAGEMENT_NEW_DEVICE");
+    categories.insert("INFORMATION_MAINTENANCE_ADVANCED");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    categories.insert("TGKILL");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_KILL");
+    categories.insert("UNKNOWN");
+    categories.insert("UNKNOWN_MODULE");
+    categories.insert("UNKNOWN_REMAP_PAGES");
   }
 
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/usr/bin/time") {
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD    
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD    ");
   } 
 
   // C++ Memory Debugging
   // FIXME: update with the actual dr memory install location?
   if (my_program.find("drmemory") != std::string::npos || 
       my_program.find("valgrind") != std::string::npos) {
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_EXTENDED_ATTRIBUTES
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_GET_SET_USER_GROUP_ID
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SYNCHRONIZATION
-#define ALLOW_SYSTEM_CALL_CATEGORY_DEVICE_MANAGEMENT_NEW_DEVICE
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    categories.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
+    categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
+    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+    categories.insert("FILE_MANAGEMENT_RARE");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
+    categories.insert("DEVICE_MANAGEMENT_NEW_DEVICE");
   } 
 
   // IMAGE COMPARISON
   if (my_program == "/usr/bin/compare") {
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SCHEDULING
+    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_SCHEDULING");
   }
-  
 
-  // ======================
-  // ======================
-  // ======================
-  // INCLUDE THE COMPLETE LIST OF SYSTEM CALLS ORGANIZED INTO CATEGORIES 
-#include "system_call_categories.h"
-  // ======================
-  // ======================
-  // ======================
+
+  allow_system_calls(sc,categories);
 
   if (seccomp_load(sc) < 0)
     return 1; // failure                                                                                   
