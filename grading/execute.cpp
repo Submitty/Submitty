@@ -692,6 +692,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
   else {
     std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
+    setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
   }
   my_path = getenv("PATH");
   //std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
@@ -728,14 +729,12 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
 
 
-  /*
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile)) {
     std::cout << "seccomp filter install failed" << std::endl;
     return 1;
   }
   // END SECCOMP
-  */
 
 
   int child_result =  execv ( my_program.c_str(), my_char_args );
