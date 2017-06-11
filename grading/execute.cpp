@@ -14,6 +14,7 @@
 #include <sstream>
 #include <cassert>
 #include <map>
+#include <set>
 
 // for system call filtering
 #include <seccomp.h>
@@ -70,7 +71,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "python2",                 "/usr/bin/python2" },
     { "python2.7",               "/usr/bin/python2.7" },
     { "python3",                 "/usr/bin/python3" },
-    { "python3.4",               "/usr/bin/python3.4" },
+    //{ "python3.4",               "/usr/bin/python3.4" },   // commenting out for now...  not easily supported on ubuntu 16.04
     { "python3.5",               "/usr/bin/python3.5" },
 
     // for Data Structures
@@ -126,28 +127,68 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 }
 
 
-bool local_executable (const std::string &program) {
-  assert (program.size() >= 1);
-  if (program.size() > 4 &&
-      program.substr(0,2) == "./" &&
-      program.substr(program.size()-4,4) == ".out" &&
-      program.substr(2,program.size()-2).find("/") == std::string::npos) {
+std::set<std::string> get_compiled_executables(const nlohmann::json &whole_config) {
+  std::set<std::string> answer;
+  assert (whole_config != nlohmann::json());
+
+  nlohmann::json testcases = whole_config.value("testcases",nlohmann::json());
+  for (nlohmann::json::iterator itr = testcases.begin(); itr != testcases.end(); itr++) {
+    if (itr->value("type","") == "Compilation") {
+      if (itr->find("executable_name") != itr->end()) {
+        std::vector<std::string> executable_names = stringOrArrayOfStrings(*itr,"executable_name");
+        for (unsigned int i = 0; i < executable_names.size(); i++) {
+          answer.insert(executable_names[i]);
+        }
+      }
+    }
+  }
+  return answer;
+}
+
+
+bool local_executable (const std::string &program, const nlohmann::json &whole_config) {
+  assert (program.size() > 3);
+  assert (program.substr(0,2) == "./");
+
+  std::set<std::string> executables = get_compiled_executables(whole_config);
+  if (executables.find(program.substr(2,program.size())) != executables.end()) {
     return true;
   }
+
+  std::cout << "WARNING: The local program '" << program
+            << "' is not compiled by the assignment configuration." << std::endl;;
+  std::cout << "CONFIGURATION COMPILED EXECUTABLES: ";
+  for (std::set<std::string>::iterator itr = executables.begin(); itr != executables.end(); itr++) {
+    std::cout << " './" << *itr << "'";
+  }
+  if (executables.size() == 0) { std::cout << " (none)" << std::endl; }
+  std::cout << std::endl;
+
   return false;
 }
 
 
-std::string validate_program(const std::string &program) {
+std::string validate_program(const std::string &program, const nlohmann::json &whole_config) {
   std::string full_path_executable;
   assert (program.size() >= 1);
-  if (system_program(program,full_path_executable)) {
-    return full_path_executable;
-  } else if (local_executable(program)) {
-    return program;
+  if (program.size() > 2 && program.substr(0,2) == "./") {
+    if (local_executable(program,whole_config)) {
+      return program;
+    }
+    std::string message = "ERROR: This local program '" + program + "' looks suspicious.\n"
+      + "  Check your assignment configuration.";
+    std::cout << message << std::endl;
+    std::cerr << message << std::endl;
+    exit(1);
   } else {
-    std::cout << "ERROR: program looks suspicious '" << program << "'" << std::endl;
-    std::cerr << "ERROR: program looks suspicious '" << program << "'" << std::endl;
+    if (system_program(program,full_path_executable)) {
+      return full_path_executable;
+    }
+
+    std::string message = "ERROR: This system program '" + program + "' is not on the allowed whitelist.\n"
+      + "  Contact the Submitty administrators for permission to use this program.";
+    std::cout << message << std::endl;
+    std::cerr << message << std::endl;
     exit(1);
   }
 }
@@ -360,14 +401,14 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
 // =====================================================================================
 // =====================================================================================
 
-std::string get_program_name(const std::string &cmd) {
+std::string get_program_name(const std::string &cmd, const nlohmann::json &whole_config) {
   std::string my_program;
   std::stringstream ss(cmd);
 
   ss >> my_program;
   assert (my_program.size() >= 1);
 
-  std::string full_path_executable = validate_program(my_program);
+  std::string full_path_executable = validate_program(my_program, whole_config);
   return full_path_executable;
 }
 
@@ -378,7 +419,8 @@ void parse_command_line(const std::string &cmd,
 			std::string &my_stdin,
 			std::string &my_stdout,
 			std::string &my_stderr,
-			std::ofstream &logfile) {
+			std::ofstream &logfile, 
+                        const nlohmann::json &whole_config) {
 
   std::cout << "PARSE COMMAND LINE " << cmd << std::endl;
 
@@ -403,7 +445,7 @@ void parse_command_line(const std::string &cmd,
     if (my_program == "") {
       assert (my_args.size() == 0);
       // program name
-      my_program = validate_program(token);
+      my_program = validate_program(token, whole_config);
       assert (my_program != "");
     }
 
@@ -559,7 +601,7 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
 
 
 // This function only returns on failure to exec
-int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
+int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config) {
 
   // to avoid creating extra layers of processes, use exec and not
   // system or the shell
@@ -570,7 +612,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
   std::string my_stdin;
   std::string my_stdout;
   std::string my_stderr;
-  parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr, logfile);
+  parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr, logfile, whole_config);
 
 
   char** temp_args = new char* [my_args.size()+2];   //memory leak here
@@ -686,14 +728,14 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
   }
 
 
-
+  /*
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile)) {
     std::cout << "seccomp filter install failed" << std::endl;
     return 1;
   }
   // END SECCOMP
-
+  */
 
 
   int child_result =  execv ( my_program.c_str(), my_char_args );
@@ -762,8 +804,9 @@ void TerminateProcess(float &elapsed, int childPID) {
 
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, const std::string &execute_logfile,
-	    nlohmann::json test_case_limits,
-	    nlohmann::json assignment_limits) {
+	    const nlohmann::json &test_case_limits,
+	    const nlohmann::json &assignment_limits,
+            const nlohmann::json &whole_config) {
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
 
@@ -777,7 +820,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
   // ensure fork was successful
   assert (childPID >= 0);
 
-  std::string program_name = get_program_name(cmd);
+  std::string program_name = get_program_name(cmd,whole_config);
   int seconds_to_run = get_the_limit(program_name,RLIMIT_CPU,test_case_limits,assignment_limits);
 
   int allowed_rss_memory = get_the_limit(program_name,RLIMIT_RSS,test_case_limits,assignment_limits);
@@ -795,7 +838,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
     assert(pgrp == 0);
 
     int child_result;
-    child_result = exec_this_command(cmd,logfile);
+    child_result = exec_this_command(cmd,logfile,whole_config);
 
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;

@@ -37,7 +37,7 @@ public:
 
   // -------------------------------
   // CONSTRUCTOR
-  TestCase (nlohmann::json& input);
+  TestCase (nlohmann::json& input,const nlohmann::json &whole_config);
 
   void General_Helper();
   void FileCheck_Helper();
