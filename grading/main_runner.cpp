@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     std::cout << "========================================================" << std::endl;
     std::cout << "TEST #" << i+1 << std::endl;
 
-    TestCase my_testcase((*tc)[i]);
+    TestCase my_testcase((*tc)[i],config_json);
 
     if (my_testcase.isFileCheck()) continue;
     if (my_testcase.isCompilation()) continue;
@@ -89,7 +89,8 @@ int main(int argc, char *argv[]) {
                             " 2>" + my_testcase.getPrefix() + "_STDERR" + which + ".txt",
                             logfile,
                             my_testcase.get_test_case_limits(),
-                            config_json.value("resource_limits",nlohmann::json())); 
+                            config_json.value("resource_limits",nlohmann::json()),
+                            config_json); 
       
     }
     
@@ -105,10 +106,11 @@ int main(int argc, char *argv[]) {
         std::string filename     = my_testcase.getMyPrefixFilename(v,i);
         assert (raw_filename != "");
         if (access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
-          execute ("/bin/mv "+raw_filename+" "+filename,
-                   "/dev/null",
-                   my_testcase.get_test_case_limits(),
-                   config_json.value("resource_limits",nlohmann::json()));
+          execute("/bin/mv "+raw_filename+" "+filename,
+                  "/dev/null",
+                  my_testcase.get_test_case_limits(),
+                  config_json.value("resource_limits",nlohmann::json()),
+                  config_json);
           std::cout << "RUNNER!  /bin/mv "+raw_filename+" "+filename << std::endl;
         }
       }

@@ -27,7 +27,7 @@ Vagrant.configure(2) do |config|
       vb.customize ['guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 10000 ]
     end
 
-    config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true
+    config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
 
     config.vm.provision 'shell', inline: $script
 

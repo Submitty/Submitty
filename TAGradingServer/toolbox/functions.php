@@ -123,11 +123,16 @@ if ($DEBUG && isset($_GET['useUser'])) {
 else {
     $key = $_GET['semester'].'_'.$_GET['course'].'_session_id';
     if (isset($_COOKIE[$key])) {
-        $db->query("SELECT * FROM sessions WHERE session_id=?", array($_COOKIE[$key]));
+        $cookie = json_decode($_COOKIE[$key], true);
+        $db->query("SELECT * FROM sessions WHERE session_id=?", array($cookie['session_id']));
         $row = $db->row();
         if (isset($row['user_id'])) {
             $suggested_username = $row['user_id'];
-            setcookie($key, $_COOKIE[$key], time() + (7 * 24 * 60 * 60), "/");
+            if ($cookie['expire_time'] > 0) {
+                $cookie['expire_time'] = time() + (7 * 24 * 60 * 60);
+                $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] != 'off';
+                setcookie($key, json_encode($cookie), $cookie['expire_time'], "/", "", $secure);
+            }
         }
         else {
             setcookie($key, "", time() - 3600);

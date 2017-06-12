@@ -109,21 +109,16 @@ sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
 grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && exit)
 
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwphp hwcronphp
+
 adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcgi hwphp
 # NOTE: hwcgi must be in the shadow group so that it has access to the
 # local passwords for pam authentication
 adduser hwcgi shadow
-if [ ${VAGRANT} == 1 ]; then
-	echo "hwphp:hwphp" | sudo chpasswd
-	echo "hwcgi:hwcgi" | sudo chpasswd
-	adduser hwphp vagrant
-	adduser hwcgi vagrant
-fi
+
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-if [ ${VAGRANT} == 1 ]; then
-	echo "hwcron:hwcron" | sudo chpasswd
-fi
+adduser hwcron hwcronphp
 
 # FIXME:  umask setting above not complete
 # might need to also set USERGROUPS_ENAB to "no", and manually create
@@ -132,14 +127,18 @@ echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwp
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
 
-
 adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-if [ ${VAGRANT} == 1 ]; then
-	echo "hsdbu:hsdbu" | sudo chpasswd
-fi
-adduser hwphp hwcronphp
-adduser hwcron hwcronphp
 
+if [ ${VAGRANT} == 1 ]; then
+	echo "hwphp:hwphp" | sudo chpasswd
+	echo "hwcgi:hwcgi" | sudo chpasswd
+	echo "hwcron:hwcron" | sudo chpasswd
+	echo "hsdbu:hsdbu" | sudo chpasswd
+	# add these users so that they can write to .vagrant/logs folder
+	adduser hwphp vagrant
+	adduser hwcgi vagrant
+	adduser hwcron vagrant
+fi
 
 #################################################################
 # PACKAGE SETUP
@@ -259,6 +258,9 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
+# Used by Network Programming class
+apt-get install -qqy libssl-dev
+
 apt-get -qqy autoremove
 
 
@@ -277,6 +279,7 @@ pip3 install PyYAML
 pip3 install psycopg2
 pip3 install sqlalchemy
 pip3 install pylint
+pip3 install psutil
 
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
@@ -560,7 +563,6 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 http://192.168.56.101
-http://192.168.56.101/hwgrading
 http://192.168.56.102
 svn+ssh:192.168.56.103
 y" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
@@ -578,7 +580,7 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
 fi
 
-sudo mkdir /usr/lib/cgi-bin
+sudo mkdir -p /usr/lib/cgi-bin
 sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
 apache2ctl -t
@@ -587,14 +589,17 @@ if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much
     echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
 
-    rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
-    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
-    rm -r ${SUBMITTY_DATA_DIR}/tagrading_logs
-    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
+    rm -r ${SUBMITTY_DATA_DIR}/*_logs
+    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/logs/*_logs
+    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding_logs
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
+    chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/autograding_logs
+    chmod 770 ${SUBMITTY_DATA_DIR}/autograding_logs
+
+    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/tagrading_logs
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
+    chown hwphp:course_builders ${SUBMITTY_DATA_DIR}/tagrading_logs
+    chmod 770 ${SUBMITTY_DATA_DIR}/tagrading_logs
 
     # Call helper script that makes the courses and refreshes the database
     ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py
