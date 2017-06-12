@@ -433,14 +433,12 @@ rm /etc/apache2/sites*/default-ssl.conf
 
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/cgi.conf /etc/apache2/sites-available/cgi.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
 
 # permissions: rw- r-- ---
 chmod 0640 /etc/apache2/sites-available/*.conf
 chmod 0640 /etc/apache2/suexec/www-data
 a2ensite submitty
-a2ensite cgi
 
 #################################################################
 # PHP SETUP
