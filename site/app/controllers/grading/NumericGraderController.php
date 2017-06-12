@@ -13,7 +13,6 @@ class NumericGraderController extends AbstractController  {
                 break;
             case 'save_data':
                 $this->saveData();
-                echo "did the savedata";
                 break;
             default:
                 break;

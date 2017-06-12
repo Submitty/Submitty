@@ -456,3 +456,70 @@ $(function() {
 
     setupCheckboxCells();
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function setupNumericTextCells() {
+    $("input[class=option-small-box]").change(function() {
+        var scores = {};
+
+        $(this).parent().parent().children("td.option-small-input").each(function() {
+            $(this).children(".option-small-box").each(function(){
+                scores[this.id] = this.value;
+            });
+        });
+
+        submitAJAX(
+            buildUrl({'component': 'grading', 'page': 'numeric', 'action': 'save_data'}),
+            {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
+            function() {
+                // elems.forEach(function(elem) {
+                //     $(elem).animate({"border-right-width": "0px"}, 400);
+                // });
+                console.log("my CALLBACK SUCCESS");
+            },
+            function() {
+                // elems.forEach(function(elem) {
+                //     console.log(elem);
+                //     $(elem).css("border-right-width", "15px");
+                //     $(elem).stop(true, true).animate({"border-right-color": "#DA4F49"}, 400);
+                // });
+                console.log("my CALLBACK FAILURE");
+            }
+        );
+    });
+}
+
+$(function() {
+    if (window.location.hash !== "") {
+        if ($(window.location.hash).offset().top > 0) {
+            var minus = 60;
+            $("html, body").animate({scrollTop: ($(window.location.hash).offset().top - minus)}, 800);
+        }
+    }
+
+    setTimeout(function() {
+        $('.inner-message').fadeOut();
+    }, 5000);
+
+    setupNumericTextCells();
+});

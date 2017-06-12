@@ -156,7 +156,7 @@ HTML;
                 }
                 else {
                     $return .= <<<HTML
-                <td class="option-small-input" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-value="{$component->getScore()}"><input type="text" value="{$component->getScore()}"/></td>
+                <td class="option-small-input" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-value="{$component->getScore()}"><input class="option-small-box" type="text" id="{$component->getId()}" value="{$component->getScore()}"/></td>
 HTML;
                 }
                 $gradeable_row++;
