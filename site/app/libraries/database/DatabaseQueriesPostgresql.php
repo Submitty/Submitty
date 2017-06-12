@@ -752,44 +752,55 @@ VALUES (?, ?, ?, ?)", $params);
     }
 
     public function removeTeamUser($g_id, $user_id) {
-        $team_ids = array();
-        $this->database->query("SELECT * FROM gradeable_teams WHERE g_id=? ORDER BY team_id", array($g_id));
-        foreach($this->database->rows() as $row) {
-            $team_ids[] = $row['team_id'];
-        }
-        foreach($team_ids as $team_id) {
-            $this->database->query("DELETE FROM teams WHERE team_id=? AND user_id=?", array($team_id, $user_id));
-        }
+        $this->database->query("
+          DELETE FROM teams AS t
+          USING gradeable_teams AS gt
+          WHERE gt.g_id=? AND gt.team_id = t.team_id AND t.user_id=?",
+          array($g_id, $user_id));
     }
 
     public function getTeamsByGradeableId($g_id) {
-        $teams = array();
-        $this->database->query("SELECT * FROM gradeable_teams WHERE g_id=? ORDER BY team_id", array($g_id));
+        $this->database->query("
+          SELECT gt.team_id, t.user_id, t.state
+          FROM gradeable_teams AS gt 
+          LEFT JOIN (
+            SELECT *
+            FROM teams
+          ) AS t ON gt.team_id=t.team_id
+          WHERE g_id=?
+          ORDER BY team_id",
+          array($g_id));
+
+        $team_rows = array();
         foreach($this->database->rows() as $row) {
-            $teams[] = new Team($row['team_id']);
+            if (!isset($team_rows[$row['team_id']])){
+                $team_rows[$row['team_id']] = array();
+            }
+            $team_rows[$row['team_id']][] = $row;
         }
-        for($i = 0; $i < count($teams); $i++) {
-            $this->database->query("SELECT * FROM teams WHERE team_id=? ORDER BY user_id", array($teams[$i]->getId()));
-            $teams[$i]->addUsers($this->database->rows());
+        $teams = array();
+        foreach($team_rows as $team_row) {
+            $teams[] = new Team($team_row);
         }
         return $teams;
     }
 
     public function getTeamByUserId($g_id, $user_id) {
-        $team_ids = array();
-        $this->database->query("SELECT * FROM gradeable_teams WHERE g_id=? ORDER BY team_id", array($g_id));
-        foreach($this->database->rows() as $row) {
-            $team_ids[] = $row['team_id'];
+        $this->database->query("
+          SELECT team_id, user_id, state
+          FROM gradeable_teams NATURAL JOIN teams
+          WHERE g_id=? AND team_id IN (
+            SELECT team_id
+            FROM teams
+            WHERE user_id=?)",
+          array($g_id, $user_id));
+
+        if (count($this->database->rows()) === 0) {
+            return null;
         }
-        for($i = 0; $i < count($team_ids); $i++) {
-            $this->database->query("SELECT * FROM teams WHERE team_id=? AND user_id=? AND state=? ORDER BY user_id", array($team_ids[$i], $user_id, 1));
-            if (count($this->database->rows()) === 1) {
-                $this->database->query("SELECT * FROM teams WHERE team_id=? ORDER BY user_id", array($team_ids[$i]));
-                $team = new Team($team_ids[$i]);
-                $team->addUsers($this->database->rows());
-                return $team;
-            }
+        else {
+            $team = new Team($this->database->rows());
+            return $team;
         }
-        return null;
     }
 }

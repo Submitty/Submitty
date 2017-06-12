@@ -8,30 +8,30 @@ use app\libraries\Core;
 use app\libraries\GradeableType;
 
 class TeamController extends AbstractController {
-	public function __construct(Core $core) {
+    public function __construct(Core $core) {
         parent::__construct($core);
         $this->gradeables_list = $this->core->loadModel("GradeableList", $this->core);
     }
 
     public function run() {
-    	switch ($_REQUEST['action']) {
-    		case 'create_new_team':
-    			$this->createNewTeam();
-    			break;
+        switch ($_REQUEST['action']) {
+            case 'create_new_team':
+                $this->createNewTeam();
+                break;
             case 'leave_team':
                 $this->leaveTeam();
                 break;
-    		case 'invitation':
-    			$this->sendInvitation();
-    			break;
+            case 'invitation':
+                $this->sendInvitation();
+                break;
             case 'accept':
                 $this->acceptInvitation();
                 break;
-    		case 'show_page':
-    		default:
-    			$this->showPage();
-    			break;
-    	}
+            case 'show_page':
+            default:
+                $this->showPage();
+                break;
+        }
     }
 
     private function getTeamByUserId($g_id, $user_id) {
@@ -51,7 +51,7 @@ class TeamController extends AbstractController {
             $this->core->getQueries()->removeTeamUser($gradeable_id, $user_id);
             $this->core->getQueries()->newTeam($gradeable_id, $user_id);
         }
-    	$this->showPage();
+        $this->showPage();
     }
 
     public function leaveTeam() {
@@ -82,7 +82,7 @@ class TeamController extends AbstractController {
             //else error user does not exist
         }
         //else error no user specified
-    	$this->showPage();
+        $this->showPage();
     }
 
     public function acceptInvitation() {
@@ -97,9 +97,9 @@ class TeamController extends AbstractController {
     }
 
     public function showPage() {
-    	$gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-    	$gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
         $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
-    	$this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $teams);
+        $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $teams);
     }
 }

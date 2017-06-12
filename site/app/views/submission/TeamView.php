@@ -12,9 +12,9 @@ class TeamView extends AbstractView {
     * @param Team[] $teams
     * @return string
     */
-	public function showTeamPage($gradeable, $teams) {
-		$site_url = $this->core->getConfig()->getSiteUrl();
-		$semester = $this->core->getConfig()->getSemester();
+    public function showTeamPage($gradeable, $teams) {
+        $site_url = $this->core->getConfig()->getSiteUrl();
+        $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         
         $user_id = $this->core->getUser()->getId();
@@ -27,9 +27,9 @@ class TeamView extends AbstractView {
             }
         }
 
-		$return = <<<HTML
+        $return = <<<HTML
 <div class="content">
-	<h2>Manage Team For: {$gradeable->getName()}</h2> <br />
+    <h2>Manage Team For: {$gradeable->getName()}</h2> <br />
 HTML;
 
     //Top content box, has team
@@ -142,6 +142,6 @@ HTML;
     $return .= <<<HTML
 </div>
 HTML;
-	return $return;
-	}
+    return $return;
+    }
 }

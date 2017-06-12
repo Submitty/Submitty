@@ -233,4 +233,45 @@ interface IDatabaseQueries {
      * @param $session_id
      */
     public function removeSessionById($session_id);
+
+    /**
+     * Create a new team id and team in gradeable_teams for given gradeable, add $user_id as a member
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function newTeam($g_id, $user_id);
+
+    /**
+     * Add user $user_id to team $team_id as an invited user
+     * @param string $team_id
+     * @param string $user_id
+     */
+    public function newTeamInvite($team_id, $user_id);
+
+    /**
+     * Add user $user_id to team $team_id as a team member
+     * @param string $team_id
+     * @param string $user_id
+     */
+    public function newTeamMember($team_id, $user_id);
+
+    /**
+     * Remove a user from their current team, decline all invitiations for that user
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function removeTeamUser($g_id, $user_id);
+
+    /**
+     * Return an array of Team objects for all teams on given gradeable
+     * @param string $g_id
+     */
+    public function getTeamsByGradeableId($g_id);
+
+    /**
+     * Return Team object for team which the given user belongs to on the given gradeable
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function getTeamByUserId($g_id, $user_id);
 }

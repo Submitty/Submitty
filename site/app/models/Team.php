@@ -20,10 +20,18 @@ class Team extends AbstractModel {
      * Team constructor.
      * @param string $team_id
      */
-    public function __construct($team_id) {
-        $this->id = $team_id;
+    public function __construct($details) {
+        $this->id = $details[0]['team_id'];
         $this->member_user_ids = array();
         $this->invited_user_ids = array();
+        foreach($details as $user) {
+            if ($user['state'] === 1) {
+                $this->member_user_ids[] = $user['user_id'];
+            }
+            else {
+                $this->invited_user_ids[] = $user['user_id'];
+            }
+        }
     }
 
     /**
@@ -63,38 +71,14 @@ class Team extends AbstractModel {
      * @return bool
      */
     public function hasMember($user_id) {
-        foreach($this->member_user_ids as $member) {
-            if ($member === $user_id) {
-                return true;
-            }
-        }
-        return false;
+        return in_array($user_id, $this->member_user_ids);
     }
     
     /**
-     * Get whether or not a given user is on the team
+     * Get whether or not a given user invited to the team
      * @return bool
      */
     public function sentInvite($user_id) {
-        foreach($this->invited_user_ids as $invite) {
-            if ($invite === $user_id) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Add members and invited users from the teams table
-     */
-    public function addUsers($details) {
-        foreach($details as $row) {
-            if ($row['state'] === 1) {
-                $this->member_user_ids[] = $row['user_id'];
-            }
-            else {
-                $this->invited_user_ids[] = $row['user_id'];
-            }
-        }
+        return in_array($user_id, $this->invited_user_ids);
     }
 }

@@ -311,19 +311,14 @@ HTML;
             <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
             style="cursor: auto; background-color: #FFF; width: 250px;">
             <br />
-
+HTML;
+    $team_yes_checked = ($g_team_assignment===true)?'checked':'';
+    $team_no_checked = ($g_team_assignment===false)?'checked':'';
+    print <<<HTML
             Is this a team assignment?:
             <fieldset>
-            <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes"
-HTML;
-    echo ($g_team_assignment===true)?'checked':'';
-    print <<<HTML
-        > Yes
-            <input type="radio" class="team_no" name="team_assignment" value ="no" 
-HTML;
-    echo ($g_team_assignment===false)?'checked':'' ;
-    print <<<HTML
-            > No
+            <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes" {$team_yes_checked}> Yes
+            <input type="radio" class="team_no" name="team_assignment" value ="no" {$team_no_checked}> No
                 <div class="team_assignment team_yes" id="team_date">
                     <!--    
                     <br />
@@ -1350,8 +1345,8 @@ HTML;
         }
 
         if($('#team_yes_radio').is(':checked')){
-                $('#team_date').show();
-            }
+            $('#team_date').show();
+        }
         
         if($('#radio_electronic_file').is(':checked')){ 
             $('input[name=date_submit]').datetimepicker('setDate', createCrossBrowserJSDate("{$electronic_gradeable['eg_submission_open_date']}"));

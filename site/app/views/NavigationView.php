@@ -297,18 +297,18 @@ HTML;
                 // Team management button, only visible on team assignments
                 $gradeable_team_range = '';
                 $admin_team_list = '';
-                if (($g_data->isTeamAssignment()) && ($title == "OPEN")) {
+                if (($g_data->isTeamAssignment()) && (($title == "OPEN") || ($title == "BETA"))) {
                     $gradeable_team_range = <<<HTML
-                 <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable, 'page' => 'team'))}'"> MANAGE TEAM
-                 </button>
+                <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable, 'page' => 'team'))}'"> MANAGE TEAM
+                </button>
 HTML;
+                }
                     // View teams button, only visible to instructors on team assignments
-                    if ($this->core->getUser()->accessAdmin()) {
-                        $admin_team_list .= <<<HTML
+                if (($this->core->getUser()->accessAdmin()) && ($g_data->isTeamAssignment())) {
+                    $admin_team_list .= <<<HTML
                 <button class="btn btn-default" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'team_list', 'gradeable_id' => $gradeable))}'"> View Teams
                 </button>
 HTML;
-                    }
                 }
 
                 if ($this->core->getUser()->accessAdmin()) {
