@@ -13,6 +13,10 @@
 #include <string>
 #include <seccomp.h>
 #include <iostream>
+#include <vector>
+#include <string>
+
+#define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
 #define ALLOW_SYSCALL(name)  allow_syscall(sc,SCMP_SYS(name),#name)
 
@@ -24,10 +28,16 @@ inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &sy
   }
 }
 
-#include "system_call_categories.h"
-
-#include <vector>
-#include <string>
+// ===========================================================================
+// ===========================================================================
+//
+// This helper file defines one function:
+// void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categories) {
+//
+// It is placed in a separate file, since the helper utility
+// system_call_check.cpp parses this function to define the categories.
+//
+#include "system_call_categories.cpp"
 
 // ===========================================================================
 // ===========================================================================
@@ -53,6 +63,37 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
 
   std::set<std::string> categories;
 
+  // DESPERATE, WHITELIST EVERYTHING
+  // FIXME: determine what is non-deterministic about system calls for compilation :(
+  categories.insert("PROCESS_CONTROL_MEMORY_ADVANCED");
+  categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+  categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
+  categories.insert("PROCESS_CONTROL_SCHEDULING");
+  /*
+  categories.insert("PROCESS_CONTROL_ADVANCED");
+  categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+  categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
+
+  categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+  categories.insert("FILE_MANAGEMENT_CAPABILITIES");
+  categories.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
+  categories.insert("FILE_MANAGEMENT_RARE");
+
+  categories.insert("DEVICE_MANAGEMENT_ADVANCED");
+  categories.insert("DEVICE_MANAGEMENT_NEW_DEVICE");
+  categories.insert("INFORMATION_MAINTENANCE_ADVANCED");
+  categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+  categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS");
+  categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+  categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+  */
+  //categories.insert("TGKILL");
+  //categories.insert("COMMUNICATIONS_AND_NETWORKING_KILL");
+  categories.insert("UNKNOWN");
+  categories.insert("UNKNOWN_MODULE");
+  categories.insert("UNKNOWN_REMAP_PAGES");
+  
+  
   // C/C++ COMPILATION
   if (my_program == "/usr/bin/g++" ||
       my_program == "/usr/bin/clang++" ||
@@ -117,7 +158,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   
 
   // JAVA
-  if (1) {//my_program == "/usr/bin/javac") {
+  if (my_program == "/usr/bin/javac") {
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
     categories.insert("FILE_MANAGEMENT_PERMISSIONS");
@@ -129,36 +170,27 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("PROCESS_CONTROL_SCHEDULING");
     categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
 
-    // DESPERATE, WHITELIST EVERYTHING
-    // FIXME: determine what is non-deterministic about system calls for compilation :(
-    categories.insert("PROCESS_CONTROL_MEMORY_ADVANCED");
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
-    categories.insert("PROCESS_CONTROL_SCHEDULING");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+    ///*
     categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
-    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
     categories.insert("FILE_MANAGEMENT_CAPABILITIES");
     categories.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
-    categories.insert("FILE_MANAGEMENT_RARE");
     categories.insert("DEVICE_MANAGEMENT_ADVANCED");
     categories.insert("DEVICE_MANAGEMENT_NEW_DEVICE");
     categories.insert("INFORMATION_MAINTENANCE_ADVANCED");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    //*/
     categories.insert("TGKILL");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_KILL");
     categories.insert("UNKNOWN");
     categories.insert("UNKNOWN_MODULE");
     categories.insert("UNKNOWN_REMAP_PAGES");
+
   }
 
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/usr/bin/time") {
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD    ");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
   } 
 
   // C++ Memory Debugging
@@ -186,6 +218,18 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("PROCESS_CONTROL_SCHEDULING");
   }
 
+  if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_node" ||
+      my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_function" ||
+      my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token") {
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
+    categories.insert("FILE_MANAGEMENT_RARE");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("UNKNOWN");
+  }
 
   allow_system_calls(sc,categories);
 

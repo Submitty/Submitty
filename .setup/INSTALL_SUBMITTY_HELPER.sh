@@ -421,7 +421,7 @@ mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DI
 
 
 # return the course index page (only necessary when 'clean' option is used)
-if [ -f $mytempcurrentcourses ]; then
+if [ -f "$mytempcurrentcourses" ]; then
     echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
     mv ${mytempcurrentcourses} ${originalcurrentcourses}
 fi

@@ -7,11 +7,9 @@
 // TO GENERATE LIST OF ALL SYSTEM CALLS:
 //    grep _NR /usr/include/x86_64-linux-gnu/asm/unistd_64.h /usr/include/x86_64-linux-gnu/asm/unistd_32.h | awk '{print $2}' | sort | uniq > /tmp/x
 //
-//
 // ================================================================================
 
-
-inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categories) {
+void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categories) {
 
   // ================================================================================
 
@@ -28,6 +26,7 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
   ALLOW_SYSCALL(sigprocmask);
   ALLOW_SYSCALL(rt_sigaction);
   ALLOW_SYSCALL(rt_sigprocmask);
+  ALLOW_SYSCALL(getrlimit);
 
   // WHITELIST : PROCESS_CONTROL_MEMORY
   ALLOW_SYSCALL(brk);
@@ -39,6 +38,7 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
   ALLOW_SYSCALL(mremap);
   ALLOW_SYSCALL(munmap);
   ALLOW_SYSCALL(set_thread_area);
+  ALLOW_SYSCALL(memfd_create);
 
   // RESTRICTED : PROCESS_CONTROL_MEMORY_ADVANCED
   if (categories.find("PROCESS_CONTROL_MEMORY_ADVANCED") != categories.end()) {
@@ -47,12 +47,14 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
     ALLOW_SYSCALL(migrate_pages);
     ALLOW_SYSCALL(set_mempolicy);
     ALLOW_SYSCALL(uselib);
+    ALLOW_SYSCALL(membarrier);
   }
 
   // RESTRICTED : PROCESS_CONTROL_NEW_PROCESS_THREAD
   if (categories.find("PROCESS_CONTROL_NEW_PROCESS_THREAD") != categories.end()) {
     ALLOW_SYSCALL(clone);
     ALLOW_SYSCALL(execve);
+    ALLOW_SYSCALL(execveat);
     ALLOW_SYSCALL(fork);
     ALLOW_SYSCALL(set_tid_address);
     ALLOW_SYSCALL(vfork);
@@ -77,6 +79,22 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
   ALLOW_SYSCALL(wait4);
   ALLOW_SYSCALL(waitid);
   ALLOW_SYSCALL(waitpid);
+  ALLOW_SYSCALL(getegid);
+  ALLOW_SYSCALL(getegid32);
+  ALLOW_SYSCALL(geteuid);
+  ALLOW_SYSCALL(geteuid32);
+  ALLOW_SYSCALL(getgid);
+  ALLOW_SYSCALL(getgid32);
+  ALLOW_SYSCALL(getgroups);
+  ALLOW_SYSCALL(getgroups32);
+  ALLOW_SYSCALL(getpgid);
+  ALLOW_SYSCALL(getpgrp);
+  ALLOW_SYSCALL(getresgid);
+  ALLOW_SYSCALL(getresgid32);
+  ALLOW_SYSCALL(getresuid);
+  ALLOW_SYSCALL(getresuid32);
+  ALLOW_SYSCALL(getuid);
+  ALLOW_SYSCALL(getuid32);
 
   // RESTRICTED : PROCESS_CONTROL_SYNCHRONIZATION
   if (categories.find("PROCESS_CONTROL_SYNCHRONIZATION") != categories.end()) {
@@ -108,7 +126,6 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
 
   // RESTRICTED : PROCESS_CONTROL_ADVANCED
   if (categories.find("PROCESS_CONTROL_ADVANCED") != categories.end()) {
-    ALLOW_SYSCALL(getrlimit);
     ALLOW_SYSCALL(getrusage);
     ALLOW_SYSCALL(move_pages);
     ALLOW_SYSCALL(prlimit64);
@@ -116,26 +133,11 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
     ALLOW_SYSCALL(setrlimit);
     ALLOW_SYSCALL(ugetrlimit);
     ALLOW_SYSCALL(ulimit);
+    ALLOW_SYSCALL(userfaultfd);
   }
 
   // RESTRICTED : PROCESS_CONTROL_GET_SET_USER_GROUP_ID
   if (categories.find("PROCESS_CONTROL_GET_SET_USER_GROUP_ID") != categories.end()) {
-    ALLOW_SYSCALL(getegid);
-    ALLOW_SYSCALL(getegid32);
-    ALLOW_SYSCALL(geteuid);
-    ALLOW_SYSCALL(geteuid32);
-    ALLOW_SYSCALL(getgid);
-    ALLOW_SYSCALL(getgid32);
-    ALLOW_SYSCALL(getgroups);
-    ALLOW_SYSCALL(getgroups32);
-    ALLOW_SYSCALL(getpgid);
-    ALLOW_SYSCALL(getpgrp);
-    ALLOW_SYSCALL(getresgid);
-    ALLOW_SYSCALL(getresgid32);
-    ALLOW_SYSCALL(getresuid);
-    ALLOW_SYSCALL(getresuid32);
-    ALLOW_SYSCALL(getuid);
-    ALLOW_SYSCALL(getuid32);
     ALLOW_SYSCALL(setfsgid);
     ALLOW_SYSCALL(setfsgid32);
     ALLOW_SYSCALL(setfsuid);
@@ -219,6 +221,10 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
   ALLOW_SYSCALL(writev);
   ALLOW_SYSCALL(chdir);
   ALLOW_SYSCALL(fchdir);
+  ALLOW_SYSCALL(fadvise64);
+  ALLOW_SYSCALL(fadvise64_64);
+  ALLOW_SYSCALL(get_robust_list);
+  ALLOW_SYSCALL(set_robust_list);
 
   // RESTRICTED : FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY
   if (categories.find("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY") != categories.end()) {
@@ -243,8 +249,6 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
     ALLOW_SYSCALL(fchownat);
     ALLOW_SYSCALL(flock);
     ALLOW_SYSCALL(futex);
-    ALLOW_SYSCALL(get_robust_list);
-    ALLOW_SYSCALL(set_robust_list);
     ALLOW_SYSCALL(lchown);
     ALLOW_SYSCALL(lchown32);
     ALLOW_SYSCALL(lock);
@@ -280,8 +284,6 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
 
   // RESTRICTED : FILE_MANAGEMENT_RARE
   if (categories.find("FILE_MANAGEMENT_RARE") != categories.end()) {
-    ALLOW_SYSCALL(fadvise64);
-    ALLOW_SYSCALL(fadvise64_64);
     ALLOW_SYSCALL(fcntl);
     ALLOW_SYSCALL(fcntl64);
   }
@@ -327,6 +329,7 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
   ALLOW_SYSCALL(utime);
   ALLOW_SYSCALL(utimensat);
   ALLOW_SYSCALL(utimes);
+  ALLOW_SYSCALL(getrandom);
 
   // RESTRICTED : INFORMATION_MAINTENANCE_ADVANCED
   if (categories.find("INFORMATION_MAINTENANCE_ADVANCED") != categories.end()) {
@@ -428,10 +431,11 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
     ALLOW_SYSCALL(shmctl);
     ALLOW_SYSCALL(shmdt);
     ALLOW_SYSCALL(shmget);
+    ALLOW_SYSCALL(bpf);
   }
 
   // RESTRICTED : TGKILL
-  if (categories.find("TGKILL") != categories.end()
+  if (categories.find("TGKILL") != categories.end()) {
     ALLOW_SYSCALL(tgkill);
   }
 
@@ -464,10 +468,12 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
     ALLOW_SYSCALL(inotify_rm_watch);
     ALLOW_SYSCALL(kcmp);
     ALLOW_SYSCALL(kexec_load);
+    ALLOW_SYSCALL(kexec_file_load);
     ALLOW_SYSCALL(keyctl);
     ALLOW_SYSCALL(lookup_dcookie);
     ALLOW_SYSCALL(mincore);
     ALLOW_SYSCALL(mlock);
+    ALLOW_SYSCALL(mlock2);
     ALLOW_SYSCALL(mlockall);
     ALLOW_SYSCALL(mpx);
     ALLOW_SYSCALL(msync);
@@ -518,9 +524,4 @@ inline void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &
   }
 
   // ================================================================================
-
 }
-
-
-
-
