@@ -270,6 +270,7 @@ replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py
@@ -286,6 +287,7 @@ chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
 chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chown ${HWCRON_USER}:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
@@ -294,6 +296,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
