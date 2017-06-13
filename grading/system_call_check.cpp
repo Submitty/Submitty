@@ -40,6 +40,7 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
   std::string category;
   std::string restriction;
   std::string actual_restriction;
+  bool skip_this = false;
   
   // loop over all lines of the file
   while (std::getline(system_call_categories_file,line)) {
@@ -58,12 +59,22 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
       assert (endpoint-startpoint-14 > 1);
       std::string system_call = line.substr(startpoint+14,endpoint-startpoint-14);
       // make sure there aren't duplicates
+#if __UBUNTU_16_04__
+#else
+      if (skip_this) continue;
+#endif
       assert (all_system_calls.find(system_call) == all_system_calls.end());
       all_system_calls[system_call] = category;
     } 
     
     // ignore blank lines
     else if (line == "") {
+      continue;
+    }
+
+    // ignore preprocessor logic
+    else if (line[0] == '#') {
+      skip_this = !skip_this;
       continue;
     } 
 
