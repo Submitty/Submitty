@@ -23,10 +23,7 @@ echo "What is the url for submission? (ex: http://192.168.56.101/ or https://sub
 read SUBMISSION_URL
 
 TAGRADING_URL=${SUBMISSION_URL}/hwgrading/
-
-echo "What is the url for the CGI scripts (cgi-bin)? (ex: http://192.168.56.102/ or https://submitty-cgi.cs.rpi.edu/)"
 CGI_URL=${SUBMISSION_URL}/cgi-bin/
-
 
 DEBUGGING_ENABLED=false
 # FIXME:  Replace with a safety check for a live installation
