@@ -728,14 +728,14 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     dup2(new_stderrfd, stderrfd);
   }
 
-
+#if 0
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile)) {
     std::cout << "seccomp filter install failed" << std::endl;
     return 1;
   }
   // END SECCOMP
-
+#endif
 
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here
