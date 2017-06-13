@@ -55,7 +55,9 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
   if (categories.find("PROCESS_CONTROL_NEW_PROCESS_THREAD") != categories.end()) {
     ALLOW_SYSCALL(clone);
     ALLOW_SYSCALL(execve);
+#if __UBUNTU_16.04__
     ALLOW_SYSCALL(execveat);
+#endif
     ALLOW_SYSCALL(fork);
     ALLOW_SYSCALL(set_tid_address);
     ALLOW_SYSCALL(vfork);
@@ -432,7 +434,9 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(shmctl);
     ALLOW_SYSCALL(shmdt);
     ALLOW_SYSCALL(shmget);
+#if __UBUNTU_16.04__
     ALLOW_SYSCALL(bpf);
+#endif
   }
 
   // RESTRICTED : TGKILL
@@ -474,7 +478,9 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(lookup_dcookie);
     ALLOW_SYSCALL(mincore);
     ALLOW_SYSCALL(mlock);
+#if __UBUNTU_16.04__
     ALLOW_SYSCALL(mlock2);
+#endif
     ALLOW_SYSCALL(mlockall);
     ALLOW_SYSCALL(mpx);
     ALLOW_SYSCALL(msync);
