@@ -219,6 +219,24 @@ void click_and_drag(std::string window_name, std::string command)
     //no_clamp = true;
   }
 
+  int mouse_button;
+  if(command.find("left") != std::string::npos)
+  {
+    mouse_button = 1;
+  }
+  else if (command.find("middle") != std::string::npos)
+  {
+    mouse_button = 2;
+  }
+  else if (command.find("right") != std::string::npos)
+  {
+    mouse_button = 3;
+  }
+  else
+  {
+    mouse_button = 1; //default.
+  }
+
   if(command.find("delta") != std::string::npos)
   {
     //delta version, 2 values movement x and movement y.
@@ -391,7 +409,13 @@ void takeAction(const std::vector<std::string>& actions, int& actions_taken, int
     std::vector<int> coordinates = extract_ints_from_string(actions[actions_taken]);
     if(coordinates.size() >= 2)
     {
-      //mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, int x_start, int x_end, int y_start, int y_end)
+      int height = get_window_data("Height", window_name)[0];
+      int width = get_window_data("Width", window_name)[0];
+      int x_start = get_window_data("Absolute upper-left X", window_name)[0]; //These values represent the upper left corner
+      int y_start = get_window_data("Absolute upper-left Y", window_name)[0];
+      int x_end = x_start+width; //These values represent the upper right corner
+      int y_end = y_start + height;
+      mouse_move(window_name, coordinates[0], coordinates[1], x_start, x_end, y_start, y_end);
     }
   }
   else
