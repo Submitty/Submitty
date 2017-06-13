@@ -76,7 +76,7 @@ white = ASCIIEscapeManager([37])
 # Run the given list of test case names
 def run_tests(names):
     totalmodules = len(names)
-    for name in names:
+    for name in sorted(names):
         name = name.split(".")
         key = name[0]
         val = to_run[key]
