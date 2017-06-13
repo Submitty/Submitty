@@ -271,17 +271,17 @@ class TestcaseWrapper:
                 print (fin.read())
 
             filename=os.path.join(self.testcase_path,"log","test01_execute_logfile.txt")
-            if filename.isfile():
+            if os.path.exists(filename):
                 print ("FILENAME: ",filename)
                 with open(filename, 'r') as fin:
                     print (fin.read())
             filename=os.path.join(self.testcase_path,"log","test02_execute_logfile.txt")
-            if filename.isfile():
+            if os.path.exists(filename):
                 print ("FILENAME: ",filename)
                 with open(filename, 'r') as fin:
                     print (fin.read())
             filename=os.path.join(self.testcase_path,"log","test03_execute_logfile.txt")
-            if filename.isfile():
+            if os.path.exists(filename):
                 print ("FILENAME: ",filename)
                 with open(filename, 'r') as fin:
                     print (fin.read())
