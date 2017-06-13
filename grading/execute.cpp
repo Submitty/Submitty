@@ -920,17 +920,8 @@ int execute(const std::string &cmd,
                   // sleep 1/10 of a second
                 if(actions_taken < actions.size() && windowName != "") //if we still have actions (keyboard events, etc.) to give the child
                 {
-                  float delayTime = takeAction(actions, actions_taken, number_of_screenshots, windowName); //returns delaytime
-                  if(delayTime == 0)
-                  {
-                    delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
-                      rss_memory, allowed_rss_memory, memory_kill, time_kill);
-                  }
-                  else
-                  {
-                    delay_and_mem_check(delayTime, childPID, elapsed, next_checkpoint, seconds_to_run, 
-                    rss_memory, allowed_rss_memory, memory_kill, time_kill);
-                  }
+                  takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                    childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill); //delay params
                 }
                 else
                 {
