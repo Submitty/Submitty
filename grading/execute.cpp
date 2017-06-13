@@ -894,7 +894,6 @@ int execute(const std::string &cmd,
         do {
             if(window_mode && windowName == "")
             {
-              usleep(3000000);
               initialize_window(windowName, childPID);
               if(windowName != "")
               {
@@ -908,7 +907,6 @@ int execute(const std::string &cmd,
                 command_stream << "wmctrl -R " << windowName << " &&  xdotool mousemove --sync "
                         << middle_x << " " << middle_y; 
                 system(command_stream.str().c_str());
-                std::cout << "We found the window " << windowName << std::endl;
               }
             }
             wpid = waitpid(childPID, &status, WNOHANG);
