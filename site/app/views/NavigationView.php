@@ -229,8 +229,10 @@ HTML;
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
                   $gradeable_grade_range = 'VIEW SUBMISSIONS<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/y{$time}")."</span>)";
                 }
+                $temp_regrade_text = "";
                 if ($title_save=='ITEMS BEING GRADED') {
                   $gradeable_grade_range = 'GRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/y{$time}").'</span>)';
+                  $temp_regrade_text = 'REGRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/y{$time}").'</span>)';
                 }
                 if ($title_save=='GRADED') {
                   $gradeable_grade_range = 'GRADE';
@@ -414,9 +416,15 @@ HTML;
                                 $TA_percent = $TA_percent * 100;
                             }
                             //if $TA_percent is 100, change the text to REGRADE
-                            if ($TA_percent == 100) {
+                            if ($TA_percent == 100 && $title_save=='ITEMS BEING GRADED') {
                                 $gradeable_grade_range = <<<HTML
                                 <button class="btn btn-default" style="width:100%;" \\
+                                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}'">
+                                {$temp_regrade_text}</button>
+HTML;
+                            } else if ($TA_percent == 100 && $title_save=='GRADED') {
+                                $gradeable_grade_range = <<<HTML
+                                <button class="btn {$title_to_button_type_grading[$title_save]}" style="width:100%;" \\
                                 onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}'">
                                 REGRADE</button>
 HTML;
@@ -426,7 +434,7 @@ HTML;
                                 onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}'">
                                 {$gradeable_grade_range}</button>
 HTML;
-                            }                            
+                            }                           
                             //Give the TAs a progress bar too                        
                             if (($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED") && $students_total != 0) {
                                 $gradeable_grade_range .= <<<HTML
