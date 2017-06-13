@@ -64,10 +64,6 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // cannot pass them the number for the target: only for the source.
   // We could use raw seccomp-bpf instead.
 
-  //execute_logfile << " HERE " << my_program << std::endl;
-  
-  //execute_logfile << SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" << std::endl;
-  
   std::set<std::string> categories;
   
   // grep ' :' grading/system_call_categories.cpp | grep WHITELIST | cut -f 6 -d ' '
@@ -131,11 +127,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_node" ||
            my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_function" ||
            my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token") {
-
-    execute_logfile << " SAM HERE " << my_program << std::endl;
-
     categories = restricted_categories;
-      
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("FILE_MANAGEMENT_RARE");
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
@@ -263,13 +255,11 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     // UGH, don't want this here
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
   }
-  
 
   // make sure all categories are valid
   for_each(categories.begin(),categories.end(),
            [restricted_categories](const std::string &s){
              assert (restricted_categories.find(s) != restricted_categories.end()); });
-  
   
   allow_system_calls(sc,categories);
 
