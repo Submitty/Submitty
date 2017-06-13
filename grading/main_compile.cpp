@@ -87,7 +87,7 @@ void CleanUpMultipleParts() {
 int main(int argc, char *argv[]) {
 
   std::cout << "MAIN COMPILE" << std::endl;
-
+  std::vector<std::string> actions;
   nlohmann::json config_json;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
@@ -175,6 +175,7 @@ int main(int argc, char *argv[]) {
 		new_filename += ".txt";
 	      }
               execute("/bin/cp "+old_filename+" "+new_filename,
+                      actions,
                       "/dev/null",
                       my_testcase.get_test_case_limits(),
                       config_json.value("resource_limits",nlohmann::json()),
@@ -208,6 +209,7 @@ int main(int argc, char *argv[]) {
         int exit_no = execute(commands[j] +
                               " 1>" + my_testcase.getPrefix() + "_STDOUT" + which + ".txt" +
                               " 2>" + my_testcase.getPrefix() + "_STDERR" + which + ".txt",
+                              actions,
                               my_testcase.getPrefix() + "_execute_logfile.txt",
                               my_testcase.get_test_case_limits(),
                               config_json.value("resource_limits",nlohmann::json()),
