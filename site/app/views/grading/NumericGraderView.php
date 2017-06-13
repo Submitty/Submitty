@@ -58,7 +58,6 @@ HTML;
         </div>
 HTML;
 
-
         if(isset($_GET['view']) && $_GET['view'] == 'all'){
             $view = 'all';
         }
@@ -73,16 +72,47 @@ HTML;
             <tr>
                 <td width="1%"></td>
                 <td width="3%">Section</td>
-                <td width="10%" style="text-align: left"><a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'numeric', 'action' => 'data_entry', 'g_id' => $gradeable->getId(), 'sort' => 'id', 'view' => $view))}"><span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fa fa-sort"></i></a></td>
-                <td width="10%" style="text-align: left"> <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'numeric', 'action' => 'data_entry', 'g_id' => $gradeable->getId(), 'sort' => 'first', 'view' => $view))}"><span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fa fa-sort"></i></a></td>
-                <td width="10%" style="text-align: left"> <a colspan="1" href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'numeric', 'action' => 'data_entry', 'g_id' => $gradeable->getId(), 'sort' => 'last', 'view' => $view))}"><span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i></a></td>
+                <td width="68" style="text-align: left"><a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'numeric', 'action' => 'data_entry', 'g_id' => $gradeable->getId(), 'sort' => 'id', 'view' => $view))}"><span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID <i class="fa fa-sort"></i></span></a></td>
+                <td width="92" style="text-align: left"> <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'numeric', 'action' => 'data_entry', 'g_id' => $gradeable->getId(), 'sort' => 'first', 'view' => $view))}"><span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fa fa-sort"></i></a></td>
+                <td width="91" style="text-align: left"> <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'numeric', 'action' => 'data_entry', 'g_id' => $gradeable->getId(), 'sort' => 'last', 'view' => $view))}"><span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i></a></td>
 HTML;
+        $num_text = 0;
+        $num_numeric = 0;
         foreach ($gradeable->getComponents() as $component) {
-/////////////////////////////////////////////HARD CODED COME BACK AND FIX ///////////////////////////////////////////////////////////////////////////////////
+            if($component->isText()){
+                $num_text++;
+            }
+            else{
+                $num_numeric++;
+            }
+        }
+        if($num_numeric !== 0){
+            foreach ($gradeable->getComponents() as $component) {
+                if(!$component->isText()){
+//                     if($num_text === 0){
+//                         $return .= <<<HTML
+//                 <td style="text-align: center">{$component->getTitle()}({$component->getMaxValue()})</td>
+// HTML;
+//                     }
+//                     else{
+                        $return .= <<<HTML
+                <td width="35" style="text-align: center">{$component->getTitle()}({$component->getMaxValue()})</td>
+HTML;
+                    // }
+                }
+            }
             $return .= <<<HTML
-                <td width="10%" style="text-align: center">{$component->getTitle()}</td>
+                <td width="25" style="text-align: center">Total</td>
 HTML;
         }
+        foreach ($gradeable->getComponents() as $component) {
+            if($component->isText()){
+                $return .= <<<HTML
+                <td style="text-align: center">{$component->getTitle()}</td>
+HTML;
+            }
+        }
+
         $return .= <<<HTML
             </tr>
         </thead>
@@ -93,7 +123,7 @@ HTML;
         $row = 0;
         $last_section = false;
         $tbody_open = false;
-        $colspan = 5 + count($gradeable->getComponents());
+        $colspan = 6 + count($gradeable->getComponents());
         if(count($rows) == 0){
             $return .= <<<HTML
             <tr class="info">
@@ -127,9 +157,6 @@ HTML;
         <tr class="info persist-header">
             <td colspan="{$colspan}" style="text-align: center">
                 Students Enrolled in Section {$display_section}
-                <a target=_blank href="{$this->core->getConfig()->getTABaseUrl()}/account/print/print_checkpoints_gradeable.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&g_id={$gradeable->getId()}&section_id={$display_section}&grade_by_reg_section={$gradeable->isGradeByRegistration()}&sort_by={$sort}">
-                    <i class="fa fa-print"></i>
-                </a>
             </td>
         </tr>
         <tr class="info">
@@ -148,19 +175,46 @@ HTML;
 HTML;
 
             $col = 0;
+            $total = 0;
+            if($num_numeric !== 0){
+                foreach ($gradeable_row->getComponents() as $component) {
+                    if (!$component->isText()) {
+                        $total+=$component->getScore();
+                        if($component->getScore() == 0){
+                            $return .= <<<HTML
+                <td class="option-small-input"><input class="option-small-box" style="text-align: center; color: #bbbbbb;" type="text" id="cell-{$row}-{$col}" value="{$component->getScore()}" data-id="{$component->getId()}" data-num="true"/></td>
+HTML;
+                        }
+                        else{
+                            $return .= <<<HTML
+                <td class="option-small-input"><input class="option-small-box" style="text-align: center" type="text" id="cell-{$row}-{$col}" value="{$component->getScore()}" data-id="{$component->getId()}" data-num="true"/></td>
+HTML;
+                        }
+                        $gradeable_row++;
+                        $col++;
+                    }
+                }
+
+                    $return .= <<<HTML
+                <td class="option-small-output" value="toobadthiswontprint"><input class="option-small-box" style="text-align: center" type="text" border="none" value=$total data-total="true" readonly></td>
+HTML;
+            }
+
             foreach ($gradeable_row->getComponents() as $component) {
                 if ($component->isText()) {
-                    $return .= <<<HTML
-                <td class="option-small-input" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-value="{$component->getComment()}"><input type="text" value="{$component->getComment()}"/></td>
+//                     if($component->getComment()==""){
+//                         $return .= <<<HTML
+//                 <td class="option-small-input"><input class="option-small-box" style="background-color: #f2f2f2;" type="text" id="cell-{$row}-{$col}" value="{$component->getComment()}" data-id="{$component->getId()}"/></td>
+// HTML;
+//                     }
+                    // else{
+                        $return .= <<<HTML
+                <td class="option-small-input"><input class="option-small-box" type="text" id="cell-{$row}-{$col}" value="{$component->getComment()}" data-id="{$component->getId()}"/></td>
 HTML;
+                    // }
+                    $gradeable_row++;
+                    $col++;
                 }
-                else {
-                    $return .= <<<HTML
-                <td class="option-small-input" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-value="{$component->getScore()}"><input class="option-small-box" type="text" id="{$component->getId()}" value="{$component->getScore()}"/></td>
-HTML;
-                }
-                $gradeable_row++;
-                $col++;
             }
 
             $return .= <<<HTML

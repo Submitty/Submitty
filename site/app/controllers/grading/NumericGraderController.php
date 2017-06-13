@@ -102,7 +102,12 @@ class NumericGraderController extends AbstractController  {
 
         foreach ($gradeable->getComponents() as $component) {
             if (isset($_POST['scores'][$component->getId()])) {
-                $component->setScore($_POST['scores'][$component->getId()]);
+                if ($component->isText()){
+                    $component->setComment($_POST['scores'][$component->getId()]);
+                }
+                else{
+                    $component->setScore($_POST['scores'][$component->getId()]);
+                }
             }
         }
 

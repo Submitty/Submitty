@@ -95,6 +95,11 @@ class GradeableComponent extends AbstractModel {
         return $this->max_value;
     }
 
+    // idk if this is bad practice............
+    public function setMaxValue($value) {
+        $this->max_value = $value;
+    }
+
     public function isText() {
         return $this->is_text;
     }
@@ -117,6 +122,11 @@ class GradeableComponent extends AbstractModel {
 
     public function getComment() {
         return $this->comment;
+    }
+
+    // idk if this is used for something else conflicting........
+    public function setComment($comment) {
+        $this->comment = $comment;
     }
 
     public function hasGrade() {

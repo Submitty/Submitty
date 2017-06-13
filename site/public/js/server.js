@@ -465,26 +465,61 @@ $(function() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 function setupNumericTextCells() {
-    $("input[class=option-small-box]").change(function() {
-        var scores = {};
 
-        $(this).parent().parent().children("td.option-small-input").each(function() {
+    $("input[class=option-small-box]").keydown(function(key){
+        // console.log("HERES THE BEGINNING");
+        // console.log(this.value.length);
+        // console.log(this.selectionEnd);
+        // console.log(this.selectionStart);
+        var cell=this.id.split('-');
+        if(key.keyCode === 39){
+            // console.log("move right");
+            if(this.selectionEnd == this.value.length){
+                $('#cell-'+cell[1]+'-'+(++cell[2])).focus();
+            }
+        }
+        else if(key.keyCode == 37){
+            // console.log("move left");
+            if(this.selectionStart == 0){
+                $('#cell-'+cell[1]+'-'+(--cell[2])).focus();
+            }
+        }
+        else if(key.keyCode == 38){
+            // console.log("move up");
+            $('#cell-'+(--cell[1])+'-'+cell[2]).focus();
+
+        }
+        else if(key.keyCode == 40){
+            // console.log("move down");
+            $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
+        }
+
+    });
+
+
+
+    $("input[class=option-small-box]").change(function() {
+        if(this.value == 0){
+            $(this).css("color", "#bbbbbb");
+        }
+        else{
+            $(this).css("color", "");
+        }
+        var scores = {};
+        var total = 0;
+        $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
+            // console.log(this.value);
             $(this).children(".option-small-box").each(function(){
-                scores[this.id] = this.value;
+                if($(this).data('num') === true){
+                    total += parseFloat(this.value);
+                }
+                if($(this).data('total') === true){
+                    this.value = total;
+                }
+                else{
+                    scores[$(this).data("id")] = this.value;
+                }
             });
         });
 
@@ -495,6 +530,8 @@ function setupNumericTextCells() {
                 // elems.forEach(function(elem) {
                 //     $(elem).animate({"border-right-width": "0px"}, 400);
                 // });
+                console.log(this);
+                console.log($(this));
                 console.log("my CALLBACK SUCCESS");
             },
             function() {

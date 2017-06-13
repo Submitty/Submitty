@@ -178,7 +178,7 @@ table tr.table-header {
 }
 
 .table-striped>tbody>tr:nth-child(even) {
-    background: #f9f9f9;
+    background: #ededed;
 }
 
 .table-striped>tbody>tr:nth-child(odd) {
@@ -485,7 +485,17 @@ table tr.table-header {
 
 .option-small-input > textarea,
 .option-small-input > input[type="text"] {
-    width: 20%;
+    width: 99%;
+    padding-right: 1px;
+    padding-left: 1px;
+}
+
+/*.option-small-output > textarea,*/
+.option-small-output > input[type="text"] {
+    width: 99%;
+    padding: 1px;
+    border:none;
+    background: transparent;
 }
 
 .post-panel-btn {
