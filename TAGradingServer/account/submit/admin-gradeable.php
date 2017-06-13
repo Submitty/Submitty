@@ -392,7 +392,8 @@ function constructGradeable ($db, $request_args){
             $g_constructor_params['date_grade'] = $g_grade_released_date;
         }
 
-        $is_repo = ($request_args['upload_type'] == 'Repository')? "true" : "false";
+        //$is_repo = ($request_args['upload_type'] == 'Repository')? "true" : "false";
+        $is_repo = "false";
         $subdirectory = (isset($request_args['subdirectory']) && $is_repo == "true")? $request_args['subdirectory'] : '';
 
         $config_path = $request_args['config_path'];
