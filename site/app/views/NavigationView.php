@@ -424,7 +424,7 @@ HTML;
 HTML;
                             } else if ($TA_percent == 100 && $title_save=='GRADED') {
                                 $gradeable_grade_range = <<<HTML
-                                <button class="btn {$title_to_button_type_grading[$title_save]}" style="width:100%;" \\
+                                <button class="btn btn-default" style="width:100%;" \\
                                 onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}'">
                                 REGRADE</button>
 HTML;
