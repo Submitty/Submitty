@@ -188,8 +188,9 @@ class TestcaseWrapper:
             return_code = subprocess.call(["make"],
                     cwd=os.path.join(self.testcase_path, "build"), stdout=make_output, stderr=make_output)
             if return_code != 0:
+                with open("make_output.txt", 'r') as fin:
+                    print fin.read()
                 raise RuntimeError("Build (make) exited with exit code " + str(return_code))
-
 
 
     # Run compile.out using some sane arguments.
