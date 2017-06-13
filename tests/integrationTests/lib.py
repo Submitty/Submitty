@@ -190,7 +190,7 @@ class TestcaseWrapper:
             # helpful for debugging make errors on travis
             #filename=os.path.join(self.testcase_path, "log", "make_output.txt")
             #with open(filename, 'r') as fin:
-            #    print (fin.read()
+            #    print (fin.read())
             if return_code != 0:
                 raise RuntimeError("Build (make) exited with exit code " + str(return_code))
 
@@ -264,6 +264,12 @@ class TestcaseWrapper:
             raise RuntimeError("ARGUMENT "+arg+" TO DIFF NOT TESTED")
         out, err = process.communicate()
         if process.returncode == 1:
+
+            filename=os.path.join(self.testcase_path,"log","run_output.txt")
+            print ("FILENAME: ",filename)
+            with open(filename, 'r') as fin:
+                print (fin.read())
+            
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
             " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
