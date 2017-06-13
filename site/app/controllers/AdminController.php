@@ -29,6 +29,9 @@ class AdminController extends AbstractController {
             case 'gradeable':
                 $controller = new GradeableController($this->core);
                 break;
+            case 'reports':
+                $controller = new ReportController($this->core);
+                break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
                 break;

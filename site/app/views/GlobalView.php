@@ -100,7 +100,7 @@ HTML;
                 <a href="{$ta_base_url}/account/admin-csv-report.php?course={$course}&semester={$semester}&this=CSV%20Report">CSV Report</a>
             </li>
             <li>
-                <a href="{$ta_base_url}/account/admin-hw-report.php?course={$course}&semester={$semester}&this=Homework%20Report">HWReport</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'hw'))}">HWReport</a>
             </li>
 
 HTML;
