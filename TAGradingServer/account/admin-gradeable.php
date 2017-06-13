@@ -317,7 +317,7 @@ HTML;
     $type_0_checked = ($g_gradeable_type === 0) ? 'checked': '';
     $type_1_checked = ($g_gradeable_type === 1) ? 'checked': '';
     $type_2_checked = ($g_gradeable_type === 2) ? 'checked': '';
-    $upload_files = ($is_repository === false) ? 'checked':'';
+    $upload_files = 'checked'; //($is_repository === false) ? 'checked':'';
     $use_repository = ($is_repository === true) ? 'checked':'';
 
     print <<<HTML
