@@ -38,30 +38,27 @@ std::vector<int> extract_ints_from_string(std::string input)
 
 std::vector<std::string> get_window_names_associated_with_pid(int pid)
 {
-  std::cout << pid << std::endl;
+  std::cout << "Attempting to find a window associated with pid: " << pid << std::endl;
   std::string pidQuery = "pgrep -P ";
   pidQuery +=  std::to_string(pid);
-  std::cout << "querying with: " << pidQuery << std::endl;
   std::string children = output_of_system_command(pidQuery.c_str());
-  std::cout << "Associated pids " << children << std::endl;
+  // std::cout << "Pids associated with child " << pid << ": " << children << std::endl;
   std::vector<int> ints = extract_ints_from_string(children);
-  for(int i = 0; i < ints.size(); i++)
-  {
-    std::string pidQuery = "pgrep -P ";
-    pidQuery +=  ints[i];
-    children = output_of_system_command(pidQuery.c_str());
-    std::cout << "pids associated with " << ints[i] << ": " << children << std::endl;
-  }
+  // for(int i = 0; i < ints.size(); i++) Support for increased depth coming at a later date.
+  // {
+  //   std::string pidQuery = "pgrep -P ";
+  //   pidQuery +=  ints[i];
+  //   children = output_of_system_command(pidQuery.c_str());
+  //   std::cout << "pids associated with " << ints[i] << ": " << children << std::endl;
+  // }
   std::vector<std::string> associatedWindows;
   std::string activeWindows = output_of_system_command("wmctrl -lp"); //returns list of active windows with pid.
   std::istringstream stream(activeWindows);
   std::string window;    
   std::smatch match;
-  std::cout << "Ideal pid is " << pid << std::endl;
   while (std::getline(stream, window)) {
-    std::cout << "Processing: " << window << std::endl;
     //remove the first two columns 
-    std::string myReg = "(.+)[ \\t]+(.*)"; //remove everthing before one or more spaces or tabs.
+    std::string myReg = "(.+?)[ \\t]+(.*)"; //remove everthing before one or more spaces or tabs.
     std::regex regex(myReg);
     if(std::regex_match(window, match, regex)){ //remove the first two columns.
       window = match[2];
@@ -75,11 +72,10 @@ std::vector<std::string> get_window_names_associated_with_pid(int pid)
     else{
       continue;
     }
-    std::cout << "broken down to " << window << std::endl;
+    // std::cout << "Yielded: " << window << std::endl;
 
     if(std::regex_match(window, match, regex)){ //get the third collumn
       int windowPid = stoi(window);
-      std::cout << "\tWindowpid was " << windowPid << std::endl;
       if(windowPid != pid){
         continue;
       }
@@ -108,22 +104,20 @@ std::vector<int> get_window_data(std::string data_string, std::string window_nam
 void initialize_window(std::string& window_name, int pid)
 {
   std::cout << "initializing window." << std::endl;
-  //std::vector<std::string> windows = get_window_names_associated_with_pid(pid);
-  // if(windows.size() == 0)
-  // {
-  //   return;
-  // }
-  // else{
-  //   std::cout<<"Windows associated with " << pid << std::endl;
-  //   for(int i = 0; i < windows.size(); i++)
-  //   {
-  //     std::cout << windows[i] <<std::endl;
-  //   }
-  // }
-  std::string windowQuery = "xdotool getwindowfocus getwindowname"; //+ windows[0];
-  window_name = output_of_system_command(windowQuery.c_str()); //get the window name for graphics programs.
-  window_name.erase(std::remove(window_name.begin(), window_name.end(), '\n'), window_name.end()); //trim.
-  std::cout << "Window name was " << window_name << std::endl;
+  std::vector<std::string> windows = get_window_names_associated_with_pid(pid);
+  if(windows.size() == 0)
+  {
+    std::cout << "Initialization failed..." << std::endl;
+    return;
+  }
+  else{
+    std::cout << "We found the window " << windows[0] << std::endl;
+    window_name = windows[0];
+  }
+  // std::string windowQuery = "xdotool getwindowfocus getwindowname"; //+ windows[0];
+  // window_name = output_of_system_command(windowQuery.c_str()); //get the window name for graphics programs.
+  // window_name.erase(std::remove(window_name.begin(), window_name.end(), '\n'), window_name.end()); //trim.
+  // std::cout << "Window name was " << window_name << std::endl;
 }
 
 //modifies pos to window border if necessary. Returns remainder.
@@ -391,6 +385,14 @@ void takeAction(const std::vector<std::string>& actions, int& actions_taken, int
   else if(actions[actions_taken].find("xdotool") != std::string::npos)
   {
     system(actions[actions_taken].c_str()); //This should be better scrubbed.
+  }
+  else if(actions[actions_taken].find("move mouse") != std::string::npos || actions[actions_taken].find("move mouse to") != std::string::npos)
+  {
+    std::vector<int> coordinates = extract_ints_from_string(actions[actions_taken]);
+    if(coordinates.size() >= 2)
+    {
+      //mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, int x_start, int x_end, int y_start, int y_end)
+    }
   }
   else
   {
