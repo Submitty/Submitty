@@ -187,14 +187,10 @@ class TestcaseWrapper:
         with open(os.path.join(self.testcase_path, "log", "make_output.txt"), "w") as make_output:
             return_code = subprocess.call(["make"],
                     cwd=os.path.join(self.testcase_path, "build"), stdout=make_output, stderr=make_output)
-
-            filename=os.path.join(self.testcase_path, "log", "make_output.txt")
-            print("going top open filename=",filename);
-            with open(filename, 'r') as fin:
-                print ("stoopid") #fin.read()
-                file_contents = fin.read()
-                print (file_contents)
-
+            # helpful for debugging make errors on travis
+            #filename=os.path.join(self.testcase_path, "log", "make_output.txt")
+            #with open(filename, 'r') as fin:
+            #    print (fin.read()
             if return_code != 0:
                 raise RuntimeError("Build (make) exited with exit code " + str(return_code))
 
