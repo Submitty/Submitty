@@ -109,6 +109,11 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     "INFORMATION_MAINTENANCE_SET_TIME"
   };
 
+#if __UBUNTU_16_04__
+#else
+  categories = restricted_categories;
+#endif
+  
   // ---------------------------------------------------------------
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/bin/cp") {
