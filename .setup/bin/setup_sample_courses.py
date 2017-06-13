@@ -614,7 +614,7 @@ class Course(object):
         database = "submitty_" + self.semester + "_" + self.code
         os.system('psql -d postgres -h {} -U hsdbu -c "CREATE DATABASE {}"'.format(DB_HOST,
                                                                                    database))
-        os.system("psql -d {} -h {} -U {} -f {}/site/data/tables.sql"
+        os.system("psql -d {} -h {} -U {} -f {}/site/data/course_tables.sql"
                   .format(database, DB_HOST, DB_USER, SUBMITTY_REPOSITORY))
 
         print("Database created, now populating ", end="")

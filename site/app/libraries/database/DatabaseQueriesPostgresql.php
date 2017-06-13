@@ -11,6 +11,11 @@ use app\models\Team;
 
 class DatabaseQueriesPostgresql extends AbstractDatabaseQueries{
 
+    public function getSubmittyUser($user_id) {
+        $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
+        return $this->submitty_db->row();
+    }
+
     public function getUserById($user_id) {
         $this->course_db->query("
 SELECT u.*, sr.grading_registration_sections
@@ -62,7 +67,6 @@ ORDER BY u.registration_section, u.user_id");
     }
 
     public function createUser(User $user) {
-
         $array = array($user->getId(), $user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(),
             $user->getEmail(), $user->getGroup(), $user->getRegistrationSection(), $user->getRotatingSection(),
             Utils::convertBooleanToString($user->isManualRegistration()));
@@ -696,27 +700,28 @@ VALUES (?, ?, ?, ?)", $params);
     }
 
     public function getSession($session_id) {
-        $this->course_db->query("SELECT * FROM sessions WHERE session_id=?", array($session_id));
-        return $this->course_db->row();
+        $this->submitty_db->query("SELECT * FROM sessions WHERE session_id=?", array($session_id));
+        return $this->submitty_db->row();
     }
 
     public function updateSessionExpiration($session_id) {
-        $this->course_db->query("UPDATE sessions SET session_expires=(current_timestamp + interval '336 hours') 
-        WHERE session_id=?", array($session_id));
+        $this->submitty_db->query("UPDATE sessions SET session_expires=(current_timestamp + interval '336 hours') 
+                                   WHERE session_id=?", array($session_id));
     }
 
     public function newSession($session_id, $user_id, $csrf_token) {
-        $this->course_db->query("INSERT INTO sessions (session_id, user_id, csrf_token, session_expires) VALUES(?,?,?,current_timestamp + interval '336 hours')",
-                               array($session_id, $user_id, $csrf_token));
+        $this->submitty_db->query("INSERT INTO sessions (session_id, user_id, csrf_token, session_expires) 
+                                   VALUES(?,?,?,current_timestamp + interval '336 hours')",
+            array($session_id, $user_id, $csrf_token));
 
     }
 
     public function removeExpiredSessions() {
-        $this->course_db->query("DELETE FROM sessions WHERE session_expires < current_timestamp");
+        $this->submitty_db->query("DELETE FROM sessions WHERE session_expires < current_timestamp");
     }
 
     public function removeSessionById($session_id) {
-        $this->course_db->query("DELETE FROM sessions WHERE session_id=?", array($session_id));
+        $this->submitty_db->query("DELETE FROM sessions WHERE session_id=?", array($session_id));
     }
     
     public function getAllGradeablesIds() {

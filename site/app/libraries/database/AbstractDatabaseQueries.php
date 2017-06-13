@@ -1,7 +1,9 @@
 <?php
 
 namespace app\libraries\database;
+
 use app\libraries\Core;
+use app\libraries\Database;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableVersion;
@@ -20,12 +22,24 @@ abstract class AbstractDatabaseQueries {
     protected $core;
 
     /** @var Database */
+    protected $submitty_db;
+
+    /** @var Database */
     protected $course_db;
 
     public function __construct(Core $core) {
         $this->core = $core;
+        $this->submitty_db = $core->getSubmittyDB();
         $this->course_db = $core->getCourseDB();
     }
+
+    /**
+     * Gets a user from the submitty database given a user_id.
+     * @param $user_id
+     *
+     * @return array
+     */
+    abstract public function getSubmittyUser($user_id);
 
     /**
      * Gets a user from the database given a user_id.
@@ -38,6 +52,7 @@ abstract class AbstractDatabaseQueries {
     /**
      * Fetches all students from the users table, ordering by course section than user_id.
      *
+     * @param string $section_key
      * @return User[]
      */
     abstract public function getAllUsers($section_key="registration_section");

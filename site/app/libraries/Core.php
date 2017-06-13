@@ -151,6 +151,7 @@ class Core {
      */
     public function __destruct() {
         if ($this->course_db !== null) {
+            $this->getSubmittyDB()->disconnect();
             $this->getCourseDB()->disconnect();
         }
     }
@@ -172,6 +173,13 @@ class Core {
      */
     public function getConfig() {
         return $this->config;
+    }
+
+    /**
+     * @return Database
+     */
+    public function getSubmittyDB() {
+        return $this->submitty_db;
     }
 
     /**
