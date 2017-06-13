@@ -6,7 +6,7 @@ use app\authentication\AbstractAuthentication;
 use app\exceptions\AuthenticationException;
 use app\exceptions\DatabaseException;
 use app\libraries\database\DatabaseQueriesPostgresql;
-use app\libraries\database\IDatabaseQueries;
+use app\libraries\database\AbstractDatabaseQueries;
 use app\models\Config;
 use app\models\User;
 
@@ -18,38 +18,36 @@ use app\models\User;
  */
 class Core {
     /**
-     * @var Config
+     * @var \app\models\Config
      */
     private $config = null;
 
-    /**
-     * @var Database
-     */
-    private $database = null;
+    /** @var Database */
+    private $submitty_db = null;
 
-    /**
-     * @var AbstractAuthentication
-     */
+    /** @var Database */
+    private $course_db = null;
+
+    /** @var AbstractAuthentication */
     private $authentication;
 
-    /**
-     * @var SessionManager
-     */
+    /** @var SessionManager */
     private $session_manager;
 
-    /**
-     * @var IDatabaseQueries
-     */
+    /** @var AbstractDatabaseQueries */
     private $database_queries;
 
-    /**
-     * @var User
-     */
+    /** @var User */
     private $user = null;
+
+    /** @var Output */
+    private $output = null;
 
     /**
      * Core constructor.
      *
+     * This sets up our core for usage, by starting up our Output class as well as any $_SESSION variables that we
+     * need. This should be called first, then loadConfig() and then loadDatabases().
      */
     public function __construct() {
         $this->output = new Output($this);
@@ -101,13 +99,17 @@ class Core {
      *
      * @throws \Exception if we have not loaded the config yet
      */
-    public function loadDatabase() {
+    public function loadDatabases() {
         if ($this->config === null) {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
-        $this->database = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
+
+        $this->submitty_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
+            $this->config->getDatabasePassword(), "submitty_db", $this->config->getDatabaseType());
+
+        $this->course_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
             $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
-        $this->database->connect();
+        $this->course_db->connect();
 
         switch ($this->config->getDatabaseType()) {
             case 'pgsql':
@@ -118,6 +120,14 @@ class Core {
         }
     }
 
+    /**
+     * Helper function which is given a list of arguments where the first is the name of the model and the rest are
+     * the parameters to pass to the constructor of the model. We use this for controllers were we are not
+     * doing dependency injection into the controller (like setting up GradeableList) so that we can then have
+     * the ability to Mock the object (by mocking this function) for testing.
+     *
+     * @return object Loaded instance of the requested model.
+     */
     public function loadModel() {
         if (func_num_args() == 0) {
             throw new \InvalidArgumentException("loadModel requires at least one argument (Model)");
@@ -140,8 +150,8 @@ class Core {
      * the database, running any open transactions that were left.
      */
     public function __destruct() {
-        if ($this->database !== null) {
-            $this->getDatabase()->disconnect();
+        if ($this->course_db !== null) {
+            $this->getCourseDB()->disconnect();
         }
     }
 
@@ -167,12 +177,12 @@ class Core {
     /**
      * @return Database
      */
-    public function getDatabase() {
-        return $this->database;
+    public function getCourseDB() {
+        return $this->course_db;
     }
 
     /**
-     * @return IDatabaseQueries
+     * @return AbstractDatabaseQueries
      */
     public function getQueries() {
         return $this->database_queries;

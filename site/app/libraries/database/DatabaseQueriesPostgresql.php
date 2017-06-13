@@ -2,8 +2,6 @@
 
 namespace app\libraries\database;
 
-use app\libraries\Core;
-use app\libraries\Database;
 use app\libraries\Utils;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
@@ -11,20 +9,10 @@ use app\models\GradeableVersion;
 use app\models\User;
 use app\models\Team;
 
-class DatabaseQueriesPostgresql implements IDatabaseQueries{
-    /** @var Core */
-    private $core;
-
-    /** @var Database */
-    private $database;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-        $this->database = $core->getDatabase();
-    }
+class DatabaseQueriesPostgresql extends AbstractDatabaseQueries{
 
     public function getUserById($user_id) {
-        $this->database->query("
+        $this->course_db->query("
 SELECT u.*, sr.grading_registration_sections
 FROM users u
 LEFT JOIN (
@@ -33,13 +21,13 @@ LEFT JOIN (
 	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_id=?", array($user_id));
-        return new User($this->database->row());
+        return new User($this->course_db->row());
     }
     
     public function getAllUsers($section_key="registration_section") {
         $keys = array("registration_section", "rotating_section");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
-        $this->database->query("
+        $this->course_db->query("
 SELECT u.*, sr.grading_registration_sections
 FROM users u
 LEFT JOIN (
@@ -49,14 +37,14 @@ LEFT JOIN (
 ) as sr ON u.user_id=sr.user_id
 ORDER BY u.{$section_key}, u.user_id");
         $return = array();
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             $return[] = new User($row);
         }
         return $return;
     }
 
     public function getAllGraders() {
-        $this->database->query("
+        $this->course_db->query("
 SELECT u.*, sr.grading_registration_sections
 FROM users u
 LEFT JOIN (
@@ -67,7 +55,7 @@ LEFT JOIN (
 WHERE u.user_group < 4
 ORDER BY u.registration_section, u.user_id");
         $return = array();
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             $return[] = new User($row);
         }
         return $return;
@@ -79,7 +67,7 @@ ORDER BY u.registration_section, u.user_id");
             $user->getEmail(), $user->getGroup(), $user->getRegistrationSection(), $user->getRotatingSection(),
             Utils::convertBooleanToString($user->isManualRegistration()));
 
-        $this->database->query("
+        $this->course_db->query("
 INSERT INTO users (user_id, user_firstname, user_preferred_firstname, user_lastname, user_email, 
                    user_group, registration_section, rotating_section, manual_registration) 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
@@ -90,7 +78,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
         $array = array($user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(),
             $user->getEmail(), $user->getGroup(), $user->getRegistrationSection(), $user->getRotatingSection(),
             Utils::convertBooleanToString($user->isManualRegistration()), $user->getId());
-        $this->database->query("
+        $this->course_db->query("
 UPDATE users SET user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?, user_group=?, 
 registration_section=?, rotating_section=?, manual_registration=?
 WHERE user_id=?", $array);
@@ -98,17 +86,17 @@ WHERE user_id=?", $array);
     }
 
     public function updateGradingRegistration($user_id, $user_group, $sections) {
-        $this->database->query("DELETE FROM grading_registration WHERE user_id=?", array($user_id));
+        $this->course_db->query("DELETE FROM grading_registration WHERE user_id=?", array($user_id));
         if ($user_group < 4) {
             foreach ($sections as $section) {
-                $this->database->query("
+                $this->course_db->query("
     INSERT INTO grading_registration (user_id, sections_registration_id) VALUES(?, ?)", array($user_id, $section));
             }
         }
     }
 
     public function getGradeableComponents($g_id, $gd_id=null) {
-        $this->database->query("
+        $this->course_db->query("
 SELECT gcd.*, gc.*
 FROM gradeable_component AS gc
 LEFT JOIN (
@@ -120,7 +108,7 @@ WHERE gc.g_id=?
 ", array($gd_id, $g_id));
 
         $return = array();
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             $return[$row['gc_id']] = new GradeableComponent($row);
         }
         return $return;
@@ -128,7 +116,7 @@ WHERE gc.g_id=?
 
     public function getGradeableVersions($g_id, $user_id, $team_id, $due_date) {
         if ($user_id === null) {
-            $this->database->query("
+            $this->course_db->query("
 SELECT egd.*, egv.active_version = egd.g_version as active_version
 FROM electronic_gradeable_data AS egd
 LEFT JOIN (
@@ -139,7 +127,7 @@ WHERE egd.g_id=? AND egd.team_id=?
 ORDER BY egd.g_version", array($g_id, $team_id));
         }
         else {
-            $this->database->query("
+            $this->course_db->query("
 SELECT egd.*, egv.active_version = egd.g_version as active_version
 FROM electronic_gradeable_data AS egd
 LEFT JOIN (
@@ -151,7 +139,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         }
         
         $return = array();
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             $row['submission_time'] = new \DateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
             $return[$row['g_version']] = new GradeableVersion($row, $due_date);
         }
@@ -344,9 +332,9 @@ ORDER BY u.{$section_key}, {$sort_key}";
         }
 
 
-        $this->database->query($query, $params);
+        $this->course_db->query($query, $params);
 
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             $user = (isset($row['user_id']) && $row['user_id'] !== null) ? new User($row) : null;
             $return[] = new Gradeable($this->core, $row, $user);
         }
@@ -358,8 +346,8 @@ ORDER BY u.{$section_key}, {$sort_key}";
         $return = array();
         if (count($sections) > 0) {
             $query = implode(",", array_fill(0, count($sections), "?"));
-            $this->database->query("SELECT * FROM users WHERE registration_section IN ({$query}) ORDER BY registration_section", $sections);
-            foreach ($this->database->rows() as $row) {
+            $this->course_db->query("SELECT * FROM users WHERE registration_section IN ({$query}) ORDER BY registration_section", $sections);
+            foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($row);
             }
         }
@@ -374,13 +362,13 @@ ORDER BY u.{$section_key}, {$sort_key}";
             $where = "WHERE registration_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
             $params = $sections;
         }
-        $this->database->query("
+        $this->course_db->query("
 SELECT count(*) as cnt, registration_section 
 FROM users 
 {$where}
 GROUP BY registration_section 
 ORDER BY registration_section", $params);
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             if ($row['registration_section'] === null) {
                 $row['registration_section'] = "NULL";
             }
@@ -397,7 +385,7 @@ ORDER BY registration_section", $params);
             $where = "WHERE registration_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
             $params = array_merge($params, $sections);
         }
-        $this->database->query("
+        $this->course_db->query("
 SELECT count(u.*) as cnt, u.registration_section
 FROM users AS u
 INNER JOIN (
@@ -406,7 +394,7 @@ INNER JOIN (
 {$where}
 GROUP BY u.registration_section
 ORDER BY u.registration_section", $params);
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             if ($row['registration_section'] === null) {
                 $row['registration_section'] = "NULL";
             }
@@ -423,7 +411,7 @@ ORDER BY u.registration_section", $params);
             $where = "WHERE sections_registration_id IN (" . implode(",", array_fill(0, count($sections), "?")) . ")";
             $params = $sections;
         }
-        $this->database->query("
+        $this->course_db->query("
 SELECT g.*, u.* 
 FROM grading_registration AS g
 LEFT JOIN (
@@ -433,7 +421,7 @@ LEFT JOIN (
 {$where}
 ORDER BY g.sections_registration_id, g.user_id", $params);
         $user_store = array();
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             if ($row['sections_registration_id'] === null) {
                 $row['sections_registration_id'] = "NULL";
             }
@@ -449,9 +437,9 @@ ORDER BY g.sections_registration_id, g.user_id", $params);
     }
 
     public function getRotatingSectionsForGradeableAndUser($g_id, $user) {
-        $this->database->query("SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
+        $this->course_db->query("SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
         $return = array();
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             $return[] = $row['sections_rotating_id'];
         }
         return $return;
@@ -461,8 +449,8 @@ ORDER BY g.sections_registration_id, g.user_id", $params);
         $return = array();
         if (count($sections) > 0) {
             $query = implode(",", array_fill(0, count($sections), "?"));
-            $this->database->query("SELECT * FROM users WHERE rotating_section IN ({$query}) ORDER BY rotating_section", $sections);
-            foreach ($this->database->rows() as $row) {
+            $this->course_db->query("SELECT * FROM users WHERE rotating_section IN ({$query}) ORDER BY rotating_section", $sections);
+            foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($row);
             }
         }
@@ -477,13 +465,13 @@ ORDER BY g.sections_registration_id, g.user_id", $params);
             $where = "WHERE rotating_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
             $params = $sections;
         }
-        $this->database->query("
+        $this->course_db->query("
 SELECT count(*) as cnt, rotating_section 
 FROM users 
 {$where}
 GROUP BY rotating_section 
 ORDER BY rotating_section", $params);
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             if ($row['rotating_section'] === null) {
                 $row['rotating_section'] = "NULL";
             }
@@ -500,7 +488,7 @@ ORDER BY rotating_section", $params);
             $where = "WHERE rotating_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
             $params = array_merge($params, $sections);
         }
-        $this->database->query("
+        $this->course_db->query("
 SELECT count(u.*) as cnt, u.rotating_section
 FROM users AS u
 INNER JOIN (
@@ -509,7 +497,7 @@ INNER JOIN (
 {$where}
 GROUP BY u.rotating_section
 ORDER BY u.rotating_section", $params);
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             if ($row['rotating_section'] === null) {
                 $row['rotating_section'] = "NULL";
             }
@@ -526,7 +514,7 @@ ORDER BY u.rotating_section", $params);
             $where = " AND sections_rotating_id IN (" . implode(",", array_fill(0, count($sections), "?")) . ")";
             $params = array_merge($params, $sections);
         }
-        $this->database->query("
+        $this->course_db->query("
 SELECT g.*, u.* 
 FROM grading_rotating AS g
 LEFT JOIN (
@@ -536,7 +524,7 @@ LEFT JOIN (
 WHERE g.g_id=? {$where}
 ORDER BY g.sections_rotating_id, g.user_id", $params);
         $user_store = array();
-        foreach ($this->database->rows() as $row) {
+        foreach ($this->course_db->rows() as $row) {
             if ($row['sections_rotating_id'] === null) {
                 $row['sections_rotating_id'] = "NULL";
             }
@@ -552,207 +540,208 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
     }
 
     public function getRegistrationSections() {
-        $this->database->query("SELECT * FROM sections_registration ORDER BY sections_registration_id");
-        return $this->database->rows();
+        $this->course_db->query("SELECT * FROM sections_registration ORDER BY sections_registration_id");
+        return $this->course_db->rows();
     }
 
     public function getRotatingSections() {
-        $this->database->query("SELECT * FROM sections_rotating ORDER BY sections_rotating_id");
-        return $this->database->rows();
+        $this->course_db->query("SELECT * FROM sections_rotating ORDER BY sections_rotating_id");
+        return $this->course_db->rows();
     }
 
     public function getCountUsersRotatingSections() {
-        $this->database->query("
+        $this->course_db->query("
 SELECT rotating_section, count(*) as count
 FROM users
 WHERE (registration_section IS NOT NULL OR manual_registration)
 GROUP BY rotating_section
 ORDER BY rotating_section");
-        return $this->database->rows();
+        return $this->course_db->rows();
     }
 
     public function getCountNullUsersRotatingSections() {
-        $this->database->query("
+        $this->course_db->query("
 SELECT rotating_section, count(*) as count
 FROM users
 WHERE (registration_section IS NULL and NOT manual_registration) AND rotating_section IS NOT NULL
 GROUP BY rotating_section
 ORDER BY rotating_section");
-        return $this->database->rows();
+        return $this->course_db->rows();
     }
 
     public function getRegisteredUserIdsWithNullRotating() {
-        $this->database->query("
+        $this->course_db->query("
 SELECT user_id 
 FROM users 
 WHERE
     (rotating_section IS NULL) and 
     (registration_section IS NOT NULL or manual_registration)
 ORDER BY user_id ASC");
-        return array_map(function($elem) { return $elem['user_id']; }, $this->database->rows());
+        return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
     }
 
     public function getRegisteredUserIds() {
-        $this->database->query("
+        $this->course_db->query("
 SELECT user_id 
 FROM users 
 WHERE
     (registration_section IS NOT NULL) OR 
     (manual_registration)
 ORDER BY user_id ASC");
-        return array_map(function($elem) { return $elem['user_id']; }, $this->database->rows());
+        return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
     }
 
     public function setAllUsersRotatingSectionNull() {
-        $this->database->query("UPDATE users SET rotating_section=NULL");
+        $this->course_db->query("UPDATE users SET rotating_section=NULL");
     }
 
     public function setNonRegisteredUsersRotatingSectionNull() {
-        $this->database->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL AND NOT manual_registration");
+        $this->course_db->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL AND NOT manual_registration");
     }
 
     public function deleteAllRotatingSections() {
-        $this->database->query("DELETE FROM sections_rotating");
+        $this->course_db->query("DELETE FROM sections_rotating");
     }
 
     public function getMaxRotatingSection() {
-        $this->database->query("SELECT MAX(sections_rotating_id) as max FROM sections_rotating");
-        $row = $this->database->row();
+        $this->course_db->query("SELECT MAX(sections_rotating_id) as max FROM sections_rotating");
+        $row = $this->course_db->row();
         return $row['max'];
     }
 
     public function insertNewRotatingSection($section) {
-        $this->database->query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", array($section));
+        $this->course_db->query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", array($section));
     }
 
     public function updateUsersRotatingSection($section, $users) {
         $update_array = array_merge(array($section), $users);
         $update_string = implode(",", array_pad(array(), count($users), "?"));
-        $this->database->query("UPDATE users SET rotating_section=? WHERE user_id IN ({$update_string})", $update_array);
+        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN ({$update_string})", $update_array);
     }
 
     public function insertVersionDetails($g_id, $user_id, $team_id, $version, $timestamp) {
-        $this->database->query("
+        $this->course_db->query("
 INSERT INTO electronic_gradeable_data 
 (g_id, user_id, team_id, g_version, autograding_non_hidden_non_extra_credit, autograding_non_hidden_extra_credit, 
 autograding_hidden_non_extra_credit, autograding_hidden_extra_credit, submission_time) 
+
 VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $timestamp));
         if ($user_id === null) {
-            $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND team_id=?",
+            $this->course_db->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND team_id=?",
             array($g_id, $team_id));
         }
         else {
-            $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND user_id=?",
+            $this->course_db->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND user_id=?",
             array($g_id, $user_id));
         }
-        $row = $this->database->row();
+        $row = $this->course_db->row();
         if (!empty($row)) {
             $this->updateActiveVersion($g_id, $user_id, $team_id, $version);
         }
         else {
-            $this->database->query("INSERT INTO electronic_gradeable_version (g_id, user_id, team_id, active_version) VALUES(?, ?, ?, ?)",
+            $this->course_db->query("INSERT INTO electronic_gradeable_version (g_id, user_id, team_id, active_version) VALUES(?, ?, ?, ?)",
                 array($g_id, $user_id, $team_id, $version));
         }
     }
 
     public function updateActiveVersion($g_id, $user_id, $team_id, $version) {
         if ($user_id === null) {
-            $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND team_id=?",
+            $this->course_db->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND team_id=?",
             array($version, $g_id, $team_id));
         }
         else {
-            $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND user_id=?",
+            $this->course_db->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND user_id=?",
             array($version, $g_id, $user_id));
         }  
     }
 
     public function updateGradeableData(Gradeable $gradeable) {
-        $this->database->beginTransaction();
+        $this->course_db->beginTransaction();
         if ($gradeable->getGdId() === null) {
             $params = array($gradeable->getId(), $gradeable->getUser()->getId(), $gradeable->getGrader()->getId(),
                             $gradeable->getOverallComment(), $gradeable->getStatus(), 0,
                             $gradeable->getActiveVersion());
-            $this->database->query("INSERT INTO 
+            $this->course_db->query("INSERT INTO 
 gradeable_data (g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version)
 VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
-            $gradeable->setGdId($this->database->getLastInsertId("gradeable_data_gd_id_seq"));
+            $gradeable->setGdId($this->course_db->getLastInsertId("gradeable_data_gd_id_seq"));
         }
         else {
-            $this->database->query("UPDATE gradeable_data SET gd_grader_id=? WHERE gd_id=?", array($gradeable->getGrader()->getId(), $gradeable->getGdId()));
+            $this->course_db->query("UPDATE gradeable_data SET gd_grader_id=? WHERE gd_id=?", array($gradeable->getGrader()->getId(), $gradeable->getGdId()));
         }
 
         foreach ($gradeable->getComponents() as $component) {
             if ($component->hasGrade()) {
                 $params = array($component->getScore(), $component->getComment(), $component->getId(), $gradeable->getGdId());
-                $this->database->query("
+                $this->course_db->query("
 UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=? WHERE gc_id=? AND gd_id=?", $params);
             }
             else {
                 $params = array($component->getId(), $gradeable->getGdId(), $component->getScore(),
                                 $component->getComment());
-                $this->database->query("
+                $this->course_db->query("
 INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment) 
 VALUES (?, ?, ?, ?)", $params);
             }
 
         }
-        $this->database->commit();
+        $this->course_db->commit();
     }
 
     public function updateUserViewedDate(Gradeable $gradeable) {
         if ($gradeable->getGdId() !== null) {
-            $this->database->query("UPDATE gradeable_data SET gd_user_viewed_date = NOW() WHERE gd_id=?",
+            $this->course_db->query("UPDATE gradeable_data SET gd_user_viewed_date = NOW() WHERE gd_id=?",
                 array($gradeable->getGdId()));
         }
     }
 
     public function getSession($session_id) {
-        $this->database->query("SELECT * FROM sessions WHERE session_id=?", array($session_id));
-        return $this->database->row();
+        $this->course_db->query("SELECT * FROM sessions WHERE session_id=?", array($session_id));
+        return $this->course_db->row();
     }
 
     public function updateSessionExpiration($session_id) {
-        $this->database->query("UPDATE sessions SET session_expires=(current_timestamp + interval '336 hours') 
+        $this->course_db->query("UPDATE sessions SET session_expires=(current_timestamp + interval '336 hours') 
         WHERE session_id=?", array($session_id));
     }
 
     public function newSession($session_id, $user_id, $csrf_token) {
-        $this->database->query("INSERT INTO sessions (session_id, user_id, csrf_token, session_expires) VALUES(?,?,?,current_timestamp + interval '336 hours')",
+        $this->course_db->query("INSERT INTO sessions (session_id, user_id, csrf_token, session_expires) VALUES(?,?,?,current_timestamp + interval '336 hours')",
                                array($session_id, $user_id, $csrf_token));
 
     }
 
     public function removeExpiredSessions() {
-        $this->database->query("DELETE FROM sessions WHERE session_expires < current_timestamp");
+        $this->course_db->query("DELETE FROM sessions WHERE session_expires < current_timestamp");
     }
 
     public function removeSessionById($session_id) {
-        $this->database->query("DELETE FROM sessions WHERE session_id=?", array($session_id));
+        $this->course_db->query("DELETE FROM sessions WHERE session_id=?", array($session_id));
     }
     
     public function getAllGradeablesIds() {
-        $this->database->query("SELECT g_id FROM gradeable ORDER BY g_id");
-        return $this->database->rows();
+        $this->course_db->query("SELECT g_id FROM gradeable ORDER BY g_id");
+        return $this->course_db->rows();
     }
 
     public function newTeam($g_id, $user_id) {
-        $this->database->query("SELECT * FROM gradeable_teams ORDER BY team_id");
-        $team_id_prefix = count($this->database->rows());
+        $this->course_db->query("SELECT * FROM gradeable_teams ORDER BY team_id");
+        $team_id_prefix = count($this->course_db->rows());
         $team_id = "{$team_id_prefix}_{$user_id}";
-        $this->database->query("INSERT INTO gradeable_teams (team_id, g_id) VALUES(?,?)", array($team_id, $g_id));
-        $this->database->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
+        $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id) VALUES(?,?)", array($team_id, $g_id));
+        $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
     }
 
     public function newTeamInvite($team_id, $user_id) {
-        $this->database->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,0)", array($team_id, $user_id,));
+        $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,0)", array($team_id, $user_id,));
     }
 
     public function newTeamMember($team_id, $user_id) {
-        $this->database->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id,));
+        $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id,));
     }
 
     public function removeTeamUser($g_id, $user_id) {
-        $this->database->query("
+        $this->course_db->query("
           DELETE FROM teams AS t
           USING gradeable_teams AS gt
           WHERE gt.g_id=? AND gt.team_id = t.team_id AND t.user_id=?",
@@ -760,7 +749,7 @@ VALUES (?, ?, ?, ?)", $params);
     }
 
     public function getTeamsByGradeableId($g_id) {
-        $this->database->query("
+        $this->course_db->query("
           SELECT gt.team_id, t.user_id, t.state
           FROM gradeable_teams AS gt 
           LEFT JOIN (
@@ -772,7 +761,7 @@ VALUES (?, ?, ?, ?)", $params);
           array($g_id));
 
         $team_rows = array();
-        foreach($this->database->rows() as $row) {
+        foreach($this->course_db->rows() as $row) {
             if (!isset($team_rows[$row['team_id']])){
                 $team_rows[$row['team_id']] = array();
             }
@@ -786,7 +775,7 @@ VALUES (?, ?, ?, ?)", $params);
     }
 
     public function getTeamByUserId($g_id, $user_id) {
-        $this->database->query("
+        $this->course_db->query("
           SELECT team_id, user_id, state
           FROM gradeable_teams NATURAL JOIN teams
           WHERE g_id=? AND team_id IN (
@@ -795,11 +784,11 @@ VALUES (?, ?, ?, ?)", $params);
             WHERE user_id=?)",
           array($g_id, $user_id));
 
-        if (count($this->database->rows()) === 0) {
+        if (count($this->course_db->rows()) === 0) {
             return null;
         }
         else {
-            $team = new Team($this->database->rows());
+            $team = new Team($this->course_db->rows());
             return $team;
         }
     }
