@@ -35,6 +35,7 @@ if($user_is_administrator){
     
     $num_numeric = $num_text = 0;
     $g_gradeable_type = $g_syllabus_bucket = $g_min_grading_group = $default_late_days = -1;
+    $team_assignment = false;
     $is_repository = false;
     $use_ta_grading = false;
     $g_overall_ta_instructions = $g_id = '';
@@ -70,7 +71,10 @@ if($user_is_administrator){
         $db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id 
                     INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($g_id));
         $has_grades= $db->row()['cnt'];
-       
+
+        //get team assignment boolean
+        $team_assignment = $old_gradeable['g_team_assignment'];
+
        //if electonic file then add all of the old questions
        if($old_gradeable['g_gradeable_type']==0){
             //get the electronic file stuff
@@ -307,22 +311,26 @@ HTML;
             <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
             style="cursor: auto; background-color: #FFF; width: 250px;">
             <br />
-
-
-       <!-- <br />
-        Is this a team assignment?:
-        <input type="radio" name="team_assignment" value="yes"
 HTML;
-    
-    echo ($g_team_assignment===true)?'checked':'';
+    $team_yes_checked = ($g_team_assignment===true)?'checked':'';
+    $team_no_checked = ($g_team_assignment===false)?'checked':'';
     print <<<HTML
-        > Yes
-            <input type="radio" name="team_assignment" value ="no" 
-HTML;
-    echo ($g_team_assignment===false)?'checked':'' ;
-    print <<<HTML
-            > No -->
-            <br />   
+            Is this a team assignment?:
+            <fieldset>
+            <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes" {$team_yes_checked}> Yes
+            <input type="radio" class="team_no" name="team_assignment" value ="no" {$team_no_checked}> No
+                <div class="team_assignment team_yes" id="team_date">
+                    <!--    
+                    <br />
+                    What is the <em style='color: orange;'><b>Team Finalization Date</b></em>? <input name="date_teams_final" id="date_teams_final" class="datepicker" type="text" style="cursor: auto; background-color: #FFF; width: 250px;">
+                    <br />
+                    -->
+                </div>
+                    
+                <div class="team_assignment team_no" id="team_no">
+                </div>
+            </fieldset>
+
             What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
             <fieldset>
@@ -1227,6 +1235,8 @@ HTML;
            }
         });
         
+        $('.team_assignment').hide();
+
         $('.gradeable_type_options').hide();
         
         if ($('input[name=gradeable_type]').is(':checked')){
@@ -1333,6 +1343,10 @@ HTML;
         if({$default_late_days} != -1){
             $('input[name=eg_late_days]').val('{$default_late_days}');
         }
+
+        if($('#team_yes_radio').is(':checked')){
+            $('#team_date').show();
+        }
         
         if($('#radio_electronic_file').is(':checked')){ 
             $('input[name=date_submit]').datetimepicker('setDate', createCrossBrowserJSDate("{$electronic_gradeable['eg_submission_open_date']}"));
@@ -1413,6 +1427,20 @@ HTML;
     if({$have_old}){
         $('#required_type').hide();
     }
+
+    // Shows the radio inputs dynamically
+    $('input:radio[name="team_assignment"]').change(
+    function(){
+        $('.team_assignment').hide();
+        if ($(this).is(':checked')){ 
+            if($(this).val() == 'yes'){ 
+                $('#team_date').show();
+            }
+            else if ($(this).val() == 'no'){ 
+                $('#team_no').show();
+            }
+        }
+    });
 
     // Shows the radio inputs dynamically
     $('input:radio[name="gradeable_type"]').change(

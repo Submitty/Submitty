@@ -237,7 +237,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   for (unsigned int i = 0; i < tc->size(); i++) {
 
     std::cout << "------------------------------------------\n";
-    TestCase my_testcase((*tc)[i]);
+    TestCase my_testcase((*tc)[i],config_json);
     std::string title = "Test " + std::to_string(i+1) + " " + (*tc)[i].value("title","MISSING TITLE");
     int points = (*tc)[i].value("points",0);
     std::cout << title << " - points: " << points << std::endl;
