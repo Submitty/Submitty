@@ -24,6 +24,9 @@ class GradeableAutocheck extends AbstractModel {
     
     /** @var String[] Message to show underneath the description for a diff */
     private $messages = array();
+
+    /** @var string Summary Message to show in the test case header */
+    private $summary_message = "";
     
     /**
      * GradeableAutocheck constructor.
@@ -44,6 +47,10 @@ class GradeableAutocheck extends AbstractModel {
             foreach ($details['messages'] as $message) {
                 $this->messages[] = Utils::prepareHtmlString($message);
             }
+        }
+
+        if (isset($details['summary_message'])) {
+            $this->summary_message = Utils::prepareHtmlString($details['summary_message']);
         }
         
         $actual_file = $expected_file = $difference_file = "";
@@ -90,5 +97,21 @@ class GradeableAutocheck extends AbstractModel {
      */
     public function hasMessages() {
       return (count($this->messages) > 0);
+    }
+
+    /**
+     * @return String
+     */
+    public function getFirstMessage() {
+        if ($this->hasMessages())
+            return $this->messages[0];
+        else return "";
+    }
+
+    /**
+     * @return string
+     */
+    public function getSummaryMessage() {
+        return $this->summary_message;
     }
 }

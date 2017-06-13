@@ -42,6 +42,9 @@ class GradeableTestcase extends AbstractModel {
         if (isset($testcase['title'])) {
             $this->name = Utils::prepareHtmlString($testcase['title']);
         }
+        if (isset($testcase['type'])) {
+            $this->name = Utils::prepareHtmlString($testcase['type']);
+        }
         if (isset($testcase['details'])) {
             $this->details = $testcase['details'];
         }
@@ -63,6 +66,10 @@ class GradeableTestcase extends AbstractModel {
                 $this->autochecks[] = new GradeableAutocheck($autocheck,
                                                              $this->core->getConfig()->getCoursePath(),
                                                              $result_path, $index);
+            }
+            foreach ($this->autochecks as $autocheck) {
+                if (($autocheck->hasMessages()) && $this->header_message === "") 
+                    $this->header_message = $autocheck->getFirstMessage();
             }
         }
         

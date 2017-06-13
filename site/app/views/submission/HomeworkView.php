@@ -607,7 +607,7 @@ HTML;
                         }
                         $command = htmlentities($testcase->getDetails());
                         $testcase_header = <<<HTML
-                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>
+                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}&nbsp;&nbsp;&nbsp;</code>
 HTML;
                         $flag = false;
                         $flag_std = false;
@@ -642,6 +642,8 @@ HTML;
 HTML;
                                     ///// setting flag true if any messages
                                     if ($autocheck->hasMessages()) $flag = true;
+                                    ///// here you can get message
+                                    $test_message = htmlentities($autocheck->getSummaryMessage());
                                     foreach ($autocheck->getMessages() as $message) {
                                         $testcase_body .= <<<HTML
                                 <span class="red-message">{$message}</span><br />
@@ -701,74 +703,6 @@ HTML;
                             $testcase_body .= <<<HTML
             </div>
 HTML;
-                        }
-
-                        ///// adding message feedback
-                        if (!$testcase->isHidden()) {
-                            ///// flag checking
-                            /*
-                            if ($flag === false) {
-                                $test_message .= "<span class='italics'><font color=\"#000000\">FLAG FALSE</font></span>";
-                            }
-                            else {
-                                $test_message .= "<span class='italics'><font color=\"#000000\">FLAG TRUE</font></span>";
-                            }
-                            */
-                            ///// each autocheck finished
-                            ///// README missing
-                            if (strpos($testcase->getName(),"README") && (!$flag)) {
-                                $test_message .= "<span class='italics'><font color=\"#006600\">README submitted.</font></span>";
-                            }
-                            ///// README submitted
-                            else if (strpos($testcase->getName(),"README")) {
-                                $test_message .= "<span class='italics'><font color=\"#c00000\">README missing.</font></span>";
-                            }
-
-                            ///// Compilation success, no messages
-                            else if (strpos($testcase->getName(),"Compilation") && ($testcase->getPointsAwarded() >= $testcase->getPoints()) && (!$flag)) {
-                                $test_message .= "<span class='italics'><font color=\"#006600\">Compilation Success.</font></span>";
-                            }
-                            ///// Compilation sucesss, some messages
-                            else if (strpos($testcase->getName(),"Compilation") && ($testcase->getPointsAwarded() >= $testcase->getPoints())) {
-                                $test_message .= "<span class='italics'><font color=\"#eac73d\">Compilation Success but with ERROR/WARNING. See output below.</font></span>";
-                            }
-                            ///// compilation failure, some messages
-                            else if (strpos($testcase->getName(),"Compilation")) {
-                                $test_message .= "<span class='italics'><font color=\"#c00000\">Compilation Failure. ERROR/WARNING. See output below.</font></span>";
-                            }
-
-                            ///// other test cases
-                            ///// normal test case with full points and output
-                            else if ((!$testcase->isExtraCredit()) && ($testcase->getPointsAwarded() >= $testcase->getPoints()) && ($flag_std)) {
-                                $test_message .= "<span class='italics'><font color=\"#006600\">Test Success. See output below.</font></span>";
-                            }
-                            ///// normal test case with full points and no output
-                            else if ((!$testcase->isExtraCredit()) && ($testcase->getPointsAwarded() >= $testcase->getPoints())) {
-                                $test_message .= "<span class='italics'><font color=\"#006600\">Test Success.</font></span>";
-                            }
-                            ///// partial points
-
-                            ///// failures
-                            else if (!$testcase->isExtraCredit() && ($flag)) {
-                                $test_message .= "<span class='italics'><font color=\"#c00000\">Test Failure. ERROR/WARNING. See output below.</font></span>";
-                            }
-                            else if (!$testcase->isExtraCredit()) {
-                                $test_message .= "<span class='italics'><font color=\"#c00000\">Test Failure. See output below.</font></span>";
-                            }
-
-                            ///// extra credit cases
-                            /*
-                            ///// extra credit failure
-                            else if ($testcase->isExtraCredit() && ($flag)) {
-                                $test_message .= "<span class='italics'><font color=\"#2d6987\">Test Failure. ERROR/WARNING. See output below.</font></span>";
-                            }
-                            else if (($testcase->isExtraCredit()) && ($flag_std)) {
-                                $test_message .= "<span class='italics'><font color=\"#2d6987\">Test Success. See output below.</font></span>";
-                            }
-                            else if ($testcase->isExtraCredit()) {
-                                $test_message .= "<span class='italics'><font color=\"#2d6987\">Test Success.</font></span>";
-                            }
-                            */
                         }
                         $testcase_body .= <<<HTML
         </div>
