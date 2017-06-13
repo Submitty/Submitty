@@ -269,6 +269,19 @@ class TestcaseWrapper:
             print ("FILENAME: ",filename)
             with open(filename, 'r') as fin:
                 print (fin.read())
+
+            filename=os.path.join(self.testcase_path,"log","test01_execute_logfile.txt")
+            print ("FILENAME: ",filename)
+            with open(filename, 'r') as fin:
+                print (fin.read())
+            filename=os.path.join(self.testcase_path,"log","test02_execute_logfile.txt")
+            print ("FILENAME: ",filename)
+            with open(filename, 'r') as fin:
+                print (fin.read())
+            filename=os.path.join(self.testcase_path,"log","test03_execute_logfile.txt")
+            print ("FILENAME: ",filename)
+            with open(filename, 'r') as fin:
+                print (fin.read())
             
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
             " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
