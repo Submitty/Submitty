@@ -23,6 +23,7 @@
 #include "TestCase.h"
 #include "execute.h"
 #include "error_message.h"
+#include "window_utils.h"
 
 
 #define DIR_PATH_MAX 1000
@@ -103,7 +104,12 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // for Network Programming
     { "timeout",                 "/usr/bin/timeout" },
     { "mpicc.openmpi",           "/usr/bin/mpicc.openmpi" },
-    { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" }
+    { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
+
+    // for graphics/window interaction
+    { "scrot",                   "/usr/bin/scrot"},
+    { "xdotool",                   "/usr/bin/xdotool"}
+
 
   };
 
@@ -694,6 +700,15 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
   }
   my_path = getenv("PATH");
+
+
+  char* my_display = getenv("DISPLAY");
+  if (my_display == NULL) {
+    setenv("DISPLAY", ":0", 1);
+  }
+  else {
+    std::cout << "WARNING: DISPLAY NOT EMPTY, DISPLAY= " << (my_display ? my_display : "<empty>") << std::endl;
+  }
   //std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
   // set the locale so that special characters (e.g., the copyright
@@ -803,12 +818,26 @@ void TerminateProcess(float &elapsed, int childPID) {
 
 
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, const std::string &execute_logfile,
+int execute(const std::string &cmd, 
+      const std::vector<std::string> actions,
+      const std::string &execute_logfile,
 	    const nlohmann::json &test_case_limits,
 	    const nlohmann::json &assignment_limits,
             const nlohmann::json &whole_config) {
 
+  bool window_mode = false; //Tells us if the process is expected to spawn a window. 
+  if(actions.size() > 0)
+  {
+    std::cout <<"Window mode activated." << std::endl;
+    char* my_display = getenv("DISPLAY");
+    if (my_display == NULL) {
+      setenv("DISPLAY", ":0", 1);
+    }
+    window_mode = true;
+  }
+
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
+  std::cout << "Recieved " << actions.size() << " actions" << std::endl;
 
   std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
 
@@ -857,41 +886,59 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
         int status;
         pid_t wpid = 0;
         float next_checkpoint = 0;
-	int rss_memory = 0;
+        std::string windowName; 
+	      int rss_memory = 0;
+        int actions_taken = 0;   
+        int number_of_screenshots = 0;
 
         do {
-            wpid = waitpid(childPID, &status, WNOHANG);
-            if (wpid == 0) {
-	      // allow 10 extra seconds for differences in wall clock
-	      // vs CPU time (imperfect solution)
-	      
-	      if (elapsed > seconds_to_run + 10) {
-		// terminate for excessive time
-		std::cout << "Killing child process " << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
-		TerminateProcess(elapsed,childPID);
-		time_kill=1;
-	      }
-	      
-	      if (rss_memory > allowed_rss_memory) {
-		// terminate for excessive memory usage (RSS = resident set size = RAM)
-		std::cout << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
-		TerminateProcess(elapsed,childPID);
-		memory_kill=1;
-	      } 
-
-	      // monitor time & memory usage
-	      if (!time_kill && !memory_kill) {
-		// sleep 1/10 of a second
-		usleep(100000);
-		elapsed+= 0.1;
-	      }
-	      if (elapsed >= next_checkpoint) {
-		rss_memory = resident_set_size(childPID);
-		std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
-		next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
-	      }
-
+            if(window_mode && windowName == "")
+            {
+              usleep(3000000);
+              initialize_window(windowName, childPID);
+              if(windowName != "")
+              {
+                std::ostringstream command_stream;
+                int height = get_window_data("Height", windowName)[0];
+                int width = get_window_data("Width", windowName)[0];
+                int xStart = get_window_data("Absolute upper-left X", windowName)[0]; //These values represent the upper left corner
+                int yStart = get_window_data("Absolute upper-left Y", windowName)[0]; 
+                int middle_x = xStart + width/2;
+                int middle_y = yStart+height/2;
+                command_stream << "wmctrl -R " << windowName << " &&  xdotool mousemove --sync "
+                        << middle_x << " " << middle_y; 
+                system(command_stream.str().c_str());
+                std::cout << "We found the window " << windowName << std::endl;
+              }
             }
+            wpid = waitpid(childPID, &status, WNOHANG);
+            if (wpid == 0) 
+            {
+              // monitor time & memory usage
+              if (!time_kill && !memory_kill) 
+              {
+                  // sleep 1/10 of a second
+                if(actions_taken < actions.size() && windowName != "") //if we still have actions (keyboard events, etc.) to give the child
+                {
+                  float delayTime = takeAction(actions, actions_taken, number_of_screenshots, windowName); //returns delaytime
+                  if(delayTime == 0)
+                  {
+                    delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
+                      rss_memory, allowed_rss_memory, memory_kill, time_kill);
+                  }
+                  else
+                  {
+                    delay_and_mem_check(delayTime, childPID, elapsed, next_checkpoint, seconds_to_run, 
+                    rss_memory, allowed_rss_memory, memory_kill, time_kill);
+                  }
+                }
+                else
+                {
+                  delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
+                    rss_memory, allowed_rss_memory, memory_kill, time_kill);
+                }
+              }
+           }
 
 
         } while (wpid == 0);
@@ -932,7 +979,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 	  logfile << "Program Terminated" << std::endl;
 	  result=3;
         }
-        if (time_kill){
+        if (memory_kill){
 	  logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
 	  logfile << "Program Terminated" << std::endl;
 	  result=3;
@@ -948,3 +995,82 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 
 // =====================================================================================
 // =====================================================================================
+
+
+//++++++++++++++++++++++++++++++++=ADDED=++++++++++++++++++++++++++
+
+bool memory_ok(int rss_memory, int allowed_rss_memory)
+{
+  if(rss_memory > allowed_rss_memory)
+  {
+      return false;
+  }
+  else
+  {
+      return true;
+  }
+}
+
+bool time_ok(float elapsed, float seconds_to_run)
+{
+  // allow 10 extra seconds for differences in wall clock
+  // vs CPU time (imperfect solution)
+  if(elapsed > seconds_to_run + 10.0f)
+  {
+      return false;
+  }
+  else
+  {
+      return true;
+  }
+}
+
+//returns true on kill order. 
+bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &elapsed, float& next_checkpoint, 
+  float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill)
+{
+  float time_left = sleep_time_in_microseconds;
+  while(time_left > 0)
+  {
+    if(time_left > 100000)
+    {
+      time_left -= 100000;
+      usleep(100000); //.1 seconds
+      elapsed += .1;
+    }
+    else
+    {
+      usleep(time_left);
+      elapsed+=time_left/1000000.0f; //convert to seconds
+      time_left = 0.0f;
+    }
+    if (elapsed >= next_checkpoint) 
+    {
+      rss_memory = resident_set_size(childPID);
+      //std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
+      next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
+    }
+
+    if (elapsed >= next_checkpoint) {
+        rss_memory = resident_set_size(childPID);
+        next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
+    }
+    if (!time_ok(elapsed, seconds_to_run)) {
+      // terminate for excessive time
+      std::cout << "Killing child process " << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
+      TerminateProcess(elapsed,childPID);
+      time_kill=1;
+      return true;
+    }
+
+    if (!memory_ok(rss_memory, allowed_rss_memory)) 
+    {
+      // terminate for excessive memory usage (RSS = resident set size = RAM)
+      memory_kill=1;
+      TerminateProcess(elapsed,childPID);
+      std::cout << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
+      return true;
+    } 
+  }
+  return false;
+}
