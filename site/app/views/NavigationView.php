@@ -277,9 +277,9 @@ HTML;
                     	}                    	
 						$points_percent = $points_percent * 100;
 						if ($points_percent > 100) { $points_percent = 100; }
-                        //prints out the button if $points_percent >= 50%
-						if ($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() != 0 && $g_data->getActiveVersion() >= 1
-							&& $title_save == "CLOSED" && $points_percent >= 50) {
+                        //prints out the button if $points_percent >= 50% or if there is no autograding points
+						if (($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() != 0 && $g_data->getActiveVersion() >= 1
+							&& $title_save == "CLOSED" && $points_percent >= 50) || ($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() == 0 && $g_data->getActiveVersion() >= 1)) {
 						$gradeable_open_range = <<<HTML
                  <button class="btn btn-default" style="width:100%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">
                      {$button_text}
@@ -343,7 +343,7 @@ HTML;
 								if ($g_data->getGradedNonHiddenPoints() == 0) {
 									$gradeable_open_range .= <<<HTML
 									<div class="meter2">
-	  								<span style="width: 0.5%"></span>
+	  								<span style="width: 2%"></span>
 									</div>					 
 HTML;
 								} 
