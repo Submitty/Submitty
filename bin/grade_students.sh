@@ -49,7 +49,7 @@ fi
 SUBMITTY_INSTALL_DIR=__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__
 SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
 
-SVN_PATH=__INSTALL__FILLIN__SVN_PATH__
+# SVN_PATH=__INSTALL__FILLIN__SVN_PATH__
 
 AUTOGRADING_LOG_PATH=__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__
 
@@ -427,7 +427,7 @@ function grade_this_item {
     # use the jq json parsing command line utility to grab the svn_checkout flag from the config file
     json_config="$SUBMITTY_DATA_DIR/courses/$semester/$course/config/form/form_${gradeable}.json"
     step=`cat ${json_config} | jq .upload_type`
-    if [ "$step" == "\"Repository\"" ]; then svn_checkout=true; else svn_checkout=false; fi
+    # if [ "$step" == "\"Repository\"" ]; then svn_checkout=true; else svn_checkout=false; fi
 
     # also save the due date
     global_gradeable_deadline=`cat ${json_config} | jq .date_due`
@@ -437,18 +437,18 @@ function grade_this_item {
     # if this homework is submitted by svn, use the date/time from
     # the .submit.timestamp file and checkout the version matching
     # that date/time from the svn server
-    if [ "$svn_checkout" == true ]
-    then
+    # if [ "$svn_checkout" == true ]
+    # then
 
         # grab the svn subdirectory (if any) from the config file
-        svn_subdirectory=`cat ${json_config} | jq .subdirectory`
-        if [ $svn_subdirectory == "null" ]
-        then
-            svn_subdirectory=""
-        else
+    #     svn_subdirectory=`cat ${json_config} | jq .subdirectory`
+    #     if [ $svn_subdirectory == "null" ]
+    #     then
+    #         svn_subdirectory=""
+    #     else
             # remove double quotes from the value
-            svn_subdirectory=${svn_subdirectory//\"/}
-        fi
+    #         svn_subdirectory=${svn_subdirectory//\"/}
+    #     fi
 
         ##############
         # SVN documentation
@@ -460,33 +460,33 @@ function grade_this_item {
         # svn co svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600/USERNAME
         #
         # -r specifies which version to checkout (by timestamp)
-	# BUT... we want to use the @ syntax.  often -r and @ are the
-	# same, but if a student has renamed a directory and then
-	# recreated it, -r and @ are different.  FIXME: Look up the
-	# documentation and improve this comment.
-	#
+        # BUT... we want to use the @ syntax.  often -r and @ are the
+        # same, but if a student has renamed a directory and then
+        # recreated it, -r and @ are different.  FIXME: Look up the
+        # documentation and improve this comment.
+        #
         ##############
 
         # first, clean out all of the old files if this is a re-run
-        rm -rf "$checkout_path"
+    #     rm -rf "$checkout_path"
 
         # svn checkout into the archival directory
-        mkdir -p $checkout_path
-        pushd $checkout_path > /dev/null
-        svn co $SVN_PATH/$who/$svn_subdirectory@{"$submission_time"} . > $tmp/results_log_svn_checkout.txt 2>&1
-        popd > /dev/null
+    #     mkdir -p $checkout_path
+    #     pushd $checkout_path > /dev/null
+    #     svn co $SVN_PATH/$who/$svn_subdirectory@{"$submission_time"} . > $tmp/results_log_svn_checkout.txt 2>&1
+    #     popd > /dev/null
 
         # copy checkout into tmp compilation directory
-        rsync 1>/dev/null  2>&1  -r $checkout_path/ $tmp_compilation || log_error "$NEXT_TO_GRADE" "Failed to copy checkout files into compilation directory: rsync -r $checkout_path/ $tmp_compilation"
+    #     rsync 1>/dev/null  2>&1  -r $checkout_path/ $tmp_compilation || log_error "$NEXT_TO_GRADE" "Failed to copy checkout files into compilation directory: rsync -r $checkout_path/ $tmp_compilation"
 
-        svn_checkout_error_code="$?"
-        if [[ "$svn_checkout_error_code" -ne 0 ]] ;
-        then
-            log_error "$NEXT_TO_GRADE" "SVN CHECKOUT FAILURE $svn_checkout_error_code"
-        else
-            echo "SVN CHECKOUT OK"
-        fi
-    fi
+    #     svn_checkout_error_code="$?"
+    #     if [[ "$svn_checkout_error_code" -ne 0 ]] ;
+    #     then
+    #         log_error "$NEXT_TO_GRADE" "SVN CHECKOUT FAILURE $svn_checkout_error_code"
+    #     else
+    #         echo "SVN CHECKOUT OK"
+    #     fi
+    # fi
 
     # copy any instructor provided code files to tmp compilation directory
     if [ -d "$test_code_path" ]
