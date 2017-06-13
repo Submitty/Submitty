@@ -21,6 +21,9 @@ class ReportController extends AbstractController {
             case 'summary':
                 $this->showGradeSummary();
                 break;
+            case 'hw-generate':
+                $this->generateHWReports();
+                break;
             default:
                 $this->core->getOutput()->showError("Invalid action request for controller ".get_class($this));
                 break;
@@ -36,6 +39,10 @@ class ReportController extends AbstractController {
     }
     
     public function showGradeSummary() {
+        
+    }
+    
+    public function generateHWReports() {
         
     }
 }
