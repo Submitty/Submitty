@@ -249,6 +249,8 @@ function grade_this_item {
     gradeable=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .gradeable| tr -d '"'`
     user=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .user | tr -d '"'`
     team=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .team | tr -d '"'`
+    who=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .who | tr -d '"'`
+    is_team=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .is_team | tr -d '"'`
     version=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .version | tr -d '"'`
 
     # error checking (make sure nothing is null)
@@ -267,14 +269,24 @@ function grade_this_item {
 	echo "ERROR IN GRADEABLE: $NEXT_TO_GRADE" >&2
 	return
     fi
-    if [ -z "$user" ]
+#    if [ -z "$user" ]
+#    then
+#	echo "ERROR IN USER: $NEXT_TO_GRADE" >&2
+#	return
+#    fi
+#    if [ -z "$team" ]
+#    then
+#	echo "ERROR IN TEAM: $NEXT_TO_GRADE" >&2
+#	return
+#    fi
+    if [ -z "$who" ]
     then
-	echo "ERROR IN USER: $NEXT_TO_GRADE" >&2
+	echo "ERROR IN WHO: $NEXT_TO_GRADE" >&2
 	return
     fi
-    if [ -z "$team" ]
+    if [ -z "$is_team" ]
     then
-    echo "ERROR IN TEAM: $NEXT_TO_GRADE" >&2
+        echo "ERROR IN IS_TEAM: $NEXT_TO_GRADE" >&2
     return
     fi
     if [ -z "$version" ]
@@ -286,7 +298,7 @@ function grade_this_item {
 
     # --------------------------------------------------------------------
     # check to see if directory exists & is readable
-    submission_path=$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$gradeable/$user/$version
+    submission_path=$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$gradeable/$who/$version
 
     if [ ! -d "$SUBMITTY_DATA_DIR" ]
     then
@@ -338,14 +350,14 @@ function grade_this_item {
 	return
     fi
 
-    if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$gradeable/$user" ]
+    if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$gradeable/$who" ]
     then
-	echo "ERROR: F directory does not exist '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$gradeable/$user'" >&2
+	echo "ERROR: F directory does not exist '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$gradeable/$who'" >&2
 	return
     fi
-    if [ ! -r "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$gradeable/$user" ]
+    if [ ! -r "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$gradeable/$who" ]
     then
-	echo "ERROR: G directory is not readable '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$gradeable/$user'" >&2
+	echo "ERROR: G directory is not readable '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$gradeable/$who'" >&2
 	return
     fi
 
@@ -370,8 +382,8 @@ function grade_this_item {
     test_code_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_code/$gradeable"
     test_input_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_input/$gradeable"
     test_output_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_output/$gradeable"
-    checkout_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/checkout/$gradeable/$user/$version"
-    results_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$user/$version"
+    checkout_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/checkout/$gradeable/$who/$version"
+    results_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
     bin_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/bin"
 
 
@@ -461,7 +473,7 @@ function grade_this_item {
         # svn checkout into the archival directory
         mkdir -p $checkout_path
         pushd $checkout_path > /dev/null
-        svn co $SVN_PATH/$user/$svn_subdirectory@{"$submission_time"} . > $tmp/results_log_svn_checkout.txt 2>&1
+        svn co $SVN_PATH/$who/$svn_subdirectory@{"$submission_time"} . > $tmp/results_log_svn_checkout.txt 2>&1
         popd > /dev/null
 
         # copy checkout into tmp compilation directory
@@ -499,8 +511,8 @@ function grade_this_item {
 	chmod -R go+rwx $tmp
 
 	# run the compile.out as the untrusted user
-	echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$gradeable" "$user" "$version" "$submission_time" >& $tmp/results_log_compile.txt'
-	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$gradeable" "$user" "$version" "$submission_time" >& $tmp/results_log_compile.txt
+	#echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$gradeable" "$who" "$version" "$submission_time" >& $tmp/results_log_compile.txt'
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$gradeable" "$who" "$version" "$submission_time" >& $tmp/results_log_compile.txt
 
 	compile_error_code="$?"
 	if [[ "$compile_error_code" -ne 0 ]] ;
@@ -561,8 +573,8 @@ function grade_this_item {
 	chmod -Rf go-x *.txt
 
 	# run the run.out as the untrusted user
-	echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$gradeable" "$user" "$version" "$submission_time" >& results_log_runner.txt'
-	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$gradeable" "$user" "$version" "$submission_time" >& results_log_runner.txt
+	#echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$gradeable" "$who" "$version" "$submission_time" >& results_log_runner.txt'
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$gradeable" "$who" "$version" "$submission_time" >& results_log_runner.txt
 	runner_error_code="$?"
 
 	# change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
@@ -605,17 +617,17 @@ function grade_this_item {
 
 	#FIXME: do we still need valgrind here?
         if [[ 0 -eq 0 ]] ; then
-            echo "$bin_path/$gradeable/validate.out" "$gradeable" "$user" "$version" "$submission_time"  >& results_log_validator.txt
-            "$bin_path/$gradeable/validate.out" "$gradeable" "$user" "$version" "$submission_time"  >& results_log_validator.txt
+            echo "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time"  >& results_log_validator.txt
+            "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time"  >& results_log_validator.txt
         else
-            echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/valgrind "$bin_path/$gradeable/validate.out" "$gradeable" "$user" "$version" "$submission_time"  >& results_log_validator.txt'
-            "$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" " "/usr/bin/valgrind" "$bin_path/$gradeable/validate.out" "$gradeable" "$user" "$version" "$submission_time"  >& results_log_validator.txt
+            echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/valgrind "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time"  >& results_log_validator.txt'
+            "$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" " "/usr/bin/valgrind" "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time"  >& results_log_validator.txt
         fi
 
 	validator_error_code="$?"
 	if [[ "$validator_error_code" -ne 0 ]] ;
 	then
-	    log_error "$NEXT_TO_GRADE" "VALIDATOR FAILURE CODE $validator_error_code  course=$course  hw=$gradeable  user=$user  version=$version"
+	    log_error "$NEXT_TO_GRADE" "VALIDATOR FAILURE CODE $validator_error_code  course=$course  hw=$gradeable  who=$who  version=$version"
 	else
 	    echo "VALIDATOR OK"
 	fi
@@ -859,9 +871,9 @@ while true; do
         "${gradeable}" \
         "${user}" \
         "${team}" \
-        ${version}
-
-    echo "${team}"
+        "${who}" \
+        "${is_team}" \
+        "${version}"
 
 	echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
 

@@ -125,14 +125,18 @@ class SubmissionController extends AbstractController {
         }
 
         $user_id = $this->core->getUser()->getId();
+        $who_id = $user_id;
+        $team_id = "";
         if ($gradeable->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
             if ($team !== null) {
-                $user_id = $team->getId();
+                $team_id = $team->getId();
+                $who_id = $team_id;
+                $user_id = "";
             }
         }
         
-        $user_path = FileUtils::joinPaths($gradeable_path, $user_id);
+        $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
         $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
                 return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
@@ -376,7 +380,7 @@ class SubmissionController extends AbstractController {
         }
 
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-            $gradeable->getId(), $user_id, $new_version);
+            $gradeable->getId(), $who_id, $new_version);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
             implode("__", $queue_file));
 
@@ -386,7 +390,9 @@ class SubmissionController extends AbstractController {
                                 "course" => $this->core->getConfig()->getCourse(),
                                 "gradeable" =>  $gradeable->getId(),
                                 "user" => $user_id,
-                                "team" => "yes",
+                                "team" => $team_id,
+                                "who" => $who_id,
+                                "is_team" => True,
                                 "version" => $new_version);
         }
         else {
@@ -394,7 +400,9 @@ class SubmissionController extends AbstractController {
                                 "course" => $this->core->getConfig()->getCourse(),
                                 "gradeable" =>  $gradeable->getId(),
                                 "user" => $user_id,
-                                "team" => "no",
+                                "team" => $team_id,
+                                "who" => $who_id,
+                                "is_team" => False,
                                 "version" => $new_version);
         }
         
@@ -404,7 +412,7 @@ class SubmissionController extends AbstractController {
         }
 
         if($gradeable->isTeamAssignment()) {
-            $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $user_id, $new_version, $current_time);
+            $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
