@@ -17,7 +17,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
      protected $g_title;
      protected $g_instructions_url;
      protected $g_overall_ta_instr;
-     protected $g_use_teams;
+     protected $g_team_assignment;
      protected $g_gradeable_type;
      protected $g_min_grading_group;
      protected $g_grade_by_registration;
@@ -31,7 +31,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
          $this->g_title = $params['gradeable_title'];
          $this->g_instructions_url = $params['instructions_url'];
          $this->g_overall_ta_instr = $params['ta_instructions'];
-         $this->g_use_teams = $params['team_assignment'];
+         $this->g_team_assignment = $params['team_assignment'];
          $this->g_gradeable_type = $params['gradeable_type'];
          $this->g_min_grading_group= $params['min_grading_group'];
          $this->g_grade_by_registration = $params['section_type'];
@@ -45,7 +45,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
       * @param \lib\Database $db
       */
     function updateGradeable($db){
-        $params = array($this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, $this->g_gradeable_type,
+        $params = array($this->g_title, $this->g_overall_ta_instr, $this->g_team_assignment, $this->g_gradeable_type,
                         $this->g_grade_by_registration, $this->g_grade_start_date, $this->g_grade_released_date,
                         $this->g_syllabus_bucket, $this->g_min_grading_group, $this->g_instructions_url,
                         $this->g_ta_view_start_date , $this->g_id);
@@ -63,7 +63,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
             $this->g_title,
             $this->g_instructions_url,
             $this->g_overall_ta_instr,
-            $this->g_use_teams,
+            $this->g_team_assignment,
             $this->g_gradeable_type,
             $this->g_grade_by_registration,
             $this->g_ta_view_start_date,
@@ -343,7 +343,7 @@ function constructGradeable ($db, $request_args){
     $g_title = $request_args['gradeable_title'];
     $g_instructions_url = $request_args['instructions_url'];
     $g_overall_ta_instr = $request_args['ta_instructions'];
-    $g_use_teams = (isset($request_args['team_assignment']) && $request_args['team_assignment'] === 'yes') ? "true" : "false";
+    $g_team_assignment = (isset($request_args['team_assignment']) && $request_args['team_assignment'] === 'yes') ? "true" : "false";
     $g_min_grading_group=(isset($request_args['minimum_grading_group'])) ? intval($request_args['minimum_grading_group']) : 1;
     $g_grade_by_registration = (isset($request_args['section_type']) && $request_args['section_type'] === 'reg_section') ? "true" : "false";
     $g_ta_view_start_date = $request_args['date_ta_view'];
@@ -356,7 +356,7 @@ function constructGradeable ($db, $request_args){
         'gradeable_title' => $g_title,
         'instructions_url' => $g_instructions_url,
         'ta_instructions' => $g_overall_ta_instr,
-        'team_assignment' => $g_use_teams,
+        'team_assignment' => $g_team_assignment,
         'min_grading_group' => $g_min_grading_group,
         'section_type' => $g_grade_by_registration,
         'date_grade' => $g_grade_start_date,
