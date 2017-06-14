@@ -95,10 +95,10 @@ class Gradeable extends AbstractModel {
     protected $ta_grading = false;
     protected $questions = array();
 
-    /* Config variables that are only for checkpoints */ // NOT USED IN NEW SYSTEM?
+    /* Config variables that are only for checkpoints */
     protected $checkpoints = array();
 
-    /* Config variables that are only for numeric/text types */ // NOT USED IN NEW SYSTEM?
+    /* Config variables that are only for numeric/text types */
     protected $numerics = array();
     protected $texts = array();
 

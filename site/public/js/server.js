@@ -457,16 +457,7 @@ $(function() {
     setupCheckboxCells();
 });
 
-
-
-
-
-
-
-
-
 function setupNumericTextCells() {
-
     $("input[class=option-small-box]").keydown(function(key){
         var cell=this.id.split('-');
         if(key.keyCode === 39){
@@ -487,8 +478,6 @@ function setupNumericTextCells() {
             $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
         }
     });
-
-
 
     $("input[class=option-small-box]").change(function() {
         elem = this;

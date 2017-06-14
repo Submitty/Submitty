@@ -480,9 +480,6 @@ table tr.table-header {
     width: 95%;
 }
 
-.option-small-input {
-}
-
 .option-small-input > textarea,
 .option-small-input > input[type="text"] {
     width: 99%;
@@ -490,10 +487,10 @@ table tr.table-header {
     padding-left: 1px;
 }
 
-/*.option-small-output > textarea,*/
 .option-small-output > input[type="text"] {
     width: 99%;
-    padding: 1px;
+    padding-right: 1px;
+    padding-left: 1px;
     border:none;
     background: transparent;
 }

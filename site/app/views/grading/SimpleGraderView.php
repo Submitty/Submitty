@@ -63,6 +63,7 @@ HTML;
     </div>
 HTML;
 
+
         if(isset($_GET['view']) && $_GET['view'] == 'all'){
             $view = 'all';
         }
@@ -97,7 +98,7 @@ HTML;
         if($action == 'lab'){
             foreach ($gradeable->getComponents() as $component) {
                 $return .= <<<HTML
-                <td>{$component->getTitle()}</td>
+                <td width="100">{$component->getTitle()}</td>
 HTML;
             }
         }
@@ -138,6 +139,7 @@ HTML;
         </thead>
         <tbody>
 HTML;
+
         $count = 1;
         $row = 0;
         $last_section = false;
@@ -266,8 +268,6 @@ HTML;
                     }
                 }
             }
-
-
             $return .= <<<HTML
             </tr>
 HTML;
