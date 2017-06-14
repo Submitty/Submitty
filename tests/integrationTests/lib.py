@@ -187,11 +187,8 @@ class TestcaseWrapper:
         with open(os.path.join(self.testcase_path, "log", "make_output.txt"), "w") as make_output:
             return_code = subprocess.call(["make"],
                     cwd=os.path.join(self.testcase_path, "build"), stdout=make_output, stderr=make_output)
-            # helpful for debugging make errors on travis
-            #filename=os.path.join(self.testcase_path, "log", "make_output.txt")
-            #with open(filename, 'r') as fin:
-            #    print (fin.read())
             if return_code != 0:
+                debug_print("log/make_output.txt")
                 raise RuntimeError("Build (make) exited with exit code " + str(return_code))
 
 
@@ -264,31 +261,22 @@ class TestcaseWrapper:
             raise RuntimeError("ARGUMENT "+arg+" TO DIFF NOT TESTED")
         out, err = process.communicate()
         if process.returncode == 1:
-
-            filename=os.path.join(self.testcase_path,"log","run_output.txt")
-            print ("FILENAME: ",filename)
+            debug_print("log/run_output.txt")
+            raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
+                               " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
+        
+        
+    # helpful for debugging make errors on travis
+    def debug_print(self,f):
+        filename=os.path.join(self.testcase_path,f)
+        print ("\nDEBUG_PRINT: ",filename)
+        if os.path.exists(filename):
             with open(filename, 'r') as fin:
                 print (fin.read())
+        else:
+            print ("  < file does not exist >")
 
-            filename=os.path.join(self.testcase_path,"log","test01_execute_logfile.txt")
-            if os.path.exists(filename):
-                print ("FILENAME: ",filename)
-                with open(filename, 'r') as fin:
-                    print (fin.read())
-            filename=os.path.join(self.testcase_path,"log","test02_execute_logfile.txt")
-            if os.path.exists(filename):
-                print ("FILENAME: ",filename)
-                with open(filename, 'r') as fin:
-                    print (fin.read())
-            filename=os.path.join(self.testcase_path,"log","test03_execute_logfile.txt")
-            if os.path.exists(filename):
-                print ("FILENAME: ",filename)
-                with open(filename, 'r') as fin:
-                    print (fin.read())
             
-            raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
-            " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
-
     # Loads 2 files, truncates them after specified number of lines,
     # and then checks to see if they match
     def diff_truncate(self, num_lines_to_compare, f1, f2=""):
