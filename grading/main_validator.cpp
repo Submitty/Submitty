@@ -61,8 +61,8 @@ bool ShowHelper(const std::string& when, bool success) {
 }
 
 
-double ValidateGrader(const TestCase &my_testcase, int which_grader, 
-                      nlohmann::json &autocheck_js, const std::string &hw_id, std::string &testcase_message) {
+double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::json &autocheck_js, 
+                      const std::string &hw_id, std::string &testcase_message) {
 
   //std::cerr << "----------------------------------------" << std::endl;
   std::cerr << "autocheck #" << which_grader << std::endl;
@@ -244,8 +244,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
           testcase_message = "ERROR.";
       }
     }
-  } 
-
+  }
   return score;
 }
 
