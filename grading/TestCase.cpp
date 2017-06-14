@@ -337,6 +337,8 @@ bool validShowValue(const nlohmann::json& v) {
 TestCase::TestCase (nlohmann::json& input,const nlohmann::json &whole_config) : _json(input) {
   test_case_id = next_test_case_id;
   next_test_case_id++;
+  /////
+  summary_message = "";
   General_Helper();
 
   if (isFileCheck()) {

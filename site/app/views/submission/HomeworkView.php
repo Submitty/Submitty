@@ -520,7 +520,7 @@ HTML;
         </div>
 HTML;
                     }
-                    ///// START FOR EACH TEST CASE
+
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
                     foreach ($gradeable->getTestcases() as $testcase) {
@@ -599,53 +599,59 @@ HTML;
                 <div class="no-badge"></div>
 HTML;
                         }
-                        ///// the testcase header
                         $name = htmlentities($testcase->getName());
-                        $test_message = "";
+                        $extra_credit = "";
                         if($testcase->isExtraCredit()) {
-                          $test_message .= "<span class='italics'><font color=\"#2d6987\">Extra Credit</font></span>";
+                          $extra_credit = "<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
                         }
                         $command = htmlentities($testcase->getDetails());
-                        $testcase_header = <<<HTML
-                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}&nbsp;&nbsp;&nbsp;</code>
+                        $testcase_message = "";
+                        if (!$testcase->isHidden()) {
+                            $color = "000000";
+                            /*
+                            if (strpos($testcase->getTestcaseMessage(), "ERROR") !== false)
+                                $color = "c00000";
+                            else if (strpos($testcase->getTestcaseMessage(), "WARNING") !== false)
+                                $color = "eac73d";
+                            */
+                            if ((strpos($testcase->getTestcaseMessage(), "ERROR") !== false) || (strpos($testcase->getTestcaseMessage(), "WARNING") !== false))
+                                $color = "c00000";
+                            $testcase_message = <<<HTML
+                        <span class='italics'><font color={$color}>{$testcase->getTestcaseMessage()}</font></span>
 HTML;
-                        $flag = false;
-                        $flag_std = false;
-                        $testcase_body = "";
-                        ///// each testcase testing
+                        }
+                        $return .= <<<HTML
+                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}&nbsp;&nbsp;{$testcase_message}</h4>
+            </div>
+HTML;
                         if ($testcase->hasDetails()) {
-                            $testcase_body .= <<<HTML
+                            $return .= <<<HTML
             <div id="testcase_{$count}" style="display: {$display_box};">
 HTML;
                             if (!$testcase->isHidden()) {
                                 $autocheck_cnt = 0;
                                 $autocheck_len = count($testcase->getAutochecks());
-                                //// performing each autocheck
                                 foreach ($testcase->getAutochecks() as $autocheck) {
                                     $description = $autocheck->getDescription();
                                     $diff_viewer = $autocheck->getDiffViewer();
 
-                                    $testcase_body .= <<<HTML
+                                    $return .= <<<HTML
                 <div class="box-block">
 HTML;
 
                                     $title = "";
-                                    $testcase_body .= <<<HTML
+                                    $return .= <<<HTML
                             <div class='diff-element'>
 HTML;
                                     if ($diff_viewer->hasDisplayExpected()) {
                                         $title = "Student ";
                                     }
                                     $title .= $description;
-                                    $testcase_body .= <<<HTML
+                                    $return .= <<<HTML
                                 <h4>{$title}</h4>
 HTML;
-                                    ///// setting flag true if any messages
-                                    if ($autocheck->hasMessages()) $flag = true;
-                                    ///// here you can get message
-                                    $test_message = htmlentities($autocheck->getSummaryMessage());
                                     foreach ($autocheck->getMessages() as $message) {
-                                        $testcase_body .= <<<HTML
+                                        $return .= <<<HTML
                                 <span class="red-message">{$message}</span><br />
 HTML;
                                     }
@@ -660,62 +666,53 @@ HTML;
                                            // Format the image SRC:  data:{mime};base64,{data};
                                            $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
                                            // insert the sample image data
-                                           $testcase_body .= '<img src="'.$myimagesrc.'">';
+                                           $return .= '<img src="'.$myimagesrc.'">';
                                         }
                                     }
                                     else if ($diff_viewer->hasDisplayActual()) {
-                                        $flag_std = true;
-                                        $testcase_body .= <<<HTML
+                                        $return .= <<<HTML
                                 {$diff_viewer->getDisplayActual()}
 HTML;
                                     }
-                                    $testcase_body .= <<<HTML
+                                    $return .= <<<HTML
                             </div>
 HTML;
 
                                     if ($diff_viewer->hasDisplayExpected()) {
-                                        $flag_std = true;
-                                        $testcase_body .= <<<HTML
+                                        $return .= <<<HTML
                             <div class='diff-element'>
                                 <h4>Expected {$description}</h4>
 HTML;
                                         for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
-                                            $testcase_body .= <<<HTML
+                                            $return .= <<<HTML
                                 <br />
 HTML;
                                         }
-                                        $testcase_body .= <<<HTML
+                                        $return .= <<<HTML
                                 {$diff_viewer->getDisplayExpected()}
                             </div>
 HTML;
                                     }
 
-                                    $testcase_body .= <<<HTML
+                                    $return .= <<<HTML
                 </div>
 HTML;
                                     if (++$autocheck_cnt < $autocheck_len) {
-                                        $testcase_body .= <<<HTML
+                                        $return .= <<<HTML
                 <div class="clear"></div>
 HTML;
                                     }
                                 }
                             }
-                            $testcase_body .= <<<HTML
+                            $return .= <<<HTML
             </div>
 HTML;
                         }
-                        $testcase_body .= <<<HTML
+                        $return .= <<<HTML
         </div>
 HTML;
                         $count++;
-                        $testcase_header .= <<<HTML
-                        &nbsp;&nbsp;{$test_message}</h4>
-        </div>
-HTML;
-                        ///// combine the header and body for each
-                        $return .= $testcase_header;
-                        $return .= $testcase_body;
-                    } ///// end of for loop for each testcase
+                    }
                 }
                 $return .= <<<HTML
     </div>

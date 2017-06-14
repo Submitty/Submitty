@@ -61,8 +61,8 @@ bool ShowHelper(const std::string& when, bool success) {
 }
 
 
-double ValidateGrader(const TestCase &my_testcase, int which_grader,
-                      nlohmann::json &autocheck_js, const std::string &hw_id) {
+double ValidateGrader(const TestCase &my_testcase, int which_grader, 
+                      nlohmann::json &autocheck_js, const std::string &hw_id, std::string &testcase_message) {
 
   //std::cerr << "----------------------------------------" << std::endl;
   std::cerr << "autocheck #" << which_grader << std::endl;
@@ -191,16 +191,6 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
       }
     }
 
-    ///// customize main message
-    if (my_testcase.isFileCheck() && messages.size() > 0)
-      autocheck_j["summary_message"] = messages[0];
-    else if (my_testcase.isFileCheck())
-      autocheck_j["summary_message"] = "Required files exist.";
-    else if (my_testcase.isCompilation() && messages.size() > 0)
-      autocheck_j["summary_message"] = messages[messages.size()-1];
-    else
-      autocheck_j["summary_message"] = "not yet written oopers";
-
     std::cout << "AUTOCHECK GRADE " << grade << std::endl;
     int num_messages = 0;
     if (autocheck_j.find("messages") != autocheck_j.end()) {
@@ -208,12 +198,54 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
       assert (num_messages > 0);
     }
 
+    /*
+    if (my_testcase.isFileCheck() && testcase_message == "")
+      testcase_message = "Required files present.";
+    if (my_testcase.isCompilation() && testcase_message == "")
+      testcase_message = "Compilation successful."
+    else if (my_testcase.isExecution() && testcase_message == "")
+      testcase_message = "Test successful.";
+    */
+
     if ((show_message && num_messages > 0)
         || show_actual 
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
+      // setting testcase_message
+      if (my_testcase.isFileCheck()) {
+        // some file missing
+        if (num_messages > 0)
+          testcase_message = "ERROR: Required files missing.";
+        else
+          testcase_message = "Required files present.";
+      }
+      // do not change message if error message already set
+      else if (my_testcase.isCompilation() && (testcase_message.find("ERROR") == std::string::npos)) {
+        // warning already happened, there are multiple problems now
+        if ((testcase_message.find("WARNING") != std::string::npos) && num_messages > 0)
+          testcase_message = "ERROR: Click to see details.";
+        else if (num_messages > 0)
+          testcase_message = "WARNING: Click to see details.";
+      }
+      // do not change message if error message already set
+      else if (my_testcase.isExecution() && (testcase_message.find("ERROR") == std::string::npos)) {
+        if (score < 0.0001 && (show_actual || show_expected))
+          testcase_message = "Test successful. See output below.";
+        else if (show_actual && num_messages > 0)
+          testcase_message = "ERROR: Click to see details.";
+        // compares output, not full points and no error messages
+        else if (show_actual || show_expected)
+          testcase_message = "ERROR: See output below.";
+        // does not compare output, has error messages
+        else if (num_messages > 0)
+          testcase_message = "ERROR: Click to see details.";
+        // not full points
+        else if (score >= 0.0001)
+          testcase_message = "ERROR.";
+      }
     }
-  }
+  } 
+
   return score;
 }
 
@@ -251,6 +283,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     std::string title = "Test " + std::to_string(i+1) + " " + (*tc)[i].value("title","MISSING TITLE");
     int points = (*tc)[i].value("points",0);
     std::cout << title << " - points: " << points << std::endl;
+    std::string testcase_message = "";
 
     nlohmann::json tc_j;
     tc_j["test_name"] = title;
@@ -277,7 +310,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       std::cout << "NUM FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
       assert (my_testcase.numFileGraders() > 0);
       for (int j = 0; j < my_testcase.numFileGraders(); j++) {
-        my_score -= ValidateGrader(my_testcase, j, autocheck_js,hw_id);
+        my_score -= ValidateGrader(my_testcase, j, autocheck_js, hw_id, testcase_message);
       }
       bool fileExists, fileEmpty;
       fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
@@ -296,6 +329,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       testcase_pts = (int)floor(my_score * my_testcase.getPoints());
       std::cout << "Grade: " << testcase_pts << std::endl;
     }
+    tc_j["testcase_message"] = testcase_message;
     tc_j["points_awarded"] = testcase_pts;
     automated_points_awarded += testcase_pts;
     if (!my_testcase.getHidden()) {

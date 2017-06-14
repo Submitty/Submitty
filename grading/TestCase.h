@@ -120,6 +120,8 @@ private:
   int test_case_id;
   static int next_test_case_id;
   nlohmann::json& _json;
+  //////
+  std::string summary_message;
 };
 
 

@@ -34,6 +34,9 @@ class GradeableTestcase extends AbstractModel {
     private $points_awarded = 0;
     private $log_file = "";
     private $autochecks = array();
+
+    /** @var string testcase message to show in the test case header */
+    private $testcase_message = "";
     
     public function __construct(Core $core, $testcase, $idx) {
         $this->core = $core;
@@ -41,9 +44,6 @@ class GradeableTestcase extends AbstractModel {
         
         if (isset($testcase['title'])) {
             $this->name = Utils::prepareHtmlString($testcase['title']);
-        }
-        if (isset($testcase['type'])) {
-            $this->name = Utils::prepareHtmlString($testcase['type']);
         }
         if (isset($testcase['details'])) {
             $this->details = $testcase['details'];
@@ -66,10 +66,6 @@ class GradeableTestcase extends AbstractModel {
                 $this->autochecks[] = new GradeableAutocheck($autocheck,
                                                              $this->core->getConfig()->getCoursePath(),
                                                              $result_path, $index);
-            }
-            foreach ($this->autochecks as $autocheck) {
-                if (($autocheck->hasMessages()) && $this->header_message === "") 
-                    $this->header_message = $autocheck->getFirstMessage();
             }
         }
         
@@ -101,6 +97,9 @@ class GradeableTestcase extends AbstractModel {
         }
         if (isset($testcase['view_testcase'])) {
             $this->view_testcase = $testcase['view_testcase'];
+        }
+        if (isset($testcase['testcase_message'])) {
+            $this->testcase_message = Utils::prepareHtmlString($testcase['testcase_message']);
         }
     }
     
@@ -158,6 +157,13 @@ class GradeableTestcase extends AbstractModel {
      */
     public function getAutochecks() {
         return $this->autochecks;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTestcaseMessage() {
+        return $this->testcase_message;
     }
     
 }
