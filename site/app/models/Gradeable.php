@@ -283,6 +283,10 @@ class Gradeable extends AbstractModel {
                     $this->graded_tagrading += $this->components[$component_details['gc_order']]->getScore();
                 }
             }
+            // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
+            // either write an inner JOIN on that aggregation to order stuff, and then have it aggregated, or we can
+            // just order it here, which is simpler in the long run and not really a performance problem.
+            ksort($this->components);
             // NOTE: the TA grading total may be negative!
         }
 
