@@ -312,8 +312,14 @@ HTML;
             style="cursor: auto; background-color: #FFF; width: 250px;">
             <br />
 HTML;
-    $team_yes_checked = ($g_team_assignment===true)?'checked':'';
-    $team_no_checked = ($g_team_assignment===false)?'checked':'';
+    $team_yes_checked = ($g_team_assignment===true) ? 'checked': '';
+    $team_no_checked = ($g_team_assignment===false) ? 'checked': '';
+    $type_0_checked = ($g_gradeable_type === 0) ? 'checked': '';
+    $type_1_checked = ($g_gradeable_type === 1) ? 'checked': '';
+    $type_2_checked = ($g_gradeable_type === 2) ? 'checked': '';
+    $upload_files = 'checked'; //($is_repository === false) ? 'checked':'';
+    $use_repository = ($is_repository === true) ? 'checked':'';
+
     print <<<HTML
             Is this a team assignment?:
             <fieldset>
@@ -334,23 +340,11 @@ HTML;
             What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
             <fieldset>
-                <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
-HTML;
-    echo ($g_gradeable_type === 0)?'checked':'';
-    print <<<HTML
-            > 
+                <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File" {$type_0_checked}> 
             Electronic File
-            <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints"
-HTML;
-            echo ($g_gradeable_type === 1)?'checked':'';
-    print <<<HTML
-            >
+            <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints" {$type_1_checked}>
             Checkpoints
-            <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric"
-HTML;
-            echo ($g_gradeable_type === 2)?'checked':'';
-    print <<<HTML
-            >
+            <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric" {$type_2_checked}>
             Numeric/Text
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable_type_options electronic_file" id="electronic_file" >    
@@ -375,16 +369,10 @@ HTML;
 
                 Are students uploading files or commiting code to an SVN repository?<br />
                 <fieldset>
-                    <input type="radio" class="upload_file" name="upload_type" value="Upload File"
-HTML;
-                    echo ($is_repository === false)?'checked':'';
-        print <<<HTML
-                    > Upload File(s)
-                    <input type="radio" id="repository_radio" class="upload_repo" name="upload_type" value="Repository"
-HTML;
-                    echo ($is_repository===true)?'checked':'';
-        print <<<HTML
-                    > Repository
+                    <input type="radio" class="upload_file" name="upload_type" value="Upload File" {$upload_files}> 
+                    Upload File(s)
+                    <!--<input type="radio" id="repository_radio" class="upload_repo" name="upload_type" value="Repository" {$use_repository}> 
+                    Repository-->
                     
                     <div class="upload_type upload_file" id="upload_file">
                     </div>

@@ -58,8 +58,7 @@ sudo echo -e "localhost
 hsdbu
 hsdbu
 http://localhost
-http://localhost/cgi-bin
-svn+ssh:192.168.56.103" | sudo bash ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
+y" | sudo bash ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 
 sudo bash ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
 sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
