@@ -108,11 +108,6 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   std::set<std::string> forbidden_categories = {
     "INFORMATION_MAINTENANCE_SET_TIME"
   };
-
-#if __UBUNTU_16_04__
-#else
-  categories = restricted_categories;
-#endif
   
   // ---------------------------------------------------------------
   // HELPER UTILTIY PROGRAMS
@@ -132,7 +127,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_node" ||
            my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_function" ||
            my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token") {
-    categories = restricted_categories;
+    //categories = restricted_categories;
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("FILE_MANAGEMENT_RARE");
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
