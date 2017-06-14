@@ -31,9 +31,15 @@ add_library(submitty_grading
 
 ###################################################################################
 
+# For now...  Ubuntu 16.04 contains 7 new system calls
+set(SPECIFIC_LINUX "__UBUNTU_14_04__")
+if (${CMAKE_HOST_SYSTEM} STREQUAL "Linux-4.4.0-75-generic")
+  set(SPECIFIC_LINUX "__UBUNTU_16_04__")
+endif()
+
 target_link_libraries(submitty_grading seccomp boost_system boost_filesystem)
 
-set_property(TARGET submitty_grading APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+set_property(TARGET submitty_grading APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11 -D${SPECIFIC_LINUX}")
 
 include_directories(${GRADINGCODE})
 
