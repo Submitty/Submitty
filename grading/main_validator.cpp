@@ -198,47 +198,27 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       assert (num_messages > 0);
     }
 
-    /*
-    if (my_testcase.isFileCheck() && testcase_message == "")
-      testcase_message = "Required files present.";
-    if (my_testcase.isCompilation() && testcase_message == "")
-      testcase_message = "Compilation successful."
-    else if (my_testcase.isExecution() && testcase_message == "")
-      testcase_message = "Test successful.";
-    */
-
     if ((show_message && num_messages > 0)
         || show_actual 
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
       // setting testcase_message
       if (my_testcase.isFileCheck()) {
-        // some file missing
         if (num_messages > 0)
           testcase_message = "ERROR: Required files missing.";
-        /*
-        else
-          testcase_message = "Required files present.";
-        */
       }
-      // do not change message if error message already set
       else if (my_testcase.isCompilation()) {
-        // warning already happened, there are multiple problems now
         if (num_messages > 0)
           testcase_message = "ERROR/WARNING: Click to see details.";
       }
       // do not change message if error message already set
       else if (my_testcase.isExecution() && (testcase_message.find("ERROR") == std::string::npos)) {
-        if (score < 0.0001 && (show_actual || show_expected))
-          testcase_message = "Test successful. See output below.";
-        else if (show_actual && num_messages > 0)
+        // has some error messages
+        if (num_messages > 0)
           testcase_message = "ERROR: Click to see details.";
         // compares output, not full points and no error messages
-        else if (show_actual || show_expected)
+        else if ((show_actual || show_expected) && (score >= 0.0001))
           testcase_message = "ERROR: See output below.";
-        // does not compare output, has error messages
-        else if (num_messages > 0)
-          testcase_message = "ERROR: Click to see details.";
         // not full points
         else if (score >= 0.0001)
           testcase_message = "ERROR.";
