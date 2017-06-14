@@ -188,7 +188,7 @@ class TestcaseWrapper:
             return_code = subprocess.call(["make"],
                     cwd=os.path.join(self.testcase_path, "build"), stdout=make_output, stderr=make_output)
             if return_code != 0:
-                debug_print("log/make_output.txt")
+                self.debug_print("log/make_output.txt")
                 raise RuntimeError("Build (make) exited with exit code " + str(return_code))
 
 
@@ -261,7 +261,7 @@ class TestcaseWrapper:
             raise RuntimeError("ARGUMENT "+arg+" TO DIFF NOT TESTED")
         out, err = process.communicate()
         if process.returncode == 1:
-            debug_print("log/run_output.txt")
+            self.debug_print("log/run_output.txt")
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
                                " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
