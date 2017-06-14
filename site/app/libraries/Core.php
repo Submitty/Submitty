@@ -105,7 +105,7 @@ class Core {
         }
 
         $this->submitty_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
-            $this->config->getDatabasePassword(), "submitty_db", $this->config->getDatabaseType());
+            $this->config->getDatabasePassword(), "submitty", $this->config->getDatabaseType());
 
         $this->course_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
             $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());

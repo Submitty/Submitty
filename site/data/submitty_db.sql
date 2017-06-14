@@ -83,7 +83,8 @@ CREATE TABLE users (
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
-    user_email character varying NOT NULL
+    user_email character varying NOT NULL,
+    last_udpated timestamp WITHOUT time zone
 );
 
 
