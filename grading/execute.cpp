@@ -894,20 +894,19 @@ int execute(const std::string &cmd,
         do {
             if(window_mode && windowName == "")
             {
-              initialize_window(windowName, childPID);
+              initializeWindow(windowName, childPID);
               if(windowName != "")
               {
-                std::ostringstream command_stream;
-                int height = get_window_data("Height", windowName)[0];
-                int width = get_window_data("Width", windowName)[0];
-                int xStart = get_window_data("Absolute upper-left X", windowName)[0]; //These values represent the upper left corner
-                int yStart = get_window_data("Absolute upper-left Y", windowName)[0]; 
-                int middle_x = xStart + width/2;
-                int middle_y = yStart+height/2;
-                command_stream << "wmctrl -R " << windowName << " &&  xdotool mousemove --sync "
-                        << middle_x << " " << middle_y; 
-                system(command_stream.str().c_str());
+                centerMouse(windowName);
               }
+            }
+            else
+            {
+            	if(windowName != "" && !windowExists(windowName))
+            	{
+            		windowName = "";
+                std::cout << "The students window shut midrun." << std::endl;
+            	}
             }
             wpid = waitpid(childPID, &status, WNOHANG);
             if (wpid == 0) 
@@ -916,7 +915,7 @@ int execute(const std::string &cmd,
               if (!time_kill && !memory_kill) 
               {
                   // sleep 1/10 of a second
-                if(actions_taken < actions.size() && windowName != "") //if we still have actions (keyboard events, etc.) to give the child
+                if(window_mode && actions_taken < actions.size() && windowName != "") //if we still have actions (keyboard events, etc.) to give the child
                 {
                   takeAction(actions, actions_taken, number_of_screenshots, windowName, 
                     childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill); //delay params
@@ -928,8 +927,6 @@ int execute(const std::string &cmd,
                 }
               }
            }
-
-
         } while (wpid == 0);
 
         if (WIFEXITED(status)) {
