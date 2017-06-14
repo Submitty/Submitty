@@ -7,12 +7,15 @@ use app\views\AbstractView;
 class AdminGradeableView extends AbstractView {
 	public function show_add_gradeable($have_old_edit) {
         $electronic_gradeable = array();
-        $electronic_gradeable['eg_submission_open_date'] = date('Y/m/d 23:59:59', strtotime( '0 days' )); //"";
-        $electronic_gradeable['eg_submission_due_date'] = date('Y/m/d 23:59:59', strtotime( '+7 days' )); //"";"";
+        $TA_beta_date = date('m/d/Y 23:59:59', strtotime( '-1 days' ));
+        $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y 23:59:59', strtotime( '0 days' ));
+        $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y 23:59:59', strtotime( '+7 days' ));
         $electronic_gradeable['eg_subdirectory'] = "";
         $electronic_gradeable['eg_config_path'] = "";
         $electronic_gradeable['eg_late_days'] = 2;
         $electronic_gradeable['eg_precision'] = 0.5;
+        $TA_grade_open_date = date('m/d/Y 23:59:59', strtotime( '+10 days' ));
+        $TA_grade_release_date = date('m/d/Y 23:59:59', strtotime( '+14 days' ));
         $default_late_days = 2;
 		$BASE_URL = "http://192.168.56.101/hwgrading";
 		$action = "add";
@@ -24,13 +27,14 @@ class AdminGradeableView extends AbstractView {
 		$g_instructions_url = "";
 		$g_gradeable_type = 0;
 		$is_repository = false;
-		$use_ta_grading=true;
-        $old_questions = array("Apple", "Pen", "Applepen");
+		$use_ta_grading=false;
+        $old_questions = array();
         $g_min_grading_group = 0;
         $g_overall_ta_instructions = "";
         $have_old = false;
 		$html_output = <<<HTML
 		<style type="text/css">
+
     body {
         overflow: scroll;
     }
@@ -65,8 +69,6 @@ class AdminGradeableView extends AbstractView {
         margin-top: 5px;
         margin-left: 5px;
         position: relative;
-        width: 12px;
-        height: 12px;
         overflow: hidden;
     }
 
@@ -170,7 +172,7 @@ HTML;
             What is the URL to the assignment instructions? (shown to student) <input style='width: 227px' type='text' name='instructions_url' value="{$g_instructions_url}" placeholder="(Optional)" />
             <br />
             What is the <em style='color: orange;'><b>TA Beta Testing Date</b></em>? (gradeable visible to TAs):
-            <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
+            <input name="date_ta_view" id="date_ta_view" class="date_picker" type="text" value="{$TA_beta_date}"
             style="cursor: auto; background-color: #FFF; width: 250px;">
             <br />
             <br />   
@@ -199,13 +201,13 @@ HTML;
             <div class="gradeable_type_options electronic_file" id="electronic_file" >    
                 <br />
                 What is the <em style='color: orange;'><b>Submission Open Date</b></em>? (submission available to students):
-                <input id="date_submit" name="date_submit" class="datepicker" type="text"
+                <input id="date_submit" name="date_submit" class="date_picker" type="text" value="{$electronic_gradeable['eg_submission_open_date']}"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <em style='color: orange;'>must be >= TA Beta Testing Date</em>
                 <br />
 
                 What is the <em style='color: orange;'><b>Due Date</b></em>?
-                <input id="date_due" name="date_due" class="datepicker" type="text"
+                <input id="date_due" name="date_due" class="date_picker" type="text" value="{$electronic_gradeable['eg_submission_due_date']}"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <em style='color: orange;'>must be >= Submission Open Date</em>
                 <br />
@@ -253,12 +255,12 @@ HTML;
                 Will this assignment also be graded by the TAs?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
-                //echo ($use_ta_grading===true)?'checked':'';
+                if ($use_ta_grading===true) { $html_output .= "checked"; }
         $html_output .= <<<HTML
                 /> Yes
                 <input type="radio" id="no_ta_grade" name="ta_grading" value="false"
 HTML;
-                //echo ($use_ta_grading===false)?'checked':'';
+                if ($use_ta_grading===false) { $html_output .= "checked"; }
         $html_output .= <<<HTML
                 /> No
                 <div id="rubric_questions" class="bool_val rubric_questions">
@@ -296,20 +298,22 @@ HTML;
 HTML;
         $html_output .= <<<HTML
                 <td style="overflow: hidden;">
-                    <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" 
-                              placeholder="Rubric Item Title"> Comment Title Num Placeholder</textarea>
+                    <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" 
+                              placeholder="Rubric Item Title">{$question['question_message']}</textarea>
                     <textarea name="ta_comment_{$num}" id="individual_{$num}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);"
                                                style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
-                                               display: block;">Question Grading Note Placeholder</textarea>
+                                               display: block; height: auto;">{$question['question_grading_note']}</textarea>
                     <textarea name="student_comment_{$num}" id="student_{$num}" class="student_comment complex_type" rows="1" placeholder=" Message to Student (seen by both students and TAs)" onkeyup="autoResizeComment(event);"
                               style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
-                              display: block;">Student Grading Note Placeholder</textarea>
+                              display: block; height: auto;">{$question['student_grading_note']}</textarea>
                 </td>
 
                 <td style="background-color:#EEE;">
 HTML;
         $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
-        //$html_output .= selectBox($num, $old_grade);
+        $html_output .= <<<HTML
+        <input type="number" id="grade-'+question+'" class="points" name="points_' + question +'" value="0" min="-1000" max="1000" step="0.5" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">
+HTML;
         //$checked = ($question['question_extra_credit']) ? "checked" : "";
         $checked = "";
         $html_output .= <<<HTML
@@ -320,12 +324,11 @@ HTML;
         if ($num > 1){
         $html_output .= <<<HTML
                 <a id="delete-{$num}" class="question-icon" onclick="deleteQuestion({$num});">
-                <img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                <i class="icon-x-mark icon-white"></i></a>
                 <a id="down-{$num}" class="question-icon" onclick="moveQuestionDown({$num});">
-                <img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-        
+                <i class="icon-down-arrow icon-white"></i></a>       
                 <a id="up-{$num}" class="question-icon" onclick="moveQuestionUp({$num});">
-                <img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                <i class="icon-up-arrow icon-white"></i></a>
 HTML;
         }
         
@@ -603,14 +606,14 @@ HTML;
     $html_output .= <<<HTML
             <!-- TODO default to the submission + late days for electronic -->
             What is the <em style='color: orange;'><b>TA Grading Open Date</b></em>? (TAs may begin grading)
-            <input name="date_grade" id="date_grade" class="datepicker" type="text"
+            <input name="date_grade" id="date_grade" class="date_picker" type="text" value="{$TA_grade_open_date}"
             style="cursor: auto; background-color: #FFF; width: 250px;">
               <em style='color: orange;'>must be >= <span id="ta_grading_compare_date">initial_ta_grading_compare_date</span></em>
             <br />
             </div>
 
             What is the <em style='color: orange;'><b>Grades Released Date</b></em>? (TA grades will be visible to students)
-            <input name="date_released" id="date_released" class="datepicker" type="text" 
+            <input name="date_released" id="date_released" class="date_picker" type="text" value="{$TA_grade_release_date}"
             style="cursor: auto; background-color: #FFF; width: 250px;">
             <em style='color: orange;'>must be >= <span id="grades_released_compare_date">initial_grades_released_compare_date</span></em>
             <br />
@@ -663,6 +666,11 @@ HTML;
     </form>
 </div>
 
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<link type="text/css" rel="stylesheet" href="css/jquery-ui-timepicker-addon.css" />
+<script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
 <script type="text/javascript">
 
 function createCrossBrowserJSDate(val){
@@ -684,8 +692,17 @@ function createCrossBrowserJSDate(val){
         return new Date(momentDate.toString()) // Convert moment into RFC2822 and construct browser-specific jQuery Date object
     }
 
+    
 
     $(document).ready(function() {
+
+        $(function() {
+            $( ".date_picker" ).datetimepicker({
+                timeFormat: "HH:mm:ss",
+                showTimezone: false
+            });
+        });
+
         var numCheckpoints=1;
         
         function addCheckpoint(label, extra_credit){
@@ -783,6 +800,25 @@ function createCrossBrowserJSDate(val){
                removeNumeric();
            }
         });
+
+        if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
+            $('#rubric_questions').hide();
+            $('#grading_questions').hide();
+        }
+        
+        $('input:radio[name="ta_grading"]').change(function(){
+            $('#rubric_questions').hide();
+            $('#grading_questions').hide();
+            if ($(this).is(':checked')){
+                if($(this).val() == 'true'){ 
+                    $('#rubric_questions').show();
+                    $('#grading_questions').show();
+                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                } else {
+                    $('#grades_released_compare_date').html('Due Date');
+                }
+            }
+        });
         
         if({$default_late_days} != -1){
             $('input[name=eg_late_days]').val('{$default_late_days}');
@@ -864,15 +900,6 @@ function createCrossBrowserJSDate(val){
 
     });
 
-    var datepicker = $('.datepicker');
-    datepicker.datetimepicker({
-        timeFormat: "HH:mm:ss",
-        showTimezone: false
-    });
-
-    $('#date_submit').datetimepicker('setDate', createCrossBrowserJSDate("{$electronic_gradeable['eg_submission_open_date']}"));
-    $('#date_due').datetimepicker('setDate', createCrossBrowserJSDate("{$electronic_gradeable['eg_submission_due_date']}"));
-
  $.fn.serializeObject = function(){
         var o = {};
         var a = this.serializeArray();
@@ -944,6 +971,206 @@ function createCrossBrowserJSDate(val){
         });
         return o;               
     }
+
+    function toggleQuestion(question, role) {
+        if(document.getElementById(role +"_" + question ).style.display == "block") {
+            $("#" + role + "_" + question ).animate({marginBottom:"-80px"});
+            setTimeout(function(){document.getElementById(role + "_"+ question ).style.display = "none";}, 175);
+        }
+        else {
+            $("#" + role + "_" + question ).animate({marginBottom:"5px"});
+            setTimeout(function(){document.getElementById(role+"_" + question ).style.display = "block";}, 175);
+        }
+        calculatePercentageTotal();
+    }
+
+     // autoresize the comment
+    function autoResizeComment(e){
+        e.target.style.height ="";
+        e.target.style.height = e.target.scrollHeight + "px";
+    }
+
+    function selectBox(question){
+        // should be the increment value
+        return '<input type="number" id="grade-'+question+'" class="points" name="points_' + question +'" value="0" min="-1000" max="1000" step="0.5" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">';
+    }
+
+    function calculatePercentageTotal() {
+        var total = 0;
+        var ec = 0;
+        $('input.points').each(function(){
+            var elem = $(this).attr('name').replace('points_','eg_extra_');
+            if ($(this).val() > 0){
+                if (!$('[name="'+elem+'"]').is(':checked') == true) {
+                    total += +($(this).val());
+                }
+                else {
+                    ec += +($(this).val());
+                }
+            }
+        });
+        document.getElementById("totalCalculation").innerHTML = total + " (" + ec + ")";
+    }
+
+    function deleteQuestion(question) {
+        if (question <= 0) {
+            return;
+        }
+        var row = $('tr#row-'+ question);
+        row.remove();
+        var totalQ = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
+        for(var i=question+1; i<= totalQ; ++i){
+            updateRow(i,i-1);
+        }
+        calculatePercentageTotal();
+    }
+
+    function updateRow(oldNum, newNum) {
+        var row = $('tr#row-'+ oldNum);
+        row.attr('id', 'row-' + newNum);
+        row.find('textarea[name=comment_title_' + oldNum + ']').attr('name', 'comment_title_' + newNum);
+        row.find('div.btn').attr('onclick', 'toggleQuestion(' + newNum + ',"individual"' + ')');
+        row.find('textarea[name=ta_comment_' + oldNum + ']').attr('name', 'ta_comment_' + newNum).attr('id', 'individual_' + newNum);
+        row.find('textarea[name=student_comment_' + oldNum + ']').attr('name', 'student_comment_' + newNum).attr('id', 'student_' + newNum);
+        row.find('select[name=points_' + oldNum + ']').attr('name', 'points_' + newNum);
+        row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
+        row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
+        row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
+        row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
+    }
+
+    function moveQuestionDown(question) {
+        if (question < 1) {
+            return;
+        }
+
+        var currentRow = $('tr#row-' + question);
+        var newRow = $('tr#row-' + (question+1));
+        var child = 0;
+        if (question == 1) {
+            child = 1;
+        }
+
+        var temp = currentRow.children()[child].children[0].value;
+        currentRow.children()[child].children[0].value = newRow.children()[0].children[0].value;
+        newRow.children()[0].children[0].value = temp;
+
+        temp = currentRow.children()[child].children[2].value;
+        currentRow.children()[child].children[2].value = newRow.children()[0].children[2].value;
+        newRow.children()[0].children[2].value = temp;
+
+        child += 1;
+
+        temp = currentRow.children()[child].children[0].value;
+        currentRow.children()[child].children[0].value = newRow.children()[1].children[0].value;
+        newRow.children()[1].children[0].value = temp;
+
+        temp = currentRow.children()[child].children[1].checked;
+        currentRow.children()[child].children[1].checked = newRow.children()[1].children[1].checked;
+        newRow.children()[1].children[1].checked = temp;
+    }
+
+    function moveQuestionUp(question) {
+        if (question < 1) {
+            return;
+        }
+
+        var currentRow = $('tr#row-' + question);
+        var newRow = $('tr#row-' + (question-1));
+        var child = 0;
+
+        var temp = currentRow.children()[0].children[0].value;
+        currentRow.children()[0].children[0].value = newRow.children()[child].children[0].value;
+        newRow.children()[child].children[0].value = temp;
+
+        temp = currentRow.children()[0].children[2].value;
+        currentRow.children()[0].children[2].value = newRow.children()[child].children[2].value;
+        newRow.children()[child].children[2].value = temp;
+
+        child += 1;
+
+        temp = currentRow.children()[1].children[0].value;
+        currentRow.children()[1].children[0].value = newRow.children()[child].children[0].value;
+        newRow.children()[child].children[0].value = temp;
+
+        temp = currentRow.children()[1].children[1].checked;
+        currentRow.children()[1].children[1].checked = newRow.children()[child].children[1].checked;
+        newRow.children()[child].children[1].checked = temp;
+    }
+
+    function addQuestion(){
+        //get the last question number
+        var num = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
+        var newQ = num+1;
+        var sBox = selectBox(newQ);
+        $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
+            <td style="overflow: hidden;"> \
+                <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" placeholder="Rubric Item Title"></textarea> \
+                <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);" \
+                          style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
+                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs"  onkeyup="autoResizeComment(event);" \
+                          style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
+            </td> \
+            <td style="background-color:#EEE;">' + sBox + ' \
+                <br /> \
+                Extra Credit:&nbsp;&nbsp;<input onclick="calculatePercentageTotal();" name="eg_extra_'+newQ+'" type="checkbox" class="eg_extra extra" value="on"/> \
+                <br /> \
+                <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
+                    <i class="icon-x-mark icon-white"></i></a> \
+                <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \
+                    <i class="icon-down-arrow icon-white"></i></a> \
+                <a id="up-'+newQ+'" class="question-icon" onclick="moveQuestionUp('+newQ+');"> \
+                    <i class="icon-up-arrow icon-white"></i></a> \
+            </td> \
+        </tr>');
+    }
+
+    $('input:radio[name="gradeable_type"]').change(
+    function(){
+        $('#required_type').hide();
+        $('.gradeable_type_options').hide();
+        if ($(this).is(':checked')){ 
+            if($(this).val() == 'Electronic File'){ 
+                $('#electronic_file').show();
+                if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
+                    $('#rubric_questions').hide();
+                    $('#grading_questions').hide();
+                }
+
+                $('#ta_grading_compare_date').html('Due Date (+ max allowed late days)');
+                if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
+                   $('#grades_released_compare_date').html('Due Date');
+                } else { 
+                   $('#grades_released_compare_date').html('TA Grading Open Date');
+                }
+            }
+            else if ($(this).val() == 'Checkpoints'){ 
+                $('#checkpoints').show();
+                $('#grading_questions').show();
+                $('#ta_grading_compare_date').html('TA Beta Testing Date');
+                $('#grades_released_compare_date').html('TA Grading Open Date');
+            }
+            else if ($(this).val() == 'Numeric'){ 
+                $('#numeric').show();
+                $('#grading_questions').show();
+                $('#ta_grading_compare_date').html('TA Beta Testing Date');
+                $('#grades_released_compare_date').html('TA Grading Open Date');
+            }
+        }
+    });
+
+    $(function () {
+        $("#alert-message").dialog({
+            modal: true,
+            autoOpen: false,
+            buttons: {
+                Ok: function () {
+                     $(this).dialog("close");
+                 }
+             }
+         });
+    });
+
 </script>
 HTML;
 
