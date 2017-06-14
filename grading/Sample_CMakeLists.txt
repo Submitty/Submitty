@@ -153,18 +153,24 @@ add_executable(validate.out
 
 ###################################################################################
 
+# For now...  Ubuntu 16.04 contains 7 new system calls
+set(SPECIFIC_LINUX "__UBUNTU_14_04__")
+if (${CMAKE_HOST_SYSTEM} STREQUAL "Linux-4.4.0-75-generic")
+  set(SPECIFIC_LINUX "__UBUNTU_16_04__")
+endif()
+
 target_link_libraries(custom_functions seccomp boost_system boost_filesystem)
-set_property(TARGET custom_functions APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+set_property(TARGET custom_functions APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11 -D${SPECIFIC_LINUX}")
 
 target_link_libraries(configure.out  ${GRADINGLIB}  seccomp  custom_functions boost_system boost_filesystem)
 target_link_libraries(compile.out    ${GRADINGLIB}  seccomp  custom_functions boost_system boost_filesystem)
 target_link_libraries(run.out        ${GRADINGLIB}  seccomp  custom_functions boost_system boost_filesystem)
 target_link_libraries(validate.out   ${GRADINGLIB}  seccomp  custom_functions boost_system boost_filesystem)
 
-set_property(TARGET configure.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
-set_property(TARGET compile.out   APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
-set_property(TARGET run.out       APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
-set_property(TARGET validate.out  APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+set_property(TARGET configure.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11 -D${SPECIFIC_LINUX}")
+set_property(TARGET compile.out   APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11 -D${SPECIFIC_LINUX}")
+set_property(TARGET run.out       APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11 -D${SPECIFIC_LINUX}")
+set_property(TARGET validate.out  APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11 -D${SPECIFIC_LINUX}")
 
 include_directories(${MY_DIR})
 include_directories(${GRADINGCODE})

@@ -23,13 +23,7 @@ echo "What is the url for submission? (ex: http://192.168.56.101/ or https://sub
 read SUBMISSION_URL
 
 TAGRADING_URL=${SUBMISSION_URL}/hwgrading/
-
-echo "What is the url for the CGI scripts (cgi-bin)? (ex: http://192.168.56.102/ or https://submitty-cgi.cs.rpi.edu/)"
-read CGI_URL
-
-echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.103/ or file:///var/lib/svn/csci2600/)"
-read SVN_PATH
-
+CGI_URL=${SUBMISSION_URL}/cgi-bin/
 
 DEBUGGING_ENABLED=false
 # FIXME:  Replace with a safety check for a live installation
@@ -146,7 +140,6 @@ echo ""                                                                         
 echo "SUBMITTY_REPOSITORY="${SUBMITTY_REPOSITORY}                                             >> $CONFIGURATION_FILE
 echo "SUBMITTY_INSTALL_DIR="${SUBMITTY_INSTALL_DIR}                                           >> $CONFIGURATION_FILE
 echo "SUBMITTY_DATA_DIR="${SUBMITTY_DATA_DIR}                                                 >> $CONFIGURATION_FILE
-echo "SVN_PATH="${SVN_PATH}                                                                   >> $CONFIGURATION_FILE
 echo "HWPHP_USER="${HWPHP_USER}                                                               >> $CONFIGURATION_FILE
 echo "HWCGI_USER="${HWCGI_USER}                                                               >> $CONFIGURATION_FILE
 echo "HWCRON_USER="${HWCRON_USER}                                                             >> $CONFIGURATION_FILE
