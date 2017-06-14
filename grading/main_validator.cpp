@@ -216,16 +216,16 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
         // some file missing
         if (num_messages > 0)
           testcase_message = "ERROR: Required files missing.";
+        /*
         else
           testcase_message = "Required files present.";
+        */
       }
       // do not change message if error message already set
-      else if (my_testcase.isCompilation() && (testcase_message.find("ERROR") == std::string::npos)) {
+      else if (my_testcase.isCompilation()) {
         // warning already happened, there are multiple problems now
-        if ((testcase_message.find("WARNING") != std::string::npos) && num_messages > 0)
-          testcase_message = "ERROR: Click to see details.";
-        else if (num_messages > 0)
-          testcase_message = "WARNING: Click to see details.";
+        if (num_messages > 0)
+          testcase_message = "ERROR/WARNING: Click to see details.";
       }
       // do not change message if error message already set
       else if (my_testcase.isExecution() && (testcase_message.find("ERROR") == std::string::npos)) {
