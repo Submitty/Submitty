@@ -264,9 +264,9 @@ class TestcaseWrapper:
             debug_print("log/run_output.txt")
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
                                " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
-        
-        
-    # helpful for debugging make errors on travis
+
+
+    # Helpful for debugging make errors on travis
     def debug_print(self,f):
         filename=os.path.join(self.testcase_path,f)
         print ("\nDEBUG_PRINT: ",filename)
