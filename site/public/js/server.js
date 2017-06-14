@@ -424,7 +424,7 @@ function setupCheckboxCells() {
         });
 
         submitAJAX(
-            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_grade'}),
+            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
             {'csrf_token': csrfToken, 'user_id': parent.data("user"), 'g_id': parent.data('gradeable'), 'scores': scores},
             function() {
                 elems.forEach(function(elem) {
@@ -468,38 +468,30 @@ $(function() {
 function setupNumericTextCells() {
 
     $("input[class=option-small-box]").keydown(function(key){
-        // console.log("HERES THE BEGINNING");
-        // console.log(this.value.length);
-        // console.log(this.selectionEnd);
-        // console.log(this.selectionStart);
         var cell=this.id.split('-');
         if(key.keyCode === 39){
-            // console.log("move right");
             if(this.selectionEnd == this.value.length){
                 $('#cell-'+cell[1]+'-'+(++cell[2])).focus();
             }
         }
         else if(key.keyCode == 37){
-            // console.log("move left");
             if(this.selectionStart == 0){
                 $('#cell-'+cell[1]+'-'+(--cell[2])).focus();
             }
         }
         else if(key.keyCode == 38){
-            // console.log("move up");
             $('#cell-'+(--cell[1])+'-'+cell[2]).focus();
 
         }
         else if(key.keyCode == 40){
-            // console.log("move down");
             $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
         }
-
     });
 
 
 
     $("input[class=option-small-box]").change(function() {
+        elem = this;
         if(this.value == 0){
             $(this).css("color", "#bbbbbb");
         }
@@ -509,7 +501,6 @@ function setupNumericTextCells() {
         var scores = {};
         var total = 0;
         $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
-            // console.log(this.value);
             $(this).children(".option-small-box").each(function(){
                 if($(this).data('num') === true){
                     total += parseFloat(this.value);
@@ -524,23 +515,12 @@ function setupNumericTextCells() {
         });
 
         submitAJAX(
-            buildUrl({'component': 'grading', 'page': 'numeric', 'action': 'save_data'}),
+            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
             {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
             function() {
-                // elems.forEach(function(elem) {
-                //     $(elem).animate({"border-right-width": "0px"}, 400);
-                // });
-                console.log(this);
-                console.log($(this));
-                console.log("my CALLBACK SUCCESS");
             },
             function() {
-                // elems.forEach(function(elem) {
-                //     console.log(elem);
-                //     $(elem).css("border-right-width", "15px");
-                //     $(elem).stop(true, true).animate({"border-right-color": "#DA4F49"}, 400);
-                // });
-                console.log("my CALLBACK FAILURE");
+                $(elem).css("background-color", "#ff7777");
             }
         );
     });
