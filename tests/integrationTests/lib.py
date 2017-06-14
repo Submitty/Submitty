@@ -261,7 +261,6 @@ class TestcaseWrapper:
             raise RuntimeError("ARGUMENT "+arg+" TO DIFF NOT TESTED")
         out, err = process.communicate()
         if process.returncode == 1:
-            self.debug_print("log/run_output.txt")
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
                                " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
