@@ -16,7 +16,6 @@ class SimpleGraderView extends AbstractView {
      * @return string
      */
     public function simpleDisplay($gradeable, $rows, $graders) {
-        assert($gradeable->getType() == 1 || $gradeable->getType() == 2);
         if($gradeable->getType() == 1){
             $action = 'lab';
         }

@@ -26,7 +26,6 @@ class SimpleGraderController extends AbstractController  {
     }
 
     public function grade($action) {
-        assert($action == 'lab' || $action == 'numeric');
         if (!isset($_REQUEST['g_id'])) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable');
         }
