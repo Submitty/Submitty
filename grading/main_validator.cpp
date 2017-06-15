@@ -203,15 +203,11 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
       // setting testcase_message
-      if (my_testcase.isFileCheck()) {
-        if (num_messages > 0)
+      if (my_testcase.isFileCheck() && (num_messages > 0))
           testcase_message = "ERROR: Required files missing.";
-      }
-      else if (my_testcase.isCompilation()) {
-        if (num_messages > 0)
+      else if (my_testcase.isCompilation() && num_messages > 0)
           testcase_message = "ERROR/WARNING: See details below.";
-      }
-      else if (my_testcase.isExecution() && score >= 0.0001) {
+      else if (score >= 0.0001) {
         if (num_messages > 0)
           testcase_message = "ERROR: See details below.";
         // cannot overwrite "ERROR: See details below."
