@@ -803,4 +803,34 @@ VALUES (?, ?, ?, ?)", $params);
             return $team;
         }
     }
+
+
+
+    public function retrieve_users_from_db($g_id) {
+//IN:  gradeable ID from database
+//OUT: all students who have late days.  Retrieves student rcs, first name,
+//     last name, timestamp and number of late days.
+//PURPOSE:  Retrieve list of students to display current late days.
+      $this->database->query("
+        SELECT
+          late_days.user_id,
+          users.user_firstname,
+          users.user_preferred_firstname,
+          users.user_lastname,
+          late_days.allowed_late_days,
+          late_days.since_timestamp::timestamp::date
+        FROM users
+        FULL OUTER JOIN late_days
+          ON users.user_id=late_days.user_id
+        WHERE late_days.allowed_late_days IS NOT NULL
+          AND late_days.allowed_late_days>0
+          AND users.user_group=4
+        ORDER BY
+          users.user_email ASC,
+          late_days.since_timestamp DESC;",
+        array($g_id));
+
+
+      return $this->database->rows(); 
 }
+
