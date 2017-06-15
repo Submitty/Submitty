@@ -354,6 +354,40 @@ bool populateClickAndDragValues(std::string command, std::string window_name, in
   return true;
 }
 
+
+/**
+* Given lines (p1,p2) and (p3,p4), find the intersection point if any. (for use in click and drag delta).
+* based on Paul Bourke's Intersection Point of Two Lines
+*/
+std::vector<float> getLineIntersectionPoint(std::vector<int> p1, std::vector<int> p2, std::vector<int> p3, std::vector<int> p4) {
+// Store the values for fast access and easy
+// equations-to-code conversion
+  float x1 = p1[0], x2 = p2[0], x3 = p3[0], x4 = p4[0];
+  float y1 = p1[1], y2 = p2[1], y3 = p3[1], y4 = p4[1];
+ 
+  float ua_numerator = ((x4-x3)*(y1-y3)) - ((y4-y3)*(x1-x3));
+  float ub_numerator = ((x2-x1)*(y1-y3)) - ((y2-y1)*(x1-x3));
+  float denominator = ((y4-y3)*(x2-x1)) - ((x4-x3)*(y2-y1));
+  float ua = ua_numerator/denominator;
+  float ub = ub_numerator / denominator;
+
+  std::vector<float> answer;
+
+  if(denominator == 0){ //the lines are parallel or coincident
+    return answer;
+  }
+  std::cout << "ua: " << ua << " ub " << ub << std::endl;
+  if((ua > 0 && ua <= 1) && (ub > 0 && ub <= 1))
+  {
+    answer.push_back(x1 + ua*(x2-x1));
+    answer.push_back(y1 + ua*(y2-y1));
+  }
+  
+  return answer;
+}
+
+
+
 /**
 * The 'delta' version of the click and drag command. This function moves an xy distance from a startpoint
 * This distance is 'wrapping', so if it is outside of the window, we mouseup, return to the start position, 
@@ -364,21 +398,28 @@ void clickAndDragDelta(std::string window_name, std::string command){
   int x_start, x_end, y_start, y_end, mouse_button; //get the values of the student's window.
   std::vector<int> coords; 
   bool no_clamp = false; 
-  bool success = populateClickAndDragValues(command, window_name, x_start, x_end, y_start, y_end, mouse_button, coords, no_clamp);
+  bool success = populateClickAndDragValues(command, window_name, x_start, x_end, y_start, y_end, 
+    mouse_button, coords, no_clamp);
  
   if(!success){ //if we can't populate the click and drag values, do nothing.
     std::cout << "Could not populate the click and drag values."<< std::endl;
     return;
   }
+
+  std::vector<int> upper_left, upper_right, lower_left, lower_right; //Define the corners of our window.
+  upper_left.push_back(x_start); upper_left.push_back(y_start);
+  upper_right.push_back(x_end); upper_right.push_back(y_start);
+  lower_left.push_back(x_start); lower_left.push_back(y_end);
+  lower_right.push_back(x_end); lower_right.push_back(y_end);
+
+  
   //delta version, 2 values movement x and movement y.
   int amt_x_movement_remaining = coords[0];
   int amt_y_movement_remaining = coords[1];
 
-
-  //We force the mouse to start inside of the window by at least a pixel.
   std::string mouse_location_string = output_of_system_command("xdotool getmouselocation"); //This shouldn't fail unless
-                                                                                            //there isn't a mouse.
-  std::vector<int> xy = extractIntsFromString(mouse_location_string);
+  std::vector<int> xy = extractIntsFromString(mouse_location_string);                       //there isn't a mouse.
+  
   
   if(xy.size() < 2){ //if the mouse isn't detected, fail.
     std::cout << "Mouse coordinates couldn't be found. Mouse undetected." << std::endl;
@@ -386,38 +427,103 @@ void clickAndDragDelta(std::string window_name, std::string command){
   }
   int mouse_x = xy[0];
   int mouse_y = xy[1];
-  clamp(mouse_x, x_start+1, x_end-1); //move in by a pixel.
+  clamp(mouse_x, x_start+1, x_end-1); //clamp the mouse within the screen (and move in by a pixel).
   clamp(mouse_y, y_start+1, y_end-1);
 
   //NOTE: check my arithmetic. 
+  /**
+  * The process that this algorithm goes through is as follows:
+  * 1) Determine the slope of the dragged line and its distance.
+  * 2) while we have not traversed the necessary distance
+  * 3)  project a line from the current mouse position towards the end position with length equal
+  *      to the remaining distance. 
+  * 4)  Now that we have a line segment defined, find where/if it intersects any of the window's edges
+  * 5)  if it does intersect, cut it off at the point of intersection, and only drag that far.
+  *      else, if it doesn't intersect, we can assume we are inside of the window, due to the clamp, and can drag.
+  * 6)  update remaining distance and continue to loop.
+  */
   float slope = (float)amt_y_movement_remaining / (float)amt_x_movement_remaining; //rise / run
+  std::cout << "Slope is: " << slope << std::endl;
   float total_distance_needed = sqrt(pow(amt_x_movement_remaining, 2) + pow (amt_y_movement_remaining, 2)); 
+  std::cout << "Total distance needed is " << total_distance_needed << std::endl;
   float remaining_distance_needed = total_distance_needed; //remaining distance needed.
-  //while loop with a clamp.
-  int curr_x = 0;
+
   while(remaining_distance_needed >= 1 && windowExists(window_name)){ //The functions called within this loop will not fire
-                                                                      //if the window doesn't exist. This check just short
-                                                                      // circuits to avoid additional printing.
-    mouse_move(window_name, mouse_x, mouse_y, x_start, x_end, y_start, y_end); //move the mouse to the start location
-    int xStep = x_end-mouse_x; //TODO: test more extensively. //How far we can move in the x
-    float distance_of_move = sqrt(pow(xStep, 2) + pow (xStep*slope, 2)); //the distance we can move 
+    int curr_x = mouse_x;                                             //if the window doesn't exist. This check just short
+    int curr_y = mouse_y;                                             // circuits to avoid additional printing.
+    int moved_mouse_x, moved_mouse_y;
+    mouse_move(window_name, mouse_x, mouse_y, x_start, x_end, y_start, y_end); //reset the mouse to the start location.
+    float fraction_of_distance_remaining = remaining_distance_needed / total_distance_needed; //determine how far we've come.
+    float projected_x = mouse_x + (coords[0] * fraction_of_distance_remaining); //project in the direction of the mouse move
+    float projected_y = mouse_y + (coords[1] * fraction_of_distance_remaining); // to find the end of our line segment.
+
+    std::vector<int> current_point, projected_point;  //we are using vectors as 2d points.
+    current_point.push_back(curr_x); current_point.push_back(curr_y);
+    projected_point.push_back(projected_x); projected_point.push_back(projected_y);
+
+    std::vector<float> intersection_point; 
+    intersection_point = getLineIntersectionPoint(current_point, projected_point, upper_left, upper_right);
     
-    if(distance_of_move > remaining_distance_needed){ //if the distance we can move is more than the distance we need to move
-    
-      distance_of_move = remaining_distance_needed; //clamp in.
-      xStep = total_distance_needed - curr_x;
+
+    /**
+    * TODO make this block smaller. 
+    * These if statements just test all edges of the window against our projected line.
+    */
+    bool found = false; //found is just a quick short circuit to keep the code from ballooning.
+    if(intersection_point.size() != 0){
+      std::cout << "intersected top" << std::endl;
+      moved_mouse_x = (int)intersection_point[0]; 
+      moved_mouse_y = (int)intersection_point[1];
+      found = true;
     }
 
-    remaining_distance_needed -= distance_of_move; //we are moving distance_of_move
+    if(!found)
+    {
+      intersection_point = getLineIntersectionPoint(current_point, projected_point, upper_right, lower_right);
+      if(intersection_point.size() != 0){ 
+        std::cout << "intersected right" << std::endl;
+        moved_mouse_x = (int)intersection_point[0]; 
+        moved_mouse_y = (int)intersection_point[1];
+        found = true;
+      }
+    }
 
+    if(!found)
+    {
+      intersection_point = getLineIntersectionPoint(current_point, projected_point, lower_right, lower_left);
+      if(intersection_point.size() != 0){
+        std::cout << "intersected bottom" << std::endl;
+        moved_mouse_x = (int)intersection_point[0]; 
+        moved_mouse_y = (int)intersection_point[1];
+        found = true;
+      }
+    }
+
+    if(!found)
+    {
+      intersection_point = getLineIntersectionPoint(current_point, projected_point, lower_left, upper_left);
+      if(intersection_point.size() != 0){
+        std::cout << "intersected left" << std::endl;
+        moved_mouse_x = (int)intersection_point[0]; 
+        moved_mouse_y = (int)intersection_point[1];
+        found = true;
+      }
+    }
+
+    if(!found) //we are inside of the box (gauranteed by clamp) so move
+    {
+      std::cout << "No intersection at all"<< std::endl;
+      moved_mouse_x = projected_x;
+      moved_mouse_y = projected_y;
+    }
+
+    float distance_of_move = sqrt(pow(moved_mouse_x - mouse_x, 2) + pow (moved_mouse_y - mouse_y, 2)); //the distance we can move
+    remaining_distance_needed -= distance_of_move; //we are moving distance_of_move
+    std::cout << "after the move, we had " << remaining_distance_needed << " distance left " << std::endl;
     mouseDown(window_name,1); //click
-    int moved_mouse_x = mouse_x+xStep;
-    int moved_mouse_y = mouse_y + (xStep * slope);
     mouse_move(window_name, moved_mouse_x, moved_mouse_y,x_start, x_end, y_start, y_end); //drag
     mouseUp(window_name,1); //release
-    
-    curr_x += xStep; //keep track of how far we've moved in the x.
-  }
+  } //end loop.
 }
 
 /**
@@ -466,10 +572,13 @@ void clickAndDragAbsolute(std::string window_name, std::string command){
 */
 void clickAndDrag(std::string window_name, std::string command)
 {
+  std::cout << "In click and drag" << std::endl;
   if(command.find("delta") != std::string::npos){
+    std::cout << "Routing to delta" << std::endl;
     clickAndDragDelta(window_name, command); //these functions check window existence internally.
   }
   else{
+    std::cout << "Routing to absolute " << std::endl;
     clickAndDragAbsolute(window_name, command);
   }
 }
@@ -585,7 +694,7 @@ void takeAction(const std::vector<std::string>& actions, int& actions_taken, int
                 seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);
   }
   else if(actions[actions_taken].find("click and drag") != std::string::npos){ //CLICK AND DRAG    
-    clickAndDragAbsolute(window_name,actions[actions_taken]);
+    clickAndDrag(window_name,actions[actions_taken]);
   }
   else if(actions[actions_taken].find("click") != std::string::npos){ //CLICK
     std::vector<int> button = extractIntsFromString(actions[actions_taken]);
@@ -628,3 +737,75 @@ void takeAction(const std::vector<std::string>& actions, int& actions_taken, int
 }
 
 
+// /**
+// * The 'delta' version of the click and drag command. This function moves an xy distance from a startpoint
+// * This distance is 'wrapping', so if it is outside of the window, we mouseup, return to the start position, 
+// * mousedown, and then move again. We give a one pixel border at each side of the window and clamp using 
+// * that value to avoid accidental resizing.
+// */
+// void clickAndDragDelta(std::string window_name, std::string command){
+//   int x_start, x_end, y_start, y_end, mouse_button; //get the values of the student's window.
+//   std::vector<int> coords; 
+//   bool no_clamp = false; 
+//   bool success = populateClickAndDragValues(command, window_name, x_start, x_end, y_start, y_end, mouse_button, coords, no_clamp);
+ 
+//   if(!success){ //if we can't populate the click and drag values, do nothing.
+//     std::cout << "Could not populate the click and drag values."<< std::endl;
+//     return;
+//   }
+//   //delta version, 2 values movement x and movement y.
+//   int amt_x_movement_remaining = coords[0];
+//   int amt_y_movement_remaining = coords[1];
+
+
+//   //We force the mouse to start inside of the window by at least a pixel.
+//   std::string mouse_location_string = output_of_system_command("xdotool getmouselocation"); //This shouldn't fail unless
+//                                                                                             //there isn't a mouse.
+//   std::vector<int> xy = extractIntsFromString(mouse_location_string);
+  
+//   if(xy.size() < 2){ //if the mouse isn't detected, fail.
+//     std::cout << "Mouse coordinates couldn't be found. Mouse undetected." << std::endl;
+//     return;
+//   }
+//   int mouse_x = xy[0];
+//   int mouse_y = xy[1];
+//   clamp(mouse_x, x_start+1, x_end-1); //clamp the mouse within the screen (and move in by a pixel).
+//   clamp(mouse_y, y_start+1, y_end-1);
+
+//   //NOTE: check my arithmetic. 
+//   float slope = (float)amt_y_movement_remaining / (float)amt_x_movement_remaining; //rise / run
+//   //TODO special cases. 
+//   float total_distance_needed = sqrt(pow(amt_x_movement_remaining, 2) + pow (amt_y_movement_remaining, 2)); 
+//   float remaining_distance_needed = total_distance_needed; //remaining distance needed.
+//   //while loop with a clamp.
+  
+//   while(remaining_distance_needed >= 1 && windowExists(window_name)){ //The functions called within this loop will not fire
+//                                                                       //if the window doesn't exist. This check just short
+//                                                                       // circuits to avoid additional printing.
+//     int curr_x = mouse_x;
+//     int curr_y = mouse_y;
+//     mouse_move(window_name, mouse_x, mouse_y, x_start, x_end, y_start, y_end); //reset the mouse to the start location.
+//     while(clamp(curr_x) == 0 && clamp(curr_y) ==0)
+//     {
+//       int step_size = 10;
+//       float distance_of_move = sqrt(pow(xStep, 2) + pow (xStep*slope, 2)); //the distance we can move 
+//     }
+//     // int xStep = x_end-mouse_x; //TODO: test more extensively. //How far we can move in the x
+    
+//     if(distance_of_move > remaining_distance_needed){ //if the distance we can move is more than the distance we need to move
+    
+//       distance_of_move = remaining_distance_needed; //clamp in.
+//       xStep = total_distance_needed - curr_x;
+//     }
+
+//     remaining_distance_needed -= distance_of_move; //we are moving distance_of_move
+
+//     mouseDown(window_name,1); //click
+//     int moved_mouse_x = mouse_x+xStep;
+//     int moved_mouse_y = mouse_y + (xStep * slope);
+//     mouse_move(window_name, moved_mouse_x, moved_mouse_y,x_start, x_end, y_start, y_end); //drag
+//     mouseUp(window_name,1); //release
+    
+//     curr_x += xStep; //keep track of how far we've moved in the x.
+//   }
+// }
