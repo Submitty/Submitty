@@ -35,7 +35,8 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 4 Is it random?  (Is it different on each run?)"
+            "test_name": "Test 4 Is it random?  (Is it different on each run?)",
+            "testcase_message": "ERROR: See details below."
         },
         {
             "points_awarded": 0,

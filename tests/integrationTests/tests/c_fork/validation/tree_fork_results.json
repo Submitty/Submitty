@@ -12,7 +12,8 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 2 ./a.out 10"
+            "test_name": "Test 2 ./a.out 10",
+            "testcase_message": "ERROR: See output below."
         },
         {
             "autochecks": [
@@ -22,7 +23,8 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 3 ./a.out 30"
+            "test_name": "Test 3 ./a.out 30",
+            "testcase_message": "ERROR: See output below."
         },
         {
             "points_awarded": 0,

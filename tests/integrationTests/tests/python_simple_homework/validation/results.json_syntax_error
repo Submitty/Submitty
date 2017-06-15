@@ -16,7 +16,8 @@
 					"messages": ["WARNING: This file should be empty"]
 				}
 			],
-			"points_awarded": 0
+			"points_awarded": 0,
+            "testcase_message": "ERROR: See output below."
 		},
                 {
                         "points_awarded": 0,

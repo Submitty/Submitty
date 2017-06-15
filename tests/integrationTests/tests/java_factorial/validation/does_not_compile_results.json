@@ -3,6 +3,7 @@
 		{
 			"test_name": "Test 1 Compilation of student code: Factorial.java",
 			"points_awarded": 0,
+            "testcase_message": "ERROR/WARNING: See details below.",
                         "autochecks": [
                             {                                "description": "Compilation Errors and/or Warnings",
                                 "messages": [ "ERROR: This file should be empty!" ],
@@ -21,6 +22,7 @@
 		{
 			"test_name": "Test 2 Compilation of instructor test cases: *Test.java",
 			"points_awarded": 2,
+            "testcase_message": "ERROR/WARNING: See details below.",
                         "autochecks": [
                             {                                "description": "Compilation Errors and/or Warnings",
                                 "messages": [ "ERROR: This file should be empty!" ],
@@ -42,7 +44,8 @@
                                 "actual_file": "test03_execute_logfile.txt",                                "description": "Execution Logfile"
                             }
 			],
-			"points_awarded": 0
+			"points_awarded": 0,
+            "testcase_message": "ERROR: See details below."
                 },
                 {
                     "points_awarded": 0,

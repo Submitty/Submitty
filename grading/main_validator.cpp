@@ -209,18 +209,18 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       }
       else if (my_testcase.isCompilation()) {
         if (num_messages > 0)
-          testcase_message = "ERROR/WARNING: Click to see details.";
+          testcase_message = "ERROR/WARNING: See details below.";
       }
-      // do not change message if error message already set
-      else if (my_testcase.isExecution() && (testcase_message.find("ERROR") == std::string::npos)) {
+      else if (my_testcase.isExecution() && score >= 0.0001) {
         // has some error messages
         if (num_messages > 0)
-          testcase_message = "ERROR: Click to see details.";
+          testcase_message = "ERROR: See details below.";
         // compares output, not full points and no error messages
-        else if ((show_actual || show_expected) && (score >= 0.0001))
+        // details message has higher priority
+        else if ((show_actual || show_expected) && (testcase_message.find("details") == std::string::npos))
           testcase_message = "ERROR: See output below.";
         // not full points
-        else if (score >= 0.0001)
+        else if ((testcase_message.find("ERROR") == std::string::npos))
           testcase_message = "ERROR.";
       }
     }
@@ -308,7 +308,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       testcase_pts = (int)floor(my_score * my_testcase.getPoints());
       std::cout << "Grade: " << testcase_pts << std::endl;
     }
-    tc_j["testcase_message"] = testcase_message;
+    if (testcase_message != "") tc_j["testcase_message"] = testcase_message;
     tc_j["points_awarded"] = testcase_pts;
     automated_points_awarded += testcase_pts;
     if (!my_testcase.getHidden()) {

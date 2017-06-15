@@ -34,6 +34,8 @@ class GradeableTestcase extends AbstractModel {
     private $points_awarded = 0;
     private $log_file = "";
     private $autochecks = array();
+    /** @var bool */
+    private $show_testcase_message = true;
 
     /** @var string testcase message to show in the test case header */
     private $testcase_message = "";
@@ -56,6 +58,9 @@ class GradeableTestcase extends AbstractModel {
         }
         if (isset($testcase['hidden'])) {
             $this->hidden = $testcase['hidden'] === true;
+        }
+        if (isset($testcase['show_testcase_message'])) {
+            $this->show_testcase_message = $testcase['show_testcase_message'] === true;
         }
     }
     
@@ -164,6 +169,13 @@ class GradeableTestcase extends AbstractModel {
      */
     public function getTestcaseMessage() {
         return $this->testcase_message;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getShowTestcaseMessage() {
+        return $this->show_testcase_message;
     }
     
 }

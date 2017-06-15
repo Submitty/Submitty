@@ -10,7 +10,8 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 copy the cpp files.."
+            "test_name": "Test 1 copy the cpp files..",
+            "testcase_message": "ERROR: Required files missing."
         },
         {
             "autochecks": [
@@ -25,7 +26,8 @@
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 2 Reasonable Code Changes"
+            "test_name": "Test 2 Reasonable Code Changes",
+            "testcase_message": "ERROR: See details below."
         },
         {
             "points_awarded": 0,

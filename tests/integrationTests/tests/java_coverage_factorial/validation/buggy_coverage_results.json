@@ -15,7 +15,7 @@
 					"description": "JUnit EMMA instrumentation output"
 				}
 			],
-			"points_awarded": 0
+			"points_awarded": 0,
 		},
 		{
 			"test_name": "Test 4 Running student tests in hw0/tests/",
@@ -25,7 +25,8 @@
 					"messages": ["ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4"]
 				}
 			],
-			"points_awarded": 1
+			"points_awarded": 1,
+            "testcase_message": "ERROR: See details below."
 		},
 		{
 			"test_name": "Test 5 Generating coverage report for student tests",
@@ -50,7 +51,8 @@
 				"messages": ["ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4"]
 			    }
 			],
-			"points_awarded": 1
+			"points_awarded": 1,
+            "testcase_message": "ERROR: See details below."
                 },
                 {
                     "points_awarded": 0,

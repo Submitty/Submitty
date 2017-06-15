@@ -22,7 +22,8 @@
 					"description": "output.txt"
 				}
 			],
-			"points_awarded": 0
+			"points_awarded": 0,
+			"testcase_message": "ERROR: See output below."
 		},
 		{
 			"test_name": "Test 4 Test of by word comparison",
@@ -33,7 +34,8 @@
 					"description": "output.txt"
 				}
 			],
-			"points_awarded": 0
+			"points_awarded": 0,
+			"testcase_message": "ERROR: See output below."
 		},
 		{
 			"test_name": "Test 5 Test of by line comparison",
@@ -44,7 +46,8 @@
 					"description": "output.txt"
 				}
 			],
-			"points_awarded": 0
+			"points_awarded": 0,
+			"testcase_message": "ERROR: See output below."
 		},
 		{
 			"test_name": "Test 6 Test of by line without whitespace comparison",
@@ -55,7 +58,8 @@
 					"description": "output.txt"
 				}
 			],
-			"points_awarded": 0
+			"points_awarded": 0,
+			"testcase_message": "ERROR: See output below."
                 },
                 {
                         "points_awarded": 0,
