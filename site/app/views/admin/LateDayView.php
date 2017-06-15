@@ -5,7 +5,7 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class LateDayView extends AbstractView {
-    public function displayLateDays() {
+    public function displayLateDays($user_table_db_data) {
         $return = <<<HTML
 <div class="content">
     <h2>Late Days Allowed</h2>
@@ -27,13 +27,16 @@ class LateDayView extends AbstractView {
 
         </div>
     </div>
+HTML;
+        $return .= $this->configure_table($user_table_db_data);
+        $return .= <<<HTML
     </form>
 </div>
 HTML;
+
         return $return;
     }
 
-}
 
 
                 // <div class="btn btn-primary" type="submit" form="configForm"><i class="fa fa-save fa-fw"></i> Submit2</div>
@@ -47,10 +50,61 @@ HTML;
 
 
 
+    public function configure_table($db_data) {
+    //IN:  data from database used to build table of granted late day exceptions
+    //     for selected gradeable
+    //OUT: no return (although private view['student_review_table'] property is
+    //     filled)
+    //PURPOSE: Craft HTML required to display a table of existing late day
+    //         exceptions
 
+        if (!is_array($db_data) || count($db_data) < 1) {
+        //No late days in DB -- indicate as much.
 
+            $return = <<<HTML
+<p><em style="font-weight:bold; font-size:1.2em; font-style:normal;">No late days are currently entered.</em>
+HTML;
+        } else {
+        //Late days found in DB -- build table to display
 
+            //Table HEAD
+            $return = <<<HTML
+<table style="border:5px solid white; border-collapse:collapse; margin: 0 auto; text-align:center;">
+<caption style="caption-side:top; font-weight:bold; font-size:1.2em;">
+Late Days Allowed
+</caption>
+<th style="background:lavender; width:20%;">Student ID</th>
+<th style="background:lavender; width:20%;">First Name</th>
+<th style="background:lavender; width:20%;">Last Name</th>
+<th style="background:lavender; width:20%;">Total Allowed Late Days</th>
+<th style="background:lavender;">Effective Date</th>
+HTML;
 
+            //Table BODY
+            $cell_color = array('white', 'aliceblue');
+            foreach ($db_data as $index => $record) {
+            //     $firstname = getDisplayName($record);
+            //     // getUser()->getDisplayedFirstName()
+                $return .= <<<HTML
+<tr>
+<td>{$record['user_id']}</td>
+<td>{$record['user_firstname']}</td>
+<td>{$record['user_lastname']}</td>
+<td>{$record['allowed_late_days']}</td>
+<td>{$record['since_timestamp']}</td>
+</tr>
+HTML;
+            }
+
+            //Table TAIL
+            $return .= <<<HTML
+</table>
+HTML;
+        return $return;
+        }
+    }
+
+}
 
 
 

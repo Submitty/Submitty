@@ -806,7 +806,7 @@ VALUES (?, ?, ?, ?)", $params);
 
 
 
-    public function retrieve_users_from_db($g_id) {
+    public function retrieve_users_from_db() {
 //IN:  gradeable ID from database
 //OUT: all students who have late days.  Retrieves student rcs, first name,
 //     last name, timestamp and number of late days.
@@ -827,10 +827,10 @@ VALUES (?, ?, ?, ?)", $params);
           AND users.user_group=4
         ORDER BY
           users.user_email ASC,
-          late_days.since_timestamp DESC;",
-        array($g_id));
+          late_days.since_timestamp DESC;");
 
 
       return $this->database->rows(); 
+    }
 }
 

@@ -24,15 +24,13 @@ class LateDayController extends AbstractController {
 
 
 
-        // $user_table_db_data = retrieve_users_from_db();
-        // $view->configure_table($user_table_db_data);
+        $user_table_db_data = $this->core->getQueries()->retrieve_users_from_db();
 
-        $this->core->getOutput()->renderOutput(array('admin', 'LateDay'), 'displayLateDays');
+        $this->core->getOutput()->renderOutput(array('admin', 'LateDay'), 'displayLateDays', $user_table_db_data);
     }
 
     public function updateLateDays() {
         //Check to see if a CSV file was submitted.
-        $this->myfunction("hehe it works");
 
         // if (isset($_FILES['csv_upload'])) {
         //     $this->myfunction($_FILES['csv_upload']);
@@ -40,14 +38,16 @@ class LateDayController extends AbstractController {
         //     if($bool){
 
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
-
                 $data = array();
                 if (!($this->parse_and_validate_csv($_FILES['csv_upload']['tmp_name'], $data))) {
+                    $this->myfunction("IF");
                     $state = 'bad_upload';
                 } else {
-                    upsert($data);
+                    $this->myfunction("ELSE");
+                    $this->upsert($data);
                     $state = 'upsert_done';
                 }
+        $this->myfunction($state);
             // }
 
         //if no file upload, examine Student ID and Late Day input fields.
@@ -126,7 +126,7 @@ class LateDayController extends AbstractController {
 
 
 function myfunction($vartoecho) {
-    echo("GOT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    echo("GOT HERE");
     echo($vartoecho);
 }
 
