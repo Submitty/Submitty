@@ -17,10 +17,7 @@ class HWReportView extends AbstractView {
                 </td>
                 <td width="5%"> </td>
                 <td width="45%" style="position:relative">
-                    <form method="post" action="{$this->core->getConfig()->getTABaseUrl()}/account/ajax/admin-hw-report.php?course={$_GET['course']}&semester={$_GET['semester']}">
-                        <input type="hidden" value="{$_SESSION['csrf']}">
-                        <button type="submit" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate Homework Reports</button>
-                    </form>
+                    <button onclick="GenerateHWReport();" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate Homework Reports</button>
                 <td>
             </tr>
             <tr class="bar"></tr>

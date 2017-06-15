@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\libraries\Core;
 use app\libraries\Output;
+use app\models\HWReport;
 /*
 use app\report\HWReportView;
 use app\report\CSVReportView;
@@ -21,7 +22,7 @@ class ReportController extends AbstractController {
             case 'summary':
                 $this->showGradeSummary();
                 break;
-            case 'hw-generate':
+            case 'generatehw':
                 $this->generateHWReports();
                 break;
             default:
@@ -43,7 +44,16 @@ class ReportController extends AbstractController {
     }
     
     public function generateHWReports() {
-        
+        if(!isset($_REQUEST['csrf_token']) || $_REQUEST['csrf_token'] !== $this->core->getCsrfToken()) {
+            $response = array('status' => 'error', 'message' => 'Invalid CSRF Token');
+            $this->core->getOutput()->renderJson($response);
+            return $response;
+        }
+        $hw_report = new HWReport($this->core);
+        $hw_report->generateAllReports();
+        $response = array('status' => 'success', 'message' => 'Successfully Updated HWReports');
+        $this->core->getOutput()->renderJson($response);
+        return $response;
     }
 }
 ?>
