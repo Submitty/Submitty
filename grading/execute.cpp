@@ -701,14 +701,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
   my_path = getenv("PATH");
 
-
-  char* my_display = getenv("DISPLAY");
-  if (my_display == NULL) {
-    setenv("DISPLAY", ":0", 1);
-  }
-  else {
-    std::cout << "WARNING: DISPLAY NOT EMPTY, DISPLAY= " << (my_display ? my_display : "<empty>") << std::endl;
-  }
   //std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
   // set the locale so that special characters (e.g., the copyright
@@ -826,10 +818,11 @@ int execute(const std::string &cmd,
             const nlohmann::json &whole_config) {
 
   bool window_mode = false; //Tells us if the process is expected to spawn a window. 
+  
   if(actions.size() > 0)
   {
     std::cout <<"Window mode activated." << std::endl;
-    char* my_display = getenv("DISPLAY");
+    char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
     if (my_display == NULL) {
       setenv("DISPLAY", ":0", 1);
     }
