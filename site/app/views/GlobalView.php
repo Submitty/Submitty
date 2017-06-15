@@ -103,7 +103,7 @@ HTML;
                 <a href="{$ta_base_url}/account/admin-hw-report.php?course={$course}&semester={$semester}&this=HWReport">HWReport</a>
             </li>
             <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'hw'))}">New Port</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">New Port</a>
             </li>
 
 HTML;

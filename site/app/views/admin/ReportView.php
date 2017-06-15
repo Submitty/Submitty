@@ -3,8 +3,8 @@ namespace app\views\admin;
 
 use app\views\AbstractView;
 
-class HWReportView extends AbstractView {
-    public function showHWReport() {
+class ReportView extends AbstractView {
+    public function showReportUpdates() {
         $return = "";
         $return .= <<<HTML
 <div class="content">

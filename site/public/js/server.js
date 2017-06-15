@@ -458,8 +458,8 @@ $(function() {
     setupCheckboxCells();
 });
 
-function GenerateHWReport() {
-       submitAJAX(buildUrl({'component': 'admin', 'page': 'reports', 'action': 'generatehw'}), // url for updating hwreports
+function GenerateReport(action) {
+       submitAJAX(buildUrl({'component': 'admin', 'page': 'reports', 'action': action}), // url for updating hwreports
        {'csrf_token': csrfToken}, // Only need to send the csrf token, all other info already available to php 
        function() {
            var newMessage = "<div id='success-1' class='inner-message alert alert-success'> <a class='fa fa-times message-close' onclick='removeMessagePopup('success-1');'></a><i class='fa fa-times-circle'></i> Successfully Generated HWReports</div>";

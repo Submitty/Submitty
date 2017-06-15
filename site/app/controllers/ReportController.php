@@ -13,16 +13,16 @@ use app\report\GradeSummaryView;
 class ReportController extends AbstractController {
     public function run() {
         switch($_REQUEST['action']) {
-            case 'hw':
-                $this->showHWReport();
+            case 'reportpage':
+                $this->showReportPage();
                 break;
             case 'csv':
                 $this->showCSVReport();
                 break;
             case 'summary':
-                $this->showGradeSummary();
+                $this->generateGradeSummary();
                 break;
-            case 'generatehw':
+            case 'hwreport':
                 $this->generateHWReports();
                 break;
             default:
@@ -31,15 +31,15 @@ class ReportController extends AbstractController {
         }
     }
     
-    public function showHWReport() {
-        $this->core->getOutput()->renderOutput(array('admin', 'HWReport'), 'showHWReport');
+    public function showReportPage() {
+        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
     
     public function showCSVReport() {
         
     }
     
-    public function showGradeSummary() {
+    public function generateGradeSummary() {
         
     }
     
