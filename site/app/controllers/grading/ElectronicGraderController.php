@@ -117,6 +117,9 @@ class ElectronicGraderController extends AbstractController {
     }
 
     public function showGrading() {
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage');
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $who_id = $_REQUEST['who_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable);
     }
 }

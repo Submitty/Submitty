@@ -896,6 +896,10 @@ class Gradeable extends AbstractModel {
     public function setActiveVersion($version) {
         $this->active_version = $version;
     }
+
+    public function getSubmissionTime() {
+        return $this->submission_time->format("m/d/Y h:i:s A");
+    }
     
     public function getGdId() {
         return $this->gd_id;

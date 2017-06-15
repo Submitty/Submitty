@@ -239,7 +239,7 @@ HTML;
                     $contents = "Grade";
                 }
                 $return .= <<<HTML
-                    <a class="btn btn-default" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'view'=>$view))}">
+                    <a class="btn btn-default" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId()))}">
                         {$contents}
                     </a>
                     <a class="btn {$btn_class}" href="{$this->core->getConfig()->getTABaseUrl()}account/index.php?g_id={$gradeable->getId()}&amp;individual={$row->getUser()->getId()}&amp;course={$this->core->getConfig()->getCourse()}&amp;semester={$this->core->getConfig()->getSemester()}">
@@ -262,11 +262,11 @@ HTML;
         return $return;
     }
 
-    public function hwGradingPage() {
+    public function hwGradingPage($gradeable) {
         $return = <<<HTML
 <div class="grading_toolbar">
     <a><i title="Go to the previous student (Press Left Arrow)" class="icon-left"></i></a>
-    <a><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
+    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'summary', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
     <a><i title="Go to the next student (Press Right Arrow)" class="icon-right"></i></a>
     <i title="Reset Rubric Panel Positions (Press R)" class="icon-refresh" onclick="handleKeyPress('KeyR');"></i>
     <i title="Show/Hide Auto-Grading Testcases (Press A)" class="icon-auto-grading-results" onclick="handleKeyPress('KeyA');"></i>
@@ -282,13 +282,32 @@ HTML;
 
 <div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:185px; width:48%; height:36%;">
     <span class="grading_label">Auto-Grading Testcases</span>
+    <div class="inner-container">
+        <br />
+HTML;
+    if ($gradeable->getActiveVersion() === 0){
+        $return .= <<<HTML
+        No Submission <br />
+HTML;
+    }
+    else{
+        $return .= <<<HTML
+        Submitted: {$gradeable->getSubmissionTime()}<br />
+        Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}
+HTML;
+    }
+    $return .= <<<HTML
+    </div>
 </div>
+
 <div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
     <span class="grading_label">Grading Rubric</span>
 </div>
+
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
     <span class="grading_label">Submission and Results Browser</span>
 </div>
+
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
     <span class="grading_label">Student Information</span>
 </div>
@@ -312,8 +331,7 @@ HTML;
             }
         });
 
-        if(document.cookie.replace(/(?:(?:^|.*;\s*)cookie_version\s*\=\s*([^;]*).*$)|^.*$/, "$1") != cookie_version)
-        {
+        if(document.cookie.replace(/(?:(?:^|.*;\s*)cookie_version\s*\=\s*([^;]*).*$)|^.*$/, "$1") != cookie_version) {
             //If cookie version is not the same as the current version then toggle the visibility of each
             //rubric panel then update the cookies
             deleteCookies();

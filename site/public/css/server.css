@@ -787,6 +787,12 @@ table .instructor .two-options{
     background: white;
 }
 
+.grading_toolbar i:not(.icon-disabled):hover{
+    cursor: pointer;
+    box-shadow: 0px 0px 5px 5px yellow;
+    background-color: yellow;
+}
+
 .icon-auto-grading-results {
     background: url('../img/glyphicons-40-notes.png') no-repeat;
     display: inline-block;
@@ -920,4 +926,11 @@ progress::-webkit-progress-value {
     padding: 10px;
     font-weight: bold;
     font-size: 16pt;
+}
+
+.inner-container {
+    width: 95%;
+    margin: auto auto auto auto;
+    /*height: 100%;*/
+    margin-bottom: 20px;
 }
