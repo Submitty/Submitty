@@ -84,5 +84,4 @@ class GradeableAutocheck extends AbstractModel {
     public function getMessages() {
         return $this->messages;
     }
-
 }

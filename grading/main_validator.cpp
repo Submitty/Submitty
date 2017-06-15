@@ -212,14 +212,12 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
           testcase_message = "ERROR/WARNING: See details below.";
       }
       else if (my_testcase.isExecution() && score >= 0.0001) {
-        // has some error messages
         if (num_messages > 0)
           testcase_message = "ERROR: See details below.";
-        // compares output, not full points and no error messages
-        // details message has higher priority
+        // cannot overwrite "ERROR: See details below."
         else if ((show_actual || show_expected) && (testcase_message.find("details") == std::string::npos))
           testcase_message = "ERROR: See output below.";
-        // not full points
+        // cannot overwrite "ERROR: See details below." or "ERROR: See details below."
         else if ((testcase_message.find("ERROR") == std::string::npos))
           testcase_message = "ERROR.";
       }
