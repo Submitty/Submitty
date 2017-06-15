@@ -11,6 +11,9 @@ class ElectronicGraderController extends AbstractController {
             case 'summary':
                 $this->showSummary();
                 break;
+            case 'grade':
+                $this->showGrading();
+                break;
             default:
                 $this->showStatus();
                 break;
@@ -111,5 +114,9 @@ class ElectronicGraderController extends AbstractController {
 
         $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'summaryPage', $gradeable, $rows, $graders);
+    }
+
+    public function showGrading() {
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage');
     }
 }

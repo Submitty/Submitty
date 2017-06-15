@@ -425,7 +425,7 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
         $.each(document.cookie.split(/; */), function(){
             var cookie = this.split("=")
            if(!cookie[1] || cookie[1] == 'undefined'){
-                deleteCookies();
+                //deleteCookies();
            }
         });
 
@@ -433,16 +433,16 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
         {
             //If cookie version is not the same as the current version then toggle the visibility of each
             //rubric panel then update the cookies
-            deleteCookies();
+            //deleteCookies();
             handleKeyPress("KeyG");
             handleKeyPress("KeyA");
             handleKeyPress("KeyS");
             handleKeyPress("KeyO");
             handleKeyPress("KeyR");
-            updateCookies();
+            //updateCookies();
         }
         else{
-            readCookies();
+            //readCookies();
         }
     });
 
@@ -562,23 +562,23 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
                 $("#stats").attr("style", "bottom: 0px; right:20px; width:35%; height: 25%; display: block;");
                 $('#grade .icon-grading-panel').addClass('icon-selected');
                 $("#rubric").attr("style", "top:50px; right:20px;width:35%; height: 65%; display: block;");
-                deleteCookies();
-                updateCookies();
+                //deleteCookies();
+                //updateCookies();
                 break;
             default:
                 break;
         }
-        updateCookies();
+        //updateCookies();
     }
 
     $(".draggable").draggable({snap:false, grid:[2, 2], stack:".draggable"}).resizable();
 
     $(".draggable").on("dragstop", function(){
-        updateCookies();
+        //updateCookies();
     });
 
     $(".draggable").on("resizestop", function(){
-        updateCookies();
+        //updateCookies();
     });
 
     function updateCookies(){

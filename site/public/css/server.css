@@ -774,3 +774,150 @@ table .instructor .two-options{
     visibility: visible;
     opacity: 1;
 }
+
+/*===========================================================================*/
+
+.grading_toolbar {
+    position:fixed;
+    top: 125px;
+    left: 0px;
+    height: 41px;
+    width: 290px;
+    z-index: 1099;
+    background: white;
+}
+
+.icon-auto-grading-results {
+    background: url('../img/glyphicons-40-notes.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-selected.icon-auto-grading-results {
+    box-shadow: 0px 0px 5px 5px #fd4472;
+    background-color: #fd4472;
+}
+
+.icon-grading-panel {
+    background: url('../img/glyphicons-151-edit.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-selected.icon-grading-panel {
+    box-shadow: 0px 0px 5px 5px #00e08e;
+    background-color: #00e08e;
+}
+
+.icon-files {
+    background: url('../img/glyphicons-145-folder-open.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-selected.icon-files {
+    box-shadow: 0px 0px 5px 5px #00b3fa;
+    background-color: #00b3fa;
+}
+
+.icon-status {
+    background: url('../img/glyphicons-4-user.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-selected.icon-status {
+    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.icon-refresh{
+    background: url('../img/refresh-page-option.png') no-repeat;
+    background-size: 100%;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+
+.icon-left {
+    background: url('../img/glyphicons-225-chevron-left.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+
+.icon-right {
+    background: url('../img/glyphicons-224-chevron-right.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+
+.icon-home {
+    background: url('../img/glyphicons-21-home.png') no-repeat -2px -1px;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+
+.progress_bar {
+    position:fixed;
+    top: 125px;
+    left: 290px;
+    height: 31px;
+    width: 250px;
+    z-index: 1099;
+    background: white;
+    border: 5px solid white;
+}
+
+progress {
+    border-radius: 2px;
+}
+
+progress::-webkit-progress-value {
+    background: #1E90FF;
+}
+
+.draggable {
+}
+
+.rubric_panel {
+    cursor: move;
+    position: absolute;
+    background: white;
+    opacity: .95;
+    display: none;
+    overflow:auto;
+}
+
+#autograding_results.rubric_panel {
+    border:5px solid #c40233 ;
+}
+
+#grading_rubric.rubric_panel {
+    border:5px solid #00a368;
+}
+
+#submission_browser.rubric_panel {
+    border:5px solid #0088bf ;
+}
+
+#student_info.rubric_panel {
+    border:5px solid black;
+}
+
+.grading_label {
+    display: inline-block;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 16pt;
+}
