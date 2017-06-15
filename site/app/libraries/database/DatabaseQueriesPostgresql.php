@@ -9,6 +9,7 @@ use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableVersion;
 use app\models\User;
+use app\models\Team;
 
 class DatabaseQueriesPostgresql implements IDatabaseQueries{
     /** @var Core */
@@ -125,8 +126,20 @@ WHERE gc.g_id=?
         return $return;
     }
 
-    public function getGradeableVersions($g_id, $user_id, $due_date) {
-        $this->database->query("
+    public function getGradeableVersions($g_id, $user_id, $team_id, $due_date) {
+        if ($user_id === null) {
+            $this->database->query("
+SELECT egd.*, egv.active_version = egd.g_version as active_version
+FROM electronic_gradeable_data AS egd
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_version
+) AS egv ON egv.active_version = egd.g_version AND egv.team_id = egd.team_id AND egv.g_id = egd.g_id
+WHERE egd.g_id=? AND egd.team_id=?
+ORDER BY egd.g_version", array($g_id, $team_id));
+        }
+        else {
+            $this->database->query("
 SELECT egd.*, egv.active_version = egd.g_version as active_version
 FROM electronic_gradeable_data AS egd
 LEFT JOIN (
@@ -135,6 +148,8 @@ LEFT JOIN (
 ) AS egv ON egv.active_version = egd.g_version AND egv.user_id = egd.user_id AND egv.g_id = egd.g_id
 WHERE egd.g_id=? AND egd.user_id=?
 ORDER BY egd.g_version", array($g_id, $user_id));
+        }
+        
         $return = array();
         foreach ($this->database->rows() as $row) {
             $row['submission_time'] = new \DateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
@@ -246,7 +261,8 @@ SELECT";
   CASE WHEN egd.active_version IS NULL THEN 
     0 ELSE 
     egd.active_version 
-  END AS active_version, 
+  END AS active_version,
+  egd.team_id,
   egd.g_version,
   egd.autograding_non_hidden_non_extra_credit,
   egd.autograding_non_hidden_extra_credit,
@@ -303,8 +319,12 @@ LEFT JOIN (
     egd.*,
     egv.active_version
   FROM electronic_gradeable_version AS egv, electronic_gradeable_data AS egd
-  WHERE egv.active_version = egd.g_version AND egv.g_id = egd.g_id AND egv.user_id = egd.user_id
-) AS egd ON g.g_id = egd.g_id AND u.user_id = egd.user_id";
+  WHERE egv.active_version = egd.g_version AND egv.g_id = egd.g_id AND (egv.user_id = egd.user_id OR egv.team_id = egd.team_id)
+) AS egd ON g.g_id = egd.g_id AND (u.user_id = egd.user_id OR u.user_id IN ( 
+    SELECT
+      t.user_id
+    FROM gradeable_teams AS gt, teams AS t
+    WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egd.team_id AND t.state = 1))";
         }
 
         $where = array();
@@ -611,27 +631,39 @@ ORDER BY user_id ASC");
         $this->database->query("UPDATE users SET rotating_section=? WHERE user_id IN ({$update_string})", $update_array);
     }
 
-    public function insertVersionDetails($g_id, $user_id, $version, $timestamp) {
+    public function insertVersionDetails($g_id, $user_id, $team_id, $version, $timestamp) {
         $this->database->query("
 INSERT INTO electronic_gradeable_data 
-(g_id, user_id, g_version, autograding_non_hidden_non_extra_credit, autograding_non_hidden_extra_credit, 
+(g_id, user_id, team_id, g_version, autograding_non_hidden_non_extra_credit, autograding_non_hidden_extra_credit, 
 autograding_hidden_non_extra_credit, autograding_hidden_extra_credit, submission_time) 
-VALUES(?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $version, $timestamp));
-        $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND user_id=?",
-            array($g_id, $user_id));
-        $row = $this->database->row();
-        if (!empty($row)) {
-            $this->updateActiveVersion($g_id, $user_id, $version);
+VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $timestamp));
+        if ($user_id === null) {
+            $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND team_id=?",
+            array($g_id, $team_id));
         }
         else {
-            $this->database->query("INSERT INTO electronic_gradeable_version (g_id, user_id, active_version) VALUES(?, ?, ?)",
-                array($g_id, $user_id, $version));
+            $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND user_id=?",
+            array($g_id, $user_id));
+        }
+        $row = $this->database->row();
+        if (!empty($row)) {
+            $this->updateActiveVersion($g_id, $user_id, $team_id, $version);
+        }
+        else {
+            $this->database->query("INSERT INTO electronic_gradeable_version (g_id, user_id, team_id, active_version) VALUES(?, ?, ?, ?)",
+                array($g_id, $user_id, $team_id, $version));
         }
     }
 
-    public function updateActiveVersion($g_id, $user_id, $version) {
-        $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND user_id=?",
+    public function updateActiveVersion($g_id, $user_id, $team_id, $version) {
+        if ($user_id === null) {
+            $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND team_id=?",
+            array($version, $g_id, $team_id));
+        }
+        else {
+            $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND user_id=?",
             array($version, $g_id, $user_id));
+        }  
     }
 
     public function updateGradeableData(Gradeable $gradeable) {
@@ -701,5 +733,74 @@ VALUES (?, ?, ?, ?)", $params);
     public function getAllGradeablesIds() {
         $this->database->query("SELECT g_id FROM gradeable ORDER BY g_id");
         return $this->database->rows();
+    }
+
+    public function newTeam($g_id, $user_id) {
+        $this->database->query("SELECT * FROM gradeable_teams ORDER BY team_id");
+        $team_id_prefix = count($this->database->rows());
+        $team_id = "{$team_id_prefix}_{$user_id}";
+        $this->database->query("INSERT INTO gradeable_teams (team_id, g_id) VALUES(?,?)", array($team_id, $g_id));
+        $this->database->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
+    }
+
+    public function newTeamInvite($team_id, $user_id) {
+        $this->database->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,0)", array($team_id, $user_id,));
+    }
+
+    public function newTeamMember($team_id, $user_id) {
+        $this->database->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id,));
+    }
+
+    public function removeTeamUser($g_id, $user_id) {
+        $this->database->query("
+          DELETE FROM teams AS t
+          USING gradeable_teams AS gt
+          WHERE gt.g_id=? AND gt.team_id = t.team_id AND t.user_id=?",
+          array($g_id, $user_id));
+    }
+
+    public function getTeamsByGradeableId($g_id) {
+        $this->database->query("
+          SELECT gt.team_id, t.user_id, t.state
+          FROM gradeable_teams AS gt 
+          LEFT JOIN (
+            SELECT *
+            FROM teams
+          ) AS t ON gt.team_id=t.team_id
+          WHERE g_id=?
+          ORDER BY team_id",
+          array($g_id));
+
+        $team_rows = array();
+        foreach($this->database->rows() as $row) {
+            if (!isset($team_rows[$row['team_id']])){
+                $team_rows[$row['team_id']] = array();
+            }
+            $team_rows[$row['team_id']][] = $row;
+        }
+        $teams = array();
+        foreach($team_rows as $team_row) {
+            $teams[] = new Team($team_row);
+        }
+        return $teams;
+    }
+
+    public function getTeamByUserId($g_id, $user_id) {
+        $this->database->query("
+          SELECT team_id, user_id, state
+          FROM gradeable_teams NATURAL JOIN teams
+          WHERE g_id=? AND team_id IN (
+            SELECT team_id
+            FROM teams
+            WHERE user_id=?)",
+          array($g_id, $user_id));
+
+        if (count($this->database->rows()) === 0) {
+            return null;
+        }
+        else {
+            $team = new Team($this->database->rows());
+            return $team;
+        }
     }
 }

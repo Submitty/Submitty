@@ -59,8 +59,7 @@ if [ ${VAGRANT} == 1 ]; then
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
 ##    http://192.168.56.101 (submission)                  ##
-##    http://192.168.56.102 (cgi-bin scripts)             ##
-##    http://192.168.56.103 (svn)                         ##
+##    http://192.168.56.101/cgi-bin (cgi-bin scripts)     ##
 ##    http://192.168.56.101/hwgrading (tagrading)         ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
@@ -70,10 +69,6 @@ if [ ${VAGRANT} == 1 ]; then
 ############################################################
 ' > /etc/motd
     chmod +rx /etc/motd
-
-    echo "192.168.56.101    test-submit test-submit.cs.rpi.edu" >> /etc/hosts
-    echo "192.168.56.102    test-cgi test-cgi.cs.rpi.edu" >> /etc/hosts
-    echo "192.168.56.103    test-svn test-svn.cs.rpi.edu" >> /etc/hosts
 fi
 
 #################################################################
@@ -235,11 +230,6 @@ apt-get install -qq build-essential pkg-config flex bison
 apt-get install -qq libpcre3 libpcre3-dev
 apt-get install -qq splint indent
 
-# SVN
-
-apt-get install -qqy subversion subversion-tools
-apt-get install -qqy libapache2-svn
-
 # Enable PHP5-mcrypt
 #php5enmod mcrypt
 
@@ -387,34 +377,6 @@ fi
 
 a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
 
-# If you have real certificates, follow the directions from your
-# certificate provider.
-#
-# If you are just developing and do not have real ssl certificates,
-# follow these directions for creating a self-signed (aka “snakeoil
-# certificate”)
-#
-# If it doesn’t already exist, create directory path
-#   /etc/apache2/ssl/
-#
-# An expiration of 365000 days (roughly 1000 years) is meant so that
-# the certificate essentially never expires.  make the certificates
-# world readable (but not the key):
-
-mkdir /etc/apache2/ssl
-cd /etc/apache2/ssl
-echo "creating ssl certificates"
-
-echo -e "US
-New York
-Troy
-RPI
-CSCI
-.
-." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout svn.key -out svn.crt > /dev/null 2>&1
-
-chmod o+r svn.crt
-
 echo -e "#%PAM-1.0
 auth required pam_unix.so
 account required pam_unix.so" > /etc/pam.d/httpd
@@ -431,20 +393,22 @@ fi
 # comment out directory configs - should be converted to something more flexible
 sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
-# remove default sites which would cause server to mess up
-rm /etc/apache2/sites*/000-default.conf
-rm /etc/apache2/sites*/default-ssl.conf
+if [ ${VAGRANT} == 1 ]; then
+    # remove default sites which would cause server to mess up
+    rm /etc/apache2/sites*/000-default.conf
+    rm /etc/apache2/sites*/default-ssl.conf
 
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/cgi.conf /etc/apache2/sites-available/cgi.conf
+    cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
+    cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
+
+    # permissions: rw- r-- ---
+    chmod 0640 /etc/apache2/sites-available/*.conf
+    a2ensite submitty
+fi
+
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
-
-# permissions: rw- r-- ---
-chmod 0640 /etc/apache2/sites-available/*.conf
 chmod 0640 /etc/apache2/suexec/www-data
-a2ensite submitty
-a2ensite cgi
+
 
 #################################################################
 # PHP SETUP
@@ -476,6 +440,11 @@ DISABLED_FUNCTIONS+="pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifex
 DISABLED_FUNCTIONS+="pcntl_wifsignaled,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,"
 DISABLED_FUNCTIONS+="pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,"
 DISABLED_FUNCTIONS+="pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,"
+
+if [ ${VAGRANT} != 1 ]; then
+    DISABLED_FUNCTIONS+="phpinfo,"
+fi
+
 sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/7.0/fpm/php.ini
 
 # create directories and fix permissions
@@ -485,21 +454,6 @@ mkdir -p ${SUBMITTY_DATA_DIR}
 # one way to create your list is by listing all of the userids in /home
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
 ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
-
-
-#################################################################
-# SVN SETUP
-#################
-a2enmod dav
-a2enmod dav_fs
-a2enmod authz_svn
-a2enmod authz_groupfile
-
-# Choose a directory for holding your subversion files that will get
-# backed up if it is a production server.  We use /var/lib/svn by
-# default.
-mkdir -p /var/lib/svn
-chmod g+s /var/lib/svn
 
 #################################################################
 # POSTGRES SETUP
@@ -563,8 +517,6 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 http://192.168.56.101
-http://192.168.56.102
-svn+ssh:192.168.56.103
 y" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else
 	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
@@ -573,12 +525,14 @@ fi
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 #source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
 
-source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
-
-if [ ${VAGRANT} == 1 ]; then
-	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
-	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
-fi
+mkdir -p ${SUBMITTY_DATA_DIR}/instructors
+mkdir -p ${SUBMITTY_DATA_DIR}/bin
+touch ${SUBMITTY_DATA_DIR}/instructors/authlist
+touch ${SUBMITTY_DATA_DIR}/instructors/valid
+[ ! -f ${SUBMITTY_DATA_DIR}/bin/authonly.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/authonly.pl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
+[ ! -f ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/validate.auth.pl ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl
+chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
+chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
 
 sudo mkdir -p /usr/lib/cgi-bin
 sudo chown -R www-data:www-data /usr/lib/cgi-bin
@@ -621,30 +575,6 @@ chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
 # With this line, subdirectories inherit the group by default and
 # blocks r/w access to the directory by others on the system.
 chmod 2771 ${SUBMITTY_INSTALL_DIR}
-
-#################################################################
-# CREATE SVN GROUPS
-###################
-# We can't do this when we install the stuff for SVN as the groups
-# are created when setting up the courses. This should also probably
-# be moved into setup_sample_courses.py
-# make a group and subdirectory for any classes requiring subversion
-# repositories:
-# mkdir -p /var/lib/svn/csci2600
-# touch /var/lib/svn/svngroups
-# chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
-# if [ ${VAGRANT} == 1 ]; then
-    # set up ssh keys for hwcron to connect to the subversion
-    # repository (do not use root/sudo except as shown)
-#	su hwcron
-        # generate the key (accept the defaults):
-#	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null 2>&1
-#	echo "hwcron" > password.txt
-        # copy the key to test-svn:
-#	sshpass -f password.txt ssh-copy-id hwcron@test-svn
-#	rm password.txt
-#	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
-#fi
 
 #################################################################
 # RESTART SERVICES

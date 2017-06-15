@@ -37,8 +37,8 @@ class Gradeable extends AbstractModel {
     /** @var string Instructions to give to TA for grading */
     protected $ta_instructions = "";
     
-    /** @var bool Is this a team gradeable */
-    protected $team_gradeable = false;
+    /** @var bool Is this a team assignment */
+    protected $team_assignment = false;
     
     /** @var string Iris Bucket to place gradeable */
     protected $bucket = null;
@@ -216,7 +216,7 @@ class Gradeable extends AbstractModel {
 
         $this->ta_instructions = $details['g_overall_ta_instructions'];
         $this->instructions_url = $details['g_instructions_url'];
-        //$this->team_gradeable = isset($details['team-assignment']) ? $details['team-assignment'] === "yes" : "no";
+        $this->team_assignment = isset($details['g_team_assignment']) ? $details['g_team_assignment'] === true : false;
         $this->type = $details['g_gradeable_type'];
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);
@@ -283,6 +283,10 @@ class Gradeable extends AbstractModel {
                     $this->graded_tagrading += $this->components[$component_details['gc_order']]->getScore();
                 }
             }
+            // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
+            // either write an inner JOIN on that aggregation to order stuff, and then have it aggregated, or we can
+            // just order it here, which is simpler in the long run and not really a performance problem.
+            ksort($this->components);
             // NOTE: the TA grading total may be negative!
         }
 
@@ -386,9 +390,17 @@ class Gradeable extends AbstractModel {
         $interactive_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive";
         $batch_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_batch";
 
+        $user_id = $this->core->getUser()->getId();
+        if ($this->team_assignment) {
+            $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
+            if ($team !== null) {
+                $user_id = $team->getId();
+            }
+        }
+
         $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
                                           $this->core->getConfig()->getCourse(), $this->id,
-                                          $this->core->getUser()->getId(), $this->current));
+                                          $user_id, $this->current));
         $grade_file = "GRADING_".$queue_file;
 
         $this->in_interactive_queue = file_exists($interactive_queue."/".$queue_file);
@@ -495,15 +507,26 @@ class Gradeable extends AbstractModel {
             return;
         }
 
+        $user_id = $this->core->getUser()->getId();
+        if ($this->team_assignment) {
+            $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
+            if ($team !== null) {
+                $user_id = $team->getId();
+            }
+            $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, null, $user_id, $this->getDueDate());
+        }
+        else {
+            $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $user_id, null, $this->getDueDate());
+        }
+        
+
         $course_path = $this->core->getConfig()->getCoursePath();
 
-        $submission_path = $course_path."/submissions/".$this->id."/".$this->core->getUser()->getId();
-        $svn_path = $course_path."/checkout/".$this->id."/".$this->core->getUser()->getId();
-        $results_path = $course_path."/results/".$this->id."/".$this->core->getUser()->getId();
+        $submission_path = $course_path."/submissions/".$this->id."/".$user_id;
+        $svn_path = $course_path."/checkout/".$this->id."/".$user_id;
+        $results_path = $course_path."/results/".$this->id."/".$user_id;
 
         //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
-        $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $this->core->getUser()->getId(), $this->getDueDate());
-
         if (count($this->versions) > 0) {
             $this->highest = Utils::getLastArrayElement($this->versions)->getVersion();
         }
@@ -518,6 +541,9 @@ class Gradeable extends AbstractModel {
             $this->current = $this->active_version;
         }
         else if ($this->current > $this->submissions) {
+            $this->current = $this->active_version;
+        }
+        else if (!isset($this->versions[$this->current]) && $this->active_version > 0) {
             $this->current = $this->active_version;
         }
 
@@ -572,7 +598,7 @@ class Gradeable extends AbstractModel {
             }
         }
 
-        $grade_file = $this->core->getConfig()->getCoursePath()."/reports/".$this->getId()."/".$this->core->getUser()->getId().".txt";
+        $grade_file = $this->core->getConfig()->getCoursePath()."/reports/".$this->getId()."/".$user_id.".txt";
         if (is_file($grade_file)) {
             $this->grade_file = htmlentities(file_get_contents($grade_file));
         }
@@ -588,6 +614,10 @@ class Gradeable extends AbstractModel {
 
     public function getType() {
         return $this->type;
+    }
+
+    public function isTeamAssignment() {
+        return $this->team_assignment;
     }
 
     public function getNumParts() {
