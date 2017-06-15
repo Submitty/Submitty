@@ -71,17 +71,17 @@ HTML;
         }
 
         if($action == 'lab'){
-            $return .= <<<HTML
-    <i class="fa fa-question-circle tooltip" style="float: right" aria-hidden="true">
-        <span class="tooltiptext">
-            No Color - No Credit<br />
-            Dark Blue - Full Credit<br />
-            Light Blue - Half Credit<br />
-            Red - [SAVE ERROR] Refresh Page
-        </span>
-    </i>
-HTML;
+            $info = "No Color - No Credit<br />
+                    Dark Blue - Full Credit<br />
+                    Light Blue - Half Credit<br />
+                    Red - [SAVE ERROR] Refresh Page";
         }
+        else{
+            $info = "Red - [SAVE ERROR] Refresh Page";
+        }
+            $return .= <<<HTML
+    <i class="fa fa-question-circle tooltip" style="float: right" aria-hidden="true"><span class="tooltiptext">$info</span></i>
+HTML;
 
         $return .= <<<HTML
     <h2>{$gradeable->getName()}</h2>
