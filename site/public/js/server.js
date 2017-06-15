@@ -459,14 +459,23 @@ $(function() {
 });
 
 function GenerateReport(action) {
-       submitAJAX(buildUrl({'component': 'admin', 'page': 'reports', 'action': action}), // url for updating hwreports
-       {'csrf_token': csrfToken}, // Only need to send the csrf token, all other info already available to php 
-       function() {
-           var newMessage = "<div id='success-1' class='inner-message alert alert-success'> <a class='fa fa-times message-close' onclick='removeMessagePopup('success-1');'></a><i class='fa fa-times-circle'></i> Successfully Generated HWReports</div>";
-           document.getElementById("messages").InnerHTML += newMessage;
-       },
-       function() {
-           var newMessage = "<div id='error-1' class='inner-message alert alert-error'> <a class='fa fa-times message-close' onclick='removeMessagePopup('error-1');'></a><i class='fa fa-times-circle'></i> Could not generate HWReports</div>";
-           document.getElementById("messages").InnerHTML += newMessage;
-       });
+    submitAJAX(buildUrl({'component': 'admin', 'page': 'reports', 'action': action}), // url for updating hwreports
+    {'csrf_token': csrfToken}, // Only need to send the csrf token, all other info already available to php 
+    function() {
+        var newMessage = "<div id='success-1' class='inner-message alert alert-success'> <a class='fa fa-times message-close' onclick='removeMessagePopup('success-1');'></a><i class='fa fa-times-circle'></i> Successfully Generated ";
+        if(action == 'hwreport') {
+            newMessage += "HWReports </div>";
+        }
+        else if(action == 'gradesummary') {
+            newMessage += "Grade Summaries</div>";
+        }
+        else if(action == 'csv') {
+            newMessage += "CSV Reports</div>";
+        }
+        document.getElementById("messages").InnerHTML += newMessage;
+    },
+    function() {
+        var newMessage = "<div id='error-1' class='inner-message alert alert-error'> <a class='fa fa-times message-close' onclick='removeMessagePopup('error-1');'></a><i class='fa fa-times-circle'></i> Could not generate HWReports</div>";
+        document.getElementById("messages").InnerHTML += newMessage;
+    });
 }

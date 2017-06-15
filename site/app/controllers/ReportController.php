@@ -20,7 +20,7 @@ class ReportController extends AbstractController {
                 $this->showCSVReport();
                 break;
             case 'summary':
-                $this->generateGradeSummary();
+                $this->generateGradeSummaries();
                 break;
             case 'hwreport':
                 $this->generateHWReports();
@@ -39,7 +39,7 @@ class ReportController extends AbstractController {
         
     }
     
-    public function generateGradeSummary() {
+    public function generateGradeSummaries() {
         
     }
     
