@@ -16,12 +16,7 @@ class SimpleGraderView extends AbstractView {
      * @return string
      */
     public function simpleDisplay($gradeable, $rows, $graders) {
-        if($gradeable->getType() == 1){
-            $action = 'lab';
-        }
-        else{
-            $action = 'numeric';
-        }
+        $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 10px; margin-left: 20px">
