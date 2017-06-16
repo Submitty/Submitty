@@ -58,56 +58,25 @@ class LateDayController extends AbstractController {
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
             }
 
-            if (!isset($_POST['user_id']) || $_POST['user_id'] == "") {
-                $_SESSION['messages']['error'][] = "Student ID can not be blank";
+            if (!isset($_POST['user_id']) || count($this->core->getQueries()->getUserById($_POST['user_id'])) !== 1) {
+                $_SESSION['messages']['error'][] = "Invalid Student ID";
                 $_SESSION['request'] = $_POST;
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
             }
-            if (!isset($_POST['datestamp']) || $_POST['datestamp'] == "") {
-                $_SESSION['messages']['error'][] = "Datestamp can not be blank";
+            if (!isset($_POST['datestamp']) || !$this->validate_timestamp($_POST['datestamp'])) {
+                $_SESSION['messages']['error'][] = "Datestamp must be mm/dd/yy";
                 $_SESSION['request'] = $_POST;
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
             }
-            if (!isset($_POST['late_days']) || $_POST['late_days'] == "") {
-                $_SESSION['messages']['error'][] = "Late Days can not be blank";
+            if (!isset($_POST['late_days']) || !ctype_digit($_POST['late_days'])) {
+                $_SESSION['messages']['error'][] = "Late Days must be a nonnegative integer";
                 $_SESSION['request'] = $_POST;
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
             }
 
         }
-// //Check to see if a CSV file was submitted.
-// if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
 
-//     $data = array();
-//     if (!parse_and_validate_csv($_FILES['csv_upload']['tmp_name'], $data)) {
-//         $state = 'bad_upload';
-//     } else {
-//         upsert($data);
-//         $state = 'upsert_done';
-//     }
 
-// //if no file upload, examine Student ID and Late Day input fields.
-// } else if (isset($_POST['user_id'])   && ($_POST['user_id']   !== "") &&
-//            isset($_POST['late_days']) && ($_POST['late_days'] !== "") &&
-//            isset($_POST['datestamp']) && ($_POST['datestamp'] !== "")) {
-
-//     //Validate that late days entered is an integer >= 0.
-//     //Negative values will fail ctype_digit test.
-//     if (!ctype_digit($_POST['late_days'])) {
-//         $state = 'late_days_not_integer';
-//     }
-
-//     //Timestamp validation
-//     if (!validate_timestamp($_POST['datestamp'])) {
-//         $state = 'invalid_datestamp';
-//     }
-
-//     //Validate that student does exist in DB (per rcs_id)
-//     //"Student Not Found" error has precedence over late days being non-numerical
-//     //as it is the more likely error to happen.
-//     if (!verify_user_in_db($_POST['user_id'])) {
-//         $state = 'user_not_found';
-//     }
 
 //     //Process upsert if no errors were flagged.
 //     if (empty($state)) {
@@ -176,14 +145,15 @@ function parse_and_validate_csv($csv_file, &$data) {
         }
 
         //$fields[0]: Verify student exists in class (check by student user ID)
-        if (!verify_user_in_db($fields[0])) {
+        if(count($this->core->getQueries()->getUserById($fields[0])) !== 1){
+        // if (!verify_user_in_db($fields[0])) {
             $data = null;
             return false;
         }
 
         //$fields[1] represents timestamp in the format (MM/DD/YY),
         //(MM/DD/YYYY), (MM-DD-YY), or (MM-DD-YYYY).
-        if (!validate_timestamp($fields[1])) {
+        if (!$this->validate_timestamp($fields[1])) {
             $data = null;
             return false;
         }
@@ -285,6 +255,46 @@ SQL;
 }
 
 /* END FUNCTION upsert() ==================================================== */
+
+
+
+/* END FUNCTION parse_and_validate_csv() ==================================== */
+
+function validate_timestamp($timestamp) {
+// //IN:  $timestamp is actually a date string, not a Unix timestamp.
+// //OUT: TRUE when date string conforms to an accetpable pattern
+// //      FALSE otherwise.
+// //PURPOSE: Validate string to (1) be a valid date and (2) conform to specific
+// //         date patterns.
+// //         'm-d-Y' -> mm-dd-yyyy
+// //         'm-d-y' -> mm-dd-yy
+// //         'm/d/Y' -> mm/dd/yyyy
+// //         'm/d/y' -> mm/dd/yy
+
+//     //This bizzare/inverted switch-case block actually does work in PHP.
+//     //This operates as a form of "white list" of valid patterns.
+//     //This checks to ensure a date pattern is acceptable AND the date actually
+//     //exists.  e.g. "02-29-2016" is valid, while "06-31-2016" is not.
+//     //That is, 2016 is a leap year, but June has only 30 days.
+//     $tmp = array(DateTime::createFromFormat('m-d-Y', $timestamp),
+//                  DateTime::createFromFormat('m/d/Y', $timestamp),
+//                  DateTime::createFromFormat('m-d-y', $timestamp),
+//                  DateTime::createFromFormat('m/d/y', $timestamp));
+
+//     switch (true) {
+//     case ($tmp[0] && $tmp[0]->format('m-d-Y') === $timestamp):
+//     case ($tmp[1] && $tmp[1]->format('m/d/Y') === $timestamp):
+//     case ($tmp[2] && $tmp[2]->format('m-d-y') === $timestamp):
+//     case ($tmp[3] && $tmp[3]->format('m/d/y') === $timestamp):
+//         return true;
+//     default:
+//         return false;
+//     }
+    return true;
+}
+
+/* END FUNCTION validate_timestamp() ==================================== */
+
 
 
 
