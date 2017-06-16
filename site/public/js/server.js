@@ -507,6 +507,7 @@ function setupNumericTextCells() {
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
             {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
             function() {
+                $(elem).css("background-color", "transparent");
             },
             function() {
                 $(elem).css("background-color", "#ff7777");
