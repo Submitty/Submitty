@@ -40,14 +40,26 @@ class LateDayController extends AbstractController {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
                 $data = array();
                 if (!($this->parse_and_validate_csv($_FILES['csv_upload']['tmp_name'], $data))) {
-                    $this->myfunction("IF");
-                    $state = 'bad_upload';
+                    $_SESSION['messages']['error'][] = "Something is wrong with the CSV. Try again.";
+                    $_SESSION['request'] = $_POST;
+                    $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
+
+                    // $this->myfunction("IF");
+                    // $state = 'bad_upload';
                 } else {
-                    $this->myfunction("ELSE");
-                    $this->upsert($data);
-                    $state = 'upsert_done';
+                    // $this->myfunction("ELSE");
+                    // $this->upsert($data);
+                    for($i = 0; $i < count($data); $i++){
+                        // $this->myfunction($data[$i][0]);
+                        // $this->myfunction($data[$i][1]);
+                        // $this->myfunction($data[$i][2]);
+                        $this->core->getQueries()->myupdateLateDays($data[$i][0], $data[$i][1], $data[$i][2]);
+                    }
+                    // $state = 'upsert_done';
                 }
-        $this->myfunction($state);
+        // $this->myfunction($state);
+                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
+
             // }
 
         //if no file upload, examine Student ID and Late Day input fields.
@@ -73,6 +85,10 @@ class LateDayController extends AbstractController {
                 $_SESSION['request'] = $_POST;
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
             }
+
+            $this->core->getQueries()->myupdateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
+            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
+
 
         }
 
@@ -174,87 +190,87 @@ function parse_and_validate_csv($csv_file, &$data) {
 
 
 
-function upsert(array $data) {
-//IN:  Data to be "upserted"
-//OUT: No return.  This is assumed to work.  (Server should throw an exception
-//     if this process fails)
-//PURPOSE:  "Update/Insert" data into the database.  This can handle large
-//          "batch" upserts in a single transaction (for when upserting via CSV)
+// function upsert(array $data) {
+// //IN:  Data to be "upserted"
+// //OUT: No return.  This is assumed to work.  (Server should throw an exception
+// //     if this process fails)
+// //PURPOSE:  "Update/Insert" data into the database.  This can handle large
+// //          "batch" upserts in a single transaction (for when upserting via CSV)
 
-/* -----------------------------------------------------------------------------
- * This SQL code was adapted from upsert discussion on Stack Overflow and is
- * meant to be compatible with PostgreSQL prior to v9.5.
- *
- *  q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
- * -------------------------------------------------------------------------- */
+// /* -----------------------------------------------------------------------------
+//  * This SQL code was adapted from upsert discussion on Stack Overflow and is
+//  * meant to be compatible with PostgreSQL prior to v9.5.
+//  *
+//  *  q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
+//  * -------------------------------------------------------------------------- */
 
-    $sql = array();
+//     $sql = array();
 
-    //TEMPORARY table to hold all new values that will be "upserted"
-    $sql['temp_table'] = <<<SQL
-CREATE TEMPORARY TABLE temp
-    (user_id VARCHAR(255),
-    date TIMESTAMP,
-    late_days INTEGER)
-ON COMMIT DROP;
-SQL;
+//     //TEMPORARY table to hold all new values that will be "upserted"
+//     $sql['temp_table'] = <<<SQL
+// CREATE TEMPORARY TABLE temp
+//     (user_id VARCHAR(255),
+//     date TIMESTAMP,
+//     late_days INTEGER)
+// ON COMMIT DROP;
+// SQL;
 
-    //INSERT new data into temporary table -- prepares all data to be upserted
-    //in a single DB transaction.
-    for ($i=0; $i<count($data); $i++) {
-        $sql["data_{$i}"] = <<<SQL
-INSERT INTO temp VALUES (?,?,?);
-SQL;
-    }
+//     //INSERT new data into temporary table -- prepares all data to be upserted
+//     //in a single DB transaction.
+//     for ($i=0; $i<count($data); $i++) {
+//         $sql["data_{$i}"] = <<<SQL
+// INSERT INTO temp VALUES (?,?,?);
+// SQL;
+//     }
 
-    //LOCK will prevent sharing collisions while upsert is in process.
-    $sql['lock'] = <<<SQL
-LOCK TABLE late_days IN EXCLUSIVE MODE;
-SQL;
+//     //LOCK will prevent sharing collisions while upsert is in process.
+//     $sql['lock'] = <<<SQL
+// LOCK TABLE late_days IN EXCLUSIVE MODE;
+// SQL;
 
-    //This portion ensures that UPDATE will only occur when a record already exists.
-    $sql['update'] = <<<SQL
-UPDATE late_days
-SET allowed_late_days=temp.late_days
-FROM temp
-WHERE late_days.user_id=temp.user_id
-    AND late_days.since_timestamp=temp.date
-SQL;
+//     //This portion ensures that UPDATE will only occur when a record already exists.
+//     $sql['update'] = <<<SQL
+// UPDATE late_days
+// SET allowed_late_days=temp.late_days
+// FROM temp
+// WHERE late_days.user_id=temp.user_id
+//     AND late_days.since_timestamp=temp.date
+// SQL;
 
-    //This portion ensures that INSERT will only occur when data record is new.
-    $sql['insert'] = <<<SQL
-INSERT INTO late_days
-    (user_id,
-    since_timestamp,
-    allowed_late_days)
-SELECT
-    temp.user_id,
-    temp.date,
-    temp.late_days
-FROM temp
-LEFT OUTER JOIN late_days
-    ON late_days.user_id=temp.user_id
-    AND late_days.since_timestamp=temp.date
-WHERE late_days.user_id IS NULL
-SQL;
+//     //This portion ensures that INSERT will only occur when data record is new.
+//     $sql['insert'] = <<<SQL
+// INSERT INTO late_days
+//     (user_id,
+//     since_timestamp,
+//     allowed_late_days)
+// SELECT
+//     temp.user_id,
+//     temp.date,
+//     temp.late_days
+// FROM temp
+// LEFT OUTER JOIN late_days
+//     ON late_days.user_id=temp.user_id
+//     AND late_days.since_timestamp=temp.date
+// WHERE late_days.user_id IS NULL
+// SQL;
 
-    //Begin DB transaction
-    \lib\Database::beginTransaction();
-    \lib\Database::query($sql['temp_table']);
+//     //Begin DB transaction
+//     \lib\Database::beginTransaction();
+//     \lib\Database::query($sql['temp_table']);
 
-    foreach ($data as $index => $record) {
-        \lib\Database::query($sql["data_{$index}"], $record);
-    }
+//     foreach ($data as $index => $record) {
+//         \lib\Database::query($sql["data_{$index}"], $record);
+//     }
 
-    \lib\Database::query($sql['lock']);
-    \lib\Database::query($sql['update']);
-    \lib\Database::query($sql['insert']);
-    \lib\Database::commit();
-    //All Done!
-    //Server will throw exception if there is a problem with DB access.
-}
+//     \lib\Database::query($sql['lock']);
+//     \lib\Database::query($sql['update']);
+//     \lib\Database::query($sql['insert']);
+//     \lib\Database::commit();
+//     //All Done!
+//     //Server will throw exception if there is a problem with DB access.
+// }
 
-/* END FUNCTION upsert() ==================================================== */
+// /* END FUNCTION upsert() ==================================================== */
 
 
 

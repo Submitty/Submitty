@@ -832,5 +832,24 @@ VALUES (?, ?, ?, ?)", $params);
 
       return $this->database->rows(); 
     }
+
+    public function myupdateLateDays($user_id, $timestamp, $days){
+        $this->database->query("
+          UPDATE late_days
+          SET allowed_late_days=?
+          WHERE late_days.user_id=?
+              AND late_days.since_timestamp=?", array($days, $user_id, $timestamp));
+
+/*        $this->database->query("
+          INSERT INTO late_days
+              (user_id,
+              since_timestamp,
+              allowed_late_days)
+          VALUES(?,?,?)
+          LEFT OUTER JOIN late_days
+              ON late_days.user_id=?
+              AND late_days.since_timestamp=?
+          WHERE late_days.user_id IS NULL", array($user_id, $timestamp, $days, $user_id, $timestamp));*/
+    }
 }
 
