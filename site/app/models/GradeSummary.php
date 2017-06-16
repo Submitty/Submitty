@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\libraries\DatabaseUtils;
+use app\libraries\FileUtils;
 
 class GradeSummary extends AbstractModel {
     /**/
@@ -61,7 +62,7 @@ class GradeSummary extends AbstractModel {
             $student_id = $student['user_id'];
             $student_output_json_name = $student_id . "_summary.json";
 
-            file_put_contents(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getSubmittyPath(), "reports","all_grades", $student_output_json_name)), json_encode($student,JSON_PRETTY_PRINT));
+            file_put_contents(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports","all_grades", $student_output_json_name)), json_encode($student,JSON_PRETTY_PRINT));
 
         }
     }
@@ -93,14 +94,14 @@ class GradeSummary extends AbstractModel {
         //  currently, a student can change the active version after the deadline and get full credit for a late submission
         //
         $active_version = -1;
-        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $g_id, $student_id, "user_assignment_settings.json");
+        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable['g_id'], $student_id, "user_assignment_settings.json");
         if (file_exists($settings_file)) {
             $settings_file_contents = file_get_contents($settings_file);
             $settings = json_decode($settings_file_contents, true);
             $active_version = $settings['active_version'];
         }
         else {
-            active_version = 0;
+            $active_version = 0;
         }
         //$autograding_score = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);
         $autograding_score = $this->autogradingTotalAwarded($gradeable['g_id'], $student_id, $active_version);
@@ -184,9 +185,9 @@ class GradeSummary extends AbstractModel {
             $this_g["component_scores"] = $component_scores;
         }
 
-        array_push($student_output_json[ucwords($gradeable['g_syllabus_bucket'])], $this_g);
+        array_push($student[ucwords($gradeable['g_syllabus_bucket'])], $this_g);
 
-        return $student_output_json;
+        return $student;
     }
     
     private function getSyllabusBuckets() {

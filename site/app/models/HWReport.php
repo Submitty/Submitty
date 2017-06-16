@@ -47,7 +47,6 @@ class HWReport extends AbstractModel {
     }
     
     private function generateReport($gradeable, $ldu, $graders){
-        $start = microtime_float();
         // Make sure we actually have a created output directory
         if (!is_dir(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports")))) {
             mkdir(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports")));

@@ -29,7 +29,7 @@ class ReportView extends AbstractView {
                 </td>
                 <td width="5%"> </td>
                 <td width="45%" style="position:relative">
-                    <button onclick="GenerateReport('gradesummary');" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate Grade Summaries</button>
+                    <button onclick="GenerateReport('summary');" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate Grade Summaries</button>
                 </td>
             </tr>
         <tbody>

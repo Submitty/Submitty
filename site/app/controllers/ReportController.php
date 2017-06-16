@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\models\HWReport;
+use app\models\GradeSummary;
 /*
 use app\report\HWReportView;
 use app\report\CSVReportView;
@@ -45,7 +46,7 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->renderJson($response);
             return $response;
         }
-        $grade_summary = new GradeSummary();
+        $grade_summary = new GradeSummary($this->core);
         $grade_summary->generateAllSummaries();
         $response = array('status' => 'success', 'message' => 'Successfully Updated Grade Summaries');
         $this->core->getOutput()->renderJson($response);
