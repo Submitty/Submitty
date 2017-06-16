@@ -40,7 +40,16 @@ class ReportController extends AbstractController {
     }
     
     public function generateGradeSummaries() {
-        
+        if(!isset($_REQUEST['csrf_token']) || $_REQUEST['csrf_token'] !== $this->core->getCsrfToken()) {
+            $response = array('status' => 'error', 'message' => 'Invalid CSRF Token');
+            $this->core->getOutput()->renderJson($response);
+            return $response;
+        }
+        $grade_summary = new GradeSummary();
+        $grade_summary->generateAllSummaries();
+        $response = array('status' => 'success', 'message' => 'Successfully Updated Grade Summaries');
+        $this->core->getOutput()->renderJson($response);
+        return $response;
     }
     
     public function generateHWReports() {

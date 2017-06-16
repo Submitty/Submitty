@@ -8,59 +8,9 @@ use app\libraries\DatabaseUtils;
 class GradeSummary extends AbstractModel {
     /**/
     protected $core;
-    /**/
-    protected $summary_query;
-    /**/
-    protected $report_order_by;
     
     public function __construct(Core $main_core) {
         $this->core = $main_core;
-        $this->summary_query = "SELECT * FROM (
-        SELECT 
-            g_syllabus_bucket, 
-            g_title, 
-            g_grade_released_date,
-            g_gradeable_type, 
-            g.g_id, 
-            u.user_id,
-            u.user_firstname,
-            u.user_preferred_firstname,
-            u.user_lastname, 
-            u.registration_section,
-            case when score is null then 0 else score end, 
-            titles, 
-            comments,
-            scores,
-            is_texts,
-            gd_active_version
-        FROM
-            users AS u CROSS JOIN gradeable AS g 
-            LEFT JOIN (
-                SELECT 
-                    g_id, 
-                    gd_user_id, 
-                    score, 
-                    titles, 
-                    comments,
-                    scores,
-                    is_texts,
-                    gd_active_version
-                FROM 
-                    gradeable_data AS gd INNER JOIN(
-                    SELECT 
-                        gd_id, 
-                        SUM(gcd_score) AS score, 
-                        array_agg(gc_title ORDER BY gc_order ASC) AS titles, 
-                        array_agg(gcd_component_comment ORDER BY gc_order ASC) AS comments,
-                        array_agg(gcd_score ORDER BY gc_order ASC) AS scores,
-                        array_agg(gc_is_text ORDER BY gc_order ASC) AS is_texts
-                    FROM 
-                        gradeable_component_data AS gcd INNER JOIN 
-                            gradeable_component AS gc ON gcd.gc_id=gc.gc_id
-                    GROUP BY gd_id
-                ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
-            ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id";
-        $this->report_order_by = " ORDER BY u.user_id ASC, g_syllabus_bucket ASC, g_grade_released_date ASC) as result";
     }
     
     private function generateSummariesFromQueryResults($summaryData, $categories, $ldu){
@@ -239,20 +189,8 @@ class GradeSummary extends AbstractModel {
         return $student_output_json;
     }
     
-    private function getSummaryDataAll() {
-        return $this->core->getDatabase()->query(($this->summary_query).($this->report_order_by));
-    }
-    
     private function getSyllabusBuckets() {
-        $buckets = $this->core->getDatabase()->query("
-            SELECT 
-              g_syllabus_bucket
-            FROM 
-              gradeable
-            GROUP BY 
-              g_syllabus_bucket
-            ORDER BY 
-              g_syllabus_bucket ASC");
+        $buckets = $this->core->getQueries()->getSyllabusBuckets();
         $categories = array();
         foreach($buckets as $bucket) {
             array_push($categories, ucwords($bucket['g_syllabus_bucket']));
@@ -261,13 +199,20 @@ class GradeSummary extends AbstractModel {
     }
     
     public function generateAllSummaries() {
-        $summary_data = $this->getSummaryDataAll();
+        $summary_data = $this->core->getQueries()->getSummaryData();
         $categories = $this->getSyllabusBuckets();
-        $ldu = new LateDaysCalculation();
+        $ldu = new LateDaysCalculation($this->core);
+        
+        $this->generateSummariesFromQueryResults($summary_data, $categories, $ldu);
+    }
+    
+    public function generateAllSummariesForStudent($student_id) {
+        $summary_data = $this->core->getQueries()->getSummaryData($student_id);
+        $categories = $this->getSyllabusBuckets();
+        $ldu = new LateDaysCalculation($this->core);
         
         $this->generateSummariesFromQueryResults($summary_data, $categories, $ldu);
     }
 }
-
 
 ?>

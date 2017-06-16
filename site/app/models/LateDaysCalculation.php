@@ -29,6 +29,7 @@ class LateDaysCalculation extends AbstractModel {
         $this->all_latedays = $this->calculate_student_lateday_usage($this->students);
     }
     
+    // PUT MY QUERY IN DatabaseQueriesPostgresql
     private function get_student_submissions() {
         $params = array();
 
@@ -87,14 +88,18 @@ class LateDaysCalculation extends AbstractModel {
                         late_day_exceptions AS lde 
                       ON submissions.g_id = lde.g_id 
                       AND submissions.user_id = lde.user_id";
-        array_push($params, $SUBMISSION_GRACE_PERIOD);
+        array_push($params, 300);
 
         //Query database and return results.
-        return $this->core->getDatabase()->query($query, $params);
+        
+        $this->core->getDatabase()->query($query, $params);
+        return $this->core->getDatabase()->rows();
     }
     
+    // PUT MY QUERY IN DatabaseQueriesPostgresql
     private function get_student_lateday_updates() {
-        return $this->core->getDatabase()->query("SELECT * FROM latedays;");
+        $this->core->getDatabase()->query("SELECT * FROM late_days;");
+        return $this->core->getDatabase()->rows();
     }
     
     private function parse_students($submissions, $latedays) {

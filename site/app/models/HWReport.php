@@ -9,115 +9,8 @@ class HWReport extends AbstractModel {
     /*var Core */
     protected $core;
     
-    protected $report_query;
-    
     public function __construct(Core $main_core) {
         $this->core = $main_core;
-        $this->report_query = "SELECT * FROM (
-        SELECT
-            g_syllabus_bucket,
-            g_title,
-            g_gradeable_type,
-            g.g_id,
-            u.user_id,
-            u.user_firstname,
-            u.user_lastname,
-            u.user_email,
-            u.registration_section,
-            case when score is null then -100 else score end,
-            titles,
-            comments,
-            scores,
-            eg_submission_due_date,
-            gd_status,
-            gd_grader_id,
-            gd_overall_comment,
-            is_extra_credits,
-            gd_active_version,
-            grading_notes,
-            max_scores,
-            grader_id,
-            grader_firstname,
-            grader_lastname,
-            grader_preferred,
-            grader_group,
-            grader_email
-        FROM
-            users AS u CROSS JOIN gradeable AS g
-            LEFT JOIN (
-                SELECT
-                    gd.g_id,
-                    gd_user_id,
-                    score,
-                    titles,
-                    comments,
-                    scores,
-                    eg_submission_due_date,
-                    gd_status,
-                    gd_grader_id,
-                    gd_overall_comment,
-                    is_extra_credits,
-                    gd_active_version,
-                    grading_notes,
-                    max_scores,
-                    grader.user_id as grader_id,
-                    grader.user_firstname as grader_firstname,
-                    grader.user_lastname as grader_lastname,
-                    grader.user_preferred_firstname as grader_preferred,
-                    grader.user_group as grader_group,
-                    grader.user_email as grader_email
-                FROM
-                    gradeable_data AS gd INNER JOIN(
-                        SELECT
-                            gd_id,
-                            SUM(gcd_score) AS score,
-                            array_agg(gc_title ORDER BY gc_order ASC) AS titles,
-                            array_agg(gcd_component_comment ORDER BY gc_order ASC) AS comments,
-                            array_agg(gcd_score ORDER BY gc_order ASC) AS scores,
-                            array_agg(gc_is_extra_credit ORDER BY gc_order ASC) AS is_extra_credits,
-                            array_agg(gc_student_comment ORDER BY gc_order ASC) AS grading_notes,
-                            array_agg(gc_max_value ORDER BY gc_order ASC) AS max_scores
-                        FROM
-                            gradeable_component_data AS gcd INNER JOIN
-                                gradeable_component AS gc ON gcd.gc_id=gc.gc_id
-                        GROUP BY gd_id
-                    ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
-                    INNER JOIN electronic_gradeable AS eg ON gd.g_id=eg.g_id
-                    LEFT JOIN (
-                      SELECT user_id, user_firstname, user_lastname, user_preferred_firstname, user_group, user_email
-                      FROM users
-                    ) AS grader ON grader.user_id = gd.gd_grader_id
-            ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id
-        ORDER BY g_syllabus_bucket ASC, g_grade_released_date ASC, u.user_id ASC
-        ) AS user_grades
-
-    WHERE g_gradeable_type='0'";
-    }
-    
-    public function getReportDataAll() {
-        $rows = $this->core->getDatabase()->query($this->report_query);
-        return $rows;
-    }
-    
-    public function getGraders() {
-        $graders = $this->core->getDatabase()->query("
-        SELECT 
-            gd_grader_id
-            , u.user_firstname
-            , u.user_lastname
-            , u.user_email
-        FROM 
-            gradeable_data gd
-            , users u
-        WHERE
-            gd.gd_grader_id = u.user_id
-        GROUP BY 
-            gd_grader_id
-            , u.user_firstname
-            , u.user_lastname
-            , u.user_email
-        ;");
-        return $graders;
     }
     
     private function autogradingTotalAwarded($g_id, $student_id, $active_version){
@@ -316,11 +209,41 @@ class HWReport extends AbstractModel {
     }
     
     public function generateAllReports() {
-        $reportsData = $this->getReportDataAll();
-        $graders = $this->getGraders();
-        $ldu = new LateDaysCalculation();
+        $reportsData = $this->core->getQueries()->getReportData();
+        $graders = $this->core->getQueries()->getGraders();
+        $ldu = new LateDaysCalculation($this->core);
 
         foreach ($reportsData as $report) {
+            $this->generateReport($report, $ldu, $graders);
+        }
+    }
+    
+    public function generateSingleReport($student_id, $gradeable_id) {
+        $reportData = $this->core->getQueries()->getReportData(array('g_id'=>$gradeable_id, 'u_id'=>$student_id));
+        $graders = $this->core->getQueries()->getGraders();
+        $ldu = new LateDaysCalculation($this->core);
+        
+        foreach($reportData as $report) {
+            $this->generateReport($report, $ldu, $graders);
+        }
+    }
+    
+    public function generateAllReportsForStudent($student_id) {
+        $reportsData = $this->core->getQueries()->getReportData(array('u_id' => $student_id));
+        $graders = $this->core->getQueries()->getGraders();
+        $ldu = new LateDaysCalculation($this->core);
+
+        foreach ($reportsData as $report) {
+            $this->generateReport($report, $ldu, $graders);
+        }
+    }
+    
+    public function generateAllReportsForGradeable($g_id) {
+        $reportsData = $this->core->getQueries()->getReportData(array('g_id' => $g_id));
+        $graders = $this->core->getQueries()->getGraders();
+        $ldu = new LateDaysCalculation($this->core);
+        
+        foreach($reportsData as $report) {
             $this->generateReport($report, $ldu, $graders);
         }
     }
