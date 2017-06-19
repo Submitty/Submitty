@@ -38,7 +38,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
   ALLOW_SYSCALL(mremap);
   ALLOW_SYSCALL(munmap);
   ALLOW_SYSCALL(set_thread_area);
-#if __UBUNTU_16_04__
+#ifdef __NR_memfd_create
   ALLOW_SYSCALL(memfd_create);
 #endif
   ALLOW_SYSCALL(futex);
@@ -50,7 +50,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(migrate_pages);
     ALLOW_SYSCALL(set_mempolicy);
     ALLOW_SYSCALL(uselib);
-#if __UBUNTU_16_04__
+#if __NR_membarrier
     ALLOW_SYSCALL(membarrier);
 #endif
   }
@@ -59,7 +59,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
   if (categories.find("PROCESS_CONTROL_NEW_PROCESS_THREAD") != categories.end()) {
     ALLOW_SYSCALL(clone);
     ALLOW_SYSCALL(execve);
-#if __UBUNTU_16_04__
+#if __NR_execveat
     ALLOW_SYSCALL(execveat);
 #endif
     ALLOW_SYSCALL(fork);
@@ -140,7 +140,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(setrlimit);
     ALLOW_SYSCALL(ugetrlimit);
     ALLOW_SYSCALL(ulimit);
-#if __UBUNTU_16_04__
+#ifdef __NR_userfaultfd
     ALLOW_SYSCALL(userfaultfd);
 #endif
   }
@@ -337,7 +337,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
   ALLOW_SYSCALL(utime);
   ALLOW_SYSCALL(utimensat);
   ALLOW_SYSCALL(utimes);
-#if __UBUNTU_16_04__
+#ifdef __NR_getrandom
   ALLOW_SYSCALL(getrandom);
 #endif
   ALLOW_SYSCALL(sysinfo);
@@ -442,7 +442,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(shmctl);
     ALLOW_SYSCALL(shmdt);
     ALLOW_SYSCALL(shmget);
-#if __UBUNTU_16_04__
+#ifdef __NR_bpf
     ALLOW_SYSCALL(bpf);
 #endif
   }
@@ -481,14 +481,14 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(inotify_rm_watch);
     ALLOW_SYSCALL(kcmp);
     ALLOW_SYSCALL(kexec_load);
-#if __UBUNTU_16_04__
+#ifdef __NR_kexec_file_load
     ALLOW_SYSCALL(kexec_file_load);
 #endif
     ALLOW_SYSCALL(keyctl);
     ALLOW_SYSCALL(lookup_dcookie);
     ALLOW_SYSCALL(mincore);
     ALLOW_SYSCALL(mlock);
-#if __UBUNTU_16_04__
+#ifdef __NR_mlock2
     ALLOW_SYSCALL(mlock2);
 #endif
     ALLOW_SYSCALL(mlockall);
