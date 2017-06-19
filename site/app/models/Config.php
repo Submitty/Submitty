@@ -120,6 +120,7 @@ class Config extends AbstractModel {
      * @param string $master_ini_path
      */
     public function __construct($semester, $course, $master_ini_path) {
+        parent::__construct();
         $this->semester = $semester;
         $this->course = $course;
         $this->config_path = dirname($master_ini_path);
@@ -132,7 +133,9 @@ class Config extends AbstractModel {
         $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
 
         if (isset($master['site_details']['debug'])) {
-            $this->debug = $master['site_details']['debug'] === true;
+            $this->setDebug($master['site_details']['debug'] === true);
+            var_dump($this->debug);
+            die();
         }
 
         if (isset($master['site_details']['timezone'])) {

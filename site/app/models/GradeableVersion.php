@@ -7,6 +7,7 @@ use app\libraries\DateUtils;
 class GradeableVersion extends AbstractModel {
     private $g_id;
     private $user_id;
+    private $team_id;
     private $version;
     private $non_hidden_non_extra_credit = 0;
     private $non_hidden_extra_credit = 0;
@@ -23,6 +24,8 @@ class GradeableVersion extends AbstractModel {
      * @param \DateTime $due_date
      */
     public function __construct($details, \DateTime $due_date) {
+        parent::__construct();
+
         $this->g_id = $details['g_id'];
         $this->user_id = $details['user_id'];
         $this->team_id = $details['team_id'];

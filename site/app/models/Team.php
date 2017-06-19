@@ -18,9 +18,11 @@ class Team extends AbstractModel {
 
     /**
      * Team constructor.
-     * @param string $team_id
+     * @param array $details
      */
     public function __construct($details) {
+        parent::__construct();
+
         $this->id = $details[0]['team_id'];
         $this->member_user_ids = array();
         $this->invited_user_ids = array();

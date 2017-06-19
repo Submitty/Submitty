@@ -6,6 +6,8 @@ use app\libraries\DatabaseUtils;
 
 /**
  * Class User
+ *
+ * @method array getGradingRegistrationSections()
  */
 class User extends AbstractModel {
     
@@ -54,6 +56,7 @@ class User extends AbstractModel {
      * @param array $details
      */
     public function __construct($details) {
+        parent::__construct();
         if (count($details) == 0) {
             return;
         }
@@ -262,13 +265,6 @@ class User extends AbstractModel {
 
     public function setManualRegistration($manual) {
         $this->manual_registration = $manual === true;
-    }
-
-    /**
-     * @return array
-     */
-    public function getGradingRegistrationSections() {
-        return $this->grading_registration_sections;
     }
 
     public function setGradingRegistrationSections($sections) {

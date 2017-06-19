@@ -36,6 +36,7 @@ class GradeableTestcase extends AbstractModel {
     private $autochecks = array();
     
     public function __construct(Core $core, $testcase, $idx) {
+        parent::__construct();
         $this->core = $core;
         $this->index = $idx;
         

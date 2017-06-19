@@ -39,6 +39,7 @@ class GradeableComponent extends AbstractModel {
     protected $graded = false;
 
     public function __construct($details) {
+        parent::__construct();
         $this->id = $details['gc_id'];
         $this->title = $details['gc_title'];
         $this->ta_comment = $details['gc_ta_comment'];

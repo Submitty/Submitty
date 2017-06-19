@@ -199,6 +199,7 @@ class Gradeable extends AbstractModel {
     protected $user_viewed_date = null;
 
     public function __construct(Core $core, $details, User $user = null) {
+        parent::__construct();
         $this->core = $core;
         $this->id = $details['g_id'];
 

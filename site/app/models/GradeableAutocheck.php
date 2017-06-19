@@ -34,6 +34,7 @@ class GradeableAutocheck extends AbstractModel {
      * @param $idx
      */
     public function __construct($details, $course_path, $result_path, $idx) {
+        parent::__construct();
         $this->index = $idx;
         
         if (isset($details['description'])) {

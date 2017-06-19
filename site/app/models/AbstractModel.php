@@ -2,6 +2,7 @@
 
 
 namespace app\models;
+use app\libraries\Utils;
 
 /**
  * Class AbstractModel
@@ -11,6 +12,16 @@ namespace app\models;
  * @package app\models
  */
 abstract class AbstractModel {
+
+    protected $property_types = array();
+
+    /** @var bool flag on whether this model has been changed or not by the application layer */
+    protected $modified = false;
+
+    public function __construct() {
+        $this->setupPropertyTypes();
+    }
+
     /**
      * Converts a model to an array object that can then be (primarily) used in something like a JSON response
      * especially if used within an API setup. By default, this just cycles through all properties for a given
@@ -54,4 +65,78 @@ abstract class AbstractModel {
         }
         return $return;
     }
+
+    protected function setupPropertyTypes() {
+        $class = new \ReflectionClass($this);
+        foreach ($class->getProperties() as $property) {
+            $matches = array();
+            preg_match("/@var (.*?)[ \n\*]/s", $property->getDocComment(), $matches);
+            if (count($matches) > 0) {
+                $this->property_types[$property->getName()] = $matches[1];
+            }
+        }
+    }
+
+    /**
+     * Magic function which we can use to scaffold our get* and set* functions without having to explicitly define
+     * all of them. Additionally, this will handle type coercions on the set* operation so long as the type is one
+     * that's recognized and that the property has been documented with a "@var <type>".
+     *
+     * @link http://php.net/manual/en/language.oop5.overloading.php#object.call
+     *
+     * @param $name
+     * @param $arguments
+     *
+     * @return mixed
+     */
+    public function __call($name, $arguments) {
+        if (Utils::startsWith($name, "set")) {
+            $value = $arguments[0];
+            $name = $this->convertName($name);
+            if (isset($this->property_types[$name])) {
+                $type = $this->property_types[$name];
+                switch ($type) {
+                    case 'int':
+                    case 'integer':
+                        $value = intval($value);
+                        break;
+                    case 'string':
+                        $value = strval($value);
+                        break;
+                    case 'float':
+                        $value = floatval($value);
+                        break;
+                    case 'bool':
+                        $value = $value === true;
+                }
+            }
+            $this->modified = true;
+            $this->$name = $value;
+        }
+        elseif (Utils::startsWith($name, "get")) {
+            $name = $this->convertName($name);
+            return $this->$name;
+        }
+        else {
+            // Mimics the error PHP normally raises when you call an invalid/non-existant method on an object
+            trigger_error('Call to undefined method '.__CLASS__.'::'.$name.'()', E_USER_ERROR);
+        }
+    }
+
+    /**
+     * Internal function that given a string, removes the first 3 characters, lowercases the first character of this
+     * new string, and then for any other capital letter, lowercases and prefixes a '_' infront of it.
+     *
+     * ex: "setMinimumGradingGroup" -> "minimum_grading_group"
+     *
+     * @param string $name
+     *
+     * @return string
+     */
+    private function convertName($name) {
+        $regex_func = function($matches) { return "_".strtolower($matches[0]); };
+        $name = preg_replace_callback("/([A-Z])/g", $regex_func, lcfirst((substr($name, 3))));
+        return $name;
+    }
+
 }

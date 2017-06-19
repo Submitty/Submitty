@@ -56,6 +56,7 @@ class GradeableList extends AbstractModel {
      * @param User $user
      */
     public function __construct(Core $core, User $user = null) {
+        parent::__construct();
         $this->core = $core;
         $this->user = ($user === null) ? $this->core->getUser() : $user;
         foreach ($this->core->getQueries()->getAllGradeables($this->user->getId()) as $gradeable) {
