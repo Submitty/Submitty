@@ -64,6 +64,7 @@ def correct(test):
     test.json_diff("results.json", "results.json_correct")
 
 
+
 @testcase
 def buggy(test):
     cleanup(test)

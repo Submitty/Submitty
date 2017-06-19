@@ -25,6 +25,7 @@ class GradeableVersion extends AbstractModel {
     public function __construct($details, \DateTime $due_date) {
         $this->g_id = $details['g_id'];
         $this->user_id = $details['user_id'];
+        $this->team_id = $details['team_id'];
         $this->version = $details['g_version'];
         $this->non_hidden_non_extra_credit = $details['autograding_non_hidden_non_extra_credit'];
         $this->non_hidden_extra_credit = $details['autograding_non_hidden_extra_credit'];

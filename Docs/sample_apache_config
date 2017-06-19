@@ -7,16 +7,27 @@
 SSLUseStapling On
 SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 <VirtualHost test-submit:443>
-	suPHP_ConfigPath /usr/local/submitty
 	AddDefaultCharset utf-8
-	AddExternalAuth pwauth /usr/sbin/pwauth
-	SetExternalAuthMethod pwauth pipe
 	ServerAdmin ADMIN@DOMAIN.HERE
 	ServerName test-submit
 
-	DocumentRoot /usr/local/submitty/website/public
+	DocumentRoot /usr/local/submitty/site/public
 
-	DirectoryIndex index.html index.php
+	DirectoryIndex index.html index.php index.htm index.cgi
+
+	<IfModule mod_fastcgi.c>
+		AddHandler php7-fcgi .php
+		Action php7-fcgi /php7-fcgi
+		Alias /php7-fcgi /usr/lib/cgi-bin/php7-fcgi
+		FastCgiExternalServer /usr/lib/cgi-bin/php7-fcgi -socket /var/run/php/php7.0-fpm-submitty.sock -pass-header Authorization
+
+		<FilesMatch ".+\.ph(p[345]?|t|tml)$">
+			SetHandler php7-fcgi
+		</FilesMatch>
+		<Directory /usr/lib/cgi-bin>
+			Require all granted
+		</Directory>
+	</IfModule>
 
 	<Files .*>
 		Order allow,deny
@@ -60,17 +71,17 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 		Allow from all
     </Directory>
 
-	<Directory /usr/local/submitty/website/public>
-		Options Includes
-		AuthType Basic
-		AuthName "Please log in"
-		AllowOverride None
-		AuthBasicProvider external
-		AuthExternal pwauth
-		require valid-user
-		AddOutputFilter Includes html php
-		Allow from all
-	</Directory>
+#	<Directory /usr/local/submitty/website/public>
+#		Options Includes
+#		AuthType Basic
+#		AuthName "Please log in"
+#		AllowOverride None
+#		AuthBasicProvider external
+#		AuthExternal pwauth
+#		require valid-user
+#		AddOutputFilter Includes html php
+#		Allow from all
+#	</Directory>
 
 	#   SSL Engine Switch:
 	#   Enable/Disable SSL for this virtual host.
