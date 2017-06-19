@@ -842,6 +842,7 @@ class Gradeable extends AbstractModel {
 
     public function setGrader(User $user) {
         $this->grader = $user;
+        $this->grader_id = $user->getId();
     }
 
     /**
@@ -889,6 +890,10 @@ class Gradeable extends AbstractModel {
 
     public function saveData() {
         $this->core->getQueries()->updateGradeableData($this);
+    }
+    
+    public function getGraderId() {
+        return $this->grader_id;
     }
 
 }
