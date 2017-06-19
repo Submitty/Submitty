@@ -735,6 +735,11 @@ VALUES (?, ?, ?, ?)", $params);
         return $this->database->rows();
     }
 
+    public function getAllElectronicGradeablesIds() {
+        $this->database->query("SELECT g_id, g_title FROM gradeable WHERE g_gradeable_type=0 ORDER BY g_grade_released_date DESC");
+        return $this->database->rows();
+    }
+
     public function newTeam($g_id, $user_id) {
         $this->database->query("SELECT * FROM gradeable_teams ORDER BY team_id");
         $team_id_prefix = count($this->database->rows());
@@ -833,23 +838,79 @@ VALUES (?, ?, ?, ?)", $params);
       return $this->database->rows(); 
     }
 
+
+    function retrieve_users_from_db2($gradeable_id) {
+    //IN:  gradeable ID from database
+    //OUT: all students who have late day exceptions, per gradeable ID parameter.
+    //     retrieves student rcs, first name, last name, and late day exceptions.
+    //PURPOSE:  Retrieve list of students to display current late day exceptions.
+      $this->database->query("
+        SELECT
+          users.user_id,
+          users.user_firstname,
+          users.user_preferred_firstname,
+          users.user_lastname,
+          late_day_exceptions.late_day_exceptions
+        FROM users
+        FULL OUTER JOIN late_day_exceptions
+          ON users.user_id=late_day_exceptions.user_id
+        WHERE late_day_exceptions.g_id=?
+          AND late_day_exceptions.late_day_exceptions IS NOT NULL
+          AND late_day_exceptions.late_day_exceptions>0
+        ORDER BY users.user_email ASC;", array($gradeable_id));
+      return $this->database->rows();
+    }
+
+
     public function myupdateLateDays($user_id, $timestamp, $days){
         $this->database->query("
           UPDATE late_days
           SET allowed_late_days=?
           WHERE late_days.user_id=?
-              AND late_days.since_timestamp=?", array($days, $user_id, $timestamp));
-
-/*        $this->database->query("
-          INSERT INTO late_days
-              (user_id,
-              since_timestamp,
-              allowed_late_days)
-          VALUES(?,?,?)
-          LEFT OUTER JOIN late_days
-              ON late_days.user_id=?
-              AND late_days.since_timestamp=?
-          WHERE late_days.user_id IS NULL", array($user_id, $timestamp, $days, $user_id, $timestamp));*/
+            AND late_days.since_timestamp=?", array($days, $user_id, $timestamp));
+        if(count($this->database->rows())==0){
+          $this->database->query("
+            INSERT INTO late_days
+            (user_id,
+            since_timestamp,
+            allowed_late_days)
+            VALUES(?,?,?)", array($user_id, $timestamp, $days));
+        }
     }
+
+
+
+    public function myupdateExtensions($user_id, $g_id, $days){
+        $this->database->query("
+          UPDATE late_day_exceptions
+          SET late_day_exceptions=?
+          WHERE late_day_exceptions.user_id=?
+            AND late_day_exceptions.g_id=?;", array($days, $user_id, $g_id));
+        if(count($this->database->rows())==0){
+          $this->database->query("
+            INSERT INTO late_day_exceptions
+            (user_id,
+            g_id,
+            late_day_exceptions)
+            VALUES(?,?,?)", array($user_id, $g_id, $days));
+        }
+    }
+
+
+
+    function retrieve_newest_gradeable_id_from_db() {
+    //IN:  No parameters
+    //OUT: Return gradeable ID of the newest gradeable, or NULL if there are no
+    //     gradeables in the system.
+    //PURPOSE:  Gradeable drop down menu is ordered with newest first, determined
+    //          by start date.
+        $this->database->query("
+          SELECT g_id
+          FROM gradeable
+          WHERE g_gradeable_type=0
+          ORDER BY g_grade_start_date DESC LIMIT 1;");
+        return $this->database->rows();
+    }
+    /* END FUNCTION retrieve_newest_gradeable_id_from_db() ====================== */
 }
 
