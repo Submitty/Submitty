@@ -13,13 +13,13 @@ use app\libraries\Utils;
  */
 abstract class AbstractModel {
 
-    protected $property_types = array();
+    protected $properties = array();
 
     /** @var bool flag on whether this model has been changed or not by the application layer */
     protected $modified = false;
 
     public function __construct() {
-        $this->setupPropertyTypes();
+        $this->setupProperties();
     }
 
     /**
@@ -57,7 +57,10 @@ abstract class AbstractModel {
         else if (is_array($object)) {
             $return = array();
             foreach ($object as $key => $value) {
-                $return[$key] = $this->parseObject($value);
+                if (is_numeric($key) || isset($this->properties[$key])) {
+                    $return[$key] = $this->parseObject($value);
+                }
+
             }
         }
         else {
@@ -66,13 +69,17 @@ abstract class AbstractModel {
         return $return;
     }
 
-    protected function setupPropertyTypes() {
+    protected function setupProperties() {
         $class = new \ReflectionClass($this);
         foreach ($class->getProperties() as $property) {
             $matches = array();
-            preg_match("/@var (.*?)[ \n\*]/s", $property->getDocComment(), $matches);
+            preg_match("/@property/s", $property->getDocComment(), $matches);
             if (count($matches) > 0) {
-                $this->property_types[$property->getName()] = $matches[1];
+                $this->properties[$property->getName()] = null;
+                preg_match("/@var (.*?)[ \n\*]/s", $property->getDocComment(), $matches);
+                if (count($matches) > 0) {
+                    $this->properties[$property->getName()] = $matches[1];
+                }
             }
         }
     }
@@ -90,11 +97,15 @@ abstract class AbstractModel {
      * @return mixed
      */
     public function __call($name, $arguments) {
+        $check_error = function() use ($name) {
+            // Mimics the error PHP normally raises when you call an invalid/non-existant method on an object
+            trigger_error('Call to undefined method '.__CLASS__.'::'.$name.'()', E_USER_ERROR);
+        };
         if (Utils::startsWith($name, "set")) {
+            $property_name = $this->convertName($name);
             $value = $arguments[0];
-            $name = $this->convertName($name);
-            if (isset($this->property_types[$name])) {
-                $type = $this->property_types[$name];
+            if (isset($this->properties[$property_name])) {
+                $type = $this->properties[$property_name];
                 switch ($type) {
                     case 'int':
                     case 'integer':
@@ -109,17 +120,19 @@ abstract class AbstractModel {
                     case 'bool':
                         $value = $value === true;
                 }
+                $this->modified = true;
+                $this->$property_name = $value;
             }
-            $this->modified = true;
-            $this->$name = $value;
+            else {
+                $check_error();
+            }
         }
         elseif (Utils::startsWith($name, "get")) {
-            $name = $this->convertName($name);
-            return $this->$name;
+            $property_name = $this->convertName($name);
+            return $this->$property_name;
         }
         else {
-            // Mimics the error PHP normally raises when you call an invalid/non-existant method on an object
-            trigger_error('Call to undefined method '.__CLASS__.'::'.$name.'()', E_USER_ERROR);
+            $check_error();
         }
     }
 
@@ -135,7 +148,7 @@ abstract class AbstractModel {
      */
     private function convertName($name) {
         $regex_func = function($matches) { return "_".strtolower($matches[0]); };
-        $name = preg_replace_callback("/([A-Z])/g", $regex_func, lcfirst((substr($name, 3))));
+        $name = preg_replace_callback("/([A-Z])/", $regex_func, lcfirst((substr($name, 3))));
         return $name;
     }
 

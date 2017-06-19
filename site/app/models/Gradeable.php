@@ -271,10 +271,10 @@ class Gradeable extends AbstractModel {
                 }
                 $this->components[$component_details['gc_order']] = new GradeableComponent($component_details);
 
-                if (!$this->components[$component_details['gc_order']]->isText()) {
+                if (!$this->components[$component_details['gc_order']]->getIsText()) {
                     $max_value = $this->components[$component_details['gc_order']]->getMaxValue();
                     if ($max_value > 0) {
-                        if ($this->components[$component_details['gc_order']]->isExtraCredit()) {
+                        if ($this->components[$component_details['gc_order']]->getIsExtraCredit()) {
                             $this->total_tagrading_extra_credit += $max_value;
                         }
                         else {

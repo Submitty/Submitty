@@ -256,7 +256,7 @@ class GreadeableListTester extends BaseUnitTest {
         $queries->method('getAllGradeables')->willReturn($gradeables);
         $core->method('getQueries')->willReturn($queries);
 
-        $user = $this->createMock(User::class);
+        $user = $this->createMockModel(User::class);
         $user->method('getId')->willReturn("testUser");
         $user->method('accessGrading')->willReturn($access_grading);
         $user->method('accessAdmin')->willReturn($access_admin);

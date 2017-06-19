@@ -20,40 +20,41 @@ class Config extends AbstractModel {
      * Variable to set the system to debug mode, which allows, among other things
      * easier access to user switching and to always output full exceptions. Never
      * turn on if running server in production environment.
+     * @property
      * @var bool
      */
     protected $debug = false;
 
-    /** @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
+    /** @property @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
     protected $semester;
-    /** @var string contains the course to use, generally from the $_REQUEST['course'] global */
+    /** @property @var string contains the course to use, generally from the $_REQUEST['course'] global */
     protected $course;
 
-    /** @var string path on the filesystem that points to the course data directory */
+    /** @property @var string path on the filesystem that points to the course data directory */
     protected $config_path;
-    /** @var string path to the ini file that contains all the course specific settings */
+    /** @property @var string path to the ini file that contains all the course specific settings */
     protected $course_ini;
 
     /*** MASTER CONFIG ***/
-    /** @var string */
+    /** @property @var string */
     protected $base_url;
-    /** @var string */
+    /** @property @var string */
     protected $ta_base_url;
-    /** @var string */
+    /** @property @var string */
     protected $cgi_url;
-    /** @var string */
+    /** @property @var string */
     protected $site_url;
-    /** @var string */
+    /** @property @var string */
     protected $authentication;
-    /** @var string */
+    /** @property @var string */
     protected $timezone = "America/New_York";
-    /** @var string */
+    /** @property @var string */
     protected $submitty_path;
-    /** @var string */
+    /** @property @var string */
     protected $course_path;
-    /** @var string */
+    /** @property @var string */
     protected $submitty_log_path;
-    /** @var bool */
+    /** @property @var bool */
     protected $log_exceptions;
 
     /**
@@ -61,24 +62,28 @@ class Config extends AbstractModel {
      * explicitly in the config files, in which case we'll just default
      * to PostgreSQL.
      * @var string
+     * @property
      */
     protected $database_type = "pgsql";
 
     /**
      * Database host for PDO
      * @var string
+     * @property
      */
     protected $database_host;
 
     /**
      * Database user for PDO
      * @var string
+     * @property
      */
     protected $database_user;
 
     /**
      * Database password for PDO
      * @var string
+     * @property
      */
     protected $database_password;
 
@@ -86,30 +91,32 @@ class Config extends AbstractModel {
     /**
      * Database name for PDO
      * @var string
+     * @property
      */
     protected $database_name;
 
     /*** COURSE DATABASE CONFIG ***/
-    /** @var string */
+    /** @property @var string */
     protected $course_name;
-    /** @var string */
+    /** @property @var string */
     protected $course_home_url;
-    /** @var int */
+    /** @property @var int */
     protected $default_hw_late_days;
-    /** @var int */
+    /** @property @var int */
     protected $default_student_late_days;
-    /** @var bool */
+    /** @property @var bool */
     protected $zero_rubric_grades;
 
-    /** @var string */
+    /** @property @var string */
     protected $upload_message;
-    /** @var bool */
+    /** @property @var bool */
     protected $keep_previous_files;
-    /** @var bool */
+    /** @property @var bool */
     protected $display_iris_grades_summary;
-    /** @var bool */
+    /** @property @var bool */
     protected $display_custom_message;
 
+    /** @property @var array */
     protected $hidden_details;
 
     /**
@@ -133,9 +140,7 @@ class Config extends AbstractModel {
         $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
 
         if (isset($master['site_details']['debug'])) {
-            $this->setDebug($master['site_details']['debug'] === true);
-            var_dump($this->debug);
-            die();
+           $this->debug = $master['site_details']['debug'] === true;
         }
 
         if (isset($master['site_details']['timezone'])) {

@@ -156,7 +156,7 @@ HTML;
 
             $col = 0;
             foreach ($gradeable_row->getComponents() as $component) {
-                if ($component->isText()) {
+                if ($component->getIsText()) {
                     $return .= <<<HTML
                 <td>{$component->getComment()}</td>
 HTML;
