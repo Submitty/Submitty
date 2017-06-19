@@ -303,12 +303,28 @@ HTML;
                 </button>
 HTML;
                 }
-                    // View teams button, only visible to instructors on team assignments
+
+                // View teams button, only visible to instructors on team assignments
                 if (($this->core->getUser()->accessAdmin()) && ($g_data->isTeamAssignment())) {
                     $admin_team_list .= <<<HTML
                 <button class="btn btn-default" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'team_list', 'gradeable_id' => $gradeable))}'"> View Teams
                 </button>
 HTML;
+                }
+
+                // Upload button, only visible to those with grading access
+                if ($this->core->getUser()->accessGrading()) {
+                    $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getGradeStartDate()->format("m/d/y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getGradeReleasedDate()->format("m/d/y{$time}")."</span>)";
+                    if ($title=="GRADED" || $title=="ITEMS BEING GRADED") { $display_date = ""; }
+                    $button_text = "UPLOAD </br> {$display_date}";
+                    $grader_upload = <<<HTML
+                 <button class="btn btn-default" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'upload', 'gradeable_id' => $gradeable))}'">
+                     {$button_text}
+                 </button>
+HTML;
+                }
+                else {
+                    $grader_upload = "";
                 }
 
                 if ($this->core->getUser()->accessAdmin()) {
@@ -325,18 +341,24 @@ HTML;
 
                 if (!$this->core->getUser()->accessGrading()) {
                     $gradeable_grade_range = "";
-
                 }
 
                 $return.= <<<HTML
             <tr class="gradeable_row">
                 <td>{$gradeable_title}</td>
                 <td style="padding: 10px;">{$gradeable_team_range}</td>
+HTML;
+                if ($this->core->getUser()->accessAdmin()) {
+                    $return .= <<<HTML
                 <td style="padding: 10px;">{$admin_team_list}</td>
+HTML;
+                }
+                $return.= <<<HTML
                 <td style="padding: 10px;">{$gradeable_open_range}</td>
 HTML;
                 if ($this->core->getUser()->accessGrading()) {
                     $return .= <<<HTML
+                <td style="padding: 10px;">{$grader_upload}</td>
                 <td style="padding: 10px;">{$gradeable_grade_range}</td>
                 <td>{$admin_button}</td>
 HTML;
@@ -345,7 +367,7 @@ HTML;
             </tr>
 HTML;
             }
-            $return .= '</tbody><tr class="colspan"><td colspan="4" style="border-bottom:2px black solid;"></td></tr>';
+            $return .= '</tbody><tr class="colspan"><td colspan="7" style="border-bottom:2px black solid;"></td></tr>';
         }
 
         if ($found_assignment == false) {
