@@ -993,12 +993,14 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &
   float time_left = sleep_time_in_microseconds;
   while(time_left > 0){
     if(time_left > 100000){ //while we have more than 1/10th second left. 
+      std::cout << "Officially slept 1/10th" << std::endl;
       time_left -= 100000; //decrease the amount of time left by 1/10th of a second.
       usleep(100000); //sleep for 1/10th of a second
       elapsed += .1; //and increment time elapsed by 1/10th second.
     }
     else{ //otherwise, if there is less than 1/10th second left
       usleep(time_left); //sleep for that amount of time
+      std::cout << "Officially slept this long in micro: " << time_left << std::endl;
       elapsed+=time_left/1000000.0f; //Increment elapsed by the amount of time (in seconds)
       time_left = 0.0f; //and set time left to be zero.
     }
