@@ -13,7 +13,31 @@ use app\libraries\Utils;
  * the application. These variables are loaded from a combination of files and tables from
  * the database. We also allow for using this to write back to the variables within the database
  * (but not the variables in the files).
+ *
+ * @method string getSemester()
+ * @method string getCourse()
+ * @method string getBaseUrl()
+ * @method string getTaBaseUrl()
+ * @method string getCgiUrl()
+ * @method string getSiteUrl()
+ * @method string getSubmittyPath()
+ * @method string getCoursePath()
+ * @method string getDatabaseType()
+ * @method string getDatabaseHost()
+ * @method string getDatabaseUser()
+ * @method string getDatabasePassword()
+ * @method string getDatabaseName()
+ * @method string getCourseName()
+ * @method string getCourseHomeUrl()
+ * @method integer getDefaultHwLateDays()
+ * @method integer getDefaultStudentLateDays()
+ * @method string getConfigPath()
+ * @method string getAuthentication()
+ * @method \DateTimeZone getTimezone()
+ * @method string getUploadMessage()
+ * @method array getHiddenDetails()
  */
+
 class Config extends AbstractModel {
 
     /**
@@ -234,69 +258,6 @@ class Config extends AbstractModel {
     }
 
     /**
-     * @return string
-     */
-    public function getSemester() {
-        return $this->semester;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCourse() {
-        return $this->course;
-    }
-
-    /**
-     * @return string
-     */
-    public function getBaseUrl() {
-        return $this->base_url;
-    }
-    
-    /**
-     * @return string
-     */
-    public function getTABaseUrl() {
-        return $this->ta_base_url;
-    }
-    
-    /**
-     * @return string
-     */
-    public function getCgiUrl() {
-        return $this->cgi_url;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSiteUrl() {
-        return $this->site_url;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSubmittyPath() {
-        return $this->submitty_path;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCoursePath() {
-        return $this->course_path;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogPath() {
-        return $this->submitty_log_path;
-    }
-
-    /**
      * @return bool
      */
     public function shouldLogExceptions() {
@@ -304,100 +265,10 @@ class Config extends AbstractModel {
     }
 
     /**
-     * @return string
-     */
-    public function getDatabaseType() {
-        return $this->database_type;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatabaseHost() {
-        return $this->database_host;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatabaseUser() {
-        return $this->database_user;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatabasePassword() {
-        return $this->database_password;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatabaseName() {
-        return $this->database_name;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCourseName() {
-        return $this->course_name;
-    }
-    /**
-     * @return string
-     */
-    public function getCourseHomeUrl(){
-        return $this->course_home_url;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getDefaultHwLateDays() {
-        return $this->default_hw_late_days;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getDefaultStudentLateDays() {
-        return $this->default_student_late_days;
-    }
-
-    /**
      * @return bool
      */
     public function shouldZeroRubricGrades() {
         return $this->zero_rubric_grades;
-    }
-
-    /**
-     * @return string
-     */
-    public function getConfigPath() {
-        return $this->config_path;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAuthentication() {
-        return $this->authentication;
-    }
-
-    /**
-     * @return \DateTimeZone
-     */
-    public function getTimezone() {
-        return $this->timezone;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUploadMessage() {
-        return $this->upload_message;
     }
 
     /**
@@ -421,14 +292,14 @@ class Config extends AbstractModel {
         return $this->display_iris_grades_summary;
     }
 
+    public function getLogPath() {
+        return $this->submitty_log_path;
+    }
+
     /**
      * @return string
      */
     public function getCourseIniPath() {
         return $this->course_ini;
-    }
-
-    public function getHiddenDetails() {
-        return $this->hidden_details;
     }
 }

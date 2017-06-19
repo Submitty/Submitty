@@ -134,7 +134,7 @@ HTML;
         <tr class="info persist-header">
             <td colspan="{$colspan}" style="text-align: center">
                 Students Enrolled in Section {$display_section}
-                <a target=_blank href="{$this->core->getConfig()->getTABaseUrl()}/account/print/print_checkpoints_gradeable.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&g_id={$gradeable->getId()}&section_id={$display_section}&grade_by_reg_section={$gradeable->isGradeByRegistration()}&sort_by={$sort}">
+                <a target=_blank href="{$this->core->getConfig()->getTaBaseUrl()}/account/print/print_checkpoints_gradeable.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&g_id={$gradeable->getId()}&section_id={$display_section}&grade_by_reg_section={$gradeable->isGradeByRegistration()}&sort_by={$sort}">
                     <i class="fa fa-print"></i>
                 </a>
             </td>

@@ -13,41 +13,49 @@ use app\libraries\GradeableType;
  * how the dates are configured for that gradeable. The order of the gradeables in these lists
  * are either by a specific datetime (if different) with later datetimes being earlier in the list
  * and then ids (if datetimes are equal) by alphabetically.
+ *
+ * @method Gradeable[] getGradeables()
+ * @method Gradeable[] getFutureGradeables()
+ * @method Gradeable[] getBetaGradeables()
+ * @method Gradeable[] getOpenGradeables()
+ * @method Gradeable[] getClosedGradeables()
+ * @method Gradeable[] getGradingGradeables()
+ * @method Gradeable[] getGradedGradeables()
  */
 class GradeableList extends AbstractModel {
     /**
      * @var Core
      */
-    private $core;
+    protected $core;
 
-    /** @var User */
-    private $user;
+    /** @property @var User */
+    protected $user;
     
     /**
-     * @var Gradeable[]
+     * @property @var Gradeable[]
      */
-    private $gradeables = array();
+    protected $gradeables = array();
 
     /*
      * All elements of $this->gradeables should fall into one of the following six lists. There should
      * be no overlap between them.
      */
-    /** @var Gradeable[] These are gradeables which are only viewable by admin users */
-    private $future_gradeables = array();
-    /** @var Gradeable[] These are gradeables which are only viewable by admin & TA users */
-    private $beta_gradeables = array();
-    /** @var Gradeable[] */
-    private $open_gradeables = array();
-    /** @var Gradeable[] */
-    private $closed_gradeables = array();
-    /** @var Gradeable[] */
-    private $grading_gradeables = array();
-    /** @var Gradeable[] */
-    private $graded_gradeables = array();
+    /** @property @var Gradeable[] These are gradeables which are only viewable by admin users */
+    protected $future_gradeables = array();
+    /** @property @var Gradeable[] These are gradeables which are only viewable by admin & TA users */
+    protected $beta_gradeables = array();
+    /** @property @var Gradeable[] */
+    protected $open_gradeables = array();
+    /** @property @var Gradeable[] */
+    protected $closed_gradeables = array();
+    /** @property @var Gradeable[] */
+    protected $grading_gradeables = array();
+    /** @property @var Gradeable[] */
+    protected $graded_gradeables = array();
 
-    
-    /** @var \DateTime */
-    private $now;
+    /** @var \DateTime Timestamp of when we initially loaded the GradeableList so that all timestamp comparisons are
+     against the same time (and don't have any potential mismatch of seconds */
+    protected $now;
     
     /**
      * GradeableList constructor.
@@ -161,19 +169,6 @@ class GradeableList extends AbstractModel {
         return $count;
     }
 
-    
-    public function getGradeables() {
-        return $this->gradeables;
-    }
-
-    public function getFutureGradeables() {
-        return $this->future_gradeables;
-    }
-
-    public function getBetaGradeables() {
-        return $this->beta_gradeables;
-    }
-
     /**
      * Gets the list of electronic gradeables that the current user has access to submit for. Admins have
      * access to all gradeables, while graders have access to all gradeables that have the TA view date
@@ -194,21 +189,5 @@ class GradeableList extends AbstractModel {
             }
         }
         return $return;
-    }
-    
-    public function getOpenElectronicGradeables() {
-        return $this->open_gradeables;
-    }
-    
-    public function getClosedElectronicGradeables() {
-        return $this->closed_gradeables;
-    }
-    
-    public function getGradingGradeables() {
-        return $this->grading_gradeables;
-    }
-    
-    public function getGradedGradeables() {
-        return $this->graded_gradeables;
     }
 }

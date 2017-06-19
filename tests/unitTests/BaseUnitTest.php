@@ -23,7 +23,7 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
     protected function createMockCore($config_values=array(), $user_config=array()) {
         $core = $this->createMock(Core::class);
 
-        $config = $this->createMock(Config::class);
+        $config = $this->createMockModel(Config::class);
         if (isset($config_values['semester'])) {
             $config->method('getSemester')->willReturn($config_values['semester']);
         }

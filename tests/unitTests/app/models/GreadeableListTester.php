@@ -85,12 +85,12 @@ class GreadeableListTester extends BaseUnitTest {
             $this->assertEquals($gradeables[$key], $actual[$key]);
         }
 
-        $actual = $list->getOpenElectronicGradeables();
+        $actual = $list->getOpenGradeables();
         $this->assertCount(1, $actual);
         $this->assertArrayHasKey('03_open_homework', $actual);
         $this->assertEquals($gradeables['03_open_homework'], $actual['03_open_homework']);
 
-        $actual = $list->getClosedElectronicGradeables();
+        $actual = $list->getClosedGradeables();
         $this->assertCount(1, $actual);
         $this->assertArrayHasKey('04_closed_homework', $actual);
         $this->assertEquals($gradeables['04_closed_homework'], $actual['04_closed_homework']);
@@ -247,7 +247,7 @@ class GreadeableListTester extends BaseUnitTest {
 
     private function mockCore($gradeables, $access_admin = true, $access_grading = true) {
         $core = $this->createMock(Core::class);
-        $config = $this->createMock(Config::class);
+        $config = $this->createMockModel(Config::class);
         $config->method('getTimezone')->willReturn(new \DateTimeZone('America/New_York'));
         $core->method('getConfig')->willReturn($config);
 
@@ -280,7 +280,7 @@ class GreadeableListTester extends BaseUnitTest {
      */
     private function mockGradeable($id, $type, $ta_view_date, $open_date, $due_date, $grade_start_date,
                                    $grade_released_date, $ta_grading = true) {
-        $gradeable = $this->createMock(Gradeable::class);
+        $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn($id);
         $gradeable->method('getType')->willReturn($type);
         $gradeable->method('useTAGrading')->willReturn($ta_grading);

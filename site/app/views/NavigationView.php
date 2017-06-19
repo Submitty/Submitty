@@ -10,7 +10,7 @@ class NavigationView extends AbstractView {
 
         $return = "";
 
-        $ta_base_url = $this->core->getConfig()->getTABaseUrl();
+        $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
