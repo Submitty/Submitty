@@ -18,7 +18,37 @@
 #include "window_utils.h"
 #include "execute.h"
 
+/**
+*Converts a string to a double with specified precision.
+*/
+double stringToFloat(std::string const &str, int precision) {
+  float my_float;
+  std::stringstream stream; //just use a string stream to get the double. 
+  stream << std::setprecision(precision) << std::fixed << str << std::endl;
 
+  stream >> my_float;
+
+  return my_float;
+}
+
+std::vector<float> extractFloatsFromString(std::string input){
+    std::vector<float> floats;
+    std::string myReg = ".*?(-?[0-9]*[1-9][0-9]*(\\.[0-9]+)?|-?0*\\.[0-9]*[1-9][0-9]*)(.*)"; 
+                                                    //Anything (lazy) followed by either a number of the form
+                                                    //#.##### or .######
+
+
+    std::regex regex(myReg);
+    std::smatch match;
+    int i = 0;
+    while (std::regex_match(input, match, regex)){ //while we can still match (find new numbers) continue to do so  
+      floats.push_back(stringToFloat(match[1].str(), 10));        //if we have matched, match 1 (group 1) is a float
+      input = match[3]; 
+      std::cout << floats[i] << std::endl;
+      i++;
+    }
+    return floats;
+}
 /**
 *This function uses a regex to extract any ints (12 digits or less)
 *from a string. The values are returned in a vector.
@@ -38,6 +68,8 @@ std::vector<int> extractIntsFromString(std::string input){
     return ints;
 }
 
+
+
 /**
 * Given a pid, this function finds any windows directly belonging to it. 
 * To do this, it iterates through the list of active windows (on the order of 3-10 usually)
@@ -50,13 +82,12 @@ std::vector<std::string> getWindowNameAssociatedWithPid(int pid)
   std::cout << "Attempting to find a window associated with pid: " << pid << std::endl;
 
   /*
-  * I hate to leave a block of commented out code, but I think there is a larger conversation to be had here.
   * At the moment, this method finds any window names associated with the child's pid. This works fine.
   * However, it is concieveable that the child could fork/generate a window with its own pid. In this case
   * we could recursively traverse the pid tree below our child and gather them up. We could then match
   * this list of pids against the pids which own the current list of active windows. This extension wouldn't
   * be difficult, but I wonder whether we want to support processes forking and then having their children
-  * create new windows. Regardless, please disregard the chunk of code below, as it really just has some of the 
+  * create new windows. Regardless, please disregard the chunk of code below, which just has some of the 
   * commands needed to exend the program in that direction.
   */
   // std::string pidQuery = "pgrep -P ";
@@ -178,18 +209,15 @@ int clamp(int& pos, int min, int max){
 * This function is responsible for processing the 'delay' action. It extracts the number of seconds that 
 * we are to delay, then converts to microseconds for use with usleep, and returns. Actual sleeping is handled
 * by the take_action function, which calls delay_and_memcheck (execute.cpp). 
-*
-* TODO: Modify to work with doubles (just write a quick regex/function)
-*/
+**/
 float delay(std::string command){
-  std::vector<int> numbers = extractIntsFromString(command); //find any numbers in the delay line (ints)
+  std::vector<float> numbers = extractFloatsFromString(command); //find any numbers in the delay line (ints)
   if (numbers.size() > 0){
-    int sleep_time_secs = numbers[0];
+    float sleep_time_secs = numbers[0];
     if(sleep_time_secs < 0){ //if we have any numbers, assume the first is the amount we want to delay by.
                              //larger errors should be detected in the preprocessing step (at course build time)
       sleep_time_secs = abs(sleep_time_secs); //we can't delay for a negative amount of time.
     }
-    std::cout << "Delaying for " << numbers[0] << " seconds." << std::endl;
     float sleep_time_micro = 1000000 * sleep_time_secs; //convert to microseconds and return.  
     return sleep_time_micro;
   }
@@ -629,15 +657,15 @@ void type(std::string command, std::string window_name, int childPID, float &ela
   int presses = 1; //default number of iterations is 1
   float delay = 100000; //default delay between iterations is 1/10th of a second.
   std::string toType = ""; 
-  std::vector<int> values = extractIntsFromString(command); //see if there are ints in the string. (optional times pressed/delay)
-  //TODO update to allow doubles.
+  std::vector<float> values = extractFloatsFromString(command); //see if there are ints in the string. (optional times pressed/delay)
+
   if(values.size() > 0){
-    presses = values[0];
+    presses = values[0]; //float to int truncation if they entered something bad. 
   }
   if(values.size() > 1){
     delay = values[1] * 1000000; //convert from seconds to microseconds.
   }
-  std::string myReg = ".*?(\".*?\").*"; //anything (lazy) followed by anything between quotes (lazy)
+  std::string myReg = ".*?(\'.*?\').*"; //anything (lazy) followed by anything between quotes (lazy)
                                         //followed by anything (greedy)
   std::regex regex(myReg);
   std::smatch match;
@@ -671,7 +699,7 @@ void type(std::string command, std::string window_name, int childPID, float &ela
 *This function requires all parameters to for execute.cpp's delayAndMemCheck function. 
 *
 * NOTE TO DEVLOPERS: If you want to add a new action, also modify the preprocessing script for config.json to 
-* include your new action as valid.
+* include your new action as valid. TODO Make sure this is valid.
 */
 void takeAction(const std::vector<std::string>& actions, int& actions_taken, int& number_of_screenshots, 
                 std::string window_name, int childPID, float &elapsed, float& next_checkpoint, 

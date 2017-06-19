@@ -1,6 +1,9 @@
 #include <string>
 #include <vector>
 
+double stringToFloat(std::string const &str, int precision);
+
+std::vector<float> extractFloatsFromString(std::string input);
 /**
 *This function uses a regex to extract any ints (12 digits or less)
 *from a string. The values are returned in a vector.
