@@ -72,7 +72,6 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "python2",                 "/usr/bin/python2" },
     { "python2.7",               "/usr/bin/python2.7" },
     { "python3",                 "/usr/bin/python3" },
-    //{ "python3.4",               "/usr/bin/python3.4" },   // commenting out for now...  not easily supported on ubuntu 16.04
     { "python3.5",               "/usr/bin/python3.5" },
 
     // for Data Structures
@@ -110,6 +109,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "scrot",                   "/usr/bin/scrot"},
     { "xdotool",                 "/usr/bin/xdotool"}
 
+    // for Debugging
+    { "strace",                  "/usr/bin/strace" }
 
   };
 
@@ -693,15 +694,14 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // The path is probably empty, we need to add /usr/bin to the path
   // since we get a "collect2 ld not found" error from g++ otherwise
   char* my_path = getenv("PATH");
-  if (my_path == NULL) {
-    setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
-  }
-  else {
+  if (my_path != NULL) {
     std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
   }
+  setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
+
   my_path = getenv("PATH");
 
-  //std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
+  std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
   // set the locale so that special characters (e.g., the copyright
   // symbol) are not interpreted as ascii
@@ -734,16 +734,12 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     dup2(new_stderrfd, stderrfd);
   }
 
-
-  /*
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile)) {
     std::cout << "seccomp filter install failed" << std::endl;
     return 1;
   }
   // END SECCOMP
-  */
-
 
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here

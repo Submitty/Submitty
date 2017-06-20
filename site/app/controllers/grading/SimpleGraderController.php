@@ -9,17 +9,23 @@ class SimpleGraderController extends AbstractController  {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'lab':
-                $this->gradeLabs();
+                $this->grade('lab');
                 break;
-            case 'save_grade':
-                $this->saveGrade();
+            case 'save_lab':
+                $this->save('lab');
+                break;
+            case 'numeric':
+                $this->grade('numeric');
+                break;
+            case 'save_numeric':
+                $this->save('numeric');
                 break;
             default:
                 break;
         }
     }
 
-    public function gradeLabs() {
+    public function grade($action) {
         if (!isset($_REQUEST['g_id'])) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable');
         }
@@ -58,7 +64,7 @@ class SimpleGraderController extends AbstractController  {
             $sort_key = "u.user_lastname";
         }
         if(count($sections) === 0 && (!isset($_GET['view']) || $_GET['view'] !== "all") && !$this->core->getUser()->accessAdmin()){
-            $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'checkpointForm', $gradeable, $sections, $graders);
+            $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $sections, $graders);
             return;
         }
         if ((isset($_GET['view']) && $_GET['view'] === "all") || (count($sections) === 0 && $this->core->getUser()->accessAdmin())) {
@@ -66,10 +72,10 @@ class SimpleGraderController extends AbstractController  {
         }
         $student_ids = array_map(function(User $user) { return $user->getId(); }, $students);
         $rows = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids, $section_key, $sort_key);
-        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'checkpointForm', $gradeable, $rows, $graders);
+        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $graders);
     }
 
-    public function saveGrade() {
+    public function save($action) {
         if (!isset($_REQUEST['g_id']) || !isset($_REQUEST['user_id'])) {
             $response = array('status' => 'fail', 'message' => 'Did not pass in g_id or user_id');
             $this->core->getOutput()->renderJson($response);
@@ -102,7 +108,17 @@ class SimpleGraderController extends AbstractController  {
 
         foreach ($gradeable->getComponents() as $component) {
             if (isset($_POST['scores'][$component->getId()])) {
-                $component->setScore($_POST['scores'][$component->getId()]);
+                if ($component->isText()){
+                    $component->setComment($_POST['scores'][$component->getId()]);
+                }
+                else{
+                    if($component->getMaxValue() < $_POST['scores'][$component->getId()]){
+                        $response = array('status' => 'fail', 'message' => "Save error: score is greater than the max score");
+                        $this->core->getOutput()->renderJson($response);
+                        return $response;
+                    }
+                    $component->setScore($_POST['scores'][$component->getId()]);
+                }
             }
         }
 

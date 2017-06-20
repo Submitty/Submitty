@@ -4,18 +4,38 @@ namespace app\models;
 
 use app\libraries\DateUtils;
 
+/**
+ * Class GradeableVersion
+ *
+ * @method int getVersion()
+ * @method float getNonHiddenNonExtraCredit()
+ * @method float getNonHiddenExtraCredit()
+ * @method float getHiddenNonExtraCredit()
+ * @method float getHiddenExtraCredit()
+ * @method integer getDaysLate()
+ */
 class GradeableVersion extends AbstractModel {
-    private $g_id;
-    private $user_id;
-    private $version;
-    private $non_hidden_non_extra_credit = 0;
-    private $non_hidden_extra_credit = 0;
-    private $hidden_non_extra_credit = 0;
-    private $hidden_extra_credit = 0;
-    /** @var \DateTime */
-    private $submission_time;
-    private $active = false;
-    private $days_late = 0;
+    /** @property @var string */
+    protected $g_id;
+    protected $user_id;
+    protected $team_id;
+    /** @property @var int */
+    protected $version;
+    /** @property @var float */
+    protected $non_hidden_non_extra_credit = 0;
+    /** @property @var float */
+    protected $non_hidden_extra_credit = 0;
+    /** @property @var float */
+    protected $hidden_non_extra_credit = 0;
+    /** @property @var float */
+    protected $hidden_extra_credit = 0;
+    /** @property
+     * @var \DateTime
+     */
+    protected $submission_time;
+    protected $active = false;
+    /** @property @var int */
+    protected $days_late = 0;
 
     /**
      * GradeableVersion constructor.
@@ -23,8 +43,11 @@ class GradeableVersion extends AbstractModel {
      * @param \DateTime $due_date
      */
     public function __construct($details, \DateTime $due_date) {
+        parent::__construct();
+
         $this->g_id = $details['g_id'];
         $this->user_id = $details['user_id'];
+        $this->team_id = $details['team_id'];
         $this->version = $details['g_version'];
         $this->non_hidden_non_extra_credit = $details['autograding_non_hidden_non_extra_credit'];
         $this->non_hidden_extra_credit = $details['autograding_non_hidden_extra_credit'];
@@ -39,28 +62,8 @@ class GradeableVersion extends AbstractModel {
         $this->active = isset($details['active_version']) && $details['active_version'] === true;
     }
 
-    public function getVersion() {
-        return $this->version;
-    }
-
-    public function getNonHiddenNonExtraCredit() {
-        return $this->non_hidden_non_extra_credit;
-    }
-
-    public function getNonHiddenExtraCredit() {
-        return $this->non_hidden_extra_credit;
-    }
-
     public function getNonHiddenTotal() {
         return $this->non_hidden_non_extra_credit + $this->non_hidden_extra_credit;
-    }
-
-    public function getHiddenNonExtraCredit() {
-        return $this->hidden_non_extra_credit;
-    }
-
-    public function getHiddenExtraCredit() {
-        return $this->hidden_extra_credit;
     }
 
     public function getHiddenTotal() {
@@ -69,10 +72,6 @@ class GradeableVersion extends AbstractModel {
 
     public function isActive() {
         return $this->active;
-    }
-
-    public function getDaysLate() {
-        return $this->days_late;
     }
 
     public function getSubmissionTime() {
