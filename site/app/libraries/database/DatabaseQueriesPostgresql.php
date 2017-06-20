@@ -231,10 +231,11 @@ ORDER BY egd.g_version", array($g_id, $user_id));
      *      components for the SELECT cause and in the FROM clause (don't need gradeable_data if this is null, etc.)
      *  section_key:
      */
-    public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id") {
+    public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
         $return = array();
         $g_ids_query = "";
         $users_query = "";
+        $g_type_query = "";
         $params = array();
         if ($g_ids !== null) {
             if (!is_array($g_ids)) {
@@ -257,6 +258,19 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                 $users_query = implode(",", array_fill(0, count($user_ids), "?"));
                 $params = array_merge($params, $user_ids);
             }
+            else {
+                return $return;
+            }
+        }
+        
+        if ($g_type !== null) {
+            if (!is_array($g_type)) {
+                $g_type = array($g_type);
+            }
+            if (count($g_type) > 0) {
+                $g_type_query = implode(",", array_fill(0, count($g_type), "?"));
+                $params = array_merge($params, $g_type);
+            } 
             else {
                 return $return;
             }
@@ -384,6 +398,9 @@ LEFT JOIN (
         }
         if ($user_ids !== null) {
             $where[] = "u.user_id IN ({$users_query})";
+        }
+        if ($g_type !== null) {
+            $where[] = "g.g_gradeable_type IN ({$g_type_query})";
         }
         if (count($where) > 0) {
             $query .= "

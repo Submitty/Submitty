@@ -372,6 +372,7 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
         try{
             response = JSON.parse(response);
             if (response['status'] === 'success') {
+                console.log("Success");
                 callbackSuccess();
             }
             else {

@@ -36,7 +36,7 @@ class HWReport extends AbstractModel {
         
         // Only generate full report when the TA has graded the work, may want to change
         if($gradeable->beenTAgraded()) {
-            $student_output_text_main .= strtoupper($gradeable->getTitle())." GRADE".$nl;
+            $student_output_text_main .= strtoupper($gradeable->getName())." GRADE".$nl;
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             $firstname = $gradeable->getGrader()->getDisplayedFirstName();
             $student_output_text_main .= "Graded by: {$gradeable->getGrader()->getDisplayedFirstName()} {$gradeable->getGrader()->getLastName()} <{$gradeable->getGrader()->getEmail()}>".$nl;
@@ -64,7 +64,7 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             $active_version = $gradeable->getActiveVersion();
             // Use FileUtils::joinPaths in future 
-            $submit_file = implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "results", $gradeable['g_id'], $student_id, $active_version, "results_grade.txt"));
+            $submit_file = implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $active_version, "results_grade.txt"));
             $auto_grading_awarded = 0;
             $auto_grading_max_score = 0;
             if(!file_exists($submit_file)) {
@@ -103,9 +103,9 @@ class HWReport extends AbstractModel {
             $student_grade += $auto_grading_awarded;
             
             $student_final_grade = max(0,$student_grade);
-            $student_output_last = strtoupper($gradeable->getTitle()) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
+            $student_output_last = strtoupper($gradeable->getName()) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
             $student_output_last .= $nl;
-            $student_output_last .= "OVERALL NOTE FROM TA: " . ($gradeable->getComment() != "" ? $gradeable->getComment() . $nl : "No Note") . $nl;
+            $student_output_last .= "OVERALL NOTE FROM TA: " . ($gradeable->getOverallComment() != "" ? $gradeable->getOverallComment() . $nl : "No Note") . $nl;
             $student_output_last .= "----------------------------------------------------------------------" . $nl;
             
             $student_final_output = $student_output_text_main . $student_output_text. $student_output_last;
@@ -132,7 +132,7 @@ class HWReport extends AbstractModel {
     public function generateAllReports() {
         $students = $this->core->getQueries()->getAllUsers();
         $stu_ids = array_map(function($stu) {return $stu->getId();}, $students);
-        $gradeables = $this->core->getQueries()->getGradeables(null, $stu_ids);
+        $gradeables = $this->core->getQueries()->getGradeables(null, $stu_ids, "registration_section", "u.user_id", 0);
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
@@ -148,7 +148,7 @@ class HWReport extends AbstractModel {
     }
     
     public function generateSingleReport($student_id, $gradeable_id) {
-        $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $student_id);
+        $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $student_id, "registration_section", "u.user_id", 0);
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
@@ -166,7 +166,7 @@ class HWReport extends AbstractModel {
     public function generateAllReportsForGradeable($g_id) {
         $students = $this->core->getQueries()->getAllUsers();
         $stu_ids = array_map(function($stu) {return $stu->getId();}, $students);
-        $gradeables = $this->core->getQueries()->getGradeables($g_id, $stu_ids);
+        $gradeables = $this->core->getQueries()->getGradeables($g_id, $stu_ids, "registration_section", "u.user_id", 0);
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this-core);
         foreach($gradeables as $gradeable) {
@@ -182,7 +182,7 @@ class HWReport extends AbstractModel {
     }
     
     public function generateAllReportsForStudent($stu_id) {
-        $gradeables = $this->core->getQueries()->getGradeables(null, $stu_id);
+        $gradeables = $this->core->getQueries()->getGradeables(null, $stu_id, "registration_section", "u.user_id", 0);
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {

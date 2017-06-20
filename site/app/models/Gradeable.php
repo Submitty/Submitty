@@ -896,4 +896,7 @@ class Gradeable extends AbstractModel {
         return $this->grader_id;
     }
 
+    public function getSyllabusBucket() {
+        return $this->bucket;
+    }
 }

@@ -47,7 +47,7 @@ class ReportController extends AbstractController {
             return $response;
         }
         $grade_summary = new GradeSummary($this->core);
-        $grade_summary->generateAllSummaries();
+        $grade_summary->generateAllSummariesModel();
         $response = array('status' => 'success', 'message' => 'Successfully Updated Grade Summaries');
         $this->core->getOutput()->renderJson($response);
         return $response;
