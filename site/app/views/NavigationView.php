@@ -300,6 +300,10 @@ HTML;
                 onclick="location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&action=edit&id={$gradeable}&this=Edit%20Gradeable'">
                     Edit
                 </button>
+                <a class="btn btn-default" style="width:100%;" \\
+                href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable))}">
+                    Test Edit
+                </a>
 HTML;
                 }
                 else {
