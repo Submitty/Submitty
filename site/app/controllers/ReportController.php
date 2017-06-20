@@ -60,7 +60,7 @@ class ReportController extends AbstractController {
             return $response;
         }
         $hw_report = new HWReport($this->core);
-        $hw_report->generateAllReports();
+        $hw_report->generateAllReportsModels();
         $response = array('status' => 'success', 'message' => 'Successfully Updated HWReports');
         $this->core->getOutput()->renderJson($response);
         return $response;

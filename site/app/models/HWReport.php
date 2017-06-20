@@ -147,7 +147,7 @@ class HWReport extends AbstractModel {
                 exit();
             }
         }
-        
+        $save_filename = implode(DIRECTORY_SEPARATOR, array($dir, $student_output_filename));
         if(file_put_contents($save_filename, $student_final_output) === false) {
             print "failed to write {$save_filename}\n";
         }
@@ -362,7 +362,7 @@ class HWReport extends AbstractModel {
                     }
                 }
             }
-            $this->generateReportModel($gradeable, $ldu)
+            $this->generateReportModel($gradeable, $ldu);
         }
     }
     
