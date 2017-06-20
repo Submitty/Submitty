@@ -202,20 +202,16 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
         || show_actual 
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
-      // setting testcase_message
+
       if (my_testcase.isFileCheck() && (num_messages > 0))
-          testcase_message = "ERROR: Required files missing.";
-      else if (my_testcase.isCompilation() && num_messages > 0)
-          testcase_message = "ERROR/WARNING: See details below.";
-      else if (score >= 0.0001) {
-        if (num_messages > 0)
-          testcase_message = "ERROR: See details below.";
-        // cannot overwrite "ERROR: See details below."
-        else if ((show_actual || show_expected) && (testcase_message.find("details") == std::string::npos))
-          testcase_message = "ERROR: See output below.";
-        // cannot overwrite "ERROR: See details below." or "ERROR: See details below."
-        else if ((testcase_message.find("ERROR") == std::string::npos))
-          testcase_message = "ERROR.";
+        testcase_message = "Required files missing.";
+      else if (my_testcase.isCompilation() && num_messages > 0) {
+        if (result.hasCompilationError())
+          testcase_message = "Compilation Error(s).";
+        else if (result.hasCompilationWarning() && (testcase_message.find("ERROR") == std::string::npos))
+          testcase_message = "Compilation Warning(s).";
+        else
+          testcase_message = "Compilation Error(s).";
       }
     }
   }
