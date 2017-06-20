@@ -86,17 +86,21 @@ HTML;
             <li>
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections'))}">Setup Rotating Sections</a>
             </li>
+            <!--
             <li>
                 <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%20Days%20Allowed">Late Days Allowed</a>
             </li>
+            -->
             <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view'))}">My Late Days Allowed</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late'))}">Late Days Allowed</a>
             </li>
+            <!--
             <li>
                 <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Excused%20Absense%20Extensions">Excused Absense Extensions</a>
             </li>
+            -->
             <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'view'))}">My Excused Absense Extensions</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">Excused Absense Extensions</a>
             </li>
             <li>
                 <a href="{$ta_base_url}/account/admin-grade-summaries.php?course={$course}&semester={$semester}&this=Grade%20Summaries">Grade Summaries</a>

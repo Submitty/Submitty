@@ -21,7 +21,7 @@ class LateDayController extends AbstractController {
     }
 
     public function viewLateDays() {
-        $user_table_db_data = $this->core->getQueries()->retrieve_users_from_db();
+        $user_table_db_data = $this->core->getQueries()->getUsersWithLateDays();
         $this->core->getOutput()->renderOutput(array('admin', 'LateDay'), 'displayLateDays', $user_table_db_data);
     }
 
@@ -35,7 +35,7 @@ class LateDayController extends AbstractController {
                     $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
                 } else {
                     for($i = 0; $i < count($data); $i++){
-                        $this->core->getQueries()->myupdateLateDays($data[$i][0], $data[$i][1], $data[$i][2]);
+                        $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2]);
                     }
                 }
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
@@ -62,7 +62,7 @@ class LateDayController extends AbstractController {
                 $_SESSION['request'] = $_POST;
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
             }
-            $this->core->getQueries()->myupdateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
+            $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late_day', 'action' => 'view')));
         }
     }

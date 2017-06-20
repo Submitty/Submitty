@@ -25,14 +25,13 @@ class ExtensionsController extends AbstractController {
         if (isset($_POST['selected_gradeable'])) {
             $g_id = $_POST['selected_gradeable'];
         } else {
-            $g_id = $this->core->getQueries()->retrieve_newest_gradeable_id_from_db();
+            $g_id = $this->core->getQueries()->getNewestElectronicGradeableId();
             foreach($g_id as $index => $value) {
                 $g_id=$value[0];
             }
         }
 
-        $user_table_db_data = $this->core->getQueries()->retrieve_users_from_db2($g_id);
-        // $user_table_db_data=array();
+        $user_table_db_data = $this->core->getQueries()->getUsersWithExtensions($g_id);
         $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
         $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $g_id, $g_ids, $user_table_db_data);
 
@@ -47,13 +46,9 @@ class ExtensionsController extends AbstractController {
                 $_SESSION['messages']['error'][] = "Something is wrong with the CSV. Try again.";
                 $_SESSION['request'] = $_POST;
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'view')));
-                // $state = 'bad_upload';
             } else {
-                // upsert($data);
-                // $this->core->getQueries()->myupdateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
-                // $state = 'upsert_done';
                 for($i = 0; $i < count($data); $i++){
-                    $this->core->getQueries()->myupdateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
+                    $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
                 }
             }
 
@@ -68,50 +63,30 @@ class ExtensionsController extends AbstractController {
             if (!isset($_POST['user_id']) || count($this->core->getQueries()->getUserById($_POST['user_id'])) !== 1) {
                 $_SESSION['messages']['error'][] = "Invalid Student ID";
                 $_SESSION['request'] = $_POST;
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'view')));
+                // $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'view')));
+                $user_table_db_data = $this->core->getQueries()->getUsersWithExtensions($_POST['selected_gradeable']);
+                $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
+                $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $_POST['selected_gradeable'], $g_ids, $user_table_db_data);
             }
-            if (!isset($_POST['selected_gradeable']) || !$this->validate_homework($_POST['selected_gradeable'])) {
-                $_SESSION['messages']['error'][] = "Invalid Gradeable ID";
-                $_SESSION['request'] = $_POST;
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'view')));
-            }
+            // if (!isset($_POST['selected_gradeable']) || !$this->validate_homework($_POST['selected_gradeable'])) {
+            //     $_SESSION['messages']['error'][] = "Invalid Gradeable ID";
+            //     $_SESSION['request'] = $_POST;
+            //     $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'view')));
+            // }
             if (!isset($_POST['late_days']) || !ctype_digit($_POST['late_days'])) {
                 $_SESSION['messages']['error'][] = "Late Days must be a nonnegative integer";
                 $_SESSION['request'] = $_POST;
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'view')));
+                // $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'view')));
+                $user_table_db_data = $this->core->getQueries()->getUsersWithExtensions($_POST['selected_gradeable']);
+                $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
+                $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $_POST['selected_gradeable'], $g_ids, $user_table_db_data);
             }
-            // echo($_POST['user_id']);
-            // echo($_POST['selected_gradeable']);
-            // echo($_POST['late_days']);
-
-            $this->core->getQueries()->myupdateExtensions($_POST['user_id'], $_POST['selected_gradeable'], $_POST['late_days']);
-            // $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'view')));
-
-
-
-
-
-                // //upsert argument requires 2D array.
-                // upsert(array(array($_POST['user_id'], $g_id, intval($_POST['late_days']))));
-                // $state = 'upsert_done';
-
+            $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['selected_gradeable'], $_POST['late_days']);
         }
-            $user_table_db_data = $this->core->getQueries()->retrieve_users_from_db2($_POST['selected_gradeable']);
+            $user_table_db_data = $this->core->getQueries()->getUsersWithExtensions($_POST['selected_gradeable']);
             $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
             $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $_POST['selected_gradeable'], $g_ids, $user_table_db_data);
     }
-
-
-
-
-
-
-
-// function myfunction($vartoecho) {
-//     echo("GOT HERE");
-//     echo($vartoecho);
-// }
-
 
 
 

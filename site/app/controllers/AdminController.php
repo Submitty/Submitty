@@ -6,8 +6,9 @@ use app\controllers\admin\GradeableController;
 use app\controllers\admin\GradeablesController;
 use app\controllers\admin\ConfigurationController;
 use app\controllers\admin\UsersController;
-use app\controllers\admin\LateDayController;
-use app\controllers\admin\ExtensionsController;
+use app\controllers\admin\LateController;
+// use app\controllers\admin\LateDayController;
+// use app\controllers\admin\ExtensionsController;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\models\User;
@@ -31,11 +32,8 @@ class AdminController extends AbstractController {
             case 'gradeable':
                 $controller = new GradeableController($this->core);
                 break;
-            case 'late_day':
-                $controller = new LateDayController($this->core);
-                break;
-            case 'extension':
-                $controller = new ExtensionsController($this->core);
+            case 'late':
+                $controller = new LateController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));

@@ -740,6 +740,16 @@ VALUES (?, ?, ?, ?)", $params);
         return $this->database->rows();
     }
 
+    function getNewestElectronicGradeableId() {
+    //IN:  No parameters
+    //OUT: Return gradeable ID of the newest gradeable, or NULL if there are no
+    //     gradeables in the system.
+    //PURPOSE:  Gradeable drop down menu is ordered with newest first, determined
+    //          by start date.
+        $this->database->query("SELECT g_id FROM gradeable WHERE g_gradeable_type=0 ORDER BY g_grade_start_date DESC LIMIT 1;");
+        return $this->database->rows();
+    }
+
     public function newTeam($g_id, $user_id) {
         $this->database->query("SELECT * FROM gradeable_teams ORDER BY team_id");
         $team_id_prefix = count($this->database->rows());
@@ -809,108 +819,69 @@ VALUES (?, ?, ?, ?)", $params);
         }
     }
 
-
-
-    public function retrieve_users_from_db() {
-//IN:  gradeable ID from database
-//OUT: all students who have late days.  Retrieves student rcs, first name,
-//     last name, timestamp and number of late days.
-//PURPOSE:  Retrieve list of students to display current late days.
+    public function getUsersWithLateDays() {
+    //IN:  gradeable ID from database
+    //OUT: all students who have late days.  Retrieves student rcs, first name,
+    //     last name, timestamp and number of late days.
+    //PURPOSE:  Retrieve list of students to display current late days.
       $this->database->query("
-        SELECT
-          late_days.user_id,
-          users.user_firstname,
-          users.user_preferred_firstname,
-          users.user_lastname,
-          late_days.allowed_late_days,
-          late_days.since_timestamp::timestamp::date
-        FROM users
-        FULL OUTER JOIN late_days
-          ON users.user_id=late_days.user_id
-        WHERE late_days.allowed_late_days IS NOT NULL
-          AND late_days.allowed_late_days>0
-          AND users.user_group=4
+        SELECT u.user_id, user_firstname, user_preferred_firstname, 
+          user_lastname, allowed_late_days, since_timestamp::timestamp::date
+        FROM users AS u
+        FULL OUTER JOIN late_days AS l
+          ON u.user_id=l.user_id
+        WHERE allowed_late_days IS NOT NULL
+          AND allowed_late_days>0
+          -- AND u.user_group=4
         ORDER BY
-          users.user_email ASC,
-          late_days.since_timestamp DESC;");
-
-
+          user_email ASC, since_timestamp DESC;");
       return $this->database->rows(); 
     }
 
-
-    function retrieve_users_from_db2($gradeable_id) {
+    public function getUsersWithExtensions($gradeable_id) {
     //IN:  gradeable ID from database
     //OUT: all students who have late day exceptions, per gradeable ID parameter.
     //     retrieves student rcs, first name, last name, and late day exceptions.
     //PURPOSE:  Retrieve list of students to display current late day exceptions.
       $this->database->query("
-        SELECT
-          users.user_id,
-          users.user_firstname,
-          users.user_preferred_firstname,
-          users.user_lastname,
-          late_day_exceptions.late_day_exceptions
-        FROM users
-        FULL OUTER JOIN late_day_exceptions
-          ON users.user_id=late_day_exceptions.user_id
-        WHERE late_day_exceptions.g_id=?
-          AND late_day_exceptions.late_day_exceptions IS NOT NULL
-          AND late_day_exceptions.late_day_exceptions>0
-        ORDER BY users.user_email ASC;", array($gradeable_id));
+        SELECT u.user_id, user_firstname,
+          user_preferred_firstname, user_lastname, late_day_exceptions
+        FROM users as u
+        FULL OUTER JOIN late_day_exceptions as l
+          ON u.user_id=l.user_id
+        WHERE g_id=?
+          AND late_day_exceptions IS NOT NULL
+          AND late_day_exceptions>0
+        ORDER BY user_email ASC;", array($gradeable_id));
       return $this->database->rows();
     }
 
-
-    public function myupdateLateDays($user_id, $timestamp, $days){
+    public function updateLateDays($user_id, $timestamp, $days){
         $this->database->query("
           UPDATE late_days
           SET allowed_late_days=?
-          WHERE late_days.user_id=?
-            AND late_days.since_timestamp=?", array($days, $user_id, $timestamp));
+          WHERE user_id=?
+            AND since_timestamp=?", array($days, $user_id, $timestamp));
         if(count($this->database->rows())==0){
           $this->database->query("
             INSERT INTO late_days
-            (user_id,
-            since_timestamp,
-            allowed_late_days)
+            (user_id, since_timestamp, allowed_late_days)
             VALUES(?,?,?)", array($user_id, $timestamp, $days));
         }
     }
 
-
-
-    public function myupdateExtensions($user_id, $g_id, $days){
+    public function updateExtensions($user_id, $g_id, $days){
         $this->database->query("
           UPDATE late_day_exceptions
           SET late_day_exceptions=?
-          WHERE late_day_exceptions.user_id=?
-            AND late_day_exceptions.g_id=?;", array($days, $user_id, $g_id));
+          WHERE user_id=?
+            AND g_id=?;", array($days, $user_id, $g_id));
         if(count($this->database->rows())==0){
           $this->database->query("
             INSERT INTO late_day_exceptions
-            (user_id,
-            g_id,
-            late_day_exceptions)
+            (user_id, g_id, late_day_exceptions)
             VALUES(?,?,?)", array($user_id, $g_id, $days));
         }
     }
-
-
-
-    function retrieve_newest_gradeable_id_from_db() {
-    //IN:  No parameters
-    //OUT: Return gradeable ID of the newest gradeable, or NULL if there are no
-    //     gradeables in the system.
-    //PURPOSE:  Gradeable drop down menu is ordered with newest first, determined
-    //          by start date.
-        $this->database->query("
-          SELECT g_id
-          FROM gradeable
-          WHERE g_gradeable_type=0
-          ORDER BY g_grade_start_date DESC LIMIT 1;");
-        return $this->database->rows();
-    }
-    /* END FUNCTION retrieve_newest_gradeable_id_from_db() ====================== */
 }
 

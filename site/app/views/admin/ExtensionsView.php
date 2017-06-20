@@ -5,11 +5,11 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class ExtensionsView extends AbstractView {
-    public function displayExtensions($g_id, $g_ids,$user_table_db_data) {
+    public function displayExtensions($g_id, $g_ids,$user_table) {
         $return = <<<HTML
 <div class="content">
     <h2>Excused Absense Extensions</h2>
-    <form id="hwDefault" method="post" enctype="multipart/form-data" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'view'))}">
+    <form id="hwDefault" method="post" enctype="multipart/form-data" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="panel">
         <div class="option">
@@ -34,7 +34,7 @@ HTML;
             </div>
         </div>
     </form>
-    <form id="excusedAbsenseForm" method="post" enctype="multipart/form-data" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'extension', 'action' => 'update'))}">
+    <form id="excusedAbsenseForm" method="post" enctype="multipart/form-data" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'update_extension'))}">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <input type="hidden" name="selected_gradeable" value="{$g_id}" />
         <div class="option-title">Single Student Entry<br></div>
@@ -45,7 +45,7 @@ HTML;
         <div style="padding-bottom:20px;"><input type="file" name="csv_upload" onchange="this.form.submit()"></div>
     </div>
 HTML;
-        if (!is_array($user_table_db_data) || count($user_table_db_data) < 1) {
+        if (!is_array($user_table) || count($user_table) < 1) {
         //No late days in DB -- indicate as much.
             $return .= <<<HTML
     <div class="panel">
@@ -57,28 +57,29 @@ HTML;
             $return .= <<<HTML
     <div class="panel" align="center">
     <table class="table table-striped table-bordered persist-area" style="width:50%">
-    <div class="option-title">Current Late Day Exceptions($g_id)</div>
-    <div></div>
-    <thead class="persist-thead">
-        <td>Student ID</td>
-        <td>First Name</td>
-        <td>Last Name</td>
-        <td>Late Day Exceptions</td>
-    </thead>
+        <div class="option-title">Current Late Day Exceptions($g_id)</div>
+        <div></div>
+        <thead class="persist-thead">
+            <td>Student ID</td>
+            <td>First Name</td>
+            <td>Last Name</td>
+            <td>Late Day Exceptions</td>
+        </thead>
 HTML;
-            foreach ($user_table_db_data as $index => $record) {
+            foreach ($user_table as $index => $record) {
+                // $firstname = $this->getDisplayName($record);
                 $return .= <<<HTML
-    <tbody>
-        <td>{$record['user_id']}</td>
-        <td>{$record['user_firstname']}</td>
-        <td>{$record['user_lastname']}</td>
-        <td>{$record['late_day_exceptions']}</td>
-    </tbody>
+        <tbody>
+            <td>{$record['user_id']}</td>
+            <td>{$record['user_firstname']}</td>
+            <td>{$record['user_lastname']}</td>
+            <td>{$record['late_day_exceptions']}</td>
+        </tbody>
 HTML;
             }
             $return .= <<<HTML
     </table>
-</div>
+    </div>
 HTML;
         }
         $return .= <<<HTML
@@ -87,4 +88,16 @@ HTML;
 HTML;
         return $return;
     }
+
+    function getDisplayName($student_info) {
+        $first_name = isset($student_info['user_firstname']) ? $student_info['user_firstname'] : "";
+        $preferred_name = isset($student_info['user_preferred_firstname']) ? $student_info['user_preferred_firstname'] : "";
+        if ($preferred_name !== null && $preferred_name !== "") {
+            return $preferred_name;
+        }
+        else {
+            return $first_name;
+        }
+    }
+
 }
