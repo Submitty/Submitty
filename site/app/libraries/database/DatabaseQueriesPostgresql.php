@@ -71,77 +71,6 @@ ORDER BY u.registration_section, u.user_id");
         }
         return $return;
     }
-    
-    // Moved from old system GradeSummary class, used to grab the info to make the grade summaries
-    // May want to eliminate in the future if GradeSummary moves to using objects instead of arrays of data
-    public function getSummaryData($user = null) {
-        $query = "SELECT * FROM (
-        SELECT 
-            g_syllabus_bucket, 
-            g_title, 
-            g_grade_released_date,
-            g_gradeable_type, 
-            g.g_id, 
-            u.user_id,
-            u.user_firstname,
-            u.user_preferred_firstname,
-            u.user_lastname, 
-            u.registration_section,
-            case when score is null then 0 else score end, 
-            titles, 
-            comments,
-            scores,
-            is_texts,
-            gd_active_version
-        FROM
-            users AS u CROSS JOIN gradeable AS g 
-            LEFT JOIN (
-                SELECT 
-                    g_id, 
-                    gd_user_id, 
-                    score, 
-                    titles, 
-                    comments,
-                    scores,
-                    is_texts,
-                    gd_active_version
-                FROM 
-                    gradeable_data AS gd INNER JOIN(
-                    SELECT 
-                        gd_id, 
-                        SUM(gcd_score) AS score, 
-                        array_agg(gc_title ORDER BY gc_order ASC) AS titles, 
-                        array_agg(gcd_component_comment ORDER BY gc_order ASC) AS comments,
-                        array_agg(gcd_score ORDER BY gc_order ASC) AS scores,
-                        array_agg(gc_is_text ORDER BY gc_order ASC) AS is_texts
-                    FROM 
-                        gradeable_component_data AS gcd INNER JOIN 
-                            gradeable_component AS gc ON gcd.gc_id=gc.gc_id
-                    GROUP BY gd_id
-                ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
-            ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id";
-        if($user != null) {
-            $query.= " WHERE user_id=".$user;
-        }
-        $query.=" ORDER BY u.user_id ASC, g_syllabus_bucket ASC, g_grade_released_date ASC) as result";
-        $this->database->query($query);
-        return $this->database->rows();
-    }
-    
-    // Moved from old system GradeSummary class, used to grab the different types of gradeables (i.e. Homework, Labs, ...)
-    // May eventually want to eliminate this if we decide to change the GradeSummary code to use full objects instead of arrays of data
-    public function getSyllabusBuckets() {
-        $this->database->query("
-            SELECT 
-              g_syllabus_bucket
-            FROM 
-              gradeable
-            GROUP BY 
-              g_syllabus_bucket
-            ORDER BY 
-              g_syllabus_bucket ASC");
-        return $this->database->rows();
-    }
 
     public function createUser(User $user) {
 
@@ -262,7 +191,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                 return $return;
             }
         }
-        
+        // added toggling of gradeable type to only grab Homeworks for HWReport generation
         if ($g_type !== null) {
             if (!is_array($g_type)) {
                 $g_type = array($g_type);
