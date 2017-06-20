@@ -178,7 +178,7 @@ HTML;
 HTML;
                 if($action == 'lab'){
                     $return .= <<<HTML
-                    <a target=_blank href="{$this->core->getConfig()->getTABaseUrl()}/account/print/print_checkpoints_gradeable.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&g_id={$gradeable->getId()}&section_id={$display_section}&grade_by_reg_section={$gradeable->isGradeByRegistration()}&sort_by={$sort}">
+                    <a target=_blank href="{$this->core->getConfig()->getTaBaseUrl()}/account/print/print_checkpoints_gradeable.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&g_id={$gradeable->getId()}&section_id={$display_section}&grade_by_reg_section={$gradeable->isGradeByRegistration()}&sort_by={$sort}">
                         <i class="fa fa-print"></i>
                     </a>
 HTML;
@@ -200,10 +200,11 @@ HTML;
                 <td class="" style="text-align: left">{$gradeable_row->getUser()->getDisplayedFirstName()}</td>
                 <td class="" style="text-align: left">{$gradeable_row->getUser()->getLastName()}</td>
 HTML;
+
             if($action == 'lab'){
                 $col = 0;
                 foreach ($gradeable_row->getComponents() as $component) {
-                    if ($component->isText()) {
+                    if ($component->getIsText()) {
                         $return .= <<<HTML
                 <td>{$component->getComment()}</td>
 HTML;
@@ -231,7 +232,7 @@ HTML;
                 $total = 0;
                 if($num_numeric !== 0){
                     foreach ($gradeable_row->getComponents() as $component) {
-                        if (!$component->isText()) {
+                        if (!$component->getIsText()) {
                             $total+=$component->getScore();
                             if($component->getScore() == 0){
                                 $return .= <<<HTML
@@ -253,7 +254,7 @@ HTML;
                 }
 
                 foreach ($gradeable_row->getComponents() as $component) {
-                    if ($component->isText()) {
+                    if ($component->getIsText()) {
                         $return .= <<<HTML
                 <td class="option-small-input"><input class="option-small-box" type="text" id="cell-{$row}-{$col}" value="{$component->getComment()}" data-id="{$component->getId()}"/></td>
 HTML;
