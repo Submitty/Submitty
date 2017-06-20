@@ -203,12 +203,12 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
 
-      if (my_testcase.isFileCheck() && (num_messages > 0))
-        testcase_message = "Required files missing.";
+      if (my_testcase.isFileCheck() && num_messages > 0 && messages[0].find("README") != std::string::npos)
+        testcase_message = "README missing.";
       else if (my_testcase.isCompilation() && num_messages > 0) {
         if (result.hasCompilationError())
           testcase_message = "Compilation Error(s).";
-        else if (result.hasCompilationWarning() && (testcase_message.find("ERROR") == std::string::npos))
+        else if (result.hasCompilationWarning() && testcase_message.find("ERROR") == std::string::npos)
           testcase_message = "Compilation Warning(s).";
         else
           testcase_message = "Compilation Error(s).";

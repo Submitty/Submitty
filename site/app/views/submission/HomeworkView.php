@@ -606,7 +606,7 @@ HTML;
                         }
                         $command = htmlentities($testcase->getDetails());
                         $testcase_message = "";
-                        if (!$testcase->isHidden() && $testcase->getShowTestcaseMessage()) {
+                        if (!$testcase->isHidden() && $testcase->viewTestcaseMessage()) {
                             $testcase_message = <<<HTML
                         <span class='italics'><font color="#c00000">{$testcase->getTestcaseMessage()}</font></span>
 HTML;
