@@ -82,8 +82,8 @@ HTML;
 
 
             for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
-                $label = $gradeable->getTextBoxes()[$i]['label'];
-                $rows = $gradeable->getTextBoxes()[$i]['rows'];
+                $label = $gradeable->getTextboxes()[$i]['label'];
+                $rows = $gradeable->getTextboxes()[$i]['rows'];
                 if ($rows == 0) {
                   $return .= <<<HTML
                     <p style="max-width: 50em;">
@@ -129,7 +129,7 @@ HTML;
             }
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 if ($gradeable->getNumParts() > 1) {
-                    $label = "Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser";
+                    $label = "Drag your {$gradeable->getPartNames()[$i]} here or click to open file browser";
                 }
                 else {
                     $label = "Drag your file(s) here or click to open file browser";

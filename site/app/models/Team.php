@@ -2,25 +2,27 @@
 
 namespace app\models;
 
-use app\libraries\DatabaseUtils;
-
 /**
  * Class Team
+ *
+ * @method string getId()
  */
 class Team extends AbstractModel {
      
-    /** @var string The id of this team of form "<unique number>_<creator user id>" */
+    /** @property @var string The id of this team of form "<unique number>_<creator user id>" */
     protected $id;
-    /** @var array containing user ids of team members */
+    /** @property @var array containing user ids of team members */
     protected $member_user_ids;
-    /** @var array containing user ids of those invited to the team */
+    /** @propety @var array containing user ids of those invited to the team */
     protected $invited_user_ids;
 
     /**
      * Team constructor.
-     * @param string $team_id
+     * @param array $details
      */
     public function __construct($details) {
+        parent::__construct();
+
         $this->id = $details[0]['team_id'];
         $this->member_user_ids = array();
         $this->invited_user_ids = array();
@@ -32,14 +34,6 @@ class Team extends AbstractModel {
                 $this->invited_user_ids[] = $user['user_id'];
             }
         }
-    }
-
-    /**
-     * Get the id of the team
-     * @return string
-     */
-    public function getId() {
-        return $this->id;
     }
 
     /**
@@ -68,6 +62,7 @@ class Team extends AbstractModel {
 
     /**
      * Get whether or not a given user is on the team
+     * @param string $user_id
      * @return bool
      */
     public function hasMember($user_id) {
@@ -76,6 +71,7 @@ class Team extends AbstractModel {
     
     /**
      * Get whether or not a given user invited to the team
+     * @param string $user_id
      * @return bool
      */
     public function sentInvite($user_id) {

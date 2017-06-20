@@ -17,7 +17,7 @@ use app\libraries\Utils;
  * @package app\models
  */
 class GradeableAutogradingConfig extends AbstractModel {
-    private static $config_store = array();
+    protected static $config_store = array();
 
     /**
      * @param Core   $core

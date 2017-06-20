@@ -15,32 +15,38 @@ use app\libraries\Utils;
  * We only really need to do this for the version we're actually looking at and no others
  * as we don't need that high level of information (as we really only ever need late days,
  * points awarded, and if it's the active version).
+ *
+ * @method string getName()
+ * @method string getDetails()
+ * @method float getPoints()
+ * @method float getPointsAwarded()
+ * @method string getLogFile()
+ * @method GradeableAutocheck[] getAutochecks()
  */
 class GradeableTestcase extends AbstractModel {
-    private $core;
-    
-    private $index;
-    
-    /** @var string */
-    private $name = "";
-    /** @var string */
-    private $details = "";
-    private $view_testcase = true;
-    /** @var float */
-    private $points = 0;
-    private $extra_credit = false;
-    private $hidden = false;
-    /** @var float */
-    private $points_awarded = 0;
-    private $log_file = "";
-    private $autochecks = array();
-    /** @var bool */
-    private $show_testcase_message = true;
+    protected $core;
 
-    /** @var string testcase message to show in the test case header */
-    private $testcase_message = "";
+    /** @property @var string */
+    protected $index;
+    
+    /** @property @var string */
+    protected $name = "";
+    /** @property @var string */
+    protected $details = "";
+    protected $view_testcase = true;
+    /** @property @var float */
+    protected $points = 0;
+    protected $extra_credit = false;
+    protected $hidden = false;
+    /** @property @var float */
+    protected $points_awarded = 0;
+    /** @proprety @var string */
+    protected $log_file = "";
+    /** @property @var GradeableAutocheck[] */
+    protected $autochecks = array();
     
     public function __construct(Core $core, $testcase, $idx) {
+        parent::__construct();
         $this->core = $core;
         $this->index = $idx;
         
@@ -59,9 +65,6 @@ class GradeableTestcase extends AbstractModel {
         if (isset($testcase['hidden'])) {
             $this->hidden = $testcase['hidden'] === true;
         }
-        if (isset($testcase['show_testcase_message'])) {
-            $this->show_testcase_message = $testcase['show_testcase_message'] === true;
-        }
     }
     
     public function addResultTestcase($testcase, $result_path) {
@@ -77,67 +80,46 @@ class GradeableTestcase extends AbstractModel {
         if (isset($testcase['points_awarded'])) {
             $this->points_awarded = floatval($testcase['points_awarded']);
             if ($this->points > 0) {
-              // POSITIVE POINTS TESTCASE
-              if ($this->points_awarded < 0) {
-                // TODO: ADD ERROR
+                // POSITIVE POINTS TESTCASE
+                if ($this->points_awarded < 0) {
+                  // TODO: ADD ERROR
+                  //$this->points_awarded = 0;
+                }
+                if ($this->points_awarded > $this->points) {
+                  // TODO: ADD ERROR
+                  //$this->points_awarded = $this->points;
+                }
+            }
+            else if ($this->points < 0) {
+                // PENALTY TESTCASE
+                if ($this->points_awarded > 0) {
+                    // TODO: ADD ERROR
+                    $this->points_awarded = 0;
+                }
+                if ($this->points_awarded < $this->points) {
+                    // TODO: ADD ERROR
+                    $this->points_awarded = $this->points;
+                }
+            }
+            else {
                 $this->points_awarded = 0;
-              }
-              if ($this->points_awarded > $this->points) {
-                // TODO: ADD ERROR
-                $this->points_awarded = $this->points;
-              }
-            } else if ($this->points < 0) {
-              // PENALTY TESTCASE
-              if ($this->points_awarded > 0) {
-                // TODO: ADD ERROR
-                $this->points_awarded = 0;
-              }
-              if ($this->points_awarded < $this->points) {
-                // TODO: ADD ERROR
-                $this->points_awarded = $this->points;
-              }
-            } else {
-              $this->points_awarded = 0;
             }
         }
         if (isset($testcase['view_testcase'])) {
             $this->view_testcase = $testcase['view_testcase'];
         }
-        if (isset($testcase['testcase_message'])) {
-            $this->testcase_message = Utils::prepareHtmlString($testcase['testcase_message']);
-        }
-    }
-    
-    public function getName() {
-        return $this->name;
-    }
-    
-    public function getDetails() {
-        return $this->details;
-    }
-
-    public function hasDetails() {
-      return (!$this->isHidden() && count($this->autochecks) > 0);
     }
 
     public function viewTestcase() {
       return $this->view_testcase;
     }
-    
-    public function getPoints() {
-        return $this->points;
-    }
-    
+
     public function getNonHiddenPoints() {
         return (!$this->isHidden()) ? $this->points : 0;
     }
     
     public function getNonHiddenNonExtraCreditPoints() {
         return (!$this->isHidden() && !$this->isExtraCredit()) ? $this->points : 0;
-    }
-    
-    public function getPointsAwarded() {
-        return $this->points_awarded;
     }
     
     public function hasPoints() {
@@ -152,30 +134,7 @@ class GradeableTestcase extends AbstractModel {
         return $this->extra_credit;
     }
     
-    public function getLogfile() {
-        return $this->log_file;
+    public function hasDetails() {
+      return (!$this->isHidden() && count($this->autochecks) > 0);
     }
-    
-    /**
-     *
-     * @return GradeableAutocheck[]
-     */
-    public function getAutochecks() {
-        return $this->autochecks;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTestcaseMessage() {
-        return $this->testcase_message;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getShowTestcaseMessage() {
-        return $this->show_testcase_message;
-    }
-    
 }
