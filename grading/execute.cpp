@@ -108,7 +108,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // for graphics/window interaction
     { "scrot",                   "/usr/bin/scrot"},
-    { "xdotool",                   "/usr/bin/xdotool"}
+    { "xdotool",                 "/usr/bin/xdotool"}
 
 
   };
@@ -820,7 +820,7 @@ int execute(const std::string &cmd,
   bool window_mode = false; //Tells us if the process is expected to spawn a window. (additional support later) 
   
   if(actions.size() > 0){ //right now, we assume if there are actions, there will be a window.  
-    std::cout << "Recieved " << actions.size() << " actions" << std::endl; //useful debug line.
+    std::cout << "Received " << actions.size() << " actions" << std::endl; //useful debug line.
     std::cout <<"Window mode activated." << std::endl;
     char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
     if (my_display == NULL) {
