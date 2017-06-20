@@ -32,18 +32,6 @@ class ReportView extends AbstractView {
                     <button onclick="GenerateReport('summary');" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate Grade Summaries</button>
                 </td>
             </tr>
-            <tr class="bar"></tr>
-            <tr class="bar"></tr>
-            <tr>
-                <td width="50%">
-                    <p>Pushing this button will generate a csv file with all students and all grades for every students
-                    </p>
-                </td>
-                <td width="5%"></td>
-                <td width="45%" style="position:relative">
-                    <button class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate CSV Report </button>
-                </td>
-            </tr>
         <tbody>
     </table>
 </div>
