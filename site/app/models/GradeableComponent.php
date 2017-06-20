@@ -119,6 +119,10 @@ class GradeableComponent extends AbstractModel {
         return $this->comment;
     }
 
+    public function setComment($comment) {
+        $this->comment = $comment;
+    }
+
     public function hasGrade() {
         return $this->graded;
     }
