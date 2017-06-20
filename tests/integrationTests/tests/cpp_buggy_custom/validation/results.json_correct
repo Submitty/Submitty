@@ -17,8 +17,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 2 Sum of 5 random numbers",
-            "testcase_message": "ERROR: See details below."
+            "test_name": "Test 2 Sum of 5 random numbers"
         },
         {
             "points_awarded": 0,

@@ -14,8 +14,7 @@
                 }
             ],
             "points_awarded": 6,
-            "test_name": "Test 2 Sum of 5 random numbers",
-            "testcase_message": "ERROR: See details below."
+            "test_name": "Test 2 Sum of 5 random numbers"
         },
         {
             "autochecks": [
@@ -27,8 +26,7 @@
                 }
             ],
             "points_awarded": 4,
-            "test_name": "Test 3 Sum of 10 random numbers",
-            "testcase_message": "ERROR: See details below."
+            "test_name": "Test 3 Sum of 10 random numbers"
         },
         {
             "autochecks": [
@@ -43,8 +41,7 @@
                 }
             ],
             "points_awarded": 3,
-            "test_name": "Test 4 Is it random?  (Is it different on each run?)",
-            "testcase_message": "ERROR: See details below."
+            "test_name": "Test 4 Is it random?  (Is it different on each run?)"
         },
         {
             "points_awarded": 0,

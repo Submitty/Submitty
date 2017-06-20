@@ -16,8 +16,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 Convert Temperature",
-            "testcase_message": "ERROR: See details below."
+            "test_name": "Test 1 Convert Temperature"
         },
         {
             "autochecks": [
@@ -28,8 +27,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 2 Legal Variable Names",
-            "testcase_message": "ERROR: See output below."
+            "test_name": "Test 2 Legal Variable Names"
         },
         {
             "autochecks": [
@@ -53,8 +51,7 @@
                 }
             ],
             "points_awarded": 2,
-            "test_name": "Test 3 Volume and Area",
-            "testcase_message": "ERROR: See details below."
+            "test_name": "Test 3 Volume and Area"
         },
         {
             "autochecks": [
@@ -72,8 +69,7 @@
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 4 Count Odd",
-            "testcase_message": "ERROR: See details below."
+            "test_name": "Test 4 Count Odd"
          },
          {
              "points_awarded": 0,

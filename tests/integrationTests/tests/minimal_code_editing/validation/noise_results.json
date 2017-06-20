@@ -10,8 +10,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 1 copy the cpp files..",
-            "testcase_message": "ERROR: Required files missing."
+            "test_name": "Test 1 copy the cpp files.."
         },
         {
             "autochecks": [

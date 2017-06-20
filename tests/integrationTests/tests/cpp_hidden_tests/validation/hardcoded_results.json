@@ -46,8 +46,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 5 Frame Size 13",
-            "testcase_message": "ERROR: See output below."
+            "test_name": "Test 5 Frame Size 13"
         },
         {
             "autochecks": [
@@ -72,8 +71,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 7 Error Checking: Frame Size Negative",
-            "testcase_message": "ERROR: See output below."
+            "test_name": "Test 7 Error Checking: Frame Size Negative"
         },
         {
             "autochecks": [
@@ -104,8 +102,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 9 Error Checking: Too Many Arguments",
-            "testcase_message": "ERROR: See output below."
+            "test_name": "Test 9 Error Checking: Too Many Arguments"
         },
         {
             "points_awarded": 0,

@@ -46,8 +46,7 @@
 					"messages": ["ERROR: Number of tests specified in configuration does not match!"]
 				}
 			],
-			"points_awarded": 0,
-            "testcase_message": "ERROR: See details below."
+			"points_awarded": 0
                 },
                 {
                     "points_awarded": 0,

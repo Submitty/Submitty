@@ -19,8 +19,7 @@
 				    "messages": ["ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4"]
 				}
 			],
-			"points_awarded": 4,
-            "testcase_message": "ERROR: See details below."
+			"points_awarded": 4
                 },
                 {
                     "points_awarded": 0,

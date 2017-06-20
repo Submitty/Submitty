@@ -25,8 +25,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 2 Required 500-1000 Words",
-            "testcase_message": "ERROR: See details below."
+            "test_name": "Test 2 Required 500-1000 Words"
         },
         {
             "points_awarded": 0,

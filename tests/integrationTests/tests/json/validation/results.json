@@ -23,7 +23,7 @@
             ],
             "points_awarded": 0,
             "test_name": "Test 1 dummy compilation",
-            "testcase_message": "ERROR/WARNING: See details below."
+            "testcase_message": "Compilation Error(s)."
         },
         {
             "autochecks": [
