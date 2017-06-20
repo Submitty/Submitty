@@ -11,8 +11,10 @@ import subprocess
 #TODO: Put FileIO into try blocks so a missing file doesn't crash the script
 #TODO: Test failure-to-rsync-behavior
 
-def remove_grade_released(line):
+def remove_extra_rawdata_fields(line):
     if 'grade_released_date' in line:
+        return False # ignore it
+    if 'last_update' in line:
         return False # ignore it
     return True
 
@@ -115,8 +117,8 @@ if __name__ == '__main__':
         contents2 = file2.readlines()
         file2.close()
 
-        filt1 = filter(remove_grade_released,contents1)
-        filt2 = filter(remove_grade_released, contents2)
+        filt1 = filter(remove_extra_rawdata_fields,contents1)
+        filt2 = filter(remove_extra_rawdata_fields, contents2)
         same_flag = True
         for x,y in zip(filt1,filt2):
             if x != y:
