@@ -1044,6 +1044,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
     public function getAllGradeablesIdsAndTitles() {
         $this->database->query("SELECT g_id, g_title FROM gradeable ORDER BY g_title ASC");
         return $this->database->rows();
+    }
       
     public function newTeam($g_id, $user_id) {
         $this->database->query("SELECT * FROM gradeable_teams ORDER BY team_id");
