@@ -4,14 +4,14 @@ dist: trusty
 
 matrix:
   include:
-    - php: 5.6
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
+#    - php: 5.6
+#      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
     - php: 7.0
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
-    - php: 7.0
-      env: AUTH_METHOD=PamAuthentication INTEGRATION_SUITE=false
-    - php: 7.0
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=true
+#      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
+#    - php: 7.0
+#      env: AUTH_METHOD=PamAuthentication INTEGRATION_SUITE=false
+#    - php: 7.0
+#      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=true
 
 cache:
   pip: true
@@ -57,8 +57,10 @@ addons:
 before_install:
   - jdk_switcher use default
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
-  - export PY_VERSION_2="$(python -V 2>&1 | egrep -o '[0-9].[0-9].[0-9]{2,}')"
-  - export PY_VERSION_3="$(python3 -V 2>&1 | egrep -o '[0-9].[0-9].[0-9]{2,}')"
+  - PY_VERSION_2="$(python -V 2>&1 | egrep -o '[0-9].[0-9].[0-9]{2,}')"
+  - PY_VERSION_3="$(python3 -V 2>&1 | egrep -o '[0-9].[0-9].[0-9]{2,}')"
+  - echo ${PY_VERSION_2}
+  - echo ${PY_VERSION_3}
   - sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/${PY_VERSION_2}/bin:/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
 
 install:
@@ -86,8 +88,10 @@ install:
   - pip3 install PyYAML
   - pip3 install sqlalchemy
   - sudo chmod -R 555 /usr/local/lib/python*/
-  - sudo chmod -R 555 /opt/python/${PY_VERSION_2}/lib/python2.7/*
-  - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python3.5/*
+  - echo ${PY_VERSION_2}
+  - echo ${PY_VERSION_3}
+  - sudo chmod -R 555 /opt/python/${PY_VERSION_2}/lib/python{$PY_VERSION_3:0:3}/*
+  - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python{$PY_VERSION_3:0:3}/*
 
 before_script:
   # Doing this helps chromedriver from hanging for some mysterious reason
