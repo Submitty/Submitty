@@ -50,7 +50,7 @@ class GradeSummary extends AbstractModel {
             }
             $student = $student_output_json[$student_id];
 
-            $student_output_json[$student_id] = $this->generateSummaryModel($gradeable, $ldu, $student);
+            $student_output_json[$student_id] = $this->generateSummary($gradeable, $ldu, $student);
         }
         
         // WRITE THE JSON FILE
@@ -143,14 +143,14 @@ class GradeSummary extends AbstractModel {
         $summary_data = $this->core->getQueries()->getGradeables(null, $ids);
         $ldu = new LateDaysCalculation($this->core);
         
-        $this->generateSummariesFromQueryResultsModel($summary_data, $ldu);
+        $this->generateSummariesFromQueryResults($summary_data, $ldu);
     }
     
     public function generateAllSummariesForStudent($student_id) {
         $summary_data = $this->core->getQueries()->getGradeables(null, $student_id);
         $ldu = new LateDaysCalculation($this->core);
         
-        $this->generateSummariesFromQueryResultsModel($summary_data, $ldu);
+        $this->generateSummariesFromQueryResults($summary_data, $ldu);
     }
 }
 
