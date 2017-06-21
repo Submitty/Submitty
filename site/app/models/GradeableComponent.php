@@ -25,6 +25,7 @@ namespace app\models;
  * @method float getScore()
  * @method setScore(float $score)
  * @method string getComment()
+ * @method void setComment(string $comment)
  * @method bool getHasGrade()
  */
 class GradeableComponent extends AbstractModel {

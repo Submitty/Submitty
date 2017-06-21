@@ -100,7 +100,7 @@ HTML;
             $num_text = 0;
             $num_numeric = 0;
             foreach ($gradeable->getComponents() as $component) {
-                if($component->isText()){
+                if($component->getIsText()){
                     $num_text++;
                 }
                 else{
@@ -109,7 +109,7 @@ HTML;
             }
             if($num_numeric !== 0){
                 foreach ($gradeable->getComponents() as $component) {
-                    if(!$component->isText()){
+                    if(!$component->getIsText()){
                         $return .= <<<HTML
                 <td width="35" style="text-align: center">{$component->getTitle()}({$component->getMaxValue()})</td>
 HTML;
@@ -120,7 +120,7 @@ HTML;
 HTML;
             }
             foreach ($gradeable->getComponents() as $component) {
-                if($component->isText()){
+                if($component->getIsText()){
                     $return .= <<<HTML
                 <td style="text-align: center">{$component->getTitle()}</td>
 HTML;
