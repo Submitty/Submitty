@@ -10,6 +10,7 @@ class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
         $details = array(
             'g_id' => 'test_gradeable',
             'user_id' => 'test_user',
+            'team_id' => 'test_team',
             'g_version' => 1,
             'autograding_non_hidden_non_extra_credit' => 2,
             'autograding_non_hidden_extra_credit' => 4,
@@ -37,6 +38,7 @@ class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
         $details = array(
             'g_id' => 'test_gradeable',
             'user_id' => 'test_user',
+            'team_id' => 'test_team',
             'g_version' => 1,
             'autograding_non_hidden_non_extra_credit' => 2,
             'autograding_non_hidden_extra_credit' => 4,
@@ -54,6 +56,7 @@ class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
         $details = array(
             'g_id' => 'test_gradeable',
             'user_id' => 'test_user',
+            'team_id' => 'test_team',
             'g_version' => 1,
             'autograding_non_hidden_non_extra_credit' => 2,
             'autograding_non_hidden_extra_credit' => 4,
@@ -69,6 +72,7 @@ class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
         $details = array(
             'g_id' => 'test_gradeable',
             'user_id' => 'test_user',
+            'team_id' => 'test_team',
             'g_version' => 1,
             'autograding_non_hidden_non_extra_credit' => 2,
             'autograding_non_hidden_extra_credit' => 4,
@@ -86,6 +90,7 @@ class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
         $details = array(
             'g_id' => 'test_gradeable',
             'user_id' => 'test_user',
+            'team_id' => 'test_team',
             'g_version' => 1,
             'autograding_non_hidden_non_extra_credit' => 2,
             'autograding_non_hidden_extra_credit' => 4,

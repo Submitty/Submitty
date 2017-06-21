@@ -88,7 +88,7 @@ interface IDatabaseQueries {
      * @param \DateTime $due_date
      * @return GradeableVersion[]
      */
-    public function getGradeableVersions($g_id, $user_id, $due_date);
+    public function getGradeableVersions($g_id, $user_id, $team_id, $due_date);
 
     public function getUsersByRegistrationSections($sections);
 
@@ -190,7 +190,7 @@ interface IDatabaseQueries {
      * @param $user_id
      * @param $version
      */
-    public function insertVersionDetails($g_id, $user_id, $version, $timestamp);
+    public function insertVersionDetails($g_id, $user_id, $team_id, $version, $timestamp);
 
     /**
      * Updates the row in electronic_gradeable_version table for a given gradeable and student. This function should
@@ -201,7 +201,7 @@ interface IDatabaseQueries {
      * @param $user_id
      * @param $version
      */
-    public function updateActiveVersion($g_id, $user_id, $version);
+    public function updateActiveVersion($g_id, $user_id, $team_id, $version);
 
     /**
      * Given a gradeable object, this updates all gradeable_component_data rows that are associated, updating the scores
@@ -278,4 +278,45 @@ interface IDatabaseQueries {
      * @param $session_id
      */
     public function removeSessionById($session_id);
+
+    /**
+     * Create a new team id and team in gradeable_teams for given gradeable, add $user_id as a member
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function newTeam($g_id, $user_id);
+
+    /**
+     * Add user $user_id to team $team_id as an invited user
+     * @param string $team_id
+     * @param string $user_id
+     */
+    public function newTeamInvite($team_id, $user_id);
+
+    /**
+     * Add user $user_id to team $team_id as a team member
+     * @param string $team_id
+     * @param string $user_id
+     */
+    public function newTeamMember($team_id, $user_id);
+
+    /**
+     * Remove a user from their current team, decline all invitiations for that user
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function removeTeamUser($g_id, $user_id);
+
+    /**
+     * Return an array of Team objects for all teams on given gradeable
+     * @param string $g_id
+     */
+    public function getTeamsByGradeableId($g_id);
+
+    /**
+     * Return Team object for team which the given user belongs to on the given gradeable
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function getTeamByUserId($g_id, $user_id);
 }
