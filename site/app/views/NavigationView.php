@@ -277,8 +277,9 @@ HTML;
                     		$points_percent = $g_data->getGradedNonHiddenPoints() / $g_data->getTotalNonHiddenNonExtraCreditPoints();
                     	}                    	
 						$points_percent = $points_percent * 100;
-						if ($points_percent > 100) { $points_percent = 100; }
-                        //prints out the button if $points_percent >= 50% or if there is no autograding points
+						if ($points_percent > 100) { 
+                            $points_percent = 100; 
+                        }
 						if (($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() != 0 && $g_data->getActiveVersion() >= 1
 							&& $title_save == "CLOSED" && $points_percent >= 50) || ($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() == 0 && $g_data->getActiveVersion() >= 1)) {
 						$gradeable_open_range = <<<HTML
@@ -287,7 +288,7 @@ HTML;
                  </button>
 HTML;
 						}
-						else { //prints out the button if $points_percent < 50%
+						else { 
 							$gradeable_open_range = <<<HTML
                  <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">
                      {$button_text}
@@ -300,7 +301,7 @@ HTML;
 							&& ($title_save == "CLOSED" || $title_save == "OPEN"))
 						{							
 							//from https://css-tricks.com/css3-progress-bars/
-							if ($points_percent >= 50) { //if $points_percent >= 50%
+							if ($points_percent >= 50) {
 								$gradeable_open_range .= <<<HTML
 								<style type="text/css">	
 									.meter1 { 
@@ -322,7 +323,7 @@ HTML;
 								</div>				 
 HTML;
 							}
-							else { //if $points_percent < 50%
+							else {
 								$gradeable_open_range .= <<<HTML
 								<style type="text/css">	
 								.meter2 { 
