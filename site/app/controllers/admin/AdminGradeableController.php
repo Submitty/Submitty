@@ -32,10 +32,28 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
+    //Pulls the data from an existing gradeable and just prints it on the page
     private function upload_new_template() {
-        print var_dump($_POST);
+        if($_REQUEST['template_id'] === "--None--") {
+            $this->view_page();
+            return;
+        }
+        $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
+        $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
+        $num_sections = $this->core->getQueries()->getNumberRotatingSessions();
+        $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections("");
+        $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
+        $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
+        $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
+        $graders_from_usertypes = array($graders_from_usertype1, $graders_from_usertype2, $graders_from_usertype3);
+        $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+        $ini_data = array($rotatingGradeables, $gradeableSectionHistory, $num_sections, $graders_all_section, $graders_from_usertypes,
+            $template_list);
+        $data = $this->core->getQueries()->getGradeableData($_REQUEST['template_id']);
+        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add_template", $ini_data, $data);
     }
 
+    //view the page with no data from previous gradeables
     private function view_page() {
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
@@ -51,6 +69,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add", $ini_data);
     }
 
+    //view the page with pulled data from the gradeable to be edited
     private function edit_page() {
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
@@ -143,7 +162,6 @@ class AdminGradeableController extends AbstractController {
             }
         }
         
-
         $num_numeric = intval($_POST['num_numeric_items']);
         $num_text= intval($_POST['num_text_items']);
         $details['num_numeric'] = $num_numeric;
@@ -191,6 +209,13 @@ class AdminGradeableController extends AbstractController {
 
         fwrite($fp, json_encode(json_decode(urldecode($_POST['gradeableJSON'])), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         fclose($fp);
+        $this->returnToNav();
+    }
+
+    //return to the navigation page
+    private function returnToNav() {
+        $url = $this->core->buildUrl(array());
+        header('Location: '. $url);
     }
 
 }

@@ -5,6 +5,23 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class AdminGradeableView extends AbstractView {
+    /**
+     * The one and only function that shows the entire page
+     *
+     * Parameters:
+     * $type_of_action dedicates how the page will display the data
+     * $initial_data is an array with all the data the view needs to display the page correct initially
+     *   $initial_data = array($rotatingGradeables, $gradeableSectionHistory, $num_sections, $graders_all_section, $graders_from_usertypes,
+     *   $template_list);
+     * $data is an array with all the data the view needs to display the edit page correctly.
+     * The contents of $data change depending on the gradeable type
+     *   Electronic: $data = array($old_gradeable, $old_components, $has_grades, $electronic_gradeable, $initial_grades_released_compare_date, 
+     *   $old_questions);
+     *   Checkpoint: $data = array($old_gradeable, $old_components, $has_grades, $initial_ta_grading_compare_date, 
+     *   $initial_grades_released_compare_date);
+     *   Num/text: $data = array($old_gradeable, $old_components, $has_grades, $num_numeric, $num_text, $initial_ta_grading_compare_date, 
+     *          $initial_grades_released_compare_date);
+     */
 	public function show_add_gradeable($type_of_action, $initial_data = array(""), $data = array("")) {
 
         $electronic_gradeable = array();
@@ -19,10 +36,10 @@ class AdminGradeableView extends AbstractView {
         $team_no_checked;
         $TA_grade_open_date = date('m/d/Y 23:59:59', strtotime( '+10 days' ));
         $TA_grade_release_date = date('m/d/Y 23:59:59', strtotime( '+14 days' ));
-        $default_late_days = 2;
+        $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
 		$BASE_URL = "http://192.168.56.101/hwgrading";
-		$action = "upload_new_gradeable";
-		$string = "Add"; //Add or edit
+		$action = "upload_new_gradeable"; //decides how the page's data is displayed
+		$string = "Add"; //Add or Edit
 		$button_string = "Add";
 		$extra = "";
 		$gradeable_submission_id = "";
@@ -41,8 +58,16 @@ class AdminGradeableView extends AbstractView {
         $g_syllabus_bucket = -1;
         $g_grade_by_registration = -1;
         $edit = json_encode($type_of_action === "edit");
-        $gradeable_id_title = $initial_data[5];
+        $template_value = "";
+        $gradeable_id_title = $initial_data[5]; //list of previous gradeables
+        $gradeables_array = array();
 
+        foreach ($gradeable_id_title as $g_id_title) { //makes an array of gradeable ids for javascript
+            array_push($gradeables_array, $g_id_title['g_id']);
+        }
+        $js_gradeables_array = json_encode($gradeables_array);
+
+        //if the user is editing a gradeable instead of adding
         if ($type_of_action === "edit") {
             $have_old = true;
             $action = "upload_edit_gradeable";
@@ -62,9 +87,30 @@ class AdminGradeableView extends AbstractView {
             $g_min_grading_group = $data[0]['g_min_grading_group'];
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
-            if ($data[0]['g_gradeable_type'] === 0) {
+            if ($data[0]['g_gradeable_type'] === 0) { //if the gradeable edited is electronic gradeable
                 $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y h:i:s', strtotime($data[3]['eg_submission_open_date']));
                 $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y h:i:s', strtotime($data[3]['eg_submission_due_date']));
+                $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
+                $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
+                $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $old_questions = $data[5];
+            }
+            if ($data[0]['g_gradeable_type'] === 2) { //if the gradeable edited is num/text gradeable
+                $num_numeric = $data[3];
+                $num_text = $data[4];
+            }
+        }
+
+        //if the user is using a template
+        if ($type_of_action === "add_template") {
+            $g_instructions_url = $data[0]['g_instructions_url'];
+            $team_yes_checked = $data[0]['g_team_assignment'];
+            $team_no_checked = !$team_yes_checked;
+            $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
+            $old_components = $data[1];
+            $g_min_grading_group = $data[0]['g_min_grading_group'];
+            $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
+            if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $old_questions = $data[5];
@@ -74,9 +120,7 @@ class AdminGradeableView extends AbstractView {
                 $num_text = $data[4];
             }
         }
-        if ($type_of_action === "add_template") {
-            $type_of_action = "add";
-        }
+
 		$html_output = <<<HTML
 		<style type="text/css">
 
@@ -106,6 +150,10 @@ class AdminGradeableView extends AbstractView {
         -webkit-background-clip: padding-box;
         -moz-background-clip: padding-box;
         background-clip: padding-box;
+        padding-top: 20px;
+        padding-right: 20px;
+        padding-left: 20px;
+        padding-bottom: 20px;
     }
 
     .question-icon {
@@ -172,7 +220,7 @@ class AdminGradeableView extends AbstractView {
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
 HTML;
-if ($type_of_action === "add"){
+if ($type_of_action === "add" || $type_of_action === "add_template"){
   $html_output .= <<<HTML
             <div style="padding-left: 200px;">
                 From Template: <select name="gradeable_template" style='width: 170px;' value=''>
@@ -182,7 +230,11 @@ HTML;
 
     foreach ($gradeable_id_title as $g_id_title){
      $html_output .= <<<HTML
-        <option value="{$g_id_title['g_id']}">{$g_id_title['g_title']}</option>
+        <option 
+HTML;
+        if ($type_of_action === "add_template" && $data[0]['g_id']===$g_id_title['g_id']) { $html_output .= "selected"; }
+        $html_output .= <<<HTML
+        value="{$g_id_title['g_id']}">{$g_id_title['g_title']}</option>
 HTML;
     }
   $html_output .= <<<HTML
@@ -194,7 +246,6 @@ HTML;
 HTML;
     $html_output .= <<<HTML
         </div>
-
 
 <div class="modal-body">
 <b>Please Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
@@ -227,12 +278,12 @@ HTML;
             <fieldset>
             <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes"
 HTML;
-        if ($type_of_action === "edit" && $team_yes_checked) { $html_output .= "checked"; }
+        if (($type_of_action === "edit" || $type_of_action === "add_template") && $team_yes_checked) { $html_output .= "checked"; }
         $html_output .= <<<HTML
             > Yes
             <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="no"
 HTML;
-        if ($type_of_action === "edit" && $team_no_checked) { $html_output .= "checked"; }
+        if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= "checked"; }
         $html_output .= <<<HTML
             > No
                 <div class="team_assignment team_yes" id="team_date">
@@ -251,19 +302,19 @@ HTML;
             <fieldset>
                 <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
 HTML;
-    if ($type_of_action === "edit" && $data[0]['g_gradeable_type']===0) { $html_output .= "checked"; }
+    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type']===0) { $html_output .= "checked"; }
     $html_output .= <<<HTML
             > 
             Electronic File
             <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints"
 HTML;
-            if ($type_of_action === "edit" && $data[0]['g_gradeable_type']===1) { $html_output .= "checked"; }
+            if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type']===1) { $html_output .= "checked"; }
     $html_output .= <<<HTML
             >
             Checkpoints
             <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric"
 HTML;
-            if ($type_of_action === "edit" && $data[0]['g_gradeable_type']===2) { $html_output .= "checked"; }
+            if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type']===2) { $html_output .= "checked"; }
     $html_output .= <<<HTML
             >
             Numeric/Text
@@ -393,7 +444,7 @@ HTML;
     }
         $html_output .= <<<HTML
             <tr id="add-question">
-                <td colspan="2" style="overflow: hidden;">
+                <td colspan="2" style="overflow: hidden; text-align: left;">
                     <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="icon-plus icon-white"></i> Rubric Item</div>
                 </td>
             </tr>
@@ -536,7 +587,7 @@ HTML;
             <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
             <br />
             <fieldset>
-                <input type="radio" name="section_type" value="reg_section"
+                <input type="radio" name="section_type" value="reg_section" id="registration-section"
 HTML;
     ($g_grade_by_registration===true)? $html_output .= 'checked':'';
     $html_output .= <<<HTML
@@ -559,6 +610,7 @@ if ($initial_data[2] > 0) {
     $graders_to_sections = array();
 
     foreach($initial_data[3] as $grader){
+        //parses the data correctly
         $graders_to_sections[$grader['user_id']] = $grader['sections'];
         $graders_to_sections[$grader['user_id']] = ltrim($graders_to_sections[$grader['user_id']], '{');
         $graders_to_sections[$grader['user_id']] = rtrim($graders_to_sections[$grader['user_id']], "}");
@@ -583,6 +635,7 @@ HTML;
         </tr>
         <tr>
 HTML;
+//display the appropriate graders for each user group 
 function display_graders($graders, $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, &$html_output){
     foreach($graders as $grader){
        $html_output .= <<<HTML
@@ -618,9 +671,10 @@ HTML;
 HTML;
 
     }
+    //parses $sections correctly
     $sections = ($row['sections_rotating_id']);
     $sections = ltrim($sections, '{');
-    $sections=rtrim($sections, "}");
+    $sections = rtrim($sections, "}");
     $html_output .= <<<HTML
           <td style="padding: 8px; border: 3px solid black; text-align: center;">{$sections}</td>      
 HTML;
@@ -636,7 +690,6 @@ HTML;
         <table>
                 <th>Instructor Graders</th>
 HTML;
-    //$db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array(1));
     display_graders($initial_data[4][0], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);
     
   $html_output .= <<<HTML
@@ -648,7 +701,6 @@ HTML;
                 <th>Full Access Graders</th>
 HTML;
     
-  //$db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array(2));
   display_graders($initial_data[4][1], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);
     
   $html_output .= <<<HTML
@@ -663,7 +715,6 @@ HTML;
                 <th>Limited Access Graders</th>
 HTML;
 
-  //$db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array(3));
   display_graders($initial_data[4][2], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);    
   
     $html_output .= <<<HTML
@@ -713,7 +764,6 @@ HTML;
     }
     $html_output .= <<<HTML
             </select>
-            <br />
             <!-- When the form is completed and the "SAVE GRADEABLE" button is pushed
                 If this is an electronic assignment:
                     Generate a new config/class.json
@@ -723,15 +773,9 @@ HTML;
                 If this is an edit of an existing AND there are existing grades this gradeable
                 regenerates the grade reports. And possibly re-runs the generate grade summaries?
             -->
-        </div>
-        <div class="modal-footer">
+        <class="modal-footer">
                 <button class="btn btn-primary" type="submit" style="margin-top: 10px; float: right;">{$button_string} Gradeable</button>
 HTML;
-    if (false && $have_old_edit) {
-        $html_output .= <<<HTML
-                <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-top:10px; margin-right: 10px; float: right;">Delete Gradeable</button>
-HTML;
-    }
     
     $html_output .= <<<HTML
         </div>
@@ -763,8 +807,6 @@ function createCrossBrowserJSDate(val){
         var momentDate = moment(val, timeParseString) // Parse raw datetime string
         return new Date(momentDate.toString()) // Convert moment into RFC2822 and construct browser-specific jQuery Date object
     }
-
-    
 
     $(document).ready(function() {
 
@@ -919,9 +961,7 @@ function createCrossBrowserJSDate(val){
                 }
             });
         }
-        
-
-        
+          
         $('input:radio[name="ta_grading"]').change(function(){
             $('#rubric_questions').hide();
             $('#grading_questions').hide();
@@ -938,7 +978,14 @@ function createCrossBrowserJSDate(val){
 
         $('[name="gradeable_template"]').change(
         function(){
-            alert("savemefrommyself");
+            var arrayUrlParts = [];
+            arrayUrlParts["component"] = ["admin"];
+            arrayUrlParts["page"] = ["admin_gradeable"];
+            arrayUrlParts["action"] = ["upload_new_template"];
+            arrayUrlParts["template_id"] = [this.value];
+
+            var new_url = buildUrl(arrayUrlParts);
+            window.location.href = new_url;
         });
         
         if({$default_late_days} != -1){
@@ -991,8 +1038,6 @@ function createCrossBrowserJSDate(val){
         if({$edit}){
             $('input[name=gradeable_id]').attr('readonly', true);
         }
-
-
 
          $('input:radio[name="gradeable_type"]').change(
     function(){
@@ -1294,7 +1339,7 @@ $('#gradeable-form').on('submit', function(e){
         row.find('div.btn').attr('onclick', 'toggleQuestion(' + newNum + ',"individual"' + ')');
         row.find('textarea[name=ta_comment_' + oldNum + ']').attr('name', 'ta_comment_' + newNum).attr('id', 'individual_' + newNum);
         row.find('textarea[name=student_comment_' + oldNum + ']').attr('name', 'student_comment_' + newNum).attr('id', 'student_' + newNum);
-        row.find('select[name=points_' + oldNum + ']').attr('name', 'points_' + newNum);
+        row.find('input[name=points_' + oldNum + ']').attr('name', 'points_' + newNum);
         row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
@@ -1313,23 +1358,32 @@ $('#gradeable-form').on('submit', function(e){
             child = 1;
         }
 
+        //Move Question title
         var temp = currentRow.children()[child].children[0].value;
         currentRow.children()[child].children[0].value = newRow.children()[0].children[0].value;
         newRow.children()[0].children[0].value = temp;
 
+        //Move Ta Comment
+        temp = currentRow.children()[child].children[1].value;
+        currentRow.children()[child].children[1].value = newRow.children()[0].children[1].value;
+        newRow.children()[0].children[1].value = temp;
+
+        //Move Student Comment
         temp = currentRow.children()[child].children[2].value;
         currentRow.children()[child].children[2].value = newRow.children()[0].children[2].value;
         newRow.children()[0].children[2].value = temp;
 
         child += 1;
 
+        //Move points
         temp = currentRow.children()[child].children[0].value;
         currentRow.children()[child].children[0].value = newRow.children()[1].children[0].value;
         newRow.children()[1].children[0].value = temp;
 
-        temp = currentRow.children()[child].children[1].checked;
-        currentRow.children()[child].children[1].checked = newRow.children()[1].children[1].checked;
-        newRow.children()[1].children[1].checked = temp;
+        //Move extra credit box
+        temp = currentRow.children()[child].children[2].checked;
+        currentRow.children()[child].children[2].checked = newRow.children()[1].children[2].checked;
+        newRow.children()[1].children[2].checked = temp;
     }
 
     function moveQuestionUp(question) {
@@ -1341,23 +1395,32 @@ $('#gradeable-form').on('submit', function(e){
         var newRow = $('tr#row-' + (question-1));
         var child = 0;
 
-        var temp = currentRow.children()[0].children[0].value;
+        //Move Question title
+        var temp = currentRow.children()[0].children[0].value; 
         currentRow.children()[0].children[0].value = newRow.children()[child].children[0].value;
         newRow.children()[child].children[0].value = temp;
 
-        temp = currentRow.children()[0].children[2].value;
+        //Move Ta Comment
+        temp = currentRow.children()[0].children[1].value; 
+        currentRow.children()[0].children[1].value = newRow.children()[child].children[1].value;
+        newRow.children()[child].children[1].value = temp;
+
+        //Move Student Comment
+        temp = currentRow.children()[0].children[2].value; 
         currentRow.children()[0].children[2].value = newRow.children()[child].children[2].value;
         newRow.children()[child].children[2].value = temp;
 
         child += 1;
 
-        temp = currentRow.children()[1].children[0].value;
+        //Move points
+        temp = currentRow.children()[1].children[0].value; 
         currentRow.children()[1].children[0].value = newRow.children()[child].children[0].value;
         newRow.children()[child].children[0].value = temp;
 
-        temp = currentRow.children()[1].children[1].checked;
-        currentRow.children()[1].children[1].checked = newRow.children()[child].children[1].checked;
-        newRow.children()[child].children[1].checked = temp;
+        //Move extra credit box
+        temp = currentRow.children()[1].children[2].checked;
+        currentRow.children()[1].children[2].checked = newRow.children()[child].children[2].checked;
+        newRow.children()[child].children[2].checked = temp;
     }
 
     function addQuestion(){
@@ -1448,7 +1511,18 @@ $('#gradeable-form').on('submit', function(e){
         var check1 = document.getElementById('radio_electronic_file').checked;
         var check2 = document.getElementById('radio_checkpoints').checked;
         var check3 = document.getElementById('radio_numeric').checked;
-
+        var checkRegister = document.getElementById('registration-section').checked;
+        var checkRotate = document.getElementById('rotating-section').checked;
+        var all_gradeable_ids = $js_gradeables_array;
+        if (!($edit)) {
+            var x;
+            for (x = 0; x < all_gradeable_ids.length; x++) {
+                if (all_gradeable_ids[x] === gradeable_id) {
+                    alert("Gradeable already exists");
+                    return false;
+                }
+            }
+        }
         if (!test || has_space || gradeable_id == "" || gradeable_id === null) {
             $( "#alert-message" ).dialog( "open" );
             return false;
@@ -1492,6 +1566,11 @@ $('#gradeable-form').on('submit', function(e){
             }
             if(date_released < date_grade) {
                 alert("DATE CONSISTENCY:  Grade Released Date must be >= TA Grading Open Date");
+                return false;
+            }
+
+            if(!checkRegister && !checkRotate) {
+                alert("A type of way for TAs to grade must be selected");
                 return false;
             }
         }
