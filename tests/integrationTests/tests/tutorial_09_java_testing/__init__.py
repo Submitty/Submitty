@@ -1,5 +1,5 @@
 # Necessary imports. Provides library functions to ease writing tests.
-from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
+from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR, SUBMITTY_TUTORIAL_DIR
 
 import subprocess
 import os
@@ -9,8 +9,8 @@ import glob
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/sample_files/sample_assignment_config/java_factorial"
-SAMPLE_SUBMISSIONS = SUBMITTY_INSTALL_DIR + "/sample_files/sample_submissions/java_factorial"
+SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_TUTORIAL_DIR + "/examples/09_java_testing/config"
+SAMPLE_SUBMISSIONS = SUBMITTY_TUTORIAL_DIR + "/examples/09_java_testing/submissions/"
 
 
 @prebuild
