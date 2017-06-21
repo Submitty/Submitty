@@ -90,8 +90,8 @@ install:
   - sudo chmod -R 555 /usr/local/lib/python*/
   - echo ${PY_VERSION_2}
   - echo ${PY_VERSION_3}
-  - sudo chmod -R 555 /opt/python/${PY_VERSION_2}/lib/python{$PY_VERSION_3:0:3}/*
-  - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python{$PY_VERSION_3:0:3}/*
+  - sudo chmod -R 555 /opt/python/${PY_VERSION_2}/lib/python${PY_VERSION_2:0:3}/*
+  - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
 
 before_script:
   # Doing this helps chromedriver from hanging for some mysterious reason
