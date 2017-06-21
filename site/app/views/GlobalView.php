@@ -94,11 +94,11 @@ HTML;
             <li>
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late'))}">Late Days Allowed</a>
             </li>
-            <!--
+            
             <li>
-                <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Excused%20Absense%20Extensions">Excused Absense Extensions</a>
+                <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Excused%20Absense%20Extensions">Old Excused Absense Extensions</a>
             </li>
-            -->
+            
             <li>
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">Excused Absense Extensions</a>
             </li>

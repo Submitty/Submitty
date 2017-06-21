@@ -20,6 +20,9 @@ class LateController extends AbstractController {
             case 'update_extension':
                 $this->update("view_extension");
                 break;
+            case 'get_extension_details':
+                $this->ajaxGetExtensions();
+                break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller");
                 break;
@@ -33,8 +36,8 @@ class LateController extends AbstractController {
     }
 
     public function viewExtensions() {
-        if (isset($_POST['selected_gradeable'])) {
-            $g_id = $_POST['selected_gradeable'];
+        if (isset($_POST['g_id'])) {
+            $g_id = $_POST['g_id'];
         } else {
             $g_id = $this->core->getQueries()->getNewestElectronicGradeableId();
             foreach($g_id as $index => $value) {
@@ -67,12 +70,12 @@ class LateController extends AbstractController {
             }
         }
         else{
-            if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            /*if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
                 $_SESSION['messages']['error'][] = "Invalid CSRF token. Try again.";
                 $_SESSION['request'] = $_POST;
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => $nextStep)));
             }
-            else if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $this->core->getQueries()->getUserById($_POST['user_id'])->getId() !== $_POST['user_id']) {
+            else */if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $this->core->getQueries()->getUserById($_POST['user_id'])->getId() !== $_POST['user_id']) {
                 $_SESSION['messages']['error'][] = "Invalid Student ID";
                 $_SESSION['request'] = $_POST;
                 $this->reloadPage($nextStep);
@@ -82,34 +85,51 @@ class LateController extends AbstractController {
                 $_SESSION['request'] = $_POST;
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')));
             }
-            else if ((!isset($_POST['late_days'])) || $_POST == "" || (!ctype_digit($_POST['late_days'])) ) {
+            else if ((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days'])) ) {
                 $_SESSION['messages']['error'][] = "Late Days must be a nonnegative integer";
                 $_SESSION['request'] = $_POST;
                 $this->reloadPage($nextStep);
+            }
+            else if ((!isset($_POST['g_id'])) || $_POST['g_id'] == "" ) {
+                $_SESSION['messages']['error'][] = "Something wrong with gradeable_id";
+                $_SESSION['request'] = $_POST;
             }
             else{
                 if($nextStep == "view_late"){
                     $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
                 }
                 else{
-                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['selected_gradeable'], $_POST['late_days']);
+                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
                 }   
             }
         }
         $this->reloadPage($nextStep);
+
     }
 
     // for use during update
     function reloadPage($nextStep){
-        if($nextStep == 'view_late'){
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')));
-        }
-        else{
-            $user_table = $this->core->getQueries()->getUsersWithExtensions($_POST['selected_gradeable']);
-            $this->setPreferedName($user_table);
-            $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
-            $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $_POST['selected_gradeable'], $g_ids, $user_table);
-        }
+        // echo"loadHomeworkExtensions();";
+                    // $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => $nextStep)));
+
+        // if($nextStep == 'view_late'){
+        //     $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')));
+        // }
+        // else{
+        //     $user_table = $this->core->getQueries()->getUsersWithExtensions($_POST['g_id']);
+        //     $this->setPreferedName($user_table);
+        //     $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
+        //     $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $_POST['g_id'], $g_ids, $user_table);
+        //     // $this->loadHomeworkExtensions();
+        // }
+
+        // $g_id = $_REQUEST['g_id'];
+        // $user_table = $this->core->getQueries()->getUsersWithExtensions($g_id);
+        // $this->core->getOutput()->renderJson(array(
+        //     'gradeable_id' => $g_id,
+        //     'users' => $user_table
+        // ));
+        // $this->ajaxGetExtensions();
     }
 
     function setPreferedName(&$user_table){
@@ -224,4 +244,80 @@ class LateController extends AbstractController {
             }
         return false;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // public function viewExtensions() {
+    //     if (isset($_POST['g_id'])) {
+    //         $g_id = $_POST['g_id'];
+    //     } else {
+    //         $g_id = $this->core->getQueries()->getNewestElectronicGradeableId();
+    //         foreach($g_id as $index => $value) {
+    //             $g_id=$value[0];
+    //         }
+    //     }
+    //     $user_table = $this->core->getQueries()->getUsersWithExtensions($g_id);
+    //     $this->setPreferedName($user_table);
+    //     $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
+    //     $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $g_id, $g_ids, $user_table);
+    // }
+
+    public function ajaxGetExtensions() {
+        $g_id = $_REQUEST['g_id'];
+        $user_table = $this->core->getQueries()->getUsersWithExtensions($g_id);
+
+        // // $user_ids;
+        // // $user_firstnames;
+        // // $user_lastnames;
+        // // $late_day_exceptions;
+        // $users;
+        // $usr;        
+
+        // foreach ($user_table as $index => $record) {
+        //     // $user_ids[] = $record['user_id'];
+        //     // $user_firstnames[] = $record['user_firstname'];
+        //     // $user_lastnames[] = $record['user_lastname'];
+        //     // $late_day_exceptions[] = $record['late_day_exceptions'];  
+        //     $usr[] = $record['user_id'];
+        //     $usr[] = $record['user_firstname'];
+        //     $usr[] = $record['user_lastname'];
+        //     $usr[] = $record['late_day_exceptions']; 
+        //     $users[] = $usr;
+        // }
+
+        // $user = $this->core->getQueries()->getUserById($user_id);
+        $this->core->getOutput()->renderJson(array(
+            'gradeable_id' => $g_id,
+            // 'users' => $users
+            'users' => $user_table
+            // 'user_ids' => $user_ids,
+            // 'user_firstnames' => $user_firstnames,
+            // 'user_lastnames' => $user_lastnames,
+            // 'late_day_exceptions' => $late_day_exceptions
+            // // 'user_preferred_firstname' => $user->getPreferredFirstName(),
+            // // 'user_email' => $user->getEmail(),
+            // // 'user_group' => $user->getGroup(),
+            // // 'registration_section' => $user->getRegistrationSection(),
+            // // 'rotating_section' => $user->getRotatingSection(),
+            // // 'manual_registration' => $user->isManualRegistration(),
+            // // 'grading_registration_sections' => $user->getGradingRegistrationSections()
+        ));
+    }
+
+
+
+
+
+
+
 }

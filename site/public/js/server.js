@@ -34,6 +34,7 @@ function editUserForm(user_id) {
     $.ajax({
         url: url,
         success: function(data) {
+            console.log(data);
             var json = JSON.parse(data);
             var form = $("#edit-user-form");
             form.css("display", "block");
@@ -456,3 +457,125 @@ $(function() {
 
     setupCheckboxCells();
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function updateHomeworkExtensions(data) {
+    console.log(data);
+    console.log("GOT INTO UPDATE HOMEWORK EXTENSIONS");
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'mything', 'g_id' : 'hw01'});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            console.log("in success");
+            // console.log(data);
+            // var json = JSON.parse(data);
+            // var form = $("#load-homework-extensions");
+            // // form.css("display", "block");
+            // // $('[name="g_id"]', form).val(json['gradeable_id']);
+            // // $("#my_table tr").remove();
+            // $('#my_table tr:gt(0)').remove();
+            // // console.log(json['users'].length);
+            // if(json['users'].length === 0){
+            //     $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+            // }
+            // json['users'].forEach(function(elem){
+            //     var bits = ['<tr><td>' + elem[0], elem[1], elem[3], elem[4] + '</td></tr>'];
+            //     $('#my_table').append(bits.join('</td><td>'));
+            // });
+        },
+        error: function() {
+            console.log("SAD, TRY AGAIN.");
+        }
+    })
+    return false;
+}
+    $("#excusedAbsenseForm").submit(function(event) {
+        console.log("ENTERED HERE");
+
+      /* stop form from submitting normally */
+      event.preventDefault();
+
+      /* get the action attribute from the <form action=""> element */
+      console.log(this);
+      console.log($(this));
+      var $form = $( this ),
+          url = $form.attr( 'action' );
+
+      /* Send the data using post with element id name and name2*/
+      var posting = $.post( url, { name: $('#name').val(), name2: $('#name2').val() } );
+
+      /* Alerts the results */
+      posting.done(function( data ) {
+        alert('success');
+      });
+        return false;
+    });
+
+
+
+
+
+
+
+
+
+
+function loadHomeworkExtensions(g_id) {
+    // console.log(g_id);
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            // console.log(data);
+            var json = JSON.parse(data);
+            var form = $("#load-homework-extensions");
+            // form.css("display", "block");
+            // $('[name="g_id"]', form).val(json['gradeable_id']);
+            // $("#my_table tr").remove();
+            $('#my_table tr:gt(0)').remove();
+            // console.log(json['users'].length);
+            if(json['users'].length === 0){
+                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+            }
+            json['users'].forEach(function(elem){
+                var bits = ['<tr><td>' + elem[0], elem[1], elem[3], elem[4] + '</td></tr>'];
+                $('#my_table').append(bits.join('</td><td>'));
+            });
+        },
+        error: function() {
+            alert("SAD, TRY AGAIN.");
+        }
+    })
+}
