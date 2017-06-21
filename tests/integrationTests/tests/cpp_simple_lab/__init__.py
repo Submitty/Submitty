@@ -122,7 +122,6 @@ def compilation_error(test):
     test.diff("results_grade.txt","compile_error_results_grade.txt","-b")
     test.json_diff("results.json","compile_error_results.json")
 
-"""
 @testcase
 def buggy(test):
     cleanup(test)
@@ -135,7 +134,6 @@ def buggy(test):
     test.run_validator()
     test.diff("results_grade.txt","buggy_results_grade.txt","-b")
     test.json_diff("results.json","buggy_results.json")
-    """
 
 
 
