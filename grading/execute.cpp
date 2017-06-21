@@ -106,8 +106,10 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
 
     // for graphics/window interaction
-    { "scrot",                   "/usr/bin/scrot"},
-    { "xdotool",                 "/usr/bin/xdotool"}
+    { "scrot",                   "/usr/bin/scrot"}, //screenshot utility
+    { "xdotool",                 "/usr/bin/xdotool"}, //keyboard/mouse input
+    { "xdotool",                 "/usr/bin/wmctrl"}, //bring window into focus
+    { "xdotool",                 "/usr/bin/xwininfo"}, // get info about window
 
     // for Debugging
     { "strace",                  "/usr/bin/strace" }
@@ -989,20 +991,18 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &
   float time_left = sleep_time_in_microseconds;
   while(time_left > 0){
     if(time_left > 100000){ //while we have more than 1/10th second left. 
-      std::cout << "Officially slept 1/10th" << std::endl;
       time_left -= 100000; //decrease the amount of time left by 1/10th of a second.
       usleep(100000); //sleep for 1/10th of a second
       elapsed += .1; //and increment time elapsed by 1/10th second.
     }
     else{ //otherwise, if there is less than 1/10th second left
       usleep(time_left); //sleep for that amount of time
-      std::cout << "Officially slept this long in micro: " << time_left << std::endl;
       elapsed+=time_left/1000000.0f; //Increment elapsed by the amount of time (in seconds)
       time_left = 0.0f; //and set time left to be zero.
     }
     if (elapsed >= next_checkpoint){ //if it is time to update our knowledge of the student's memory usage, do so.
       rss_memory = resident_set_size(childPID);
-      //std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
+      std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
       next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
     }
 
@@ -1013,7 +1013,6 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &
       time_kill=1;
       return true;
     }
-
     if (!memory_ok(rss_memory, allowed_rss_memory)){ //if the student's program used too much memory
       // terminate for excessive memory usage (RSS = resident set size = RAM)
       memory_kill=1;

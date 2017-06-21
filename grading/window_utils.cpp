@@ -35,9 +35,8 @@ double stringToFloat(std::string const &str, int precision) {
 std::vector<float> extractFloatsFromString(std::string input){
     std::vector<float> floats;
     //Anything (lazy) followed by either a number of the form #.##### or .#####
-    std::string myReg = ".*?(-?[0-9]*[1-9][0-9]*(\\.[0-9]+)?|-?0*\\.[0-9]*[1-9]
-                            [0-9]*)(.*)"; 
-                                                    
+    std::string myReg = 
+           ".*?(-?[0-9]*[1-9][0-9]*(\\.[0-9]+)?|-?0*\\.[0-9]*[1-9][0-9]*)(.*)";
 
 
     std::regex regex(myReg);
@@ -678,8 +677,8 @@ void clickAndDragAbsolute(std::string window_name, std::string command){
   
   //if we couldn't populate the values, do nothing (window doesn't exist)
   if(!success){ 
-    std::cout << "Click and drag unsuccessful due to failutre to 
-                        populate click and drag values." << std::endl;
+    std::cout << "Click and drag unsuccessful due to failutre to "
+                        << "populate click and drag values." << std::endl;
     return;
   }
 
@@ -721,7 +720,6 @@ void clickAndDragAbsolute(std::string window_name, std::string command){
 */
 void clickAndDrag(std::string window_name, std::string command)
 {
-  std::cout << "In click and drag" << std::endl;
   if(command.find("delta") != std::string::npos){
     std::cout << "Routing to delta" << std::endl;
     //these functions check window existence internally.
@@ -746,8 +744,8 @@ void centerMouse(std::string window_name){
 
   //wait until the last moment to check window existence.
   if(success && windowExists(window_name)){ 
-    std::string command = "wmctrl -R " + window_name + " &&  xdotool mousemove 
-          --sync " + std::to_string(x_middle) + " " + std::to_string(y_middle); 
+    std::string command = "wmctrl -R " + window_name + " &&  xdotool mousemove"
+      + " --sync " + std::to_string(x_middle) + " " + std::to_string(y_middle); 
     system(command.c_str());
   }
   else{
@@ -768,8 +766,8 @@ void moveMouseToOrigin(std::string window_name){
 
   //wait until the last moment to check window existence.
   if(success&& windowExists(window_name)){ 
-    std::string command = "wmctrl -R " + window_name + " &&  xdotool 
-                mousemove --sync " + std::to_string(x_start) + " " + 
+    std::string command = "wmctrl -R " + window_name + " &&  xdotool" 
+             +" mousemove --sync " + std::to_string(x_start) + " " + 
                                               std::to_string(y_start); 
     system(command.c_str());
   }
@@ -819,8 +817,8 @@ void type(std::string command, std::string window_name, int childPID,
   {
     //Evem of there is nothing to type, we allow the function to continue so
     // that it delays as expected.
-    std::cout << "ERROR: The line " << command << " contained no quoted 
-                                                      string." <<std::endl; 
+    std::cout << "ERROR: The line " << command << " contained no quoted " <<
+                                                     "string." <<std::endl; 
   }   
   //get window focus then type the string toType.
   std::string internal_command = "wmctrl -R " + window_name 
