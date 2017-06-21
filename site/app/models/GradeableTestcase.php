@@ -44,6 +44,10 @@ class GradeableTestcase extends AbstractModel {
     protected $log_file = "";
     /** @property @var GradeableAutocheck[] */
     protected $autochecks = array();
+    /** @property @var string */
+    protected $testcase_message = "";
+    /** @property @var bool */
+    protected $view_testcase_message = true;
     
     public function __construct(Core $core, $testcase, $idx) {
         parent::__construct();
@@ -64,6 +68,9 @@ class GradeableTestcase extends AbstractModel {
         }
         if (isset($testcase['hidden'])) {
             $this->hidden = $testcase['hidden'] === true;
+        }
+         if (isset($testcase['view_testcase_message'])) {
+            $this->view_testcase_message = $testcase['view_testcase_message'] === true;
         }
     }
     
@@ -108,6 +115,9 @@ class GradeableTestcase extends AbstractModel {
         if (isset($testcase['view_testcase'])) {
             $this->view_testcase = $testcase['view_testcase'];
         }
+        if (isset($testcase['testcase_message'])) {
+            $this->testcase_message = Utils::prepareHtmlString($testcase['testcase_message']);
+        }
     }
 
     public function viewTestcase() {
@@ -136,5 +146,13 @@ class GradeableTestcase extends AbstractModel {
     
     public function hasDetails() {
       return (!$this->isHidden() && count($this->autochecks) > 0);
+    }
+
+    public function getTestcaseMessage() {
+        return $this->testcase_message;
+    }
+
+    public function viewTestcaseMessage() {
+        return $this->view_testcase_message;
     }
 }

@@ -602,11 +602,17 @@ HTML;
                         $name = htmlentities($testcase->getName());
                         $extra_credit = "";
                         if($testcase->isExtraCredit()) {
-                          $extra_credit = "<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
+                          $extra_credit = "&nbsp;&nbsp;<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
                         }
                         $command = htmlentities($testcase->getDetails());
+                        $testcase_message = "";
+                        if (!$testcase->isHidden() && $testcase->viewTestcaseMessage()) {
+                            $testcase_message = <<<HTML
+                        <span class='italics'><font color="#c00000">{$testcase->getTestcaseMessage()}</font></span>
+HTML;
+                        }
                         $return .= <<<HTML
-                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}</h4>
+                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>{$extra_credit}&nbsp;&nbsp;{$testcase_message}</h4>
             </div>
 HTML;
                         if ($testcase->hasDetails()) {
