@@ -6,47 +6,64 @@ use app\libraries\DatabaseUtils;
 
 /**
  * Class User
+ *
+ * @method string getId()
+ * @method void setId(string $id) Get the id of the loaded user
+ * @method string getPassword()
+ * @method string getFirstName() Get the first name of the loaded user
+ * @method string getPreferredFirstName() Get the preferred name of the loaded user
+ * @method string getDisplayedFirstName() Returns the preferred name if one exists and is not null or blank,
+ *                                        otherwise return the first name field for the user.
+ * @method string getLastName() Get the last name of the loaded user
+ * @method void setLastName(string $last_name)
+ * @method string getEmail()
+ * @method void setEmail(string $email)
+ * @method int getGroup()
+ * @method void setGroup(integer $group)
+ * @method array getRegistrationSection()
+ * @method void setManualRegistration(bool $flag)
+ * @method array getGradingRegistrationSections()
  */
 class User extends AbstractModel {
     
-    /**
-     * @var bool Is this user actually loaded (else you cannot access the other member variables)
-     */
+    /** @property @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
     
-    /** @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
+    /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
     /**
+     * @property
      * @var string The password for the student used for database authentication. This should be hashed and salted.
      * @link http://php.net/manual/en/function.password-hash.php
      */
     protected $password = null;
-    /** @var string The first name of the user */
+    /** @property @var string The first name of the user */
     protected $first_name;
-    /** @var string The first name of the user */
+    /** @property @var string The first name of the user */
     protected $preferred_first_name = "";
-    /** @var  string The name to be displayed by the system (either preferred name or first name) */
+    /** @property @var  string The name to be displayed by the system (either preferred name or first name) */
     protected $displayed_first_name;
-    /** @var string The last name of the user */
+    /** @property @var string The last name of the user */
     protected $last_name;
-    /** @var string The email of the user */
+    /** @property @var string The email of the user */
     protected $email;
-    /** @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
+    /** @property @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
     
-    /** @var int What is the registration section that the user was assigned to for the course */
+    /** @property @var int What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
-    /** @var int What is the assigned rotating section for the user */
+    /** @property @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
     
     /**
+     * @property
      * @var bool Was the user imported via a normal class list or was added manually. This is useful for students
      *           that are doing independent studies in the course, so not actually registered and so wouldn't want
      *           to be shifted to a null registration section or rotating section like a dropped student
      */
     protected $manual_registration = false;
 
-    /** @var array */
+    /** @property @var array */
     protected $grading_registration_sections = array();
 
     /**
@@ -54,6 +71,7 @@ class User extends AbstractModel {
      * @param array $details
      */
     public function __construct($details) {
+        parent::__construct();
         if (count($details) == 0) {
             return;
         }
@@ -77,7 +95,6 @@ class User extends AbstractModel {
         if (isset($details['grading_registration_sections'])) {
             $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
         }
-
     }
     
     /**
@@ -120,22 +137,6 @@ class User extends AbstractModel {
         return $this->group === 0;
     }
 
-    /**
-     * Get the id of the loaded user
-     * @return string
-     */
-    public function getId() {
-        return $this->id;
-    }
-
-    public function setId($id) {
-        $this->id = $id;
-    }
-
-    public function getPassword() {
-        return $this->password;
-    }
-
     public function setPassword($password) {
         $info = password_get_info($password);
         if ($info['algo'] === 0) {
@@ -145,40 +146,15 @@ class User extends AbstractModel {
             $this->password = $password;
         }
     }
-    
-    /**
-     * Get the first name of the loaded user
-     * @return string
-     */
-    public function getFirstName() {
-        return $this->first_name;
-    }
 
     public function setFirstName($name) {
         $this->first_name = $name;
         $this->setDisplayedFirstName();
     }
 
-    /**
-     * Get the preferred name of the loaded user
-     * @return string
-     */
-    public function getPreferredFirstName() {
-        return $this->preferred_first_name;
-    }
-
     public function setPreferredFirstName($name) {
         $this->preferred_first_name = $name;
         $this->setDisplayedFirstName();
-    }
-
-    /**
-     * Returns the preferred name if one exists and is not null or blank, otherwise return the
-     * first name field for the user.
-     * @return string
-     */
-    public function getDisplayedFirstName() {
-        return $this->displayed_first_name;
     }
 
     public function setDisplayedFirstName() {
@@ -188,50 +164,6 @@ class User extends AbstractModel {
         else {
             $this->displayed_first_name = $this->first_name;
         }
-    }
-    
-    /**
-     * Get the last name of the loaded user
-     * @return string
-     */
-    public function getLastName() {
-        return $this->last_name;
-    }
-
-    public function setLastName($name) {
-        $this->last_name = $name;
-    }
-    
-    /**
-     * Get the email of the loaded user
-     * @return string
-     */
-    public function getEmail() {
-        return $this->email;
-    }
-
-    public function setEmail($email) {
-        $this->email = $email;
-    }
-    
-    /**
-     * Get the group of the loaded user
-     * @return int
-     */
-    public function getGroup() {
-        return $this->group;
-    }
-
-    public function setGroup($group) {
-        $this->group = intval($group);
-    }
-    
-    /**
-     * Get the registration section of the loaded user
-     * @return int
-     */
-    public function getRegistrationSection() {
-        return $this->registration_section;
     }
 
     public function setRegistrationSection($section) {
@@ -258,17 +190,6 @@ class User extends AbstractModel {
      */
     public function isManualRegistration() {
         return $this->manual_registration;
-    }
-
-    public function setManualRegistration($manual) {
-        $this->manual_registration = $manual === true;
-    }
-
-    /**
-     * @return array
-     */
-    public function getGradingRegistrationSections() {
-        return $this->grading_registration_sections;
     }
 
     public function setGradingRegistrationSections($sections) {

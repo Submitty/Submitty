@@ -2,7 +2,7 @@
 
 """
 Expected directory structure:
-<BASE_PATH>/courses/<SEMESTER>/<COURSES>/submissions/<HW>/<USERNAME>/<VERSION#>
+<BASE_PATH>/courses/<SEMESTER>/<COURSES>/submissions/<HW>/<WHO>/<VERSION#>
 
 This script will find all submissions that match the provided
 pattern and add them to the grading queue.
@@ -66,15 +66,15 @@ def main():
         pattern_gradeable="*"
         if len(dirs) > len(data_dirs)+3:
             pattern_gradeable=dirs[len(data_dirs)+3]
-        pattern_user="*"
+        pattern_who="*"
         if len(dirs) > len(data_dirs)+4:
-            pattern_user=dirs[len(data_dirs)+4]
+            pattern_who=dirs[len(data_dirs)+4]
         pattern_version="*"
         if len(dirs) > len(data_dirs)+5:
             pattern_version=dirs[len(data_dirs)+5]
 
         # full pattern may include wildcards!
-        pattern = os.path.join(data_dir,pattern_semester,pattern_course,"submissions",pattern_gradeable,pattern_user,pattern_version)
+        pattern = os.path.join(data_dir,pattern_semester,pattern_course,"submissions",pattern_gradeable,pattern_who,pattern_version)
         print("pattern: ",pattern)
 
         # Find all matching submissions
@@ -87,14 +87,24 @@ def main():
                 my_semester=my_dirs[len(data_dirs)]
                 my_course=my_dirs[len(data_dirs)+1]
                 my_gradeable=my_dirs[len(data_dirs)+3]
-                my_user=my_dirs[len(data_dirs)+4]
+                my_who=my_dirs[len(data_dirs)+4]
                 my_version=my_dirs[len(data_dirs)+5]
-                my_path=os.path.join(data_dir,my_semester,my_course,"submissions",my_gradeable,my_user,my_version)
+                my_path=os.path.join(data_dir,my_semester,my_course,"submissions",my_gradeable,my_who,my_version)
                 if my_path != d:
                     raise SystemExit("ERROR: path reconstruction failed")
                 # add them to the queue
-                grade_queue.append({"semester": my_semester, "course": my_course, "assignment": my_gradeable,
-                                    "user": my_user, "version": my_version})
+
+                if '_' not in my_who:
+                    my_user = my_who
+                    my_team = ""
+                    my_is_team = False
+                else:
+                    my_user = ""
+                    my_team = my_who
+                    my_is_team = True
+
+                grade_queue.append({"semester": my_semester, "course": my_course, "gradeable": my_gradeable,
+                                    "user": my_user, "team": my_team, "who": my_who, "is_team": my_is_team, "version": my_version})
 
     # Check before adding a very large number of systems to the queue
     if len(grade_queue) > 50:
@@ -107,7 +117,7 @@ def main():
         which_queue="interactive"
 
     for item in grade_queue:
-        file_name = "__".join([item['semester'], item['course'], item['assignment'], item['user'], item['version']])
+        file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['who'], item['version']])
         file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_"+which_queue, file_name)
         with open(file_name, "w") as open_file:
             json.dump(item, open_file)

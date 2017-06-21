@@ -529,16 +529,33 @@ foreach ($eg->questions as $question) {
     $output .= <<<HTML
                         <tr>
 HTML;
-
+    $penalty = !(intval($question['gc_max_value']) > 0);
     $message = htmlentities($question["gc_title"]);
     $note = htmlentities($question["gc_ta_comment"]);
     if ($note != "") {
         $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
     }
-    $output .= <<<HTML
-                            <td style="font-size: 12px" colspan="4">
+
+    //adds an icon depending on the question type (extra credit, normal, penalty)
+    //adds background color as well.
+    if($question['gc_is_extra_credit'] == true) {
+        $output .= <<<HTML
+                            <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
+                                <i class="icon-plus"></i> <b>{$message}</b> {$note}
+HTML;
+    }
+    else if($penalty) {
+        $output .= <<<HTML
+                            <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
+                                <i class="icon-minus"></i> <b>{$message}</b> {$note}
+HTML;
+    }
+    else {
+        $output .= <<<HTML
+                            <td style="font-size: 12px;" colspan="4">
                                 <b>{$message}</b> {$note}
 HTML;
+    }
 
     $student_note = htmlentities($question['gc_student_comment']);
     if ($student_note != ''){
@@ -555,8 +572,32 @@ HTML;
     
     $min_val = (intval($question['gc_max_value']) > 0) ? 0 : intval($question['gc_max_value']);
     $max_val = (intval($question['gc_max_value']) > 0) ? intval($question['gc_max_value']) : 0;
-    
-    $output .= <<<HTML
+    if($question['gc_is_extra_credit'] == true) {
+        $output .= <<<HTML
+    <tr style="background-color: #f9f9f9;">
+                            <td style="white-space:nowrap; vertical-align:middle; text-align:center; background-color: #D8F2D8;" colspan="1"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
+                                min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
+                                style="width:50px; resize:none;" {$disabled}></textarea><strong> / {$question['gc_max_value']}</strong></td>
+                            <td style="width:98%; background-color: #D8F2D8;" colspan="3">
+                                <div id="rubric-{$c}">
+                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; resize:none; float:left;" 
+                                        placeholder="Message for the student..." comment-position="0" {$disabled}>{$question['gcd_component_comment']}</textarea>
+HTML;
+    }
+    else if($penalty) {
+        $output .= <<<HTML
+    <tr style="background-color: #f9f9f9;">
+                            <td style="white-space:nowrap; vertical-align:middle; text-align:center; background-color: #FAD5D3;" colspan="1"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
+                                min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
+                                style="width:50px; resize:none;" {$disabled}></textarea><strong> / {$question['gc_max_value']}</strong></td>
+                            <td style="width:98%; background-color: #FAD5D3;" colspan="3">
+                                <div id="rubric-{$c}">
+                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; resize:none; float:left;" 
+                                        placeholder="Message for the student..." comment-position="0" {$disabled}>{$question['gcd_component_comment']}</textarea>
+HTML;
+    }
+    else {
+        $output .= <<<HTML
     <tr style="background-color: #f9f9f9;">
                             <td style="white-space:nowrap; vertical-align:middle; text-align:center;" colspan="1"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
                                 min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
@@ -566,6 +607,7 @@ HTML;
                                     <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; resize:none; float:left;" 
                                         placeholder="Message for the student..." comment-position="0" {$disabled}>{$question['gcd_component_comment']}</textarea>
 HTML;
+    }
 
     $comment = htmlspecialchars($question['gcd_component_comment']);
     if ($comment != "") {

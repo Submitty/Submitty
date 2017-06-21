@@ -75,7 +75,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
     private function createMockGradeableList($highest_version = 0, $num_parts = 1, $max_size = 1000000.) {
-        $gradeable = $this->createMock(Gradeable::class);
+        $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn("test");
         $gradeable->method('getName')->willReturn("Test Gradeable");
 
@@ -83,7 +83,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable->method('getNumParts')->willReturn(intval($num_parts));
         $gradeable->method('getMaxSize')->willReturn($max_size);
 
-        $g_list = $this->createMock(GradeableList::class);
+        $g_list = $this->createMockModel(GradeableList::class);
         $g_list->method('getSubmittableElectronicGradeables')->willReturn(array('test' => $gradeable));
         return $g_list;
     }
@@ -1066,7 +1066,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
         $now = new \DateTime("now", $core->getConfig()->getTimezone());
-        $gradeable = $this->createMock(Gradeable::class);
+        $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(true);
         $gradeable->method('getOpenDate')->willReturn($now);
 
@@ -1082,7 +1082,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
         $now = new \DateTime("now", $core->getConfig()->getTimezone());
-        $gradeable = $this->createMock(Gradeable::class);
+        $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(false);
         $gradeable->method('getOpenDate')->willReturn($now);
 
@@ -1099,11 +1099,11 @@ class SubmissionControllerTester extends BaseUnitTest {
         $core = $this->createMockCore(array(), array('access_grading' => false));
         /** @noinspection PhpUndefinedMethodInspection */
         $now = new \DateTime("tomorrow", $core->getConfig()->getTimezone());
-        $gradeable = $this->createMock(Gradeable::class);
+        $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(false);
         $gradeable->method('getOpenDate')->willReturn($now);
 
-        $g_list = $this->createMock(GradeableList::class);
+        $g_list = $this->createMockModel(GradeableList::class);
         $g_list->method('getGradeable')->willReturn($gradeable);
         $core->method('loadModel')->willReturn($g_list);
         $return = $this->runController($core);

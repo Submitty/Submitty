@@ -123,8 +123,20 @@ class SubmissionController extends AbstractController {
         if (!FileUtils::createDir($gradeable_path)) {
             return $this->uploadResult("Failed to make folder for this assignment.", false);
         }
-    
-        $user_path = FileUtils::joinPaths($gradeable_path, $this->core->getUser()->getId());
+
+        $user_id = $this->core->getUser()->getId();
+        $who_id = $user_id;
+        $team_id = "";
+        if ($gradeable->isTeamAssignment()) {
+            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            if ($team !== null) {
+                $team_id = $team->getId();
+                $who_id = $team_id;
+                $user_id = "";
+            }
+        }
+        
+        $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
         $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
                 return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
@@ -195,7 +207,7 @@ class SubmissionController extends AbstractController {
                 for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
                     $textbox_answer_val = $textbox_answer_array[$i];
                     if ($textbox_answer_val != "") $empty_textboxes = false;
-                    $filename = $gradeable->getTextBoxes()[$i]['filename'];
+                    $filename = $gradeable->getTextboxes()[$i]['filename'];
                     $dst = FileUtils::joinPaths($version_path, $filename);
                     // FIXME: add error checking
                     $file = fopen($dst, "w");
@@ -367,26 +379,45 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
-        $user_id = $this->core->getUser()->getId();
-
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-            $gradeable->getId(), $user_id, $new_version);
+            $gradeable->getId(), $who_id, $new_version);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
             implode("__", $queue_file));
 
         // create json file...
-        $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
-                            "course" => $this->core->getConfig()->getCourse(),
-                            "gradeable" =>  $gradeable->getId(),
-                            "user" => $user_id,
-                            "version" => $new_version);
+        if ($gradeable->isTeamAssignment()) {
+            $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+                                "course" => $this->core->getConfig()->getCourse(),
+                                "gradeable" =>  $gradeable->getId(),
+                                "user" => $user_id,
+                                "team" => $team_id,
+                                "who" => $who_id,
+                                "is_team" => True,
+                                "version" => $new_version);
+        }
+        else {
+            $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+                                "course" => $this->core->getConfig()->getCourse(),
+                                "gradeable" =>  $gradeable->getId(),
+                                "user" => $user_id,
+                                "team" => $team_id,
+                                "who" => $who_id,
+                                "is_team" => False,
+                                "version" => $new_version);
+        }
+        
 
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
 
-        $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, $new_version, $current_time);
-        
+        if($gradeable->isTeamAssignment()) {
+            $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
+        }
+        else {
+            $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
+        }
+
         $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         return $this->uploadResult("Successfully uploaded files");
     }
@@ -456,9 +487,17 @@ class SubmissionController extends AbstractController {
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);
         }
+
+        $user_id = $this->core->getUser()->getId();
+        if ($gradeable->isTeamAssignment()) {
+            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            if ($team !== null) {
+                $user_id = $team->getId();
+            }
+        }
     
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
-            $gradeable->getId(), $this->core->getUser()->getId(), "user_assignment_settings.json");
+            $gradeable->getId(), $user_id, "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
             $msg = "Failed to open settings file.";
@@ -479,7 +518,14 @@ class SubmissionController extends AbstractController {
         }
 
         $version = ($new_version > 0) ? $new_version : null;
-        $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $this->core->getUser()->getId(), $version);
+
+        if($gradeable->isTeamAssignment()) {
+            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), null, $user_id, $version);
+        }
+        else {
+            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $user_id, null, $version);
+        }
+        
 
         if ($new_version == 0) {
             $msg = "Cancelled submission for gradeable.";
@@ -504,10 +550,20 @@ class SubmissionController extends AbstractController {
     public function checkRefresh() {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        $g_id = $_REQUEST['gradeable_id'];
         $version = $_REQUEST['gradeable_version'];
+        $g_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable = $this->gradeables_list->getGradeable($g_id, GradeableType::ELECTRONIC_FILE);
+
+        $user_id = $this->core->getUser()->getId();
+        if ($gradeable !== null && $gradeable->isTeamAssignment()) {
+            $team = $this->core->getQueries()->getTeamByUserId($g_id, $user_id);
+            if ($team !== null) {
+                $user_id = $team->getId();
+            }
+        }
+
         $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id,
-            $this->core->getUser()->getId(), $version);
+            $user_id, $version);
         if (file_exists($path."/results.json")) {
             $refresh_string = "REFRESH_ME";
             $refresh_bool = true;
