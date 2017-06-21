@@ -424,7 +424,7 @@ function setupCheckboxCells() {
         });
 
         submitAJAX(
-            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_grade'}),
+            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
             {'csrf_token': csrfToken, 'user_id': parent.data("user"), 'g_id': parent.data('gradeable'), 'scores': scores},
             function() {
                 elems.forEach(function(elem) {
@@ -455,4 +455,69 @@ $(function() {
     }, 5000);
 
     setupCheckboxCells();
+    setupNumericTextCells();
+
 });
+
+function setupNumericTextCells() {
+    $("input[class=option-small-box]").keydown(function(key){
+        var cell=this.id.split('-');
+        // right
+        if(key.keyCode === 39){
+            if(this.selectionEnd == this.value.length){
+                $('#cell-'+cell[1]+'-'+(++cell[2])).focus();
+            }
+        }
+        // left
+        else if(key.keyCode == 37){
+            if(this.selectionStart == 0){
+                $('#cell-'+cell[1]+'-'+(--cell[2])).focus();
+            }
+        }
+        // up
+        else if(key.keyCode == 38){
+            $('#cell-'+(--cell[1])+'-'+cell[2]).focus();
+
+        }
+        // down
+        else if(key.keyCode == 40){
+            $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
+        }
+    });
+
+    $("input[class=option-small-box]").change(function() {
+        elem = this;
+        if(this.value == 0){
+            $(this).css("color", "#bbbbbb");
+        }
+        else{
+            $(this).css("color", "");
+        }
+        var scores = {};
+        var total = 0;
+        $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
+            $(this).children(".option-small-box").each(function(){
+                if($(this).data('num') === true){
+                    total += parseFloat(this.value);
+                }
+                if($(this).data('total') === true){
+                    this.value = total;
+                }
+                else{
+                    scores[$(this).data("id")] = this.value;
+                }
+            });
+        });
+
+        submitAJAX(
+            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
+            {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
+            function() {
+                $(elem).css("background-color", "#ffffff");
+            },
+            function() {
+                $(elem).css("background-color", "#ff7777");
+            }
+        );
+    });
+}

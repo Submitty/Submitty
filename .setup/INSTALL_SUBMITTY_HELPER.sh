@@ -190,6 +190,7 @@ rsync -rtz ${SUBMITTY_REPOSITORY}/grading ${SUBMITTY_INSTALL_DIR}/src
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/Sample_CMakeLists.txt
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/CMakeLists.txt
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/seccomp_functions.cpp
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/execute.cpp
 
 # building the autograding library
@@ -420,7 +421,7 @@ mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DI
 
 
 # return the course index page (only necessary when 'clean' option is used)
-if [ -f $mytempcurrentcourses ]; then
+if [ -f "$mytempcurrentcourses" ]; then
     echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
     mv ${mytempcurrentcourses} ${originalcurrentcourses}
 fi

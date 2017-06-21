@@ -3,6 +3,7 @@
 		{
 			"test_name": "Test 1 Compilation of student code: Factorial.java",
 			"points_awarded": 0,
+            "testcase_message": "Compilation Error(s).",
                         "autochecks": [
                             {                                "description": "Compilation Errors and/or Warnings",
                                 "messages": [ "ERROR: This file should be empty!" ],
@@ -21,6 +22,7 @@
 		{
 			"test_name": "Test 2 Compilation of instructor test cases: *Test.java",
 			"points_awarded": 2,
+            "testcase_message": "Compilation Error(s).",
                         "autochecks": [
                             {                                "description": "Compilation Errors and/or Warnings",
                                 "messages": [ "ERROR: This file should be empty!" ],

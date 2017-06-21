@@ -23,6 +23,7 @@ nlohmann::json printTestCase(TestCase test) {
   j["points"] = test.getPoints();
   j["extra_credit"] = test.getExtraCredit();
   j["hidden"] = test.getHidden();
+  j["view_testcase_message"] = test.viewTestcaseMessage();
 
   // THESE ELEMENTS ARE DEPRECATED / NEED TO BE REPLACED
   j["view_file_results"] = true;
