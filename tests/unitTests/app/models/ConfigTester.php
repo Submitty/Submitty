@@ -91,7 +91,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals("s17", $config->getSemester());
         $this->assertEquals("csci0000", $config->getCourse());
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
-        $this->assertEquals("http://example.com/ta/", $config->getTABaseUrl());
+        $this->assertEquals("http://example.com/ta/", $config->getTaBaseUrl());
         $this->assertEquals("http://example.com/cgi/", $config->getCgiUrl());
         $this->assertEquals("http://example.com/index.php?semester=s17&course=csci0000", $config->getSiteUrl());
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
@@ -171,7 +171,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $extra = array('hidden_details' => array('ta_base_url' => 'http://example.com/hwgrading'));
         $this->createConfigFile($extra);
         $config = new Config("s17", "csci0000", $this->master);
-        $this->assertEquals("http://example.com/hwgrading/", $config->getTABaseUrl());
+        $this->assertEquals("http://example.com/hwgrading/", $config->getTaBaseUrl());
         $this->assertEquals("http://example.com/hwgrading", $config->getHiddenDetails()['ta_base_url']);
     }
 

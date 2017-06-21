@@ -15,7 +15,7 @@ class UsersView extends AbstractView {
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-        <a href="{$this->core->getConfig()->getTABaseUrl()}account/admin-classlist.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&this[]=Students&this[]=Upload%20ClassList" class="btn btn-primary">Upload Classlist</a>
+        <a href="{$this->core->getConfig()->getTaBaseUrl()}account/admin-classlist.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&this[]=Students&this[]=Upload%20ClassList" class="btn btn-primary">Upload Classlist</a>
         <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
     </div>
     <h2>View Students</h2>
@@ -106,7 +106,7 @@ HTML;
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-        <a href="{$this->core->getConfig()->getTABaseUrl()}account/admin-grader-list.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&this[]=Graders&this[]=Upload%20Grader%20List" class="btn btn-primary">Upload Grader list</a>
+        <a href="{$this->core->getConfig()->getTaBaseUrl()}account/admin-grader-list.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&this[]=Graders&this[]=Upload%20Grader%20List" class="btn btn-primary">Upload Grader list</a>
         <a onclick="newUserForm();
             $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
     </div>
