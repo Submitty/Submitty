@@ -12,30 +12,30 @@ class AdminGradeableController extends AbstractController {
 	public function run() {
         switch ($_REQUEST['action']) {
             case 'view_gradeable_page':
-            	$this->view_page();
+            	$this->viewPage();
                 break;
             case 'upload_new_gradeable':
-                $this->upload_gradeable(0);
+                $this->modifyGradeable(0);
                 break;
             case 'edit_gradeable_page':
-                $this->edit_page();
+                $this->editPage();
                 break;
             case 'upload_edit_gradeable':
-                $this->upload_gradeable(1);
+                $this->modifyGradeable(1);
                 break;
             case 'upload_new_template';
-                $this->upload_new_template();
+                $this->uploadNewTemplate();
                 break;
             default:
-                $this->view_page();
+                $this->viewPage();
                 break;
         }
     }
 
     //Pulls the data from an existing gradeable and just prints it on the page
-    private function upload_new_template() {
+    private function uploadNewTemplate() {
         if($_REQUEST['template_id'] === "--None--") {
-            $this->view_page();
+            $this->viewPage();
             return;
         }
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
@@ -54,7 +54,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     //view the page with no data from previous gradeables
-    private function view_page() {
+    private function viewPage() {
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
         $num_sections = $this->core->getQueries()->getNumberRotatingSessions();
@@ -70,7 +70,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     //view the page with pulled data from the gradeable to be edited
-    private function edit_page() {
+    private function editPage() {
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
         $num_sections = $this->core->getQueries()->getNumberRotatingSessions();
@@ -86,9 +86,9 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "edit", $ini_data, $data);
     }
 
-    //if updateGradeable === 0 then it uploads the gradeable to the database
-    //if updateGradeable === 1 then it updates the gradeable to the database
-    private function upload_gradeable($updateGradeable) {
+    //if $edit_gradeable === 0 then it uploads the gradeable to the database
+    //if $edit_gradeable === 1 then it updates the gradeable to the database
+    private function modifyGradeable($edit_gradeable) {
         $details = array();
         $details['g_id'] = $_POST['gradeable_id'];
         $details['g_title'] = $_POST['gradeable_title'];
@@ -183,18 +183,18 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
-        if ($updateGradeable === 0) {
+        if ($edit_gradeable === 0) {
             $this->core->getQueries()->createNewGradeable($details);
         }
-        else if ($updateGradeable === 1) {
+        else if ($edit_gradeable === 1) {
             $this->core->getQueries()->updateGradeable($details);
         }
 
         //set up roating sections
         $graders = array();
         foreach ($_POST as $k => $v ) {
-        if (substr($k,0,7) === 'grader_' && !empty(trim($v))) {
-            $graders[explode('_', $k)[1]]=explode(',',trim($v));
+            if (substr($k,0,7) === 'grader_' && !empty(trim($v))) {
+                $graders[explode('_', $k)[1]]=explode(',',trim($v));
             }
         }
 
@@ -202,13 +202,11 @@ class AdminGradeableController extends AbstractController {
             $this->core->getQueries()->setupRotatingSections($graders, $details['g_id']);
         }
 
-        $fp = fopen($this->core->getConfig()->getCoursePath() . '/config/form/form_'.$details['g_id'].'.json', 'w');
+        $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_'.$details['g_id'].'.json';
         if (!$fp){
-            die('failed to open file');
+           echo "Could not open file";
         }
-
-        fwrite($fp, json_encode(json_decode(urldecode($_POST['gradeableJSON'])), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        fclose($fp);
+        file_put_contents ($fp ,  json_encode(json_decode(urldecode($_POST['gradeableJSON'])), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         $this->returnToNav();
     }
 

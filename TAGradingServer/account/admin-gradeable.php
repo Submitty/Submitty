@@ -1660,13 +1660,16 @@ HTML;
         var numOfNumeric = 0;
         var wrapper = $('.numerics-table');
         var i;
-        for (i = 0; i < $('#numeric_num-items').val(); i++) {
-        	numOfNumeric++;
-        	if ($('#mult-field-' + numOfNumeric,wrapper).find('.max_score').attr('name','max_score_'+numOfNumeric).val() == 0 && check3) {
-				alert("Max score cannot be 0 [Question "+ numOfNumeric + "]");
-            	return false;
-        	}
-    	}
+        if(check3) {
+            for (i = 0; i < $('#numeric_num-items').val(); i++) {
+                numOfNumeric++;
+                if ($('#mult-field-' + numOfNumeric,wrapper).find('.max_score').attr('name','max_score_'+numOfNumeric).val() == 0) {
+                    alert("Max score cannot be 0 [Question "+ numOfNumeric + "]");
+                    return false;
+                }
+            }
+        }
+        
     }
     calculatePercentageTotal();
     </script>

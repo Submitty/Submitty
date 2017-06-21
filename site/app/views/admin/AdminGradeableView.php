@@ -260,12 +260,12 @@ HTML;
 }
 else {
     $html_output .= <<<HTML
-            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
+            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" value="{$gradeable_submission_id}" placeholder="(Required)" required/>
 HTML;
 }
         $html_output .= <<<HTML
             <br />
-            What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' class="required" value="{$gradeable_name}" placeholder="(Required)" />
+            What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' class="required" value="{$gradeable_name}" placeholder="(Required)" required/>
             <br />
             What is the URL to the assignment instructions? (shown to student) <input style='width: 227px' type='text' name='instructions_url' value="{$g_instructions_url}" placeholder="(Optional)" />
             <br />
@@ -429,11 +429,11 @@ HTML;
         if ($num > 1){
         $html_output .= <<<HTML
                 <a id="delete-{$num}" class="question-icon" onclick="deleteQuestion({$num});">
-                <i class="icon-x-mark icon-white"></i></a>
+                <i class="fa fa-times" aria-hidden="true"></i></a>
                 <a id="down-{$num}" class="question-icon" onclick="moveQuestionDown({$num});">
-                <i class="icon-down-arrow icon-white"></i></a>       
+                <i class="fa fa-arrow-down" aria-hidden="true"></i></a>       
                 <a id="up-{$num}" class="question-icon" onclick="moveQuestionUp({$num});">
-                <i class="icon-up-arrow icon-white"></i></a>
+                <i class="fa fa-arrow-up" aria-hidden="true"></i></a>
 HTML;
         }
         
@@ -1441,11 +1441,11 @@ $('#gradeable-form').on('submit', function(e){
                 Extra Credit:&nbsp;&nbsp;<input onclick="calculatePercentageTotal();" name="eg_extra_'+newQ+'" type="checkbox" class="eg_extra extra" value="on"/> \
                 <br /> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
-                    <i class="icon-x-mark icon-white"></i></a> \
+                    <i class="fa fa-times" aria-hidden="true"></i></a> \
                 <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \
-                    <i class="icon-down-arrow icon-white"></i></a> \
+                    <i class="fa fa-arrow-down" aria-hidden="true"></i></a> \
                 <a id="up-'+newQ+'" class="question-icon" onclick="moveQuestionUp('+newQ+');"> \
-                    <i class="icon-up-arrow icon-white"></i></a> \
+                    <i class="fa fa-arrow-up" aria-hidden="true"></i></a> \
             </td> \
         </tr>');
     }
