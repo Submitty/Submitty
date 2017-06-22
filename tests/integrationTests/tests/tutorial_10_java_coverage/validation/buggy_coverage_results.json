@@ -39,10 +39,13 @@
                 },
                 {
                     "actual_file": "test05_emma_report.txt",
-                    "description": "JUnit EMMA coverage report"
+                    "description": "JUnit EMMA coverage report",
+                    "messages": [
+                        "ERROR: Insuffficient block coverage below threshold for... hw0 (55/90 = 0.611111)"
+                    ]
                 }
             ],
-            "points_awarded": 6,
+            "points_awarded": 3,
             "test_name": "Test 5 Java - Generating Coverage Report for Student Tests"
         },
         {

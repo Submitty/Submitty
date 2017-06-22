@@ -36,10 +36,13 @@
                 },
                 {
                     "actual_file": "test05_emma_report.txt",
-                    "description": "JUnit EMMA coverage report"
+                    "description": "JUnit EMMA coverage report",
+                    "messages": [
+                        "ERROR: Insuffficient block coverage below threshold for... hw0 (42/90 = 0.466667)"
+                    ]
                 }
             ],
-            "points_awarded": 6,
+            "points_awarded": 2,
             "test_name": "Test 5 Java - Generating Coverage Report for Student Tests"
         },
         {
@@ -50,10 +53,6 @@
                     "messages": [
                         "ERROR: Number of tests specified in configuration does not match!"
                     ]
-                },
-                {
-                    "actual_file": "test06_execute_logfile.txt",
-                    "description": "Execution Logfile"
                 }
             ],
             "points_awarded": 0,
