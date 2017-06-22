@@ -31,6 +31,8 @@ DB_USER = "__INSTALL__FILLIN__DATABASE_USER__"
 DB_PASSWORD = "__INSTALL__FILLIN__DATABASE_PASSWORD__"
 DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
+def str2bool(v):
+  return v.lower() in ("yes", "true", "t", "1")
 
 def parse_arguments():
     """
@@ -45,6 +47,9 @@ def parse_arguments():
     parser.add_argument("course", type=str, help="")
     parser.add_argument("gradeable_id", type=str, help="")
     parser.add_argument("user_id", type=str, help="")
+    parser.add_argument("team_id", type=str, help="")
+    parser.add_argument("who_id", type=str, help="")
+    parser.add_argument("is_team", type=str, help="")  # converted to boolean below
     parser.add_argument("version", type=int, help="")
 
     parser.add_argument("-n", "--no-file", action="store_true", dest="no_file", default=False,
@@ -89,6 +94,9 @@ def main():
     course = args.course
     gradeable_id = args.gradeable_id
     user_id = args.user_id
+    team_id = args.team_id
+    who_id = args.who_id
+    is_team = str2bool(args.is_team)
     version = args.version
 
     if not args.no_file:
@@ -97,7 +105,7 @@ def main():
         hidden_non_ec = 0
         hidden_ec = 0
         testcases = get_testcases(semester, course, gradeable_id)
-        results = get_result_details(semester, course, gradeable_id, user_id, version)
+        results = get_result_details(semester, course, gradeable_id, who_id, version)
         for i in range(len(testcases)):
             if testcases[i]['hidden'] and testcases[i]['extra_credit']:
                 hidden_ec += results['testcases'][i]['points']
@@ -126,42 +134,81 @@ def main():
     we're using some other method of grading, we'll insert the row and whoever called the script
     will need to handle the active version afterwards.
     """
-    result = db.execute(select([func.count()]).select_from(data_table)
-                        .where(data_table.c.g_id == bindparam('g_id'))
-                        .where(data_table.c.user_id == bindparam('user_id'))
-                        .where(data_table.c.g_version == bindparam('g_version')),
-                        g_id=args.gradeable_id, user_id=args.user_id, g_version=args.version)
-    row = result.fetchone()
-    query_type = data_table.insert()
-    if row[0] > 0:
-        query_type = data_table\
-            .update(
-                values=
-                {
-                    data_table.c.autograding_non_hidden_non_extra_credit:
-                        bindparam("autograding_non_hidden_non_extra_credit"),
-                    data_table.c.autograding_non_hidden_extra_credit:
-                        bindparam("autograding_non_hidden_extra_credit"),
-                    data_table.c.autograding_hidden_non_extra_credit:
-                        bindparam("autograding_hidden_non_extra_credit"),
-                    data_table.c.autograding_hidden_extra_credit:
-                        bindparam("autograding_hidden_extra_credit")
-                })\
-            .where(data_table.c.g_id == bindparam('u_g_id'))\
-            .where(data_table.c.user_id == bindparam('u_user_id'))\
-            .where(data_table.c.g_version == bindparam('u_g_version'))
-        # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
-        # update. Passing this as an argument to db.execute doesn't cause any issue when we
-        # use the insert query (that doesn't have u_g_id)
-    db.execute(query_type,
-               g_id=args.gradeable_id, u_g_id=args.gradeable_id,
-               user_id=args.user_id, u_user_id=args.user_id,
-               g_version=args.version, u_g_version=args.version,
-               autograding_non_hidden_non_extra_credit=non_hidden_non_ec,
-               autograding_non_hidden_extra_credit=non_hidden_ec,
-               autograding_hidden_non_extra_credit=hidden_non_ec,
-               autograding_hidden_extra_credit=hidden_ec,
-               submission_time=submission_time)
+    if (is_team == True):
+        result = db.execute(select([func.count()]).select_from(data_table)
+                            .where(data_table.c.g_id == bindparam('g_id'))
+                            .where(data_table.c.team_id == bindparam('team_id'))
+                            .where(data_table.c.g_version == bindparam('g_version')),
+                            g_id=args.gradeable_id,  team_id=args.team_id, g_version=args.version)
+        row = result.fetchone()
+        query_type = data_table.insert()
+        if row[0] > 0:
+            query_type = data_table\
+                .update(
+                    values=
+                    {
+                        data_table.c.autograding_non_hidden_non_extra_credit:
+                            bindparam("autograding_non_hidden_non_extra_credit"),
+                        data_table.c.autograding_non_hidden_extra_credit:
+                            bindparam("autograding_non_hidden_extra_credit"),
+                        data_table.c.autograding_hidden_non_extra_credit:
+                            bindparam("autograding_hidden_non_extra_credit"),
+                        data_table.c.autograding_hidden_extra_credit:
+                            bindparam("autograding_hidden_extra_credit")
+                    })\
+                .where(data_table.c.g_id == bindparam('u_g_id'))\
+                .where(data_table.c.team_id == bindparam('u_team_id'))\
+                .where(data_table.c.g_version == bindparam('u_g_version'))
+            # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
+            # update. Passing this as an argument to db.execute doesn't cause any issue when we
+            # use the insert query (that doesn't have u_g_id)
+        db.execute(query_type,
+                   g_id=args.gradeable_id, u_g_id=args.gradeable_id,
+                   team_id=args.team_id, u_team_id=args.team_id,
+                   g_version=args.version, u_g_version=args.version,
+                   autograding_non_hidden_non_extra_credit=non_hidden_non_ec,
+                   autograding_non_hidden_extra_credit=non_hidden_ec,
+                   autograding_hidden_non_extra_credit=hidden_non_ec,
+                   autograding_hidden_extra_credit=hidden_ec,
+                   submission_time=submission_time)
+
+    else:
+        result = db.execute(select([func.count()]).select_from(data_table)
+                            .where(data_table.c.g_id == bindparam('g_id'))
+                            .where(data_table.c.user_id == bindparam('user_id'))
+                            .where(data_table.c.g_version == bindparam('g_version')),
+                            g_id=args.gradeable_id, user_id=args.user_id, g_version=args.version)
+        row = result.fetchone()
+        query_type = data_table.insert()
+        if row[0] > 0:
+            query_type = data_table\
+                .update(
+                    values=
+                    {
+                        data_table.c.autograding_non_hidden_non_extra_credit:
+                            bindparam("autograding_non_hidden_non_extra_credit"),
+                        data_table.c.autograding_non_hidden_extra_credit:
+                            bindparam("autograding_non_hidden_extra_credit"),
+                        data_table.c.autograding_hidden_non_extra_credit:
+                            bindparam("autograding_hidden_non_extra_credit"),
+                        data_table.c.autograding_hidden_extra_credit:
+                            bindparam("autograding_hidden_extra_credit")
+                    })\
+                .where(data_table.c.g_id == bindparam('u_g_id'))\
+                .where(data_table.c.user_id == bindparam('u_user_id'))\
+                .where(data_table.c.g_version == bindparam('u_g_version'))
+            # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
+            # update. Passing this as an argument to db.execute doesn't cause any issue when we
+            # use the insert query (that doesn't have u_g_id)
+        db.execute(query_type,
+                   g_id=args.gradeable_id, u_g_id=args.gradeable_id,
+                   user_id=args.user_id, u_user_id=args.user_id,
+                   g_version=args.version, u_g_version=args.version,
+                   autograding_non_hidden_non_extra_credit=non_hidden_non_ec,
+                   autograding_non_hidden_extra_credit=non_hidden_ec,
+                   autograding_hidden_non_extra_credit=hidden_non_ec,
+                   autograding_hidden_extra_credit=hidden_ec,
+                   submission_time=submission_time)
 
 
 def parse_default_int(arg):
@@ -210,9 +257,9 @@ def get_testcases(semester, course, g_id):
     return testcases
 
 
-def get_result_details(semester, course, g_id, user_id, version):
+def get_result_details(semester, course, g_id, who_id, version):
     """
-    Gets the result details for a particular version of a gradeable for the user. It returns a
+    Gets the result details for a particular version of a gradeable for the who (user or team). It returns a
     dictionary that contains a list of the testcases (that should have a 1-to-1 correspondance
     with the testcases gotten through get_testcases() method) and the submission time for the
     particular version.
@@ -220,12 +267,12 @@ def get_result_details(semester, course, g_id, user_id, version):
     :param semester:
     :param course:
     :param g_id:
-    :param user_id:
+    :param who_id:
     :param version:
     :return:
     """
     result_details = {'testcases': [], 'submission_time': None}
-    result_dir = os.path.join(DATA_DIR, "courses", semester, course, "results", g_id, user_id,
+    result_dir = os.path.join(DATA_DIR, "courses", semester, course, "results", g_id, who_id,
                               str(version))
     if os.path.isfile(os.path.join(result_dir, "results.json")):
         with open(os.path.join(result_dir, "results.json")) as result_file:

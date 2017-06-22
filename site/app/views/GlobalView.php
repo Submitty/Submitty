@@ -67,7 +67,7 @@ HTML;
 HTML;
         if ($this->core->getUser() != null) {
             if($this->core->getUser()->accessGrading()) {
-                $ta_base_url = $this->core->getConfig()->getTABaseUrl();
+                $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
                 $semester = $this->core->getConfig()->getSemester();
                 $course = $this->core->getConfig()->getCourse();
                 if($this->core->getUser()->accessAdmin()) {

@@ -54,6 +54,7 @@ public:
   int getPoints() const { return _json.value("points", 0); }
   bool getHidden() const { return _json.value("hidden", false); }
   bool getExtraCredit() const { return _json.value("extra_credit",false); }
+  bool viewTestcaseMessage() const { return _json.value("view_testcase_message",true); }
 
   bool isFileCheck() const { return _json.value("type","Execution") == "FileCheck"; }
   bool isCompilation() const { return _json.value("type","Execution") == "Compilation"; }

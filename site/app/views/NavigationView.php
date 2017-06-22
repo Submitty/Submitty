@@ -10,7 +10,7 @@ class NavigationView extends AbstractView {
 
         $return = "";
 
-        $ta_base_url = $this->core->getConfig()->getTABaseUrl();
+        $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
@@ -46,6 +46,7 @@ HTML;
             $return .= <<<HTML
         <button class="btn btn-primary" onclick="window.location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&this=New%20Gradeable'">New Gradeable</button>
         <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config'))}">Upload Config & Review Build Output</a>
+
         <!--<button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
 HTML;
         }
@@ -284,13 +285,31 @@ HTML;
                 {$gradeable_grade_range}</button>
 HTML;
                     }
+                    // onclick="location.href='{$ta_base_url}/account/account-numerictext-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                     elseif($g_data->getType() == GradeableType::NUMERIC_TEXT){
                         $gradeable_grade_range = <<<HTML
                 <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
-                onclick="location.href='{$ta_base_url}/account/account-numerictext-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
+                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable))}'">
                 {$gradeable_grade_range}</button>
 HTML;
                     }
+                }
+
+                // Team management button, only visible on team assignments
+                $gradeable_team_range = '';
+                $admin_team_list = '';
+                if (($g_data->isTeamAssignment()) && (($title == "OPEN") || ($title == "BETA"))) {
+                    $gradeable_team_range = <<<HTML
+                <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable, 'page' => 'team'))}'"> MANAGE TEAM
+                </button>
+HTML;
+                }
+                    // View teams button, only visible to instructors on team assignments
+                if (($this->core->getUser()->accessAdmin()) && ($g_data->isTeamAssignment())) {
+                    $admin_team_list .= <<<HTML
+                <button class="btn btn-default" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'team_list', 'gradeable_id' => $gradeable))}'"> View Teams
+                </button>
+HTML;
                 }
 
                 if ($this->core->getUser()->accessAdmin()) {
@@ -313,6 +332,8 @@ HTML;
                 $return.= <<<HTML
             <tr class="gradeable_row">
                 <td>{$gradeable_title}</td>
+                <td style="padding: 10px;">{$gradeable_team_range}</td>
+                <td style="padding: 10px;">{$admin_team_list}</td>
                 <td style="padding: 10px;">{$gradeable_open_range}</td>
 HTML;
                 if ($this->core->getUser()->accessGrading()) {
