@@ -1,0 +1,13 @@
+Testcase  1: README                                             2 /  2  
+Testcase  2: Compilation                                        0 /  3  
+Testcase  3: Dummy Compilation testing view_testcase_message    0 /  2  
+Testcase  4: non leap year                                      0 /  5  
+Testcase  5: leap year                                          0 /  5  
+Testcase  6: corner case A                                      0 /  2 
+Testcase  7: corner case B                                      0 /  2  
+Testcase  8: corner case C                                      0 /  1
+Testcase  9: error case A                                  
+Testcase 10: error case B                           
+Testcase 11: Submission Limit                                             
+Automatic grading total:                                        2 / 22
+Non-hidden automatic grading total:                             2 / 22
