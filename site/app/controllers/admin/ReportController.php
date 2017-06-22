@@ -1,7 +1,8 @@
 <?php
 
-namespace app\controllers;
+namespace app\controllers\admin;
 
+use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\models\HWReport;
