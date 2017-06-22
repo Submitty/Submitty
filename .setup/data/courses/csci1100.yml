@@ -42,4 +42,4 @@ gradeables:
     g_grade_released_date: +9 days
     g_grade_start_date: +8 days
     g_ta_view_start_date: -5 days
-    gradeable_config: python_static_analysis
+    gradeable_config: python_multipart_static_analysis
