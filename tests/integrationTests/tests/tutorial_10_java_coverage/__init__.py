@@ -1,5 +1,5 @@
 # Necessary imports. Provides library functions to ease writing tests.
-from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
+from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR, SUBMITTY_TUTORIAL_DIR
 
 import subprocess
 import os
@@ -9,8 +9,8 @@ import glob
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/sample_files/sample_assignment_config/java_coverage_factorial"
-SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/sample_files/sample_submissions/java_coverage_factorial"
+SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_TUTORIAL_DIR + "/examples/10_java_coverage/config"
+SAMPLE_SUBMISSIONS       = SUBMITTY_TUTORIAL_DIR + "/examples/10_java_coverage/submissions/"
 
 @prebuild
 def initialize(test):
@@ -18,39 +18,25 @@ def initialize(test):
         os.mkdir(os.path.join(test.testcase_path, "assignment_config"))
     except OSError:
         pass
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+                     os.path.join(test.testcase_path, "assignment_config")])
+
+
+############################################################################
+
+def cleanup(test):
+    os.system("rm -rf " + test.testcase_path + "data/")
     try:
         os.mkdir(os.path.join(test.testcase_path, "data"))
     except OSError:
         pass
-
-    subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-        os.path.join(test.testcase_path, "assignment_config")])
     subprocess.call(["cp", "-r",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_code"),
         os.path.join(test.testcase_path, "data")])
 
 
 ############################################################################
-
-
-def cleanup(test):
-    # seem to need to cleanup this class file, otherwise it doesn't recompile
-    subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/", "*.zip")))
-    subprocess.call(["rm"] + ["-rf"] +
-            glob.glob(os.path.join(test.testcase_path, "data/hw0")))
-    subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/", "*.class")))
-    subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/", "*.java")))
-    subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/", "test*.txt")))
-    subprocess.call(["rm"] + ["-f"] + 
-            glob.glob(os.path.join(test.testcase_path, "data/results_grade.txt")))
-    subprocess.call(["rm"] + ["-f"] + 
-            glob.glob(os.path.join(test.testcase_path, "data/results.json")))
-
 
 @testcase
 def correct(test):

@@ -1,5 +1,5 @@
 # Necessary imports. Provides library functions to ease writing tests.
-from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR, SUBMITTY_TUTORIAL_DIR
+from lib import prebuild, testcase, SUBMITTY_TUTORIAL_DIR
 
 import subprocess
 import os
