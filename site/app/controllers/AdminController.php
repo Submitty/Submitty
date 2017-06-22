@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\controllers\admin\ReportController;
 use app\controllers\admin\GradeableController;
 use app\controllers\admin\GradeablesController;
 use app\controllers\admin\ConfigurationController;
