@@ -108,8 +108,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // for graphics/window interaction
     { "scrot",                   "/usr/bin/scrot"}, //screenshot utility
     { "xdotool",                 "/usr/bin/xdotool"}, //keyboard/mouse input
-    { "xdotool",                 "/usr/bin/wmctrl"}, //bring window into focus
-    { "xdotool",                 "/usr/bin/xwininfo"}, // get info about window
+    { "wmctrl",                  "/usr/bin/wmctrl"}, //bring window into focus
+    { "xwininfo",                "/usr/bin/xwininfo"}, // get info about window
 
     // for Debugging
     { "strace",                  "/usr/bin/strace" }
@@ -811,9 +811,9 @@ void TerminateProcess(float &elapsed, int childPID) {
 int execute(const std::string &cmd, 
       const std::vector<std::string> actions,
       const std::string &execute_logfile,
-	    const nlohmann::json &test_case_limits,
-	    const nlohmann::json &assignment_limits,
-            const nlohmann::json &whole_config) {
+      const nlohmann::json &test_case_limits,
+      const nlohmann::json &assignment_limits,
+      const nlohmann::json &whole_config) {
 
   bool window_mode = false; //Tells us if the process is expected to spawn a window. (additional support later) 
   
