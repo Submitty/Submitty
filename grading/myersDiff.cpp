@@ -15,7 +15,7 @@
 #include "clean.h"
 
 #include "execute.h"
-
+#include "window_utils.h"
 
 
 // ==============================================================================
@@ -208,6 +208,54 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
   Difference* diff = ses(j, &text_a, &text_b, false,extraStudentOutputOk);
   diff->type = ByLineByChar;
   return diff;
+}
+
+TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j) {
+  std::cout << "################IMAGE DIFF################" << std::endl;
+  std::string actual_file = j.value("actual_file","");
+  std::string expected_file = j.value("expected_file","");
+  std::string acceptable_threshold_str = j.value("acceptable_threshold","");
+
+  if(actual_file == "" || expected_file == "" || acceptable_threshold_str == ""){
+    return new TestResults(0.0, {"ERROR: Error in configuration. Please speak to your professor."});
+  }
+
+  actual_file = tc.getPrefix() + "_" + actual_file;
+  actual_file = replace_slash_with_double_underscore(actual_file);
+
+  float acceptable_threshold = stringToFloat(acceptable_threshold_str,6); //window_utils function.
+
+  std::cout << "About to compare " << actual_file << " and " << expected_file << std::endl;
+  std::string command = "compare -metric RMSE " + actual_file + " " + expected_file + " NULL: 2>&1";
+  std::string output = output_of_system_command(command.c_str()); //get the string
+  std::cout << "captured the following:\n" << output << "\n" <<std::endl;
+
+  std::vector<float> values = extractFloatsFromString(output); //window_utils function.
+  for(float f : values)
+  {
+    std::cout << f << std::endl;
+  }
+
+  if(values.size() < 2){
+    return new TestResults(0.0, {"ERROR: File comparison failed because the system command couldn't be parsed."});
+  }
+
+  float difference = values[1];
+  float similarity = 1 - difference;
+
+  
+
+  if(difference >= acceptable_threshold){
+    return new TestResults(0.0, {"ERROR: File not similar enough."});
+  }
+   else{
+         return new TestResults(1.0, {""});
+  }
+
+  // std::string command2 = "compare " + actual_file + " " + expected_file + " -compose Src differences.png";
+  // system(command2.c_str());
+  //   return new TestResults(0.0, {"ERROR: File comparison failed."});
+
 }
 
 

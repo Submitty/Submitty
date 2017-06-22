@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 
-double stringToFloat(std::string const &str, int precision);
+float stringToFloat(std::string const &str, int precision);
 
 std::vector<float> extractFloatsFromString(std::string input);
 /**

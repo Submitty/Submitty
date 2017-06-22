@@ -228,7 +228,8 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader) const {
   else if (method == "warnIfEmpty")                { return warnIfEmpty_doit(*this,grader);               }
   else if (method == "errorIfNotEmpty")            { return errorIfNotEmpty_doit(*this,grader);           }
   else if (method == "errorIfEmpty")               { return errorIfEmpty_doit(*this,grader);              }
-  else                                             { return custom_dispatch(grader);                      }
+  else if (method == "ImageDiff")                  { return ImageDiff_doit(*this,grader);                 }
+  else                                             { return custom_dispatch(grader);                      }  
 }
 
 

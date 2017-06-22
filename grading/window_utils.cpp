@@ -21,7 +21,7 @@
 /**
 *Converts a string to a double with specified precision.
 */
-double stringToFloat(std::string const &str, int precision) {
+float stringToFloat(std::string const &str, int precision) {
   float my_float;
   //just use a string stream to get the double. 
   std::stringstream stream; 
