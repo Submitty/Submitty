@@ -7,12 +7,18 @@ use app\views\AbstractView;
 class ExtensionsView extends AbstractView {
     public function displayExtensions($g_id, $g_ids,$user_table) {
         $return = <<<HTML
+    <div class="inner-message alert alert-error" style="text-align:center; vertical-align: top; position: fixed;">
+        <a class="fa fa-times message-close"></a>
+        <i class="fa fa-times-circle"></i> my error text
+    </div>
+
+
 <div class="content">
     <h2>Excused Absense Extensions</h2>
     <!--
     <form id="hwDefault" method="post" enctype="multipart/form-data" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">
     -->
-    <form id="excusedAbsenseForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateHomeworkExtensions($(this));">
+    <form id="excusedAbsenseForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateHomeworkExtensions2($(this));">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="panel">
 
@@ -24,7 +30,7 @@ class ExtensionsView extends AbstractView {
 <!--
                 <select name="g_id" onchange="this.form.submit()" style="margin-top: 10px; width:50%">
 -->
-                <select name="g_id" onchange="loadHomeworkExtensions($(this).val());" style="margin-top: 10px; width:50%">
+                <select name="g_id" id="myid" onchange="loadHomeworkExtensions($(this).val());" style="margin-top: 10px; width:50%">
                     <option disabled selected value> -- select an option -- </option>
 HTML;
         foreach($g_ids as $index => $value) {
@@ -56,9 +62,9 @@ HTML;
     <input type="hidden" name="g_id" value="{$g_id}" />
     -->
         <div class="option-title">Single Student Entry<br></div>
-        <div class="option" style="width:25%; display:inline-block;">Student ID:<br><input class="option-input" type="text" name="user_id" id="user_id" style="float:left"></div>
-        <div class="option" style="width:25%; display:inline-block;">Late Days:<br><input class="option-input" type="text" name="late_days" style="float:left"></div>
-        <div class="option" style="width:10%; display:inline-block; vertical-align: bottom;"><input class="btn btn-primary" type="submit" id="submit" style="float:left"></div>
+        <div class="option" style="width:25%; display:inline-block;">Student ID:<br><input class="option-input" type="text" name="user_id" id="myid" style="float:left"></div>
+        <div class="option" style="width:25%; display:inline-block;">Late Days:<br><input class="option-input" type="text" name="late_days" id="myid" style="float:left"></div>
+        <div class="option" style="width:10%; display:inline-block; vertical-align: bottom;"><input class="btn btn-primary" type="submit" id="myid" style="float:left"></div>
         <!--
         <a class="btn btn-default"
             onclick="console.log($(this).val()); console.log($([id='user_id']);">
@@ -70,11 +76,11 @@ HTML;
                 <span class="tooltiptext">Do not use column headers. CSV must be of the following form:<br>student_id,gradeable_id,late_days</span>
             </i><br>
         </div>
-        <div style="padding-bottom:20px;"><input type="file" name="csv_upload" onchange="this.form.submit()"></div>
-
         <!--
-        <div style="padding-bottom:20px;"><input type="file" name="csv_upload" onchange="updateHomeworkExtensions($(this).val());"></div>
+        <div style="padding-bottom:20px;"><input type="file" name="csv_upload" onchange="this.form.submit()"></div>
         -->
+
+        <div style="padding-bottom:20px;"><input id="myid" type="file" name="csv_upload" onchange="updateHomeworkExtensions2($(this));"></div>
     </form>
     </div>
 HTML;
@@ -138,7 +144,7 @@ HTML;
         $return .= <<<HTML
     <div class="panel" id="load-homework-extensions" align="center">
     <table id="my_table" class="table table-striped table-bordered persist-area" style="width:70%" align="center">
-        <div class="option-title">Current Late Day Exceptions</div>
+        <div class="option-title" id="title"></div>
         <div>
         <thead class="persist-thead">
             <td>Student ID</td>

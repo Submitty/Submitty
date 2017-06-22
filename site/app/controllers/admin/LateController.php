@@ -54,11 +54,18 @@ class LateController extends AbstractController {
         //Check to see if a CSV file was submitted.
         $data = array();
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
+            $error = "I'm pretty confused";
+            $this->core->getOutput()->renderJson(array('error' => $error));
             if (!($this->parse_and_validate_csv($_FILES['csv_upload']['tmp_name'], $data, $nextStep))) {
-                $_SESSION['messages']['error'][] = "Something is wrong with the CSV. Try again.";
-                $_SESSION['request'] = $_POST;
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => $nextStep)));
+                // $_SESSION['messages']['error'][] = "Something is wrong with the CSV. Try again.";
+                // $_SESSION['request'] = $_POST;
+                // $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => $nextStep)));
+                $error = "Something is wrong with the CSV. Try again.";
+                $this->core->getOutput()->renderJson(array('error' => $error));
+                return;
             } else {
+                $error = "Got in here...good";
+                $this->core->getOutput()->renderJson(array('error' => $error));
                 for($i = 0; $i < count($data); $i++){
                     if($nextStep == "view_late"){
                         $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2]);
@@ -68,31 +75,48 @@ class LateController extends AbstractController {
                     }
                 }
             }
+            $this->reloadPage($nextStep, $data[0][1]);
+
         }
         else{
-            /*if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-                $_SESSION['messages']['error'][] = "Invalid CSRF token. Try again.";
-                $_SESSION['request'] = $_POST;
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => $nextStep)));
+            if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+                // $_SESSION['messages']['error'][] = "Invalid CSRF token. Try again.";
+                // $_SESSION['request'] = $_POST;
+                // $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => $nextStep)));
+                $error = "Invalid CSRF token. Try again.";
+                $this->core->getOutput()->renderJson(array('error' => $error));
+                return;
             }
-            else */if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $this->core->getQueries()->getUserById($_POST['user_id'])->getId() !== $_POST['user_id']) {
-                $_SESSION['messages']['error'][] = "Invalid Student ID";
-                $_SESSION['request'] = $_POST;
-                $this->reloadPage($nextStep);
+            else if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $this->core->getQueries()->getUserById($_POST['user_id'])->getId() !== $_POST['user_id']) {
+                // $_SESSION['messages']['error'][] = "Invalid Student ID";
+                // $_SESSION['request'] = $_POST;
+                // $this->reloadPage($nextStep);
+                $error = "Invalid Student ID";
+                $this->core->getOutput()->renderJson(array('error' => $error));
+                return;
             }
             else if ((!isset($_POST['datestamp']) || !$this->validate_timestamp($_POST['datestamp'])) && $nextStep == 'view_late') {
-                $_SESSION['messages']['error'][] = "Datestamp must be mm/dd/yy";
-                $_SESSION['request'] = $_POST;
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')));
+                // $_SESSION['messages']['error'][] = "Datestamp must be mm/dd/yy";
+                // $_SESSION['request'] = $_POST;
+                // $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')));
+                $error = "Datestamp must be mm/dd/yy";
+                $this->core->getOutput()->renderJson(array('error' => $error));
+                return;
             }
             else if ((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days'])) ) {
-                $_SESSION['messages']['error'][] = "Late Days must be a nonnegative integer";
-                $_SESSION['request'] = $_POST;
-                $this->reloadPage($nextStep);
+                // $_SESSION['messages']['error'][] = "Late Days must be a nonnegative integer";
+                // $_SESSION['request'] = $_POST;
+                // $this->reloadPage($nextStep);
+                $error = "Late Days must be a nonnegative integer";
+                $this->core->getOutput()->renderJson(array('error' => $error));
+                return;
             }
-            else if ((!isset($_POST['g_id'])) || $_POST['g_id'] == "" ) {
-                $_SESSION['messages']['error'][] = "Something wrong with gradeable_id";
-                $_SESSION['request'] = $_POST;
+            else if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" ) && $nextStep == 'view_extension') {
+                // $_SESSION['messages']['error'][] = "Something wrong with gradeable_id";
+                // $_SESSION['request'] = $_POST;
+                $error = "Something wrong with gradeable_id. Please try again.";
+                $this->core->getOutput()->renderJson(array('error' => $error));
+                return;
             }
             else{
                 if($nextStep == "view_late"){
@@ -102,13 +126,75 @@ class LateController extends AbstractController {
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
                 }   
             }
+
+
+//             if (!isset($_REQUEST['info']) || $_REQUEST['info'] == ""){
+//                 $error = "Something went wrong. Please try again.";
+//                 $this->core->getOutput()->renderJson(array('error' => $error));
+//                 return;
+//             }
+//             $info = $_REQUEST['info'];
+//             $myinfo = explode(",", $info);
+
+
+//             if (!isset($myinfo[1]) || $myinfo[1] == "" || $this->core->getQueries()->getUserById($myinfo[1])->getId() !== $myinfo[1]) {
+// //                 $_SESSION['messages']['error'][] = "Invalid Student ID";
+// //                 $_SESSION['request'] = $_POST;
+// //                 echo("Invalid Student ID");
+
+// // //                   $messages = <<<HTML
+// // //                 <div id='{$type}-{$key}' class="inner-message alert alert-{$type}">
+// // //                     <a class="fa fa-times message-close" onClick="removeMessagePopup('{$type}-{$key}');"></a>
+// // //                     <i class="fa fa-times-circle"></i> {$error}
+// // //                 </div>
+// // // HTML;
+// // //                 echo($messages);
+// //                 // $this->reloadPage($nextStep);
+//                 $error = "Invalid Student ID";
+//                 $this->core->getOutput()->renderJson(array('error' => $error));
+//                 return;
+
+//             }
+//             else if ((!isset($_POST['datestamp']) || !$this->validate_timestamp($_POST['datestamp'])) && $nextStep == 'view_late') {
+//                 // $_SESSION['messages']['error'][] = "Datestamp must be mm/dd/yy";
+//                 // $_SESSION['request'] = $_POST;
+//                 // // $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')));
+//                 $error = "Datestamp must be mm/dd/yy";
+//                 $this->core->getOutput()->renderJson(array('error' => $error));
+//                 return;
+//             }
+//             else if ((!isset($myinfo[2])) || $myinfo[2] == "" || (!ctype_digit($myinfo[2])) ) {
+//                 // $_SESSION['messages']['error'][] = "Late Days must be a nonnegative integer";
+//                 // $_SESSION['request'] = $_POST;
+//                 // // $this->reloadPage($nextStep);
+//                 $error = "Late Days must be a nonnegative integer";
+//                 $this->core->getOutput()->renderJson(array('error' => $error));
+//                 return;
+//             }
+//             else if (((!isset($myinfo[0])) || $myinfo[0] == "" ) && $nextStep == "view_extension") {
+//                 // $_SESSION['messages']['error'][] = "Something wrong with gradeable_id";
+//                 // $_SESSION['request'] = $_POST;
+//                 $error = "Something wrong with gradeable_id";
+//                 $this->core->getOutput()->renderJson(array('error' => $error));
+//                 return;
+//             }
+//             else{
+//                 if($nextStep == "view_late"){
+//                     $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
+//                 }
+//                 else{
+//                     $this->core->getQueries()->updateExtensions($myinfo[1], $myinfo[0], $myinfo[2]);
+//                 }   
+//             }
+            $this->reloadPage($nextStep, $_POST['g_id']);
+
         }
-        $this->reloadPage($nextStep);
+        // $this->reloadPage($nextStep, $myinfo[0]);
 
     }
 
     // for use during update
-    function reloadPage($nextStep){
+    function reloadPage($nextStep, $g_id){
         // echo"loadHomeworkExtensions();";
                     // $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => $nextStep)));
 
@@ -130,6 +216,14 @@ class LateController extends AbstractController {
         //     'users' => $user_table
         // ));
         // $this->ajaxGetExtensions();
+
+
+        $user_table = $this->core->getQueries()->getUsersWithExtensions($g_id);
+        $this->core->getOutput()->renderJson(array(
+            'gradeable_id' => $g_id,
+            'users' => $user_table
+        ));
+
     }
 
     function setPreferedName(&$user_table){
