@@ -120,6 +120,10 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   }
   else if (my_program == "/usr/bin/time") {
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+  }
+
+  else if (my_program == "/usr/bin/strace") {
+    categories = restricted_categories;
   } 
   
   // ---------------------------------------------------------------
@@ -138,6 +142,9 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // PYTHON 
   else if (my_program.find("/usr/bin/python") != std::string::npos) {
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    categories.insert("FILE_MANAGEMENT_RARE");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
   }
   
   // ---------------------------------------------------------------

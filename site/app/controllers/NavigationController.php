@@ -32,8 +32,8 @@ class NavigationController extends AbstractController {
         
         $future_gradeables_list = $this->gradeables_list->getFutureGradeables();
         $beta_gradeables_list = $this->gradeables_list->getBetaGradeables();
-        $open_gradeables_list = $this->gradeables_list->getOpenElectronicGradeables();
-        $closed_gradeables_list = $this->gradeables_list->getClosedElectronicGradeables();
+        $open_gradeables_list = $this->gradeables_list->getOpenGradeables();
+        $closed_gradeables_list = $this->gradeables_list->getClosedGradeables();
         $grading_gradeables_list = $this->gradeables_list->getGradingGradeables();
         $graded_gradeables_list = $this->gradeables_list->getGradedGradeables();
         

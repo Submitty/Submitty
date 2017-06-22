@@ -59,10 +59,6 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
       assert (endpoint-startpoint-14 > 1);
       std::string system_call = line.substr(startpoint+14,endpoint-startpoint-14);
       // make sure there aren't duplicates
-#if __UBUNTU_16_04__
-#else
-      if (skip_this) continue;
-#endif
       assert (all_system_calls.find(system_call) == all_system_calls.end());
       all_system_calls[system_call] = category;
     } 
@@ -155,11 +151,7 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
 
   // verify that we have all of the linux system calls (32 & 64 bit)
   //std::cout << "all_system_calls.size() " <<  all_system_calls.size() << std::endl;
-#if __UBUNTU_16_04__
   assert (all_system_calls.size() == 393);
-#else
-  assert (all_system_calls.size() == 385);
-#endif
 }
 
 

@@ -270,7 +270,7 @@ HTML;
 
             <div class="modal-footer">
                 <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>
-                <a class="btn" href="{$SUBMISSION_URL}/index.php?semester={$_GET['semester']}&course={$_GET['course']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET['g_id']}">{$g_title} Overview</a>
+                <a class="btn" href="{$SUBMISSION_URL}/index.php?semester={$_GET['semester']}&course={$_GET['course']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET['g_id']}">{$g_title} Status</a>
                 <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
             </div>
         </div>
@@ -293,7 +293,7 @@ HTML;
 
             <div class="modal-footer">
                 <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>
-                <a class="btn" href="{$SUBMISSION_URL}/index.php?semester={$_GET['semester']}&course={$_GET['course']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET['g_id']}">{$g_title} Overview</a>
+                <a class="btn" href="{$SUBMISSION_URL}/index.php?semester={$_GET['semester']}&course={$_GET['course']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET['g_id']}">{$g_title} Status</a>
                 <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
             </div>
         </div>

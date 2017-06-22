@@ -50,7 +50,7 @@
                     "show_expected" : "never",
                     "show_actual" : "always",
                     "show_message" : "on_failure",
-                    "failure_messaage" : "Incorrect Answer"
+                    "failure_message" : "Incorrect Answer"
                 }
             ]
         },
