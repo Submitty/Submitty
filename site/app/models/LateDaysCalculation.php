@@ -22,84 +22,11 @@ class LateDaysCalculation extends AbstractModel {
     
     function __construct(Core $main_core) {
         $this->core = $main_core;
-        $this->submissions = $this->get_student_submissions();
-        $this->latedays = $this->get_student_lateday_updates();
+        $this->submissions = $this->core->getQueries()->getLateDayInformation();
+        $this->latedays = $this->core->getQueries()->getLateDayUpdates();
         $this->students = $this->parse_students($this->submissions, $this->latedays);
         //Calculate lateday usages for all students for all assignments queried
         $this->all_latedays = $this->calculate_student_lateday_usage($this->students);
-    }
-    
-    // PUT MY QUERY IN DatabaseQueriesPostgresql
-    private function get_student_submissions() {
-        $params = array();
-
-        $query = "SELECT
-                      submissions.*
-                      , coalesce(late_day_exceptions, 0) extensions
-                      , greatest(0, ceil((extract(EPOCH FROM(coalesce(submission_time, eg_submission_due_date) - eg_submission_due_date)) - (?*60))/86400):: integer) as days_late
-                    FROM
-                      (
-                        SELECT
-                        base.g_id
-                        , g_title
-                        , base.assignment_allowed
-                        , base.user_id
-                        , eg_submission_due_date
-                        , coalesce(active_version, -1) as active_version
-                        , submission_time
-                      FROM
-                      (
-                        --Begin BASE--
-                        SELECT
-                          g.g_id,
-                          u.user_id,
-                          g.g_title,
-                          eg.eg_submission_due_date,
-                          eg.eg_late_days AS assignment_allowed
-                        FROM
-                          users u
-                          , gradeable g
-                          , electronic_gradeable eg
-                        WHERE
-                          g.g_id = eg.g_id
-                        --End Base--
-                      ) as base
-                    FULL JOIN
-                    (
-                      --Begin Details--
-                      SELECT
-                        g_id
-                        , user_id
-                        , active_version
-                        , g_version
-                        , submission_time
-                      FROM
-                        electronic_gradeable_version egv NATURAL JOIN electronic_gradeable_data egd
-                      WHERE
-                        egv.active_version = egd.g_version
-                      --End Details--
-                    ) as details
-                    ON
-                      base.user_id = details.user_id
-                      AND base.g_id = details.g_id
-                    ) 
-                      AS submissions 
-                      FULL OUTER JOIN 
-                        late_day_exceptions AS lde 
-                      ON submissions.g_id = lde.g_id 
-                      AND submissions.user_id = lde.user_id";
-        array_push($params, 300);
-
-        //Query database and return results.
-        
-        $this->core->getDatabase()->query($query, $params);
-        return $this->core->getDatabase()->rows();
-    }
-    
-    // PUT MY QUERY IN DatabaseQueriesPostgresql
-    private function get_student_lateday_updates() {
-        $this->core->getDatabase()->query("SELECT * FROM late_days;");
-        return $this->core->getDatabase()->rows();
     }
     
     private function parse_students($submissions, $latedays) {
