@@ -682,7 +682,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         foreach ($gradeable->getComponents() as $component) {
-            if ($component->hasGrade()) {
+            if ($component->getHasGrade()) {
                 $params = array($component->getScore(), $component->getComment(), $component->getId(), $gradeable->getGdId());
                 $this->database->query("
 UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=? WHERE gc_id=? AND gd_id=?", $params);

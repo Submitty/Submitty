@@ -94,7 +94,7 @@ HTML;
             if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
                 $return .= <<<HTML
             <a class="btn btn-primary"
-                href="{$this->core->getConfig()->getTABaseUrl()}account/index.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}">
+                href="{$this->core->getConfig()->getTaBaseUrl()}account/index.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}">
                 Grade Next Student
             </a>
         </div>
@@ -239,7 +239,7 @@ HTML;
                     $contents = "Grade";
                 }
                 $return .= <<<HTML
-                    <a class="btn {$btn_class}" href="{$this->core->getConfig()->getTABaseUrl()}account/index.php?g_id={$gradeable->getId()}&amp;individual={$row->getUser()->getId()}&amp;course={$this->core->getConfig()->getCourse()}&amp;semester={$this->core->getConfig()->getSemester()}">
+                    <a class="btn {$btn_class}" href="{$this->core->getConfig()->getTaBaseUrl()}account/index.php?g_id={$gradeable->getId()}&amp;individual={$row->getUser()->getId()}&amp;course={$this->core->getConfig()->getCourse()}&amp;semester={$this->core->getConfig()->getSemester()}">
                         {$contents}
                     </a>
                 </td>

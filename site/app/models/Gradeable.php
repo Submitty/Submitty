@@ -16,136 +16,161 @@ use app\libraries\Utils;
  * submission folder. This abstract class is extended by GradeableFile (which loads the form json file) and
  * GradeableDb (which loads the data from the database). Additionally, it'll hold the relevant information necessary
  * for the TA to be able to grade this.
+ *
+ * @method string getId()
+ * @method string getName()
+ * @method int getType()
+ * @method array getPartNames()
+ * @method array getTextboxes()
+ * @method int getHighestVersion()
+ * @method int getActiveVersion()
+ * @method void setActiveVersion(int $version)
+ * @method int getMaxSubmissions()
+ * @method float getMaxSize()
+ * @method GradeableVersion[] getVersions()
+ * @method float getNormalPoints() Returns the total number of points for testcases that are not hidden nor are extra credit
+ * @method getDueDate()
+ * @method getGradeStartDate()
+ * @method getGradeReleasedDate()
+ * @method getOpenDate()
+ * @method array getSubmittedFiles()
+ * @method array getSvnFiles()
+ * @method array getTestcases()
+ * @method string getGradeFile()
+ * @method int getInteractiveQueuePosition()
+ * @method int getInteractiveQueueTotal()
+ * @method int getBatchQueuePosition()
+ * @method int getBatchQueueTotal()
+ * @method User getUser()
+ * @method void setUser(User $user)
+ * @method GradeableComponent[] getComponents()
+ * @method string getGrader()
+ * @method void setGrader(User $user)
+ * @method string getOverallComment()
+ * @method void setOverallComment(string $comment)
+ * @method int getStatus()
+ * @method void setStatus(int $status)
+ * @method int getGdId()
+ * @method getUserViewedDate()
  */
 class Gradeable extends AbstractModel {
 
     /** @var Core */
     protected $core;
     
-    /** @var string Id of the gradeable (must be unique) */
+    /** @property @var string Id of the gradeable (must be unique) */
     protected $id;
 
-    /** @var int  */
+    /** @property @var int  */
     protected $gd_id;
     
-    /** @var string Name of the gradeable */
+    /** @property @var string Name of the gradeable */
     protected $name;
     
-    /** @var int GradeableType set for this Gradeable */
+    /** @property @var int GradeableType set for this Gradeable */
     protected $type;
     
-    /** @var string Instructions to give to TA for grading */
+    /** @property @var string Instructions to give to TA for grading */
     protected $ta_instructions = "";
     
-    /** @var bool Is this a team assignment */
+    /** @property @var bool Is this a team assignment */
     protected $team_assignment = false;
     
-    /** @var string Iris Bucket to place gradeable */
+    /** @property @var string Iris Bucket to place gradeable */
     protected $bucket = null;
     
-    /** @var int Minimum group that's allowed to submit grades for this gradeable */
+    /** @property @var int Minimum group that's allowed to submit grades for this gradeable */
     protected $minimum_grading_group = 1;
 
-    /** @var \DateTime|null Date for when grading can view */
+    /** @property @var \DateTime|null Date for when grading can view */
     protected $ta_view_date = null;
 
-    /** @var \DateTime|null Date for when grading can start */
+    /** @property @var \DateTime|null Date for when grading can start */
     protected $grade_start_date = null;
 
-    /** @var \DateTime|null Date for when the grade will be released to students */
+    /** @property @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
 
     protected $ta_grades_released = false;
 
-    /** @var bool Should the gradeable be graded by registration section (or by rotating section) */
+    /** @property @var bool Should the gradeable be graded by registration section (or by rotating section) */
     protected $grade_by_registration = true;
 
-    /** @var \app\models\GradeableComponent[] */
+    /** @property @var \app\models\GradeableComponent[] */
     protected $components = array();
 
     /* Config variables that are only for electronic submissions */
+    /** @property @var bool */
     protected $has_config = false;
     
-    /** @var \DateTime|null When is an electronic submission open to students */
+    /** @property @var \DateTime|null When is an electronic submission open to students */
     protected $open_date = null;
 
-    /** @var \DateTime|null Due date for an electronic submission */
+    /** @property @var \DateTime|null Due date for an electronic submission */
     protected $due_date = null;
 
-    /** @var bool Is the electronic submission a SVN repository or allow uploads */
+    /** @property @var bool Is the electronic submission a SVN repository or allow uploads */
     protected $is_repository = false;
 
-    /** @var string What is the subdirectory for SVN */
+    /** @property @var string What is the subdirectory for SVN */
     protected $subdirectory = "";
 
-    /** @var int Number of days you can submit */
+    /** @property @var int Number of days you can submit */
     protected $late_days = 0;
 
-    /** @var string Url to any instructions for the gradeable for students */
+    /** @property @var string Url to any instructions for the gradeable for students */
     protected $instructions_url = "";
 
-    /** @var string Path to the config.json file used to build the config/build/build_XXX.json file */
+    /** @property @var string Path to the config.json file used to build the config/build/build_XXX.json file */
     protected $config_path = "";
 
-    /** @var float Precision to allow for inputting points when grading (such that precision of 0.5 then allows grades
+    /** @property @var float Precision to allow for inputting points when grading (such that precision of 0.5 then allows grades
      * of 0, 0.5, 1, 1.5, etc.) */
     protected $point_precision = 0;
 
-    /** @var bool Is there any TA grading to be done for this gradeable (ie. any rubric questions) */
+    /** @property @var bool Is there any TA grading to be done for this gradeable (ie. any rubric questions) */
     protected $ta_grading = false;
-    protected $questions = array();
-
-    /* Config variables that are only for checkpoints */
-    protected $checkpoints = array();
-
-    /* Config variables that are only for numeric/text types */
-    protected $numerics = array();
-    protected $texts = array();
-
-    /* Config variables that are for both checkpoints and numeric/text types */
-    protected $optional_ta_message = false;
 
     /* Config variables for submission details for this gradeable */
-    /** @var int Max size (in bytes) allowed for the submission */
+    /** @property @var float Max size (in bytes) allowed for the submission */
     protected $max_size = 50000;
-    /** @var int Max number of submission allowed before a student starts suffering deductions every 10 submissions */
+    /** @property @var int Max number of submission allowed before a student starts suffering deductions every 10 submissions */
     /* NOTE:  This should never be used.  It should always be set in the gradeables build.json file. */
     protected $max_submissions = 20;
 
-    /** @var float Non hidden, non extra credit points */
+    /** @property @var float Non hidden, non extra credit points */
     protected $normal_points = 0;
 
     /**  @var float Non hidden points (including extra credit) */
     protected $non_hidden_points = 0;
 
-    /** @var GradeableTestcase[] Autograding testcases for the gradeable */
+    /** @property @var GradeableTestcase[] Autograding testcases for the gradeable */
     protected $testcases = array();
 
-    /** @var string Message to show for the gradeable above all submission results */
+    /** @property @var string Message to show for the gradeable above all submission results */
     protected $message = "";
 
-    /** @var string[] */
+    /** @property @var string[] */
     protected $part_names = array();
 
-    /** @var string[] */
+    /** @property @var string[] */
     protected $textboxes = array();
 
-    /* Variables for submission details (such as attempts used, etc.) */
+    /** @property @var int Variables for submission details (such as attempts used, etc.) */
     protected $submissions = 0;
 
-    /**
-     * @var int $active_version  The set active version for the assignment
-     */
+    /** @property @var int $active_version  The set active version for the assignment */
     protected $active_version = -1;
-    /** @var int $current The current version of the assignment being viewed */
-    protected $current = -1;
-    /** @var int $highest Highest version submitted for an assignment */
-    protected $highest = 0;
+    /** @property @var int $current The current version of the assignment being viewed */
+    protected $current_version = -1;
+    /** @property @var int $highest Highest version submitted for an assignment */
+    protected $highest_version = 0;
 
+    /** @property @var array */
     protected $versions = array();
 
-    /** @var array Array of all files for a specified submission number where each key is a previous file and then each element
-     * is an array that contains filename, file path, and the file size. */
+    /** @property @var array Array of all files for a specified submission number where each key is a previous file
+     * and then each element is an array that contains filename, file path, and the file size. */
     protected $submitted_files = array();
     protected $svn_files = array();
     protected $meta_files = array();
@@ -153,6 +178,7 @@ class Gradeable extends AbstractModel {
 
     protected $result_details;
 
+    /** @property @var string */
     protected $grade_file = null;
 
     protected $in_interactive_queue = false;
@@ -160,18 +186,25 @@ class Gradeable extends AbstractModel {
     protected $in_batch_queue = false;
     protected $grading_batch_queue = false;
 
+    /** @property @var User */
     protected $grader = null;
+    /** @property @var string */
     protected $grader_id = null;
     protected $overall_comment = "";
-    /** @var int code representing the state of electronic submission where 0 = not submitted, 1 = fine, 2 = late,
+    /** @property @var int code representing the state of electronic submission where 0 = not submitted, 1 = fine, 2 = late,
      * 3 = too late */
     protected $status;
     protected $graded_version = null;
 
+    /** @property @var int */
     protected $interactive_queue_total = 0;
+    /** @property @var int */
     protected $interactive_queue_position = 0;
+    /** @property @var int */
     protected $batch_queue_total = 0;
+    /** @property @var int */
     protected $batch_queue_position = 0;
+    /** @property @var int */
     protected $grading_total = 0;
 
     protected $been_autograded = false;
@@ -194,11 +227,13 @@ class Gradeable extends AbstractModel {
     protected $total_tagrading_non_extra_credit = 0;
     protected $total_tagrading_extra_credit = 0;
 
+    /** @property @var \app\models\User|null */
     protected $user = null;
 
     protected $user_viewed_date = null;
 
     public function __construct(Core $core, $details, User $user = null) {
+        parent::__construct();
         $this->core = $core;
         $this->id = $details['g_id'];
 
@@ -270,10 +305,10 @@ class Gradeable extends AbstractModel {
                 }
                 $this->components[$component_details['gc_order']] = new GradeableComponent($component_details);
 
-                if (!$this->components[$component_details['gc_order']]->isText()) {
+                if (!$this->components[$component_details['gc_order']]->getIsText()) {
                     $max_value = $this->components[$component_details['gc_order']]->getMaxValue();
                     if ($max_value > 0) {
-                        if ($this->components[$component_details['gc_order']]->isExtraCredit()) {
+                        if ($this->components[$component_details['gc_order']]->getIsExtraCredit()) {
                             $this->total_tagrading_extra_credit += $max_value;
                         }
                         else {
@@ -283,6 +318,10 @@ class Gradeable extends AbstractModel {
                     $this->graded_tagrading += $this->components[$component_details['gc_order']]->getScore();
                 }
             }
+            // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
+            // either write an inner JOIN on that aggregation to order stuff, and then have it aggregated, or we can
+            // just order it here, which is simpler in the long run and not really a performance problem.
+            ksort($this->components);
             // NOTE: the TA grading total may be negative!
         }
 
@@ -396,7 +435,7 @@ class Gradeable extends AbstractModel {
 
         $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
                                           $this->core->getConfig()->getCourse(), $this->id,
-                                          $user_id, $this->current));
+                                          $user_id, $this->current_version));
         $grade_file = "GRADING_".$queue_file;
 
         $this->in_interactive_queue = file_exists($interactive_queue."/".$queue_file);
@@ -524,28 +563,28 @@ class Gradeable extends AbstractModel {
 
         //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
         if (count($this->versions) > 0) {
-            $this->highest = Utils::getLastArrayElement($this->versions)->getVersion();
+            $this->highest_version = Utils::getLastArrayElement($this->versions)->getVersion();
         }
 
         $this->submissions = count($this->versions);
 
         if (isset($_REQUEST['gradeable_version'])) {
-            $this->current = intval($_REQUEST['gradeable_version']);
+            $this->current_version = intval($_REQUEST['gradeable_version']);
         }
 
-        if ($this->current < 0 && $this->active_version >= 0) {
-            $this->current = $this->active_version;
+        if ($this->current_version < 0 && $this->active_version >= 0) {
+            $this->current_version = $this->active_version;
         }
-        else if ($this->current > $this->submissions) {
-            $this->current = $this->active_version;
+        else if ($this->current_version > $this->submissions) {
+            $this->current_version = $this->active_version;
         }
-        else if (!isset($this->versions[$this->current]) && $this->active_version > 0) {
-            $this->current = $this->active_version;
+        else if (!isset($this->versions[$this->current_version]) && $this->active_version > 0) {
+            $this->current_version = $this->active_version;
         }
 
         $this->setQueueStatus();
 
-        $submission_current_path = $submission_path."/".$this->current;
+        $submission_current_path = $submission_path."/".$this->current_version;
         $submitted_files = FileUtils::getAllFiles($submission_current_path, array(), true);
         foreach ($submitted_files as $file => $details) {
             if (substr(basename($file), 0, 1) === '.') {
@@ -556,7 +595,7 @@ class Gradeable extends AbstractModel {
             }
         }
 
-        $svn_current_path = $svn_path."/".$this->current;
+        $svn_current_path = $svn_path."/".$this->current_version;
         $svn_files = FileUtils::getAllFiles($svn_current_path, array(), true);
         foreach ($svn_files as $file => $details) {
             $this->svn_files[$file] = $details;
@@ -576,10 +615,10 @@ class Gradeable extends AbstractModel {
             $this->previous_files[1] = $this->submitted_files;
         }
 
-        if ($this->current > 0) {
-            $this->result_details = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current, "results.json"));
+        if ($this->current_version > 0) {
+            $this->result_details = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "results.json"));
             if ($this->result_details !== false) {
-                $results_history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current, "results_history.json"));
+                $results_history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "results_history.json"));
                 if ($results_history !== false) {
                     $last_results_timestamp = $results_history[count($results_history) - 1];
                 } else {
@@ -589,7 +628,7 @@ class Gradeable extends AbstractModel {
                 $this->result_details = array_merge($this->result_details, $last_results_timestamp);
                 $this->result_details['num_autogrades'] = count($results_history);
                 for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
-                    $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current));
+                    $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current_version));
                 }
             }
         }
@@ -600,18 +639,6 @@ class Gradeable extends AbstractModel {
         }
     }
 
-    public function getId() {
-        return $this->id;
-    }
-
-    public function getName() {
-        return $this->name;
-    }
-
-    public function getType() {
-        return $this->type;
-    }
-
     public function isTeamAssignment() {
         return $this->team_assignment;
     }
@@ -620,50 +647,27 @@ class Gradeable extends AbstractModel {
       return count($this->part_names);
     }
 
-    public function getPartsNames() {
-        return $this->part_names;
-    }
-
     public function getNumTextBoxes() {
       return count($this->textboxes);
     }
-    public function getTextBoxes() {
-        return $this->textboxes;
-    }
-
-    public function getHighestVersion() {
-        return $this->highest;
-    }
-
-    public function getActiveVersion() {
-        return $this->active_version;
-    }
 
     public function getCurrentVersionNumber() {
-        return $this->current;
+        return $this->current_version;
     }
 
     /**
      * @return GradeableVersion|null
      */
     public function getCurrentVersion() {
-        if (!isset($this->versions[$this->current])) {
+        if (!isset($this->versions[$this->current_version])) {
             return null;
         }
-        return $this->versions[$this->current];
+        return $this->versions[$this->current_version];
     }
 
     public function getPreviousFiles($part = 1) {
         $part = ($this->getNumParts() < $part || $part < 1) ? 1 : $part;
         return $this->previous_files[$part];
-    }
-
-    public function getMaxSubmissions() {
-        return $this->max_submissions;
-    }
-
-    public function getMaxSize() {
-        return $this->max_size;
     }
 
     public function getSubmissionCount() {
@@ -672,21 +676,6 @@ class Gradeable extends AbstractModel {
 
     public function getAllowedLateDays() {
         return $this->late_days;
-    }
-
-    /**
-     * @return GradeableVersion[]
-     */
-    public function getVersions() {
-        return $this->versions;
-    }
-
-    /**
-     * Returns the total number of points for testcases that are not hidden nor are extra credit
-     * @return int
-     */
-    public function getNormalPoints() {
-        return $this->normal_points;
     }
 
     public function getTotalNonHiddenNonExtraCreditPoints() {
@@ -716,24 +705,8 @@ class Gradeable extends AbstractModel {
         return $this->total_tagrading_non_extra_credit;
     }
 
-    public function getDueDate() {
-        return $this->due_date;
-    }
-
     public function getTAViewDate(){
         return $this->ta_view_date;
-    }
-
-    public function getGradeStartDate(){
-        return $this->grade_start_date;
-    }
-
-    public function getGradeReleasedDate(){
-        return $this->grade_released_date;
-    }
-
-    public function getOpenDate() {
-        return $this->open_date;
     }
 
     public function getDaysLate() {
@@ -759,18 +732,6 @@ class Gradeable extends AbstractModel {
         return $this->result_details;
     }
 
-    public function getSubmittedFiles() {
-        return $this->submitted_files;
-    }
-
-    public function getSvnFiles() {
-        return $this->svn_files;
-    }
-
-    public function getTestcases() {
-        return $this->testcases;
-    }
-
     public function hasAssignmentMessage() {
         return trim($this->message) !== "";
     }
@@ -793,10 +754,6 @@ class Gradeable extends AbstractModel {
 
     public function hasGradeFile() {
         return $this->grade_file !== null;
-    }
-
-    public function getGradeFile() {
-        return $this->grade_file;
     }
 
     public function useTAGrading() {
@@ -827,86 +784,12 @@ class Gradeable extends AbstractModel {
         return $this->grading_batch_queue;
     }
 
-    public function getInteractiveQueuePosition() {
-        return $this->interactive_queue_position;
-    }
-
-    public function getInteractiveQueueTotal() {
-        return $this->interactive_queue_total;
-    }
-
-    public function getBatchQueuePosition() {
-        return $this->batch_queue_position;
-    }
-
-    public function getBatchQueueTotal() {
-        return $this->batch_queue_total;
-    }
-
     public function getNumberOfGradingTotal() {
         return $this->grading_total;
     }
 
     public function isGradeByRegistration() {
         return $this->grade_by_registration;
-    }
-
-    /**
-     * @return User
-     */
-    public function getUser() {
-        return $this->user;
-    }
-
-    public function getComponents() {
-        return $this->components;
-    }
-
-    public function setUser(User $user) {
-        $this->user = $user;
-    }
-
-    public function setGrader(User $user) {
-        $this->grader = $user;
-    }
-
-    /**
-     * @return User
-     */
-    public function getGrader() {
-        return $this->grader;
-    }
-
-    public function setOverallComment($comment) {
-        $this->overall_comment = $comment;
-    }
-
-    public function getOverallComment() {
-        return $this->overall_comment;
-    }
-
-    public function setStatus($status) {
-        $this->status = $status;
-    }
-
-    public function getStatus() {
-        return $this->status;
-    }
-
-    public function setActiveVersion($version) {
-        $this->active_version = $version;
-    }
-    
-    public function getGdId() {
-        return $this->gd_id;
-    }
-
-    public function setGdId($gd_id) {
-        $this->gd_id = $gd_id;
-    }
-
-    public function getUserViewedDate() {
-        return $this->user_viewed_date;
     }
 
     public function updateUserViewedDate() {
@@ -916,5 +799,4 @@ class Gradeable extends AbstractModel {
     public function saveData() {
         $this->core->getQueries()->updateGradeableData($this);
     }
-
 }
