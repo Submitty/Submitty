@@ -15,6 +15,8 @@ SAMPLE_SUBMISSIONS = SUBMITTY_TUTORIAL_DIR + "/examples/09_java_testing/submissi
 
 @prebuild
 def initialize(test):
+    print ("TUTORIAL DIR", SUBMITTY_TUTORIAL_DIR)
+
     try:
         os.mkdir(os.path.join(test.testcase_path, "assignment_config"))
     except OSError:
