@@ -53,27 +53,3 @@
     height: 14px;
     width: 14px;
 }
-
-.icon-up-arrow {
-    background: url('../img/glyphicons-halflings.png') no-repeat -288px -96px;
-    color: rgb(51, 51, 51);
-    display: inline-block;
-    height: 14px;
-    width: 14px;
-}
-
-.icon-down-arrow {
-    background: url('../img/glyphicons-halflings.png') no-repeat -311px -96px;
-    color: rgb(51, 51, 51);
-    display: inline-block;
-    height: 14px;
-    width: 14px;
-}
-
-.icon-x-mark {
-    background: url('../img/glyphicons-halflings.png') no-repeat -312px 0px;
-    color: rgb(51, 51, 51);
-    display: inline-block;
-    height: 14px;
-    width: 14px;
-}
