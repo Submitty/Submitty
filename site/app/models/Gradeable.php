@@ -45,6 +45,7 @@ use app\libraries\Utils;
  * @method void setUser(User $user)
  * @method GradeableComponent[] getComponents()
  * @method string getGrader()
+ * @method void setGrader(User $user)
  * @method string getOverallComment()
  * @method void setOverallComment(string $comment)
  * @method int getStatus()
