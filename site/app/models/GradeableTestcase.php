@@ -22,6 +22,7 @@ use app\libraries\Utils;
  * @method float getPointsAwarded()
  * @method string getLogFile()
  * @method GradeableAutocheck[] getAutochecks()
+ * @method string getTestcaseMessage()
  */
 class GradeableTestcase extends AbstractModel {
     protected $core;
@@ -146,10 +147,6 @@ class GradeableTestcase extends AbstractModel {
     
     public function hasDetails() {
       return (!$this->isHidden() && count($this->autochecks) > 0);
-    }
-
-    public function getTestcaseMessage() {
-        return $this->testcase_message;
     }
 
     public function viewTestcaseMessage() {
