@@ -784,7 +784,7 @@ table .instructor .two-options{
     height: 41px;
     width: 290px;
     z-index: 1099;
-    background: white;
+    background-color: #edf6f6;
 }
 
 .grading_toolbar i:not(.icon-disabled):hover{
@@ -881,8 +881,8 @@ table .instructor .two-options{
     height: 31px;
     width: 250px;
     z-index: 1099;
-    background: white;
-    border: 5px solid white;
+    background-color: #edf6f6;
+    border: 5px solid #edf6f6;
 }
 
 progress {
@@ -897,10 +897,10 @@ progress::-webkit-progress-value {
 }
 
 .rubric_panel {
+    font-size: 90%;
     cursor: move;
     position: absolute;
-    background: white;
-    opacity: .95;
+    background-color: #edf6f6;
     display: none;
     overflow:auto;
 }
@@ -929,8 +929,80 @@ progress::-webkit-progress-value {
 }
 
 .inner-container {
-    width: 95%;
-    margin: auto auto auto auto;
-    /*height: 100%;*/
+    margin-top: 0px;
+    margin-right: 20px;
     margin-bottom: 20px;
+    margin-left: 10px;
+}
+
+.file-viewer{
+    float: left;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.file-viewer a,
+.file-viewer a:link,
+.file-viewer a:visited,
+.file-viewer a:active {
+    color: #005c83;
+}
+
+.file-viewer a:hover {
+    color: #6db7ff;
+    text-decoration: none;
+}
+
+.div-viewer{
+    float: left;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.div-viewer a,
+.div-viewer a:link,
+.div-viewer a:visited,
+.div-viewer a:active {
+    color: #005c83;
+}
+
+.div-viewer a:hover {
+    color: #6db7ff;
+    text-decoration: none;
+}
+
+.icon-folder-closed {
+    background: url('../img/glyphicons-halflings.png') no-repeat -384px -120px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-folder-open {
+    background: url('../img/glyphicons-halflings.png') no-repeat -410px -120px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-plus {
+    background-image: url('../img/glyphicons-halflings.png');
+    background-position: 0px -96px;
+    background-repeat: no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-minus {
+    background-image: url('../img/glyphicons-halflings.png');
+    background-position: -24px -96px;
+    background-repeat: no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
 }
