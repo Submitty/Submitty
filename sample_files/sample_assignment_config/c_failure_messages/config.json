@@ -11,6 +11,8 @@
     },
 
     "allow_system_calls" : [
+        "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+        "PROCESS_CONTROL_SCHEDULING"
     ],
 
 
