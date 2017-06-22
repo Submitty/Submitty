@@ -108,7 +108,7 @@ class SimpleGraderController extends AbstractController  {
 
         foreach ($gradeable->getComponents() as $component) {
             if (isset($_POST['scores'][$component->getId()])) {
-                if ($component->isText()){
+                if ($component->getIsText()){
                     $component->setComment($_POST['scores'][$component->getId()]);
                 }
                 else{
