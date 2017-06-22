@@ -40,6 +40,7 @@ SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 SAMPLE_ASSIGNMENT_CONFIG = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_assignment_config")
+MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
 SAMPLE_SUBMISSIONS = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_submissions")
 
 TUTORIAL_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial")
@@ -839,21 +840,27 @@ class Gradeable(object):
                 self.config_path = gradeable['config_path']
             else:
                 sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, self.gradeable_config)
+                examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "config")
                 if os.path.isdir(sample_path):
                     self.config_path = sample_path
+                elif os.path.isdir(examples_path):
+                    self.config_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.config_path = tutorial_path
                 else:
                     self.config_path = None
 
             sample_path = os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config)
+            examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "submissions")
             tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
             if 'sample_path' in gradeable:
                 self.sample_path = gradeable['sample_path']
             else:
                 if os.path.isdir(sample_path):
                     self.sample_path = sample_path
+                elif os.path.isdir(examples_path):
+                    self.sample_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.sample_path = tutorial_path
                 else:
@@ -895,9 +902,12 @@ class Gradeable(object):
                 self.precision = float(gradeable['eg_precision'])
             if self.config_path is None:
                 sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, self.id)
+                examples_path = os.path.join(MORE_EXAMPLES_DIR, self.id, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
                 if os.path.isdir(sample_path):
                     self.config_path = sample_path
+                elif os.path.isdir(examples_path):
+                    self.config_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.config_path = tutorial_path
                 else:
