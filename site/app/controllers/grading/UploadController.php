@@ -28,8 +28,12 @@ class UploadController extends AbstractController {
                 break;
             case 'verify':
                 return $this->validGradeable();
+                break;
+            case 'get':
+                return $this->getGradeable();
+                break;
             case 'update':
-                //return $this->updateSubmissionVersion();
+                return $this->updateSubmissionVersion();
                 break;
             case 'check_refresh':
                 //return $this->checkRefresh();
@@ -54,8 +58,7 @@ class UploadController extends AbstractController {
                 return array('error' => true, 'message' => 'No gradeable with that id.');
             }
             else {
-                $loc = array('component' => 'student',
-                             'gradeable_id' => $gradeable->getId());
+                $loc = array('component' => 'grading', 'page' => 'upload');
                 $this->core->getOutput()->addBreadcrumb($gradeable->getName(), $this->core->buildUrl($loc));
                 if (!$gradeable->hasConfig()) {
                     // rewrite to not use submission functions, reference simple grader
@@ -82,35 +85,58 @@ class UploadController extends AbstractController {
     }
 
     private function validGradeable() {
-        // gets gradeable_id', 'student_id', student_gradeable' 
-        if (!isset($_REQUEST['gradeable_id']) || !isset($_REQUEST['student_id'] || isset($_REQUEST['student_gradeable'])) {
-            $response = array('status' => 'fail', 'message' => 'Did not pass in gradeable_id or student_id or student_gradeable');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+        // gets gradeable_id, student_id
+
+        if (!isset($_REQUEST['gradeable_id'])) {
+            $msg = "Did not pass in gradeable_id.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'upload')));
+            return array('error' => true, 'message' => $msg);
         }
-        $student_user = $this->core->getQueries()->getUserById($student_user_id);
-        $student_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $student_user_id);
-        $user = $this->core->getQueries()->getUserById($user_id);
+        if (!isset($_REQUEST['days_late'])) {
+            $msg = "Did not pass in days_late.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'upload')));
+            return array('error' => true, 'message' => $msg);
+        }
+        if (!isset($_POST['student_id'])) {
+            $msg = "Did not pass in student_id.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'upload')));
+            return array('error' => true, 'message' => $msg);
+        }
+
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $days_late = $_REQUEST['days_late'];
+        $student_id = $_POST['student_id'];
+        $student_user = $this->core->getQueries()->getUserById($student_id);
+        $student_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $student_id);
 
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
-            $response = array('status' => 'fail', 'message' => 'Invalid CSRF token');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            $msg = "Invalid CSRF token. Refresh the page and try again.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'upload', 'gradeable_id' => $gradeable_id)));
+            return array('error' => true, 'message' => $msg);
         }
-
+        else 
+        if (!$student_user->isLoaded()) {
+            $msg = "Not a valid student id.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'upload', 'gradeable_id' => $gradeable_id, 'days_late' => $days_late)));
+            return array('error' => true, 'message' => $msg);
+        }
         else if ($student_gradeable === null) {
-            $response = array('status' => 'fail', 'message' => 'Invalid gradeable ID');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            $msg = "Not a valid gradeable.";
+            $msg .= $student_id;
+            $msg .= $gradeable_id;
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'upload', 'gradeable_id' => $gradeable_id, 'days_late' => $days_late)));
+            return array('error' => true, 'message' => $msg);
         }
-        else if ($student_user === null) {
-            $response = array('status' => 'fail', 'message' => 'Invalid user ID');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
-        }
-        $this->student_user = $user;
+        $this->student_user = $student_user;
         $this->student_gradeable = $student_gradeable; 
-        return "";
+        $this->core->getOutput()->renderOutput(array('grading', 'Upload'), 'showUpload', $student_gradeable, $days_late, $student_id);
+        return array('id' => $gradeable_id, 'error' => false);
     }
 
     /**
@@ -123,7 +149,7 @@ class UploadController extends AbstractController {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
-        $svn_checkout = false;
+        $svn_checkout = isset($_REQUEST['svn_checkout']) ? $_REQUEST['svn_checkout'] === "true" : false;
     
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         
@@ -133,7 +159,7 @@ class UploadController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
         }
         
-        $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+        $gradeable = $this->student_gradeable;
         $gradeable->loadResultDetails();
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
@@ -149,7 +175,7 @@ class UploadController extends AbstractController {
             return $this->uploadResult("Failed to make folder for this assignment.", false);
         }
 
-        $user_id = $this->core->getUser()->getId();
+        $user_id = $gradeable->getUser()->getId();
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
@@ -445,6 +471,38 @@ class UploadController extends AbstractController {
 
         $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         return $this->uploadResult("Successfully uploaded files");
+    }
+
+    private function uploadResult($message, $success = true) {
+        if (!$success) {
+            // we don't want to throw an exception here as that'll mess up our return json payload
+            if ($this->upload_details['version_path'] !== null
+                && !FileUtils::recursiveRmdir($this->upload_details['version_path'])) {
+                // @codeCoverageIgnoreStart
+                // Without the filesystem messing up here, we should not be able to hit this error
+                Logger::error("Could not clean up folder {$this->upload_details['version_path']}");
+
+            }
+            // @codeCoverageIgnoreEnd
+            else if ($this->upload_details['assignment_settings'] === true) {
+                $settings_file = FileUtils::joinPaths($this->upload_details['user_path'], "user_assignment_settings.json");
+                $settings = json_decode(file_get_contents($settings_file), true);
+                if (count($settings['history']) == 1) {
+                    unlink($settings_file);
+                }
+                else {
+                    array_pop($settings['history']);
+                    $last = Utils::getLastArrayElement($settings['history']);
+                    $settings['active_version'] = $last['version'];
+                    file_put_contents($settings_file, FileUtils::encodeJson($settings));
+                }
+            }
+        }
+
+        $return = array('success' => $success, 'error' => !$success, 'message' => $message);
+        
+        $this->core->getOutput()->renderJson($return);
+        return $return;
     }
 
 

@@ -15,19 +15,28 @@ class UploadView extends AbstractView {
      *
      * @return string
      */
-    public function showUpload($gradeable, $days_late) {
+    public function showUpload($gradeable, $days_late, $student_id="") {
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
-        $student_id = "";
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New upload for: {$gradeable->getName()}</h2>
-    <form>
-        <div class ="sub">
-            <div>Student RCS ID: <input type="text" name="course_name" value="{$student_id}" placeholder="(Required)" required/></div>
-        </div>
+
+    <form form id="idForm" method="post" action="{$this->core->buildUrl(array('component' => 'grading', 
+                                                                                'page'      => 'upload', 
+                                                                                'action'    => 'verify',
+                                                                                'gradeable_id' => $gradeable->getId(),
+                                                                                'days_late' => $days_late))}">
+    
+    <div class ="sub">
+    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        Student RCS ID: <input type="text" id="student_id" name="student_id" value="" placeholder="{$gradeable->getUser()->getID()}" required/>
+        <button style="margin-right: 100px;" type="submit" form="idForm">
+            Submit ID
+        </button>
+    </div>
     </form>
     <div class="sub">
 HTML;
@@ -195,56 +204,56 @@ HTML;
             });
         }
     </script>
-HTML;
 
+HTML;
         $response = "";
-        $student_gradeable = $gradeable;
+        $student_gradeable;
         $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
-                // get student id
-                $response = $this->core->buildUrl(array('component' => 'grading',
-                                            'page' => 'upload',
-                                            'action' => 'verify',
-                                            'gradeable_id' => $gradeable->getId(),
-                                            'student_id' => $student_id));
-                if ($response == "") {
-                    $student_gradeable = $this->core->buildUrl(array('component' => 'grading',
-                                                'page' => 'upload',
-                                                'action' => 'get',
-                                                'gradeable_id' => $gradeable->getId(),
-                                                'student_id' => $student_id));
-                }
-                if ($response == "") {
-                    handleSubmission("{$this->core->buildUrl(array('component' => 'grading',
-                                                                   'page' => 'upload',
-                                                                   'action' => 'upload',
-                                                                   'gradeable_id' => $gradeable->getId()))}",
-                                     "{$this->core->buildUrl(array('component' => 'grading',
+                // is it a valid student ID?
+                // get the student gradeable
+                // submit the student gradeable
+                handleSubmission("{$this->core->buildUrl(array('component' => 'grading',
+                                                               'page' => 'upload',
+                                                               'action' => 'upload',
+                                                               'gradeable_id' => $gradeable->getId()))}",
+                                     "{$this->core->buildUrl(array('component' => 'submission',
                                                                    'gradeable_id' => $gradeable->getId()))}",
                                      {$days_late},
-                                     {$student_gradeable->getAllowedLateDays()},
-                                     {$student_gradeable->getHighestVersion()},
-                                     {$student_gradeable->getMaxSubmissions()},
-                                     "{$this->core->getCsrfToken()}",
-                                     false,
-                                     {$student_gradeable->getNumTextBoxes()});
-                    e.stopPropagation();
-                };
+                                 {$gradeable->getAllowedLateDays()},
+                                 {$gradeable->getHighestVersion()},
+                                 {$gradeable->getMaxSubmissions()},
+                                 "{$this->core->getCsrfToken()}",
+                                 false,
+                                 {$gradeable->getNumTextBoxes()});
+                e.stopPropagation();
             });
         });
     </script>
 </div>
 HTML;
-        if ($response != "")
-            return $response;
         $return .= <<<HTML
 <div class="content">
     <span>Instructor uploads for this gradeable.</span>
 </div>
 HTML;
+        $gradeable_id = $gradeable->getId();
+        $return .= <<<HTML
+<div class="content">
+    <span>{$gradeable_id}</span>
+</div>
+HTML;
         return $return;
+    }
+
+    private function validID($student_id) {
+        // gets gradeable_id, student_id
+        $student_user = $this->core->getQueries()->getUserById($student_id);
+
+        if ($student_user === null) return false;
+        else return true;
     }
 
 }
