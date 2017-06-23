@@ -160,9 +160,10 @@ HTML;
 
         if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
             $return .= <<<HTML
-                <td width="14%">Autograding</td>
-                <td width="10%">TA Grading</td>
-                <td width="10%">Total</td>
+                <td width="9%">Autograding</td>
+                <td width="8%">TA Grading</td>
+                <td width="7%">Total</td>
+                <td width="10%">Active Version</td>
                 <td width="8%">Viewed Grade</td>
             </tr>
         </thead>
@@ -171,8 +172,9 @@ HTML;
         else {
             $show_auto_grading_points = false;
             $return .= <<<HTML
-                <td width="17%">TA Grading</td>
-                <td width="17%">Total</td>
+                <td width="12%">TA Grading</td>
+                <td width="12%">Total</td>
+                <td width="10%">Active Version</td>
                 <td width="8%">Viewed Grade</td>
             </tr>
         </thead>
@@ -202,6 +204,8 @@ HTML;
                     $grade_viewed = "";
                     $grade_viewed_color = "";
                 }
+                $active_version = $row->getActiveVersion();
+                $highest_version = $row->getHighestVersion();
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
                 $graded = $row->getGradedAutograderPoints() + $row->getGradedTAPoints();
                 if ($graded < 0) $graded = 0;
@@ -226,7 +230,7 @@ HTML;
                     else {
                         $section_graders = "Nobody";
                     }
-                    $cols = ($show_auto_grading_points) ? 9 : 8;
+                    $cols = ($show_auto_grading_points) ? 10 : 9;
                     $return .= <<<HTML
         <tr class="info persist-header">
             <td colspan="{$cols}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
@@ -271,6 +275,28 @@ HTML;
                     </a>
                 </td>
                 <td>{$graded} / {$total_possible}</td>
+HTML;
+                // Conditionals to determine what to show in active version
+                // If no submission, active version is blank
+                if($highest_version == 0) {
+                    $return .= <<<HTML
+                <td></td>
+HTML;
+                }
+                // if the highest version is the active version, show it, giving info about number of tries
+                else if($active_version == $highest_version) {
+                    $return .= <<<HTML
+                <td>{$active_version}</td>
+HTML;
+                }
+                // otherwise show the active_version as one of the number of versions
+                else {
+                    $return .= <<<HTML
+                <td>{$active_version}/{$highest_version}</td>
+HTML;
+                }
+                
+                $return .= <<<HTML
                 <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
             </tr>
 HTML;
