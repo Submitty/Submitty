@@ -548,32 +548,24 @@ function setupNumericTextCells() {
 
 
 function updateHomeworkExtensions2(data) {
+        console.log(data);
     var fd = new FormData($('#excusedAbsenseForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension', 'info' : data});
-    // console.log(url);
+    console.log(url);
     $.ajax({
         url: url,
         type: "POST",
         data: fd,
         processData: false,
+        cache: false,
         contentType: false,
         success: function(data) {
-            // console.log(data);
+            console.log(data);
             var json = JSON.parse(data);
             if(json['error']){
-                // var message = '<div id="error" class="inner-message alert alert-error"><a class="fa fa-times message-close" onClick="removeMessagePopup("error");"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="myspecialid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'myspecialid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
-                // console.log(message);
                 $('#messages').append(message);
-                // console.log(json['error']);
-                // var error= json['error'];
                 return;
-                // json['error'].forEach(function(elem){
-                //     var message ='<div class="inner-message alert alert-error" style="position:fixed;top:40px;left:50%;width:40%;margin-left:-20%;" id="myspecialid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'myspecialid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div><div></div>';
-                //     $('#messages').append(message);
-                // });
-                // return;
-
             }
             var form = $("#load-homework-extensions");
             $('#my_table tr:gt(0)').remove();
@@ -597,78 +589,6 @@ function updateHomeworkExtensions2(data) {
     })
     return false;
 }
-
-
-
-// function updateHomeworkExtensions(data) {
-//     // console.log(data);
-//     // // console.log($(this).children().children().val());
-//     var info = [];
-//     $('.option').children('#myid').each(function() {
-//         // // console.log("here");
-//         // // console.log(this);
-//         // // console.log($(this));
-//         // console.log( $(this).val() );
-//         info.push($(this).val());
-//     });
-//     // $("#myid").each
-//     // console.log("HERES THE INFO:");
-//     // console.log(info);
-//     // console.log("GOT INTO UPDATE HOMEWORK EXTENSIONS");
-//     // theinfo=JSON.stringify(info);
-//     // console.log(JSON.stringify(info));
-//     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension', 'info' : info});
-//     // console.log(url);
-//     $.ajax({
-//         url: url,
-//         success: function(data) {
-//             // console.log("in success");
-//             // console.log(data);
-//             var json = JSON.parse(data);
-//             // console.log(json.length);
-//             // console.log(json['gradeable_id'] == undefined);
-//             if(json['error']){
-//                 console.log(json['error']);
-//                 var error= json['error'];
-//                 // $('body').prepend('<div class="inner-message alert alert-error"><a class="fa fa-times message-close" onClick="removeMessagePopup();"></a><i class="fa fa-times-circle"></i>json["error"]</div>');
-//                 // $('body').prepend('<div id="this" class="inner-message alert alert-error"><a class="fa fa-times message-close" onClick="removeMessagePopup("this");"></a>json["error"]</div>');
-//                 // $('#excusedAbsenseForm').prepend('<tr><td colspan="4">error</td></tr>');
-//                 return;
-
-//                 // //                 <div id='{$type}-{$key}' class="inner-message alert alert-{$type}">
-// // //                     <a class="fa fa-times message-close" onClick="removeMessagePopup('{$type}-{$key}');"></a>
-// // //                     <i class="fa fa-times-circle"></i> {$error}
-// // //                 </div>
-
-//             }
-//             var form = $("#load-homework-extensions");
-//             // // form.css("display", "block");
-//             // // $('[name="g_id"]', form).val(json['gradeable_id']);
-//             // // $("#my_table tr").remove();
-//             $('#my_table tr:gt(0)').remove();
-//             // // console.log(json['users'].length);
-//             if(json['users'].length === 0){
-//                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
-//             }
-//             json['users'].forEach(function(elem){
-//                 var bits = ['<tr><td>' + elem[0], elem[1], elem[3], elem[4] + '</td></tr>'];
-//                 $('#my_table').append(bits.join('</td><td>'));
-//             });
-//             // $('[name="user_id"]', form).val("");
-//             // $('#myid')[0].reset();
-//             // document.getElementById('myid').reset();
-//             // $('#myid').val('');
-
-//             // $("#excusedAbsenseForm")[0].reset();
-
-//         },
-//         error: function(data) {
-//             console.log("SAD, TRY AGAIN.");
-//             console.log(data);
-//         }
-//     })
-//     return false;
-// }
 
 function loadHomeworkExtensions(g_id) {
     // console.log(g_id);
@@ -694,3 +614,72 @@ function loadHomeworkExtensions(g_id) {
         }
     });
 }
+
+
+function updateLateDays(data) {
+    console.log("into update late days");
+    console.log(data);
+    var fd = new FormData($('#lateDayForm').get(0));
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late'});
+    console.log(url);
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(data) {
+            console.log("in success");
+            console.log(data);
+            var json = JSON.parse(data);
+            // console.log(json);
+            if(json['error']){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="myspecialid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'myspecialid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            var form = $("#load-late-days");
+            $('#late_day_table tr:gt(0)').remove();
+            if(json['users'].length === 0){
+                $('#late_day_table').append('<tr><td colspan="4">No late days are currently entered.</td></tr>');
+            }
+            json['users'].forEach(function(elem){
+                var bits = ['<tr><td>' + elem[0], elem[1], elem[3], elem[4], elem[5] + '</td></tr>'];
+                $('#late_day_table').append(bits.join('</td><td>'));
+            });
+            $('#user_id').val(this.defaultValue);
+            $('#datestamp').val(this.defaultValue);
+            $('#late_days').val(this.defaultValue);
+        },
+        error: function(data) {
+            console.log("SAD, TRY AGAIN.");
+            console.log(data);
+        }
+    })
+    return false;
+}
+
+// function loadLateDays(g_id) {
+//     console.log(g_id);
+//     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_late_day_details', 'g_id': g_id});
+//     $.ajax({
+//         url: url,
+//         success: function(data) {
+//             var json = JSON.parse(data);
+//             var form = $("#load-late-days");
+//             $('#my_table tr:gt(0)').remove();
+//             var title = '<div class="option-title" id="title">Current Late Days for ' + json['gradeable_id'] + '</div>';
+//             $('#title').replaceWith(title);
+//             if(json['users'].length === 0){
+//                 $('#my_table').append('<tr><td colspan="4">No additional late days are currently entered.</td></tr>');
+//             }
+//             json['users'].forEach(function(elem){
+//                 var bits = ['<tr><td>' + elem[0], elem[1], elem[3], elem[4] + '</td></tr>'];
+//                 $('#my_table').append(bits.join('</td><td>'));
+//             });
+//         },
+//         error: function() {
+//             alert("SAD, TRY AGAIN.");
+//         }
+//     });
+// }
