@@ -77,15 +77,12 @@ HTML;
         if($action === 'numeric') {
             $return .= <<<HTML
     <input class ="csvButtonUpload" data-gradeable="{$gradeable->getId()}" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
-    <label for="csvUpload" style="float: right" data-gradeable="{$gradeable->getId()}">Upload CSV </label>
+    <label for="csvUpload" style="float: right; padding-right: 10px;" data-gradeable="{$gradeable->getId()}">Upload CSV</label>
 HTML;
         }
         $return .= <<<HTML
-    <i class="fa fa-question-circle tooltip" style="float: right" aria-hidden="true"><span class="tooltiptext">$info</span></i>
-HTML;
-
-        $return .= <<<HTML
     <h2>{$gradeable->getName()}</h2>
+    <i class="fa fa-question-circle tooltip" style="float: right;" aria-hidden="true"><span class="tooltiptext">$info</span></i>
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
