@@ -12,11 +12,6 @@ import tempfile
 import shutil
 import subprocess
 
-# TODO: Add documentation to github.io: grading_done, Generate Reports, run on Vagrant host, what to run
-# TODO: Check for batch grading queue with appropriate prefix (if it exists, stop script)
-# TODO: Make script soft-fail so it can be in either install_submitty test or install_submitty testrainbow or something
-# TODO: Check if PEP8 has rules on function ordering
-
 
 def error_and_cleanup(tmp_path, message, error=-1):
     """Used to exit and remove the top-level Rainbow Grades test in tmp.
@@ -79,7 +74,6 @@ def csci1100_rainbow_grades_test():
                                        " Wait for the autograder to finish and then generate new grade summary reports"
                                        "prior to re-running this test.")
 
-    #rainbow_path = os.path.join(script_path, "..", "..", "RainbowGrades")
     rainbow_path = os.path.join(repository_path,"RainbowGrades")
     if not os.path.exists(rainbow_path):
         error_and_cleanup(test_tmp, "Couldn't find Rainbow Grades source code")
@@ -136,7 +130,7 @@ def csci1100_rainbow_grades_test():
     return_code = subprocess.call(["make", "pull"])
 
     if return_code != 0:
-        error_and_cleanup(test_tmp, "Failed to rsync data", return_code)
+        error_and_cleanup(test_tmp, "Failed to rsync data (Error {})",format(return_code))
 
     if not os.path.exists(os.path.join(summary_tmp, "raw_data")):
         error_and_cleanup(test_tmp, "Could not find raw_data folder after rsync'ing")
@@ -149,7 +143,7 @@ def csci1100_rainbow_grades_test():
     return_code = subprocess.call(["tar", "-xf", os.path.join(script_path, "raw_data_10090542_csci1100.tar"),
                                    "-C", known_raw_path])
     if return_code != 0:
-        error_and_cleanup(test_tmp, "Extracting raw data failed", return_code)
+        error_and_cleanup(test_tmp, "Extracting raw data failed (Error {}".format(return_code))
     print("Comparing known raw data to rsync'd raw data")
 
     # Construct a list of all files in the Submitty and test versions of reports to make sure the name/number matches
@@ -203,7 +197,7 @@ def csci1100_rainbow_grades_test():
     try:
         make_output = subprocess.check_output(["make"])
     except subprocess.CalledProcessError as e:
-        error_and_cleanup(test_tmp, "Make failed with code {}".format(e.returncode), e.returncode)
+        error_and_cleanup(test_tmp, "Make failed with code {}".format(e.returncode))
 
     if not os.path.exists(os.path.join(summary_tmp, "output.html")):
         error_and_cleanup(test_tmp, "Failed to create output.html")
@@ -236,8 +230,10 @@ def csci1100_rainbow_grades_test():
     known_individual_path = os.path.join(test_tmp, "individual_summary_html")
     summary_individual_path = os.path.join(summary_tmp, "individual_summary_html")
     os.mkdir(known_individual_path)
-    subprocess.call(["tar", "-xf", os.path.join(script_path, "individual_summary_10090542_csci1100.tar"),
+    return_code = subprocess.call(["tar", "-xf", os.path.join(script_path, "individual_summary_10090542_csci1100.tar"),
                      "-C", known_individual_path])
+    if return_code != 0:
+        error_and_cleanup(test_tmp, "Extracting raw data failed (Error {}".format(return_code))
 
     # Construct lists of generated and test individual_grade_summary_html files
     known_files = []
