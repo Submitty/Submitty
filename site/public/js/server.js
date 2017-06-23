@@ -459,7 +459,7 @@ $(function() {
 
 });
 
-function setupNumericTextCells() {
+function setupNumericTextCells() { 
     $("input[class=option-small-box]").keydown(function(key){
         var cell=this.id.split('-');
         // right
@@ -513,11 +513,85 @@ function setupNumericTextCells() {
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
             {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
             function() {
-                $(elem).css("background-color", "#ffffff");
+                $(elem).css("background-color", "#ffffff"); 
             },
             function() {
                 $(elem).css("background-color", "#ff7777");
             }
         );
+    });
+
+    $("input[class=csvButtonUpload]").change(function() {
+        var gradeable_id = $(this).data('gradeable');
+        var confirmation = window.confirm("WARNING! \nPreviously entered data may be overwritten! " +
+        "This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for " +
+        "student id and one column for each field. Columns and field types must match.");
+        if(confirmation) {
+            var f = $('#csvUpload').get(0).files[0];
+                        
+            if(f) {
+                var reader = new FileReader();
+                var tempArray;
+                reader.readAsText(f);
+                reader.onload = function(evt) {
+                    var breakOut = false;
+                    var lines = (reader.result).trim().split(/\r\n|\n/);
+                    var text_data_table = new Array(lines.length);
+                    tempArray = lines[0].split(',');
+                    var csvLength = tempArray.length;
+                    for (var j = 0; j < lines.length; j++) {
+                        text_data_table[j] = new Array(csvLength);
+                    }
+                    for (var x = 0; x < lines.length && !breakOut; x++) {                        
+                        tempArray = lines[x].split(',');
+                        breakOut = (tempArray.length === csvLength) ? false : true;
+                        for (var y = 0; y < tempArray.length && !breakOut; y++) {
+                            text_data_table[x][y] = tempArray[y];
+                        }
+                    }
+                    if (!breakOut){
+                        var checkOnce = true;
+                        $('.cell-all').each(function(){
+                            
+                            if (checkOnce) {
+                                if (csvLength !== 3 + 1 + $(this).parent().parent().data("numnumeric")) {
+                                    breakOut = true;
+                                    return false;
+                                }
+                                checkOnce = false;
+                            }
+                            for (var i = 0; i < lines.length; i++) {
+                                if($(this).parent().data("user") === text_data_table[i][0]) {
+                                    for (var z = 2; z < tempArray.length-2; z++) {
+                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).val(text_data_table[i][z]);
+                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).trigger("change");
+                                        if($('#cell-'+$(this).parent().data("row")+'-'+(z-2)).val() <= $(this).parent().parent().data("maxvalues")[z-2]) {
+                                            $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).css("background-color", "#ffffff"); 
+                                        } else {
+                                            $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).css("background-color", "#ff7777"); 
+                                        }
+                                    }
+                                    if($(this).parent().parent().data("numtext") > 0) {
+                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).val(text_data_table[i][tempArray.length-1]);
+                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).trigger("change");
+                                    }                                    
+                                    i = lines.length;
+                                }
+                            }                            
+                        }); 
+                    }
+                    if(breakOut) {
+                        alert("CVS upload faled! Format file incorrect.");
+                    }
+                                         
+                }
+                reader.onerror = function(evt){
+                    console.error(evt);
+                }
+            }
+        } else{
+            var f = $('#csvUpload');
+            f.replaceWith(f = f.clone(true));
+        }
     });
 }

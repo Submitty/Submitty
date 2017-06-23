@@ -20,6 +20,9 @@ class SimpleGraderController extends AbstractController  {
             case 'save_numeric':
                 $this->save('numeric');
                 break;
+            case 'upload_csv_numeric':
+                $this->csv('numeric');
+                break;
             default:
                 break;
         }
