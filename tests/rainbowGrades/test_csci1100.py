@@ -60,8 +60,10 @@ def csci1100_rainbow_grades_test():
     """Function wrapper for the body of the test."""
 
     # Get the Submitty repo path
-    #script_path = os.path.dirname(os.path.realpath(__file__))
-    script_path = "__INSTALL__FILLIN__SUBMITTY_REPOSITORY__"
+    # script_path = os.path.dirname(os.path.realpath(__file__))
+    repository_path = "__INSTALL__FILLIN__SUBMITTY_REPOSITORY__"
+    script_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__","test_suite","rainbowGrades")
+    runner_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__","to_be_graded_batch")
 
     # Verify resources exist, set up initial temporary directories and configuration
     print("Creating temporary RainbowGrades test directories")
@@ -71,7 +73,14 @@ def csci1100_rainbow_grades_test():
     if not os.path.exists(test_tmp):
         error_and_cleanup(test_tmp, "Failed to create temporary directory")
 
-    rainbow_path = os.path.join(script_path, "..", "..", "RainbowGrades")
+    for f in os.listdir(runner_dir):
+        if "__csci1100__" in f:
+            error_and_cleanup(test_tmp,"csci1100 has assignments in the grading queue."
+                                       " Wait for the autograder to finish and then generate new grade summary reports"
+                                       "prior to re-running this test.")
+
+    #rainbow_path = os.path.join(script_path, "..", "..", "RainbowGrades")
+    rainbow_path = os.path.join(repository_path,"RainbowGrades")
     if not os.path.exists(rainbow_path):
         error_and_cleanup(test_tmp, "Couldn't find Rainbow Grades source code")
 
@@ -100,7 +109,7 @@ def csci1100_rainbow_grades_test():
         shutil.copy(os.path.join(script_path, "Makefile_csci1100"), os.path.join(summary_tmp, "Makefile"))
         shutil.copy(os.path.join(script_path, "customization_csci1100.json"),
                     os.path.join(summary_tmp, "customization.json"))
-        shutil.copy(os.path.join(script_path, "..", "..", "grading", "json_syntax_checker.py"),
+        shutil.copy(os.path.join(repository_path, "grading", "json_syntax_checker.py"),
                     os.path.join(grading_tmp, "json_syntax_checker.py"))
     except Exception as e:
         error_and_cleanup(test_tmp, "{}".format(e))

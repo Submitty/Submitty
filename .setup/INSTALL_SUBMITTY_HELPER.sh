@@ -25,7 +25,7 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 # check optional argument
-if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" ]]; then
+if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" ]]; then
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
     echo -e "   ./INSTALL_SUBMITTY.sh clean"
@@ -35,6 +35,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" ]]; then
     echo -e "   ./INSTALL_SUBMITTY.sh test"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1>"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
+    echo -e "   ./INSTALL_SUBMITTY.sh test_rainbow"
     exit
 fi
 
@@ -557,7 +558,7 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     # copy the directory tree and replace variables
     echo -e "Install Rainbow Grades Test Suite..."
     rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
-    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/RainbowGrades/csci1100.py
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_csci1100.py
 
     # add a symlink to conveniently run the test suite or specific tests without the full reinstall
     #ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
@@ -567,7 +568,7 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
-    python ${SUBMITTY_INSTALL_DIR}/test_suite/RainbowGrades/csci1100.py  "$@"
+    python ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_csci1100.py  "$@"
 
     echo -e "\nCompleted Autograding Test Suite\n"
 fi
