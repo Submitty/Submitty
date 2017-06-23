@@ -61,9 +61,7 @@ def main():
     """
     global DB_ONLY
 
-    """
-    To make Iris testing possible, need to seed random
-    """
+    # To make Iris testing possible, need to seed random
     random.seed(10090542)
 
     args = parse_args()

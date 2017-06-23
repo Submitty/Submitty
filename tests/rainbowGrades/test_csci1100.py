@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+"""
+This script tests Rainbow Grades functionality in a mostly end-to-end manner - it requires that a user has manually
+run Generate Grade Summaries on csci1100 prior to running the script. It checks that the reports can be copied, that
+they match the expected reports (minus time-specific fields), that Rainbow Grades compiles correctly, and that the
+grade summaries that are written out by Rainbow Grades match expectations. It does not currently check that a make push
+will succeed or result in the correct website behavior, but this should be added in the future.
+"""
 import sys
 import os
 import tempfile
@@ -5,19 +13,31 @@ import shutil
 import subprocess
 
 # TODO: Add documentation to github.io: grading_done, Generate Reports, run on Vagrant host, what to run
-# TODO: Make issue to extend script to work on host or live server?
+# TODO: Check for batch grading queue with appropriate prefix (if it exists, stop script)
+# TODO: Make script soft-fail so it can be in either install_submitty test or install_submitty testrainbow or something
+# TODO: Check if PEP8 has rules on function ordering
 
 
-# Used to exit and remove the top-level Rainbow Grades test in tmp
 def error_and_cleanup(tmp_path, message, error=-1):
+    """Used to exit and remove the top-level Rainbow Grades test in tmp.
+
+    :param tmp_path: The path of the temporary directory used for testing
+    :param message: An error message to be written to the terminal
+    :param error: Which error code to return (default -1)
+    :return: None
+    """
     print(message)
     if os.path.exists(tmp_path):
         shutil.rmtree(tmp_path)
     sys.exit(error)
 
 
-# Used for filter() to ignore time-sensitive lines in report JSON files
 def remove_extra_raw_data_fields(raw_line):
+    """Used for filter() to ignore time-sensitive lines in report JSON files.
+
+    :param raw_line: A line to filter
+    :return: True if no time-sensitive fields are present in the line
+    """
     if 'grade_released_date' in raw_line:
         return False
     if 'last_update' in raw_line:
@@ -25,18 +45,23 @@ def remove_extra_raw_data_fields(raw_line):
     return True
 
 
-# Used for filter() to ignore time-sensitive lines in summary HTML files
 def remove_info_last_updated(raw_line):
-    # <em>Information last updated: Monday, June 12, 2017</em><br>
+    """Used for filter() to ignore time-sensitive lines in summary HTML files.
+
+    :param raw_line: A line to filter
+    :return: True if no time-sensitive fields are present in the line
+    """
     if '<em>Information last updated:' in raw_line:
         return False
     return True
 
 
-# Function wrapper for the body of the test
 def csci1100_rainbow_grades_test():
+    """Function wrapper for the body of the test."""
+
     # Get the Submitty repo path
-    script_path = os.path.dirname(os.path.realpath(__file__))
+    #script_path = os.path.dirname(os.path.realpath(__file__))
+    script_path = "__INSTALL__FILLIN__SUBMITTY_REPOSITORY__"
 
     # Verify resources exist, set up initial temporary directories and configuration
     print("Creating temporary RainbowGrades test directories")
@@ -82,16 +107,17 @@ def csci1100_rainbow_grades_test():
 
     # Update Makefile to use the temporary location of RainbowGrades
     try:
-        make_file = open(os.path.join(summary_tmp, "Makefile"), 'r')
-        make_file_contents = make_file.readlines()
-        make_file.close()
-        make_file = open(os.path.join(summary_tmp, "Makefile"), 'w')
-        for line in make_file_contents:
-            if len(line) >= 25 and line[:25] == "RAINBOW_GRADES_DIRECTORY=":
-                make_file.write("RAINBOW_GRADES_DIRECTORY=" + rainbow_tmp + "\n")
-            else:
-                make_file.write(line)
-        make_file.close()
+        with open(os.path.join(summary_tmp, "Makefile"), 'r') as make_file:
+            make_file_contents = make_file.readlines()
+        with open(os.path.join(summary_tmp, "Makefile"), 'w') as make_file:
+            for line in make_file_contents:
+                if len(line) >= 25 and line[:25] == "RAINBOW_GRADES_DIRECTORY=":
+                    make_file.write("RAINBOW_GRADES_DIRECTORY=" + rainbow_tmp + "\n")
+                elif len(line) >= 18 and line[:18] == "REPORTS_DIRECTORY=":
+                    make_file.write(os.path.join("REPORTS_DIRECTORY=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__","courses",
+                                                 "s17","csci1100","reports") + "\n")
+                else:
+                    make_file.write(line)
     except Exception as e:
         error_and_cleanup(test_tmp, "{}".format(e))
 
@@ -142,13 +168,11 @@ def csci1100_rainbow_grades_test():
         filename2 = os.path.join(summary_raw_path, f)
 
         try:
-            file1 = open(filename1, 'r')
-            contents1 = file1.readlines()
-            file1.close()
+            with open(filename1, 'r') as file1:
+                contents1 = file1.readlines()
 
-            file2 = open(filename2, 'r')
-            contents2 = file2.readlines()
-            file2.close()
+            with open(filename2, 'r') as file2:
+                contents2 = file2.readlines()
         except Exception as e:
             error_and_cleanup(test_tmp, "{}".format(e))
 
@@ -189,10 +213,10 @@ def csci1100_rainbow_grades_test():
     output_generated_contents = ""
     output_known_contents = ""
     try:
-        output_generated_file = open(os.path.join(summary_tmp, "output.html"), 'r')
-        output_known_file = open(os.path.join(script_path, "output_10090542_csci1100.html"), 'r')
-        output_generated_contents = output_generated_file.read()
-        output_known_contents = output_known_file.read()
+        with open(os.path.join(summary_tmp, "output.html"), 'r') as output_generated_file,\
+             open(os.path.join(script_path, "output_10090542_csci1100.html"), 'r') as output_known_file:
+            output_generated_contents = output_generated_file.read()
+            output_known_contents = output_known_file.read()
     except Exception as e:
         error_and_cleanup(test_tmp, "{}".format(e))
 
@@ -236,13 +260,11 @@ def csci1100_rainbow_grades_test():
         contents2 = ""
 
         try:
-            file1 = open(filename1, 'r')
-            contents1 = file1.readlines()
-            file1.close()
+            with open(filename1, 'r') as file1:
+                contents1 = file1.readlines()
 
-            file2 = open(filename2, 'r')
-            contents2 = file2.readlines()
-            file2.close()
+            with open(filename2, 'r') as file2:
+                contents2 = file2.readlines()
         except Exception as e:
             error_and_cleanup(test_tmp, "{}".format(e))
 
@@ -266,4 +288,3 @@ def csci1100_rainbow_grades_test():
 
 if __name__ == '__main__':
     csci1100_rainbow_grades_test()
-    sys.exit(0)

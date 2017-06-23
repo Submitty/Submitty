@@ -547,3 +547,30 @@ fi
 
 ################################################################################################################
 ################################################################################################################
+
+# INSTALL RAINBOW GRADES TEST SUITE
+
+
+# one optional argument installs & runs test suite
+if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
+
+    # copy the directory tree and replace variables
+    echo -e "Install Rainbow Grades Test Suite..."
+    rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/RainbowGrades/csci1100.py
+
+    # add a symlink to conveniently run the test suite or specific tests without the full reinstall
+    #ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
+
+    echo -e "\nRun Autograding Test Suite...\n"
+
+    # pop the first argument from the list of command args
+    shift
+    # pass any additional command line arguments to the run test suite
+    python ${SUBMITTY_INSTALL_DIR}/test_suite/RainbowGrades/csci1100.py  "$@"
+
+    echo -e "\nCompleted Autograding Test Suite\n"
+fi
+
+################################################################################################################
+################################################################################################################
