@@ -145,6 +145,7 @@ HTML;
     </div>
 HTML;
         }
+        $show_auto_grading_points = true;
         $return .= <<<HTML
     <h2>Grade Details for {$gradeable->getName()}</h2>
     <table class="table table-striped table-bordered persist-area">
@@ -155,6 +156,10 @@ HTML;
                 <td width="20%">User ID</td>
                 <td width="15%">First Name</td>
                 <td width="15%">Last Name</td>
+HTML;
+
+        if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
+            $return .= <<<HTML
                 <td width="14%">Autograding</td>
                 <td width="10%">TA Grading</td>
                 <td width="10%">Total</td>
@@ -162,6 +167,18 @@ HTML;
             </tr>
         </thead>
 HTML;
+        }
+        else {
+            $show_auto_grading_points = false;
+            $return .= <<<HTML
+                <td width="17%">TA Grading</td>
+                <td width="17%">Total</td>
+                <td width="8%">Viewed Grade</td>
+            </tr>
+        </thead>
+HTML;
+        }
+        
             $return .= <<<HTML
 HTML;
             $count = 1;
@@ -209,13 +226,13 @@ HTML;
                     else {
                         $section_graders = "Nobody";
                     }
-
+                    $cols = ($show_auto_grading_points) ? 9 : 8;
                     $return .= <<<HTML
         <tr class="info persist-header">
-            <td colspan="9" style="text-align: center">Students Enrolled in Section {$display_section}</td>
+            <td colspan="{$cols}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
         </tr>
         <tr class="info">
-            <td colspan="9" style="text-align: center">Graders: {$section_graders}</td>
+            <td colspan="{$cols}" style="text-align: center">Graders: {$section_graders}</td>
         </tr>
         <tbody id="section-{$section}">
 HTML;
@@ -227,9 +244,19 @@ HTML;
                 <td>{$row->getUser()->getId()}</td>
                 <td>{$row->getUser()->getDisplayedFirstName()}</td>
                 <td>{$row->getUser()->getLastName()}</td>
+HTML;
+                if($show_auto_grading_points) {
+                    $return .= <<<HTML
                 <td>{$row->getGradedAutograderPoints()} / {$row->getTotalAutograderNonExtraCreditPoints()}</td>
                 <td>
 HTML;
+                }
+                else {
+                    $return .= <<<HTML
+                <td>
+HTML;
+                }
+                
                 if ($row->beenTAgraded()) {
                     $btn_class = "btn-default";
                     $contents = "{$row->getGradedTAPoints()} / {$row->getTotalTANonExtraCreditPoints()}";
