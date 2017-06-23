@@ -87,7 +87,7 @@ class LateController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            else if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $this->core->getQueries()->getUserById($_POST['user_id'])->getId() !== $_POST['user_id']) {
+            if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $this->core->getQueries()->getUserById($_POST['user_id'])->getId() !== $_POST['user_id']) {
                 // $_SESSION['messages']['error'][] = "Invalid Student ID";
                 // $_SESSION['request'] = $_POST;
                 // $this->reloadPage($nextStep);
@@ -95,7 +95,7 @@ class LateController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            else if ((!isset($_POST['datestamp']) || !$this->validate_timestamp($_POST['datestamp'])) && $nextStep == 'view_late') {
+            if ((!isset($_POST['datestamp']) || !$this->validate_timestamp($_POST['datestamp'])) && $nextStep == 'view_late') {
                 // $_SESSION['messages']['error'][] = "Datestamp must be mm/dd/yy";
                 // $_SESSION['request'] = $_POST;
                 // $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')));
@@ -103,7 +103,7 @@ class LateController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            else if ((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days'])) ) {
+            if ((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days'])) ) {
                 // $_SESSION['messages']['error'][] = "Late Days must be a nonnegative integer";
                 // $_SESSION['request'] = $_POST;
                 // $this->reloadPage($nextStep);
@@ -111,20 +111,19 @@ class LateController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            else if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" ) && $nextStep == 'view_extension') {
+            if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" ) && $nextStep == 'view_extension') {
                 // $_SESSION['messages']['error'][] = "Something wrong with gradeable_id";
                 // $_SESSION['request'] = $_POST;
-                $error = "Something wrong with gradeable_id. Please try again.";
+                $error = "Please choose a gradeable_id";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
+            
+            if($nextStep == "view_late"){
+                $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
+            }
             else{
-                if($nextStep == "view_late"){
-                    $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
-                }
-                else{
-                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
-                }   
+                $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
             }
 
 

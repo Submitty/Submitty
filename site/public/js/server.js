@@ -521,6 +521,7 @@ function setupNumericTextCells() {
             }
         );
     });
+}
 
 
 
@@ -549,7 +550,7 @@ function setupNumericTextCells() {
 function updateHomeworkExtensions2(data) {
     var fd = new FormData($('#excusedAbsenseForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension', 'info' : data});
-    console.log(url);
+    // console.log(url);
     $.ajax({
         url: url,
         type: "POST",
@@ -557,14 +558,22 @@ function updateHomeworkExtensions2(data) {
         processData: false,
         contentType: false,
         success: function(data) {
+            // console.log(data);
             var json = JSON.parse(data);
             if(json['error']){
-                var message = '<div id="error" class="inner-message alert alert-error"><a class="fa fa-times message-close" onClick="removeMessagePopup("error");"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
-                console.log(message);
-                $('#messages').replaceWith(message);
-                console.log(json['error']);
-                var error= json['error'];
+                // var message = '<div id="error" class="inner-message alert alert-error"><a class="fa fa-times message-close" onClick="removeMessagePopup("error");"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="myspecialid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'myspecialid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                // console.log(message);
+                $('#messages').append(message);
+                // console.log(json['error']);
+                // var error= json['error'];
                 return;
+                // json['error'].forEach(function(elem){
+                //     var message ='<div class="inner-message alert alert-error" style="position:fixed;top:40px;left:50%;width:40%;margin-left:-20%;" id="myspecialid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'myspecialid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div><div></div>';
+                //     $('#messages').append(message);
+                // });
+                // return;
+
             }
             var form = $("#load-homework-extensions");
             $('#my_table tr:gt(0)').remove();
@@ -577,7 +586,9 @@ function updateHomeworkExtensions2(data) {
                 var bits = ['<tr><td>' + elem[0], elem[1], elem[3], elem[4] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
-
+            // $( ".option-input" ).reset();
+            $('#user_id').val(this.defaultValue);
+            $('#late_days').val(this.defaultValue);
         },
         error: function(data) {
             console.log("SAD, TRY AGAIN.");
