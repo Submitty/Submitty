@@ -61,8 +61,8 @@ bool ShowHelper(const std::string& when, bool success) {
 }
 
 
-double ValidateGrader(const TestCase &my_testcase, int which_grader,
-                      nlohmann::json &autocheck_js, const std::string &hw_id) {
+double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::json &autocheck_js, 
+                      const std::string &hw_id, std::string &testcase_message) {
 
   //std::cerr << "----------------------------------------" << std::endl;
   std::cerr << "autocheck #" << which_grader << std::endl;
@@ -122,7 +122,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
       std::vector<std::string> files;
       wildcard_expansion(files, actual_file, std::cout);
       for (int i = 0; i < files.size(); i++) {
-	actual_file = files[i];
+	      actual_file = files[i];
       }
       bool studentFileExists, studentFileEmpty;
       bool expectedFileExists=false, expectedFileEmpty=false;
@@ -131,38 +131,38 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
       if (studentFileExists) {
         if (show_actual) {
           autocheck_j["actual_file"] = actual_file;
-	}
+	      }
         expected = tcg.value("expected_file", "");
-	if (expected != "") {
-	  fileStatus(expected, expectedFileExists,expectedFileEmpty);
-	  if (!expectedFileExists) {
-	    BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
-	    std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
-	  }
-	  else {
-	    // PREPARE THE JSON DIFF FILE
-	    std::stringstream diff_path;
-	    diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
-	    std::ofstream diff_stream(diff_path.str().c_str());
-	    result.printJSON(diff_stream);
-	    std::stringstream expected_path;
-	    std::string id = hw_id;
-	    std::string expected_out_dir = "test_output/" + id + "/";
-	    expected_path << expected_out_dir << expected;
-	    if (show_expected) {
-	      autocheck_j["expected_file"] = expected_path.str();
-	    }
-	    if (show_actual) {
-	      autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
-	    }
-	  }
-	}
+	      if (expected != "") {
+	        fileStatus(expected, expectedFileExists,expectedFileEmpty);
+	        if (!expectedFileExists) {
+	          BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
+	          std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
+	        }
+	        else {
+  	        // PREPARE THE JSON DIFF FILE
+  	        std::stringstream diff_path;
+  	        diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
+  	        std::ofstream diff_stream(diff_path.str().c_str());
+  	        result.printJSON(diff_stream);
+  	        std::stringstream expected_path;
+  	        std::string id = hw_id;
+  	        std::string expected_out_dir = "test_output/" + id + "/";
+  	        expected_path << expected_out_dir << expected;
+  	        if (show_expected) {
+  	         autocheck_j["expected_file"] = expected_path.str();
+  	        }
+  	        if (show_actual) {
+  	         autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+  	        }
+	        }
+	      }
       }
       std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
       std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
 
       if (studentFileExists && !studentFileEmpty) {
-	actual_file_to_print = true;
+	      actual_file_to_print = true;
       }
     }
 
@@ -202,6 +202,17 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
         || show_actual 
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
+
+      if (my_testcase.isFileCheck() && num_messages > 0 && messages[0].find("README") != std::string::npos)
+        testcase_message = "README missing.";
+      else if (my_testcase.isCompilation() && num_messages > 0) {
+        if (result.hasCompilationError())
+          testcase_message = "Compilation Error(s).";
+        else if (result.hasCompilationWarning() && testcase_message.find("ERROR") == std::string::npos)
+          testcase_message = "Compilation Warning(s).";
+        else
+          testcase_message = "Compilation Error(s).";
+      }
     }
   }
   return score;
@@ -237,10 +248,11 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   for (unsigned int i = 0; i < tc->size(); i++) {
 
     std::cout << "------------------------------------------\n";
-    TestCase my_testcase((*tc)[i]);
+    TestCase my_testcase((*tc)[i],config_json);
     std::string title = "Test " + std::to_string(i+1) + " " + (*tc)[i].value("title","MISSING TITLE");
     int points = (*tc)[i].value("points",0);
     std::cout << title << " - points: " << points << std::endl;
+    std::string testcase_message = "";
 
     nlohmann::json tc_j;
     tc_j["test_name"] = title;
@@ -267,7 +279,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       std::cout << "NUM FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
       assert (my_testcase.numFileGraders() > 0);
       for (int j = 0; j < my_testcase.numFileGraders(); j++) {
-        my_score -= ValidateGrader(my_testcase, j, autocheck_js,hw_id);
+        my_score -= ValidateGrader(my_testcase, j, autocheck_js, hw_id, testcase_message);
       }
       bool fileExists, fileEmpty;
       fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
@@ -286,6 +298,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       testcase_pts = (int)floor(my_score * my_testcase.getPoints());
       std::cout << "Grade: " << testcase_pts << std::endl;
     }
+    if (testcase_message != "") tc_j["testcase_message"] = testcase_message;
     tc_j["points_awarded"] = testcase_pts;
     automated_points_awarded += testcase_pts;
     if (!my_testcase.getHidden()) {

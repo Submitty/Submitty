@@ -13,32 +13,48 @@ namespace app\models;
  * The gradeable can either have a max score that is either positive or negative. If it's positive, we
  * can clamp the earned score between 0 and the max score, and if it's negative, we clamp from the
  * max score to 0.
+ *
+ * @method int getId()
+ * @method string getTitle()
+ * @method string getTaComment()
+ * @method string getStudentComment()
+ * @method float getMaxValue()
+ * @method bool getIsText();
+ * @method bool getIsExtraCredit()
+ * @method int getOrder()
+ * @method float getScore()
+ * @method setScore(float $score)
+ * @method string getComment()
+ * @method void setComment(string $comment)
+ * @method bool getHasGrade()
  */
 class GradeableComponent extends AbstractModel {
-    /** @var int Unique identifier for the component */
+    /** @property @var int Unique identifier for the component */
     protected $id;
-    /** @var string Title of the component shown to students and graders */
+    /** @property @var string Title of the component shown to students and graders */
     protected $title;
-    /** @var string Comment shown to graders during grading about this particular component */
+    /** @property @var string Comment shown to graders during grading about this particular component */
     protected $ta_comment;
-    /** @var string Comment shown to both graders and students giving more information about the component */
+    /** @property @var string Comment shown to both graders and students giving more information about the component */
     protected $student_comment;
-    /** @var float Maximum value that the component can have */
+    /** @property @var float Maximum value that the component can have */
     protected $max_value;
-    /** @var bool Is the component just used for text fields (ignore max_value and is_extra_credit and score) */
+    /** @property @var bool Is the component just used for text fields (ignore max_value and is_extra_credit and score) */
     protected $is_text;
-    /** @var bool Is the component extra credit for this gradeable */
+    /** @property @var bool Is the component extra credit for this gradeable */
     protected $is_extra_credit;
-    /** @var int Order for components to be shown in */
+    /** @property @var int Order for components to be shown in */
     protected $order;
-    /** @var float Given grade that someone has given this component */
+    /** @property @var float Given grade that someone has given this component */
     protected $score = 0;
-    /** @var string Comment that grader has put on the component while grading for student */
+    /** @property @var string Comment that grader has put on the component while grading for student */
     protected $comment = "";
 
-    protected $graded = false;
+    /** @property @var bool */
+    protected $has_grade = false;
 
     public function __construct($details) {
+        parent::__construct();
         $this->id = $details['gc_id'];
         $this->title = $details['gc_title'];
         $this->ta_comment = $details['gc_ta_comment'];
@@ -48,7 +64,7 @@ class GradeableComponent extends AbstractModel {
         $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
-            $this->graded = true;
+            $this->has_grade = true;
             $this->score = floatval($details['gcd_score']);
             if (!$this->is_text) {
                 if ($this->max_value > 0) {
@@ -73,53 +89,5 @@ class GradeableComponent extends AbstractModel {
                 $this->comment = "";
             }
         }
-    }
-
-    public function getId() {
-        return $this->id;
-    }
-
-    public function getTitle() {
-        return $this->title;
-    }
-
-    public function getTAComment() {
-        return $this->ta_comment;
-    }
-
-    public function getStudentComment() {
-        return $this->student_comment;
-    }
-
-    public function getMaxValue() {
-        return $this->max_value;
-    }
-
-    public function isText() {
-        return $this->is_text;
-    }
-
-    public function isExtraCredit() {
-        return $this->is_extra_credit;
-    }
-
-    public function getOrder() {
-        return $this->order;
-    }
-
-    public function getScore() {
-        return $this->score;
-    }
-
-    public function setScore($score) {
-        $this->score = floatval($score);
-    }
-
-    public function getComment() {
-        return $this->comment;
-    }
-
-    public function hasGrade() {
-        return $this->graded;
     }
 }

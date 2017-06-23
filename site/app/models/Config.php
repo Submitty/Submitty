@@ -13,47 +13,72 @@ use app\libraries\Utils;
  * the application. These variables are loaded from a combination of files and tables from
  * the database. We also allow for using this to write back to the variables within the database
  * (but not the variables in the files).
+ *
+ * @method string getSemester()
+ * @method string getCourse()
+ * @method string getBaseUrl()
+ * @method string getTaBaseUrl()
+ * @method string getCgiUrl()
+ * @method string getSiteUrl()
+ * @method string getSubmittyPath()
+ * @method string getCoursePath()
+ * @method string getDatabaseType()
+ * @method string getDatabaseHost()
+ * @method string getDatabaseUser()
+ * @method string getDatabasePassword()
+ * @method string getDatabaseName()
+ * @method string getCourseName()
+ * @method string getCourseHomeUrl()
+ * @method integer getDefaultHwLateDays()
+ * @method integer getDefaultStudentLateDays()
+ * @method string getConfigPath()
+ * @method string getAuthentication()
+ * @method \DateTimeZone getTimezone()
+ * @method string getUploadMessage()
+ * @method array getHiddenDetails()
  */
+
 class Config extends AbstractModel {
 
     /**
      * Variable to set the system to debug mode, which allows, among other things
      * easier access to user switching and to always output full exceptions. Never
      * turn on if running server in production environment.
+     * @property
      * @var bool
      */
     protected $debug = false;
 
-    /** @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
+    /** @property @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
     protected $semester;
-    /** @var string contains the course to use, generally from the $_REQUEST['course'] global */
+    /** @property @var string contains the course to use, generally from the $_REQUEST['course'] global */
     protected $course;
 
-    /** @var string path on the filesystem that points to the course data directory */
+    /** @property @var string path on the filesystem that points to the course data directory */
     protected $config_path;
-    /** @var string path to the ini file that contains all the course specific settings */
+    /** @property @var string path to the ini file that contains all the course specific settings */
     protected $course_ini;
 
     /*** MASTER CONFIG ***/
-    /** @var string */
+    /** @property @var string */
     protected $base_url;
-    /** @var string */
+    /** @property @var string */
     protected $ta_base_url;
-    /** @var string */
+    /** @property @var string */
     protected $cgi_url;
-    /** @var string */
+    /** @property @var string */
     protected $site_url;
-    /** @var string */
+    /** @property @var string */
     protected $authentication;
-    /** @var string */
+    /** @property @var string */
     protected $timezone = "America/New_York";
-    /** @var string */
+    /** @property @var string */
     protected $submitty_path;
-    /** @var string */
+    /** @property @var string */
     protected $course_path;
-    /** @var string */
+    /** @property @var string */
     protected $submitty_log_path;
-    /** @var bool */
+    /** @property @var bool */
     protected $log_exceptions;
 
     /**
@@ -61,24 +86,28 @@ class Config extends AbstractModel {
      * explicitly in the config files, in which case we'll just default
      * to PostgreSQL.
      * @var string
+     * @property
      */
     protected $database_type = "pgsql";
 
     /**
      * Database host for PDO
      * @var string
+     * @property
      */
     protected $database_host;
 
     /**
      * Database user for PDO
      * @var string
+     * @property
      */
     protected $database_user;
 
     /**
      * Database password for PDO
      * @var string
+     * @property
      */
     protected $database_password;
 
@@ -86,30 +115,32 @@ class Config extends AbstractModel {
     /**
      * Database name for PDO
      * @var string
+     * @property
      */
     protected $database_name;
 
     /*** COURSE DATABASE CONFIG ***/
-    /** @var string */
+    /** @property @var string */
     protected $course_name;
-    /** @var string */
+    /** @property @var string */
     protected $course_home_url;
-    /** @var int */
+    /** @property @var int */
     protected $default_hw_late_days;
-    /** @var int */
+    /** @property @var int */
     protected $default_student_late_days;
-    /** @var bool */
+    /** @property @var bool */
     protected $zero_rubric_grades;
 
-    /** @var string */
+    /** @property @var string */
     protected $upload_message;
-    /** @var bool */
+    /** @property @var bool */
     protected $keep_previous_files;
-    /** @var bool */
+    /** @property @var bool */
     protected $display_iris_grades_summary;
-    /** @var bool */
+    /** @property @var bool */
     protected $display_custom_message;
 
+    /** @property @var array */
     protected $hidden_details;
 
     /**
@@ -120,6 +151,7 @@ class Config extends AbstractModel {
      * @param string $master_ini_path
      */
     public function __construct($semester, $course, $master_ini_path) {
+        parent::__construct();
         $this->semester = $semester;
         $this->course = $course;
         $this->config_path = dirname($master_ini_path);
@@ -132,7 +164,7 @@ class Config extends AbstractModel {
         $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
 
         if (isset($master['site_details']['debug'])) {
-            $this->debug = $master['site_details']['debug'] === true;
+           $this->debug = $master['site_details']['debug'] === true;
         }
 
         if (isset($master['site_details']['timezone'])) {
@@ -226,69 +258,6 @@ class Config extends AbstractModel {
     }
 
     /**
-     * @return string
-     */
-    public function getSemester() {
-        return $this->semester;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCourse() {
-        return $this->course;
-    }
-
-    /**
-     * @return string
-     */
-    public function getBaseUrl() {
-        return $this->base_url;
-    }
-    
-    /**
-     * @return string
-     */
-    public function getTABaseUrl() {
-        return $this->ta_base_url;
-    }
-    
-    /**
-     * @return string
-     */
-    public function getCgiUrl() {
-        return $this->cgi_url;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSiteUrl() {
-        return $this->site_url;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSubmittyPath() {
-        return $this->submitty_path;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCoursePath() {
-        return $this->course_path;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogPath() {
-        return $this->submitty_log_path;
-    }
-
-    /**
      * @return bool
      */
     public function shouldLogExceptions() {
@@ -296,100 +265,10 @@ class Config extends AbstractModel {
     }
 
     /**
-     * @return string
-     */
-    public function getDatabaseType() {
-        return $this->database_type;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatabaseHost() {
-        return $this->database_host;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatabaseUser() {
-        return $this->database_user;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatabasePassword() {
-        return $this->database_password;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatabaseName() {
-        return $this->database_name;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCourseName() {
-        return $this->course_name;
-    }
-    /**
-     * @return string
-     */
-    public function getCourseHomeUrl(){
-        return $this->course_home_url;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getDefaultHwLateDays() {
-        return $this->default_hw_late_days;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getDefaultStudentLateDays() {
-        return $this->default_student_late_days;
-    }
-
-    /**
      * @return bool
      */
     public function shouldZeroRubricGrades() {
         return $this->zero_rubric_grades;
-    }
-
-    /**
-     * @return string
-     */
-    public function getConfigPath() {
-        return $this->config_path;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAuthentication() {
-        return $this->authentication;
-    }
-
-    /**
-     * @return \DateTimeZone
-     */
-    public function getTimezone() {
-        return $this->timezone;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUploadMessage() {
-        return $this->upload_message;
     }
 
     /**
@@ -413,14 +292,14 @@ class Config extends AbstractModel {
         return $this->display_iris_grades_summary;
     }
 
+    public function getLogPath() {
+        return $this->submitty_log_path;
+    }
+
     /**
      * @return string
      */
     public function getCourseIniPath() {
         return $this->course_ini;
-    }
-
-    public function getHiddenDetails() {
-        return $this->hidden_details;
     }
 }
