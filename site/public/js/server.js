@@ -380,7 +380,6 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
                 if (response['status'] === 'error') {
                     window.alert("[SAVE ERROR] Refresh Page");
                 }
-
             }
         }
         catch (e) {
@@ -522,29 +521,27 @@ function setupNumericTextCells() {
     });
 
     $("input[class=csvButtonUpload]").change(function() {
-        var gradeable_id = $(this).data('gradeable');
         var confirmation = window.confirm("WARNING! \nPreviously entered data may be overwritten! " +
         "This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for " +
         "student id and one column for each field. Columns and field types must match.");
         if(confirmation) {
-            var f = $('#csvUpload').get(0).files[0];
-                        
+            var f = $('#csvUpload').get(0).files[0];                        
             if(f) {
                 var reader = new FileReader();
                 var tempArray;
                 reader.readAsText(f);
                 reader.onload = function(evt) {
-                    var breakOut = false;
+                    var breakOut = false; //breakOut is used to break out of the function and alert the user the format is wrong
                     var lines = (reader.result).trim().split(/\r\n|\n/);
                     var text_data_table = new Array(lines.length);
-                    tempArray = lines[0].split(',');
-                    var csvLength = tempArray.length;
+                    tempArray = lines[0].split(','); 
+                    var csvLength = tempArray.length; //gets the length of the array, all the tempArray should be the same length
                     for (var j = 0; j < lines.length; j++) {
                         text_data_table[j] = new Array(csvLength);
                     }
                     for (var x = 0; x < lines.length && !breakOut; x++) {                        
                         tempArray = lines[x].split(',');
-                        breakOut = (tempArray.length === csvLength) ? false : true;
+                        breakOut = (tempArray.length === csvLength) ? false : true; //if tempArray is not the same length, break out
                         for (var y = 0; y < tempArray.length && !breakOut; y++) {
                             text_data_table[x][y] = tempArray[y];
                         }
@@ -552,8 +549,8 @@ function setupNumericTextCells() {
                     if (!breakOut){
                         var checkOnce = true;
                         $('.cell-all').each(function(){
-                            
-                            if (checkOnce) {
+                            //it has to be checked here since .cell-all holds the data of numnumeric
+                            if (checkOnce) { //checks if the file has the right number of parameters
                                 if (csvLength !== 3 + 1 + $(this).parent().parent().data("numnumeric")) {
                                     breakOut = true;
                                     return false;
@@ -561,10 +558,12 @@ function setupNumericTextCells() {
                                 checkOnce = false;
                             }
                             for (var i = 0; i < lines.length; i++) {
-                                if($(this).parent().data("user") === text_data_table[i][0]) {
+                                if($(this).parent().data("user") === text_data_table[i][0]) { //puts the data in the form
                                     for (var z = 2; z < tempArray.length-2; z++) {
                                         $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).val(text_data_table[i][z]);
-                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).trigger("change");
+                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).trigger("change"); //manually triggers change to save data
+                                        
+                                        //has to manually set the background colors because of ajax shenanigans
                                         if($('#cell-'+$(this).parent().data("row")+'-'+(z-2)).val() <= $(this).parent().parent().data("maxvalues")[z-2]) {
                                             $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).css("background-color", "#ffffff"); 
                                         } else {
@@ -575,7 +574,7 @@ function setupNumericTextCells() {
                                         $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).val(text_data_table[i][tempArray.length-1]);
                                         $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).trigger("change");
                                     }                                    
-                                    i = lines.length;
+                                    i = lines.length; //halts the for loop early to not waste resources
                                 }
                             }                            
                         }); 
@@ -589,7 +588,7 @@ function setupNumericTextCells() {
                     console.error(evt);
                 }
             }
-        } else{
+        } else {
             var f = $('#csvUpload');
             f.replaceWith(f = f.clone(true));
         }

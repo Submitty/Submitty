@@ -76,8 +76,8 @@ HTML;
         }
         if($action === 'numeric') {
             $return .= <<<HTML
-    <input class ="csvButtonUpload" data-gradeable="{$gradeable->getId()}" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
-    <label for="csvUpload" style="float: right; padding-right: 10px;" data-gradeable="{$gradeable->getId()}">Upload CSV</label>
+    <input class ="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
+    <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
 HTML;
         }
         $return .= <<<HTML
