@@ -62,9 +62,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "tail",                    "/usr/bin/tail" },
 
     // Submitty Analysis Tools
-    { "submitty_count_token",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" },
-    { "submitty_count_node",     SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_node" },
-    { "submitty_count_function", SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_function" },
+    { "lichen",                  SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/lichen" },
 
     // for Computer Science I
     { "python",                  "/usr/bin/python" },
