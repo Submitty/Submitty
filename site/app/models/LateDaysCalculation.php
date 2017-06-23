@@ -157,6 +157,120 @@ class LateDaysCalculation extends AbstractModel {
         return $all_latedays;
     }
     
+     /**
+     * For the given user id generate the late day usage HTML table.
+     * @param $user_id String. The user id of the user whose table you want.
+     * @return string. The string representation of the HTML table.
+     */
+    public function generate_table_for_user($user_id){
+        //table header row.
+        $table = <<<HTML
+                <h4>Overall Late Day Usage</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th style="border:thin solid black">Allowed per term</th>
+                            <th style="border:thin solid black">Allowed per assignment</th>
+                            <th style="border:thin solid black">Late days used</th>
+                            <th style="border:thin solid black">Extensions</th>
+                            <th style="border:thin solid black">Status</th>
+                            <th style="border:thin solid black">Late Days Charged</th>
+                            <th style="border:thin solid black">Remaining Days</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+HTML;
+
+        //If user exists in list build their table. If user does not exist empty table is returned.
+        if(array_key_exists($user_id, $this ->students)) {
+
+            $student = $this->all_latedays[$user_id];
+
+            //For each submission build a table row.
+            foreach ($student as $submission) {
+                $table .= <<<HTML
+                <tr>
+                    <th style="border:thin solid black">{$submission['g_title']}</th>
+                    <td align="center" style="border:thin solid black">{$submission['allowed_per_term']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['allowed_per_assignment']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['late_days_used']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['extensions']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['status']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['late_days_charged']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['remaining_days']}</td>
+                </tr>
+HTML;
+            }
+        }
+
+        //Close HTML tags for table.
+        $table .= <<<HTML
+                </tbody>
+            </table>
+HTML;
+
+        return $table;
+    }
+    
+     /**
+     * For the given user id generate the late day usage HTML table.
+     * @param $user_id String. The user id of the user whose table you want.
+     * @return string. The string representation of the HTML table.
+     */
+    public function generate_table_for_user_date($user_id, $endDate){
+        //table header row.
+        $table = <<<HTML
+                <h4>Overall Late Day Usage</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th style="border:thin solid black">Allowed per term</th>
+                            <th style="border:thin solid black">Allowed per assignment</th>
+                            <th style="border:thin solid black">Late days used</th>
+                            <th style="border:thin solid black">Extensions</th>
+                            <th style="border:thin solid black">Status</th>
+                            <th style="border:thin solid black">Late Days Charged</th>
+                            <th style="border:thin solid black">Remaining Days</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+HTML;
+
+        //If user exists in list build their table. If user does not exist empty table is returned.
+        if(array_key_exists($user_id, $this ->students)) {
+
+            $student = $this->all_latedays[$user_id];
+
+            //For each submission build a table row.
+            foreach ($student as $submission) {
+                if ($submission['eg_submission_due_date'] <= $endDate) {
+                    $table .= <<<HTML
+                <tr>
+                    <th style="border:thin solid black">{$submission['g_title']}</th>
+                    <td align="center" style="border:thin solid black">{$submission['allowed_per_term']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['allowed_per_assignment']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['late_days_used']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['extensions']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['status']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['late_days_charged']}</td>
+                    <td align="center" style="border:thin solid black">{$submission['remaining_days']}</td>
+                </tr>
+HTML;
+                }
+            }
+        }
+
+        //Close HTML tags for table.
+        $table .= <<<HTML
+                </tbody>
+            </table>
+HTML;
+
+        return $table;
+    }
+    
     public function get_gradeable($user_id, $g_id) {
         if(array_key_exists($user_id, $this->all_latedays) && array_key_exists($g_id, $this->all_latedays[$user_id])){
             return $this->all_latedays[$user_id][$g_id];
