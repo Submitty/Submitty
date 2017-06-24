@@ -94,7 +94,7 @@ class GradeSummary extends AbstractModel {
     }
     
     private function addLateDays(&$this_g, $ldu, $gradeable) {
-        $late_days = $ldu->get_gradeable($gradeable->getUser()->getId(), $gradeable->getId());
+        $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
 
         $this_g['status'] = $gradeable->getStatus();
 

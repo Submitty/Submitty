@@ -43,7 +43,7 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= "Graded by: {$gradeable->getGrader()->getDisplayedFirstName()} {$gradeable->getGrader()->getLastName()} <{$gradeable->getGrader()->getEmail()}>".$nl;
             
             // Calculate late days for this gradeable
-            $late_days = $ldu->get_gradeable($student_id, $g_id);
+            $late_days = $ldu->getGradeable($student_id, $g_id);
             $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$gradeable->getGrader()->getEmail().$nl;
             if($gradeable->getDaysLate() > 0) {
                 $student_output_text_main .= "This submission was submitted ".$gradeable->getDaysLate()." day(s) after the due date.".$nl;
@@ -64,8 +64,8 @@ class HWReport extends AbstractModel {
             
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             $active_version = $gradeable->getActiveVersion();
-            // Use FileUtils::joinPaths in future 
-            $submit_file = implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $active_version, "results_grade.txt"));
+ 
+            $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $active_version, "results_grade.txt");
             $auto_grading_awarded = 0;
             $auto_grading_max_score = 0;
             if(!file_exists($submit_file)) {
@@ -93,7 +93,7 @@ class HWReport extends AbstractModel {
                 $student_output_text .= $nl;
                 
                 $student_grade += $component->getScore();
-                if(!$component->isExtraCredit() && $component->getMaxValue() > 0) {
+                if(!$component->getIsExtraCredit() && $component->getMaxValue() > 0) {
                     $rubric_total += $component->getMaxValue();
                     $ta_max_score += $component->getMaxValue();
                 }
@@ -115,10 +115,10 @@ class HWReport extends AbstractModel {
             $student_final_output = "[ TA HAS NOT GRADED ASSIGNMENT, CHECK BACK LATER ]";
         }
 
-        $dir = FileUtils::joinPaths(array($this->core->getConfig()->getCoursePath(), "reports", $g_id));
+        $dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", $g_id);
         FileUtils::createDir($dir);
 
-        $save_filename = FileUtils::joinPaths(array($dir, $student_output_filename));
+        $save_filename = FileUtils::joinPaths($dir, $student_output_filename);
         if(file_put_contents($save_filename, $student_final_output) === false) {
             // Need to change failure status, unsure how yet
             print "failed to write {$save_filename}\n";

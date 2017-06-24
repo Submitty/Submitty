@@ -42,21 +42,17 @@ class ReportController extends AbstractController {
     }
     
     public function generateGradeSummaries() {
-        else {
-            $grade_summary = new GradeSummary($this->core);
-            $grade_summary->generateAllSummaries();
-            $_SESSION['messages']['success'][] = "Successfully Generated GradeSummaries";
-            $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
-        }
+        $grade_summary = new GradeSummary($this->core);
+        $grade_summary->generateAllSummaries();
+        $_SESSION['messages']['success'][] = "Successfully Generated GradeSummaries";
+        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
     
     public function generateHWReports() {
-        else {
-            $hw_report = new HWReport($this->core);
-            $hw_report->generateAllReports();
-            $_SESSION['messages']['success'][] = "Successfully Generated HWReports";
-            $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
-        }
+        $hw_report = new HWReport($this->core);
+        $hw_report->generateAllReports();
+        $_SESSION['messages']['success'][] = "Successfully Generated HWReports";
+        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 }
 ?>
