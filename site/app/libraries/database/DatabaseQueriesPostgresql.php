@@ -379,7 +379,7 @@ ORDER BY u.{$section_key}, {$sort_key}";
     
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayInformation() {
-        $params = array();
+        $params = array(300);
 
         $query = "SELECT
                       submissions.*
@@ -436,7 +436,6 @@ ORDER BY u.{$section_key}, {$sort_key}";
                         late_day_exceptions AS lde 
                       ON submissions.g_id = lde.g_id 
                       AND submissions.user_id = lde.user_id";
-        array_push($params, 300);
 
         //Query database and return results.
         
