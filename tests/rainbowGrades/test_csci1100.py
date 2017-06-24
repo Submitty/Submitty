@@ -12,6 +12,11 @@ import tempfile
 import shutil
 import subprocess
 
+# Get paths required for testing
+repository_path = "__INSTALL__FILLIN__SUBMITTY_REPOSITORY__"
+script_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", "test_suite", "rainbowGrades")
+runner_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "to_be_graded_batch")
+
 
 def error_and_cleanup(tmp_path, message, error=-1):
     """Used to exit and remove the top-level Rainbow Grades test in tmp.
@@ -54,12 +59,6 @@ def remove_info_last_updated(raw_line):
 def csci1100_rainbow_grades_test():
     """Function wrapper for the body of the test."""
 
-    # Get the Submitty repo path
-    # script_path = os.path.dirname(os.path.realpath(__file__))
-    repository_path = "__INSTALL__FILLIN__SUBMITTY_REPOSITORY__"
-    script_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__","test_suite","rainbowGrades")
-    runner_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__","to_be_graded_batch")
-
     # Verify resources exist, set up initial temporary directories and configuration
     print("Creating temporary RainbowGrades test directories")
     test_tmp = tempfile.mkdtemp("", "")
@@ -70,11 +69,11 @@ def csci1100_rainbow_grades_test():
 
     for f in os.listdir(runner_dir):
         if "__csci1100__" in f:
-            error_and_cleanup(test_tmp,"csci1100 has assignments in the grading queue."
-                                       " Wait for the autograder to finish and then generate new grade summary reports"
-                                       "prior to re-running this test.")
+            error_and_cleanup(test_tmp, "csci1100 has assignments in the grading queue."
+                              " Wait for the autograder to finish and then generate new grade summary reports"
+                              "prior to re-running this test.")
 
-    rainbow_path = os.path.join(repository_path,"RainbowGrades")
+    rainbow_path = os.path.join(repository_path, "RainbowGrades")
     if not os.path.exists(rainbow_path):
         error_and_cleanup(test_tmp, "Couldn't find Rainbow Grades source code")
 
@@ -87,7 +86,7 @@ def csci1100_rainbow_grades_test():
     grading_tmp = os.path.join(test_tmp, "grading")
     os.mkdir(grading_tmp)
 
-    if not os.path.exists(rainbow_tmp) or not os.path.exists(summary_tmp):
+    if not os.path.isdir(rainbow_tmp) or not os.path.isdir(summary_tmp):
         error_and_cleanup(test_tmp, "Failed to create temporary subdirectory")
 
     print("Copying Rainbow Grades code from Submitty to RainbowGrades")
@@ -95,9 +94,11 @@ def csci1100_rainbow_grades_test():
         for f in os.listdir(rainbow_path):
             shutil.copy(os.path.join(rainbow_path, f), rainbow_tmp)
     except Exception as e:
+        print("Rainbow PAth: {} Rainbow tmp: {}".format(rainbow_path,rainbow_tmp))
         error_and_cleanup(test_tmp, "{}".format(e))
 
     # Copy non-standard files over
+    print("Copying test-specific files")
     try:
         shutil.copy(os.path.join(script_path, "MakefileHelperTest"), os.path.join(rainbow_tmp, "MakefileHelper"))
         shutil.copy(os.path.join(script_path, "Makefile_csci1100"), os.path.join(summary_tmp, "Makefile"))
@@ -109,6 +110,7 @@ def csci1100_rainbow_grades_test():
         error_and_cleanup(test_tmp, "{}".format(e))
 
     # Update Makefile to use the temporary location of RainbowGrades
+    print("Updating Rainbow Grades Makefile")
     try:
         with open(os.path.join(summary_tmp, "Makefile"), 'r') as make_file:
             make_file_contents = make_file.readlines()
@@ -117,8 +119,8 @@ def csci1100_rainbow_grades_test():
                 if len(line) >= 25 and line[:25] == "RAINBOW_GRADES_DIRECTORY=":
                     make_file.write("RAINBOW_GRADES_DIRECTORY=" + rainbow_tmp + "\n")
                 elif len(line) >= 18 and line[:18] == "REPORTS_DIRECTORY=":
-                    make_file.write(os.path.join("REPORTS_DIRECTORY=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__","courses",
-                                                 "s17","csci1100","reports") + "\n")
+                    make_file.write(os.path.join("REPORTS_DIRECTORY=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses",
+                                                 "s17", "csci1100", "reports") + "\n")
                 else:
                     make_file.write(line)
     except Exception as e:
@@ -130,7 +132,7 @@ def csci1100_rainbow_grades_test():
     return_code = subprocess.call(["make", "pull"])
 
     if return_code != 0:
-        error_and_cleanup(test_tmp, "Failed to rsync data (Error {})",format(return_code))
+        error_and_cleanup(test_tmp, "Failed to rsync data (Error {})".format(return_code))
 
     if not os.path.exists(os.path.join(summary_tmp, "raw_data")):
         error_and_cleanup(test_tmp, "Could not find raw_data folder after rsync'ing")
@@ -182,12 +184,11 @@ def csci1100_rainbow_grades_test():
         # Use filters to avoid time-dependent fields and speed up comparison
         filter1 = filter(remove_extra_raw_data_fields, contents1)
         filter2 = filter(remove_extra_raw_data_fields, contents2)
-        same_flag = True
         for x, y in zip(filter1, filter2):
             if x != y:
-                same_flag = False
-        if not same_flag:
-            error_and_cleanup(test_tmp, "{} and {} differ".format(filename1, filename2))
+                print("{} and {} differ".format(filename1, filename2))
+                exit(-1)
+                error_and_cleanup(test_tmp, "{} and {} differ".format(filename1, filename2))
 
     print("All raw files match")
 
@@ -208,7 +209,7 @@ def csci1100_rainbow_grades_test():
     # Verify that a valid copy of output.html was sent to all_students_summary_html
     make_output = make_output.splitlines()
     make_output = make_output[-1].strip()  # Get the RUN COMMAND LINE
-    make_output = make_output.split(b'/')
+    make_output = make_output.split('/')
     make_output = make_output[-1]  # Get the name of the output.html file since it uses the date
     if not os.path.exists(os.path.join(summary_tmp, "all_students_summary_html", make_output)):
         error_and_cleanup(test_tmp, "Failed to find output file in all_students_summary_html")
@@ -231,7 +232,7 @@ def csci1100_rainbow_grades_test():
     summary_individual_path = os.path.join(summary_tmp, "individual_summary_html")
     os.mkdir(known_individual_path)
     return_code = subprocess.call(["tar", "-xf", os.path.join(script_path, "individual_summary_10090542_csci1100.tar"),
-                     "-C", known_individual_path])
+                                   "-C", known_individual_path])
     if return_code != 0:
         error_and_cleanup(test_tmp, "Extracting raw data failed (Error {}".format(return_code))
 
@@ -276,12 +277,9 @@ def csci1100_rainbow_grades_test():
         # Construct and use filters to ignore time-dependent contents during comparison
         filter1 = filter(remove_info_last_updated, contents1)
         filter2 = filter(remove_info_last_updated, contents2)
-        same_flag = True
         for x, y in zip(filter1, filter2):
             if x != y:
-                same_flag = False
-        if not same_flag:
-            error_and_cleanup(test_tmp, "{} and {} differ".format(filename1, filename2))
+                error_and_cleanup(test_tmp, "{} and {} differ".format(filename1, filename2))
 
     print("All generated files match")
 

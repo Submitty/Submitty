@@ -19,6 +19,7 @@ from collections import OrderedDict
 from datetime import datetime, timedelta
 import glob
 import grp
+import hashlib
 import json
 import os
 import pwd
@@ -60,9 +61,6 @@ def main():
     and then sets us up to run the create methods for the users and courses.
     """
     global DB_ONLY
-
-    # To make Iris testing possible, need to seed random
-    random.seed(10090542)
 
     args = parse_args()
     DB_ONLY = args.db_only
@@ -106,6 +104,9 @@ def main():
         else:
             for key in courses.keys():
                 courses[key].users.append(user)
+
+    # To make Rainbow Grades testing possible, need to seed random to have the same users each time
+    random.seed(10090542)
 
     # we get the max number of extra students, and then create a list that holds all of them,
     # which we then randomly choose from to add to a course
@@ -601,6 +602,12 @@ class Course(object):
             self.unregistered_students = course['unregistered_students']
 
     def create(self):
+
+        # To make Rainbow Grades testing possible, need to seed random
+        m = hashlib.md5()
+        m.update(self.code)
+        random.seed(int(m.hexdigest(),16))
+
         course_group = self.code + "_tas_www"
         archive_group = self.code + "_archive"
         create_group(self.code)
