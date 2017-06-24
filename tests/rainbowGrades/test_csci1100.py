@@ -27,7 +27,7 @@ def error_and_cleanup(tmp_path, message, error=-1):
     :return: None
     """
     print(message)
-    if os.path.exists(tmp_path):
+    if os.path.isdir(tmp_path):
         shutil.rmtree(tmp_path)
     sys.exit(error)
 
@@ -64,7 +64,7 @@ def csci1100_rainbow_grades_test():
     test_tmp = tempfile.mkdtemp("", "")
     print("Made new directory {}".format(test_tmp))
 
-    if not os.path.exists(test_tmp):
+    if not os.path.isdir(test_tmp):
         error_and_cleanup(test_tmp, "Failed to create temporary directory")
 
     for f in os.listdir(runner_dir):
@@ -74,7 +74,7 @@ def csci1100_rainbow_grades_test():
                               "prior to re-running this test.")
 
     rainbow_path = os.path.join(repository_path, "RainbowGrades")
-    if not os.path.exists(rainbow_path):
+    if not os.path.isdir(rainbow_path):
         error_and_cleanup(test_tmp, "Couldn't find Rainbow Grades source code")
 
     rainbow_tmp = os.path.join(test_tmp, "rainbow_grades")
@@ -134,7 +134,7 @@ def csci1100_rainbow_grades_test():
     if return_code != 0:
         error_and_cleanup(test_tmp, "Failed to rsync data (Error {})".format(return_code))
 
-    if not os.path.exists(os.path.join(summary_tmp, "raw_data")):
+    if not os.path.isdir(os.path.join(summary_tmp, "raw_data")):
         error_and_cleanup(test_tmp, "Could not find raw_data folder after rsync'ing")
 
     # Extract the test version of the reports for comparison
@@ -200,7 +200,7 @@ def csci1100_rainbow_grades_test():
     except subprocess.CalledProcessError as e:
         error_and_cleanup(test_tmp, "Make failed with code {}".format(e.returncode))
 
-    if not os.path.exists(os.path.join(summary_tmp, "output.html")):
+    if not os.path.isfile(os.path.join(summary_tmp, "output.html")):
         error_and_cleanup(test_tmp, "Failed to create output.html")
 
     print("output.html generated")
@@ -211,7 +211,7 @@ def csci1100_rainbow_grades_test():
     make_output = make_output[-1].strip()  # Get the RUN COMMAND LINE
     make_output = make_output.split('/')
     make_output = make_output[-1]  # Get the name of the output.html file since it uses the date
-    if not os.path.exists(os.path.join(summary_tmp, "all_students_summary_html", make_output)):
+    if not os.path.isdir(os.path.join(summary_tmp, "all_students_summary_html", make_output)):
         error_and_cleanup(test_tmp, "Failed to find output file in all_students_summary_html")
 
     output_generated_contents = ""
