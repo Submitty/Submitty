@@ -39,8 +39,3 @@ HTML;
         return $return;
     }
 }
-
-
-
-
-?>

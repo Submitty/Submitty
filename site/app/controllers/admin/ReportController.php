@@ -42,9 +42,6 @@ class ReportController extends AbstractController {
     }
     
     public function generateGradeSummaries() {
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("Non Admin User attempting to access admin page");
-        }
         else {
             $grade_summary = new GradeSummary($this->core);
             $grade_summary->generateAllSummaries();
@@ -54,9 +51,6 @@ class ReportController extends AbstractController {
     }
     
     public function generateHWReports() {
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("Non Admin User attempting to access admin page");
-        }
         else {
             $hw_report = new HWReport($this->core);
             $hw_report->generateAllReports();

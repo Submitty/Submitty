@@ -3,7 +3,8 @@ namespace app\models;
 
 use app\models\LateDaysCalculation;
 use app\libraries\DatabaseUtils;
-use app\libraries\Core; 
+use app\libraries\Core;
+use app\libraries\FileUtils; 
 
 class HWReport extends AbstractModel {
     /*var Core */
@@ -113,16 +114,11 @@ class HWReport extends AbstractModel {
         else {
             $student_final_output = "[ TA HAS NOT GRADED ASSIGNMENT, CHECK BACK LATER ]";
         }
-        // Use FileUtils::joinPaths in future
-        $dir = implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports", $g_id));
-        if (!is_dir($dir)) {
-            if(!mkdir($dir)) {
-                print "failed to create directory {$dir}";
-                exit();
-            }
-        }
-        // Use FileUtils::joinPaths in future
-        $save_filename = implode(DIRECTORY_SEPARATOR, array($dir, $student_output_filename));
+
+        $dir = FileUtils::joinPaths(array($this->core->getConfig()->getCoursePath(), "reports", $g_id));
+        FileUtils::createDir($dir);
+
+        $save_filename = FileUtils::joinPaths(array($dir, $student_output_filename));
         if(file_put_contents($save_filename, $student_final_output) === false) {
             // Need to change failure status, unsure how yet
             print "failed to write {$save_filename}\n";
@@ -136,7 +132,7 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() == null) {
+            if($gradeable->getGrader() === null) {
                 foreach($graders as $g) {
                     if($g->getId() == $gradeable->getGraderId()) {
                         $gradeable->setGrader($g);
@@ -152,7 +148,7 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() == null) {
+            if($gradeable->getGrader() === null) {
                 foreach($graders as $grader) {
                     if($grader->getId() == $gradeable->getGraderId()) {
                         $gradeable->setGrader($grader);
@@ -170,7 +166,7 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this-core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() == null) {
+            if($gradeable->getGrader() === null) {
                 foreach($graders as $grader) {
                     if($grader->getId() == $gradeable->getGraderId()) {
                         $gradeable->setGrader($grader);
@@ -186,7 +182,7 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() == null) {
+            if($gradeable->getGrader() === null) {
                 foreach($graders as $grader) {
                     if($grader->getId() == $gradeable->getGraderId()) {
                         $gradeable->setGrader($grader);
@@ -197,4 +193,4 @@ class HWReport extends AbstractModel {
         }
     }
 }
-?>
+

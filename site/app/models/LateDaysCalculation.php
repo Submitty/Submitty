@@ -24,12 +24,12 @@ class LateDaysCalculation extends AbstractModel {
         $this->core = $main_core;
         $this->submissions = $this->core->getQueries()->getLateDayInformation();
         $this->latedays = $this->core->getQueries()->getLateDayUpdates();
-        $this->students = $this->parse_students($this->submissions, $this->latedays);
+        $this->students = $this->parseStudents($this->submissions, $this->latedays);
         //Calculate lateday usages for all students for all assignments queried
-        $this->all_latedays = $this->calculate_student_lateday_usage($this->students);
+        $this->all_latedays = $this->calculateStudentLatedayUsage($this->students);
     }
     
-    private function parse_students($submissions, $latedays) {
+    private function parseStudents($submissions, $latedays) {
         $students = array();
 
         //For each submission ensure that an entry exists for that user and append the submission to their list of
@@ -65,7 +65,7 @@ class LateDaysCalculation extends AbstractModel {
         return $students;
     }
     
-    private function calculate_student_lateday_usage($students) {
+    private function calculateStudentLatedayUsage($students) {
         $all_latedays = array();
 
         //For each student for each submission calculate late day usage
@@ -80,7 +80,7 @@ class LateDaysCalculation extends AbstractModel {
             $submissions = $student['submissions'];
 
             //Sort submissions by due date before calculating late day usage.
-            usort($submissions, array($this, "submission_sort"));
+            usort($submissions, function($a, $b) { return $a['eg_submission_due_date'] > $b['eg_submission_due_date']; });
 
             $latedays = $student['latedays'];
 
@@ -91,7 +91,7 @@ class LateDaysCalculation extends AbstractModel {
                 $submission_latedays = array();
 
                 //Sort latedays by since_timestamp before calculating late day usage.
-                usort($latedays, array($this, "lateday_update_sort"));
+                usort($latedays, function($a, $b) { return $a['since_timestamp'] > $b['since_timestamp']; });
 
                 //Find all late day updates before this submission due date.
                 foreach($latedays as $ld){
@@ -162,7 +162,7 @@ class LateDaysCalculation extends AbstractModel {
      * @param $user_id String. The user id of the user whose table you want.
      * @return string. The string representation of the HTML table.
      */
-    public function generate_table_for_user($user_id){
+    public function generateTableForUser($user_id){
         //table header row.
         $table = <<<HTML
                 <h4>Overall Late Day Usage</h4>
@@ -218,7 +218,7 @@ HTML;
      * @param $user_id String. The user id of the user whose table you want.
      * @return string. The string representation of the HTML table.
      */
-    public function generate_table_for_user_date($user_id, $endDate){
+    public function generateTableForUserDate($user_id, $endDate){
         //table header row.
         $table = <<<HTML
                 <h4>Overall Late Day Usage</h4>
@@ -271,19 +271,11 @@ HTML;
         return $table;
     }
     
-    public function get_gradeable($user_id, $g_id) {
+    public function getGradeable($user_id, $g_id) {
         if(array_key_exists($user_id, $this->all_latedays) && array_key_exists($g_id, $this->all_latedays[$user_id])){
             return $this->all_latedays[$user_id][$g_id];
         }
         return array();
-    }
-    
-    private function submission_sort($a, $b){
-        return $a['eg_submission_due_date'] > $b['eg_submission_due_date'];
-    }
-    
-    private function lateday_update_sort($a, $b){
-        return $a['since_timestamp'] > $b['since_timestamp'];
     }
 }
 
