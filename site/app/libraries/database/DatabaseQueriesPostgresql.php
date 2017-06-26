@@ -821,10 +821,6 @@ VALUES (?, ?, ?, ?)", $params);
     }
 
     public function getUsersWithLateDays() {
-    //IN:  gradeable ID from database
-    //OUT: all students who have late days.  Retrieves student rcs, first name,
-    //     last name, timestamp and number of late days.
-    //PURPOSE:  Retrieve list of students to display current late days.
       $this->database->query("
         SELECT u.user_id, user_firstname, user_preferred_firstname, 
           user_lastname, allowed_late_days, since_timestamp::timestamp::date
@@ -833,7 +829,6 @@ VALUES (?, ?, ?, ?)", $params);
           ON u.user_id=l.user_id
         WHERE allowed_late_days IS NOT NULL
           AND allowed_late_days>0
-          -- AND u.user_group=4
         ORDER BY
           user_email ASC, since_timestamp DESC;");
 
@@ -844,12 +839,7 @@ VALUES (?, ?, ?, ?)", $params);
       return $return;
     }
 
-
     public function getUsersWithExtensions($gradeable_id) {
-    //IN:  gradeable ID from database
-    //OUT: all students who have late day exceptions, per gradeable ID parameter.
-    //     retrieves student rcs, first name, last name, and late day exceptions.
-    //PURPOSE:  Retrieve list of students to display current late day exceptions.
       $this->database->query("
         SELECT u.user_id, user_firstname,
           user_preferred_firstname, user_lastname, late_day_exceptions

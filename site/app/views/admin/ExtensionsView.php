@@ -10,11 +10,9 @@ class ExtensionsView extends AbstractView {
 <div type="hidden" id="message"></div>
 <div class="content">
     <h2>Excused Absense Extensions</h2>
-    <form id="excusedAbsenseForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateHomeworkExtensions2($(this));">
+    <form id="excusedAbsenseForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateHomeworkExtensions($(this));">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="panel">
-
-
         <div class="option">
             <p> Use this form to grant an extension (e.g., for an excused absense) to a user on a specific assignment.<br><br><br></p>
             <div class="option">Select Rubric:<br>
@@ -23,7 +21,7 @@ class ExtensionsView extends AbstractView {
 HTML;
         foreach($g_ids as $index => $value) {
             $return .= <<<HTML
-                <option value="$value[0]">$value[0]</option>
+                    <option value="$value[0]">$value[0]</option>
 HTML;
         }
         $return .= <<<HTML
@@ -40,11 +38,9 @@ HTML;
                 <span class="tooltiptext">Do not use column headers. CSV must be of the following form:<br>student_id,gradeable_id,late_days</span>
             </i><br>
         </div>
-        <div style="padding-bottom:20px;"><input type="file" name="csv_upload" id="csv_upload" onchange="updateHomeworkExtensions2($(this));"></div>
+        <div style="padding-bottom:20px;"><input type="file" name="csv_upload" id="csv_upload" onchange="return updateHomeworkExtensions($(this));"></div>
     </form>
     </div>
-HTML;
-        $return .= <<<HTML
     <div class="panel" id="load-homework-extensions" align="center">
     <table id="my_table" class="table table-striped table-bordered persist-area" style="width:70%" align="center">
         <div class="option-title" id="title"></div>
@@ -58,8 +54,6 @@ HTML;
         </div>
     </table>
     </div>
-
-    </form>
 </div>
 HTML;
         return $return;

@@ -15,13 +15,13 @@ class LateController extends AbstractController {
                 $this->viewExtensions();
                 break;
             case 'update_late':
-                $this->update("view_late");
+                $this->update("late");
                 break;
             case 'update_extension':
-                $this->update("view_extension");
+                $this->update("extension");
                 break;
             case 'get_extension_details':
-                $this->ajaxGetExtensions($_REQUEST['g_id']);
+                $this->getExtensions($_REQUEST['g_id']);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller");
@@ -39,38 +39,38 @@ class LateController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $g_ids);
     }
 
-    public function update($nextStep) {
+    public function update($type) {
         //Check to see if a CSV file was submitted.
         $data = array();
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
-            if (!($this->parse_and_validate_csv($_FILES['csv_upload']['tmp_name'], $data, $nextStep))) {
+            if (!($this->parse_and_validate_csv($_FILES['csv_upload']['tmp_name'], $data, $type))) {
                 $error = "Something is wrong with the CSV. Try again.";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             } else {
                 for($i = 0; $i < count($data); $i++){
-                    if($nextStep == "view_late"){
+                    if($type == "late"){
                         $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2]);
                     }
                     else{
                         $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
                     }
                 }
-                if($nextStep == "view_late"){
+                if($type == "late"){
                     $this->getLateDays();
                 }
                 else{
-                    $this->ajaxGetExtensions($data[0][1]);
+                    $this->getExtensions($data[0][1]);
                 }
             }
         }
-        else{
+        else{ // not CSV, it's an individual
             if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
                 $error = "Invalid CSRF token. Try again.";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" ) && $nextStep == 'view_extension') {
+            if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" ) && $type == 'extension') {
                 $error = "Please choose a gradeable_id";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
@@ -80,7 +80,7 @@ class LateController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            if ((!isset($_POST['datestamp']) || !$this->validate_timestamp($_POST['datestamp'])) && $nextStep == 'view_late') {
+            if ((!isset($_POST['datestamp']) || !$this->validate_timestamp($_POST['datestamp'])) && $type == 'late') {
                 $error = "Datestamp must be mm/dd/yy";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
@@ -90,18 +90,18 @@ class LateController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            if($nextStep == "view_late"){
+            if($type == "late"){
                 $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
                 $this->getLateDays();
             }
             else{
                 $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
-                $this->ajaxGetExtensions($_POST['g_id']);
+                $this->getExtensions($_POST['g_id']);
             }
         }
 
     }
-    // for use during update
+
     function getLateDays(){
         $users = $this->core->getQueries()->getUsersWithLateDays();
         $user_table = array();
@@ -113,7 +113,19 @@ class LateController extends AbstractController {
         ));
     }
 
-    function parse_and_validate_csv($csv_file, &$data, $nextStep) {
+    public function getExtensions($g_id) {
+        $users = $this->core->getQueries()->getUsersWithExtensions($g_id);
+        $user_table = array();
+        foreach($users as $user){
+            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getLastName(), 'late_day_exceptions' => $user->getLateDayExceptions());
+        }
+        $this->core->getOutput()->renderJson(array(
+            'gradeable_id' => $g_id,
+            'users' => $user_table
+        ));
+    }
+
+    function parse_and_validate_csv($csv_file, &$data, $type) {
     //IN:  * csv file name and path
     //     * (by reference) empty data array that will be filled.
     //OUT: TRUE should csv file be properly validated and data array filled.
@@ -154,12 +166,12 @@ class LateController extends AbstractController {
             }
             //$fields[1] represents timestamp in the format (MM/DD/YY) for late days
             //(MM/DD/YYYY), (MM-DD-YY), or (MM-DD-YYYY).
-            if ($nextStep == "view_late" && !$this->validate_timestamp($fields[1])) {
+            if ($type == "late" && !$this->validate_timestamp($fields[1])) {
                 $data = null;
                 return false;
             }
             //$fields[1] represents the gradeable id for extensions
-            if ($nextStep == "view_extension" && !$this->validate_homework($fields[1])) {
+            if ($type == "extension" && !$this->validate_homework($fields[1])) {
                 $data = null;
                 return false;
             }
@@ -217,21 +229,4 @@ class LateController extends AbstractController {
             }
         return false;
     }
-
-
-
-    public function ajaxGetExtensions($g_id) {
-        // $g_id = $_REQUEST['g_id'];
-        // $user_table = $this->core->getQueries()->getUsersWithExtensions($g_id);
-        $users = $this->core->getQueries()->getUsersWithExtensions($g_id);
-        $user_table = array();
-        foreach($users as $user){
-            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getLastName(), 'late_day_exceptions' => $user->getLateDayExceptions());
-        }
-        $this->core->getOutput()->renderJson(array(
-            'gradeable_id' => $g_id,
-            'users' => $user_table
-        ));
-    }
-
 }

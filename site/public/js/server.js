@@ -523,31 +523,7 @@ function setupNumericTextCells() {
     });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function updateHomeworkExtensions2(data) {
+function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenseForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
     $.ajax({
@@ -560,7 +536,7 @@ function updateHomeworkExtensions2(data) {
         success: function(data) {
             var json = JSON.parse(data);
             if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="myspecialid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'myspecialid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -578,6 +554,8 @@ function updateHomeworkExtensions2(data) {
             $('#user_id').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
             $('#csv_upload').val(this.defaultValue);
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
+            $('#messages').append(message);
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
@@ -623,7 +601,7 @@ function updateLateDays(data) {
         success: function(data) {
             var json = JSON.parse(data);
             if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="myspecialid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'myspecialid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -640,6 +618,8 @@ function updateLateDays(data) {
             $('#datestamp').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
             $('#csv_upload').val(this.defaultValue);
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days have been updated.</div>';
+            $('#messages').append(message);
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
