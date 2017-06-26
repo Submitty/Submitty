@@ -19,6 +19,7 @@ class UploadController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
         $this->gradeables_list = $this->core->loadModel("GradeableList", $this->core);
+        $this->student_id = "";
     }
 
     public function run() {
@@ -36,7 +37,7 @@ class UploadController extends AbstractController {
                 return $this->updateSubmissionVersion();
                 break;
             case 'check_refresh':
-                //return $this->checkRefresh();
+                return $this->checkRefresh();
                 break;
             case 'display':
             default:
@@ -48,6 +49,9 @@ class UploadController extends AbstractController {
     public function showUploadPage() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
+        if (isset($this->student_gradeable))
+            $gradeable = $this->student_gradeable;
+        ///// maybe make sure it's the student gradeable? all this redirecting is confusing :x 
         if ($gradeable !== null) {
             $error = false;
             $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
@@ -121,6 +125,8 @@ class UploadController extends AbstractController {
         else 
         if (!$student_user->isLoaded()) {
             $msg = "Not a valid student id.";
+            $msg .= $student_id;
+            $msg .= $gradeable_id;
             $_SESSION['messages']['error'][] = $msg;
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'upload', 'gradeable_id' => $gradeable_id, 'days_late' => $days_late)));
             return array('error' => true, 'message' => $msg);
@@ -133,13 +139,16 @@ class UploadController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'upload', 'gradeable_id' => $gradeable_id, 'days_late' => $days_late)));
             return array('error' => true, 'message' => $msg);
         }
-        $this->student_user = $student_user;
-        $this->student_gradeable = $student_gradeable; 
-        $this->core->getOutput()->renderOutput(array('grading', 'Upload'), 'showUpload', $student_gradeable, $days_late, $student_id);
+        //$this->core->getQueries()->updateGradeableData($student_gradeable);
+        // $this->student_id = "";
+        // $this->student_id .= $_POST['student_id'];
+        // $this->student_user = $student_user;
+        // $this->student_gradeable = $student_gradeable; 
+        $this->core->getOutput()->renderOutput(array('grading', 'Upload'), 'showUpload', $student_gradeable, $days_late);
         return array('id' => $gradeable_id, 'error' => false);
     }
 
-    /**
+    /*
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
      *
@@ -158,8 +167,13 @@ class UploadController extends AbstractController {
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
         }
-        
-        $gradeable = $this->student_gradeable;
+        if (!isset($_POST['user_id'])) {
+            return $this->uploadResult("Invalid user id '{$_REQUEST['user_id']}'", false);
+        }
+        $student_id = $_REQUEST['user_id'];
+        //$gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+        $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $student_id);
+        //$gradeable = $this->student_gradeable;
         $gradeable->loadResultDetails();
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
@@ -175,7 +189,8 @@ class UploadController extends AbstractController {
             return $this->uploadResult("Failed to make folder for this assignment.", false);
         }
 
-        $user_id = $gradeable->getUser()->getId();
+        /////$user_id = $this->core->getUser()->getId();
+        $user_id = $student_id;
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
@@ -472,7 +487,7 @@ class UploadController extends AbstractController {
         $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         return $this->uploadResult("Successfully uploaded files");
     }
-
+    
     private function uploadResult($message, $success = true) {
         if (!$success) {
             // we don't want to throw an exception here as that'll mess up our return json payload
@@ -504,6 +519,131 @@ class UploadController extends AbstractController {
         $this->core->getOutput()->renderJson($return);
         return $return;
     }
+    
+    private function updateSubmissionVersion() {
+        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
+            $msg = "Invalid gradeable id.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student')));
+            return array('error' => true, 'message' => $msg);
+        }
+        
+        /////$gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+        $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $this->student_id);
+        //$gradeable = $this->student_gradeable;
 
+        $gradeable->loadResultDetails();
+        $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
+        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $msg = "Invalid CSRF token. Refresh the page and try again.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($url);
+            return array('error' => true, 'message' => $msg);
+        }
+    
+        $new_version = intval($_REQUEST['new_version']);
+        if ($new_version < 0) {
+            $msg = "Cannot set the version below 0.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($url);
+            return array('error' => true, 'message' => $msg);
+        }
+        
+        if ($new_version > $gradeable->getHighestVersion()) {
+            $msg = "Cannot set the version past {$gradeable->getHighestVersion()}.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($url);
+            return array('error' => true, 'message' => $msg);
+        }
+
+        /////$user_id = $this->core->getUser()->getId();
+        $user_id = $this->student_id;
+        if ($gradeable->isTeamAssignment()) {
+            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            if ($team !== null) {
+                $user_id = $team->getId();
+            }
+        }
+    
+        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
+            $gradeable->getId(), $user_id, "user_assignment_settings.json");
+        $json = FileUtils::readJsonFile($settings_file);
+        if ($json === false) {
+            $msg = "Failed to open settings file.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($url);
+            return array('error' => true, 'message' => $msg);
+        }
+        $json["active_version"] = $new_version;
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s");
+        $json["history"][] = array("version" => $new_version, "time" => $current_time);
+
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $msg = "Could not write to settings file.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student',
+                                                              'gradeable_id' => $gradeable->getId())));
+            return array('error' => true, 'message' => $msg);
+        }
+
+        $version = ($new_version > 0) ? $new_version : null;
+
+        if($gradeable->isTeamAssignment()) {
+            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), null, $user_id, $version);
+        }
+        else {
+            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $user_id, null, $version);
+        }
+        
+
+        if ($new_version == 0) {
+            $msg = "Cancelled submission for gradeable.";
+            $_SESSION['messages']['success'][] = $msg;
+        }
+        else {
+            $msg = "Updated version of gradeable to version #{$new_version}.";
+            $_SESSION['messages']['success'][] = $msg;
+        }
+        $this->core->redirect($this->core->buildUrl(array('component' => 'student',
+                                                          'gradeable_id' => $gradeable->getId(),
+                                                          'gradeable_version' => $new_version)));
+
+        return array('error' => false, 'version' => $new_version, 'message' => $msg);
+    }
+    
+    /**
+     * Check if the results folder exists for a given gradeable and version results.json
+     * in the results/ directory. If the file exists, we output a string that the calling
+     * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
+     */
+    public function checkRefresh() {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        $version = $_REQUEST['gradeable_version'];
+        $g_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable = $this->gradeables_list->getGradeable($g_id, GradeableType::ELECTRONIC_FILE);
+
+        $user_id = $this->core->getUser()->getId();
+        if ($gradeable !== null && $gradeable->isTeamAssignment()) {
+            $team = $this->core->getQueries()->getTeamByUserId($g_id, $user_id);
+            if ($team !== null) {
+                $user_id = $team->getId();
+            }
+        }
+
+        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id,
+            $user_id, $version);
+        if (file_exists($path."/results.json")) {
+            $refresh_string = "REFRESH_ME";
+            $refresh_bool = true;
+        }
+        else {
+            $refresh_string = "NO_REFRESH";
+            $refresh_bool = false;
+        }
+        $this->core->getOutput()->renderString($refresh_string);
+        return array('refresh' => $refresh_bool, 'string' => $refresh_string);
+    }
 
 }

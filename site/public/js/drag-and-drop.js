@@ -330,8 +330,10 @@ function isValidSubmission(){
  * @param versions_allowed
  * @param csrf_token
  * @param svn_checkout
+ * @param num_textboxes
+ * @param user_id
  */
-function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes) {
+function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id) {
     $("#submit").prop("disabled", true);
 
     var message = "";
@@ -356,11 +358,11 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         }
     }
 
-
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
     formData.append('svn_checkout', svn_checkout);
+    formData.append('user_id', user_id);
 
     if (!svn_checkout) {
         // Check if new submission

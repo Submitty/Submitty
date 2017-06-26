@@ -15,7 +15,7 @@ class UploadView extends AbstractView {
      *
      * @return string
      */
-    public function showUpload($gradeable, $days_late, $student_id="") {
+    public function showUpload($gradeable, $days_late) {
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
@@ -23,13 +23,11 @@ class UploadView extends AbstractView {
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New upload for: {$gradeable->getName()}</h2>
-
     <form form id="idForm" method="post" action="{$this->core->buildUrl(array('component' => 'grading', 
                                                                                 'page'      => 'upload', 
                                                                                 'action'    => 'verify',
                                                                                 'gradeable_id' => $gradeable->getId(),
                                                                                 'days_late' => $days_late))}">
-    
     <div class ="sub">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
         Student RCS ID: <input type="text" id="student_id" name="student_id" value="" placeholder="{$gradeable->getUser()->getID()}" required/>
@@ -207,7 +205,6 @@ HTML;
 
 HTML;
         $response = "";
-        $student_gradeable;
         $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
@@ -219,15 +216,18 @@ HTML;
                                                                'page' => 'upload',
                                                                'action' => 'upload',
                                                                'gradeable_id' => $gradeable->getId()))}",
-                                     "{$this->core->buildUrl(array('component' => 'submission',
-                                                                   'gradeable_id' => $gradeable->getId()))}",
+                                     "{$this->core->buildUrl(array('component' => 'grading', 
+                                                                'page' => 'upload',
+                                                                   'gradeable_id' => $gradeable->getId(),
+                                                                   'days_late' => $days_late))}",
                                      {$days_late},
                                  {$gradeable->getAllowedLateDays()},
                                  {$gradeable->getHighestVersion()},
                                  {$gradeable->getMaxSubmissions()},
                                  "{$this->core->getCsrfToken()}",
                                  false,
-                                 {$gradeable->getNumTextBoxes()});
+                                 {$gradeable->getNumTextBoxes()},
+                                 "{$gradeable->getUser()->getID()}");
                 e.stopPropagation();
             });
         });
