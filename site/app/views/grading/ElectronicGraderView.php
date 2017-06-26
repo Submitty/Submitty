@@ -277,27 +277,27 @@ HTML;
                 <td>{$graded} / {$total_possible}</td>
 HTML;
 
-                $text_class = "0";
-                if ($row->hasResults()) {
-                    $text_class = "1";
+                $text_class = "";
+                if ($row->getActiveDaysLate() != 0) {
+                    $text_class = "red-message";
                 }
                 // Conditionals to determine what to show in active version
                 // If no submission, active version is blank
                 if($highest_version == 0) {
                     $return .= <<<HTML
-                <td>{$text_class}</td>
+                <td></td>
 HTML;
                 }
                 // if the highest version is the active version, show it, giving info about number of tries
                 else if($active_version == $highest_version) {
                     $return .= <<<HTML
-                <td class="">{$text_class}</td>
+                <td class="{$text_class}">{$active_version}</td>
 HTML;
                 }
                 // otherwise show the active_version as one of the number of versions
                 else {
                     $return .= <<<HTML
-                <td class="">{$text_class}</td>
+                <td class="{$text_class}">{$active_version}/{$highest_version}</td>
 HTML;
                 }
                 

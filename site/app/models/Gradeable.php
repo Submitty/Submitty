@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DatabaseUtils;
 use app\libraries\FileUtils;
+use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\libraries\Utils;
 
@@ -799,5 +800,13 @@ class Gradeable extends AbstractModel {
 
     public function saveData() {
         $this->core->getQueries()->updateGradeableData($this);
+    }
+    
+    public function getActiveDaysLate() {
+        $return =  DateUtils::calculateDayDiff($this->due_date->add(new \DateInterval("PT5M")), $this->submission_time);
+        if ($return < 0) {
+            $return = 0;
+        }
+        return $return;
     }
 }
