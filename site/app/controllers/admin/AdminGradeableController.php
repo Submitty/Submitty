@@ -23,7 +23,7 @@ class AdminGradeableController extends AbstractController {
             case 'upload_edit_gradeable':
                 $this->modifyGradeable(1);
                 break;
-            case 'upload_new_template';
+            case 'upload_new_template':
                 $this->uploadNewTemplate();
                 break;
             default:
