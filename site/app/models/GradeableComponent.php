@@ -31,6 +31,8 @@ use app\libraries\Core;
  * @method void setComment(string $comment)
  * @method User getGrader()
  * @method void setGrader(User $grader)
+ * @method \DateTime getGradeTime()
+ * @method void setGradeTime(\DateTime $date_time)
  * @method bool getHasGrade()
  */
 class GradeableComponent extends AbstractModel {
@@ -58,6 +60,9 @@ class GradeableComponent extends AbstractModel {
     /** @property @var User */
     protected $grader = null;
 
+    /** @property @var \DateTime */
+    protected $grade_time = null;
+
     /** @property @var bool */
     protected $has_grade = false;
 
@@ -74,6 +79,9 @@ class GradeableComponent extends AbstractModel {
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = isset($details['gcd_grader']) ? $details['gcd_grader'] : null;
+            if (isset($details['gcd_grade_time'])) {
+                $this->grade_time = new \DateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());
+            }
             $this->score = floatval($details['gcd_score']);
             if (!$this->is_text) {
                 if ($this->max_value > 0) {

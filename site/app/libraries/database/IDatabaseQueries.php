@@ -182,25 +182,10 @@ interface IDatabaseQueries {
      */
     public function updateActiveVersion($g_id, $user_id, $team_id, $version);
 
-    /**
-     * Given a gradeable objec, this updates all gradeable_component_data rows that are associated, updating the scores
-     * and comments that were left.
-     *
-     * @param \app\models\Gradeable $gradeable
-     */
-    public function saveGradeableData(Gradeable $gradeable);
-
     public function insertGradeableData(Gradeable $gradeable);
     public function updateGradeableData(Gradeable $gradeable);
     public function insertGradeableComponentData($gd_id, GradeableComponent $component);
     public function updateGradeableComponentData($gd_id, GradeableComponent $component);
-
-    /**
-     * Given a gradeable component object, this updates all of the gradeable_component_data rows
-     *
-     * @param \app\models\GradeableComponent $component
-     */
-    public function saveGradeableComponentData(GradeableComponent $component);
 
     /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
@@ -286,6 +271,7 @@ interface IDatabaseQueries {
      * Return Team object for team which the given user belongs to on the given gradeable
      * @param string $g_id
      * @param string $user_id
+     * @return \app\models\Team
      */
     public function getTeamByUserId($g_id, $user_id);
 }

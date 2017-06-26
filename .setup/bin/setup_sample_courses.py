@@ -773,7 +773,6 @@ class Course(object):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
-                                                             gd_grader_id=self.instructor.id,
                                                              gd_overall_comment="lorem ipsum lodar",
                                                              gd_status=status, gd_late_days_used=0,
                                                              gd_active_version=active)
@@ -782,7 +781,8 @@ class Course(object):
                         for component in gradeable.components:
                             score = 0 if status == 0 else (random.randint(0, component.max_value * 2) / 2)
                             conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
-                                         gcd_score=score, gcd_component_comment="lorem ipsum")
+                                         gcd_score=score, gcd_component_comment="lorem ipsum",
+                                         gcd_grader_id=self.instructor.id)
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))

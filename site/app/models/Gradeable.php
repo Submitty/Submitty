@@ -187,11 +187,11 @@ class Gradeable extends AbstractModel {
     /** @property @var User */
     protected $grader = null;
     /** @property @var string */
-    protected $grader_id = null;
     protected $overall_comment = "";
     /** @property @var int code representing the state of electronic submission where 0 = not submitted, 1 = fine, 2 = late,
      * 3 = too late */
     protected $status;
+    /** @property @var */
     protected $graded_version = null;
 
     /** @property @var int */
@@ -237,7 +237,6 @@ class Gradeable extends AbstractModel {
         $this->user = ($user === null) ? $this->core->getUser() : $user;
         if (isset($details['gd_id'])) {
             $this->gd_id = $details['gd_id'];
-            $this->grader_id = $details['gd_grader_id'];
             $this->overall_comment = $details['gd_overall_comment'];
             $this->status = $details['gd_status'];
             $this->graded_version = $details['gd_active_version'];
@@ -278,7 +277,7 @@ class Gradeable extends AbstractModel {
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
                             'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment',
-                            'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
+                            'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
@@ -306,6 +305,7 @@ class Gradeable extends AbstractModel {
                         if ($details['array_gcd_gc_id'][$j] === $component_details['gc_id']) {
                             $component_details['gcd_score'] = $details['array_gcd_score'][$j];
                             $component_details['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
+                            $component_details['gcd_grade_time'] = $details['array_gcd_grade_time'][$j];
 
                             if (isset($details['array_gcd_user_id'][$j])) {
                                 $user_details = array();
@@ -319,6 +319,7 @@ class Gradeable extends AbstractModel {
                         }
                     }
                 }
+
                 $this->components[$component_details['gc_order']] = $this->core->loadModel(GradeableComponent::class, $component_details);
 
                 if (!$this->components[$component_details['gc_order']]->getIsText()) {
@@ -334,6 +335,7 @@ class Gradeable extends AbstractModel {
                     $this->graded_tagrading += $this->components[$component_details['gc_order']]->getScore();
                 }
             }
+
             // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
             // either write an inner JOIN on that aggregation to order stuff, and then have it aggregated, or we can
             // just order it here, which is simpler in the long run and not really a performance problem.
@@ -824,10 +826,6 @@ class Gradeable extends AbstractModel {
             $component->saveData($this->gd_id);
         }
         $this->core->getDatabase()->commit();
-    }
-    
-    public function getGraderId() {
-        return $this->grader_id;
     }
 
     public function getSyllabusBucket() {
