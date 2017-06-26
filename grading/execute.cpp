@@ -23,6 +23,7 @@
 #include "TestCase.h"
 #include "execute.h"
 #include "error_message.h"
+#include "window_utils.h"
 
 
 #define DIR_PATH_MAX 1000
@@ -101,6 +102,12 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "timeout",                 "/usr/bin/timeout" },
     { "mpicc.openmpi",           "/usr/bin/mpicc.openmpi" },
     { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
+
+    // for graphics/window interaction
+    { "scrot",                   "/usr/bin/scrot"}, //screenshot utility
+    { "xdotool",                 "/usr/bin/xdotool"}, //keyboard/mouse input
+    { "wmctrl",                  "/usr/bin/wmctrl"}, //bring window into focus
+    { "xwininfo",                "/usr/bin/xwininfo"}, // get info about window
 
     // for Debugging
     { "strace",                  "/usr/bin/strace" }
@@ -693,6 +700,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
 
   my_path = getenv("PATH");
+
   std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
   // set the locale so that special characters (e.g., the copyright
@@ -798,10 +806,24 @@ void TerminateProcess(float &elapsed, int childPID) {
 
 
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, const std::string &execute_logfile,
-	    const nlohmann::json &test_case_limits,
-	    const nlohmann::json &assignment_limits,
-            const nlohmann::json &whole_config) {
+int execute(const std::string &cmd, 
+      const std::vector<std::string> actions,
+      const std::string &execute_logfile,
+      const nlohmann::json &test_case_limits,
+      const nlohmann::json &assignment_limits,
+      const nlohmann::json &whole_config) {
+
+  bool window_mode = false; //Tells us if the process is expected to spawn a window. (additional support later) 
+  
+  if(actions.size() > 0){ //right now, we assume if there are actions, there will be a window.  
+    std::cout << "Received " << actions.size() << " actions" << std::endl; //useful debug line.
+    std::cout <<"Window mode activated." << std::endl;
+    char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
+    if (my_display == NULL) {
+      setenv("DISPLAY", ":0", 1);
+    }
+    window_mode = true;
+  }
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
 
@@ -822,10 +844,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 
   if (childPID == 0) {
     // CHILD PROCESS
-
-
     enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
-
 
     // Student's shouldn't be forking & making threads/processes...
     // but if they do, let's set them in the same process group
@@ -838,103 +857,94 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;
     exit(child_result);
-
     }
     else {
-        // PARENT PROCESS
-        std::cout << "childPID = " << childPID << std::endl;
-        std::cout << "PARENT PROCESS START: " << std::endl;
-        int parent_result = system("date");
-        assert (parent_result == 0);
-        //std::cout << "  parent_result = " << parent_result << std::endl;
+      // PARENT PROCESS
+      std::cout << "childPID = " << childPID << std::endl;
+      std::cout << "PARENT PROCESS START: " << std::endl;
+      int parent_result = system("date");
+      assert (parent_result == 0);
+      //std::cout << "  parent_result = " << parent_result << std::endl;
+      float elapsed = 0;
+      int status;
+      pid_t wpid = 0;
+      float next_checkpoint = 0;
+      std::string windowName; 
+      int rss_memory = 0;
+      int actions_taken = 0;   
+      int number_of_screenshots = 0;
 
-        float elapsed = 0;
-        int status;
-        pid_t wpid = 0;
-        float next_checkpoint = 0;
-	int rss_memory = 0;
-
-        do {
-            wpid = waitpid(childPID, &status, WNOHANG);
-            if (wpid == 0) {
-	      // allow 10 extra seconds for differences in wall clock
-	      // vs CPU time (imperfect solution)
-	      
-	      if (elapsed > seconds_to_run + 10) {
-		// terminate for excessive time
-		std::cout << "Killing child process " << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
-		TerminateProcess(elapsed,childPID);
-		time_kill=1;
-	      }
-	      
-	      if (rss_memory > allowed_rss_memory) {
-		// terminate for excessive memory usage (RSS = resident set size = RAM)
-		std::cout << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
-		TerminateProcess(elapsed,childPID);
-		memory_kill=1;
-	      } 
-
-	      // monitor time & memory usage
-	      if (!time_kill && !memory_kill) {
-		// sleep 1/10 of a second
-		usleep(100000);
-		elapsed+= 0.1;
-	      }
-	      if (elapsed >= next_checkpoint) {
-		rss_memory = resident_set_size(childPID);
-		std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
-		next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
-	      }
-
+      do {
+          if(window_mode && windowName == ""){ //if we are expecting a window, but know nothing about it
+            initializeWindow(windowName, childPID); //attempt to get information about the window
+            if(windowName != ""){ //if we found information about the window
+              centerMouse(windowName); //center our mouse on its screen
             }
-
-
-        } while (wpid == 0);
-
-        if (WIFEXITED(status)) {
-
-            std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
-            if (WEXITSTATUS(status) == 0){
-                result=0;
-            }
-            else{
-	      logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
-	      result=1;
-
-              //
-              // NOTE: If wrapping /usr/bin/time around a program that exits with signal = 25
-              //       time exits with status = 153 (128 + 25)
-              //
-              if (WEXITSTATUS(status) > 128 && WEXITSTATUS(status) <= 256) {
-                OutputSignalErrorMessageToExecuteLogfile(  WEXITSTATUS(status)-128,logfile );
+          }
+          else{ //if we could not find out anything about our expected window 
+          	if(windowName != "" && !windowExists(windowName)){ //If we had a window but it no longer exists (crashed/shut)
+          		windowName = "";  //reset it's name to nothing so we can begin searching again.
+              std::cout << "The students window shut midrun." << std::endl;
+          	}
+          }
+          wpid = waitpid(childPID, &status, WNOHANG);
+          if (wpid == 0){
+            // monitor time & memory usage
+            if (!time_kill && !memory_kill){
+                // sleep 1/10 of a second
+              if(window_mode && actions_taken < actions.size() && windowName != ""){ //if we still have actions (keyboard events, etc.) to give the child
+                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                  childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
+                  memory_kill, time_kill); //Takes each action on the window. Requires delay parameters to do delays.
               }
-
+              else{ //if we are out of actions or there were none, delay 1/10th second.
+                delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
+                  rss_memory, allowed_rss_memory, memory_kill, time_kill);
+              }
             }
+         }
+      } while (wpid == 0);
+      if (WIFEXITED(status)) {
+        std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
+        if (WEXITSTATUS(status) == 0){
+            result=0;
         }
-        else if (WIFSIGNALED(status)) {
-            int what_signal =  WTERMSIG(status);
-	    OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
-            std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
-            if (WTERMSIG(status) == 0){
-	      result=0;
-            }
-            else{
-	      result=2;
-            }
+        else{
+          logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
+          result=1;
+          //
+          // NOTE: If wrapping /usr/bin/time around a program that exits with signal = 25
+          //       time exits with status = 153 (128 + 25)
+          //
+          if (WEXITSTATUS(status) > 128 && WEXITSTATUS(status) <= 256) {
+            OutputSignalErrorMessageToExecuteLogfile(  WEXITSTATUS(status)-128,logfile );
+          }
         }
-        if (time_kill){
-	  logfile << "ERROR: Maximum run time exceeded" << std::endl;
-	  logfile << "Program Terminated" << std::endl;
-	  result=3;
+      }
+      else if (WIFSIGNALED(status)) {
+        int what_signal =  WTERMSIG(status);
+        OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
+        std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
+        if (WTERMSIG(status) == 0){
+          result=0;
         }
-        if (time_kill){
-	  logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
-	  logfile << "Program Terminated" << std::endl;
-	  result=3;
+        else{
+          result=2;
         }
-        std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
-        parent_result = system("date");
-        assert (parent_result == 0);
+      }
+      if (time_kill){
+	     logfile << "ERROR: Maximum run time exceeded" << std::endl;
+	     logfile << "Program Terminated" << std::endl;
+	     result=3;
+      }
+      if (memory_kill){
+	     logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
+	     logfile << "Program Terminated" << std::endl;
+	     result=3;
+      }
+      std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
+      parent_result = system("date");
+      assert (parent_result == 0);
     }
     std::cout <<"Result: "<<result<<std::endl;
     return result;
@@ -943,3 +953,71 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 
 // =====================================================================================
 // =====================================================================================
+
+
+/**
+* Tests to see if the student has used too much memory.
+*/
+bool memory_ok(int rss_memory, int allowed_rss_memory){
+  if(rss_memory > allowed_rss_memory){
+      return false;
+  }
+  else{
+      return true;
+  }
+}
+
+/**
+* Tests to see if the student has used too much time.
+*/
+bool time_ok(float elapsed, float seconds_to_run){
+  // allow 10 extra seconds for differences in wall clock
+  // vs CPU time (imperfect solution)
+  if(elapsed > seconds_to_run + 10.0f){
+      return false;
+  }
+  else{
+      return true;
+  }
+}
+
+/**
+* Delays for a number of microseconds, checking the student's memory and time consumption at intervals.
+*/
+bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &elapsed, float& next_checkpoint, 
+                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill){
+  float time_left = sleep_time_in_microseconds;
+  while(time_left > 0){
+    if(time_left > 100000){ //while we have more than 1/10th second left. 
+      time_left -= 100000; //decrease the amount of time left by 1/10th of a second.
+      usleep(100000); //sleep for 1/10th of a second
+      elapsed += .1; //and increment time elapsed by 1/10th second.
+    }
+    else{ //otherwise, if there is less than 1/10th second left
+      usleep(time_left); //sleep for that amount of time
+      elapsed+=time_left/1000000.0f; //Increment elapsed by the amount of time (in seconds)
+      time_left = 0.0f; //and set time left to be zero.
+    }
+    if (elapsed >= next_checkpoint){ //if it is time to update our knowledge of the student's memory usage, do so.
+      rss_memory = resident_set_size(childPID);
+      std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
+      next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
+    }
+
+    if (!time_ok(elapsed, seconds_to_run)) { //If the student's program ran too long
+      // terminate for excessive time
+      std::cout << "Killing child process " << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
+      TerminateProcess(elapsed,childPID); //kill it.
+      time_kill=1;
+      return true;
+    }
+    if (!memory_ok(rss_memory, allowed_rss_memory)){ //if the student's program used too much memory
+      // terminate for excessive memory usage (RSS = resident set size = RAM)
+      memory_kill=1;
+      TerminateProcess(elapsed,childPID); //kill it.
+      std::cout << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
+      return true;
+    } 
+  }
+  return false;
+}

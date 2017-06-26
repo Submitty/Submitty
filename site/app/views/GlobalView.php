@@ -92,15 +92,11 @@ HTML;
             <li>
                 <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Excused%20Absense%20Extensions">Excused Absense Extensions</a>
             </li>
-
-            <li>
-                <a href="{$ta_base_url}/account/admin-grade-summaries.php?course={$course}&semester={$semester}&this=Grade%20Summaries">Grade Summaries</a>
-            </li>
             <li>
                 <a href="{$ta_base_url}/account/admin-csv-report.php?course={$course}&semester={$semester}&this=CSV%20Report">CSV Report</a>
             </li>
             <li>
-                <a href="{$ta_base_url}/account/admin-hw-report.php?course={$course}&semester={$semester}&this=Homework%20Report">HWReport</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">HWReports and Grade Summaries</a>
             </li>
 
 HTML;
