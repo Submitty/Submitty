@@ -1,10 +1,4 @@
 {
-    "grading_parameters" : {
-	"TOTAL_POINTS" : 100,
-	"AUTO_POINTS" : 20,
-	"TA_POINTS" : 80,
-	"EXTRA_CREDIT_POINTS" : 0
-    },
     
     "resource_limits" : {
         "RLIMIT_NPROC" : 10
@@ -26,15 +20,14 @@
 	    "command" : "/usr/bin/gcc -Wall -Werror -o a.out *.c -lm",
 	    "details" : "/usr/bin/gcc -Wall -Werror -o a.out *.c -lm",
 	    "executable_name" : "a.out",
-	    "points" : 10
+	    "points" : 5
 	},
 
 	{
-	    "title" : "test with sort and cut",
+	    "title" : "NORMAL GRADING:  (hiding the details)",
 	    "command" : [
 		"./a.out",
 		"sort < test02_STDOUT_0.txt",
-                // NOTE: double backslash is a space character
 		"cut -d \\  -f2-3 < test02_STDOUT_1.txt"
 		],
 	    "details" : "./a.out",
@@ -44,45 +37,104 @@
 		    "method" : "errorIfEmpty",
 		    "actual_file" : "STDOUT_0.txt",
 		    "show_actual" : "always",
-                    "deduction" : 0.2
+                    "deduction" : 0.0
 		},
 		{
 		    "method" : "errorIfEmpty",
 		    "actual_file" : "STDOUT_1.txt",
-		    "show_actual" : "always", // "never",
+		    "show_actual" : "never",
 		    "show_message" : "never",
-                    "deduction" : 0.2
+                    "deduction" : 0.0
 		},
 		{
 		    "method" : "myersDiffbyLinebyChar",
 		    "actual_file" : "STDOUT_2.txt",
-                    "expected_file" : "sample_output.txt",
-		    "show_actual" : "always", //"never",
+                    "expected_file" : "second_third.txt",
+		    "show_actual" : "never",
 		    "show_expected" : "never",
                     "deduction" : 1.0,
 		    "failure_message" : "Please re-read the assignment instructions.",
 		    "show_message" : "always"
+		}
+	    ]
+	},
+
+	{
+	    "title" : "BEHIND THE SCENES:  raw output",
+	    "command" : "./a.out",
+	    "details" : "./a.out",
+	    "points" : 5,
+	    "validation" : [
+		{
+		    "method" : "myersDiffbyLinebyChar",
+		    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "raw_output.txt",
+		    "failure_message" : "Your raw output does not match.",
+		    "show_message" : "on_failure",
+                    "deduction" : 1.0
+		}
+	    ]
+	},
+
+	{
+	    "title" : "BEHIND THE SCENES:  checking the sorted output",
+	    "command" : [
+		"./a.out",
+		"sort < test04_STDOUT_0.txt"
+		],
+	    "details" : "./a.out",
+	    "points" : 5,
+	    "validation" : [
+                {
+		    "method" : "warnIfEmpty",
+		    "actual_file" : "STDOUT_0.txt",
+		    "show_actual" : "never",
+                    "deduction" : 0.0
 		},
 		{
-		    "method" : "errorIfNotEmpty",
-		    "actual_file" : "STDERR_0.txt",
-		    "show_message" : "never",
+		    "method" : "myersDiffbyLinebyChar",
+		    "actual_file" : "STDOUT_1.txt",
+                    "expected_file" : "sorted_output.txt",
+		    "failure_message" : "ERROR: Your sorted output does not match.",
+		    "show_message" : "on_failure",
+                    "deduction" : 1.0
+		}
+	    ]
+	},
+
+	{
+	    "title" : "BEHIND THE SCENES:  checking the second and third words",
+	    "command" : [
+		"./a.out",
+		"sort < test05_STDOUT_0.txt",
+		"cut -d \\  -f2-3 < test05_STDOUT_1.txt"
+		],
+	    "details" : "./a.out",
+	    "points" : 5,
+	    "validation" : [
+		{
+		    "method" : "warnIfEmpty",
+		    "actual_file" : "STDOUT_0.txt",
 		    "show_actual" : "never",
-                    "deduction" : 0.2
+		    "show_message" : "never",
+                    "deduction" : 0.0
 		},
 		{
-		    "method" : "errorIfNotEmpty",
-		    "actual_file" : "STDERR_1.txt",
+		    "method" : "warnIfEmpty",
+		    "actual_file" : "STDOUT_1.txt",
 		    "show_actual" : "never",
 		    "show_message" : "never",
-                    "deduction" : 0.2
+                    "deduction" : 0.0
 		},
 		{
-		    "method" : "errorIfNotEmpty",
-		    "actual_file" : "STDERR_2.txt",
-		    "show_actual" : "never",
-		    "show_message" : "never",
-                    "deduction" : 0.2
+		    "method" : "myersDiffbyLinebyChar",
+		    "actual_file" : "STDOUT_2.txt",
+                    "expected_file" : "second_words.txt",
+		    "show_actual" : "always",
+		    "show_expected" : "always",
+                    "deduction" : 1.0,
+		    "failure_message" : "ERROR: Your second word output does not match.",
+		    "show_message" : "on_failure"
 		}
 	    ]
 	}
