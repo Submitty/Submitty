@@ -1021,3 +1021,11 @@ progress::-webkit-progress-value {
     height: 14px;
     width: 14px;
 }
+
+.rubric-title {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    float: left;
+    text-align: left;
+}

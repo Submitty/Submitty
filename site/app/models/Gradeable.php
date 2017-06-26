@@ -739,26 +739,6 @@ class Gradeable extends AbstractModel {
         return $this->result_details;
     }
 
-    public function getMetaFiles() {
-        return $this->meta_files;
-    }
-
-    public function getSubmittedFiles() {
-        return $this->submitted_files;
-    }
-
-    public function getSvnFiles() {
-        return $this->svn_files;
-    }
-
-    public function getResultsFiles() {
-        return $this->results_files;
-    }
-
-    public function getTestcases() {
-        return $this->testcases;
-    }
-
     public function hasAssignmentMessage() {
         return trim($this->message) !== "";
     }
@@ -817,68 +797,6 @@ class Gradeable extends AbstractModel {
 
     public function isGradeByRegistration() {
         return $this->grade_by_registration;
-    }
-
-    /**
-     * @return User
-     */
-    public function getUser() {
-        return $this->user;
-    }
-
-    public function getComponents() {
-        return $this->components;
-    }
-
-    public function setUser(User $user) {
-        $this->user = $user;
-    }
-
-    public function setGrader(User $user) {
-        $this->grader = $user;
-    }
-
-    /**
-     * @return User
-     */
-    public function getGrader() {
-        return $this->grader;
-    }
-
-    public function setOverallComment($comment) {
-        $this->overall_comment = $comment;
-    }
-
-    public function getOverallComment() {
-        return $this->overall_comment;
-    }
-
-    public function setStatus($status) {
-        $this->status = $status;
-    }
-
-    public function getStatus() {
-        return $this->status;
-    }
-
-    public function setActiveVersion($version) {
-        $this->active_version = $version;
-    }
-
-    public function getSubmissionTime() {
-        return $this->submission_time->format("m/d/Y h:i:s A");
-    }
-    
-    public function getGdId() {
-        return $this->gd_id;
-    }
-
-    public function setGdId($gd_id) {
-        $this->gd_id = $gd_id;
-    }
-
-    public function getUserViewedDate() {
-        return $this->user_viewed_date;
     }
 
     public function updateUserViewedDate() {

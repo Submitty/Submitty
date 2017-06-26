@@ -517,10 +517,6 @@ HTML;
     </div>
 </div>
 
-<div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
-    <span class="grading_label">Grading Rubric</span>
-</div>
-
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
     <span class="grading_label">Submissions and Results Browser</span>
     <button class="btn btn-default" onclick="openAll()">Expand All</button>
@@ -592,9 +588,289 @@ HTML;
         $return .= <<<HTML
     </div>
 </div>
+HTML;
+
+        $user = $gradeable->getUser();
+        $return .= <<<HTML
 
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
     <span class="grading_label">Student Information</span>
+    <div class="inner-container">
+        <div class="rubric-title">
+            <b>{$user->getFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
+            Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
+            Submitted: {$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
+        </div>
+HTML;
+        $cookie_auto = ((isset($_COOKIE['auto']) && intval($_COOKIE["auto"]) == 1) ? "checked" : "");
+        $return .= <<<HTML
+        <form id="rubric_form" action="" method="post">
+            <input type="checkbox" style="margin-right:5px;" id="rubric-autoscroll-checkbox" {$cookie_auto} />
+                <span style="display: inline-block; margin-top:15px;">Rubric Auto Scroll</span>
+HTML;
+
+        /*/Begin late day calculation///////////////////////////////////////////////////////////////////////////////
+        $due_string = $gradeable->getDueDate()->format('Y-m-d H:i:s');
+        $ldu = new LateDaysCalculation();
+        $ld_table = $ldu->generate_table_for_user_date($s_user_id, $eg_due_date);
+        $output .= $ld_table;
+        $gradeable= $ldu->get_gradeable($s_user_id, $eg->g_id);
+        $status = $gradeable['status'];
+        $late_charged = $gradeable['late_days_charged'];
+        //End late day calculation/////////////////////////////////////////////////////////////////////////////////
+
+        if($status != "Good" && $status != "Late") {
+            $color = "red";
+            $return .= <<<HTML
+        <script>
+            $('body').css('background-color', 'red');
+            $("#rubric_form").submit(function(event){
+                var confirm = window.confirm("This submission has a bad status. Are you sure you want to submit a grade for it?");
+                if(!confirm){
+                    event.preventDefault();
+                }
+            });
+        </script>
+HTML;
+        }
+        $return .= <<<HTML
+        <b>Status:</b> <span style="color: {$color};">{$status}</span><br />*/
+        $return .= <<<HTML
+    </div>
+</div>
+
+<div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
+    <span class="grading_label">Grading Rubric</span>
+    <div class="inner-container">
+        <table class="table table-bordered table-striped" id="rubric-table">
+            <tbody>
+HTML;
+
+$c = 1;
+
+$precision = floatval($eg->eg_details['eg_precision']);
+
+foreach ($eg->questions as $question) {
+    // hide auto-grading if it has no value
+    if ($question['gc_max_value'] == 0){
+        continue;
+    }
+    // FIXME add autograding extra credit 
+    else if($question['gcd_score'] ==0 && substr($question['gc_title'], 0, 12) === "AUTO-GRADING"){
+        $question['gcd_score'] = $eg->autograding_points;
+    }
+    
+    $disabled = '';
+    if(substr($question['gc_title'], 0, 12) === "AUTO-GRADING"){
+        $disabled = 'disabled';
+    }
+    
+    $output .= <<<HTML
+                        <tr>
+HTML;
+    $penalty = !(intval($question['gc_max_value']) > 0);
+    $message = htmlentities($question["gc_title"]);
+    $note = htmlentities($question["gc_ta_comment"]);
+    if ($note != "") {
+        $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
+    }
+
+    //adds an icon depending on the question type (extra credit, normal, penalty)
+    //adds background color as well.
+    if($question['gc_is_extra_credit'] == true) {
+        $output .= <<<HTML
+                            <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
+                                <i class="icon-plus"></i> <b>{$message}</b> {$note}
+HTML;
+    }
+    else if($penalty) {
+        $output .= <<<HTML
+                            <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
+                                <i class="icon-minus"></i> <b>{$message}</b> {$note}
+HTML;
+    }
+    else {
+        $output .= <<<HTML
+                            <td style="font-size: 12px;" colspan="4">
+                                <b>{$message}</b> {$note}
+HTML;
+    }
+
+    $student_note = htmlentities($question['gc_student_comment']);
+    if ($student_note != ''){
+        $student_note = "<div style='margin-bottom:5px; color:#777;'><i><b>Note to Student: </b>" . $student_note . "</i></div>";
+        
+    }
+    $output .= <<<HTML
+                                {$student_note}
+                            </td>
+                        </tr>
+HTML;
+
+    $comment = ($question['gcd_component_comment'] != "") ? "in" : "";
+    
+    $min_val = (intval($question['gc_max_value']) > 0) ? 0 : intval($question['gc_max_value']);
+    $max_val = (intval($question['gc_max_value']) > 0) ? intval($question['gc_max_value']) : 0;
+    if($question['gc_is_extra_credit'] == true) {
+        $output .= <<<HTML
+    <tr style="background-color: #f9f9f9;">
+                            <td style="white-space:nowrap; vertical-align:middle; text-align:center; background-color: #D8F2D8;" colspan="1"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
+                                min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
+                                style="width:50px; resize:none;" {$disabled}></textarea><strong> / {$question['gc_max_value']}</strong></td>
+                            <td style="width:98%; background-color: #D8F2D8;" colspan="3">
+                                <div id="rubric-{$c}">
+                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; resize:none; float:left;" 
+                                        placeholder="Message for the student..." comment-position="0" {$disabled}>{$question['gcd_component_comment']}</textarea>
+HTML;
+    }
+    else if($penalty) {
+        $output .= <<<HTML
+    <tr style="background-color: #f9f9f9;">
+                            <td style="white-space:nowrap; vertical-align:middle; text-align:center; background-color: #FAD5D3;" colspan="1"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
+                                min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
+                                style="width:50px; resize:none;" {$disabled}></textarea><strong> / {$question['gc_max_value']}</strong></td>
+                            <td style="width:98%; background-color: #FAD5D3;" colspan="3">
+                                <div id="rubric-{$c}">
+                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; resize:none; float:left;" 
+                                        placeholder="Message for the student..." comment-position="0" {$disabled}>{$question['gcd_component_comment']}</textarea>
+HTML;
+    }
+    else {
+        $output .= <<<HTML
+    <tr style="background-color: #f9f9f9;">
+                            <td style="white-space:nowrap; vertical-align:middle; text-align:center;" colspan="1"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
+                                min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
+                                style="width:50px; resize:none;" {$disabled}></textarea><strong> / {$question['gc_max_value']}</strong></td>
+                            <td style="width:98%;" colspan="3">
+                                <div id="rubric-{$c}">
+                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; resize:none; float:left;" 
+                                        placeholder="Message for the student..." comment-position="0" {$disabled}>{$question['gcd_component_comment']}</textarea>
+HTML;
+    }
+
+    $comment = htmlspecialchars($question['gcd_component_comment']);
+    if ($comment != "") {
+        $output .= <<<HTML
+                                    <div>
+                                        <a class="btn" name="comment-{$question["gc_order"]}-up" style="border-radius: 0px; padding:0px;" onclick="updateCommentBox_{$question["gc_order"]}(-1);"
+                                           disabled="true"><i class="icon-chevron-up" style="height:20px; width:13px;"></i></a>
+                                        <br/>
+                                        <a class="btn" name="comment-{$question["gc_order"]}-down" style="border-radius: 0px; padding:0px;" onclick="updateCommentBox_{$question["gc_order"]}(1);">
+                                            <i class="icon-chevron-down" style="height:20px; width:13px;"></i>
+                                        </a>
+                                    </div>
+                                    <script type="text/javascript">
+                                        function updateCommentBox_{$question["gc_order"]}(delta)
+                                        {
+                                            var pastComments = [];
+                                            pastComments[0] = "{$comment}";
+
+HTML;
+        $i = 1;
+        $output .= <<<JS
+
+                                            var new_position = parseInt($('[name=comment-{$question["gc_order"]}]').attr("comment-position"));
+                                            new_position += delta;
+
+                                            if(new_position >= pastComments.length - 1)
+                                            {
+                                                new_position = pastComments.length - 1;
+                                                $('a[name=comment-{$question["gc_order"]}-down]').attr("disabled", "true");
+                                            }
+                                            else
+                                            {
+                                                $('a[name=comment-{$question["gc_order"]}-down]').removeAttr("disabled");
+                                            }
+
+                                            if(new_position <= 0)
+                                            {
+                                                new_position = 0;
+                                                $('a[name=comment-{$question["gc_order"]}-up]').attr("disabled", "true");
+                                            }
+                                            else
+                                            {
+                                                $('a[name=comment-{$question["gc_order"]}-up]').removeAttr("disabled");
+                                            }
+
+                                            var textarea = $('textarea[name=comment-{$question["gc_order"]}]');
+                                            textarea.attr("comment-position", new_position);
+                                            textarea.html(pastComments[new_position]);
+                                        }
+
+JS;
+        $output .= "                                    </script>";
+    }
+    $output .= <<<HTML
+
+                                </div>
+                            </td>
+                        </tr>
+HTML;
+    $c++;
+}
+
+if(isset($_GET["individual"])) {
+    $output .= <<<HTML
+                        <tr>
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></td>
+                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="3"><strong id="score_total">0 / {$eg->eg_details['eg_total']} &emsp;&emsp;&emsp;
+                            AUTO-GRADING {$eg->autograding_points} / {$eg->autograding_max}</strong></td>
+                        </tr>
+HTML;
+}
+else {
+    $output .= <<<HTML
+                        <tr>
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;" colspan="1"><strong>TOTAL</strong></td>
+                            <td style="background-color: #EEE; border-top: 1px solid #CCC;" colspan="1"><strong id="score_total">0 / {$eg->eg_details['eg_total']}&emsp;&emsp;&emsp;
+                            AUTO-GRADING {$eg->autograding_points} / {$eg->autograding_max}</strong></td>
+                        </tr>
+HTML;
+}
+
+$output .= <<<HTML
+                    </tbody>
+                </table>
+                <div style="width:100%;"><b>General Comment:</b></div>
+                <textarea name="comment-general" rows="5" style="width:98%; resize:none;" 
+                          placeholder="Overall message for student about the gradeable...">{$eg->eg_details['gd_overall_comment']}</textarea>
+HTML;
+if (isset($eg->original_grader)) {
+    $output .= <<<HTML
+    <div style="width:100%; height:40px;">
+        Graded By: {$eg->original_grader}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br /><br />
+    </div>
+HTML;
+}
+else { //Adding this checkbox to simplify checking for grader overwrite.  It's hidden from view so that the first time someone grades, $_POST['overwrite'] is guarenteed to exist
+    $output .= <<<HTML
+    <input type='checkbox' class='hidden' name='overwrite' value='1' checked='checked' style='display:none;' /> 
+HTML;
+}
+                
+if (!($now < new DateTime($eg->eg_details['g_grade_start_date'])) && $eg->eg_details['eg_total'] > 0) {
+    if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded)) {
+        $output .= <<<HTML
+        <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>
+HTML;
+    } else {
+        $output .= <<<HTML
+        <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);"/>
+HTML;
+    }
+}
+else {
+    $output .= <<<HTML
+        <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
+        <div style="width:100%; text-align:right; color:#777;">This homework has not been opened for grading.</div>
+HTML;
+}
+
+
+$output .= <<<HTML
+            </form>
+
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -731,7 +1007,7 @@ HTML;
             var expires = "; expires="+date.toGMTString();
         }
         else var expires = "";
-        document.cookie = name+"="+value+expires+"; domain=."+document.domain+"; path=/";
+        document.cookie = name+"="+value+expires+"; path=/";
     }
 
     function eraseCookie(name) {
@@ -842,8 +1118,12 @@ HTML;
         updateCookies();
     });
 
-    /*$("#grading_rubric-autoscroll-checkbox").change(function() {
-        if($("#grading_rubric-autoscroll-checkbox").is(':checked')) {
+    if($("#rubric-autoscroll-checkbox").is(':checked')) {
+        $('#grading_rubric').css("overflow-y", "hidden");
+    }
+
+    $("#rubric-autoscroll-checkbox").change(function() {
+        if($("#rubric-autoscroll-checkbox").is(':checked')) {
             createCookie('auto',1,1000);
             $('#grading_rubric').css("overflow-y", "hidden");
         }
@@ -854,11 +1134,11 @@ HTML;
     });
 
     $('.content').scroll(function() {
-        if($("#grading_rubric-autoscroll-checkbox").is(':checked')) {
+        if($("#rubric-autoscroll-checkbox").is(':checked')) {
             var scrollPercentage = this.scrollTop / (this.scrollHeight-this.clientHeight);
-            document.getElementById('rubric').scrollTop = scrollPercentage * (document.getElementById('rubric').scrollHeight-document.getElementById('rubric').clientHeight);
+            document.getElementById('grading_rubric').scrollTop = scrollPercentage * (document.getElementById('grading_rubric').scrollHeight-document.getElementById('grading_rubric').clientHeight);
         }
-    });*/
+    });
 
     window.onkeydown = function(e) {
         if (e.target.tagName == "TEXTAREA" || e.target.tagName == "INPUT" || e.target.tagName == "SELECT") return; // disable keyboard event when typing to textarea/input
