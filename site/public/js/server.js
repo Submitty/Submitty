@@ -584,6 +584,7 @@ function setupNumericTextCells() {
                                         $('#cell-'+$(this).parent().data("row")+'-'+(z-4)).val(text_data_table[i][z]);
                                         z++;
                                     }      
+                                    //triggers change here instad of in for loops to not start too many saves at once
                                     $('#cell-'+$(this).parent().data("row")+'-'+(0)).trigger("change");                               
                                     i = lines.length; //halts the for loop early to not waste resources
                                 }
