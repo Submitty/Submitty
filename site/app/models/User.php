@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\libraries\Core;
 use app\libraries\DatabaseUtils;
 
 /**
@@ -68,10 +69,12 @@ class User extends AbstractModel {
 
     /**
      * User constructor.
+     *
+     * @param Core  $core
      * @param array $details
      */
-    public function __construct($details) {
-        parent::__construct();
+    public function __construct(Core $core, $details) {
+        parent::__construct($core);
         if (count($details) == 0) {
             return;
         }

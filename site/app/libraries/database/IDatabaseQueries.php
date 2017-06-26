@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries\database;
+
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableVersion;
@@ -187,7 +188,19 @@ interface IDatabaseQueries {
      *
      * @param \app\models\Gradeable $gradeable
      */
+    public function saveGradeableData(Gradeable $gradeable);
+
+    public function insertGradeableData(Gradeable $gradeable);
     public function updateGradeableData(Gradeable $gradeable);
+    public function insertGradeableComponentData($gd_id, GradeableComponent $component);
+    public function updateGradeableComponentData($gd_id, GradeableComponent $component);
+
+    /**
+     * Given a gradeable component object, this updates all of the gradeable_component_data rows
+     *
+     * @param \app\models\GradeableComponent $component
+     */
+    public function saveGradeableComponentData(GradeableComponent $component);
 
     /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
@@ -265,6 +278,7 @@ interface IDatabaseQueries {
     /**
      * Return an array of Team objects for all teams on given gradeable
      * @param string $g_id
+     * @return \app\models\Team[]
      */
     public function getTeamsByGradeableId($g_id);
 

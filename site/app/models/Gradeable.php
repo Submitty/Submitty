@@ -44,19 +44,17 @@ use app\libraries\Utils;
  * @method User getUser()
  * @method void setUser(User $user)
  * @method GradeableComponent[] getComponents()
- * @method string getGrader()
+ * @method User getGrader()
  * @method void setGrader(User $user)
  * @method string getOverallComment()
  * @method void setOverallComment(string $comment)
  * @method int getStatus()
  * @method void setStatus(int $status)
- * @method int getGdId()
+ * @method int|null getGdId()
+ * @method void setGdId(int $gd_id)
  * @method getUserViewedDate()
  */
 class Gradeable extends AbstractModel {
-
-    /** @var Core */
-    protected $core;
     
     /** @property @var string Id of the gradeable (must be unique) */
     protected $id;
@@ -233,8 +231,7 @@ class Gradeable extends AbstractModel {
     protected $user_viewed_date = null;
 
     public function __construct(Core $core, $details, User $user = null) {
-        parent::__construct();
-        $this->core = $core;
+        parent::__construct($core);
         $this->id = $details['g_id'];
 
         $this->user = ($user === null) ? $this->core->getUser() : $user;
@@ -280,31 +277,49 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment');
+                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment',
+                            'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
+                            'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
+
+            $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
+                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order');
+            $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
+                                 'user_email', 'user_group');
+
             $bools = array('gc_is_text', 'gc_is_extra_credit');
             foreach ($fields as $key) {
                 if (isset($details['array_'.$key])) {
                     $details['array_'.$key] = DatabaseUtils::fromPGToPHPArray($details['array_'.$key], in_array($key, $bools));
                 }
             }
+
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {
                 $component_details = array();
-                $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                          'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order');
                 foreach ($component_fields as $key) {
                     $component_details[$key] = $details["array_{$key}"][$i];
                 }
+
+
 
                 if (isset($details['array_gcd_gc_id'])) {
                     for ($j = 0; $j < count($details['array_gcd_gc_id']); $j++) {
                         if ($details['array_gcd_gc_id'][$j] === $component_details['gc_id']) {
                             $component_details['gcd_score'] = $details['array_gcd_score'][$j];
                             $component_details['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
+
+                            if (isset($details['array_gcd_user_id'][$j])) {
+                                $user_details = array();
+                                foreach ($user_fields as $key) {
+                                    $user_details[$key] = $details["array_gcd_{$key}"][$j];
+                                }
+                                $component_details['gcd_grader'] = $this->core->loadModel(User::class, $user_details);
+                            }
+
                             break;
                         }
                     }
                 }
-                $this->components[$component_details['gc_order']] = new GradeableComponent($component_details);
+                $this->components[$component_details['gc_order']] = $this->core->loadModel(GradeableComponent::class, $component_details);
 
                 if (!$this->components[$component_details['gc_order']]->getIsText()) {
                     $max_value = $this->components[$component_details['gc_order']]->getMaxValue();
@@ -392,7 +407,7 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['testcases'])) {
             foreach ($details['testcases'] as $idx => $testcase) {
-                $testcase = new GradeableTestcase($this->core, $testcase, $idx);
+                $testcase = $this->core->loadModel(GradeableTestcase::class, $testcase, $idx);
                 $this->testcases[] = $testcase;
                 if ($testcase->getPoints() > 0) {
                     if ($testcase->isHidden() && $testcase->isExtraCredit()) {
@@ -798,6 +813,16 @@ class Gradeable extends AbstractModel {
     }
 
     public function saveData() {
-        $this->core->getQueries()->updateGradeableData($this);
+        $this->core->getDatabase()->beginTransaction();
+        if ($this->gd_id === null) {
+            $this->gd_id = $this->core->getQueries()->insertGradeableData($this);
+        }
+        elseif ($this->modified) {
+            $this->core->getQueries()->updateGradeableData($this);
+        }
+        foreach ($this->components as $component) {
+            $component->saveData($this->gd_id);
+        }
+        $this->core->getDatabase()->commit();
     }
 }

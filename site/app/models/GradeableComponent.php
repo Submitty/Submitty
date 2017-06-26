@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+use app\libraries\Core;
 
 /**
  * Class GradeableComponent
@@ -15,6 +16,8 @@ namespace app\models;
  * max score to 0.
  *
  * @method int getId()
+ * @method int getGdId()
+ * @method void setGdId(int $id)
  * @method string getTitle()
  * @method string getTaComment()
  * @method string getStudentComment()
@@ -26,6 +29,8 @@ namespace app\models;
  * @method setScore(float $score)
  * @method string getComment()
  * @method void setComment(string $comment)
+ * @method User getGrader()
+ * @method void setGrader(User $grader)
  * @method bool getHasGrade()
  */
 class GradeableComponent extends AbstractModel {
@@ -50,11 +55,14 @@ class GradeableComponent extends AbstractModel {
     /** @property @var string Comment that grader has put on the component while grading for student */
     protected $comment = "";
 
+    /** @property @var User */
+    protected $grader = null;
+
     /** @property @var bool */
     protected $has_grade = false;
 
-    public function __construct($details) {
-        parent::__construct();
+    public function __construct(Core $core, $details=array()) {
+        parent::__construct($core);
         $this->id = $details['gc_id'];
         $this->title = $details['gc_title'];
         $this->ta_comment = $details['gc_ta_comment'];
@@ -65,6 +73,7 @@ class GradeableComponent extends AbstractModel {
         $this->order = $details['gc_order'];
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
+            $this->grader = isset($details['gcd_grader']) ? $details['gcd_grader'] : null;
             $this->score = floatval($details['gcd_score']);
             if (!$this->is_text) {
                 if ($this->max_value > 0) {
@@ -87,6 +96,25 @@ class GradeableComponent extends AbstractModel {
             $this->comment = $details['gcd_component_comment'];
             if ($this->comment === null) {
                 $this->comment = "";
+            }
+        }
+
+    }
+
+    /**
+     * @raises \BadMethodCallException
+     */
+    public function setId() {
+        throw new \BadMethodCallException('Call to undefined method '.__CLASS__.'::setId()');
+    }
+
+    public function saveData($gd_id) {
+        if ($this->modified) {
+            if ($this->has_grade) {
+                $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
+            }
+            else {
+                $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
             }
         }
     }

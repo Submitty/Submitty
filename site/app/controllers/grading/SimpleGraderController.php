@@ -118,14 +118,10 @@ class SimpleGraderController extends AbstractController  {
                         return $response;
                     }
                     $component->setScore($_POST['scores'][$component->getId()]);
+                    $component->setGrader($this->core->getUser());
                 }
             }
         }
-
-        $gradeable->setUser($user);
-        $gradeable->setGrader($this->core->getUser());
-        $gradeable->setStatus(1);
-        $gradeable->setActiveVersion(1);
 
         $this->core->getQueries()->updateGradeableData($gradeable);
 

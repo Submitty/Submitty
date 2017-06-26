@@ -495,6 +495,9 @@ function setupNumericTextCells() {
         }
         var scores = {};
         var total = 0;
+        var parent = $(this).parent().parent();
+        scores[$(this).data('id')] = this.value;
+
         $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
             $(this).children(".option-small-box").each(function(){
                 if($(this).data('num') === true){
@@ -503,15 +506,12 @@ function setupNumericTextCells() {
                 if($(this).data('total') === true){
                     this.value = total;
                 }
-                else{
-                    scores[$(this).data("id")] = this.value;
-                }
             });
         });
 
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
-            {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
+            {'csrf_token': csrfToken, 'user_id': parent.data("user"), 'g_id': parent.data('gradeable'), scores: scores},
             function() {
                 $(elem).css("background-color", "#ffffff");
             },
