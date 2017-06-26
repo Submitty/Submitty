@@ -129,11 +129,11 @@
 		{
 		    "method" : "myersDiffbyLinebyChar",
 		    "actual_file" : "STDOUT_2.txt",
-                    "expected_file" : "second_words.txt",
+                    "expected_file" : "second_third.txt",
 		    "show_actual" : "always",
 		    "show_expected" : "always",
                     "deduction" : 1.0,
-		    "failure_message" : "ERROR: Your second word output does not match.",
+		    "failure_message" : "ERROR: Your second and third word output does not match.",
 		    "show_message" : "on_failure"
 		}
 	    ]

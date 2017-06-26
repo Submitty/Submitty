@@ -17,17 +17,23 @@ def initialize(test):
         os.mkdir(os.path.join(test.testcase_path, "assignment_config"))
     except OSError:
         pass
-    try:
-        os.mkdir(os.path.join(test.testcase_path, "data"))
-    except OSError:
-        pass
     subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-        os.path.join(test.testcase_path, "assignment_config")])
+                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+                     os.path.join(test.testcase_path, "assignment_config")])
+
+
+def cleanup(test):
+    subprocess.call(["rm", "-rf",
+                     os.path.join(test.testcase_path, "data")])
+    os.mkdir(os.path.join(test.testcase_path, "data"))
+    subprocess.call(["cp"] +
+                     glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output","*.txt")) +
+                     [os.path.join(test.testcase_path, "data")])
 
 
 @testcase
 def correct(test):
+    cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "correct.c"),
                      os.path.join(test.testcase_path, "data", "correct.c")])
@@ -35,11 +41,11 @@ def correct(test):
     test.run_run()
     test.run_validator()
     test.diff("results_grade.txt", "results_grade.txt_correct", "-b")
-    subprocess.call(["rm", os.path.join(test.testcase_path, "data", "correct.c")])
 
 
 @testcase
 def buggy(test):
+    cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "buggy.c"),
                      os.path.join(test.testcase_path, "data", "buggy.c")])
@@ -52,6 +58,7 @@ def buggy(test):
 
 @testcase
 def alternate(test):
+    cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "alternate.c"),
                      os.path.join(test.testcase_path, "data", "alternate.c")])
@@ -64,6 +71,7 @@ def alternate(test):
 
 @testcase
 def hello_world(test):
+    cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "hello_world.c"),
                      os.path.join(test.testcase_path, "data", "hello_world.c")])
