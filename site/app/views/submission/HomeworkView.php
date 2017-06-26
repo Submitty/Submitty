@@ -647,17 +647,17 @@ HTML;
 HTML;
                                     }
 
-                                    $myimage = $diff_viewer->getActualImageFilename();
-                                    if ($myimage != "") {
+                                    $myActualimage = $diff_viewer->getActualImageFilename();
+                                    if ($myActualimage != "") {
                                         // borrowed from file-display.php
-                                        $content_type = FileUtils::getContentType($myimage);
+                                        $content_type = FileUtils::getContentType($myActualimage);
                                         if (substr($content_type, 0, 5) === "image") {
                                            // Read image path, convert to base64 encoding
-                                           $imageData = base64_encode(file_get_contents($myimage));
+                                           $actualImageData = base64_encode(file_get_contents($myActualimage));
                                            // Format the image SRC:  data:{mime};base64,{data};
-                                           $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
+                                           $myActualimagesrc = 'data: '.mime_content_type($myActualimage).';charset=utf-8;base64,'.$actualImageData;
                                            // insert the sample image data
-                                           $return .= '<img src="'.$myimagesrc.'">';
+                                           $return .= '<img src="'.$myActualimagesrc.'">';
                                         }
                                     }
                                     else if ($diff_viewer->hasDisplayActual()) {
@@ -669,7 +669,36 @@ HTML;
                             </div>
 HTML;
 
-                                    if ($diff_viewer->hasDisplayExpected()) {
+                                
+
+
+                                    $myExpectedimage = $diff_viewer->getExpectedImageFilename();
+                                    if($myExpectedimage != "")
+                                    {
+                                        $return .= <<<HTML
+                                    <div class='diff-element'>
+                                    <h4>Expected {$description}</h4>
+HTML;
+                                    for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
+                                        $return .= <<<HTML
+                                    <br />
+HTML;
+                                        }
+                                        // borrowed from file-display.php
+                                        $content_type = FileUtils::getContentType($myExpectedimage);
+                                        if (substr($content_type, 0, 5) === "image") {
+                                           // Read image path, convert to base64 encoding
+                                           $expectedImageData = base64_encode(file_get_contents($myExpectedimage));
+                                           // Format the image SRC:  data:{mime};base64,{data};
+                                           $myExpectedimagesrc = 'data: '.mime_content_type($myExpectedimage).';charset=utf-8;base64,'.$expectedImageData;
+                                           // insert the sample image data
+                                           $return .= '<img src="'.$myExpectedimagesrc.'">';
+                                        }
+                                    $return .= <<<HTML
+                                    </div>
+HTML;
+                                    }
+                                    else if ($diff_viewer->hasDisplayExpected()) {
                                         $return .= <<<HTML
                             <div class='diff-element'>
                                 <h4>Expected {$description}</h4>

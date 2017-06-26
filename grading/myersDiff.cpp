@@ -54,7 +54,7 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
 	std::cout << "FOUND '" << files[i] << "'" << std::endl;
 	found = true;
       } else {
-	std::cout << "OOPS, does not exist: " << files[i] << std::endl;
+	       std::cout << "OOPS, does not exist: " << files[i] << std::endl;
       }
     }
     if (found) {
@@ -211,7 +211,6 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
 }
 
 TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j) {
-  std::cout << "################IMAGE DIFF################" << std::endl;
   std::string actual_file = j.value("actual_file","");
   std::string expected_file = j.value("expected_file","");
   std::string acceptable_threshold_str = j.value("acceptable_threshold","");
@@ -223,21 +222,28 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j) {
   actual_file = tc.getPrefix() + "_" + actual_file;
   actual_file = replace_slash_with_double_underscore(actual_file);
 
+  if (access(expected_file.c_str(), F_OK|R_OK ) == -1)
+  {
+        return new TestResults(0.0, {"ERROR: Professor image not found."});
+  }
+
+  if (access(actual_file.c_str(), F_OK|R_OK ) == -1)
+  {
+        return new TestResults(0.0, {"ERROR: Student image not found."});
+  }
+
   float acceptable_threshold = stringToFloat(acceptable_threshold_str,6); //window_utils function.
 
   std::cout << "About to compare " << actual_file << " and " << expected_file << std::endl;
+
+
   std::string command = "compare -metric RMSE " + actual_file + " " + expected_file + " NULL: 2>&1";
   std::string output = output_of_system_command(command.c_str()); //get the string
   std::cout << "captured the following:\n" << output << "\n" <<std::endl;
 
   std::vector<float> values = extractFloatsFromString(output); //window_utils function.
-  for(float f : values)
-  {
-    std::cout << f << std::endl;
-  }
-
   if(values.size() < 2){
-    return new TestResults(0.0, {"ERROR: File comparison failed because the system command couldn't be parsed."});
+    return new TestResults(0.0, {"ERROR: Image comparison failed; Images are incomparable."});
   }
 
   float difference = values[1];
@@ -246,7 +252,7 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j) {
   
 
   if(difference >= acceptable_threshold){
-    return new TestResults(0.0, {"ERROR: File not similar enough."});
+    return new TestResults(0.0, {"ERROR: Your image does not match the professor's."});
   }
    else{
          return new TestResults(1.0, {""});

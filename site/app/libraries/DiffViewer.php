@@ -30,7 +30,7 @@ class DiffViewer {
      * @var bool
      */
     private $has_expected = false;
-
+    private $expected_file_image = "";
     /**
      * @var bool
      */
@@ -106,16 +106,25 @@ class DiffViewer {
                 $this->display_actual = true;
 	        }
         }
-        
+
         if (!file_exists($expected_file) && $expected_file != "") {
             throw new \Exception("'{$expected_file}' could not be found.");
         }
         else if ($expected_file != "") {
-            $this->expected = file_get_contents($expected_file);
-            $this->has_expected = trim($this->expected) !== "" ? true : false;
-            $this->expected = explode("\n", $this->expected);
-            $this->display_expected = true;
+            //TODO: fix this hacky way to deal with images.
+            if (substr($expected_file,strlen($expected_file)-4,4) == ".png") {
+                $this->expected_file_image = $expected_file;
+                $this->display_expected = true; //DEBUG: Added.
+
+            }
+            else{
+                $this->expected = file_get_contents($expected_file);
+                $this->has_expected = trim($this->expected) !== "" ? true : false;
+                $this->expected = explode("\n", $this->expected);
+                $this->display_expected = true;
+            }
         }
+        
         
         if (!file_exists($diff_file) && $diff_file != "") {
             throw new \Exception("'{$diff_file}' could not be found.");
@@ -235,6 +244,10 @@ class DiffViewer {
 
     public function getActualImageFilename() {
     	return $this->actual_file_image;
+    }
+
+    public function getExpectedImageFilename() {
+        return $this->expected_file_image;
     }
 
 

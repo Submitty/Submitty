@@ -109,6 +109,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     "INFORMATION_MAINTENANCE_SET_TIME"
   };
   
+  std::cout << "!!!!DEBUG: MY PROGRAM IS " << my_program << std::endl;
   // ---------------------------------------------------------------
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/bin/cp") {
@@ -162,7 +163,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   }
 
   // ---------------------------------------------------------------
-  // CMAKE/MAKE COMPILATION
+  // cmake/make COMPILATION
   else if (my_program == "/usr/bin/cmake" ||
            my_program == "/usr/bin/make") {
     categories = restricted_categories;
