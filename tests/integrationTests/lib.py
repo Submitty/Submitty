@@ -131,7 +131,7 @@ def run_tests(names):
             totalmodules -= 1
     if totalmodules == len(names):
         with bold + green:
-            print("All modules passed")
+            print("All " + str(len(names)) + " modules passed")
     else:
         with bold + red:
             print(str(totalmodules) + "/" + str(len(names)) + " modules passed")
