@@ -13,7 +13,7 @@ class SimpleLateUser extends AbstractModel {
     protected $id;
     /** @property @var string The first name of the user */
     protected $first_name;
-    /** @property @var string The first name of the user */
+    /** @property @var string The preferred first name of the user if exists */
     protected $preferred_first_name = "";
     /** @property @var  string The name to be displayed by the system (either preferred name or first name) */
     protected $displayed_first_name;
