@@ -38,6 +38,7 @@ addons:
       - automake
       - cmake
       - clang
+      - gcc
       - g++-multilib
       - libseccomp2
       - seccomp
