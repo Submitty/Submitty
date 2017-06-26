@@ -521,7 +521,7 @@ function setupNumericTextCells() {
         );
     });
 
-    $("input[class=csvButtonUpload]").change(function() { //make it instructor only, strict parsing, instructions, firstname lastname, sample files, html fix in gradeable, lastdays, checks
+    $("input[class=csvButtonUpload]").change(function() { 
         var confirmation = window.confirm("WARNING! \nPreviously entered data may be overwritten! " +
         "This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for " +
         "student id and one column for each field. Columns and field types must match.");
@@ -548,6 +548,7 @@ function setupNumericTextCells() {
                         }
                     }
                     if (!breakOut){
+                    	var textChecker = 0;
                     	var numOfNumeric = 0;
                         var checkOnce = true;
                         $('.cell-all').each(function(){
@@ -555,6 +556,25 @@ function setupNumericTextCells() {
                             if (checkOnce) { //checks if the file has the right number of parameters
                                 if (csvLength !== 4 + $(this).parent().parent().data("numnumeric") + $(this).parent().parent().data("numtext")) {
                                     breakOut = true;
+                                    return false;
+                                }
+                                var k = 3; //checks if the file has the right number of numerics
+                                if($(this).parent().parent().data("numnumeric") > 0) {
+									for (k = 3; k < $(this).parent().parent().data("numnumeric") + 4; k++) {
+                                		if (isNaN(Number(text_data_table[0][k]))) {
+                                			breakOut = true;
+                                    		return false;                                    		
+                                		}
+                                	}
+                                }
+                                
+                                //checks if the file has the right number of texts
+                                while (k < csvLength) {
+                                	textChecker++;
+                                	k++;
+                                }
+                                if (textChecker !== $(this).parent().parent().data("numtext")) {
+                                	breakOut = true;
                                     return false;
                                 }
                                 numOfNumeric = $(this).parent().parent().data("numnumeric");
@@ -589,13 +609,11 @@ function setupNumericTextCells() {
                                     i = lines.length; //halts the for loop early to not waste resources
                                 }
                             }
-
                         }); 
                     }
                     if(breakOut) {
                         alert("CVS upload failed! Format file incorrect.");
-                    }
-                                         
+                    }                                         
                 }
                 reader.onerror = function(evt){
                     console.error(evt);
