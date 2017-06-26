@@ -34,7 +34,6 @@ function editUserForm(user_id) {
     $.ajax({
         url: url,
         success: function(data) {
-            console.log(data);
             var json = JSON.parse(data);
             var form = $("#edit-user-form");
             form.css("display", "block");

@@ -741,16 +741,6 @@ VALUES (?, ?, ?, ?)", $params);
         return $this->database->rows();
     }
 
-    function getNewestElectronicGradeableId() {
-    //IN:  No parameters
-    //OUT: Return gradeable ID of the newest gradeable, or NULL if there are no
-    //     gradeables in the system.
-    //PURPOSE:  Gradeable drop down menu is ordered with newest first, determined
-    //          by start date.
-        $this->database->query("SELECT g_id FROM gradeable WHERE g_gradeable_type=0 ORDER BY g_grade_start_date DESC LIMIT 1;");
-        return $this->database->rows();
-    }
-
     public function newTeam($g_id, $user_id) {
         $this->database->query("SELECT * FROM gradeable_teams ORDER BY team_id");
         $team_id_prefix = count($this->database->rows());
