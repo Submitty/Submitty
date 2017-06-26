@@ -46,6 +46,7 @@ echo -e "\nBeginning installation of the Submitty homework submission server\n"
 function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_REPOSITORY__|$SUBMITTY_REPOSITORY|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_TUTORIAL_DIR__|$SUBMITTY_TUTORIAL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCGI_USER__|$HWCGI_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
@@ -221,12 +222,16 @@ echo -e "Copy the sample files"
 
 # copy the files from the repo
 rsync -rtz ${SUBMITTY_REPOSITORY}/sample_files ${SUBMITTY_INSTALL_DIR}
+rsync -rtz ${SUBMITTY_REPOSITORY}/more_autograding_examples ${SUBMITTY_INSTALL_DIR}
 
 # root will be owner & group of these files
 chown -R  root:root ${SUBMITTY_INSTALL_DIR}/sample_files
+chown -R  root:root ${SUBMITTY_INSTALL_DIR}/more_autograding_examples
 # but everyone can read all that files & directories, and cd into all the directories
 find ${SUBMITTY_INSTALL_DIR}/sample_files -type d -exec chmod 555 {} \;
 find ${SUBMITTY_INSTALL_DIR}/sample_files -type f -exec chmod 444 {} \;
+find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type d -exec chmod 555 {} \;
+find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type f -exec chmod 444 {} \;
 
 
 ########################################################################################################################
