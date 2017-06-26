@@ -44,8 +44,8 @@ def correct(test):
     test.debug_print("log/run_output.txt")
     test.debug_print("log/validate_output.txt")
 
-    test.debug_print("test01_STDOUT.txt")
-    test.debug_print("test01_STDERR.txt")
+    test.debug_print("data/test01_STDOUT.txt")
+    test.debug_print("data/test01_STDERR.txt")
     
     test.diff("results_grade.txt", "results_grade.txt_correct", "-b")
 
