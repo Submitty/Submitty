@@ -548,10 +548,8 @@ function setupNumericTextCells() {
 
 
 function updateHomeworkExtensions2(data) {
-        console.log(data);
     var fd = new FormData($('#excusedAbsenseForm').get(0));
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension', 'info' : data});
-    console.log(url);
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
     $.ajax({
         url: url,
         type: "POST",
@@ -560,7 +558,6 @@ function updateHomeworkExtensions2(data) {
         cache: false,
         contentType: false,
         success: function(data) {
-            console.log(data);
             var json = JSON.parse(data);
             if(json['error']){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="myspecialid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'myspecialid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
@@ -575,23 +572,21 @@ function updateHomeworkExtensions2(data) {
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
             json['users'].forEach(function(elem){
-                var bits = ['<tr><td>' + elem[0], elem[1], elem[3], elem[4] + '</td></tr>'];
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
-            // $( ".option-input" ).reset();
             $('#user_id').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
+            $('#csv_upload').val(this.defaultValue);
         },
-        error: function(data) {
-            console.log("SAD, TRY AGAIN.");
-            console.log(data);
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
         }
     })
     return false;
 }
 
 function loadHomeworkExtensions(g_id) {
-    // console.log(g_id);
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
     $.ajax({
         url: url,
@@ -605,23 +600,20 @@ function loadHomeworkExtensions(g_id) {
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
             json['users'].forEach(function(elem){
-                var bits = ['<tr><td>' + elem[0], elem[1], elem[3], elem[4] + '</td></tr>'];
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
         },
         error: function() {
-            alert("SAD, TRY AGAIN.");
+            window.alert("Something went wrong. Please try again.");
         }
     });
 }
 
 
 function updateLateDays(data) {
-    console.log("into update late days");
-    console.log(data);
     var fd = new FormData($('#lateDayForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late'});
-    console.log(url);
     $.ajax({
         url: url,
         type: "POST",
@@ -629,10 +621,7 @@ function updateLateDays(data) {
         processData: false,
         contentType: false,
         success: function(data) {
-            console.log("in success");
-            console.log(data);
             var json = JSON.parse(data);
-            // console.log(json);
             if(json['error']){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="myspecialid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'myspecialid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
                 $('#messages').append(message);
@@ -644,42 +633,17 @@ function updateLateDays(data) {
                 $('#late_day_table').append('<tr><td colspan="4">No late days are currently entered.</td></tr>');
             }
             json['users'].forEach(function(elem){
-                var bits = ['<tr><td>' + elem[0], elem[1], elem[3], elem[4], elem[5] + '</td></tr>'];
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'] + '</td></tr>'];
                 $('#late_day_table').append(bits.join('</td><td>'));
             });
             $('#user_id').val(this.defaultValue);
             $('#datestamp').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
+            $('#csv_upload').val(this.defaultValue);
         },
-        error: function(data) {
-            console.log("SAD, TRY AGAIN.");
-            console.log(data);
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
         }
     })
     return false;
 }
-
-// function loadLateDays(g_id) {
-//     console.log(g_id);
-//     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_late_day_details', 'g_id': g_id});
-//     $.ajax({
-//         url: url,
-//         success: function(data) {
-//             var json = JSON.parse(data);
-//             var form = $("#load-late-days");
-//             $('#my_table tr:gt(0)').remove();
-//             var title = '<div class="option-title" id="title">Current Late Days for ' + json['gradeable_id'] + '</div>';
-//             $('#title').replaceWith(title);
-//             if(json['users'].length === 0){
-//                 $('#my_table').append('<tr><td colspan="4">No additional late days are currently entered.</td></tr>');
-//             }
-//             json['users'].forEach(function(elem){
-//                 var bits = ['<tr><td>' + elem[0], elem[1], elem[3], elem[4] + '</td></tr>'];
-//                 $('#my_table').append(bits.join('</td><td>'));
-//             });
-//         },
-//         error: function() {
-//             alert("SAD, TRY AGAIN.");
-//         }
-//     });
-// }

@@ -9,6 +9,7 @@ use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableVersion;
 use app\models\User;
+use app\models\SimpleLateUser;
 use app\models\Team;
 
 class DatabaseQueriesPostgresql implements IDatabaseQueries{
@@ -835,8 +836,14 @@ VALUES (?, ?, ?, ?)", $params);
           -- AND u.user_group=4
         ORDER BY
           user_email ASC, since_timestamp DESC;");
-      return $this->database->rows(); 
+
+      $return = array();
+      foreach($this->database->rows() as $row){
+        $return[] = new SimpleLateUser($row);
+      }
+      return $return;
     }
+
 
     public function getUsersWithExtensions($gradeable_id) {
     //IN:  gradeable ID from database
@@ -853,7 +860,12 @@ VALUES (?, ?, ?, ?)", $params);
           AND late_day_exceptions IS NOT NULL
           AND late_day_exceptions>0
         ORDER BY user_email ASC;", array($gradeable_id));
-      return $this->database->rows();
+
+      $return = array();
+      foreach($this->database->rows() as $row){
+        $return[] = new SimpleLateUser($row);
+      }
+      return $return;
     }
 
     public function updateLateDays($user_id, $timestamp, $days){

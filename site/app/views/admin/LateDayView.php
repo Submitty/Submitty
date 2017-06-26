@@ -5,7 +5,7 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class LateDayView extends AbstractView {
-    public function displayLateDays($user_table) {
+    public function displayLateDays($users) {
         $return = <<<HTML
 <div type="hidden" id="message"></div>
 <div class="content">
@@ -26,12 +26,12 @@ class LateDayView extends AbstractView {
                     <span class="tooltiptext">Do not use column headers. CSV must be of the following form:<br>student_id,MM/DD/YY,late_days</span>
                 </i><br>
             </div>
-            <div style="padding-bottom:20px;"><input type="file" name="csv_upload" onchange="return updateLateDays($(this));"></div>
+            <div style="padding-bottom:20px;"><input type="file" name="csv_upload" id="csv_upload" onchange="return updateLateDays($(this));"></div>
     </form>
     </div>
 
 HTML;
-        if (!is_array($user_table) || count($user_table) < 1) {
+        if (!is_array($users) || count($users) < 1) {
         //No late days in DB -- indicate as much.
             $return .= <<<HTML
     <div class="panel">
@@ -53,14 +53,14 @@ HTML;
         </thead>
         <tbody>
 HTML;
-            foreach ($user_table as $index => $record) {
+            foreach ($users as $user) {
                 $return .= <<<HTML
             <tr>
-            <td>{$record['user_id']}</td>
-            <td>{$record['user_firstname']}</td>
-            <td>{$record['user_lastname']}</td>
-            <td>{$record['allowed_late_days']}</td>
-            <td>{$record['since_timestamp']}</td>
+            <td>{$user->getId()}</td>
+            <td>{$user->getDisplayedFirstName()}</td>
+            <td>{$user->getLastName()}</td>
+            <td>{$user->getAllowedLateDays()}</td>
+            <td>{$user->getSinceTimestamp()}</td>
             </tr>
 HTML;
             }

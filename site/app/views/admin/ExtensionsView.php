@@ -5,7 +5,7 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class ExtensionsView extends AbstractView {
-    public function displayExtensions($g_id, $g_ids,$user_table) {
+    public function displayExtensions($g_ids) {
         $return = <<<HTML
 <div type="hidden" id="message"></div>
 <div class="content">
@@ -32,15 +32,15 @@ HTML;
         </div>
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
         <div class="option-title">Single Student Entry<br></div>
-        <div class="option" style="width:25%; display:inline-block;">Student ID:<br><input class="option-input" type="text" name="user_id" style="float:left"></div>
-        <div class="option" style="width:25%; display:inline-block;">Late Days:<br><input class="option-input" type="text" name="late_days" style="float:left"></div>
+        <div class="option" style="width:25%; display:inline-block;">Student ID:<br><input class="option-input" type="text" name="user_id" id="user_id" style="float:left"></div>
+        <div class="option" style="width:25%; display:inline-block;">Late Days:<br><input class="option-input" type="text" name="late_days" id="late_days" style="float:left"></div>
         <div class="option" style="width:10%; display:inline-block; vertical-align: bottom;"><input class="btn btn-primary" type="submit" style="float:left"></div>
         <div class="option-title">Multiple Student Entry Via CSV Upload
             <i class="fa fa-question-circle tooltip" aria-hidden="true">
                 <span class="tooltiptext">Do not use column headers. CSV must be of the following form:<br>student_id,gradeable_id,late_days</span>
             </i><br>
         </div>
-        <div style="padding-bottom:20px;"><input type="file" name="csv_upload" onchange="updateHomeworkExtensions2($(this));"></div>
+        <div style="padding-bottom:20px;"><input type="file" name="csv_upload" id="csv_upload" onchange="updateHomeworkExtensions2($(this));"></div>
     </form>
     </div>
 HTML;

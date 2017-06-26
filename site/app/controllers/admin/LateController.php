@@ -21,10 +21,7 @@ class LateController extends AbstractController {
                 $this->update("view_extension");
                 break;
             case 'get_extension_details':
-                $this->ajaxGetExtensions();
-                break;
-            case 'get_late_day_details':
-                $this->ajaxGetLateDays();
+                $this->ajaxGetExtensions($_REQUEST['g_id']);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller");
@@ -34,23 +31,12 @@ class LateController extends AbstractController {
 
     public function viewLateDays() {
         $user_table = $this->core->getQueries()->getUsersWithLateDays();
-        $this->setPreferedName($user_table);
         $this->core->getOutput()->renderOutput(array('admin', 'LateDay'), 'displayLateDays', $user_table);
     }
 
     public function viewExtensions() {
-        if (isset($_POST['g_id'])) {
-            $g_id = $_POST['g_id'];
-        } else {
-            $g_id = $this->core->getQueries()->getNewestElectronicGradeableId();
-            foreach($g_id as $index => $value) {
-                $g_id=$value[0];
-            }
-        }
-        $user_table = $this->core->getQueries()->getUsersWithExtensions($g_id);
-        $this->setPreferedName($user_table);
         $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
-        $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $g_id, $g_ids, $user_table);
+        $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $g_ids);
     }
 
     public function update($nextStep) {
@@ -70,12 +56,22 @@ class LateController extends AbstractController {
                         $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
                     }
                 }
+                if($nextStep == "view_late"){
+                    $this->getLateDays();
+                }
+                else{
+                    $this->ajaxGetExtensions($data[0][1]);
+                }
             }
-            $this->reloadPage($nextStep, $data[0][1]);
         }
         else{
             if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
                 $error = "Invalid CSRF token. Try again.";
+                $this->core->getOutput()->renderJson(array('error' => $error));
+                return;
+            }
+            if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" ) && $nextStep == 'view_extension') {
+                $error = "Please choose a gradeable_id";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
@@ -94,47 +90,27 @@ class LateController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" ) && $nextStep == 'view_extension') {
-                $error = "Please choose a gradeable_id";
-                $this->core->getOutput()->renderJson(array('error' => $error));
-                return;
-            }
-
             if($nextStep == "view_late"){
                 $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
-                $this->reloadPage($nextStep, 'garbage');
+                $this->getLateDays();
             }
             else{
                 $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
-                $this->reloadPage($nextStep, $_POST['g_id']);
+                $this->ajaxGetExtensions($_POST['g_id']);
             }
         }
-    }
 
+    }
     // for use during update
-    function reloadPage($nextStep, $g_id){
-        if($nextStep == "view_late"){
-            $user_table = $this->core->getQueries()->getUsersWithLateDays();
-            $this->core->getOutput()->renderJson(array(
-                'users' => $user_table
-            ));       
+    function getLateDays(){
+        $users = $this->core->getQueries()->getUsersWithLateDays();
+        $user_table = array();
+        foreach($users as $user){
+            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions());
         }
-        else{
-            $user_table = $this->core->getQueries()->getUsersWithExtensions($g_id);
-            $this->core->getOutput()->renderJson(array(
-                'gradeable_id' => $g_id,
-                'users' => $user_table
-            ));
-        }
-        
-    }
-
-    function setPreferedName(&$user_table){
-        foreach ($user_table as $index => &$value) {
-            if(isset($value['user_preferred_firstname']) && $value['user_preferred_firstname'] !== null && $value['user_preferred_firstname'] !== ""){
-                $value['user_firstname']=$value['user_preferred_firstname'];
-            }
-        }
+        $this->core->getOutput()->renderJson(array(
+            'users' => $user_table
+        ));
     }
 
     function parse_and_validate_csv($csv_file, &$data, $nextStep) {
@@ -243,24 +219,19 @@ class LateController extends AbstractController {
     }
 
 
-    public function ajaxGetExtensions() {
-        $g_id = $_REQUEST['g_id'];
-        $user_table = $this->core->getQueries()->getUsersWithExtensions($g_id);
+
+    public function ajaxGetExtensions($g_id) {
+        // $g_id = $_REQUEST['g_id'];
+        // $user_table = $this->core->getQueries()->getUsersWithExtensions($g_id);
+        $users = $this->core->getQueries()->getUsersWithExtensions($g_id);
+        $user_table = array();
+        foreach($users as $user){
+            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getLastName(), 'late_day_exceptions' => $user->getLateDayExceptions());
+        }
         $this->core->getOutput()->renderJson(array(
             'gradeable_id' => $g_id,
             'users' => $user_table
         ));
     }
-
-    public function ajaxGetLateDays() {
-        $user_table = $this->core->getQueries()->getUsersWithLateDays();
-        $this->core->getOutput()->renderJson(array(
-            'users' => $user_table
-        ));
-    }
-
-
-
-
 
 }
