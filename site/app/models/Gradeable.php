@@ -825,4 +825,12 @@ class Gradeable extends AbstractModel {
         }
         $this->core->getDatabase()->commit();
     }
+    
+    public function getGraderId() {
+        return $this->grader_id;
+    }
+
+    public function getSyllabusBucket() {
+        return $this->bucket;
+    }
 }
