@@ -21,11 +21,8 @@ class LateDayView extends AbstractView {
             <div class="option" style="width:30%; display:inline-block;">Datestamp (MM/DD/YY):<br><input class="option-input" type="text" name="datestamp" id="datestamp" style="float:left"></div>
             <div class="option" style="width:15%; display:inline-block;">Late Days:<br><input class="option-input" type="text" name="late_days" id="late_days" style="float:left"></div>
             <div class="option" style="width:15%; display:inline-block; float:right;"><br><input class="btn btn-primary" type="submit" style="float:left"></div>
-            <div class="option-title"><br><br>Multiple Student Entry Via CSV Upload
-                <i class="fa fa-question-circle tooltip" aria-hidden="true">
-                    <span class="tooltiptext">Do not use column headers. CSV must be of the following form:<br>student_id,MM/DD/YY,late_days</span>
-                </i><br>
-            </div>
+            <div class="option-title"><br><br>Multiple Student Entry Via CSV Upload</div>
+            <div>Do not use column headers. CSV must be of the following form: student_id, MM/DD/YY, late_days</div>
             <div style="padding-bottom:20px;"><input type="file" name="csv_upload" id="csv_upload" onchange="return updateLateDays($(this));"></div>
     </form>
     </div>
