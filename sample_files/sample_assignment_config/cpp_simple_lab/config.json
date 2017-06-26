@@ -1,6 +1,6 @@
 {
     "grading_parameters" : {
-        "AUTO_POINTS" : 20,
+        "AUTO_POINTS" : 22,
         "EXTRA_CREDIT_POINTS" : 2
     },
 
@@ -27,6 +27,16 @@
             "points" : 3
         },
 
+        // * COMPILATION TESTING view_testcase_message *
+        {
+            "type" : "Compilation",
+            "title" : "Dummy Compilation testing view_testcase_message",
+            "command" : "clang++ -Wall -o a_2.out -- part2/*.cpp",
+            "executable_name" : "a_2.out",
+            "points" : 2,
+            "view_testcase_message" : false
+        },
+
         // *************** TEST CASES *****************
         {
             "title" : "non leap year",
@@ -37,7 +47,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDOUT.txt",
-                    "expected_file" : "test1_output.txt"
+                    "expected_file" : "output_1.txt"
                 }
             ]
         },
@@ -50,7 +60,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDOUT.txt",
-                    "expected_file" : "test2_output.txt"
+                    "expected_file" : "output_2.txt"
                 }
             ]
         },
@@ -64,7 +74,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDOUT.txt",
-                    "expected_file" : "test3_output.txt"
+                    "expected_file" : "output_3.txt"
                 }
             ]
         },
@@ -77,7 +87,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDOUT.txt",
-                    "expected_file" : "test4_output.txt"
+                    "expected_file" : "output_4.txt"
                 }
             ]
         },
@@ -90,7 +100,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDOUT.txt",
-                    "expected_file" : "test5_output.txt"
+                    "expected_file" : "output_5.txt"
                 }
             ]
         },
@@ -105,12 +115,12 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDOUT.txt",
-                    "expected_file" : "test6_output.txt"
+                    "expected_file" : "output_6.txt"
                 },
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDERR.txt",
-                    "expected_file" : "test6_outputB.txt"
+                    "expected_file" : "output_6B.txt"
                 }
             ]
         },
@@ -124,12 +134,12 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDOUT.txt",
-                    "expected_file" : "test7_output.txt"
+                    "expected_file" : "output_7.txt"
                 },
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDERR.txt",
-                    "expected_file" : "test7_outputB.txt"
+                    "expected_file" : "output_7B.txt"
                 }
             ]
         }
