@@ -3,7 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-// use app\libraries\FileUtils;
+use app\libraries\DateUtils;
 
 class LateController extends AbstractController {
     public function run() {
@@ -43,7 +43,7 @@ class LateController extends AbstractController {
         //Check to see if a CSV file was submitted.
         $data = array();
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
-            if (!($this->parse_and_validate_csv($_FILES['csv_upload']['tmp_name'], $data, $type))) {
+            if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, $type))) {
                 $error = "Something is wrong with the CSV. Try again.";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
@@ -80,7 +80,7 @@ class LateController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            if ((!isset($_POST['datestamp']) || !$this->validate_timestamp($_POST['datestamp'])) && $type == 'late') {
+            if ((!isset($_POST['datestamp']) || !DateUtils::validateTimestamp($_POST['datestamp'])) && $type == 'late') {
                 $error = "Datestamp must be mm/dd/yy";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
@@ -125,7 +125,7 @@ class LateController extends AbstractController {
         ));
     }
 
-    function parse_and_validate_csv($csv_file, &$data, $type) {
+    private function parseAndValidateCsv($csv_file, &$data, $type) {
     //IN:  * csv file name and path
     //     * (by reference) empty data array that will be filled.
     //OUT: TRUE should csv file be properly validated and data array filled.
@@ -151,9 +151,7 @@ class LateController extends AbstractController {
 
             $fields = explode(',', $row);
             //Remove any extraneous whitespace at beginning/end of all fields.
-            foreach($fields as &$field) {
-                $field = trim($field);
-            } unset($field);
+            $fields = array_map(function($k) { return trim($k); }, $fields);
             //Each row has three fields
             if (count($fields) !== 3) {
                 $data = null;
@@ -166,12 +164,12 @@ class LateController extends AbstractController {
             }
             //$fields[1] represents timestamp in the format (MM/DD/YY) for late days
             //(MM/DD/YYYY), (MM-DD-YY), or (MM-DD-YYYY).
-            if ($type == "late" && !$this->validate_timestamp($fields[1])) {
+            if ($type == "late" && !DateUtils::validateTimestamp($fields[1])) {
                 $data = null;
                 return false;
             }
             //$fields[1] represents the gradeable id for extensions
-            if ($type == "extension" && !$this->validate_homework($fields[1])) {
+            if ($type == "extension" && !$this->validateHomework($fields[1])) {
                 $data = null;
                 return false;
             }
@@ -187,46 +185,13 @@ class LateController extends AbstractController {
         return true;
     }
 
-    function validate_timestamp($timestamp) {
-    //IN:  $timestamp is actually a date string, not a Unix timestamp.
-    //OUT: TRUE when date string conforms to an accetpable pattern
-    //      FALSE otherwise.
-    //PURPOSE: Validate string to (1) be a valid date and (2) conform to specific
-    //         date patterns.
-    //         'm-d-Y' -> mm-dd-yyyy
-    //         'm-d-y' -> mm-dd-yy
-    //         'm/d/Y' -> mm/dd/yyyy
-    //         'm/d/y' -> mm/dd/yy
-
-        //This bizzare/inverted switch-case block actually does work in PHP.
-        //This operates as a form of "white list" of valid patterns.
-        //This checks to ensure a date pattern is acceptable AND the date actually
-        //exists.  e.g. "02-29-2016" is valid, while "06-31-2016" is not.
-        //That is, 2016 is a leap year, but June has only 30 days.
-        $tmp = array(date_create_from_format('m-d-Y', $timestamp),
-                     date_create_from_format('m/d/Y', $timestamp),
-                     date_create_from_format('m-d-y', $timestamp),
-                     date_create_from_format('m/d/y', $timestamp));
-
-        switch (true) {
-        case ($tmp[0] && $tmp[0]->format('m-d-Y') === $timestamp):
-        case ($tmp[1] && $tmp[1]->format('m/d/Y') === $timestamp):
-        case ($tmp[2] && $tmp[2]->format('m-d-y') === $timestamp):
-        case ($tmp[3] && $tmp[3]->format('m/d/y') === $timestamp):
-            return true;
-        default:
-            return false;
-        }
-        return true;
-    }
-
-    function validate_homework($id) {
+    private function validateHomework($id) {
         $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
-            foreach($g_ids as $index => $value) {
-                if($id == $value[0]){
-                    return true;
-                }
+        foreach($g_ids as $index => $value) {
+            if($id == $value[0]){
+                return true;
             }
+        }
         return false;
     }
 }
