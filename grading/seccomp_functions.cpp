@@ -162,6 +162,13 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   }
 
   // ---------------------------------------------------------------
+  // CMAKE/MAKE COMPILATION
+  else if (my_program == "/usr/bin/cmake" ||
+           my_program == "/usr/bin/make") {
+    categories = restricted_categories;
+  }
+
+  // ---------------------------------------------------------------
   // JAVA COMPILATION
   else if (my_program == "/usr/bin/javac") {
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
@@ -258,7 +265,32 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("PROCESS_CONTROL_SCHEDULING");
   }
 
+  // ---------------------------------------------------------------
+  //KEYBOARD INPUT
+  else if(my_program == "/usr/bin/xdotool"){
+    categories = restricted_categories; //TODO: fix
+  }
+
+  // ---------------------------------------------------------------
+  //WINDOW FOCUS
+  else if(my_program == "/usr/bin/wmctrl"){
+    categories = restricted_categories; //TODO: fix
+  }
+
+  // ---------------------------------------------------------------
+  //WINDOW INFORMATION
+  else if(my_program == "/usr/bin/xwininfo"){
+    categories = restricted_categories; //TODO: fix
+  }
+
+  // ---------------------------------------------------------------
+  //SCREENSHOT FUNCTIONALITY
+  else if(my_program == "/usr/bin/scrot"){
+    categories = restricted_categories; //TODO: fix
+  }
+
   else {
+    categories = restricted_categories; //TODO: fix
     // UGH, don't want this here
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
   }
