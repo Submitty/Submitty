@@ -800,4 +800,12 @@ class Gradeable extends AbstractModel {
     public function saveData() {
         $this->core->getQueries()->updateGradeableData($this);
     }
+    
+    public function getGraderId() {
+        return $this->grader_id;
+    }
+
+    public function getSyllabusBucket() {
+        return $this->bucket;
+    }
 }
