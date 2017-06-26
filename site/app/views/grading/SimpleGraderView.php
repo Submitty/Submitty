@@ -75,14 +75,26 @@ HTML;
             $info = "Red - [SAVE ERROR] Refresh Page";
         }
         if($action === 'numeric') {
-            $return .= <<<HTML
+            if ($this->core->getUser()->accessAdmin()) {
+                $return .= <<<HTML
     <input class ="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
     <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
 HTML;
+            }            
         }
         $return .= <<<HTML
     <h2>{$gradeable->getName()}</h2>
-    <i class="fa fa-question-circle tooltip" style="float: right;" aria-hidden="true"><span class="tooltiptext">$info</span></i>
+    <p style="float: left;">$info</p>
+HTML;
+
+        if ($this->core->getUser()->accessAdmin()) {
+            $return .= <<<HTML
+    <p style="float: right;">The CSV file should be formated as such: <br />
+    user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...</p>
+HTML;
+        }
+        $return .= <<<HTML
+    <!-- <i class="fa fa-question-circle tooltip" style="float: right;" aria-hidden="true"><span class="tooltiptext">$info</span></i> -->
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>

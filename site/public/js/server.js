@@ -486,6 +486,7 @@ function setupNumericTextCells() {
 
     $("input[class=option-small-box]").change(function() {
         elem = this;
+        var save = this;
         if(this.value == 0){
             $(this).css("color", "#bbbbbb");
         }
@@ -510,7 +511,7 @@ function setupNumericTextCells() {
 
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
-            {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
+            {'csrf_token': csrfToken, 'user_id': $(save).parent().parent().data("user"), 'g_id': $(save).parent().parent().data('gradeable'), 'scores': scores},
             function() {
                 $(elem).css("background-color", "#ffffff"); 
             },
@@ -520,7 +521,7 @@ function setupNumericTextCells() {
         );
     });
 
-    $("input[class=csvButtonUpload]").change(function() {
+    $("input[class=csvButtonUpload]").change(function() { //make it instructor only, strict parsing, instructions, firstname lastname, sample files, html fix in gradeable, lastdays, checks
         var confirmation = window.confirm("WARNING! \nPreviously entered data may be overwritten! " +
         "This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for " +
         "student id and one column for each field. Columns and field types must match.");
@@ -547,40 +548,51 @@ function setupNumericTextCells() {
                         }
                     }
                     if (!breakOut){
+                    	var numOfNumeric = 0;
                         var checkOnce = true;
                         $('.cell-all').each(function(){
                             //it has to be checked here since .cell-all holds the data of numnumeric
                             if (checkOnce) { //checks if the file has the right number of parameters
-                                if (csvLength !== 3 + 1 + $(this).parent().parent().data("numnumeric")) {
+                                if (csvLength !== 4 + $(this).parent().parent().data("numnumeric") + $(this).parent().parent().data("numtext")) {
                                     breakOut = true;
                                     return false;
                                 }
+                                numOfNumeric = $(this).parent().parent().data("numnumeric");
                                 checkOnce = false;
                             }
                             for (var i = 0; i < lines.length; i++) {
                                 if($(this).parent().data("user") === text_data_table[i][0]) { //puts the data in the form
-                                    for (var z = 2; z < tempArray.length-2; z++) {
-                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).val(text_data_table[i][z]);
-                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).trigger("change"); //manually triggers change to save data
+                                    for (var z = 3; z < numOfNumeric+3; z++) {
+                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-3)).val(text_data_table[i][z]);
+                                        //$('#cell-'+$(this).parent().data("row")+'-'+(z-3)).trigger("change"); //manually triggers change to save data
                                         
-                                        //has to manually set the background colors because of ajax shenanigans
-                                        if($('#cell-'+$(this).parent().data("row")+'-'+(z-2)).val() <= $(this).parent().parent().data("maxvalues")[z-2]) {
-                                            $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).css("background-color", "#ffffff"); 
+                                        //has to manually set the text and background colors because of ajax shenanigans
+                                        if($('#cell-'+$(this).parent().data("row")+'-'+(z-3)).val() == 0) {
+                                        	$('#cell-'+$(this).parent().data("row")+'-'+(z-3)).css("color", "#bbbbbb");
                                         } else {
-                                            $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).css("background-color", "#ff7777"); 
+                                        	$('#cell-'+$(this).parent().data("row")+'-'+(z-3)).css("color", "");
+                                        }
+
+                                        if($('#cell-'+$(this).parent().data("row")+'-'+(z-3)).val() <= $(this).parent().parent().data("maxvalues")[z-3]) {
+                                            $('#cell-'+$(this).parent().data("row")+'-'+(z-3)).css("background-color", "#ffffff"); 
+                                        } else {
+                                            $('#cell-'+$(this).parent().data("row")+'-'+(z-3)).css("background-color", "#ff7777"); 
                                         }
                                     }
-                                    if($(this).parent().parent().data("numtext") > 0) {
-                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).val(text_data_table[i][tempArray.length-1]);
-                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-2)).trigger("change");
-                                    }                                    
+                                    z++;
+                                    while(z < csvLength) {
+                                        $('#cell-'+$(this).parent().data("row")+'-'+(z-4)).val(text_data_table[i][z]);
+                                        z++;
+                                    }      
+                                    $('#cell-'+$(this).parent().data("row")+'-'+(0)).trigger("change");                               
                                     i = lines.length; //halts the for loop early to not waste resources
                                 }
-                            }                            
+                            }
+
                         }); 
                     }
                     if(breakOut) {
-                        alert("CVS upload faled! Format file incorrect.");
+                        alert("CVS upload failed! Format file incorrect.");
                     }
                                          
                 }
