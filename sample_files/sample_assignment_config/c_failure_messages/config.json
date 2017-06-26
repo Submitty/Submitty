@@ -34,7 +34,8 @@
 	    "command" : [
 		"./a.out",
 		"sort < test02_STDOUT_0.txt",
-		"cut -d : -f2- < test02_STDOUT_1.txt"
+                // NOTE: double backslash is a space character
+		"cut -d \\  -f2-3 < test02_STDOUT_1.txt"
 		],
 	    "details" : "./a.out",
 	    "points" : 10,
@@ -46,28 +47,21 @@
                     "deduction" : 0.2
 		},
 		{
+		    "method" : "errorIfEmpty",
+		    "actual_file" : "STDOUT_1.txt",
+		    "show_actual" : "always", // "never",
+		    "show_message" : "never",
+                    "deduction" : 0.2
+		},
+		{
 		    "method" : "myersDiffbyLinebyChar",
 		    "actual_file" : "STDOUT_2.txt",
                     "expected_file" : "sample_output.txt",
-		    "show_actual" : "never",
+		    "show_actual" : "always", //"never",
 		    "show_expected" : "never",
                     "deduction" : 1.0,
 		    "failure_message" : "Please re-read the assignment instructions.",
 		    "show_message" : "always"
-		},
-		{
-		    "method" : "errorIfEmpty",
-		    "actual_file" : "STDOUT_1.txt",
-		    "show_actual" : "never",
-		    "show_message" : "never",
-                    "deduction" : 0.2
-		},
-		{
-		    "method" : "errorIfEmpty",
-		    "actual_file" : "STDOUT_2.txt",
-		    "show_actual" : "never",
-		    "show_message" : "never",
-                    "deduction" : 0.2
 		},
 		{
 		    "method" : "errorIfNotEmpty",
