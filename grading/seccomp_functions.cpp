@@ -128,7 +128,8 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   
   // ---------------------------------------------------------------
   // SUBMITTY ANALYSIS TOOLS
-  else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/lichen") {
+  else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count"
+		  || my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/plagiarism") {
     categories = restricted_categories;
   }
 

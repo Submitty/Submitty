@@ -10,8 +10,8 @@
     "testcases" : [
         {
             "title" : "Check for goto and auto",
-            "command" : [ "lichen count token -l c Goto *.cpp",
-                          "lichen count token -l c Auto *.cpp" ],
+            "command" : [ "submitty_count token -l c Goto *.cpp",
+                          "submitty_count token -l c Auto *.cpp" ],
            "points" : 2,
             "validation" : [
                 {

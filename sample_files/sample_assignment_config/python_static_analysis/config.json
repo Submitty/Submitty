@@ -14,7 +14,7 @@
         {
             "title" : "Convert Temperature",
             "command" : [ "python3 part1/*.py",
-                          "lichen count call -l python print part1/*.py"],
+                          "submitty_count call -l python print part1/*.py"],
             "points" : 2,
             "validation" : [
                 {
@@ -58,9 +58,9 @@
         {
             "title" : "Volume and Area",
             "command" : [ "python3 part3/*.py",
-                          "lichen count token -l python Equal part3/*.py",
-                          "lichen count token -l python Asterisk part3/*.py",
-                          "lichen count token -l python Plus part3/*.py" ],
+                          "submitty_count token -l python Equal part3/*.py",
+                          "submitty_count token -l python Asterisk part3/*.py",
+                          "submitty_count token -l python Plus part3/*.py" ],
            "points" : 4,
             "validation" : [
                 {
@@ -108,7 +108,7 @@
         {
             "title" : "Count Odd",
             "command" : [ "python3 part4/*.py",
-                          "lichen count token -l python While part4/*.py" ],
+                          "submitty_count token -l python While part4/*.py" ],
             "points" : 2,
             "validation" : [
                 {
