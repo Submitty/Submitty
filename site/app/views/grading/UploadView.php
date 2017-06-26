@@ -240,11 +240,6 @@ HTML;
 </div>
 HTML;
         $gradeable_id = $gradeable->getId();
-        $return .= <<<HTML
-<div class="content">
-    <span>{$gradeable_id}</span>
-</div>
-HTML;
         return $return;
     }
 

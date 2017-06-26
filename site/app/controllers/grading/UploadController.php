@@ -484,6 +484,8 @@ class UploadController extends AbstractController {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
+        /////$this->core->getQueries()->updateGradeableData($gradeable);
+        
         $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         return $this->uploadResult("Successfully uploaded files");
     }
