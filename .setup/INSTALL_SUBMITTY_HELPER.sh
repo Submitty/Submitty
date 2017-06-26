@@ -502,7 +502,8 @@ stack --allow-different-user --no-terminal --install-ghc build
 popd
 
 # change permissions
-chmod -R 777 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 ################################################################################################################
 ################################################################################################################
