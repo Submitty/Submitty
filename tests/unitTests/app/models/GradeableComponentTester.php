@@ -40,6 +40,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'score' => 10.0,
             'comment' => 'Comment about gradeable',
             'has_grade' => true,
+            'grade_time' => null,
+            'grader' => null,
             'modified' => false
         );
         $actual = $component->toArray();

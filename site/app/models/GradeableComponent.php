@@ -37,21 +37,21 @@ use app\libraries\Core;
  */
 class GradeableComponent extends AbstractModel {
     /** @property @var int Unique identifier for the component */
-    protected $id;
+    protected $id = null;
     /** @property @var string Title of the component shown to students and graders */
-    protected $title;
+    protected $title = "";
     /** @property @var string Comment shown to graders during grading about this particular component */
-    protected $ta_comment;
+    protected $ta_comment = "";
     /** @property @var string Comment shown to both graders and students giving more information about the component */
-    protected $student_comment;
+    protected $student_comment = "";
     /** @property @var float Maximum value that the component can have */
-    protected $max_value;
+    protected $max_value = 0;
     /** @property @var bool Is the component just used for text fields (ignore max_value and is_extra_credit and score) */
-    protected $is_text;
+    protected $is_text = false;
     /** @property @var bool Is the component extra credit for this gradeable */
-    protected $is_extra_credit;
+    protected $is_extra_credit = false;
     /** @property @var int Order for components to be shown in */
-    protected $order;
+    protected $order = 1;
     /** @property @var float Given grade that someone has given this component */
     protected $score = 0;
     /** @property @var string Comment that grader has put on the component while grading for student */
@@ -68,6 +68,9 @@ class GradeableComponent extends AbstractModel {
 
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
+        if (!isset($details['gc_id'])) {
+            return;
+        }
         $this->id = $details['gc_id'];
         $this->title = $details['gc_title'];
         $this->ta_comment = $details['gc_ta_comment'];
