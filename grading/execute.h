@@ -1,10 +1,11 @@
 #include <string>
-
+#include <vector>
 #include "json.hpp"
 
 
 // implemented in execute.cpp
 int execute(const std::string &cmd, 
+		const std::vector<std::string>,
 	    const std::string &execute_logfile, 
 	    const nlohmann::json &test_case_limits,
             const nlohmann::json &assignment_limits,
@@ -29,3 +30,13 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
 
 std::string replace_slash_with_double_underscore(const std::string& input);
 std::string escape_spaces(const std::string& input);
+
+bool memory_ok(int rss_memory, int allowed_rss_memory);
+
+bool time_ok(float elapsed, float seconds_to_run);
+
+//returns true on kill order. 
+bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float& elapsed, float& next_checkpoint, 
+  float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill);
+
+std::string output_of_system_command(const char* cmd);
