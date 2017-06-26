@@ -265,7 +265,7 @@ HTML;
 }
         $html_output .= <<<HTML
             <br />
-            What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' class="required" value="{$gradeable_name}" placeholder="(Required)" required/>
+            What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' id='gradeable_title_id' class="required" value="{$gradeable_name}" placeholder="(Required)" required/>
             <br />
             What is the URL to the assignment instructions? (shown to student) <input style='width: 227px' type='text' name='instructions_url' value="{$g_instructions_url}" placeholder="(Optional)" />
             <br />
@@ -335,7 +335,6 @@ HTML;
 
                 How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
                                                                          type="text"/>
-                <em style='color: orange;'>NOTE: must be 0 for gradeables with no TA grading</em>
                 <br /> <br />
                 
 
@@ -961,6 +960,14 @@ function createCrossBrowserJSDate(val){
                 }
             });
         }
+
+        if ($('input[name=team_assignment]').is(':checked')){
+            $('input[name=team_assignment]').each(function(){
+                if(!($(this).is(':checked')) && ({$edit})){
+                    $(this).attr("disabled",true);
+                }
+            });
+        }
           
         $('input:radio[name="ta_grading"]').change(function(){
             $('#rubric_questions').hide();
@@ -1498,6 +1505,7 @@ $('#gradeable-form').on('submit', function(e){
 
     function checkForm() {
         var gradeable_id = $('#gradeable_id').val();
+        var gradeable_title = $('gradeable_title_id').val();
         var date_submit = Date.parse($('#date_submit').val());
         var date_due = Date.parse($('#date_due').val());
         var date_ta_view = Date.parse($('#date_ta_view').val());

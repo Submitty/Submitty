@@ -91,7 +91,7 @@ class AdminGradeableController extends AbstractController {
     private function modifyGradeable($edit_gradeable) {
         $details = array();
         $details['g_id'] = $_POST['gradeable_id'];
-        $details['g_title'] = $_POST['gradeable_title'];
+        $details['g_title'] = htmlentities($_POST['gradeable_title']);
         $details['g_instructions_url'] = $_POST['instructions_url'];
         $details['g_overall_ta_instructions'] = $_POST['ta_instructions'];
         $details['g_use_teams'] = (isset($_POST['team_assignment']) && $_POST['team_assignment']=='yes')? "true" : "false";
