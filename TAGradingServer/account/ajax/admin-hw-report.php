@@ -5,8 +5,12 @@ require "../../models/HWReport.php";
 
 check_administrator();
 
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
+if (!isset($_POST['csrf_token'])) {
     die("invalid csrf token");
+}
+
+if ($_POST['csrf_token'] !== $_SESSION['csrf']) {
+    die("csrf token mismatch");
 }
 
 $hw_report = new HWReport();
