@@ -6,7 +6,8 @@
     "resource_limits" : {
         "RLIMIT_CPU" : 60,
         "RLIMIT_NPROC" : 100,
-        "RLIMIT_AS" : "RLIM_INFINITY"
+        "RLIMIT_AS" : "RLIM_INFINITY",
+	"RLIMIT_SIGPENDING" : 100
     },
 
     "testcases" : [

@@ -490,16 +490,18 @@ rm ${HWCRON_CRONTAB_FILE}
 
 echo -e "Compile and install analysis tools"
 
+rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 
 # compile the tools
-stack --no-terminal --install-ghc build
+stack --allow-different-user --no-terminal --install-ghc build
 
 popd
 
 # change permissions
-chown -R hwcron:course_builders ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-chmod -R 555 ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+chmod -R 777 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 ################################################################################################################
 ################################################################################################################
