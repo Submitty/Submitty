@@ -250,10 +250,18 @@ HTML;
                 <td>{$row->getUser()->getLastName()}</td>
 HTML;
                 if($show_auto_grading_points) {
-                    $return .= <<<HTML
+                    if ($highest_version != 0) {
+                        $return .= <<<HTML
                 <td>{$row->getGradedAutograderPoints()} / {$row->getTotalAutograderNonExtraCreditPoints()}</td>
                 <td>
 HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+                <td></td>
+                <td>
+HTML;
+                    }
                 }
                 else {
                     $return .= <<<HTML
