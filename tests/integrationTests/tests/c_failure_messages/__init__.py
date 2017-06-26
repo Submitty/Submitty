@@ -40,10 +40,12 @@ def correct(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_correct", "-b")
     test.debug_print("log/compile_output.txt")
     test.debug_print("log/run_output.txt")
     test.debug_print("log/validate_output.txt")
+
+    test.diff("results_grade.txt", "results_grade.txt_correct", "-b")
+
 
 @testcase
 def buggy(test):
