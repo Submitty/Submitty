@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 This script tests Rainbow Grades functionality in a mostly end-to-end manner - it requires that a user has manually
-run Generate Grade Summaries on csci1100 prior to running the script. It checks that the reports can be copied, that
+run Generate Grade Summaries on the sample course prior to running the script. It checks that the reports can be copied, that
 they match the expected reports (minus time-specific fields), that Rainbow Grades compiles correctly, and that the
 grade summaries that are written out by Rainbow Grades match expectations. It does not currently check that a make push
 will succeed or result in the correct website behavior, but this should be added in the future.
@@ -56,7 +56,7 @@ def remove_info_last_updated(raw_line):
     return True
 
 
-def csci1100_rainbow_grades_test():
+def sample_rainbow_grades_test():
     """Function wrapper for the body of the test."""
 
     # Verify resources exist, set up initial temporary directories and configuration
@@ -68,8 +68,8 @@ def csci1100_rainbow_grades_test():
         error_and_cleanup(test_tmp, "Failed to create temporary directory")
 
     for f in os.listdir(runner_dir):
-        if "__csci1100__" in f:
-            error_and_cleanup(test_tmp, "csci1100 has assignments in the grading queue."
+        if "__sample__" in f:
+            error_and_cleanup(test_tmp, "sample has assignments in the grading queue."
                               " Wait for the autograder to finish and then generate new grade summary reports"
                               "prior to re-running this test.")
 
@@ -101,8 +101,8 @@ def csci1100_rainbow_grades_test():
     print("Copying test-specific files")
     try:
         shutil.copy(os.path.join(script_path, "MakefileHelperTest"), os.path.join(rainbow_tmp, "MakefileHelper"))
-        shutil.copy(os.path.join(script_path, "Makefile_csci1100"), os.path.join(summary_tmp, "Makefile"))
-        shutil.copy(os.path.join(script_path, "customization_csci1100.json"),
+        shutil.copy(os.path.join(script_path, "Makefile_sample"), os.path.join(summary_tmp, "Makefile"))
+        shutil.copy(os.path.join(script_path, "customization_sample.json"),
                     os.path.join(summary_tmp, "customization.json"))
         shutil.copy(os.path.join(repository_path, "grading", "json_syntax_checker.py"),
                     os.path.join(grading_tmp, "json_syntax_checker.py"))
@@ -120,7 +120,7 @@ def csci1100_rainbow_grades_test():
                     make_file.write("RAINBOW_GRADES_DIRECTORY=" + rainbow_tmp + "\n")
                 elif len(line) >= 18 and line[:18] == "REPORTS_DIRECTORY=":
                     make_file.write(os.path.join("REPORTS_DIRECTORY=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses",
-                                                 "s17", "csci1100", "reports") + "\n")
+                                                 "s17", "sample", "reports") + "\n")
                 else:
                     make_file.write(line)
     except Exception as e:
@@ -142,7 +142,7 @@ def csci1100_rainbow_grades_test():
     known_raw_path = os.path.join(test_tmp, "raw_data")
     summary_raw_path = os.path.join(summary_tmp, "raw_data")
     os.mkdir(known_raw_path)
-    return_code = subprocess.call(["tar", "-xf", os.path.join(script_path, "raw_data_10090542_csci1100.tar"),
+    return_code = subprocess.call(["tar", "-xf", os.path.join(script_path, "raw_data_10090542_sample.tar"),
                                    "-C", known_raw_path])
     if return_code != 0:
         error_and_cleanup(test_tmp, "Extracting raw data failed (Error {}".format(return_code))
@@ -218,7 +218,7 @@ def csci1100_rainbow_grades_test():
     output_known_contents = ""
     try:
         with open(os.path.join(summary_tmp, "output.html"), 'r') as output_generated_file,\
-             open(os.path.join(script_path, "output_10090542_csci1100.html"), 'r') as output_known_file:
+             open(os.path.join(script_path, "output_10090542_sample.html"), 'r') as output_known_file:
             output_generated_contents = output_generated_file.read()
             output_known_contents = output_known_file.read()
     except Exception as e:
@@ -231,7 +231,7 @@ def csci1100_rainbow_grades_test():
     known_individual_path = os.path.join(test_tmp, "individual_summary_html")
     summary_individual_path = os.path.join(summary_tmp, "individual_summary_html")
     os.mkdir(known_individual_path)
-    return_code = subprocess.call(["tar", "-xf", os.path.join(script_path, "individual_summary_10090542_csci1100.tar"),
+    return_code = subprocess.call(["tar", "-xf", os.path.join(script_path, "individual_summary_10090542_sample.tar"),
                                    "-C", known_individual_path])
     if return_code != 0:
         error_and_cleanup(test_tmp, "Extracting raw data failed (Error {}".format(return_code))
@@ -290,4 +290,4 @@ def csci1100_rainbow_grades_test():
     shutil.rmtree(test_tmp)
 
 if __name__ == '__main__':
-    csci1100_rainbow_grades_test()
+    sample_rainbow_grades_test()
