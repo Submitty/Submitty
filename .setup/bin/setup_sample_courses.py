@@ -780,9 +780,10 @@ class Course(object):
                         gd_id = res.inserted_primary_key[0]
                         for component in gradeable.components:
                             score = 0 if status == 0 else (random.randint(0, component.max_value * 2) / 2)
+                            grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S")
                             conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="lorem ipsum",
-                                         gcd_grader_id=self.instructor.id)
+                                         gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time)
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
