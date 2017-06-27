@@ -19,8 +19,7 @@ cache:
     - vendor
     - $HOME/.composer/cache
     - $HOME/.cache/pip
-    # we should be catching this once we no longer use AnalysisTools make to install it
-#    - $HOME/.stack
+    - $HOME/.stack
 
 addons:
   postgresql: "9.5"

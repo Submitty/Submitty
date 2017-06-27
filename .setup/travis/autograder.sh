@@ -66,13 +66,10 @@ popd
 echo -e "Compile and install analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-git pull origin master
-sed -i "s/stack upgrade \-\-install\-ghc/stack upgrade \-\-install\-ghc \-\-allow\-different\-user/g" Makefile
-make
-
+stack --allow-different-user --install-ghc --copy-bins build
+popd
 mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
+cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 
 # --------------------------------------
