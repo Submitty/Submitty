@@ -6,6 +6,7 @@ use app\controllers\admin\GradeableController;
 use app\controllers\admin\GradeablesController;
 use app\controllers\admin\ConfigurationController;
 use app\controllers\admin\UsersController;
+use app\controllers\admin\AdminGradeableController;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\models\User;
@@ -28,6 +29,9 @@ class AdminController extends AbstractController {
                 break;
             case 'gradeable':
                 $controller = new GradeableController($this->core);
+                break;
+            case 'admin_gradeable':
+                $controller = new AdminGradeableController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
