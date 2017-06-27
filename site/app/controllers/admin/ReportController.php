@@ -81,7 +81,8 @@ class ReportController extends AbstractController {
         header('Content-Disposition: attachment; filename=hwserver-report.csv');
         header("Content-Length: " . strlen($csv_output));
         echo $csv_output;
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
+        exit;
+        //$this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
     
     public function generateGradeSummaries() {
