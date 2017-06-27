@@ -63,7 +63,7 @@ def csci1100_rainbow_grades_test():
 
     # Verify resources exist, set up initial temporary directories and configuration
     print("Creating temporary RainbowGrades test directories")
-    test_tmp = tempfile.mkdtemp("", "")
+    test_tmp = tempfile.mkdtemp("", "",script_path)
     print("Made new directory {}".format(test_tmp))
 
     if not os.path.isdir(test_tmp):
@@ -286,8 +286,8 @@ def csci1100_rainbow_grades_test():
     # TODO: Add make push, and create a test for the Submitty-side "View Grades"
 
     # Cleanup generated directories/files
-    print("Removing temporary directory")
-    shutil.rmtree(test_tmp)
+    # print("Removing temporary directory")
+    # shutil.rmtree(test_tmp)
 
 if __name__ == '__main__':
     csci1100_rainbow_grades_test()
