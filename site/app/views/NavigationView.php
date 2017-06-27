@@ -239,7 +239,7 @@ HTML;
                     $gradeable_title = '<label>'.$g_data->getName().'</label>';
                 }
 
-                $grader_upload = "";
+                /////$grader_upload = "";
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
 
                     $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getOpenDate()->format("m/d/y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getDueDate()->format("m/d/y{$time}")."</span>)";
@@ -276,20 +276,20 @@ HTML;
 HTML;
                     }
 
-                    // Upload button, only visible to those with grading access
-                    if ($this->core->getUser()->accessFullGrading()) {
-                        $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getGradeStartDate()->format("m/d/y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getGradeReleasedDate()->format("m/d/y{$time}")."</span>)";
-                        if ($title=="GRADED" || $title=="ITEMS BEING GRADED") { $display_date = ""; }
-                        $button_text = "UPLOAD </br> {$display_date}";
-                        $grader_upload = <<<HTML
-                 <button class="btn btn-default" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'upload', 'gradeable_id' => $gradeable))}'">
-                     {$button_text}
-                 </button>
-HTML;
-                    }
-                    else {
-                        $grader_upload = "";
-                    }
+//                     // Upload button, only visible to those with grading access
+//                     if ($this->core->getUser()->accessFullGrading()) {
+//                         $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getGradeStartDate()->format("m/d/y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getGradeReleasedDate()->format("m/d/y{$time}")."</span>)";
+//                         if ($title=="GRADED" || $title=="ITEMS BEING GRADED") { $display_date = ""; }
+//                         $button_text = "UPLOAD </br> {$display_date}";
+//                         $grader_upload = <<<HTML
+//                  <button class="btn btn-default" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'upload', 'gradeable_id' => $gradeable))}'">
+//                      {$button_text}
+//                  </button>
+// HTML;
+//                     }
+//                     else {
+//                         $grader_upload = "";
+//                     }
                 }
                 else{
                     $gradeable_open_range = '';
@@ -358,8 +358,9 @@ HTML;
                 <td style="padding: 10px;">{$gradeable_open_range}</td>
 HTML;
                 if ($this->core->getUser()->accessGrading()) {
+                    // <td style="padding: 10px;">{$grader_upload}</td>
                     $return .= <<<HTML
-                <td style="padding: 10px;">{$grader_upload}</td>
+                
                 <td style="padding: 10px;">{$gradeable_grade_range}</td>
                 <td>{$admin_button}</td>
 HTML;

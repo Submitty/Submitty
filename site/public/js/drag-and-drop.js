@@ -320,6 +320,76 @@ function isValidSubmission(){
     return false;
 }
 
+function validateStudentId(csrf_token, gradeable_id, student_id) {
+    $("#submit").prop("disabled", true);
+
+    var formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+    formData.append('gradeable_id', gradeable_id);
+    formData.append('student_id', student_id);
+
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify'});
+
+    $.ajax({
+        url: url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            $("#submit").prop("disabled", false);
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    return true;
+                }
+                else {
+                    alert("ERROR! \n\n" + data['message']);
+                    return false;
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+                return false;
+            }
+        },
+        error: function() {
+            $("#submit").prop("disabled", false);
+            alert("Something went wrong. Please try again.");
+            return false;
+        }
+    });
+}
+
+function getHighestVersion(gradeable_id, student_id) {
+    $("#submit").prop("disabled", true);
+
+    var formData = new FormData();
+    formData.append('gradeable_id', gradeable_id);
+    formData.append('student_id', student_id);
+
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'get'});
+
+    $.ajax({
+        url: url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            $("#submit").prop("disabled", false);
+            data = JSON.parse(data);
+            return data['highest_version'];
+        },
+        error: function() {
+            $("#submit").prop("disabled", false);
+            alert("Something went wrong. Please try again.");
+        }
+    });
+}
+
 /**
  *
  * @param submit_url
@@ -332,8 +402,9 @@ function isValidSubmission(){
  * @param svn_checkout
  * @param num_textboxes
  * @param user_id
+ * @param is_instructor_upload
  */
-function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id) {
+function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id, is_instructor_upload) {
     $("#submit").prop("disabled", true);
 
     var message = "";
@@ -363,6 +434,7 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
     formData.append('csrf_token', csrf_token);
     formData.append('svn_checkout', svn_checkout);
     formData.append('user_id', user_id);
+    formData.append('is_instructor_upload', is_instructor_upload);
 
     if (!svn_checkout) {
         // Check if new submission

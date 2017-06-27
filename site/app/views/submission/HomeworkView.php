@@ -60,6 +60,12 @@ HTML;
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
+    <form form id="idForm" method="post">
+    <div class ="sub">
+    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        Student RCS ID: <input type="text" name="student_id" placeholder="{$gradeable->getUser()->getID()}" required/>
+    </div>
+    </form>
     <div class="sub">
 HTML;
         if ($gradeable->hasAssignmentMessage()) {
@@ -242,7 +248,28 @@ HTML;
     <script type="text/javascript">
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
-                handleSubmission("{$this->core->buildUrl(array('component' => 'student',
+                var user_id = document.getElementById("idForm").student_id.value;
+                var valid_id = true;
+                var highest_version = {$gradeable->getHighestVersion()};;
+                var is_instructor_upload = false;
+                if (user_id == "") {
+                    user_id = "{$gradeable->getUser()->getId()}";
+                }
+                else {
+                    // validate user 
+                    valid_id = validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id);
+                    // if valid, update highest ver
+                    if (valid_id) highest_version = getHighestVersion("{$gradeable->getId()}", user_id);
+                    is_instructor_upload = true;
+                }
+                //if valid, submit
+                console.log(valid_id);
+                console.log(user_id);
+                console.log(highest_version);
+                console.log(is_instructor_upload);
+                valid_id = true;
+                if (valid_id){
+                    handleSubmission("{$this->core->buildUrl(array('component' => 'student',
                                                                'page' => 'submission',
                                                                'action' => 'upload',
                                                                'gradeable_id' => $gradeable->getId()))}",
@@ -250,11 +277,14 @@ HTML;
                                                                'gradeable_id' => $gradeable->getId()))}",
                                  {$days_late},
                                  {$gradeable->getAllowedLateDays()},
-                                 {$gradeable->getHighestVersion()},
+                                 highest_version,
                                  {$gradeable->getMaxSubmissions()},
                                  "{$this->core->getCsrfToken()}",
                                  {$svn_string},
-                                 {$gradeable->getNumTextBoxes()});
+                                 {$gradeable->getNumTextBoxes()},
+                                 user_id,
+                                 is_instructor_upload);
+                }
                 e.stopPropagation();
             });
         });

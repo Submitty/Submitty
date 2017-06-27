@@ -19,10 +19,7 @@ class UploadView extends AbstractView {
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
-        $return = <<<HTML
-<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
-<div class="content">
-    <h2>New upload for: {$gradeable->getName()}</h2>
+        /*
     <form form id="idForm" method="post" action="{$this->core->buildUrl(array('component' => 'grading', 
                                                                                 'page'      => 'upload', 
                                                                                 'action'    => 'verify',
@@ -34,6 +31,18 @@ class UploadView extends AbstractView {
         <button style="margin-right: 100px;" type="submit" form="idForm">
             Submit ID
         </button>
+    </div>
+    </form>
+    */
+
+        $return = <<<HTML
+<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
+<div class="content">
+    <h2>New upload for: {$gradeable->getName()}</h2>
+    <form form id="idForm" method="post">
+    <div class ="sub">
+    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        Student RCS ID: <input type="text" name="student_id" value="" placeholder="{$gradeable->getUser()->getID()}" required/>
     </div>
     </form>
     <div class="sub">
@@ -212,6 +221,8 @@ HTML;
                 // is it a valid student ID?
                 // get the student gradeable
                 // submit the student gradeable
+                var student_id = document.getElementById("idForm").student_id;
+                bool valid_id = isValidId(student_id);
                 handleSubmission("{$this->core->buildUrl(array('component' => 'grading',
                                                                'page' => 'upload',
                                                                'action' => 'upload',

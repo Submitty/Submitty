@@ -39,6 +39,10 @@ class SubmissionController extends AbstractController {
             case 'check_refresh':
                 return $this->checkRefresh();
                 break;
+            case 'get':
+                return $this->getGradeableHighestVersion();
+            case 'verify':
+                return $this->validGradeable();
             case 'display':
             default:
                 return $this->showHomeworkPage();
@@ -87,7 +91,82 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
     }
+
+    /**
+    * @return boolean
+    */
+    private function validGradeable() {
+        if (!isset($_POST['gradeable_id'])) {
+            $msg = "Did not pass in gradeable_id.";
+            //$_SESSION['messages']['error'][] = $msg;
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        if (!isset($_POST['student_id'])) {
+            $msg = "Did not pass in student_id.";
+            //$_SESSION['messages']['error'][] = $msg;
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
+            $msg = "Invalid CSRF token. Refresh the page and try again.";
+            //$_SESSION['messages']['error'][] = $msg;
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+
+        $gradeable_id = $_POST['gradeable_id'];
+        $student_id = $_POST['student_id'];
+        $student_user = $this->core->getQueries()->getUserById($student_id);
+
+        if (!$student_user === null) {
+            $msg = "Invalid student id '{$_POST['student_id']}'";
+            //$_SESSION['messages']['error'][] = $msg;
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        if (!$student_user->isLoaded()) {
+            $msg = "Invalid student id '{$_POST['student_id']}'";
+            //$_SESSION['messages']['error'][] = $msg;
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        $student_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $student_id);
+        if ($student_gradeable === null) {
+            $msg = "Invalid gradeable id '{$_POST['gradeable_id']}'";
+            //$_SESSION['messages']['error'][] = $msg;
+            $eturn = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        //$this->core->getQueries()->updateGradeableData($student_gradeable);
+        // $this->student_id = "";
+        // $this->student_id .= $_POST['student_id'];
+        // $this->student_user = $student_user;
+        // $this->student_gradeable = $student_gradeable; 
+        $return = array('success' => true);
+        $this->core->getOutput()->renderJson($return);
+        return $return;
+    }
     
+    /**
+    * @return 
+    */
+    private function getGradeableHighestVersion() {
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $student_id = $_POST['student_id'];
+        $student_user = $this->core->getQueries()->getUserById($student_id);
+        $student_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $student_id);
+
+        $highest_ver = $student_gradeable->getHighestVersion();
+        return array('highest_version' => $highest_ver);
+    }
+
     /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
@@ -107,8 +186,17 @@ class SubmissionController extends AbstractController {
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
         }
-        
-        $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+
+        if (!isset($_POST['user_id'])) {
+            return $this->uploadResult("Invalid user id '{$_REQUEST['user_id']}'", false);
+        }
+        $is_instructor_upload = isset($_REQUEST['is_instructor_upload']) ? $_REQUEST['is_instructor_upload'] === "true" : false;
+        $student_id = $_REQUEST['user_id'];
+        if ($is_instructor_upload === true)
+            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $student_id);
+        else 
+            $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+
         $gradeable->loadResultDetails();
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
@@ -124,7 +212,10 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to make folder for this assignment.", false);
         }
 
-        $user_id = $this->core->getUser()->getId();
+        if ($is_instructor_upload === true)
+            $user_id = $student_id;
+        else 
+            $user_id = $this->core->getUser()->getId();
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
@@ -418,7 +509,11 @@ class SubmissionController extends AbstractController {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
-        $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
+        if ($is_instructor_upload)
+            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$user_id}";
+        else
+            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
+
         return $this->uploadResult("Successfully uploaded files");
     }
     
