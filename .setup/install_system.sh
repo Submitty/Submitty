@@ -170,7 +170,7 @@ apt-get install -qqy libpam-passwdqc
 # the worker/threaded mode instead)
 
 apt-get install -qqy ssh sshpass unzip
-apt-get install -qqy postgresql postgresql-contrib postgresql-client postgresql-client-common postgresql-client-9.5
+apt-get install -qqy postgresql-9.5
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup
 apt-get install -qqy php7.0 php7.0-cli php-xdebug libapache2-mod-fastcgi php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt
 apt-get install -qqy php7.0-zip
@@ -459,12 +459,11 @@ ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
 # POSTGRES SETUP
 #################
 if [ ${VAGRANT} == 1 ]; then
-	echo "postgres:postgres" | chpasswd postgres
-        # note:  maybe it's not necessary for postgres to be in shadow
-	adduser postgres shadow
 	service postgresql restart
 	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
-	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
+	#sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5\nlocal      all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
+	cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
+	cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
 	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
 	echo "Finished creating PostgreSQL users"
@@ -513,7 +512,7 @@ popd
 #################
 
 if [ ${VAGRANT} == 1 ]; then
-	echo -e "localhost
+	echo -e "/var/run/postgresql
 hsdbu
 hsdbu
 http://192.168.56.101
