@@ -99,7 +99,7 @@ before_script:
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
   - pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-  - travis_wait 30 stack --allow-different-user --install-ghc --copy-bins build
+  - travis_wait stack --allow-different-user --install-ghc --no-terminal --copy-bins build
   - popd
   - mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
   - cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
