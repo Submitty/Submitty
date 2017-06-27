@@ -1,0 +1,35 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01_STDOUT_0.txt",
+                    "description": "Program Output",
+                    "messages": [
+                        "ERROR!  Could not open expected file: 'output.txt",
+                        "ERROR!  Expected File 'output.txt' does not exist"
+                    ]
+                },
+                {
+                    "description": "Number of assignments",
+                    "messages": [
+                        "Re-read the problem instructions."
+                    ]
+                },
+                {
+                    "description": "Number of multiplications",
+                    "messages": [
+                        "Re-read the problem instructions."
+                    ]
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 1 Python - Static Analysis"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 2 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

@@ -1,7 +1,0 @@
-Testcase  1: Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp  2 /  2
-Testcase  2: Compilation of Submitted Files (for Valgrind): g++ -g -Wall *cpp  2 /  2
-Testcase  3: Under Dr Memory                 0 /  5
-Testcase  4: Under Valgrind                  0 /  5
-Testcase  5: Submission Limit
-Automatic grading total:                           4 / 14
-Non-hidden automatic grading total:                           4 / 14

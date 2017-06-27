@@ -139,6 +139,7 @@ echo ""                                                                         
 
 echo "SUBMITTY_REPOSITORY="${SUBMITTY_REPOSITORY}                                             >> $CONFIGURATION_FILE
 echo "SUBMITTY_INSTALL_DIR="${SUBMITTY_INSTALL_DIR}                                           >> $CONFIGURATION_FILE
+echo "SUBMITTY_TUTORIAL_DIR="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial                    >> $CONFIGURATION_FILE
 echo "SUBMITTY_DATA_DIR="${SUBMITTY_DATA_DIR}                                                 >> $CONFIGURATION_FILE
 echo "HWPHP_USER="${HWPHP_USER}                                                               >> $CONFIGURATION_FILE
 echo "HWCGI_USER="${HWCGI_USER}                                                               >> $CONFIGURATION_FILE
