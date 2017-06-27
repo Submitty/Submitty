@@ -75,5 +75,3 @@ cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_D
 # --------------------------------------
 echo -e "Compile and install the tutorial repository"
 git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-
-popd
