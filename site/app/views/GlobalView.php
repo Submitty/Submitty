@@ -93,10 +93,7 @@ HTML;
                 <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Excused%20Absense%20Extensions">Excused Absense Extensions</a>
             </li>
             <li>
-                <a href="{$ta_base_url}/account/admin-csv-report.php?course={$course}&semester={$semester}&this=CSV%20Report">CSV Report</a>
-            </li>
-            <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">HWReports and Grade Summaries</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">HWReports, CSV Reports, and Grade Summaries</a>
             </li>
 
 HTML;
