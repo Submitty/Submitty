@@ -82,8 +82,8 @@ HTML;
 
 
             for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
-                $label = $gradeable->getTextBoxes()[$i]['label'];
-                $rows = $gradeable->getTextBoxes()[$i]['rows'];
+                $label = $gradeable->getTextboxes()[$i]['label'];
+                $rows = $gradeable->getTextboxes()[$i]['rows'];
                 if ($rows == 0) {
                   $return .= <<<HTML
                     <p style="max-width: 50em;">
@@ -129,7 +129,7 @@ HTML;
             }
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 if ($gradeable->getNumParts() > 1) {
-                    $label = "Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser";
+                    $label = "Drag your {$gradeable->getPartNames()[$i]} here or click to open file browser";
                 }
                 else {
                     $label = "Drag your file(s) here or click to open file browser";
@@ -602,11 +602,17 @@ HTML;
                         $name = htmlentities($testcase->getName());
                         $extra_credit = "";
                         if($testcase->isExtraCredit()) {
-                          $extra_credit = "<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
+                          $extra_credit = "&nbsp;&nbsp;<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
                         }
                         $command = htmlentities($testcase->getDetails());
+                        $testcase_message = "";
+                        if (!$testcase->isHidden() && $testcase->viewTestcaseMessage()) {
+                            $testcase_message = <<<HTML
+                        <span class='italics'><font color="#c00000">{$testcase->getTestcaseMessage()}</font></span>
+HTML;
+                        }
                         $return .= <<<HTML
-                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}</h4>
+                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>{$extra_credit}&nbsp;&nbsp;{$testcase_message}</h4>
             </div>
 HTML;
                         if ($testcase->hasDetails()) {

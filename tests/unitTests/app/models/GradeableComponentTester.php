@@ -31,7 +31,7 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'order' => 1,
             'score' => 10.0,
             'comment' => 'Comment about gradeable',
-            'graded' => true
+            'has_grade' => true
         );
         $actual = $component->toArray();
         ksort($expected);
@@ -39,12 +39,12 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, $actual);
         $this->assertEquals($expected['id'], $component->getId());
         $this->assertEquals($expected['title'], $component->getTitle());
-        $this->assertEquals($expected['ta_comment'], $component->getTAComment());
+        $this->assertEquals($expected['ta_comment'], $component->getTaComment());
         $this->assertEquals($expected['student_comment'], $component->getStudentComment());
         $this->assertEquals($expected['max_value'], $component->getMaxValue());
-        $this->assertFalse($component->isText());
-        $this->assertFalse($component->isExtraCredit());
-        $this->assertTrue($component->hasGrade());
+        $this->assertFalse($component->getIsText());
+        $this->assertFalse($component->getIsExtraCredit());
+        $this->assertTrue($component->getHasGrade());
         $this->assertEquals($expected['order'], $component->getOrder());
         $this->assertEquals($expected['score'], $component->getScore());
         $this->assertEquals($expected['comment'], $component->getComment());
@@ -177,7 +177,7 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
         $component = new GradeableComponent($details);
         $this->assertEquals(100, $component->getMaxValue());
         $this->assertEquals(50, $component->getScore());
-        $this->assertTrue($component->hasGrade());
+        $this->assertTrue($component->getHasGrade());
         $this->assertEquals("", $component->getComment());
     }
 }
