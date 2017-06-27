@@ -227,11 +227,6 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j) {
         return new TestResults(0.0, {"ERROR: Professor image not found."});
   }
 
-  if (access(actual_file.c_str(), F_OK|R_OK ) == -1)
-  {
-        return new TestResults(0.0, {"ERROR: Student image not found."});
-  }
-
   float acceptable_threshold = stringToFloat(acceptable_threshold_str,6); //window_utils function.
 
   std::cout << "About to compare " << actual_file << " and " << expected_file << std::endl;

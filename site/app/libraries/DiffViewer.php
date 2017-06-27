@@ -114,8 +114,6 @@ class DiffViewer {
             //TODO: fix this hacky way to deal with images.
             if (substr($expected_file,strlen($expected_file)-4,4) == ".png") {
                 $this->expected_file_image = $expected_file;
-                $this->display_expected = true; //DEBUG: Added.
-
             }
             else{
                 $this->expected = file_get_contents($expected_file);

@@ -109,7 +109,6 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     "INFORMATION_MAINTENANCE_SET_TIME"
   };
   
-  std::cout << "!!!!DEBUG: MY PROGRAM IS " << my_program << std::endl;
   // ---------------------------------------------------------------
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/bin/cp") {

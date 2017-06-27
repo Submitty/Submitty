@@ -36,7 +36,8 @@ std::vector<float> extractFloatsFromString(std::string input){
     std::vector<float> floats;
     //Anything (lazy) followed by either a number of the form #.##### or .#####
     std::string myReg = 
-           ".*?(-?[0-9]*[1-9][0-9]*(\\.[0-9]+)?|-?0*\\.[0-9]*[1-9][0-9]*)(.*)";
+          ".*?(-?[0-9]+(\\.[0-9]+)?|-?0*\\.[0-9]+)(.*)";
+          // ".*?(-?[0-9]*[1-9][0-9]*(\\.[0-9]+)?|-?0*\\.[0-9]*[1-9][0-9]*)(.*)";
 
 
     std::regex regex(myReg);

@@ -131,7 +131,6 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       if (studentFileExists) {
         if (show_actual) {
           autocheck_j["actual_file"] = actual_file;
-          std::cout << "<<<<<<<<<<<<<<<<<<<" << actual_file << std::endl;
 	      }
         expected = tcg.value("expected_file", "");
 	      if (expected != "") {
@@ -152,7 +151,6 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
   	        expected_path << expected_out_dir << expected;
   	        if (show_expected) {
   	         autocheck_j["expected_file"] = expected_path.str();
-             std::cout << "^^^^^^^^^^^^^^^^^^^" << expected_path.str() << std::endl;
   	        }
   	        if (show_actual) {
   	         autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
@@ -160,8 +158,6 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
 	        }
 	      }
       }
-      std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
-      std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
 
       if (studentFileExists && !studentFileEmpty) {
 	      actual_file_to_print = true;
