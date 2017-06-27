@@ -109,6 +109,8 @@ interface IDatabaseQueries {
 
     public function getGradersForRotatingSections($g_id, $sections);
 
+    public function getGradersFromUserType($user_type);
+
     /**
      * Gets all registration sections from the sections_registration table
 
@@ -122,6 +124,20 @@ interface IDatabaseQueries {
      * @return array
      */
     public function getRotatingSections();
+
+    /**
+     * Gets all the gradeable IDs of the rotating sections
+     *
+     * @return array
+     */
+    public function getRotatingSectionsGradeableIDS();
+
+    /**
+     * Get gradeables graded by rotating section in the past and the sections each grader graded
+     *
+     * @return array
+     */
+    public function getGradeablesPastAndSection();
 
     /**
      * Returns the count of all users in rotating sections that are in a non-null registration section. These are
@@ -153,7 +169,13 @@ interface IDatabaseQueries {
 
     public function getMaxRotatingSection();
 
+    public function getNumberRotatingSessions();
+
+    public function getGradersForAllRotatingSections($gradeable_id);
+
     public function insertNewRotatingSection($section);
+
+    public function setupRotatingSections($graders, $gradeable_id);
 
     public function updateUsersRotatingSection($section, $users);
 
@@ -186,6 +208,29 @@ interface IDatabaseQueries {
     public function updateGradeableData(Gradeable $gradeable);
     public function insertGradeableComponentData($gd_id, GradeableComponent $component);
     public function updateGradeableComponentData($gd_id, GradeableComponent $component);
+
+    /**
+     * Creates a new gradeable in the database
+     *
+     * @param array $details
+     */
+    public function createNewGradeable($details);
+
+    /**
+     * Gets an array that contains all revelant data in a gradeable.
+     * Uses the gradeable id to use the data in the database.
+     *
+     * @param $gradeable_id
+     *
+     */
+    public function getGradeableData($gradeable_id);
+
+    /**
+     * Updates the current gradeable with new properties.
+     *
+     * @param array $details
+     */
+    public function updateGradeable($details);
 
     /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).

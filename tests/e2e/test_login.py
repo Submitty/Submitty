@@ -17,12 +17,12 @@ class TestLogin(BaseTestCase):
         taken to that original page you had requested.
         """
         url = "/index.php?semester=" + self.semester + \
-              "&course=csci1000&component=cpp_cats&success_login=true"
+              "&course=sample&component=cpp_cats&success_login=true"
         self.log_in(url)
         self.assertEqual(self.test_url + url, self.driver.current_url)
 
     def test_bad_login_password(self):
-        self.get("/index.php?semester=" + self.semester + "&course=csci1000")
+        self.get("/index.php?semester=" + self.semester + "&course=sample")
         self.driver.find_element_by_id("login-guest")
         self.driver.find_element_by_name("user_id").send_keys(self.user_id)
         self.driver.find_element_by_name("password").send_keys("bad_password")
@@ -31,7 +31,7 @@ class TestLogin(BaseTestCase):
         self.assertEqual("Could not login using that user id or password", error.text)
 
     def test_bad_login_username(self):
-        self.get("/index.php?semester=" + self.semester + "&course=csci1000")
+        self.get("/index.php?semester=" + self.semester + "&course=sample")
         self.driver.find_element_by_id("login-guest")
         self.driver.find_element_by_name("user_id").send_keys("bad_username")
         self.driver.find_element_by_name("password").send_keys(self.user_password)
@@ -40,7 +40,7 @@ class TestLogin(BaseTestCase):
         self.assertEqual("Could not login using that user id or password", error.text)
 
     def test_login_non_course_user(self):
-        self.get("/index.php?semester=" + self.semester + "&course=csci1000")
+        self.get("/index.php?semester=" + self.semester + "&course=sample")
         self.driver.find_element_by_id("login-guest")
         self.driver.find_element_by_name("user_id").send_keys("pearsr")
         self.driver.find_element_by_name("password").send_keys("pearsr")
