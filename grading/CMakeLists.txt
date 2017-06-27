@@ -27,6 +27,7 @@ add_library(submitty_grading
   ${GRADINGCODE}/grading/execute.cpp 
   ${GRADINGCODE}/grading/execute_limits.cpp 
   ${GRADINGCODE}/grading/error_message.cpp
+  ${GRADINGCODE}/grading/window_utils.cpp
 )
 
 ###################################################################################

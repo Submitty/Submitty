@@ -21,7 +21,6 @@ class TestResultsFixedSize {
 public:
 
   void initialize() {
-    std::cout << "TRFS initializer" << std::endl;
     distance = 0;
     grade = 0;
     compilation_error = false;
@@ -30,7 +29,6 @@ public:
     char default_message[] = "ERROR: TestResults not initialized.\nProbably caused by error in validation.\nIf you cannot debug the issue, ask your instructor to check results_log_validator.txt";
     assert (strlen(default_message) < TEST_RESULT_MESSAGES_SIZE-1);
     strcpy(messages,default_message);
-    std::cout << "init done " << std::endl;
   }
 
   void PACK(std::string d, int dist, std::vector<std::string> m, float g, bool ce, bool cw) {

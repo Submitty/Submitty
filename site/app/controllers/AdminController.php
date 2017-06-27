@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\controllers\admin\ReportController;
 use app\controllers\admin\GradeableController;
 use app\controllers\admin\GradeablesController;
+use app\controllers\admin\AdminGradeableController;
 use app\controllers\admin\ConfigurationController;
 use app\controllers\admin\UsersController;
 use app\libraries\Core;
@@ -29,6 +30,9 @@ class AdminController extends AbstractController {
                 break;
             case 'gradeable':
                 $controller = new GradeableController($this->core);
+                break;
+            case 'admin_gradeable':
+                $controller = new AdminGradeableController($this->core);
                 break;
             case 'reports':
                 $controller = new ReportController($this->core);
