@@ -26,9 +26,9 @@ def error_and_cleanup(tmp_path, message, error=-1):
     :param error: Which error code to return (default -1)
     :return: None
     """
-    print(message)
-    if os.path.isdir(tmp_path):
-        shutil.rmtree(tmp_path)
+    print("ERROR: " + message)
+    # if os.path.isdir(tmp_path):
+    #     shutil.rmtree(tmp_path)
     sys.exit(error)
 
 
@@ -41,6 +41,8 @@ def remove_extra_raw_data_fields(raw_line):
     if 'grade_released_date' in raw_line:
         return False
     if 'last_update' in raw_line:
+        return False
+    if 'date:' in raw_line:
         return False
     return True
 
@@ -186,8 +188,6 @@ def csci1100_rainbow_grades_test():
         filter2 = filter(remove_extra_raw_data_fields, contents2)
         for x, y in zip(filter1, filter2):
             if x != y:
-                print("{} and {} differ".format(filename1, filename2))
-                exit(-1)
                 error_and_cleanup(test_tmp, "{} and {} differ".format(filename1, filename2))
 
     print("All raw files match")
