@@ -145,7 +145,7 @@ CREATE TABLE electronic_gradeable_data (
     autograding_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
     submission_time timestamp(6) without time zone NOT NULL,
     CONSTRAINT egd_user_team_id_check CHECK (user_id IS NOT NULL OR team_id IS NOT NULL),
-    CONSTRAINT egd_g_user_team_id_unique UNIQUE (g_id, user_id, team_id)
+    CONSTRAINT egd_g_user_team_id_unique UNIQUE (g_id, user_id, team_id, g_version)
 );
 
 
@@ -362,7 +362,6 @@ CREATE TABLE sessions (
 
 CREATE TABLE users (
     user_id character varying NOT NULL,
-    user_password character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,

@@ -55,7 +55,11 @@ CREATE TABLE courses (
 CREATE TABLE courses_users (
     semester character varying(5) NOT NULL,
     course character varying(10) NOT NULL,
-    user_id character varying NOT NULL
+    user_id character varying NOT NULL,
+    user_group integer NOT NULL,
+    registration_section integer,
+    manual_registration boolean DEFAULT false,
+    CONSTRAINT users_user_group_check CHECK ((user_group >= 0) AND (user_group <= 4))
 );
 
 
@@ -84,6 +88,8 @@ CREATE TABLE users (
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
     user_email character varying NOT NULL,
+    user_updated BOOLEAN NOT NULL DEFAULT FALSE,
+    instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
     last_udpated timestamp WITHOUT time zone
 );
 
