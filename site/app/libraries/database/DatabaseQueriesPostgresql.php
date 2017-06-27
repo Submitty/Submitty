@@ -326,7 +326,8 @@ LEFT JOIN (
       t.user_id
     FROM gradeable_teams AS gt, teams AS t
     WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egd.team_id AND t.state = 1)
-) LEFT JOIN (
+) 
+LEFT JOIN (
   SELECT
     g_id,
     user_id,
