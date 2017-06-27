@@ -249,65 +249,62 @@ HTML;
                 <td>{$row->getUser()->getDisplayedFirstName()}</td>
                 <td>{$row->getUser()->getLastName()}</td>
 HTML;
+
                 if($show_auto_grading_points) {
                     if ($highest_version != 0) {
                         $return .= <<<HTML
-                <td>{$row->getGradedAutograderPoints()} / {$row->getTotalAutograderNonExtraCreditPoints()}</td>
-                <td>
-HTML;
-                        $box_background = "";
-                        if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
-                            $box_background = "background:red;padding:3px;margin-top:3px;margin-bottom:3px";
-                        }
-                        
-                        if ($row->beenTAgraded()) {
-                            $btn_class = "btn-default";
-                            $contents = "{$row->getGradedTAPoints()} / {$row->getTotalTANonExtraCreditPoints()}";
-                        }
-                        else {
-                            $btn_class = "btn-primary";
-                            $contents = "Grade";
-                        }
-                        $return .= <<<HTML
-                            <a class="btn {$btn_class}" href="{$this->core->getConfig()->getTaBaseUrl()}account/index.php?g_id={$gradeable->getId()}&amp;individual={$row->getUser()->getId()}&amp;course={$this->core->getConfig()->getCourse()}&amp;semester={$this->core->getConfig()->getSemester()}">
-                                {$contents}
-                            </a>
-                        </td>
-                        <td><div style="{$box_background}">{$graded} / {$total_possible}</div></td>
+                <td>{$row->getGradedAutograderPoints()}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
 HTML;
                     }
                     else {
                         $return .= <<<HTML
                 <td></td>
-                <td></td>
-                <td></td>
 HTML;
                     }
+                }
+                if ($highest_version != 0) {
+                    $return .= <<<HTML
+                <td>
+HTML;
+                    $box_background = "";
+                    if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
+                        $box_background = "background:red;padding:3px;margin-top:3px;margin-bottom:3px";
+                    }
                     
-                }
-                else {
+                    if ($row->beenTAgraded()) {
+                        $btn_class = "btn-default";
+                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                    }
+                    else {
+                        $btn_class = "btn-primary";
+                        $contents = "Grade";
+                    }
                     $return .= <<<HTML
-                <td></td>
-                <td></td>
+                        <a class="btn {$btn_class}" href="{$this->core->getConfig()->getTaBaseUrl()}account/index.php?g_id={$gradeable->getId()}&amp;individual={$row->getUser()->getId()}&amp;course={$this->core->getConfig()->getCourse()}&amp;semester={$this->core->getConfig()->getSemester()}">
+                            {$contents}
+                        </a>
+                </td>
+                <td><div style="{$box_background}">{$graded}&nbsp;/&nbsp;{$total_possible}</div></td>
 HTML;
-                }
-                // Conditionals to determine what to show in active version
-                // If no submission, active version is blank
-                if($highest_version == 0) {
-                    $return .= <<<HTML
-                <td></td>
-HTML;
-                }
-                // if the highest version is the active version, show it, giving info about number of tries
-                else if($active_version == $highest_version) {
-                    $return .= <<<HTML
+                    if($active_version == $highest_version) {
+                        $return .= <<<HTML
                 <td>{$active_version}</td>
 HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+                <td>{$active_version}&nbsp;/&nbsp;{$highest_version}</td>
+HTML;
+                    }
                 }
-                // otherwise show the active_version as one of the number of versions
                 else {
                     $return .= <<<HTML
-                <td>{$active_version}/{$highest_version}</td>
+                <td>
+                    <a class="btn btn-default" style="color:#a5a5a5;" href="{$this->core->getConfig()->getTaBaseUrl()}account/index.php?g_id={$gradeable->getId()}&amp;individual={$row->getUser()->getId()}&amp;course={$this->core->getConfig()->getCourse()}&amp;semester={$this->core->getConfig()->getSemester()}">Grade
+                    </a>
+                </td>
+                <td></td>
+                <td></td>
 HTML;
                 }
                 
