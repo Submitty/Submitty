@@ -1,0 +1,6 @@
+Testcase  1: Java - Compilation                                   2 /  2  
+Testcase  2: Java - Instructor JUnit Test Compilation             2 /  2  
+Testcase  3: Java - JUnit Test                                    4 / 16  
+Testcase  4: Submission Limit                                             
+Automatic grading total:                                          8 / 20
+Non-hidden automatic grading total:                               8 / 20
