@@ -65,12 +65,6 @@ popd
 # --------------------------------------
 echo -e "Compile and install analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-travis_wait 30 stack --allow-different-user --install-ghc --copy-bins build
-popd
-mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-
 
 # --------------------------------------
 echo -e "Compile and install the tutorial repository"
