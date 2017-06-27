@@ -575,7 +575,7 @@ HTML;
                 if ($this->core->getUser()->accessGrading()) {
                     $return .= <<<HTML
                 <td style="padding: 10px;">{$gradeable_grade_range}</td>
-                <td>{$admin_button}</td>
+                <td style="padding: 20px;">{$admin_button}</td>
                 <td style="padding: 10px;">{$quick_links}</td>
 HTML;
                 }
