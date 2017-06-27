@@ -19,6 +19,7 @@ from collections import OrderedDict
 from datetime import datetime, timedelta
 import glob
 import grp
+import hashlib
 import json
 import os
 import pwd
@@ -40,6 +41,7 @@ SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 SAMPLE_ASSIGNMENT_CONFIG = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_assignment_config")
+MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
 SAMPLE_SUBMISSIONS = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_submissions")
 
 TUTORIAL_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial")
@@ -103,6 +105,9 @@ def main():
         else:
             for key in courses.keys():
                 courses[key].users.append(user)
+
+    # To make Rainbow Grades testing possible, need to seed random to have the same users each time
+    random.seed(10090542)
 
     # we get the max number of extra students, and then create a list that holds all of them,
     # which we then randomly choose from to add to a course
@@ -598,6 +603,12 @@ class Course(object):
             self.unregistered_students = course['unregistered_students']
 
     def create(self):
+
+        # To make Rainbow Grades testing possible, need to seed random
+        m = hashlib.md5()
+        m.update(self.code)
+        random.seed(int(m.hexdigest(),16))
+
         course_group = self.code + "_tas_www"
         archive_group = self.code + "_archive"
         create_group(self.code)
@@ -839,21 +850,27 @@ class Gradeable(object):
                 self.config_path = gradeable['config_path']
             else:
                 sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, self.gradeable_config)
+                examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "config")
                 if os.path.isdir(sample_path):
                     self.config_path = sample_path
+                elif os.path.isdir(examples_path):
+                    self.config_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.config_path = tutorial_path
                 else:
                     self.config_path = None
 
             sample_path = os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config)
+            examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "submissions")
             tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
             if 'sample_path' in gradeable:
                 self.sample_path = gradeable['sample_path']
             else:
                 if os.path.isdir(sample_path):
                     self.sample_path = sample_path
+                elif os.path.isdir(examples_path):
+                    self.sample_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.sample_path = tutorial_path
                 else:
@@ -895,9 +912,12 @@ class Gradeable(object):
                 self.precision = float(gradeable['eg_precision'])
             if self.config_path is None:
                 sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, self.id)
+                examples_path = os.path.join(MORE_EXAMPLES_DIR, self.id, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
                 if os.path.isdir(sample_path):
                     self.config_path = sample_path
+                elif os.path.isdir(examples_path):
+                    self.config_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.config_path = tutorial_path
                 else:
