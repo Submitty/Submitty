@@ -420,6 +420,54 @@ std::string get_program_name(const std::string &cmd, const nlohmann::json &whole
 }
 
 
+std::vector<std::string> break_into_tokens(const std::string &cmd) {
+  std::vector<std::string> answer;
+  std::string current_token;
+  std::stringstream ss(cmd);
+  char c;
+  bool quoted = false;
+
+  while (ss >> std::noskipws >> c) {
+    //std::cout << "char is '" << c << "'" << std::endl;
+
+    // ESCAPED CHARACTER
+    if (c == '\\') {
+      ss >> std::noskipws >> c;
+      current_token.push_back(c);
+    }
+
+    // SINGLE QUOTED STRING
+    else if (c =='\'') {
+
+    }
+
+    // WHITE SPACE
+    else if (c == ' ' ||
+             c == '\t' ||
+             c == '\n') {
+      if (current_token != "") {
+        answer.push_back(current_token);
+        //std::cout << "--->  '" << current_token << "'" << std::endl;
+        current_token = "";
+      }
+    }
+
+    // ALL OTHER CHARACTERS
+    else {
+      current_token.push_back(c);
+    }
+  }
+
+  // HANDLE LAST TOKEN
+  if (current_token != "") {
+    //std::cout << "--->  '" << current_token << "'" << std::endl;
+    answer.push_back(current_token);
+  }
+
+  return answer;
+}
+
+
 void parse_command_line(const std::string &cmd,
 			std::string &my_program,
 			std::vector<std::string> &my_args,
@@ -434,19 +482,11 @@ void parse_command_line(const std::string &cmd,
   my_args.clear();
   my_program = my_stdin = my_stdout = my_stderr = "";
 
-  std::stringstream ss(cmd);
-  std::string token,token2;
+  std::vector<std::string> tokens = break_into_tokens(cmd);
 
-  while (ss >> token) {
-    assert (token.size() >= 1);
-
-    // handle escaped spaces in the command line
-    while (token.back() == '\\') {
-      token.pop_back();
-      token2 = " ";
-      ss >> token2;
-      token = token + ' ' + token2;
-    }
+  int which = 0;
+  while (which < tokens.size()) {
+    std::string token = tokens[which];
 
     // grab the program name
     if (my_program == "") {
@@ -460,9 +500,9 @@ void parse_command_line(const std::string &cmd,
     else if (token.substr(0,1) == "<") {
       assert (my_stdin == "");
       if (token.size() == 1) {
-        ss >> token; bool success = ss.good();
-        assert (success);
-        my_stdin = token;
+        which++;
+        assert (which < tokens.size());
+        my_stdin = tokens[which];
       } else {
         my_stdin = token.substr(1,token.size()-1);
       }
@@ -471,9 +511,9 @@ void parse_command_line(const std::string &cmd,
     else if (token.size() >= 2 && token.substr(0,2) == "1>") {
       assert (my_stdout == "");
       if (token.size() == 2) {
-        ss >> token; bool success = ss.good();
-        assert (success);
-        my_stdout = token;
+        which++;
+        assert (which < tokens.size());
+        my_stdout = tokens[which];
       } else {
         my_stdout = token.substr(2,token.size()-2);
       }
@@ -482,9 +522,9 @@ void parse_command_line(const std::string &cmd,
     else if (token.size() >= 2 && token.substr(0,2) == "2>") {
       assert (my_stderr == "");
       if (token.size() == 2) {
-        ss >> token; bool success = ss.good();
-        assert (success);
-        my_stderr = token;
+        which++;
+        assert (which < tokens.size());
+        my_stderr = tokens[which];
       } else {
         my_stderr = token.substr(2,token.size()-2);
       }
@@ -499,7 +539,9 @@ void parse_command_line(const std::string &cmd,
     // special exclude file option
     // FIXME: this is ugly, don't know how I want it to be done though
     else if (token == "-EXCLUDE_FILE") {
-      ss >> token;
+      which++;
+      assert (which < tokens.size());
+      token = tokens[which];
       std::cout << "EXCLUDE THIS FILE " << token << std::endl;
       for (std::vector<std::string>::iterator itr = my_args.begin();
            itr != my_args.end(); ) {
@@ -516,6 +558,8 @@ void parse_command_line(const std::string &cmd,
       //std::cout << "after  TOKEN IS " << token << std::endl;
       my_args.push_back(token);
     }
+
+    which++;
   }
 
 
@@ -527,7 +571,10 @@ void parse_command_line(const std::string &cmd,
   std::cout << "MY STDOUT:  '" << my_stdout  << "'" << std::endl;
   std::cout << "MY STDERR:  '" << my_stderr  << "'" << std::endl;
   std::cout << "MY ARGS (" << my_args.size() << ") :";
-
+  for (int i = 0; i < my_args.size(); i++) {
+    std::cout << "'" << my_args[i] << "' ";
+  }
+  std::cout << "\n" << std::endl;
 }
 
 // =====================================================================================
@@ -625,14 +672,14 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   char** temp_args = new char* [my_args.size()+2];   //memory leak here
   temp_args[0] = (char*) my_program.c_str();
   for (int i = 0; i < my_args.size(); i++) {
-    std::cout << "'" << my_args[i] << "' ";
+    //std::cout << "'" << my_args[i] << "' ";
     temp_args[i+1] = (char*) my_args[i].c_str();
   }
   temp_args[my_args.size()+1] = (char *)NULL;
 
   char** const my_char_args = temp_args;
 
-  std::cout << std::endl << std::endl;
+  //std::cout << std::endl << std::endl;
 
 
   // print out the command line to be executed
@@ -735,7 +782,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
 
   // SECCOMP: install the filter (system calls restrictions)
-  if (install_syscall_filter(prog_is_32bit, my_program,logfile)) {
+  if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
     std::cout << "seccomp filter install failed" << std::endl;
     return 1;
   }

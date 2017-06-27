@@ -39,17 +39,17 @@
 #         included in this list. An example of the basic usage is:
 #
 #         courses:
-#           - csci1100
-#           - datastructures
+#           - development
+#           - tutorial
 #
-#         where the user will only be added to the csci1100 and datastructures courses using the settings defined above.
+#         where the user will only be added to the development and sample courses using the settings defined above.
 #         A more complex usage would be:
 #
 #         courses:
-#           csci1100:
+#           development:
 #             user_group: 4
 #             registration_section: 1
-#           datastructures:
+#           sample:
 #             user_group: 1
 #
 #         where now the user is added to the two courses as before, but their in different groups in the courses (and
