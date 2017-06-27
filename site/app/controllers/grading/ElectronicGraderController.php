@@ -8,8 +8,8 @@ use app\models\User;
 class ElectronicGraderController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
-            case 'summary':
-                $this->showSummary();
+            case 'details':
+                $this->showDetails();
                 break;
             default:
                 $this->showStatus();
@@ -77,10 +77,10 @@ class ElectronicGraderController extends AbstractController {
     /**
      * This loads a gradeable and
      */
-    public function showSummary() {
+    public function showDetails() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        $this->core->getOutput()->addBreadcrumb("Summary {$gradeable->getName()}");
+        $this->core->getOutput()->addBreadcrumb("Details {$gradeable->getName()}");
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
