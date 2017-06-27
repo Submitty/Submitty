@@ -29,14 +29,14 @@ class TestAccess(BaseTestCase):
         self.assertIn("Invalid course: null", self.driver.find_element_by_tag_name("div").text)
 
     def test_semester_with_directory_change(self):
-        self.get("/index.php?semester=../../" + self.semester + "&course=csci1000")
+        self.get("/index.php?semester=../../" + self.semester + "&course=sample")
         self.assertEqual(self.driver.current_url, self.test_url + "/index.php?semester=" +
-                         self.semester + "&course=csci1000")
+                         self.semester + "&course=sample")
 
     def test_course_with_directory_change(self):
-        self.get("/index.php?semester=" + self.semester + "&course=../../csci1000")
+        self.get("/index.php?semester=" + self.semester + "&course=../../sample")
         self.assertEqual(self.driver.current_url, self.test_url + "/index.php?semester=" +
-                         self.semester + "&course=csci1000")
+                         self.semester + "&course=sample")
 
 if __name__ == "__main__":
     unittest2.main()

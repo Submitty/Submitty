@@ -280,7 +280,7 @@ void INSPECT_IMPROVE_CHANGES(std::ostream& ostr, Change &c,
   char_added += tmp_char_added;
   char_deleted += tmp_char_deleted;
 
-#if 1
+#if 0
   if (j != nlohmann::json()) {
     std::cout << "line_added=" << std::setw(6) << tmp_line_added << " " << " line_deleted=" << std::setw(6) << tmp_line_deleted
               << " char_added=" << std::setw(6) << tmp_char_added << " " << " char_deleted=" << std::setw(6) << tmp_char_deleted << "  | cumm:  ";

@@ -2,8 +2,10 @@
 
 namespace app\controllers;
 
+use app\controllers\admin\ReportController;
 use app\controllers\admin\GradeableController;
 use app\controllers\admin\GradeablesController;
+use app\controllers\admin\AdminGradeableController;
 use app\controllers\admin\ConfigurationController;
 use app\controllers\admin\UsersController;
 use app\controllers\admin\AdminGradeableController;
@@ -32,6 +34,9 @@ class AdminController extends AbstractController {
                 break;
             case 'admin_gradeable':
                 $controller = new AdminGradeableController($this->core);
+                break;
+            case 'reports':
+                $controller = new ReportController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
