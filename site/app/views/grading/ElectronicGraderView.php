@@ -268,7 +268,7 @@ HTML;
 HTML;
                     $box_background = "";
                     if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
-                        $box_background = "background:red;padding:3px;margin-top:3px;margin-bottom:3px";
+                        $box_background = "background:red;padding:3px;margin-top:3px;margin-bottom:3px;margin-left:5%;margin-right:5%;border-radius:4px;";
                     }
                     
                     if ($row->beenTAgraded()) {
