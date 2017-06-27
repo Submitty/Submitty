@@ -97,12 +97,12 @@ before_script:
   - export DBUS_SESSION_BUS_ADDRESS=/dev/null
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
   - sudo ./.setup/travis/autograder.sh
-  - ./.setup/travis/setup.sh
   - pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
   - travis_wait stack --allow-different-user --install-ghc --no-terminal --copy-bins build
   - popd
   - mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
   - cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+  - ./.setup/travis/setup.sh
   - if [ ${INTEGRATION_SUITE} = false ]; then sudo python /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample; fi
   - sudo ./.setup/travis/setup_test_suite.sh
   - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
