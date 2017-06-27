@@ -44,61 +44,43 @@ class ReportController extends AbstractController {
         $results = array();
         $results['header_model'] = array('First' => 'First Name', 'Last'=> 'Last Name', 'reg_section' => 'Registration Section');
         foreach($gradeables as $gradeable) {
-            $stu_id = $gradeable->getUser()->getId();
-            if(!isset($results[$stu_id])) {
-                $results[$stu_id] = array('First' => $gradeable->getUser()->getFirstName(), 'Last' => $gradeable->getUser()->getLastName(), 'reg_section' => $gradeable->getUser()->getRegistrationSection());
-                foreach($results['header_model'] as $s_buckets => $assignments) {
-                    $results[$stu_id][$s_buckets] = array();
-                }
+            $student_id = $gradeable->getUser()->getId();
+            if(!isset($results[$student_id])) {
+                $results[$student_id] = array('First'=>$gradeable->getUser()->getDisplayedFirstName(), 'Last' => $gradeable->getUser()->getLastName(), 'reg_section' => $gradeable->getUser()->getRegistrationSection());
             }
             $g_id = $gradeable->getId();
-            $syllabus_bucket = $gradeable->getSyllabusBucket();
-            if(!isset($results['header_model'][$syllabus_bucket])) {
-                $results['header_model'][$syllabus_bucket] = array($g_id => $g_id);
+            if(!isset($results['header_model'][$g_id])) {
+                $results['header_model'][$g_id] = $g_id.": ".($gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints());
             }
-            if(!isset($results[$stu_id][$syllabus_bucket])) {
-                $results[$stu_id][$syllabus_bucket] = array($g_id => $gradeable->getGradedTAPoints());
-            }
-            else {
-                $results[$stu_id][$syllabus_bucket][$g_id] = $gradeable->getGradedTAPoints();
-            }
-            if(!isset($results['header_model'][$syllabus_bucket][$g_id])) {
-                $results['header_model'][$syllabus_bucket][$g_id] = $g_id;
-            }
+            $results[$student_id][$g_id] = $gradeable->getGradedTAPoints() + $gradeable->getGradedAutograderPoints();
         }
         
+        $nl = "\n";
         $csv_output = "";
-        
-        foreach($results as $id => $user_grades) {
-            $row = array();
+        foreach($results as $id => $student) {
+            $student_line = array();
             if($id === 'header_model') {
-                $row[] = 'UserId';
+                $student_line[] = "UserId";
             }
             else {
-                $row[] = $id;
+                $student_line[] = $id;
             }
-            
-            $row[] = $results[$id]['First'];
-            $row[] = $results[$id]['Last'];
-            $row[] = $results[$id]['reg_section'];
-            foreach($results[$id] as $s_bucket => $gradeables) {
-                if($s_bucket == 'First' || $s_bucket == 'Last' || $s_bucket == 'reg_section') {
+            $student_line[] = $student['First'];
+            $student_line[] = $student['Last'];
+            $student_line[] = $student['reg_section'];
+            foreach($results['header_model'] as $grade_id => $grade) {
+                if($grade_id == 'First' || $grade_id == 'Last' || $grade_id == 'reg_section') {
                     continue;
                 }
-                $row[] = $s_bucket;
-                foreach($results[$id][$s_bucket] as $score) {
-                    $row[] = $score;
-                }
+                $student_line[] = $student[$grade_id];
             }
-            $student_row = implode(",", $row);
-            $csv_output .= $student_row."\n";
+            $csv_output .= implode(",",$student_line).$nl;
         }
-        header("Content-type: text/plain");
-        header("Contenet-Disposition: attachment; filename=hwserver-report.csv");
-        header("Content-Length: ".strlen($csv_output));
         
+        header("Content-Type: text/plain");
+        header('Content-Disposition: attachment; filename=hwserver-report.csv');
+        header("Content-Length: " . strlen($csv_output));
         echo $csv_output;
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
     
     public function generateGradeSummaries() {
