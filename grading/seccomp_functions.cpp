@@ -41,11 +41,12 @@ inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &sy
 // system_call_check.cpp parses this function to define the categories.
 //
 #include "system_call_categories.cpp"
+#include "json.hpp"
 
 // ===========================================================================
 // ===========================================================================
 
-int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile) {
+int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile, const nlohmann::json &whole_config) {
 
   int res;
   scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
@@ -108,6 +109,22 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   std::set<std::string> forbidden_categories = {
     "INFORMATION_MAINTENANCE_SET_TIME"
   };
+
+
+  // ---------------------------------------------------------------
+  // READ ALLOWED SYSTEM CALLS FROM CONFIG.JSON
+  const nlohmann::json &config_whitelist = whole_config.value("allow_system_calls",nlohmann::json());
+  for (nlohmann::json::const_iterator cwitr = config_whitelist.begin();
+       cwitr != config_whitelist.end(); cwitr++) {
+    std::string my_category = *cwitr;
+    if (my_category.size() > 27 && my_category.substr(0,27) == "ALLOW_SYSTEM_CALL_CATEGORY_") {
+      my_category = my_category.substr(27,my_category.size()-27);
+    }
+    // make sure categories is valid
+    assert (restricted_categories.find(my_category) != restricted_categories.end());
+    categories.insert(my_category);
+  }
+
   
   // ---------------------------------------------------------------
   // HELPER UTILTIY PROGRAMS
@@ -162,7 +179,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   }
 
   // ---------------------------------------------------------------
-  // cmake/make COMPILATION
+  // CMAKE/MAKE COMPILATION
   else if (my_program == "/usr/bin/cmake" ||
            my_program == "/usr/bin/make") {
     categories = restricted_categories;
@@ -261,6 +278,12 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   else if (my_program == "/usr/bin/compare") {
     categories.insert("FILE_MANAGEMENT_PERMISSIONS");
     categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_SCHEDULING");
+  }
+
+  // ---------------------------------------------------------------
+  else if (my_program == "/usr/bin/sort") {
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
     categories.insert("PROCESS_CONTROL_SCHEDULING");
   }

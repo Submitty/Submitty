@@ -175,10 +175,11 @@ ORDER BY egd.g_version", array($g_id, $user_id));
      *      components for the SELECT cause and in the FROM clause (don't need gradeable_data if this is null, etc.)
      *  section_key:
      */
-    public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id") {
+    public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
         $return = array();
         $g_ids_query = "";
         $users_query = "";
+        $g_type_query = "";
         $params = array();
         if ($g_ids !== null) {
             if (!is_array($g_ids)) {
@@ -201,6 +202,19 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                 $users_query = implode(",", array_fill(0, count($user_ids), "?"));
                 $params = array_merge($params, $user_ids);
             }
+            else {
+                return $return;
+            }
+        }
+        // added toggling of gradeable type to only grab Homeworks for HWReport generation
+        if ($g_type !== null) {
+            if (!is_array($g_type)) {
+                $g_type = array($g_type);
+            }
+            if (count($g_type) > 0) {
+                $g_type_query = implode(",", array_fill(0, count($g_type), "?"));
+                $params = array_merge($params, $g_type);
+            } 
             else {
                 return $return;
             }
@@ -334,6 +348,9 @@ LEFT JOIN (
         if ($user_ids !== null) {
             $where[] = "u.user_id IN ({$users_query})";
         }
+        if ($g_type !== null) {
+            $where[] = "g.g_gradeable_type IN ({$g_type_query})";
+        }
         if (count($where) > 0) {
             $query .= "
 WHERE ".implode(" AND ", $where);
@@ -352,6 +369,78 @@ ORDER BY u.{$section_key}, {$sort_key}";
         }
 
         return $return;
+    }
+    
+    // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query 
+    public function getLateDayUpdates() {
+        $this->database->query("SELECT * FROM late_days");
+        return $this->database->rows();
+    }
+    
+    // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
+    public function getLateDayInformation() {
+        $params = array(300);
+
+        $query = "SELECT
+                      submissions.*
+                      , coalesce(late_day_exceptions, 0) extensions
+                      , greatest(0, ceil((extract(EPOCH FROM(coalesce(submission_time, eg_submission_due_date) - eg_submission_due_date)) - (?*60))/86400):: integer) as days_late
+                    FROM
+                      (
+                        SELECT
+                        base.g_id
+                        , g_title
+                        , base.assignment_allowed
+                        , base.user_id
+                        , eg_submission_due_date
+                        , coalesce(active_version, -1) as active_version
+                        , submission_time
+                      FROM
+                      (
+                        --Begin BASE--
+                        SELECT
+                          g.g_id,
+                          u.user_id,
+                          g.g_title,
+                          eg.eg_submission_due_date,
+                          eg.eg_late_days AS assignment_allowed
+                        FROM
+                          users u
+                          , gradeable g
+                          , electronic_gradeable eg
+                        WHERE
+                          g.g_id = eg.g_id
+                        --End Base--
+                      ) as base
+                    FULL JOIN
+                    (
+                      --Begin Details--
+                      SELECT
+                        g_id
+                        , user_id
+                        , active_version
+                        , g_version
+                        , submission_time
+                      FROM
+                        electronic_gradeable_version egv NATURAL JOIN electronic_gradeable_data egd
+                      WHERE
+                        egv.active_version = egd.g_version
+                      --End Details--
+                    ) as details
+                    ON
+                      base.user_id = details.user_id
+                      AND base.g_id = details.g_id
+                    ) 
+                      AS submissions 
+                      FULL OUTER JOIN 
+                        late_day_exceptions AS lde 
+                      ON submissions.g_id = lde.g_id 
+                      AND submissions.user_id = lde.user_id";
+
+        //Query database and return results.
+        
+        $this->database->query($query, $params);
+        return $this->core->getDatabase()->rows();
     }
 
     public function getUsersByRegistrationSections($sections) {

@@ -1,0 +1,45 @@
+EXPECTED RESULTS 
+AUTOMATED GRADING
+
+
+README.txt 
+   The instructor provided README - should be filled out by the
+   student before submission, but the autograding test case just
+   checks for the presense of this test case).
+   Submitted alone, this file is worth 2 / 22 points.
+
+
+julian_compile_error.cpp
+   This version of the code contains a number of small compilation
+   errors.
+   Submitted alone, this file is worth 0 / 22 points.
+
+
+julian_buggy.cpp
+   This version compiles, but contains some logic errors.  It receives
+   credit for correct execution on some but not all of the test
+   cases.
+   Submitted alone, this file is worth 13 / 22 points.
+
+
+julian_full_credit.cpp
+   This version compiles, and passes all of the basic test cases.
+   Submitted alone, this file is worth 20 / 22 points.
+
+
+julian_full_credit.zip
+   This zip file contains both README.txt and julian_full_credit.cpp.
+   This zip file is worth 22 / 22 points.    
+
+
+julian_extra_credit.cpp
+   This version contains some error checking an error handling by
+   printing to STDERR, so it passes the extra credit tests.
+   Submitted alone, this file is worth 22 / 22 points.
+
+
+julian_extra_credit.zip
+   This zip file contains both README.txt and julian_extra_credit.cpp.
+   This zip file is worth 24 / 22 points.    
+
+

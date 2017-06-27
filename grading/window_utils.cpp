@@ -39,7 +39,6 @@ std::vector<float> extractFloatsFromString(std::string input){
           ".*?(-?[0-9]+(\\.[0-9]+)?|-?0*\\.[0-9]+)(.*)";
           // ".*?(-?[0-9]*[1-9][0-9]*(\\.[0-9]+)?|-?0*\\.[0-9]*[1-9][0-9]*)(.*)";
 
-
     std::regex regex(myReg);
     std::smatch match;
     int i = 0;
