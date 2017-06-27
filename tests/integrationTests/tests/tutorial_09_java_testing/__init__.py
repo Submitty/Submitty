@@ -12,7 +12,6 @@ import glob
 SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_TUTORIAL_DIR + "/examples/09_java_testing/config"
 SAMPLE_SUBMISSIONS = SUBMITTY_TUTORIAL_DIR + "/examples/09_java_testing/submissions/"
 
-
 @prebuild
 def initialize(test):
     try:
