@@ -1,10 +1,8 @@
 courses:
-  csci1000:
+  sample:
     user_group: 1
-  csci1100:
+  development:
     user_group: 2
-  datastructures:
-    user_group: 4
   tutorial:
     user_group: 4
 user_firstname: Emmett

@@ -20,6 +20,7 @@ gradeables:
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
     g_grade_released_date: +9 days
+  
   - gradeable_config:  03_multipart
     components:
     - gc_max_value: 5
@@ -29,6 +30,7 @@ gradeables:
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
     g_grade_released_date: +9 days
+  
   - gradeable_config:  04_python_static_analysis
     components:
     - gc_max_value: 5
@@ -38,6 +40,7 @@ gradeables:
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
     g_grade_released_date: +9 days
+  
   - gradeable_config:  05_cpp_static_analysis
     components:
     - gc_max_value: 5

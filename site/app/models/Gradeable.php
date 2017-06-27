@@ -296,9 +296,10 @@ class Gradeable extends AbstractModel {
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
                             'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment');
+            $bools = array('gc_is_text', 'gc_is_extra_credit');
             foreach ($fields as $key) {
                 if (isset($details['array_'.$key])) {
-                    $details['array_'.$key] = DatabaseUtils::fromPGToPHPArray($details['array_'.$key], true);
+                    $details['array_'.$key] = DatabaseUtils::fromPGToPHPArray($details['array_'.$key], in_array($key, $bools));
                 }
             }
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {
@@ -814,8 +815,13 @@ class Gradeable extends AbstractModel {
     public function saveData() {
         $this->core->getQueries()->updateGradeableData($this);
     }
-
     public function updateGradeable() {
         $this->core->getQueries()->updateGradeable2($this);
+    }
+    public function getGraderId() {
+        return $this->grader_id;
+    }
+    public function getSyllabusBucket() {
+        return $this->bucket;
     }
 }

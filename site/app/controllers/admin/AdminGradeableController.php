@@ -229,11 +229,9 @@ class AdminGradeableController extends AbstractController {
         $gradeable->updateGradeable();
         $this->returnToNav();
     }
-
     //return to the navigation page
     private function returnToNav() {
         $url = $this->core->buildUrl(array());
         header('Location: '. $url);
     }
-
 }
