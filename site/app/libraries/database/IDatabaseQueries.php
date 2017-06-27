@@ -204,9 +204,26 @@ interface IDatabaseQueries {
      */
     public function updateActiveVersion($g_id, $user_id, $team_id, $version);
 
+    /**
+     * @param Gradeable $gradeable
+     */
     public function insertGradeableData(Gradeable $gradeable);
+
+    /**
+     * @param Gradeable $gradeable
+     */
     public function updateGradeableData(Gradeable $gradeable);
+
+    /**
+     * @param string             $gd_id
+     * @param GradeableComponent $component
+     */
     public function insertGradeableComponentData($gd_id, GradeableComponent $component);
+
+    /**
+     * @param string             $gd_id
+     * @param GradeableComponent $component
+     */
     public function updateGradeableComponentData($gd_id, GradeableComponent $component);
 
     /**

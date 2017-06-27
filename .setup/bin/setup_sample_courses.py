@@ -776,7 +776,7 @@ class Course(object):
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
                                                              gd_overall_comment="lorem ipsum lodar",
                                                              gd_status=status, gd_late_days_used=0,
-                                                             gd_active_version=active)
+                                                             gd_active_version=active, gd_grader_id=self.instructor.id)
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         for component in gradeable.components:
