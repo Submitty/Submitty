@@ -33,6 +33,7 @@ class AdminController extends AbstractController {
                 break;
             case 'admin_gradeable':
                 $controller = new AdminGradeableController($this->core);
+                break;
             case 'reports':
                 $controller = new ReportController($this->core);
                 break;
