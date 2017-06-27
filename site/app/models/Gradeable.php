@@ -713,6 +713,20 @@ class Gradeable extends AbstractModel {
         return $this->total_tagrading_non_extra_credit;
     }
 
+    public function getGradedPoints() {
+        return $this->graded_auto_non_hidden_extra_credit +
+            $this->graded_auto_non_hidden_non_extra_credit +
+            $this->graded_auto_hidden_extra_credit +
+            $this->graded_auto_hidden_non_extra_credit +
+            $this->graded_tagrading;
+    }
+
+    public function getTotalPoints() {
+        return $this->total_auto_hidden_non_extra_credit + 
+            $this->total_auto_non_hidden_non_extra_credit +
+            $this->total_tagrading_non_extra_credit;
+    }
+
     public function getTAViewDate(){
         return $this->ta_view_date;
     }

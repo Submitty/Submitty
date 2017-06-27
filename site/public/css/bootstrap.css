@@ -479,6 +479,16 @@ input[type="button"].btn-block {
     width: 100%;
 }
 
+.btn-large {
+    width: 96%;
+    margin-left: 2%;
+    margin-right: 2%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 17px;
+    padding: 16px;
+}
+
 .alert {
     padding: 8px 35px 8px 14px;
     margin-bottom: 20px;

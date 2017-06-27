@@ -422,10 +422,10 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
     $(document).ready(function(){
 
         //Check each cookie and test for 'undefined'. If any cookie is undefined
-        $.each(document.cookie.split(/; */), function(){
-            var cookie = this.split("=")
+        //$.each(document.cookie.split(/; */), function(){
+        /*    var cookie = this.split("=")
            if(!cookie[1] || cookie[1] == 'undefined'){
-                //deleteCookies();
+                deleteCookies();
            }
         });
 
@@ -433,17 +433,22 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
         {
             //If cookie version is not the same as the current version then toggle the visibility of each
             //rubric panel then update the cookies
-            //deleteCookies();
+            deleteCookies();
             handleKeyPress("KeyG");
             handleKeyPress("KeyA");
             handleKeyPress("KeyS");
             handleKeyPress("KeyO");
             handleKeyPress("KeyR");
-            //updateCookies();
+            updateCookies();
         }
         else{
-            //readCookies();
-        }
+            readCookies();
+        }*/
+        handleKeyPress("KeyG");
+        handleKeyPress("KeyA");
+        handleKeyPress("KeyS");
+        handleKeyPress("KeyO");
+        handleKeyPress("KeyR");
     });
 
     function deleteCookies(){
