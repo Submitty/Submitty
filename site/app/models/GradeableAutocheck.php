@@ -28,7 +28,7 @@ class GradeableAutocheck extends AbstractModel {
     
     /** @var String[] Message to show underneath the description for a diff */
     protected $messages = array();
-    
+
     /**
      * GradeableAutocheck constructor.
      *
@@ -57,10 +57,16 @@ class GradeableAutocheck extends AbstractModel {
             $actual_file = $result_path . "/" . $details["actual_file"];
         }
     
+        
+    
         if(isset($details["expected_file"]) &&
             file_exists($course_path . "/" . $details["expected_file"])) {
             $expected_file = $course_path . "/" . $details["expected_file"];
+        }else if(isset($details["expected_file"]) &&
+           ! file_exists($course_path . "/" . $details["expected_file"])) {
+            $_SESSION['messages']['error'][] = "Expected file not found.";
         }
+
     
         if(isset($details["difference_file"]) && file_exists($result_path . "/" . $details["difference_file"])) {
             $difference_file = $result_path . "/" . $details["difference_file"];

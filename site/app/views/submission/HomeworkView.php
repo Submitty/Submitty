@@ -470,7 +470,6 @@ HTML;
                     }
 
                 }
-
                 if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
                     if ($gradeable->beingGradedInteractiveQueue() ||
                         (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
