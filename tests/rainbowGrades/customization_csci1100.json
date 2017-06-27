@@ -31,7 +31,7 @@
 	    "percent": 1.00,
 	    "ids": [
 		{ "id":"python_static_analysis", "max": 14, "curve": [4.50, 4.00, 3.50, 3.00]},
-		{ "id":"python_simple_homework_multipart", "max": 15, "curve": [14.50, 14.00, 13.50, 13.00] },
+		{ "id":"03_multipart", "max": 15, "curve": [14.50, 14.00, 13.50, 13.00] },
 		{ "id":"python_linehighlight", "max": 95, "curve": [94.50, 64.00, 23.50, 13.00] },
 		{ "id":"python_simple_homework", "max": 5, "curve": [4.0, 4.0, 3.0, 3.0] }
 	    ]
