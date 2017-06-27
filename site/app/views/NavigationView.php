@@ -14,6 +14,7 @@ class NavigationView extends AbstractView {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
+        $columnSpan = 10;
         $return = "";
 
 
@@ -141,7 +142,7 @@ HTML;
 
             $lower_title = str_replace(" ", "_", strtolower($title));
             $return .= <<<HTML
-        <tr class="bar"><td colspan="4"></td></tr>
+        <tr class="bar"><td colspan="10"></td></tr>
         <tr class="colspan nav-title-row" id="{$lower_title}"><td colspan="4">{$title_to_category_title[$title]}</td></tr>
         <tbody id="{$lower_title}_tbody">
 HTML;
@@ -583,7 +584,7 @@ HTML;
             </tr>
 HTML;
             }
-            $return .= '</tbody><tr class="colspan"><td colspan="4" style="border-bottom:2px black solid;"></td></tr>';
+            $return .= '</tbody><tr class="colspan"><td colspan="10" style="border-bottom:2px black solid;"></td></tr>';
         }
 
         if ($found_assignment == false) {
