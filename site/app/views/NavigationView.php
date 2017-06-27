@@ -226,14 +226,14 @@ HTML;
                 }
                 $time = " @ H:i";
 
-                $gradeable_grade_range = 'VIEW FORM<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/y{$time}").")</span>";
+                $gradeable_grade_range = 'VIEW FORM<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}").")</span>";
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
-                  $gradeable_grade_range = 'VIEW SUBMISSIONS<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/y{$time}")."</span>)";
+                  $gradeable_grade_range = 'VIEW SUBMISSIONS<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}")."</span>)";
                 }
                 $temp_regrade_text = "";
                 if ($title_save=='ITEMS BEING GRADED') {
-                  $gradeable_grade_range = 'GRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/y{$time}").'</span>)';
-                  $temp_regrade_text = 'REGRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/y{$time}").'</span>)';
+                  $gradeable_grade_range = 'GRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/Y{$time}").'</span>)';
+                  $temp_regrade_text = 'REGRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/Y{$time}").'</span>)';
                 }
                 if ($title_save=='GRADED') {
                   $gradeable_grade_range = 'GRADE';
@@ -248,7 +248,7 @@ HTML;
 
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
 
-                    $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getOpenDate()->format("m/d/y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getDueDate()->format("m/d/y{$time}")."</span>)";
+                    $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getOpenDate()->format("m/d/Y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getDueDate()->format("m/d/Y{$time}")."</span>)";
                     if ($title=="GRADED" || $title=="ITEMS BEING GRADED") { $display_date = ""; }
                     if ($g_data->getActiveVersion() >= 1 && $title == "OPEN") { //if the user submitted something on time
                         $button_text = "RESUBMIT {$submission_status["SUBMITTED"]} {$submission_status["AUTOGRADE"]} {$display_date}";
