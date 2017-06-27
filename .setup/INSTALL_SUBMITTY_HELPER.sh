@@ -498,10 +498,9 @@ stack --allow-different-user --no-terminal --install-ghc --copy-bins build
 
 popd
 
-rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/count
-cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/plagiarism ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/plagiarism
+mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/plagiarism ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 # change permissions
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools

@@ -128,9 +128,13 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   
   // ---------------------------------------------------------------
   // SUBMITTY ANALYSIS TOOLS
-  else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count"
-		  || my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/plagiarism") {
+  else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count") {
+    //TODO
     categories = restricted_categories;
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    categories.insert("FILE_MANAGEMENT_RARE");
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
   }
 
   // ---------------------------------------------------------------
