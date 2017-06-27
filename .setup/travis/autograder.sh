@@ -74,4 +74,9 @@ mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
 cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
 
+
+# --------------------------------------
+echo -e "Compile and install the tutorial repository"
+git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+
 popd
