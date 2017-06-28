@@ -495,27 +495,21 @@ rm ${HWCRON_CRONTAB_FILE}
 # COMPILE AND INSTALL ANALYSIS TOOLS
 
 echo -e "Compile and install analysis tools"
+
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#git pull origin master
-make
 
-# copy the necessary files out of the repo
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-#mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/config
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_node      ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_token     ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_function  ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang/*              ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/config/*            ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/config
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/*               ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-
-# change permissions
-chown -R hwcron:course_builders ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+# compile the tools
+stack --allow-different-user --no-terminal --install-ghc --copy-bins build
 
 popd
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/plagiarism ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+# change permissions
+chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 ################################################################################################################
 ################################################################################################################
