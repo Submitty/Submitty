@@ -1203,4 +1203,23 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
             return $team;
         }
     }
+
+    public function createGradeableData($g_id, $user_id, $grader_id) {
+        $params = array($g_id, $user_id, $grader_id);
+        $this->database->query("INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version, gd_user_viewed_date ) VALUES(?,?,?,'',1,0,0,NULL)", $params);
+        return $this->database->getLastInsertId('gradeable_data_gd_id_seq');
+    }
+
+    public function updateComponentData($gd_id, $gc_id, $grade, $comment) {
+        $this->database->query("DELETE FROM gradeable_component_data WHERE gd_id=? AND gc_id=?", array($gd_id, $gc_id));
+        $this->database->query("INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment) VALUES(?,?,?,?)", array($gc_id, $gd_id, $grade, $comment));
+    }
+
+    public function updateGradeableDataHW($grader_id, $active_version, $comment, $status, $late_charged, $gd_id) {
+        $this->database->query("UPDATE gradeable_data SET gd_grader_id=?, gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=?, gd_user_viewed_date=NULL WHERE gd_id=?", array($grader_id, $active_version, $comment, $status, $late_charged, $gd_id));
+    }
+
+    public function updateLateDays($user_id, $g_id, $late_charged) {
+        $this->database->query("INSERT INTO late_days_used (user_id, g_id, late_days_used) VALUES (?,?,?)", array($user_id, $g_id, $late_charged));
+    }
 }

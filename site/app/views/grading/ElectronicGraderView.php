@@ -240,10 +240,7 @@ HTML;
                     $contents = "Grade";
                 }
                 $return .= <<<HTML
-                    <a class="btn btn-default" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId()))}">
-                        {$contents}
-                    </a>
-                    <a class="btn {$btn_class}" href="{$this->core->getConfig()->getTaBaseUrl()}account/index.php?g_id={$gradeable->getId()}&amp;individual={$row->getUser()->getId()}&amp;course={$this->core->getConfig()->getCourse()}&amp;semester={$this->core->getConfig()->getSemester()}">
+                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId()))}">
                         {$contents}
                     </a>
                 </td>
@@ -266,9 +263,9 @@ HTML;
     public function hwGradingPage($gradeable) {
         $return = <<<HTML
 <div class="grading_toolbar">
-    <a><i title="Go to the previous student (Press Left Arrow)" class="icon-left"></i></a>
-    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'summary', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
-    <a><i title="Go to the next student (Press Right Arrow)" class="icon-right"></i></a>
+    <a><i title="Go to the previous student" class="icon-left"></i></a>
+    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'summary', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="icon-home" ></i></a>
+    <a><i title="Go to the next student" class="icon-right"></i></a>
     <i title="Reset Rubric Panel Positions (Press R)" class="icon-refresh" onclick="handleKeyPress('KeyR');"></i>
     <i title="Show/Hide Auto-Grading Testcases (Press A)" class="icon-auto-grading-results" onclick="handleKeyPress('KeyA');"></i>
     <i title="Show/Hide Grading Rubric (Press G)" class="icon-grading-panel" onclick="handleKeyPress('KeyG');"></i>
@@ -277,7 +274,7 @@ HTML;
 </div>
 
 <div class="progress_bar">
-    <progress class="progressbar" max="100" value="60" style="width:80%; height: 100%;"></progress>
+    <progress class="progressbar" max="100" value="0" style="width:80%; height: 100%;"></progress>
     <div class="progress-value" style="display:inline;"></div>
 </div>
 
@@ -592,11 +589,6 @@ HTML;
 HTML;
 
         $user = $gradeable->getUser();
-        /*<input type="hidden" name="submitted" value="{$submitted}" />
-        <input type="hidden" name="status" value="{$eg->status}" />
-        <input type="hidden" name="is_graded" value="{$student_individual_graded}" />
-        <input type="hidden" name="late" value="{$late_charged}" />
-        <input type="hidden" name="active_assignment" value="{$active_assignments}" />*/
         $return .= <<<HTML
 
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
@@ -611,7 +603,7 @@ HTML;
         $cookie_auto = ((isset($_COOKIE['auto']) && intval($_COOKIE["auto"]) == 1) ? "checked" : "");
         $return .= <<<HTML
         <form id="rubric_form" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'submit'))}" method="post">
-            <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
+            <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
             <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
             <input type="hidden" name="u_id" value="{$user->getId()}" />
             <input type="checkbox" style="margin-right:5px;" id="rubric-autoscroll-checkbox" {$cookie_auto} />
@@ -624,6 +616,9 @@ HTML;
         $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
         $status = $late_days_data['status'];
         $late_charged = $late_days_data['late_days_charged'];
+        $return .= <<<HTML
+            <input type="hidden" name="late" value="{$late_charged}" />
+HTML;
 
         $color = "green";
         if($status != "Good" && $status != "Late") {

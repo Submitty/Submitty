@@ -4,6 +4,8 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\models\User;
+use app\models\HWReport;
+
 
 class ElectronicGraderController extends AbstractController {
     public function run() {
@@ -120,12 +122,59 @@ class ElectronicGraderController extends AbstractController {
     }
 
     public function submitGrade() {
-        echo "submitted " . $_POST['g_id'] . " grade for " . $_POST['u_id'];
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
+            return;
+        }
+
         $gradeable_id = $_POST['g_id'];
         $who_id = $_POST['u_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
         $gradeable->loadResultDetails();
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable);
+
+        $now = new \DateTime('now');
+        $homeworkDate = $gradeable->getGradeStartDate();
+        if ($now < $homeworkDate) {
+            return;
+        }
+        
+        $grader_id = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getGraderId();
+        $regrade = $gradeable->beenTaGraded();
+        if (!$regrade) {
+            $gd_id = $this->core->getQueries()->createGradeableData($gradeable_id,$who_id,$grader_id);
+            $status = 1;
+        }
+        else {
+            $gd_id = $gradeable->getGdId();
+            $status = $gradeable->getStatus();
+        }
+
+        $late_charged = intval($_POST['late']);
+        $comps = $gradeable->getComponents();
+
+        //update each gradeable component data
+        foreach($comps as $comp){
+            $grade = floatval($_POST["grade-{$comp->getOrder()}"]);
+            $comment = isset($_POST["comment-{$comp->getOrder()}"]) ? $_POST["comment-{$comp->getOrder()}"] : '';
+            $gc_id = $comp->getId();
+            $this->core->getQueries()->updateComponentData($gd_id, $gc_id, $grade, $comment);
+        }
+
+        //update the gradeable data
+        $overall_comment = $_POST['comment-general'];
+        $active_version = $gradeable->getActiveVersion();
+
+        // Only changes the grader id if the overwrite grader box was checked
+        $this->core->getQueries()->updateGradeableDataHW($grader_id, $active_version, $overall_comment, $status, $late_charged, $gd_id);
+
+        //update the number of late days for the student the first time grades are submitted
+        if ($status == 1 && !$regrade){
+            $this->core->getQueries()->updateLateDays($who_id, $gradeable_id, $late_charged);
+        }
+
+        $hwReport = new HWReport($this->core);
+        $hwReport->generateSingleReport($who_id, $gradeable_id);
+
+        $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable_id)));
     }
 
     public function showGrading() {
