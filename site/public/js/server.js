@@ -373,7 +373,7 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
             response = JSON.parse(response);
             if (response['status'] === 'success') {
                 console.log("Success");
-                callbackSuccess();
+                callbackSuccess(response);
             }
             else {
                 console.log(response['message']);
@@ -526,6 +526,40 @@ function setupNumericTextCells() {
         var confirmation = window.confirm("WARNING! \nPreviously entered data may be overwritten! " +
         "This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for " +
         "student id and one column for each field. Columns and field types must match.");
+        if (confirmation) {
+            var f = $('#csvUpload').get(0).files[0];                        
+            if(f) {
+                var reader = new FileReader();
+                reader.readAsText(f);
+                reader.onload = function(evt) {
+                    var user_ids = [];
+                    var get_once = true;
+                    var gradeable_id = "";
+                    $('.cell-all').each(function() {
+                        user_ids.push($(this).parent().data("user"));
+                        if(get_once) {
+                            gradeable_id = $(this).parent().data("gradeable");
+                            get_once = false;
+                        }
+                    });
+                    submitAJAX(
+                        buildUrl({'component': 'grading', 'page': 'simple', 'action': 'upload_csv_numeric'}),
+                        {'csrf_token': csrfToken, 'g_id': gradeable_id, 'users': user_ids, 'big_file': reader.result},
+                        function(test) {
+                            window.alert(test['test']);
+                        },
+                        function() {
+                            
+                        }
+                    );
+                }
+            }
+        } else {
+            var f = $('#csvUpload');
+            f.replaceWith(f = f.clone(true));
+        }
+
+        /*
         if(confirmation) {
             var f = $('#csvUpload').get(0).files[0];                        
             if(f) {
@@ -623,6 +657,6 @@ function setupNumericTextCells() {
         } else {
             var f = $('#csvUpload');
             f.replaceWith(f = f.clone(true));
-        }
+        }*/
     });
 }

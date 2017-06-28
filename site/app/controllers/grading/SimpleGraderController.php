@@ -136,4 +136,39 @@ class SimpleGraderController extends AbstractController  {
         $this->core->getOutput()->renderJson($response);
         return $response;
     }
+
+    public function csv($action) {
+
+        $users = $_POST['users'];
+        $g_id = $_POST['g_id'];
+        $csv_array = preg_split("/\r\n|\n|\r/", $_POST['big_file']);
+        $arr_length = count($csv_array);
+        $return_data = array();
+
+        $data_array = array();
+        for ($i = 0; $i < $arr_length; $i++) {
+            $temp_array = explode(',', $csv_array[$i]);
+            $data_array[] = $temp_array;
+        }
+
+
+        foreach($users as $username) {
+            for ($j = 0; $j < $arr_length; $j++) {
+                if($username === $data_array[$j][0]) {
+                    $temp_array = array();
+                    $num_questions = 0;
+                    $num_text = 0;
+                    $value_str = "value_";
+                    $status_str = "status_";
+                    $gradeable = $this->core->getQueries()->getGradeable($g_id, $username);
+
+                    $j = $arr_length;
+                }
+            }
+        }
+
+        $response = array('status' => 'success', 'test' => $g_id);
+        $this->core->getOutput()->renderJson($response);
+        return $response;
+    }
 }
