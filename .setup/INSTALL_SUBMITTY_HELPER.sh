@@ -558,14 +558,24 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     # add a symlink to conveniently run the test suite or specific tests without the full reinstall
     #ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
 
-    echo -e "\nRun Autograding Test Suite...\n"
+    echo -e "\nRun Rainbow Grades Test Suite...\n"
+    rainbow_counter=0
+    rainbow_total=0
 
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
+    rainbow_total=$((rainbow_total+1))
     python ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+    
+    if [[ $? -ne 0 ]]; then
+        echo -e "\n[ FAILED ] sample test\n"
+    else
+        rainbow_counter=$((rainbow_counter+1))
+        echo -e "\n[ SUCCEEDED ] sample test\n"
+    fi
 
-    echo -e "\nCompleted Autograding Test Suite\n"
+    echo -e "\nCompleted Rainbow Grades Test Suite. $rainbow_counter of $rainbow_total tests succeeded.\n"
 fi
 
 ################################################################################################################
