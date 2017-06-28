@@ -67,7 +67,7 @@ echo -e "Compile and install analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 
 pushd /usr/local/submitty/GIT_CHECKOUT_AnalysisTools
-stack --allow-different-user --install-ghc --verbose --copy-bins build
+stack --allow-different-user --install-ghc --copy-bins build
 popd
 mkdir /usr/local/submitty/SubmittyAnalysisTools
 cp /usr/local/submitty/GIT_CHECKOUT_AnalysisTools/count /usr/local/submitty/SubmittyAnalysisTools
