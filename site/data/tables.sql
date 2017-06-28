@@ -246,7 +246,7 @@ CREATE TABLE gradeable_data (
     gd_id integer NOT NULL,
     g_id character varying(255) NOT NULL,
     gd_user_id character varying(255) NOT NULL,
-    gd_grader_id character varying(255) NOT NULL,
+    gd_grader_id character varying(255),
     gd_overall_comment character varying NOT NULL,
     gd_status integer NOT NULL,
     gd_late_days_used integer NOT NULL,
