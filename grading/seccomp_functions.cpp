@@ -41,11 +41,12 @@ inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &sy
 // system_call_check.cpp parses this function to define the categories.
 //
 #include "system_call_categories.cpp"
+#include "json.hpp"
 
 // ===========================================================================
 // ===========================================================================
 
-int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile) {
+int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile, const nlohmann::json &whole_config) {
 
   int res;
   scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
@@ -108,6 +109,22 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   std::set<std::string> forbidden_categories = {
     "INFORMATION_MAINTENANCE_SET_TIME"
   };
+
+
+  // ---------------------------------------------------------------
+  // READ ALLOWED SYSTEM CALLS FROM CONFIG.JSON
+  const nlohmann::json &config_whitelist = whole_config.value("allow_system_calls",nlohmann::json());
+  for (nlohmann::json::const_iterator cwitr = config_whitelist.begin();
+       cwitr != config_whitelist.end(); cwitr++) {
+    std::string my_category = *cwitr;
+    if (my_category.size() > 27 && my_category.substr(0,27) == "ALLOW_SYSTEM_CALL_CATEGORY_") {
+      my_category = my_category.substr(27,my_category.size()-27);
+    }
+    // make sure categories is valid
+    assert (restricted_categories.find(my_category) != restricted_categories.end());
+    categories.insert(my_category);
+  }
+
   
   // ---------------------------------------------------------------
   // HELPER UTILTIY PROGRAMS
@@ -128,9 +145,8 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   
   // ---------------------------------------------------------------
   // SUBMITTY ANALYSIS TOOLS
-  else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_node" ||
-           my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_function" ||
-           my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token") {
+  else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count") {
+    //TODO
     categories = restricted_categories;
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("FILE_MANAGEMENT_RARE");
@@ -159,6 +175,13 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("PROCESS_CONTROL_ADVANCED");
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
     categories.insert("TGKILL");
+  }
+
+  // ---------------------------------------------------------------
+  // CMAKE/MAKE COMPILATION
+  else if (my_program == "/usr/bin/cmake" ||
+           my_program == "/usr/bin/make") {
+    categories = restricted_categories;
   }
 
   // ---------------------------------------------------------------
@@ -258,7 +281,38 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("PROCESS_CONTROL_SCHEDULING");
   }
 
+  // ---------------------------------------------------------------
+  else if (my_program == "/usr/bin/sort") {
+    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_SCHEDULING");
+  }
+
+  // ---------------------------------------------------------------
+  //KEYBOARD INPUT
+  else if(my_program == "/usr/bin/xdotool"){
+    categories = restricted_categories; //TODO: fix
+  }
+
+  // ---------------------------------------------------------------
+  //WINDOW FOCUS
+  else if(my_program == "/usr/bin/wmctrl"){
+    categories = restricted_categories; //TODO: fix
+  }
+
+  // ---------------------------------------------------------------
+  //WINDOW INFORMATION
+  else if(my_program == "/usr/bin/xwininfo"){
+    categories = restricted_categories; //TODO: fix
+  }
+
+  // ---------------------------------------------------------------
+  //SCREENSHOT FUNCTIONALITY
+  else if(my_program == "/usr/bin/scrot"){
+    categories = restricted_categories; //TODO: fix
+  }
+
   else {
+    categories = restricted_categories; //TODO: fix
     // UGH, don't want this here
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
   }

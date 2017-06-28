@@ -46,6 +46,7 @@ echo -e "\nBeginning installation of the Submitty homework submission server\n"
 function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_REPOSITORY__|$SUBMITTY_REPOSITORY|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_TUTORIAL_DIR__|$SUBMITTY_TUTORIAL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCGI_USER__|$HWCGI_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
@@ -221,12 +222,16 @@ echo -e "Copy the sample files"
 
 # copy the files from the repo
 rsync -rtz ${SUBMITTY_REPOSITORY}/sample_files ${SUBMITTY_INSTALL_DIR}
+rsync -rtz ${SUBMITTY_REPOSITORY}/more_autograding_examples ${SUBMITTY_INSTALL_DIR}
 
 # root will be owner & group of these files
 chown -R  root:root ${SUBMITTY_INSTALL_DIR}/sample_files
+chown -R  root:root ${SUBMITTY_INSTALL_DIR}/more_autograding_examples
 # but everyone can read all that files & directories, and cd into all the directories
 find ${SUBMITTY_INSTALL_DIR}/sample_files -type d -exec chmod 555 {} \;
 find ${SUBMITTY_INSTALL_DIR}/sample_files -type f -exec chmod 444 {} \;
+find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type d -exec chmod 555 {} \;
+find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type f -exec chmod 444 {} \;
 
 
 ########################################################################################################################
@@ -490,27 +495,21 @@ rm ${HWCRON_CRONTAB_FILE}
 # COMPILE AND INSTALL ANALYSIS TOOLS
 
 echo -e "Compile and install analysis tools"
+
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#git pull origin master
-make
 
-# copy the necessary files out of the repo
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-#mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/config
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_node      ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_token     ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_function  ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang/*              ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/config/*            ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/config
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/*               ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-
-# change permissions
-chown -R hwcron:course_builders ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+# compile the tools
+stack --allow-different-user --no-terminal --install-ghc --copy-bins build
 
 popd
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/plagiarism ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+# change permissions
+chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 ################################################################################################################
 ################################################################################################################
@@ -558,7 +557,7 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     # copy the directory tree and replace variables
     echo -e "Install Rainbow Grades Test Suite..."
     rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
-    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_csci1100.py
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py
 
     # add a symlink to conveniently run the test suite or specific tests without the full reinstall
     #ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
@@ -568,7 +567,7 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
-    python ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_csci1100.py  "$@"
+    python ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
 
     echo -e "\nCompleted Autograding Test Suite\n"
 fi
