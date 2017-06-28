@@ -10,20 +10,24 @@ use app\libraries\Utils;
  *
  * Contains information pertaining to the autocheck element that's contained within a
  * GradeableTestcase. There is 0+ autochecks per GradeableTestcase.
+ *
+ * @method DiffViewer getDiffViewer()
+ * @method string getDescription()
+ * @method String[] getMessages()
  */
 class GradeableAutocheck extends AbstractModel {
     
     /** @var string */
-    private $index;
+    protected $index;
     
     /** @var DiffViewer DiffViewer instance to hold the student, instructor, and differences */
-    private $diff_viewer;
+    protected $diff_viewer;
     
     /** @var string Description to show for displaying the diff */
-    private $description = "";
+    protected $description = "";
     
     /** @var String[] Message to show underneath the description for a diff */
-    private $messages = array();
+    protected $messages = array();
     
     /**
      * GradeableAutocheck constructor.
@@ -34,6 +38,7 @@ class GradeableAutocheck extends AbstractModel {
      * @param $idx
      */
     public function __construct($details, $course_path, $result_path, $idx) {
+        parent::__construct();
         $this->index = $idx;
         
         if (isset($details['description'])) {
@@ -62,26 +67,5 @@ class GradeableAutocheck extends AbstractModel {
         }
         
         $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $this->index);
-    }
-    
-    /**
-     * @return DiffViewer
-     */
-    public function getDiffViewer() {
-        return $this->diff_viewer;
-    }
-    
-    /**
-     * @return string
-     */
-    public function getDescription() {
-        return $this->description;
-    }
-    
-    /**
-     * @return String[]
-     */
-    public function getMessages() {
-        return $this->messages;
     }
 }

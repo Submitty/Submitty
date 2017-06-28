@@ -103,7 +103,12 @@ TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) 
     return new TestResults(0.0,messages);
   }
   if (student_file_contents != "") {
-    return new TestResults(0.0,{"ERROR: This file should be empty!"});
+    if (student_file_contents.find("error") != std::string::npos)
+      return new TestResults(0.0,{"ERROR: This file should be empty!"},"",true,true);
+    else if (student_file_contents.find("warning") != std::string::npos)
+      return new TestResults(0.0,{"ERROR: This file should be empty!"},"",false,true);
+    else
+      return new TestResults(0.0,{"ERROR: This file should be empty!"});
   }
   return new TestResults(1.0);
 }
@@ -386,10 +391,10 @@ template<class T> Difference* ses (const nlohmann::json& j, T* student_output, T
 
   Difference* diff = sesChanges( meta_diff, extraStudentOutputOk );
   if ( secondary ) {
-    if (j != nlohmann::json()) { std::cout << "do a secondary" << std::endl; }
+    if (j != nlohmann::json()) { /*std::cout << "do a secondary" << std::endl; */ }
     sesSecondary( diff, meta_diff, extraStudentOutputOk );
   } else {
-    if (j != nlohmann::json()) { std::cout << "no secondary" << std::endl; }
+    if (j != nlohmann::json()) { /*std::cout << "no secondary" << std::endl; */ }
   }
 
   diff->only_whitespace_changes = true;
@@ -424,8 +429,8 @@ template<class T> Difference* ses (const nlohmann::json& j, T* student_output, T
     } else {
       std::cout << "FILE HAS NON WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
     }
-    std::cout << "INSPECT CHANGES   lines  added=" << diff->line_added << "  deleted=" << diff->line_deleted << "  total=" << diff->total_line;
-    std::cout << "   chars  added=" << diff->char_added << "  deleted=" << diff->char_deleted << "  total=" << diff->total_char << std::endl;
+    //std::cout << "INSPECT CHANGES   lines  added=" << diff->line_added << "  deleted=" << diff->line_deleted << "  total=" << diff->total_line;
+    //std::cout << "   chars  added=" << diff->char_added << "  deleted=" << diff->char_deleted << "  total=" << diff->total_char << std::endl;
   }
 
   if (j != nlohmann::json()) {
@@ -702,7 +707,7 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
 
 
   // --------------------------------------------------------
-  std::cout << "json " << j.dump(4) << std::endl;
+  //std::cout << "json " << j.dump(4) << std::endl;
   if (j.find("max_char_changes") != j.end()) {
     std::cout << "MAX CHAR CHANGES" << std::endl;
 
