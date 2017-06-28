@@ -66,6 +66,12 @@ popd
 echo -e "Compile and install analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 
+pushd /usr/local/submitty/GIT_CHECKOUT_AnalysisTools
+stack --allow-different-user --install-ghc --verbose --copy-bins build
+popd
+mkdir /usr/local/submitty/SubmittyAnalysisTools
+cp /usr/local/submitty/GIT_CHECKOUT_AnalysisTools/count /usr/local/submitty/SubmittyAnalysisTools
+
 # --------------------------------------
 echo -e "Compile and install the tutorial repository"
 git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
