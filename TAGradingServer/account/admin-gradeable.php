@@ -1646,6 +1646,7 @@ HTML;
         var has_space = gradeable_id.includes(" ");
         var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
         var unique_gradeable = false;
+        var bad_max_score = false;
         var check1 = document.getElementById('radio_electronic_file').checked;
         var check2 = document.getElementById('radio_checkpoints').checked;
         var check3 = document.getElementById('radio_numeric').checked;
@@ -1700,6 +1701,23 @@ HTML;
             alert("A type of gradeable must be selected");
             return false;
         }
+
+
+        var numOfNumeric = 0;
+        var wrapper = $('.numerics-table');
+        var i;
+        if(check3) {
+            for (i = 0; i < $('#numeric_num-items').val(); i++) {
+                numOfNumeric++;
+                if ($('#mult-field-' + numOfNumeric,wrapper).find('.max_score').attr('name','max_score_'+numOfNumeric).val() == 0) {
+                    alert("Max score cannot be 0 [Question "+ numOfNumeric + "]");
+                    return false;
+                }
+            }
+        }
+        
+    }
+
     }
     calculateTotalScore();
     calculatePercentageTotal();
