@@ -9,6 +9,7 @@ use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableVersion;
 use app\models\User;
+use app\models\SimpleLateUser;
 use app\models\Team;
 
 class DatabaseQueriesPostgresql implements IDatabaseQueries{
@@ -1140,6 +1141,11 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
         return $this->database->rows();
     }
 
+    public function getAllElectronicGradeablesIds() {
+        $this->database->query("SELECT g_id, g_title FROM gradeable WHERE g_gradeable_type=0 ORDER BY g_grade_released_date DESC");
+        return $this->database->rows();
+    }
+
     public function getAllGradeablesIdsAndTitles() {
         $this->database->query("SELECT g_id, g_title FROM gradeable ORDER BY g_title ASC");
         return $this->database->rows();
@@ -1213,4 +1219,71 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
             return $team;
         }
     }
+
+    public function getUsersWithLateDays() {
+      $this->database->query("
+        SELECT u.user_id, user_firstname, user_preferred_firstname, 
+          user_lastname, allowed_late_days, since_timestamp::timestamp::date
+        FROM users AS u
+        FULL OUTER JOIN late_days AS l
+          ON u.user_id=l.user_id
+        WHERE allowed_late_days IS NOT NULL
+          AND allowed_late_days>0
+        ORDER BY
+          user_email ASC, since_timestamp DESC;");
+
+      $return = array();
+      foreach($this->database->rows() as $row){
+        $return[] = new SimpleLateUser($row);
+      }
+      return $return;
+    }
+
+    public function getUsersWithExtensions($gradeable_id) {
+      $this->database->query("
+        SELECT u.user_id, user_firstname,
+          user_preferred_firstname, user_lastname, late_day_exceptions
+        FROM users as u
+        FULL OUTER JOIN late_day_exceptions as l
+          ON u.user_id=l.user_id
+        WHERE g_id=?
+          AND late_day_exceptions IS NOT NULL
+          AND late_day_exceptions>0
+        ORDER BY user_email ASC;", array($gradeable_id));
+
+      $return = array();
+      foreach($this->database->rows() as $row){
+        $return[] = new SimpleLateUser($row);
+      }
+      return $return;
+    }
+
+    public function updateLateDays($user_id, $timestamp, $days){
+        $this->database->query("
+          UPDATE late_days
+          SET allowed_late_days=?
+          WHERE user_id=?
+            AND since_timestamp=?", array($days, $user_id, $timestamp));
+        if(count($this->database->rows())==0){
+          $this->database->query("
+            INSERT INTO late_days
+            (user_id, since_timestamp, allowed_late_days)
+            VALUES(?,?,?)", array($user_id, $timestamp, $days));
+        }
+    }
+
+    public function updateExtensions($user_id, $g_id, $days){
+        $this->database->query("
+          UPDATE late_day_exceptions
+          SET late_day_exceptions=?
+          WHERE user_id=?
+            AND g_id=?;", array($days, $user_id, $g_id));
+        if(count($this->database->rows())==0){
+          $this->database->query("
+            INSERT INTO late_day_exceptions
+            (user_id, g_id, late_day_exceptions)
+            VALUES(?,?,?)", array($user_id, $g_id, $days));
+        }
+    }
 }
+
