@@ -246,29 +246,27 @@ HTML;
 
         $return .= <<<HTML
     <script type="text/javascript">
+        function doStuff(user_id_, highest_version_) {
+            handleSubmission("{$this->core->buildUrl(array('component' => 'student',
+                                                            'page' => 'submission',
+                                                            'action' => 'upload',
+                                                            'gradeable_id' => $gradeable->getId()))}",
+                                 "{$this->core->buildUrl(array('component' => 'student',
+                                                               'gradeable_id' => $gradeable->getId()))}",
+                                 {$days_late},
+                                 {$gradeable->getAllowedLateDays()},
+                                 highest_version_,
+                                 {$gradeable->getMaxSubmissions()},
+                                 "{$this->core->getCsrfToken()}",
+                                 {$svn_string},
+                                 {$gradeable->getNumTextBoxes()},
+                                 user_id_,
+                                 true);           
+        }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
                 var user_id = document.getElementById("idForm").student_id.value;
-                var valid_id = true;
-                var highest_version = {$gradeable->getHighestVersion()};;
-                var is_instructor_upload = false;
-                if (user_id == "") {
-                    user_id = "{$gradeable->getUser()->getId()}";
-                }
-                else {
-                    // validate user 
-                    valid_id = validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id);
-                    // if valid, update highest ver
-                    if (valid_id) highest_version = getHighestVersion("{$gradeable->getId()}", user_id);
-                    is_instructor_upload = true;
-                }
-                //if valid, submit
-                console.log(valid_id);
-                console.log(user_id);
-                console.log(highest_version);
-                console.log(is_instructor_upload);
-                valid_id = true;
-                if (valid_id){
+                if (user_id == ""){
                     handleSubmission("{$this->core->buildUrl(array('component' => 'student',
                                                                'page' => 'submission',
                                                                'action' => 'upload',
@@ -277,13 +275,19 @@ HTML;
                                                                'gradeable_id' => $gradeable->getId()))}",
                                  {$days_late},
                                  {$gradeable->getAllowedLateDays()},
-                                 highest_version,
+                                 {$gradeable->getHighestVersion()},
                                  {$gradeable->getMaxSubmissions()},
                                  "{$this->core->getCsrfToken()}",
                                  {$svn_string},
                                  {$gradeable->getNumTextBoxes()},
-                                 user_id,
-                                 is_instructor_upload);
+                                 "{$gradeable->getUser()->getId()}",
+                                 false);
+                }
+                else {
+                    // validate user 
+                    /////valid_id = validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id);
+                    //validateStudentId(results, "{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id).done(doStuff);
+                    validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, doStuff);
                 }
                 e.stopPropagation();
             });

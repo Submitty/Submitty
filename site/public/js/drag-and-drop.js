@@ -320,7 +320,7 @@ function isValidSubmission(){
     return false;
 }
 
-function validateStudentId(csrf_token, gradeable_id, student_id) {
+function validateStudentId(csrf_token, gradeable_id, student_id, doStuff) {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -341,24 +341,23 @@ function validateStudentId(csrf_token, gradeable_id, student_id) {
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    return true;
+                    doStuff(student_id, data['highest_version']);
+                    return data;
                 }
                 else {
                     alert("ERROR! \n\n" + data['message']);
-                    return false;
                 }
             }
             catch (e) {
+                console.log(e);
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);
-                return false;
             }
         },
         error: function() {
             $("#submit").prop("disabled", false);
             alert("Something went wrong. Please try again.");
-            return false;
         }
     });
 }

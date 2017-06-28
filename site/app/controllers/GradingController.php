@@ -5,7 +5,6 @@ namespace app\controllers;
 use app\controllers\grading\ElectronicGraderController;
 use app\controllers\grading\SimpleGraderController;
 use app\controllers\grading\TeamListController;
-use app\controllers\grading\UploadController;
 
 
 class GradingController extends AbstractController{
@@ -24,9 +23,6 @@ class GradingController extends AbstractController{
                 break;
             case 'team_list':
                 $controller = new TeamListController($this->core);
-                break;
-            case 'upload':
-                $controller = new UploadController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));

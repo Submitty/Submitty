@@ -39,10 +39,9 @@ class SubmissionController extends AbstractController {
             case 'check_refresh':
                 return $this->checkRefresh();
                 break;
-            case 'get':
-                return $this->getGradeableHighestVersion();
             case 'verify':
                 return $this->validGradeable();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
@@ -98,7 +97,7 @@ class SubmissionController extends AbstractController {
     private function validGradeable() {
         if (!isset($_POST['gradeable_id'])) {
             $msg = "Did not pass in gradeable_id.";
-            //$_SESSION['messages']['error'][] = $msg;
+            //_SESSION['messages']['error'][] = $msg;
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
@@ -144,27 +143,10 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
-        //$this->core->getQueries()->updateGradeableData($student_gradeable);
-        // $this->student_id = "";
-        // $this->student_id .= $_POST['student_id'];
-        // $this->student_user = $student_user;
-        // $this->student_gradeable = $student_gradeable; 
-        $return = array('success' => true);
+        $highest_version = $student_gradeable->getHighestVersion();
+        $return = array('success' => true, 'highest_version' => $highest_version);
         $this->core->getOutput()->renderJson($return);
         return $return;
-    }
-    
-    /**
-    * @return 
-    */
-    private function getGradeableHighestVersion() {
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $student_id = $_POST['student_id'];
-        $student_user = $this->core->getQueries()->getUserById($student_id);
-        $student_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $student_id);
-
-        $highest_ver = $student_gradeable->getHighestVersion();
-        return array('highest_version' => $highest_ver);
     }
 
     /**
@@ -192,11 +174,12 @@ class SubmissionController extends AbstractController {
         }
         $is_instructor_upload = isset($_REQUEST['is_instructor_upload']) ? $_REQUEST['is_instructor_upload'] === "true" : false;
         $student_id = $_REQUEST['user_id'];
-        if ($is_instructor_upload === true)
+        if ($is_instructor_upload) {
             $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $student_id);
-        else 
+        }
+        else {
             $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
-
+        }
         $gradeable->loadResultDetails();
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
