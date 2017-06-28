@@ -211,7 +211,7 @@ def csci1100_rainbow_grades_test():
     make_output = make_output[-1].strip()  # Get the RUN COMMAND LINE
     make_output = make_output.split('/')
     make_output = make_output[-1]  # Get the name of the output.html file since it uses the date
-    if not os.path.isdir(os.path.join(summary_tmp, "all_students_summary_html", make_output)):
+    if not os.path.isfile(os.path.join(summary_tmp, "all_students_summary_html", make_output)):
         error_and_cleanup(test_tmp, "Failed to find output file in all_students_summary_html")
 
     output_generated_contents = ""
