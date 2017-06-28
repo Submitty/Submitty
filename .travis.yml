@@ -98,7 +98,7 @@ before_script:
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
   - sudo ./.setup/travis/autograder.sh
   - pushd /usr/local/submitty/GIT_CHECKOUT_AnalysisTools
-  - sudo travis_wait stack --allow-different-user --install-ghc --no-terminal --copy-bins build
+  - travis_wait sudo stack --allow-different-user --install-ghc --no-terminal --copy-bins build
   - popd
   - mkdir /usr/local/submitty/SubmittyAnalysisTools
   - cp /usr/local/submitty/GIT_CHECKOUT_AnalysisTools/count /usr/local/submitty/SubmittyAnalysisTools
