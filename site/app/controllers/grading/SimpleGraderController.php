@@ -141,6 +141,9 @@ class SimpleGraderController extends AbstractController  {
 
         $users = $_POST['users'];
         $g_id = $_POST['g_id'];
+        $num_numeric = $_POST['num_numeric'];
+        $num_text = $_POST['num_text'];
+        $component_ids = $_POST['component_ids'];
         $csv_array = preg_split("/\r\n|\n|\r/", $_POST['big_file']);
         $arr_length = count($csv_array);
         $return_data = array();
@@ -151,23 +154,59 @@ class SimpleGraderController extends AbstractController  {
             $data_array[] = $temp_array;
         }
 
-
         foreach($users as $username) {
             for ($j = 0; $j < $arr_length; $j++) {
                 if($username === $data_array[$j][0]) {
                     $temp_array = array();
+                    $temp_array['username'] = $username;
                     $num_questions = 0;
                     $num_text = 0;
+                    $index1 = 0; 
+                    $index2 = 3; //3 is the starting index of the grades in the csv
                     $value_str = "value_";
                     $status_str = "status_";
                     $gradeable = $this->core->getQueries()->getGradeable($g_id, $username);
+                    foreach ($gradeable->getComponents() as $component) {
+                        $value_temp_str = $value_str . $index1;
+                        $status_temp_str = $status_str . $index1;
+                        if (isset($data_array[$j][$index2])) {
+                            if ($component->getIsText()){
+                                $component->setComment($data_array[$j][$index2]);
+                                $temp_array[$value_temp_str] = $data_array[$j][$index2];
+                                $temp_array[$status_temp_str] = "OK";
+                            }
+                            else{
+                                if($component->getMaxValue() < $data_array[$j][$index2]){
+                                    $temp_array[$value_temp_str] = $data_array[$j][$index2];
+                                    $temp_array[$status_temp_str] = "ERROR";
+                                } else {
+                                    $component->setScore($data_array[$j][$index2]);
+                                    $temp_array[$value_temp_str] = $data_array[$j][$index2];
+                                    $temp_array[$status_temp_str] = "OK";
+                                }
+                                
+                            }
+                        }
+                        $index1++;
+                        $index2++;
+                        if($index1 == $num_numeric) {
+                            $index2++;
+                        }
+                    }
 
+                    $user = $this->core->getQueries()->getUserById($username);
+                    $gradeable->setUser($user);
+                    $gradeable->setGrader($this->core->getUser());
+                    $gradeable->setStatus(1);
+                    $gradeable->setActiveVersion(1);
+                    $gradeable->saveData();
+                    $return_data[] = $temp_array;
                     $j = $arr_length;
                 }
             }
         }
 
-        $response = array('status' => 'success', 'test' => $g_id);
+        $response = array('status' => 'success', 'data' => $return_data);
         $this->core->getOutput()->renderJson($response);
         return $response;
     }

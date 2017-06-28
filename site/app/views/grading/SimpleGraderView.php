@@ -106,7 +106,7 @@ HTML;
 HTML;
         $num_text = 0;
         $num_numeric = 0;
-        $numMaxes = array();
+        $comp_ids = array();
         if($action == 'lab'){
             foreach ($gradeable->getComponents() as $component) {
                 $return .= <<<HTML
@@ -131,7 +131,7 @@ HTML;
                         $return .= <<<HTML
                 <td width="35" style="text-align: center">{$component->getTitle()}({$component->getMaxValue()})</td>
 HTML;
-                        array_push($numMaxes, $component->getMaxValue());
+                        $comp_ids[] = $component->getId();
                     }
                 }
                 $return .= <<<HTML
@@ -202,14 +202,14 @@ HTML;
                     </a>
 HTML;
                 }
-                $maxValues = json_encode($numMaxes);
+                $component_ids = json_encode($comp_ids);
                 $return .= <<<HTML
                 </td>
             </tr>
             <tr class="info">
                 <td colspan="{$colspan}" style="text-align: center">Graders: {$section_graders}</td>
             </tr>
-        <tbody id="section-{$section}" data-numnumeric="{$num_numeric}" data-numtext="{$num_text}" data-maxvalues = "{$maxValues}">
+        <tbody id="section-{$section}" data-numnumeric="{$num_numeric}" data-numtext="{$num_text}" data-compids = "{$component_ids}">
 HTML;
             }
             $return .= <<<HTML
@@ -269,7 +269,7 @@ HTML;
                         }
                     }
                     $return .= <<<HTML
-                <td class="option-small-output" value="toobadthiswontprint"><input class="option-small-box" style="text-align: center" type="text" border="none" value=$total data-total="true" readonly></td>
+                <td class="option-small-output" value="toobadthiswontprint"><input class="option-small-box" style="text-align: center" type="text" border="none" id="total-{$row}" value=$total data-total="true" readonly></td>
 HTML;
                 }
 
