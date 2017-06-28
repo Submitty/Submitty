@@ -30,9 +30,9 @@ def initialize(test):
             os.mkdir(os.path.join(test.testcase_path, "data", "part" + i))
         except OSError:
             pass
-        subprocess.call(["cp",
-            os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "p" + i + "_out.txt"),
-            os.path.join(test.testcase_path, "data")])
+        #subprocess.call(["cp",
+        #    os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "p" + i + "_out.txt"),
+        #    os.path.join(test.testcase_path, "data")])
 
 
 def cleanup(test):

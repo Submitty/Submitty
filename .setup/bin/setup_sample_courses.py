@@ -847,9 +847,7 @@ class Gradeable(object):
             else:
                 examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "config")
-                if os.path.isdir(sample_path):
-                    self.config_path = sample_path
-                elif os.path.isdir(examples_path):
+                if os.path.isdir(examples_path):
                     self.config_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.config_path = tutorial_path
@@ -861,9 +859,7 @@ class Gradeable(object):
             if 'sample_path' in gradeable:
                 self.sample_path = gradeable['sample_path']
             else:
-                if os.path.isdir(sample_path):
-                    self.sample_path = sample_path
-                elif os.path.isdir(examples_path):
+                if os.path.isdir(examples_path):
                     self.sample_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.sample_path = tutorial_path
@@ -907,9 +903,7 @@ class Gradeable(object):
             if self.config_path is None:
                 examples_path = os.path.join(MORE_EXAMPLES_DIR, self.id, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
-                if os.path.isdir(sample_path):
-                    self.config_path = sample_path
-                elif os.path.isdir(examples_path):
+                if os.path.isdir(examples_path):
                     self.config_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.config_path = tutorial_path
