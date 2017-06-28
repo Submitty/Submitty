@@ -222,13 +222,8 @@ rm glfw-3.2.1.zip
 chmod -R o+rx /usr/local/lib/pkgconfig 
 chmod -R o+rx /usr/local/lib/cmake
 
-# Packages necessary for static analysis
-# graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
-add-apt-repository ppa:ubuntu-toolchain-r/test -y
-apt-get update -qq
-apt-get install -qq build-essential pkg-config flex bison
-apt-get install -qq libpcre3 libpcre3-dev
-apt-get install -qq splint indent
+# Install stack (used to build analysis tools)
+curl -sSL https://get.haskellstack.org/ | sh
 
 # Enable PHP5-mcrypt
 #php5enmod mcrypt
@@ -500,11 +495,6 @@ if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
 else
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 fi
-
-# graph tool...  for later?  apt-get install -qq --force-yes python3-graph-tool
-pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-make
-popd
 
 
 #################################################################
