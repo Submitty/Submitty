@@ -14,6 +14,9 @@ class ElectronicGraderController extends AbstractController {
             case 'grade':
                 $this->showGrading();
                 break;
+            case 'submit':
+                $this->submitGrade();
+                break;
             default:
                 $this->showStatus();
                 break;
@@ -114,6 +117,15 @@ class ElectronicGraderController extends AbstractController {
 
         $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'summaryPage', $gradeable, $rows, $graders);
+    }
+
+    public function submitGrade() {
+        echo "submitted " . $_POST['g_id'] . " grade for " . $_POST['u_id'];
+        $gradeable_id = $_POST['g_id'];
+        $who_id = $_POST['u_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
+        $gradeable->loadResultDetails();
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable);
     }
 
     public function showGrading() {

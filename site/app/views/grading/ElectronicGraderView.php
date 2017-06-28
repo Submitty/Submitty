@@ -592,6 +592,11 @@ HTML;
 HTML;
 
         $user = $gradeable->getUser();
+        /*<input type="hidden" name="submitted" value="{$submitted}" />
+        <input type="hidden" name="status" value="{$eg->status}" />
+        <input type="hidden" name="is_graded" value="{$student_individual_graded}" />
+        <input type="hidden" name="late" value="{$late_charged}" />
+        <input type="hidden" name="active_assignment" value="{$active_assignments}" />*/
         $return .= <<<HTML
 
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
@@ -605,7 +610,10 @@ HTML;
 HTML;
         $cookie_auto = ((isset($_COOKIE['auto']) && intval($_COOKIE["auto"]) == 1) ? "checked" : "");
         $return .= <<<HTML
-        <form id="rubric_form" action="" method="post">
+        <form id="rubric_form" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'submit'))}" method="post">
+            <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
+            <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
+            <input type="hidden" name="u_id" value="{$user->getId()}" />
             <input type="checkbox" style="margin-right:5px;" id="rubric-autoscroll-checkbox" {$cookie_auto} />
                 <span style="display: inline-block; margin-top:15px; margin-bottom:15px;">Rubric Auto Scroll</span>
 HTML;
