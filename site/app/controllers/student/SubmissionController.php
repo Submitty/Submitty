@@ -92,26 +92,26 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-    * @return boolean
+    * Function for verification that a given RCS ID is valid and has a corresponding user and gradeable.
+    * This should be called via AJAX, saving the result to the json_buffer of the Output object. 
+    * If failure, also returns message explaining what happened.
+    * If success, also returns highest version of the student gradeable.
     */
     private function validGradeable() {
         if (!isset($_POST['gradeable_id'])) {
             $msg = "Did not pass in gradeable_id.";
-            //_SESSION['messages']['error'][] = $msg;
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
         if (!isset($_POST['student_id'])) {
             $msg = "Did not pass in student_id.";
-            //$_SESSION['messages']['error'][] = $msg;
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
-            //$_SESSION['messages']['error'][] = $msg;
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
@@ -123,14 +123,12 @@ class SubmissionController extends AbstractController {
 
         if (!$student_user === null) {
             $msg = "Invalid student id '{$_POST['student_id']}'";
-            //$_SESSION['messages']['error'][] = $msg;
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
         if (!$student_user->isLoaded()) {
             $msg = "Invalid student id '{$_POST['student_id']}'";
-            //$_SESSION['messages']['error'][] = $msg;
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
@@ -138,11 +136,11 @@ class SubmissionController extends AbstractController {
         $student_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $student_id);
         if ($student_gradeable === null) {
             $msg = "Invalid gradeable id '{$_POST['gradeable_id']}'";
-            //$_SESSION['messages']['error'][] = $msg;
             $eturn = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
+        $student_gradeable->loadResultDetails();
         $highest_version = $student_gradeable->getHighestVersion();
         $return = array('success' => true, 'highest_version' => $highest_version);
         $this->core->getOutput()->renderJson($return);

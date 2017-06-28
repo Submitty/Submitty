@@ -320,7 +320,13 @@ function isValidSubmission(){
     return false;
 }
 
-function validateStudentId(csrf_token, gradeable_id, student_id, doStuff) {
+/**
+ * @param csrf_token
+ * @param gradeable_id
+ * @param student_id
+ * @param submitStudentGradeable, a callback function
+ */
+function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGradeable) {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -341,7 +347,7 @@ function validateStudentId(csrf_token, gradeable_id, student_id, doStuff) {
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    doStuff(student_id, data['highest_version']);
+                    submitStudentGradeable(student_id, data['highest_version']);
                     return data;
                 }
                 else {
@@ -354,33 +360,6 @@ function validateStudentId(csrf_token, gradeable_id, student_id, doStuff) {
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);
             }
-        },
-        error: function() {
-            $("#submit").prop("disabled", false);
-            alert("Something went wrong. Please try again.");
-        }
-    });
-}
-
-function getHighestVersion(gradeable_id, student_id) {
-    $("#submit").prop("disabled", true);
-
-    var formData = new FormData();
-    formData.append('gradeable_id', gradeable_id);
-    formData.append('student_id', student_id);
-
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'get'});
-
-    $.ajax({
-        url: url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            $("#submit").prop("disabled", false);
-            data = JSON.parse(data);
-            return data['highest_version'];
         },
         error: function() {
             $("#submit").prop("disabled", false);
@@ -492,6 +471,7 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
                 }
             }
             catch (e) {
+                console.log(e);
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);

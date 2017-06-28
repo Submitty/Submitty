@@ -60,12 +60,18 @@ HTML;
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
+HTML;
+        if ($this->core->getUser()->accessAdmin()) {
+            $return .= <<<HTML
     <form form id="idForm" method="post">
     <div class ="sub">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
         Student RCS ID: <input type="text" name="student_id" placeholder="{$gradeable->getUser()->getID()}" required/>
     </div>
     </form>
+HTML;
+        }
+        $return .= <<<HTML
     <div class="sub">
 HTML;
         if ($gradeable->hasAssignmentMessage()) {
@@ -246,7 +252,7 @@ HTML;
 
         $return .= <<<HTML
     <script type="text/javascript">
-        function doStuff(user_id_, highest_version_) {
+        function submitStudentGradeable(student_id, highest_version) {
             handleSubmission("{$this->core->buildUrl(array('component' => 'student',
                                                             'page' => 'submission',
                                                             'action' => 'upload',
@@ -255,17 +261,20 @@ HTML;
                                                                'gradeable_id' => $gradeable->getId()))}",
                                  {$days_late},
                                  {$gradeable->getAllowedLateDays()},
-                                 highest_version_,
+                                 highest_version,
                                  {$gradeable->getMaxSubmissions()},
                                  "{$this->core->getCsrfToken()}",
                                  {$svn_string},
                                  {$gradeable->getNumTextBoxes()},
-                                 user_id_,
+                                 student_id,
                                  true);           
         }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
-                var user_id = document.getElementById("idForm").student_id.value;
+                var user_id = "";
+                if (document.getElementById("idForm"))
+                    user_id = document.getElementById("idForm").student_id.value;
+                // no RCS entered, upload for whoever is logged in
                 if (user_id == ""){
                     handleSubmission("{$this->core->buildUrl(array('component' => 'student',
                                                                'page' => 'submission',
@@ -284,10 +293,7 @@ HTML;
                                  false);
                 }
                 else {
-                    // validate user 
-                    /////valid_id = validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id);
-                    //validateStudentId(results, "{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id).done(doStuff);
-                    validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, doStuff);
+                    validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, submitStudentGradeable);
                 }
                 e.stopPropagation();
             });
