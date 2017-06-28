@@ -208,7 +208,7 @@ class Gradeable extends AbstractModel {
     protected $overall_comment = "";
     /** @property @var int code representing the state of electronic submission where 0 = not submitted, 1 = fine, 2 = late,
      * 3 = too late */
-    protected $status;
+    protected $status = 0;
     protected $graded_version = null;
 
     /** @property @var int */
