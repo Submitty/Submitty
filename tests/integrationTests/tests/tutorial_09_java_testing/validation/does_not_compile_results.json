@@ -1,0 +1,68 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01_STDERR.txt",
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        "ERROR: This file should be empty!"
+                    ]
+                },
+                {
+                    "description": "Create Executable",
+                    "messages": [
+                        "ERROR: required files not found:  Factorial.class"
+                    ]
+                },
+                {
+                    "actual_file": "test01_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 1 Java - Compilation",
+            "testcase_message": "Compilation Error(s)."
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_STDERR.txt",
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        "ERROR: This file should be empty!"
+                    ]
+                },
+                {
+                    "actual_file": "test02_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Test 2 Java - Instructor JUnit Test Compilation",
+            "testcase_message": "Compilation Error(s)."
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03_STDOUT.txt",
+                    "description": "JUnit output",
+                    "messages": [
+                        "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 0/4"
+                    ]
+                },
+                {
+                    "actual_file": "test03_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 3 Java - JUnit Test"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 4 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
