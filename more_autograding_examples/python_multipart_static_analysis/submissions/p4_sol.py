@@ -1,4 +1,4 @@
 i = 1
 while i < 20:
-    print i
+    print(i)
     i += 2
