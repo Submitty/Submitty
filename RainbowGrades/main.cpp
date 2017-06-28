@@ -1510,14 +1510,21 @@ void load_student_grades(std::vector<Student*> &students) {
 		} else if (token == "last_update") {
 			s->setLastUpdate(j[token].get<std::string>());
 		} else if (token == "registration_section") {
-		  int a = j[token].get<int>();
-		  if (!validSection(a)) {
-		    // the "drop" section is 0 (really should be NULL)
-		    if (a != 0) {
-			  std::cerr << "WARNING: invalid section " << a << std::endl;
-		    }
-		  }
-		  s->setSection(a);
+          int a;
+          if(!j[token].is_null()) {
+            a = j[token].get<int>();
+            if (!validSection(a)) {
+              // the "drop" section is 0 (really should be NULL)
+              if (a != 0) {
+                std::cerr << "WARNING: invalid section " << a << std::endl;
+              }
+            }
+          }
+          else{
+            a = 0;
+          }
+          s->setSection(a);
+
 		} else if (token == "default_allowed_late_days") {
                   int value = 0;
                   if (!j[token].is_null()) {

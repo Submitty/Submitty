@@ -46,7 +46,7 @@ def remove_lines(filename, lines):
     """
     if not os.path.isfile(filename):
         return
-    if not isinstance(lines, list) or len(lines) == 0:
+    if not isinstance(lines, list) or not lines:
         return
     stat = os.stat(filename)
     with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
@@ -124,10 +124,11 @@ def main():
 
         psql_version = subprocess.check_output("psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}'",
                                                shell=True).strip()
-        hosts = ["hostssl    all    all    192.168.56.0/24    pam",
-                 "host       all    all    192.168.56.0/24    pam",
-                 "host       all    all    all                md5"]
-        remove_lines('/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf', hosts)
+
+        try:
+            shutil.move('/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf.backup', '/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf')
+        except FileNotFoundError:
+            pass
 
     for i in range(0, 60):
         j = str(i).zfill(2)

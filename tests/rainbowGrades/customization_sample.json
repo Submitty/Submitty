@@ -61,7 +61,9 @@
 	"5": "TA_name_1",
 	"6": "TA_name_2",
 	"7": "TA_name_3",
-	"8": "TA_name_4"
+	"8": "TA_name_4",
+  "9": "TA_name_5",
+	"10": "TA_name_5"
     },
     "messages": [
 	"<b>My Favorite CS Class</b>",
