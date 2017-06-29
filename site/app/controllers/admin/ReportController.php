@@ -57,6 +57,7 @@ class ReportController extends AbstractController {
         
         $nl = "\n";
         $csv_output = "";
+        $filename = $_GET['course']."CSVReport.csv";
         foreach($results as $id => $student) {
             $student_line = array();
             if($id === 'header_model') {
@@ -76,13 +77,7 @@ class ReportController extends AbstractController {
             }
             $csv_output .= implode(",",$student_line).$nl;
         }
-        
-        header("Content-Type: text/plain");
-        header('Content-Disposition: attachment; filename=hwserver-report.csv');
-        header("Content-Length: " . strlen($csv_output));
-        echo $csv_output;
-        exit;
-        //$this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
+        $this->core->getOutput()->renderFile($csv_output, $filename);
     }
     
     public function generateGradeSummaries() {
