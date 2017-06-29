@@ -78,6 +78,7 @@ class ReportController extends AbstractController {
             $csv_output .= implode(",",$student_line).$nl;
         }
         $this->core->getOutput()->renderFile($csv_output, $filename);
+        return $csv_output;
     }
     
     public function generateGradeSummaries() {
