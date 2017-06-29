@@ -268,7 +268,7 @@ HTML;
 HTML;
                     $box_background = "";
                     if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
-                        $box_background = "background:#d9534f;padding:3px;margin-top:3px;margin-bottom:3px;margin-left:5%;margin-right:5%;border-radius:4px;";
+                        $box_background = "late-box";
                     }
                     
                     if ($row->beenTAgraded()) {
@@ -284,7 +284,7 @@ HTML;
                             {$contents}
                         </a>
                 </td>
-                <td><div style="{$box_background}">{$graded}&nbsp;/&nbsp;{$total_possible}</div></td>
+                <td><div class="{$box_background}">{$graded}&nbsp;/&nbsp;{$total_possible}</div></td>
 HTML;
                     if($active_version == $highest_version) {
                         $return .= <<<HTML
