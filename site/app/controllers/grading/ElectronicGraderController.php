@@ -130,7 +130,6 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_POST['g_id'];
         $who_id = $_POST['u_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
-        $gradeable->loadResultDetails();
 
         $now = new \DateTime('now');
         $homeworkDate = $gradeable->getGradeStartDate();
@@ -139,44 +138,35 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
         
-        $grader_id = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getGrader()->getId();
         $regrade = $gradeable->beenTAgraded();
-        if (!$regrade) {
-            $gd_id = $this->core->getQueries()->createGradeableData($gradeable_id,$who_id,$grader_id);
-            $status = 1;
-        }
-        else {
-            $gd_id = $gradeable->getGdId();
-            $status = $gradeable->getStatus();
-        }
-
-        $late_charged = intval($_POST['late']);
+        
+        $submit_data = array();
+        $submit_data['g_id'] = $gradeable_id;
+        $submit_data['u_id'] = $who_id;
+        $submit_data['gd_id'] = $regrade ? $gradeable->getGdId() : null;
+        $submit_data['status'] = $regrade ? $gradeable->getStatus() : 1;
+        $submit_data['grader_id'] = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getGrader()->getId();
+        $submit_data['late_charged'] = intval($_POST['late']);
+        $submit_data['comment'] = $_POST['comment-general'];
+        $submit_data['active_version'] = $gradeable->getActiveVersion();
+        $submit_data['time'] = $now->format("Y-m-d H:i:s");
+        
+        $submit_data['components'] = array();
         $comps = $gradeable->getComponents();
-
         //update each gradeable component data
         foreach($comps as $comp){
-            $grade = floatval($_POST["grade-{$comp->getOrder()}"]);
-            $comment = isset($_POST["comment-{$comp->getOrder()}"]) ? $_POST["comment-{$comp->getOrder()}"] : '';
             $gc_id = $comp->getId();
-            $this->core->getQueries()->updateComponentData($gd_id, $gc_id, $grader_id, $grade, $comment, $now);
+            $submit_data['components'][$gc_id] = array();
+            $submit_data['components'][$gc_id]['grade'] = floatval($_POST["grade-{$comp->getOrder()}"]);
+            $submit_data['components'][$gc_id]['comment'] = isset($_POST["comment-{$comp->getOrder()}"]) ? $_POST["comment-{$comp->getOrder()}"] : '';
         }
 
-        //update the gradeable data
-        $overall_comment = $_POST['comment-general'];
-        $active_version = $gradeable->getActiveVersion();
-
-        // Only changes the grader id if the overwrite grader box was checked
-        $this->core->getQueries()->updateGradeableDataHW($grader_id, $active_version, $overall_comment, $status, $late_charged, $gd_id);
-
-        //update the number of late days for the student the first time grades are submitted
-        if ($status == 1 && !$regrade){
-            $this->core->getQueries()->updateLateDaysHW($who_id, $gradeable_id, $late_charged);
-        }
+        $this->core->getQueries()->submitTAGrade($submit_data);
 
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($who_id, $gradeable_id);
-
         $individual = intval($_POST['individual']);
+
         $_SESSION['messages']['success'][] = "Successfully uploaded grade for {$who_id}";
 
         if ($individual == 1) {

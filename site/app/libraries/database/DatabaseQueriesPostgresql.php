@@ -1229,23 +1229,29 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
         }
     }
 
-    public function createGradeableData($g_id, $user_id, $grader_id) {
-        $params = array($g_id, $user_id, $grader_id);
-        $this->database->query("INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version, gd_user_viewed_date ) VALUES(?,?,?,'',1,0,0,NULL)", $params);
-        return $this->database->getLastInsertId('gradeable_data_gd_id_seq');
-    }
+    public function submitTAGrade($details) {
+        if ($details['gd_id'] === null) {
+            $params = array($details['g_id'], $details['u_id'], $details['grader_id'], $details['comment'], $details['status'], $details['late_charged'], $details['active_version']);
+            $this->database->query("INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version, gd_user_viewed_date ) VALUES(?,?,?,?,?,?,?,NULL)", $params);
+            $details['gd_id'] = $this->database->getLastInsertId('gradeable_data_gd_id_seq');
 
-    public function updateComponentData($gd_id, $gc_id, $grader_id, $grade, $comment, $now) {
-        $this->database->query("DELETE FROM gradeable_component_data WHERE gd_id=? AND gc_id=?", array($gd_id, $gc_id));
-        $this->database->query("INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grade_time) VALUES(?,?,?,?,?,?)", array($gc_id, $gd_id, $grade, $comment, $grader_id, $now->format("Y-m-d H:i:s")));
-    }
+            $params = array($details['u_id'], $details['g_id'], $details['late_charged']);
+            $this->database->query("INSERT INTO late_days_used (user_id, g_id, late_days_used) VALUES (?,?,?)", $params);
 
-    public function updateGradeableDataHW($grader_id, $active_version, $comment, $status, $late_charged, $gd_id) {
-        $this->database->query("UPDATE gradeable_data SET gd_grader_id=?, gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=?, gd_user_viewed_date=NULL WHERE gd_id=?", array($grader_id, $active_version, $comment, $status, $late_charged, $gd_id));
-    }
+            foreach($details['components'] as $gc_id => $data) {
+                $params = array($details['gd_id'], $gc_id, $data['grade'], $data['comment'], $details['grader_id'], $details['time']);
+                $this->database->query("INSERT INTO gradeable_component_data (gd_id, gc_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grade_time) VALUES (?,?,?,?,?,?)", $params);
+            }
+        }
+        else {
+            $params = array($details['grader_id'], $details['active_version'], $details['comment'], $details['status'], $details['late_charged'], $details['gd_id']);
+            $this->database->query("UPDATE gradeable_data SET gd_grader_id=?, gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=?, gd_user_viewed_date=NULL WHERE gd_id=?", $params);
 
-    public function updateLateDaysHW($user_id, $g_id, $late_charged) {
-        $this->database->query("INSERT INTO late_days_used (user_id, g_id, late_days_used) VALUES (?,?,?)", array($user_id, $g_id, $late_charged));
+            foreach($details['components'] as $gc_id => $data) {
+                $params = array($data['grade'], $data['comment'], $details['grader_id'], $details['time'], $details['gd_id'], $gc_id);
+                $this->database->query("UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_grade_time=? WHERE gd_id=? AND gc_id=?", $params);
+            }
+        }
     }
 
     public function getUsersWithLateDays() {
