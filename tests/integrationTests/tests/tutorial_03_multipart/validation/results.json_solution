@@ -1,0 +1,45 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01_STDOUT.txt",
+                    "description": "Program Output",
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/part1_sol.txt"
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Test 1 Part 1 Compute square root"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_STDOUT.txt",
+                    "description": "Program Output",
+                    "difference_file": "test02_0_diff.json",
+                    "expected_file": "test_output/testassignment/part2_sol.txt"
+                }
+            ],
+            "points_awarded": 4,
+            "test_name": "Test 2 Part 2 Solve for x^2 + 5x + 6 = 0"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03_STDOUT.txt",
+                    "description": "Program Output",
+                    "difference_file": "test03_0_diff.json",
+                    "expected_file": "test_output/testassignment/part3_sol.txt"
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Test 3 Part 3 Count from 1 to 10"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 4 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
