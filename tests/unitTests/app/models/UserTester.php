@@ -2,9 +2,15 @@
 
 namespace tests\unitTests\app\models;
 
+use app\libraries\Core;
 use app\models\User;
 
 class UserTester extends \PHPUnit_Framework_TestCase {
+    private $core;
+    public function setUp() {
+        $this->core = $this->createMock(Core::class);
+    }
+
     public function testUserNoPreferred() {
         $details = array(
             'user_id' => "test",
@@ -19,7 +25,7 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'manual_registration' => false,
             'grading_registration_sections' => "{1,2}"
         );
-        $user = new User($details);
+        $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['user_firstname'], $user->getFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
@@ -51,7 +57,7 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'manual_registration' => false,
             'grading_registration_sections' => "{1,2}"
         );
-        $user = new User($details);
+        $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['user_firstname'], $user->getFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
@@ -73,7 +79,7 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'manual_registration' => false,
             'grading_registration_sections' => "{1,2}"
         );
-        $user = new User($details);
+        $user = new User($this->core, $details);
         $this->assertTrue(password_verify("test", $user->getPassword()));
         $user->setPassword("test");
         $hashed_password = password_hash("test", PASSWORD_DEFAULT);
@@ -96,7 +102,7 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'manual_registration' => false,
             'grading_registration_sections' => "{1,2}"
         );
-        $user = new User($details);
+        $user = new User($this->core, $details);
         $actual = $user->toArray();
         password_verify("test", $actual['password']);
         unset($actual['password']);
@@ -113,13 +119,14 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'manual_registration' => false,
             'preferred_first_name' => "",
             'registration_section' => 1,
-            'rotating_section' => null
+            'rotating_section' => null,
+            'modified' => true
         );
         $this->assertEquals($expected, $actual);
     }
 
     public function testErrorUser() {
-        $user = new User(array());
+        $user = new User($this->core, array());
         $this->assertFalse($user->isLoaded());
         $this->assertNull($user->getId());
     }

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\exceptions\ConfigException;
+use app\libraries\Core;
 use app\libraries\IniParser;
 use app\libraries\Utils;
 
@@ -146,12 +147,13 @@ class Config extends AbstractModel {
     /**
      * Config constructor.
      *
+     * @param Core   $core
      * @param string $semester
      * @param string $course
      * @param string $master_ini_path
      */
-    public function __construct($semester, $course, $master_ini_path) {
-        parent::__construct();
+    public function __construct(Core $core, $semester, $course, $master_ini_path) {
+        parent::__construct($core);
         $this->semester = $semester;
         $this->course = $course;
         $this->config_path = dirname($master_ini_path);

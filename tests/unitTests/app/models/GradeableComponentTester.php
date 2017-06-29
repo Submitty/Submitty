@@ -2,9 +2,16 @@
 
 namespace unitTests\app\models;
 
+use app\libraries\Core;
 use app\models\GradeableComponent;
 
 class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
+    private $core;
+
+    public function setUp() {
+        $this->core = $this->createMock(Core::class);
+    }
+    
     public function testGradeableComponent() {
         $details = array(
             'gc_id' => 'test',
@@ -19,7 +26,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gcd_component_comment' => 'Comment about gradeable'
         );
 
-        $component = new GradeableComponent($details);
+
+        $component = new GradeableComponent($this->core, $details);
         $expected = array(
             'id' => 'test',
             'title' => 'Test Component',
@@ -31,7 +39,10 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'order' => 1,
             'score' => 10.0,
             'comment' => 'Comment about gradeable',
-            'has_grade' => true
+            'has_grade' => true,
+            'grade_time' => null,
+            'grader' => null,
+            'modified' => false
         );
         $actual = $component->toArray();
         ksort($expected);
@@ -66,7 +77,9 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gcd_score' => 1000,
             'gcd_component_comment' => 'Comment about gradeable'
         );
-        $component = new GradeableComponent($details);
+
+
+        $component = new GradeableComponent($this->core, $details);
         $this->assertEquals(100, $component->getScore());
         $this->assertEquals(100, $component->getMaxValue());
     }
@@ -84,7 +97,7 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gcd_score' => -100,
             'gcd_component_comment' => 'Comment about gradeable'
         );
-        $component = new GradeableComponent($details);
+        $component = new GradeableComponent($this->core, $details);
         $this->assertEquals(0, $component->getScore());
         $this->assertEquals(100, $component->getMaxValue());
     }
@@ -102,7 +115,9 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gcd_score' => null,
             'gcd_component_comment' => null
         );
-        $component = new GradeableComponent($details);
+
+
+        $component = new GradeableComponent($this->core, $details);
         $this->assertEquals(0, $component->getScore());
         $this->assertEquals("", $component->getComment());
     }
@@ -120,7 +135,9 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gcd_score' => -50,
             'gcd_component_comment' => 'Comment about gradeable'
         );
-        $component = new GradeableComponent($details);
+
+
+        $component = new GradeableComponent($this->core, $details);
         $this->assertEquals(-100, $component->getMaxValue());
         $this->assertEquals(-50, $component->getScore());
     }
@@ -138,7 +155,9 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gcd_score' => -150,
             'gcd_component_comment' => 'Comment about gradeable'
         );
-        $component = new GradeableComponent($details);
+
+
+        $component = new GradeableComponent($this->core, $details);
         $this->assertEquals(-100, $component->getMaxValue());
         $this->assertEquals(-100, $component->getScore());
     }
@@ -156,7 +175,9 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gcd_score' => 100,
             'gcd_component_comment' => 'Comment about gradeable'
         );
-        $component = new GradeableComponent($details);
+
+
+        $component = new GradeableComponent($this->core, $details);
         $this->assertEquals(-100, $component->getMaxValue());
         $this->assertEquals(0, $component->getScore());
     }
@@ -174,10 +195,19 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gcd_score' => 50,
             'gcd_component_comment' => null
         );
-        $component = new GradeableComponent($details);
+
+
+        $component = new GradeableComponent($this->core, $details);
         $this->assertEquals(100, $component->getMaxValue());
         $this->assertEquals(50, $component->getScore());
         $this->assertTrue($component->getHasGrade());
         $this->assertEquals("", $component->getComment());
+    }
+
+    public function testSetFunctions() {
+        $component = new GradeableComponent($this->core);
+        $expected = "f";
+        $component->setComment($expected);
+        $this->assertEquals($expected, $component->getComment());
     }
 }

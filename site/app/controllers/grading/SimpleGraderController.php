@@ -111,23 +111,21 @@ class SimpleGraderController extends AbstractController  {
                 if ($component->getIsText()){
                     $component->setComment($_POST['scores'][$component->getId()]);
                 }
-                else{
+                else {
                     if($component->getMaxValue() < $_POST['scores'][$component->getId()]){
                         $response = array('status' => 'fail', 'message' => "Save error: score is greater than the max score");
                         $this->core->getOutput()->renderJson($response);
                         return $response;
                     }
                     $component->setScore($_POST['scores'][$component->getId()]);
+                    $component->setGrader($this->core->getUser());
+                    $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                 }
             }
         }
 
-        $gradeable->setUser($user);
-        $gradeable->setGrader($this->core->getUser());
         $gradeable->setStatus(1);
-        $gradeable->setActiveVersion(1);
-
-        $this->core->getQueries()->updateGradeableData($gradeable);
+        $gradeable->saveData();
 
         $response = array('status' => 'success', 'data' => null);
         $this->core->getOutput()->renderJson($response);
