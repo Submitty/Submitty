@@ -355,7 +355,6 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
                 }
             }
             catch (e) {
-                console.log(e);
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);
@@ -470,7 +469,6 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
                 }
             }
             catch (e) {
-                console.log(e);
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);
