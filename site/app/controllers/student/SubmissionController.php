@@ -136,11 +136,20 @@ class SubmissionController extends AbstractController {
         $student_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $student_id);
         if ($student_gradeable === null) {
             $msg = "Invalid gradeable id '{$_POST['gradeable_id']}'";
-            $eturn = array('success' => false, 'message' => $msg);
+            $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
         $student_gradeable->loadResultDetails();
+        if ($student_gradeable->isTeamAssignment()) {
+            $student_team = $this->core->getQueries()->getTeamByUserId($gradeable_id, $student_id);
+            if ($student_team === null) {
+                $msg = "Student '{$_POST['student_id']}' is not part of a team.";
+                $return = array('success' => false, 'message' => $msg);
+                $this->core->getOutput()->renderJson($return);
+                return $return;
+            }
+        }
         $highest_version = $student_gradeable->getHighestVersion();
         $return = array('success' => true, 'highest_version' => $highest_version);
         $this->core->getOutput()->renderJson($return);
@@ -492,7 +501,7 @@ class SubmissionController extends AbstractController {
         if ($user_id == $original_user_id)
             $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         else
-            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$user_id}";
+            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}";
             
 
         return $this->uploadResult("Successfully uploaded files");

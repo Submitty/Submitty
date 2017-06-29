@@ -63,31 +63,35 @@ HTML;
 HTML;
         if ($this->core->getUser()->accessAdmin()) {
             $return .= <<<HTML
-    <fieldset>
-        <input type='radio' id="radio_normal"> 
-            Normal Submission
-        <input type='radio' id="radio_student">
-            Make Upload for a Student
-        <input type='radio' id="radio_view">
-            View Student Upload Page
-    <fieldset>
+    <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
+        <div >
+            <input type='radio' id="radio_normal" name="submission_type"> 
+                Normal Submission
+            <input type='radio' id="radio_student" name="submission_type">
+                Make Submission for a Student
+        </div>
+        <div id="student_id_input" style="display: none">
+            <div class="sub">
+                Input the user_id of the student you wish to submit for. This <i>permanently</i> affects the student's submissions, so please use with caution.
+            </div>
+            <div class="sub">
+                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                user_id: <input type="text" float="right" id= "student_id" name="student_id" placeholder="{$gradeable->getUser()->getId()}"/>
+            </div class="sub">
+        </div>
+
+    </form>
 HTML;
         }   
 
             $return .= <<<HTML
-    <form form id="idForm" method="post" style="display:none">
-    <div class ="sub">
-    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-        RCS ID: <input type="text" float="right" name="student_id" placeholder="{$gradeable->getUser()->getId()}" required/>
-    </div>
-    </form>
-HTML;
-
-            $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#radio_student').on( "change", function() {
-                 $('#idForm').show;
+            $('#radio_normal').click(function() {
+                $('#student_id_input').hide();
+            });
+            $('#radio_student').click(function() {
+                $('#student_id_input').show();
             });
         });
     </script>
@@ -295,8 +299,8 @@ HTML;
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
                 var user_id = "";
-                if (document.getElementById("idForm"))
-                    user_id = document.getElementById("idForm").student_id.value;
+                if (document.getElementById("submissionForm"))
+                    user_id = document.getElementById("submissionForm").student_id.value;
                 // no RCS entered, upload for whoever is logged in
                 if (user_id == ""){
                     handleSubmission("{$this->core->buildUrl(array('component' => 'student',
