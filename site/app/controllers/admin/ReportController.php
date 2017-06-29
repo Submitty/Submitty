@@ -57,7 +57,7 @@ class ReportController extends AbstractController {
         
         $nl = "\n";
         $csv_output = "";
-        $filename = $_GET['course']."CSVReport.csv";
+        $filename = $_REQUEST['course']."CSVReport.csv";
         foreach($results as $id => $student) {
             $student_line = array();
             if($id === 'header_model') {
