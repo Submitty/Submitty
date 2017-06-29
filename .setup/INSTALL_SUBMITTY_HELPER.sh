@@ -495,7 +495,7 @@ echo -e "Compile and install analysis tools"
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 
 # compile the tools
-stack --allow-different-user --no-terminal --install-ghc --copy-bins build
+./build.sh v0.2.1
 
 popd
 
