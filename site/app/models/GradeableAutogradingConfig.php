@@ -14,6 +14,8 @@ use app\libraries\Utils;
  * students and we must not perform 600 file lookups on the same piece of information. We have all other information
  * for quick analysis of an assignment stored within the DB so that we can keep our general overhead down.
  *
+ * @TODO: Replace this with memcached once we are using that as this is not a very good model
+ *
  * @package app\models
  */
 class GradeableAutogradingConfig extends AbstractModel {

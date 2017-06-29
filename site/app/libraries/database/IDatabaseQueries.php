@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries\database;
+
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableVersion;
@@ -108,6 +109,8 @@ interface IDatabaseQueries {
 
     public function getGradersForRotatingSections($g_id, $sections);
 
+    public function getGradersFromUserType($user_type);
+
     /**
      * Gets all registration sections from the sections_registration table
 
@@ -121,6 +124,20 @@ interface IDatabaseQueries {
      * @return array
      */
     public function getRotatingSections();
+
+    /**
+     * Gets all the gradeable IDs of the rotating sections
+     *
+     * @return array
+     */
+    public function getRotatingSectionsGradeableIDS();
+
+    /**
+     * Get gradeables graded by rotating section in the past and the sections each grader graded
+     *
+     * @return array
+     */
+    public function getGradeablesPastAndSection();
 
     /**
      * Returns the count of all users in rotating sections that are in a non-null registration section. These are
@@ -152,7 +169,13 @@ interface IDatabaseQueries {
 
     public function getMaxRotatingSection();
 
+    public function getNumberRotatingSessions();
+
+    public function getGradersForAllRotatingSections($gradeable_id);
+
     public function insertNewRotatingSection($section);
+
+    public function setupRotatingSections($graders, $gradeable_id);
 
     public function updateUsersRotatingSection($section, $users);
 
@@ -182,12 +205,49 @@ interface IDatabaseQueries {
     public function updateActiveVersion($g_id, $user_id, $team_id, $version);
 
     /**
-     * Given a gradeable objec, this updates all gradeable_component_data rows that are associated, updating the scores
-     * and comments that were left.
-     *
-     * @param \app\models\Gradeable $gradeable
+     * @param Gradeable $gradeable
+     */
+    public function insertGradeableData(Gradeable $gradeable);
+
+    /**
+     * @param Gradeable $gradeable
      */
     public function updateGradeableData(Gradeable $gradeable);
+
+    /**
+     * @param string             $gd_id
+     * @param GradeableComponent $component
+     */
+    public function insertGradeableComponentData($gd_id, GradeableComponent $component);
+
+    /**
+     * @param string             $gd_id
+     * @param GradeableComponent $component
+     */
+    public function updateGradeableComponentData($gd_id, GradeableComponent $component);
+
+    /**
+     * Creates a new gradeable in the database
+     *
+     * @param array $details
+     */
+    public function createNewGradeable($details);
+
+    /**
+     * Gets an array that contains all revelant data in a gradeable.
+     * Uses the gradeable id to use the data in the database.
+     *
+     * @param $gradeable_id
+     *
+     */
+    public function getGradeableData($gradeable_id);
+
+    /**
+     * Updates the current gradeable with new properties.
+     *
+     * @param array $details
+     */
+    public function updateGradeable($details);
 
     /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
@@ -235,6 +295,12 @@ interface IDatabaseQueries {
     public function removeSessionById($session_id);
 
     /**
+     * gets ids of all electronic gradeables
+     */
+    public function getAllElectronicGradeablesIds();
+
+
+    /**
      * Create a new team id and team in gradeable_teams for given gradeable, add $user_id as a member
      * @param string $g_id
      * @param string $user_id
@@ -265,6 +331,7 @@ interface IDatabaseQueries {
     /**
      * Return an array of Team objects for all teams on given gradeable
      * @param string $g_id
+     * @return \app\models\Team[]
      */
     public function getTeamsByGradeableId($g_id);
 
@@ -272,6 +339,35 @@ interface IDatabaseQueries {
      * Return Team object for team which the given user belongs to on the given gradeable
      * @param string $g_id
      * @param string $user_id
+     * @return \app\models\Team
      */
     public function getTeamByUserId($g_id, $user_id);
+
+    /**
+     * Return an array of users with late days
+     */
+    public function getUsersWithLateDays();
+
+    /**
+     * Return an array of users with extensions
+     * @param string $gradeable_id
+     */
+    public function getUsersWithExtensions($gradeable_id);
+
+    /**
+     * Updates a given user's late days allowed effective at a given time
+     * @param string $user_id
+     * @param string $timestamp
+     * @param integer $days
+     */
+    public function updateLateDays($user_id, $timestamp, $days);
+
+    /**
+     * Updates a given user's extensions for a given homework
+     * @param string $user_id
+     * @param string $g_id
+     * @param integer $days
+     */
+    public function updateExtensions($user_id, $g_id, $days);
+
 }

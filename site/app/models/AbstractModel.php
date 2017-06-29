@@ -2,6 +2,7 @@
 
 
 namespace app\models;
+use app\libraries\Core;
 use app\libraries\Utils;
 
 /**
@@ -9,16 +10,20 @@ use app\libraries\Utils;
  *
  * Base model class that all other models should inherit from as its parent.
  *
- * @package app\models
+ * @method bool isModified()
  */
 abstract class AbstractModel {
 
     protected $properties = array();
 
-    /** @var bool flag on whether this model has been changed or not by the application layer */
+    /** @var Core */
+    protected $core;
+
+    /** @property @var bool flag on whether this model has been changed or not by the application layer */
     protected $modified = false;
 
-    public function __construct() {
+    public function __construct(Core $core) {
+        $this->core = $core;
         $this->setupProperties();
     }
 
@@ -95,12 +100,10 @@ abstract class AbstractModel {
      * @param $arguments
      *
      * @return mixed
+     *
+     * @throws \BadMethodCallException
      */
     public function __call($name, $arguments) {
-        $check_error = function() use ($name) {
-            // Mimics the error PHP normally raises when you call an invalid/non-existant method on an object
-            trigger_error('Call to undefined method '.__CLASS__.'::'.$name.'()', E_USER_ERROR);
-        };
         if (Utils::startsWith($name, "set")) {
             $property_name = $this->convertName($name);
             $value = $arguments[0];
@@ -118,22 +121,26 @@ abstract class AbstractModel {
                         $value = floatval($value);
                         break;
                     case 'bool':
+                    case 'boolean':
                         $value = $value === true;
                 }
-                $this->modified = true;
-                $this->$property_name = $value;
-            }
-            else {
-                $check_error();
+                if ($this->$property_name !== $value) {
+                    $this->modified = true;
+                    $this->$property_name = $value;
+                }
+                return null;
             }
         }
         elseif (Utils::startsWith($name, "get")) {
             $property_name = $this->convertName($name);
             return $this->$property_name;
         }
-        else {
-            $check_error();
+        elseif (Utils::startsWith($name, "is")) {
+            $property_name = $this->convertName($name, 2);
+            return $this->$property_name === true;
         }
+
+        throw new \BadMethodCallException('Call to undefined method '.__CLASS__.'::'.$name.'()');
     }
 
     /**
@@ -146,10 +153,9 @@ abstract class AbstractModel {
      *
      * @return string
      */
-    private function convertName($name) {
+    private function convertName($name, $prefix_length=3) {
         $regex_func = function($matches) { return "_".strtolower($matches[0]); };
-        $name = preg_replace_callback("/([A-Z])/", $regex_func, lcfirst((substr($name, 3))));
+        $name = preg_replace_callback("/([A-Z])/", $regex_func, lcfirst((substr($name, $prefix_length))));
         return $name;
     }
-
 }
