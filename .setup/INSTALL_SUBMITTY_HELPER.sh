@@ -221,15 +221,11 @@ find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
 echo -e "Copy the sample files"
 
 # copy the files from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/sample_files ${SUBMITTY_INSTALL_DIR}
 rsync -rtz ${SUBMITTY_REPOSITORY}/more_autograding_examples ${SUBMITTY_INSTALL_DIR}
 
 # root will be owner & group of these files
-chown -R  root:root ${SUBMITTY_INSTALL_DIR}/sample_files
 chown -R  root:root ${SUBMITTY_INSTALL_DIR}/more_autograding_examples
 # but everyone can read all that files & directories, and cd into all the directories
-find ${SUBMITTY_INSTALL_DIR}/sample_files -type d -exec chmod 555 {} \;
-find ${SUBMITTY_INSTALL_DIR}/sample_files -type f -exec chmod 444 {} \;
 find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type d -exec chmod 555 {} \;
 find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type f -exec chmod 444 {} \;
 
@@ -499,7 +495,7 @@ echo -e "Compile and install analysis tools"
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 
 # compile the tools
-stack --allow-different-user --no-terminal --install-ghc --copy-bins build
+./build.sh v0.2.1
 
 popd
 

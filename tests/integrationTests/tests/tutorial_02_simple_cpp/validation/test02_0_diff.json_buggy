@@ -1,0 +1,37 @@
+{
+    "differences": [
+        {
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 0
+                    }
+                ],
+                "start": 0
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 0
+                    }
+                ],
+                "start": 0
+            }
+        }
+    ]
+}
+

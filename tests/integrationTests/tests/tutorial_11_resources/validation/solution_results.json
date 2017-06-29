@@ -1,0 +1,25 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 5,
+            "test_name": "Test 1 C++ - Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_STDOUT.txt",
+                    "description": "Program Output",
+                    "difference_file": "test02_0_diff.json",
+                    "expected_file": "test_output/testassignment/simple_out.txt"
+                }
+            ],
+            "points_awarded": 4,
+            "test_name": "Test 2 C++ - Execution"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 3 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

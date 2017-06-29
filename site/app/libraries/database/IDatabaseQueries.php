@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries\database;
+
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableVersion;
@@ -204,12 +205,26 @@ interface IDatabaseQueries {
     public function updateActiveVersion($g_id, $user_id, $team_id, $version);
 
     /**
-     * Given a gradeable object, this updates all gradeable_component_data rows that are associated, updating the scores
-     * and comments that were left.
-     *
-     * @param \app\models\Gradeable $gradeable
+     * @param Gradeable $gradeable
+     */
+    public function insertGradeableData(Gradeable $gradeable);
+
+    /**
+     * @param Gradeable $gradeable
      */
     public function updateGradeableData(Gradeable $gradeable);
+
+    /**
+     * @param string             $gd_id
+     * @param GradeableComponent $component
+     */
+    public function insertGradeableComponentData($gd_id, GradeableComponent $component);
+
+    /**
+     * @param string             $gd_id
+     * @param GradeableComponent $component
+     */
+    public function updateGradeableComponentData($gd_id, GradeableComponent $component);
 
     /**
      * Creates a new gradeable in the database
@@ -316,6 +331,7 @@ interface IDatabaseQueries {
     /**
      * Return an array of Team objects for all teams on given gradeable
      * @param string $g_id
+     * @return \app\models\Team[]
      */
     public function getTeamsByGradeableId($g_id);
 
@@ -323,6 +339,7 @@ interface IDatabaseQueries {
      * Return Team object for team which the given user belongs to on the given gradeable
      * @param string $g_id
      * @param string $user_id
+     * @return \app\models\Team
      */
     public function getTeamByUserId($g_id, $user_id);
 

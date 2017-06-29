@@ -46,7 +46,7 @@ def remove_lines(filename, lines):
     """
     if not os.path.isfile(filename):
         return
-    if not isinstance(lines, list) or len(lines) == 0:
+    if not isinstance(lines, list) or not lines:
         return
     stat = os.stat(filename)
     with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
