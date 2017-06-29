@@ -196,11 +196,12 @@ class Output {
     
     public function addBreadcrumb($string, $url=null, $top=false) {
         if ($url !== null && $url !== "") {
-	    if ($top == true) {
-                $string = "<a target=\"_top\" href='{$url}'>{$string}</a>";
-	    } else {
-                $string = "<a href='{$url}'>{$string}</a>";
-	    }
+            if ($top === true) {
+                    $string = "<a target=\"_top\" href='{$url}'>{$string}</a>";
+            }
+            else {
+                    $string = "<a href='{$url}'>{$string}</a>";
+            }
         }
         $this->breadcrumbs[] = $string;
     }
