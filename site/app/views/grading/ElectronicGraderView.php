@@ -95,7 +95,7 @@ HTML;
             if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
                 $return .= <<<HTML
             <a class="btn btn-primary"
-                href="{$this->core->getConfig()->getTaBaseUrl()}account/index.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}">
+                href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'individual'=>'0'))}">
                 Grade Next Student
             </a>
         </div>
@@ -240,7 +240,7 @@ HTML;
                     $contents = "Grade";
                 }
                 $return .= <<<HTML
-                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId()))}">
+                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
                         {$contents}
                     </a>
                 </td>
@@ -260,12 +260,14 @@ HTML;
         return $return;
     }
 
-    public function hwGradingPage($gradeable) {
+    public function hwGradingPage($gradeable, $progress, $prev_id, $next_id, $individual) {
+        $prev_href = $prev_id == '' ? '' : "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id, 'individual'=>$individual))}\"";
+        $next_href = $next_id == '' ? '' : "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual))}\"";
         $return = <<<HTML
 <div class="grading_toolbar">
-    <a><i title="Go to the previous student" class="icon-left"></i></a>
+    <a {$prev_href}><i title="Go to the previous student" class="icon-left"></i></a>
     <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'summary', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="icon-home" ></i></a>
-    <a><i title="Go to the next student" class="icon-right"></i></a>
+    <a {$next_href}><i title="Go to the next student" class="icon-right"></i></a>
     <i title="Reset Rubric Panel Positions (Press R)" class="icon-refresh" onclick="handleKeyPress('KeyR');"></i>
     <i title="Show/Hide Auto-Grading Testcases (Press A)" class="icon-auto-grading-results" onclick="handleKeyPress('KeyA');"></i>
     <i title="Show/Hide Grading Rubric (Press G)" class="icon-grading-panel" onclick="handleKeyPress('KeyG');"></i>
@@ -274,7 +276,7 @@ HTML;
 </div>
 
 <div class="progress_bar">
-    <progress class="progressbar" max="100" value="0" style="width:80%; height: 100%;"></progress>
+    <progress class="progressbar" max="100" value="{$progress}" style="width:80%; height: 100%;"></progress>
     <div class="progress-value" style="display:inline;"></div>
 </div>
 
@@ -606,6 +608,7 @@ HTML;
             <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
             <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
             <input type="hidden" name="u_id" value="{$user->getId()}" />
+            <input type="hidden" name="individual" value="{$individual}" />
             <input type="checkbox" style="margin-right:5px;" id="rubric-autoscroll-checkbox" {$cookie_auto} />
                 <span style="display: inline-block; margin-top:15px; margin-bottom:15px;">Rubric Auto Scroll</span>
 HTML;
