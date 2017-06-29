@@ -221,15 +221,11 @@ find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
 echo -e "Copy the sample files"
 
 # copy the files from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/sample_files ${SUBMITTY_INSTALL_DIR}
 rsync -rtz ${SUBMITTY_REPOSITORY}/more_autograding_examples ${SUBMITTY_INSTALL_DIR}
 
 # root will be owner & group of these files
-chown -R  root:root ${SUBMITTY_INSTALL_DIR}/sample_files
 chown -R  root:root ${SUBMITTY_INSTALL_DIR}/more_autograding_examples
 # but everyone can read all that files & directories, and cd into all the directories
-find ${SUBMITTY_INSTALL_DIR}/sample_files -type d -exec chmod 555 {} \;
-find ${SUBMITTY_INSTALL_DIR}/sample_files -type f -exec chmod 444 {} \;
 find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type d -exec chmod 555 {} \;
 find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type f -exec chmod 444 {} \;
 
@@ -562,14 +558,24 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     # add a symlink to conveniently run the test suite or specific tests without the full reinstall
     #ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
 
-    echo -e "\nRun Autograding Test Suite...\n"
+    echo -e "\nRun Rainbow Grades Test Suite...\n"
+    rainbow_counter=0
+    rainbow_total=0
 
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
+    rainbow_total=$((rainbow_total+1))
     python ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+    
+    if [[ $? -ne 0 ]]; then
+        echo -e "\n[ FAILED ] sample test\n"
+    else
+        rainbow_counter=$((rainbow_counter+1))
+        echo -e "\n[ SUCCEEDED ] sample test\n"
+    fi
 
-    echo -e "\nCompleted Autograding Test Suite\n"
+    echo -e "\nCompleted Rainbow Grades Test Suite. $rainbow_counter of $rainbow_total tests succeeded.\n"
 fi
 
 ################################################################################################################
