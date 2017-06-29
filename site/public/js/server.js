@@ -593,11 +593,19 @@ function setupNumericTextCells() {
     });
 }
 
-function openPopUp(test) {
-    my_window = window.open("", "mywindow1", "status=1,width=350,height=150");
-    //my_window.document.write('somehow add JS'); 
-    my_window.document.write(test); 
-    my_window.document.write('J_\alpha(x) = \sum_{m=0}^\infty \frac{(-1)^m}{m! \, \Gamma(m + \alpha + 1)}{\left({\frac{x}{2}}\right)}^{2 m + \alpha} ');
+function openPopUp(number) {
+    var element_id = "testcase_" + number;
+    var popup_id = "popup_" + number;
+    var pop_element = document.getElementById(popup_id);
+    
+    //Temporarily makes the icon invisible so it won't show up the pop up 
+    pop_element.style.visibility = "hidden";
+    var elem_html = document.getElementById(element_id).innerHTML;
+    pop_element.style.visibility = "visible";
+    my_window = window.open("", "mywindow1", "status=1,width=750,height=500");
+    my_window.document.write(elem_html);
+    my_window.document.close(); 
+    my_window.focus();
 }
 function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenseForm').get(0));

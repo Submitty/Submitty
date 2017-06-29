@@ -627,8 +627,10 @@ HTML;
                                     $diff_viewer = $autocheck->getDiffViewer();
                                     $return .= <<<HTML
                 <div class="box-block"> 
+                <!-- Readded css here so the popup has the css -->
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
                 <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-                <span onclick='openUrl("{$this->core->buildUrl(array('component' => 'student', 'page' => 'submission', 'action' => 'pop_up', 'autocheck_index' => $autocheck_cnt))}")'> <i class="fa fa-window-maximize" style="visibility: visible"></i> </span>
+                <span onclick="openPopUp({$count})"> <i class="fa fa-window-restore" id="popup_{$count}" style="visibility: visible; cursor: pointer;"></i> </span>
 HTML;
 
                                     $title = "";
