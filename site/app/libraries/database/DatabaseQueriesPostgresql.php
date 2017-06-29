@@ -756,10 +756,6 @@ VALUES (?, ?, ?, ?, ?, ?)", $params);
         return $this->database->getLastInsertId("gradeable_data_gd_id_seq");
     }
 
-    public function updateGradeableData(Gradeable $gradeable) {
-        //$this->database->query("UPDATE gradeable_data SET gd_grader_id=? WHERE gd_id=?", array($gradeable->getGrader()->getId(), $gradeable->getGdId()));
-    }
-
     public function insertGradeableComponentData($gd_id, GradeableComponent $component) {
         $params = array($component->getId(), $gd_id, $component->getScore(),
                         $component->getComment(), $component->getGrader()->getId(), $component->getGradeTime()->format("Y-m-d H:i:s"));
@@ -1016,41 +1012,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
             }
         }
         $this->database->commit();
-    }
-
-    public function insertVersionDetails($g_id, $user_id, $team_id, $version, $timestamp) {
-        $this->database->query("
-INSERT INTO electronic_gradeable_data 
-(g_id, user_id, team_id, g_version, autograding_non_hidden_non_extra_credit, autograding_non_hidden_extra_credit, 
-autograding_hidden_non_extra_credit, autograding_hidden_extra_credit, submission_time) 
-VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $timestamp));
-        if ($user_id === null) {
-            $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND team_id=?",
-            array($g_id, $team_id));
-        }
-        else {
-            $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND user_id=?",
-            array($g_id, $user_id));
-        }
-        $row = $this->database->row();
-        if (!empty($row)) {
-            $this->updateActiveVersion($g_id, $user_id, $team_id, $version);
-        }
-        else {
-            $this->database->query("INSERT INTO electronic_gradeable_version (g_id, user_id, team_id, active_version) VALUES(?, ?, ?, ?)",
-                array($g_id, $user_id, $team_id, $version));
-        }
-    }
-
-    public function updateActiveVersion($g_id, $user_id, $team_id, $version) {
-        if ($user_id === null) {
-            $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND team_id=?",
-            array($version, $g_id, $team_id));
-        }
-        else {
-            $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND user_id=?",
-            array($version, $g_id, $user_id));
-        }  
     }
 
     public function updateGradeableData(Gradeable $gradeable) {
