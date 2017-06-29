@@ -600,6 +600,7 @@ function setupNumericTextCells() {
                                             var total = 0;
                                             var y = starting_index1;
                                             var z = starting_index2; //3 is the starting index of the grades in the csv
+                                            //puts all the data in the form
                                             for (z = starting_index2; z < num_numeric + starting_index2; z++, y++) {
                                                 value_temp_str = value_str + y;
                                                 status_temp_str = status_str + y;

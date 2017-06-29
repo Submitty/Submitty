@@ -166,6 +166,7 @@ class SimpleGraderController extends AbstractController  {
                     $value_str = "value_";
                     $status_str = "status_";
                     $gradeable = $this->core->getQueries()->getGradeable($g_id, $username);
+                    //Makes an array with all the values and their status.
                     foreach ($gradeable->getComponents() as $component) {
                         $value_temp_str = $value_str . $index1;
                         $status_temp_str = $status_str . $index1;
@@ -189,6 +190,7 @@ class SimpleGraderController extends AbstractController  {
                         }
                         $index1++;
                         $index2++;
+                        //skips the index of the total points in the csv file
                         if($index1 == $num_numeric) {
                             $index2++;
                         }
@@ -201,7 +203,7 @@ class SimpleGraderController extends AbstractController  {
                     $gradeable->setActiveVersion(1);
                     $gradeable->saveData();
                     $return_data[] = $temp_array;
-                    $j = $arr_length;
+                    $j = $arr_length; //stops the for loop early to not waste resources
                 }
             }
         }
