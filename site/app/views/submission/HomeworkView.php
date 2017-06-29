@@ -63,14 +63,38 @@ HTML;
 HTML;
         if ($this->core->getUser()->accessAdmin()) {
             $return .= <<<HTML
-    <form form id="idForm" method="post">
+    <fieldset>
+        <input type='radio' id="radio_normal"> 
+            Normal Submission
+        <input type='radio' id="radio_student">
+            Make Upload for a Student
+        <input type='radio' id="radio_view">
+            View Student Upload Page
+    <fieldset>
+HTML;
+        }   
+
+            $return .= <<<HTML
+    <form form id="idForm" method="post" style="display:none">
     <div class ="sub">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-        Student RCS ID: <input type="text" name="student_id" placeholder="{$gradeable->getUser()->getID()}" required/>
+        RCS ID: <input type="text" float="right" name="student_id" placeholder="{$gradeable->getUser()->getId()}" required/>
     </div>
     </form>
 HTML;
-        }
+
+            $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#radio_student').on( "change", function() {
+                 $('#idForm').show;
+            });
+        });
+    </script>
+HTML;
+
+
+
         $return .= <<<HTML
     <div class="sub">
 HTML;
@@ -266,8 +290,7 @@ HTML;
                                  "{$this->core->getCsrfToken()}",
                                  {$svn_string},
                                  {$gradeable->getNumTextBoxes()},
-                                 student_id,
-                                 true);           
+                                 student_id);           
         }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
@@ -289,8 +312,7 @@ HTML;
                                  "{$this->core->getCsrfToken()}",
                                  {$svn_string},
                                  {$gradeable->getNumTextBoxes()},
-                                 "{$gradeable->getUser()->getId()}",
-                                 false);
+                                 "{$gradeable->getUser()->getId()}");
                 }
                 else {
                     validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, submitStudentGradeable);

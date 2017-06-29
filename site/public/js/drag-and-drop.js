@@ -382,7 +382,7 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
  * @param user_id
  * @param is_instructor_upload
  */
-function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id, is_instructor_upload) {
+function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id) {
     $("#submit").prop("disabled", true);
 
     var message = "";
@@ -412,7 +412,6 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
     formData.append('csrf_token', csrf_token);
     formData.append('svn_checkout', svn_checkout);
     formData.append('user_id', user_id);
-    formData.append('is_instructor_upload', is_instructor_upload);
 
     if (!svn_checkout) {
         // Check if new submission

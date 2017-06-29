@@ -170,13 +170,14 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['user_id'])) {
             return $this->uploadResult("Invalid user id '{$_REQUEST['user_id']}'", false);
         }
-        $is_instructor_upload = isset($_REQUEST['is_instructor_upload']) ? $_REQUEST['is_instructor_upload'] === "true" : false;
-        $student_id = $_REQUEST['user_id'];
-        if ($is_instructor_upload) {
-            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $student_id);
+
+        $original_user_id = $this->core->getUser()->getId();
+        $user_id = $_REQUEST['user_id'];
+        if ($user_id == $original_user_id) {
+            $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
         }
         else {
-            $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $user_id);
         }
         $gradeable->loadResultDetails();
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
@@ -192,11 +193,7 @@ class SubmissionController extends AbstractController {
         if (!FileUtils::createDir($gradeable_path)) {
             return $this->uploadResult("Failed to make folder for this assignment.", false);
         }
-
-        if ($is_instructor_upload === true)
-            $user_id = $student_id;
-        else 
-            $user_id = $this->core->getUser()->getId();
+        
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
@@ -279,7 +276,7 @@ class SubmissionController extends AbstractController {
                 for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
                     $textbox_answer_val = $textbox_answer_array[$i];
                     if ($textbox_answer_val != "") $empty_textboxes = false;
-                    $filename = $gradeable->getTextboxes()[$i]['filename'];
+                    $filename = $gradeable->getTextBoxes()[$i]['filename'];
                     $dst = FileUtils::joinPaths($version_path, $filename);
                     // FIXME: add error checking
                     $file = fopen($dst, "w");
@@ -429,7 +426,9 @@ class SubmissionController extends AbstractController {
         if (!file_exists($settings_file)) {
             $json = array("active_version" => $new_version,
                           "history" => array(array("version" => $new_version,
-                                                   "time" => $current_time)));
+                                                   "time" => $current_time,
+                                                   "who" => $original_user_id,
+                                                   "type" => "upload")));
         }
         else {
             $json = FileUtils::readJsonFile($settings_file);
@@ -437,7 +436,7 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to open settings file.", false);
             }
             $json["active_version"] = $new_version;
-            $json["history"][] = array("version"=> $new_version, "time" => $current_time);
+            $json["history"][] = array("version"=> $new_version, "time" => $current_time, "who" => $original_user_id, "type" => "upload");
         }
     
         // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
@@ -490,10 +489,11 @@ class SubmissionController extends AbstractController {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
-        if ($is_instructor_upload)
-            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$user_id}";
-        else
+        if ($user_id == $original_user_id)
             $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
+        else
+            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$user_id}";
+            
 
         return $this->uploadResult("Successfully uploaded files");
     }
@@ -564,6 +564,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
 
+        $original_user_id = $this->core->getUser()->getId();
         $user_id = $this->core->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
@@ -583,7 +584,8 @@ class SubmissionController extends AbstractController {
         }
         $json["active_version"] = $new_version;
         $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s");
-        $json["history"][] = array("version" => $new_version, "time" => $current_time);
+
+        $json["history"][] = array("version" => $new_version, "time" => $current_time, "who" => $original_user_id, "type" => "select");
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $msg = "Could not write to settings file.";
