@@ -14,7 +14,6 @@ class NavigationView extends AbstractView {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
-        $columnSpan = 10;
         $return = "";
 
 

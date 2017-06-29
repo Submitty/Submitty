@@ -1165,11 +1165,6 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
         $this->database->query("SELECT g_id, g_title FROM gradeable WHERE g_gradeable_type=0 ORDER BY g_grade_released_date DESC");
         return $this->database->rows();
     }
-
-    public function getAllGradeablesIdsAndTitles() {
-        $this->database->query("SELECT g_id, g_title FROM gradeable ORDER BY g_title ASC");
-        return $this->database->rows();
-    }
       
     public function newTeam($g_id, $user_id) {
         $this->database->query("SELECT * FROM gradeable_teams ORDER BY team_id");
