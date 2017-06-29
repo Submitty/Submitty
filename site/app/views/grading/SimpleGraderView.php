@@ -204,6 +204,8 @@ HTML;
             if($action == 'lab'){
                 $col = 0;
                 foreach ($gradeable_row->getComponents() as $component) {
+                    $grader = ($component->getGrader() !== null) ? "data-grader='{$component->getGrader()->getId()}'" : '';
+                    $time = ($component->getGradeTime() !== null) ? "data-grade-time='{$component->getGradeTime()->format('Y-m-d H:i:s')}'" : '';
                     if ($component->getIsText()) {
                         $return .= <<<HTML
                 <td>{$component->getComment()}</td>
@@ -219,8 +221,10 @@ HTML;
                         else {
                             $background_color = "";
                         }
+
+
                         $return .= <<<HTML
-                <td class="cell-grade" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-score="{$component->getScore()}" style="{$background_color}"></td>
+                <td class="cell-grade" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-score="{$component->getScore()}" {$grader} {$time} style="{$background_color}"></td>
 HTML;
                     }
                     $gradeable_row++;
@@ -232,16 +236,18 @@ HTML;
                 $total = 0;
                 if($num_numeric !== 0){
                     foreach ($gradeable_row->getComponents() as $component) {
+                        $grader = ($component->getGrader() !== null) ? "data-grader='{$component->getGrader()->getId()}'" : '';
+                        $time = ($component->getGradeTime() !== null) ? "data-grade-time='{$component->getGradeTime()->format('Y-m-d H:i:s')}'" : '';
                         if (!$component->getIsText()) {
                             $total+=$component->getScore();
-                            if($component->getScore() == 0){
+                            if ($component->getScore() == 0){
                                 $return .= <<<HTML
-                <td class="option-small-input"><input class="option-small-box" style="text-align: center; color: #bbbbbb;" type="text" id="cell-{$row}-{$col}" value="{$component->getScore()}" data-id="{$component->getId()}" data-num="true"/></td>
+                <td class="option-small-input"><input class="option-small-box" style="text-align: center; color: #bbbbbb;" type="text" id="cell-{$row}-{$col}" value="{$component->getScore()}" data-id="{$component->getId()}" {$grader} {$time} data-num="true"/></td>
 HTML;
                             }
-                            else{
+                            else {
                                 $return .= <<<HTML
-                <td class="option-small-input"><input class="option-small-box" style="text-align: center" type="text" id="cell-{$row}-{$col}" value="{$component->getScore()}" data-id="{$component->getId()}" data-num="true"/></td>
+                <td class="option-small-input"><input class="option-small-box" style="text-align: center" type="text" id="cell-{$row}-{$col}" value="{$component->getScore()}" data-id="{$component->getId()}" {$grader} {$time} data-num="true"/></td>
 HTML;
                             }
                             $gradeable_row++;
@@ -249,7 +255,7 @@ HTML;
                         }
                     }
                     $return .= <<<HTML
-                <td class="option-small-output" value="toobadthiswontprint"><input class="option-small-box" style="text-align: center" type="text" border="none" value=$total data-total="true" readonly></td>
+                <td class="option-small-output"><input class="option-small-box" style="text-align: center" type="text" border="none" value=$total data-total="true" readonly></td>
 HTML;
                 }
 
