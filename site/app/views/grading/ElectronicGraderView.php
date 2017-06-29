@@ -655,7 +655,6 @@ HTML;
             if ($question->getMaxValue() == 0) {
                 continue;
             }
-            // FIXME add autograding extra credit 
             else if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
             }
@@ -727,51 +726,6 @@ HTML;
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
                             <textarea name="comment-{$question->getOrder()}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$question->getComment()}</textarea>
-HTML;
-
-            $comment = htmlspecialchars($question->getComment());
-            if ($comment != "") {
-                $return .= <<<HTML
-                            <div>
-                                <a class="btn" name="comment-{$question->getOrder()}-up" style="border-radius: 0px; padding:0px;" onclick="updateCommentBox_{$question->getOrder()}(-1);" disabled="true">
-                                    <i class="icon-chevron-up" style="height:20px; width:13px;"></i>
-                                </a><br/>
-                                <a class="btn" name="comment-{$question->getOrder()}-down" style="border-radius: 0px; padding:0px;" onclick="updateCommentBox_{$question->getOrder()}(1);">
-                                    <i class="icon-chevron-down" style="height:20px; width:13px;"></i>
-                                </a>
-                            </div>
-                            <script type="text/javascript">
-                                function updateCommentBox_{$question->getOrder()}(delta) {
-                                    var pastComments = [];
-                                    pastComments[0] = "{$comment}";
-
-                                    var new_position = parseInt($('[name=comment-{$question->getOrder()}]').attr("comment-position"));
-                                    new_position += delta;
-
-                                    if(new_position >= pastComments.length - 1) {
-                                        new_position = pastComments.length - 1;
-                                        $('a[name=comment-{$question->getOrder()}-down]').attr("disabled", "true");
-                                    }
-                                    else {
-                                        $('a[name=comment-{$question->getOrder()}-down]').removeAttr("disabled");
-                                    }
-
-                                    if(new_position <= 0) {
-                                        new_position = 0;
-                                        $('a[name=comment-{$question->getOrder()}-up]').attr("disabled", "true");
-                                    }
-                                    else {
-                                        $('a[name=comment-{$question->getOrder()}-up]').removeAttr("disabled");
-                                    }
-
-                                    var textarea = $('textarea[name=comment-{$question->getOrder()}]');
-                                    textarea.attr("comment-position", new_position);
-                                    textarea.html(pastComments[new_position]);
-                                }
-                            </script>
-HTML;
-            }
-            $return .= <<<HTML
                         </div>
                     </td>
                 </tr>
