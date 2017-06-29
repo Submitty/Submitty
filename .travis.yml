@@ -64,7 +64,7 @@ before_install:
   - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 
 install:
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
+  - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then sudo apt-get -y install libapache2-mod-php5.6 php5.6-pgsql php5.6-curl; a2enmod php5.6; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo apt-get -y install libapache2-mod-php7.0 php7.0-pgsql php7.0-curl; a2enmod php7.0; fi
   - wget http://chromedriver.storage.googleapis.com/2.24/chromedriver_linux64.zip
@@ -130,12 +130,13 @@ script:
   - if [ ${INTEGRATION_SUITE} = false ]; then vendor/bin/phpunit --configuration tests/phpunit.xml; fi
   - if [ ${INTEGRATION_SUITE} = false ]; then TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"; fi
   - if [ ${INTEGRATION_SUITE} = true ]; then sudo python /usr/local/submitty/test_suite/integrationTests/run.py; fi
+  - sudo chown -R ${USER}:${USER} ${HOME}/.stack
 
 # Add more linters to the build process here
 after_script:
   # Eventually this should be moved into the "script" once we've gotten the build to a point where all contained
   # python files will actually pass (which a lot right now will not)
-  - pylint_runner -v ${TRAVIS_BUILD_DIR}
+  - pylint_runner3 -v ${TRAVIS_BUILD_DIR}
   # - sudo ./.setup/travis/print_debug.sh
   # if this fails, it only prints, travis does not fail
   - sudo /usr/local/submitty/bin/check_everything.py

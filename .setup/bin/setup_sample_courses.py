@@ -40,12 +40,8 @@ SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
-SAMPLE_ASSIGNMENT_CONFIG = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_assignment_config")
 MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
-SAMPLE_SUBMISSIONS = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_submissions")
-
-TUTORIAL_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial")
-TUTORIAL_DIR = os.path.join(TUTORIAL_REPOSITORY, "examples")
+TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial", "examples")
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
@@ -774,16 +770,17 @@ class Course(object):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
-                                                             gd_grader_id=self.instructor.id,
                                                              gd_overall_comment="lorem ipsum lodar",
                                                              gd_status=status, gd_late_days_used=0,
-                                                             gd_active_version=active)
+                                                             gd_active_version=active, gd_grader_id=self.instructor.id)
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         for component in gradeable.components:
                             score = 0 if status == 0 else (random.randint(0, component.max_value * 2) / 2)
+                            grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S")
                             conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
-                                         gcd_score=score, gcd_component_comment="lorem ipsum")
+                                         gcd_score=score, gcd_component_comment="lorem ipsum",
+                                         gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time)
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
@@ -849,27 +846,21 @@ class Gradeable(object):
             if 'config_path' in gradeable:
                 self.config_path = gradeable['config_path']
             else:
-                sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, self.gradeable_config)
                 examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "config")
-                if os.path.isdir(sample_path):
-                    self.config_path = sample_path
-                elif os.path.isdir(examples_path):
+                if os.path.isdir(examples_path):
                     self.config_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.config_path = tutorial_path
                 else:
                     self.config_path = None
 
-            sample_path = os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config)
             examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "submissions")
             tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
             if 'sample_path' in gradeable:
                 self.sample_path = gradeable['sample_path']
             else:
-                if os.path.isdir(sample_path):
-                    self.sample_path = sample_path
-                elif os.path.isdir(examples_path):
+                if os.path.isdir(examples_path):
                     self.sample_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.sample_path = tutorial_path
@@ -911,12 +902,9 @@ class Gradeable(object):
             if 'eg_precision' in gradeable:
                 self.precision = float(gradeable['eg_precision'])
             if self.config_path is None:
-                sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, self.id)
                 examples_path = os.path.join(MORE_EXAMPLES_DIR, self.id, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
-                if os.path.isdir(sample_path):
-                    self.config_path = sample_path
-                elif os.path.isdir(examples_path):
+                if os.path.isdir(examples_path):
                     self.config_path = examples_path
                 elif os.path.isdir(tutorial_path):
                     self.config_path = tutorial_path

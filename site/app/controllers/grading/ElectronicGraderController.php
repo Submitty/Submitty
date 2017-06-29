@@ -170,7 +170,7 @@ class ElectronicGraderController extends AbstractController {
 
         //update the number of late days for the student the first time grades are submitted
         if ($status == 1 && !$regrade){
-            $this->core->getQueries()->updateLateDays($who_id, $gradeable_id, $late_charged);
+            $this->core->getQueries()->updateLateDaysHW($who_id, $gradeable_id, $late_charged);
         }
 
         $hwReport = new HWReport($this->core);

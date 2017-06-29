@@ -2,10 +2,15 @@
 
 namespace unitTests\app\models;
 
+use app\libraries\Core;
 use app\models\GradeableVersion;
 
 class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
-
+    private $core;
+    
+    public function setUp() {
+        $this->core = $this->createMock(Core::class);
+    }
     public function testVersion() {
         $details = array(
             'g_id' => 'test_gradeable',
@@ -20,7 +25,7 @@ class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
             'active_version' => null
         );
         $due_date = new \DateTime("2017-05-08 23:59:59");
-        $version = new GradeableVersion($details, $due_date);
+        $version = new GradeableVersion($this->core, $details, $due_date);
         $this->assertEquals(1, $version->getVersion());
         $this->assertEquals(2, $version->getNonHiddenNonExtraCredit());
         $this->assertEquals(4, $version->getNonHiddenExtraCredit());
@@ -48,7 +53,8 @@ class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
             'active_version' => null
         );
         $due_date = new \DateTime("2017-05-08 23:59:59");
-        $version = new GradeableVersion($details, $due_date);
+
+        $version = new GradeableVersion($this->core, $details, $due_date);
         $this->assertEquals(1, $version->getDaysLate());
     }
 
@@ -66,7 +72,8 @@ class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
             'active_version' => null
         );
         $due_date = new \DateTime("2017-05-08 23:59:59");
-        $version = new GradeableVersion($details, $due_date);
+
+        $version = new GradeableVersion($this->core, $details, $due_date);
         $this->assertEquals(0, $version->getDaysLate());
 
         $details = array(
@@ -82,7 +89,8 @@ class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
             'active_version' => null
         );
         $due_date = new \DateTime("2017-05-08 23:59:59");
-        $version = new GradeableVersion($details, $due_date);
+
+        $version = new GradeableVersion($this->core, $details, $due_date);
         $this->assertEquals(1, $version->getDaysLate());
     }
 
@@ -100,7 +108,8 @@ class GradeableVersionTester extends \PHPUnit_Framework_TestCase {
             'active_version' => null
         );
         $due_date = new \DateTime("2017-05-08 23:59:59");
-        $version = new GradeableVersion($details, $due_date);
+
+        $version = new GradeableVersion($this->core, $details, $due_date);
         $this->assertEquals(0, $version->getDaysLate());
     }
 }

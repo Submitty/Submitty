@@ -96,10 +96,13 @@ class GradeSummary extends AbstractModel {
     private function addLateDays(&$this_g, $ldu, $gradeable) {
         $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
 
-        $this_g['status'] = $gradeable->getStatus();
-
-        if ($this_g['status'] == 0 || $this_g['status'] == 3) {
-            $this_g["score"] = 0;
+        if(!is_null($gradeable->getStatus())) {
+            if ($gradeable->getStatus() == 0 || $gradeable->getStatus() == 3) {
+                $this_g["score"] = 0;
+            }
+        }
+        if(!is_null($late_days['status'])){
+            $this_g['status'] = $late_days['status'];
         }
 
         if (array_key_exists('late_days_charged', $late_days) && $late_days['late_days_used'] > 0) {
@@ -142,14 +145,14 @@ class GradeSummary extends AbstractModel {
         $ids = array_map(function($user) {return $user->getId();}, $users);
         $summary_data = $this->core->getQueries()->getGradeables(null, $ids);
         $ldu = new LateDaysCalculation($this->core);
-        
+
         $this->generateSummariesFromQueryResults($summary_data, $ldu);
     }
     
     public function generateAllSummariesForStudent($student_id) {
         $summary_data = $this->core->getQueries()->getGradeables(null, $student_id);
         $ldu = new LateDaysCalculation($this->core);
-        
+
         $this->generateSummariesFromQueryResults($summary_data, $ldu);
     }
 }
