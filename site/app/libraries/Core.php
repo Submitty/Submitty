@@ -84,7 +84,7 @@ class Core {
      * @throws \Exception
      */
     public function loadConfig($semester, $course, $master_ini_path) {
-        $this->config = new Config($semester, $course, $master_ini_path);
+        $this->config = new Config($this, $semester, $course, $master_ini_path);
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
@@ -118,21 +118,18 @@ class Core {
         }
     }
 
-    public function loadModel() {
-        if (func_num_args() == 0) {
-            throw new \InvalidArgumentException("loadModel requires at least one argument (Model)");
-        }
-        $args = func_get_args();
-        $model = $args[0];
-        foreach (AutoLoader::getClasses() as $class => $path) {
-            if (Utils::startsWith($class, "app\\models\\") && Utils::endsWith($class, $model)) {
-                // TODO: Once we drop PHP 5.5, we can drop this reflection and just use vargs
-                $reflect = new \ReflectionClass($class);
-                return $reflect->newInstanceArgs(array_slice($args, 1));
-            }
-        }
-        $error = "Could not find the model to load. Check for misspellings and that it was autoloaded";
-        throw new \InvalidArgumentException($error);
+    /**
+     * Utility function that helps us load our models, especially when called from within a controller as then we
+     * can mock this function to return a mock object instead of having to worry about dealing with setting up
+     * the whole object.
+     *
+     * @param string $model
+     * @param array ...$args
+     *
+     * @return object an instantiated instance of the given $model class using the AutoLoader.
+     */
+    public function loadModel($model, ...$args) {
+        return new $model($this, ...$args);
     }
 
     /**

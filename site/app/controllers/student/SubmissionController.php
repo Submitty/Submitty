@@ -25,7 +25,8 @@ class SubmissionController extends AbstractController {
 
     public function __construct(Core $core) {
         parent::__construct($core);
-        $this->gradeables_list = $this->core->loadModel("GradeableList", $this->core);
+        $this->gradeables_list = $this->core->loadModel(GradeableList::class);
+
     }
 
     public function run() {

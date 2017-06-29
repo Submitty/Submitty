@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\libraries\Core;
 use app\libraries\DateUtils;
 
 /**
@@ -39,11 +40,13 @@ class GradeableVersion extends AbstractModel {
 
     /**
      * GradeableVersion constructor.
+     *
+     * @param Core $core
      * @param $details
      * @param \DateTime $due_date
      */
-    public function __construct($details, \DateTime $due_date) {
-        parent::__construct();
+    public function __construct(Core $core, $details, \DateTime $due_date) {
+        parent::__construct($core);
 
         $this->g_id = $details['g_id'];
         $this->user_id = $details['user_id'];
