@@ -523,12 +523,12 @@ HTML;
 
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
-                    foreach ($gradeable->getTestcases() as $testcase) {
+                    foreach ($gradeable->getTestcases() as $testcase) { 
                         if (!$testcase->viewTestcase()) {
                           continue;
                         }
                         $div_click = "";
-                        if ($testcase->hasDetails()) {
+                        if ($testcase->hasDetails()) { 
                             $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
                         }
                         $return .= <<<HTML
@@ -625,9 +625,10 @@ HTML;
                                 foreach ($testcase->getAutochecks() as $autocheck) {
                                     $description = $autocheck->getDescription();
                                     $diff_viewer = $autocheck->getDiffViewer();
-
                                     $return .= <<<HTML
-                <div class="box-block">
+                <div class="box-block"> 
+                <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+                <span onclick='openUrl("{$this->core->buildUrl(array('component' => 'student', 'page' => 'submission', 'action' => 'pop_up', 'autocheck_index' => $autocheck_cnt))}")'> <i class="fa fa-window-maximize" style="visibility: visible"></i> </span>
 HTML;
 
                                     $title = "";
@@ -688,7 +689,7 @@ HTML;
                                     $return .= <<<HTML
                 </div>
 HTML;
-                                    if (++$autocheck_cnt < $autocheck_len) {
+                                    if (++$autocheck_cnt < $autocheck_len) { 
                                         $return .= <<<HTML
                 <div class="clear"></div>
 HTML;
@@ -734,6 +735,13 @@ HTML;
 HTML;
         }
 
+        return $return;
+    }
+
+    public function showPopUp($gradeable) {
+        $return = <<<HTML
+            <p>Banana</p>
+HTML;
         return $return;
     }
 }

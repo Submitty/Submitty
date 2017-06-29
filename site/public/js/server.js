@@ -521,3 +521,10 @@ function setupNumericTextCells() {
         );
     });
 }
+
+function openPopUp(test) {
+    my_window = window.open("", "mywindow1", "status=1,width=350,height=150");
+    //my_window.document.write('somehow add JS'); 
+    my_window.document.write(test); 
+    my_window.document.write('J_\alpha(x) = \sum_{m=0}^\infty \frac{(-1)^m}{m! \, \Gamma(m + \alpha + 1)}{\left({\frac{x}{2}}\right)}^{2 m + \alpha} ');
+}
