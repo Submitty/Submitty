@@ -98,8 +98,8 @@ class User extends AbstractModel {
             $this->group = 4;
         }
 
-        $this->registration_section = isset($details['registration_section']) ? isset($details['registration_section']) : null;
-        $this->rotating_section = isset($details['rotating_section']) ? $details['rotating_section'] : null;
+        $this->registration_section = isset($details['registration_section']) ? intval($details['registration_section']) : null;
+        $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
             $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
