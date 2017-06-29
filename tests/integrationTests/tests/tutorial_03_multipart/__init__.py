@@ -21,18 +21,21 @@ def initialize(test):
         os.mkdir(os.path.join(test.testcase_path, "data"))
     except OSError:
         pass
-
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
         os.path.join(test.testcase_path, "assignment_config")])
-    for i in [str(n) for n in range(1, 5)]:
-        try:
-            os.mkdir(os.path.join(test.testcase_path, "data", "part" + i))
-        except OSError:
-            pass
-        #subprocess.call(["cp",
-        #    os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "p" + i + "_out.txt"),
-        #    os.path.join(test.testcase_path, "data")])
+    try:
+        os.mkdir(os.path.join(test.testcase_path, "data", "part1"))
+    except OSError:
+        pass
+    try:
+        os.mkdir(os.path.join(test.testcase_path, "data", "part2"))
+    except OSError:
+        pass
+    try:
+        os.mkdir(os.path.join(test.testcase_path, "data", "part3"))
+    except OSError:
+        pass
 
 
 def cleanup(test):
@@ -40,29 +43,27 @@ def cleanup(test):
             glob.glob(os.path.join(test.testcase_path, "data", "part*", "*")))
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+    subprocess.call(["cp"] +
+                     glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output","*")) +
+                     [os.path.join(test.testcase_path, "data")])
 
 
-'''
 @testcase
-def correct(test):
+def solution(test):
     cleanup(test)
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p1_sol.py"),
+                     os.path.join(SAMPLE_SUBMISSIONS, "part1.py"),
                      os.path.join(test.testcase_path, "data", "part1")])
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p2_sol.txt"),
+                     os.path.join(SAMPLE_SUBMISSIONS, "part2.py"),
                      os.path.join(test.testcase_path, "data", "part2")])
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p3_sol.py"),
+                     os.path.join(SAMPLE_SUBMISSIONS, "part3.py"),
                      os.path.join(test.testcase_path, "data", "part3")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p4_sol.py"),
-                     os.path.join(test.testcase_path, "data", "part4")])
-    test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_correct", "-b")
-    test.json_diff("results.json", "results.json_correct")
+    test.diff("results_grade.txt", "results_grade.txt_solution", "-b")
+    test.json_diff("results.json", "results.json_solution")
 
 
 
@@ -70,18 +71,14 @@ def correct(test):
 def buggy(test):
     cleanup(test)
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p1_bug.py"),
+                     os.path.join(SAMPLE_SUBMISSIONS, "part1_syntax_error1.py"),
                      os.path.join(test.testcase_path, "data", "part1")])
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p2_bug.txt"),
+                     os.path.join(SAMPLE_SUBMISSIONS, "part2_syntax_error1.py"),
                      os.path.join(test.testcase_path, "data", "part2")])
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p3_bug.py"),
+                     os.path.join(SAMPLE_SUBMISSIONS, "part3_syntax_error1.py"),
                      os.path.join(test.testcase_path, "data", "part3")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p4_bug.py"),
-                     os.path.join(test.testcase_path, "data", "part4")])
-    test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
     test.diff("results_grade.txt", "results_grade.txt_buggy", "-b")
@@ -91,24 +88,9 @@ def buggy(test):
 @testcase
 def buggy2(test):
     cleanup(test)
-
-    # FIXME: INFINITE LOOP(?) WHEN THIS DOES NOT EXIST
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p1_bug.py"),
+                     os.path.join(SAMPLE_SUBMISSIONS, "part1_syntax_error2.py"),
                      os.path.join(test.testcase_path, "data", "part1")])
-
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p2_bug2.txt"),
-                     os.path.join(test.testcase_path, "data", "part2")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p3_bug2.py"),
-                     os.path.join(test.testcase_path, "data", "part3")])
-
-    # FIXME: INFINITE LOOP(?) WHEN THIS DOES NOT EXIST
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p4_bug.py"),
-                     os.path.join(test.testcase_path, "data", "part4")])
-    test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
     test.diff("results_grade.txt", "results_grade.txt_buggy2", "-b")
@@ -116,28 +98,19 @@ def buggy2(test):
 
 
 @testcase
-def buggy3(test):
+def wrong(test):
     cleanup(test)
-
-    # FIXME: INFINITE LOOP(?) WHEN THIS DOES NOT EXIST
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p1_bug.py"),
+                     os.path.join(SAMPLE_SUBMISSIONS, "part1_wrong_output.py"),
                      os.path.join(test.testcase_path, "data", "part1")])
-
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p2_bug3.txt"),
+                     os.path.join(SAMPLE_SUBMISSIONS, "part2_wrong_output.py"),
                      os.path.join(test.testcase_path, "data", "part2")])
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p3_bug3.py"),
+                     os.path.join(SAMPLE_SUBMISSIONS, "part3_wrong_output.py"),
                      os.path.join(test.testcase_path, "data", "part3")])
-
-    # FIXME: INFINITE LOOP(?) WHEN THIS DOES NOT EXIST
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "p4_bug.py"),
-                     os.path.join(test.testcase_path, "data", "part4")])
-    test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_buggy3", "-b")
-    test.json_diff("results.json", "results.json_buggy3")
-'''
+    test.diff("results_grade.txt", "results_grade.txt_wrong", "-b")
+    test.json_diff("results.json", "results.json_wrong")
+    
