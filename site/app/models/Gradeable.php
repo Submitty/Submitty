@@ -825,7 +825,6 @@ class Gradeable extends AbstractModel {
     }
   
     public function saveData() {
-        $this->core->getQueries()->updateGradeableData($this);
         $this->core->getDatabase()->beginTransaction();
         if ($this->gd_id === null) {
             $this->gd_id = $this->core->getQueries()->insertGradeableData($this);
