@@ -139,7 +139,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
         
-        $grader_id = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getGraderId();
+        $grader_id = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getGrader()->getId();
         $regrade = $gradeable->beenTAgraded();
         if (!$regrade) {
             $gd_id = $this->core->getQueries()->createGradeableData($gradeable_id,$who_id,$grader_id);
@@ -158,7 +158,7 @@ class ElectronicGraderController extends AbstractController {
             $grade = floatval($_POST["grade-{$comp->getOrder()}"]);
             $comment = isset($_POST["comment-{$comp->getOrder()}"]) ? $_POST["comment-{$comp->getOrder()}"] : '';
             $gc_id = $comp->getId();
-            $this->core->getQueries()->updateComponentData($gd_id, $gc_id, $grade, $comment);
+            $this->core->getQueries()->updateComponentData($gd_id, $gc_id, $grader_id, $grade, $comment, $now);
         }
 
         //update the gradeable data

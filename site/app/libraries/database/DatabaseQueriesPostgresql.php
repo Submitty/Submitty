@@ -264,6 +264,7 @@ SELECT";
         if ($user_ids !== null) {
             $query .= ",
   gd.gd_id,
+  gd.gd_grader_id,
   gd.gd_overall_comment,
   gd.gd_status,
   gd.gd_user_viewed_date,
@@ -1234,9 +1235,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
         return $this->database->getLastInsertId('gradeable_data_gd_id_seq');
     }
 
-    public function updateComponentData($gd_id, $gc_id, $grade, $comment) {
+    public function updateComponentData($gd_id, $gc_id, $grader_id, $grade, $comment, $now) {
         $this->database->query("DELETE FROM gradeable_component_data WHERE gd_id=? AND gc_id=?", array($gd_id, $gc_id));
-        $this->database->query("INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment) VALUES(?,?,?,?)", array($gc_id, $gd_id, $grade, $comment));
+        $this->database->query("INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grade_time) VALUES(?,?,?,?,?,?)", array($gc_id, $gd_id, $grade, $comment, $grader_id, $now->format("Y-m-d H:i:s")));
     }
 
     public function updateGradeableDataHW($grader_id, $active_version, $comment, $status, $late_charged, $gd_id) {

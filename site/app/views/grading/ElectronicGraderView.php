@@ -798,7 +798,7 @@ HTML;
         if ($gradeable->beenTAgraded()) {
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: {$gradeable->getGraderId()}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
+            Graded By: {$gradeable->getGrader()->getId()}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
         </div>
 HTML;
         }

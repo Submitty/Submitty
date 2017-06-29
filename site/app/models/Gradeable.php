@@ -238,6 +238,7 @@ class Gradeable extends AbstractModel {
         $this->user = ($user === null) ? $this->core->getUser() : $user;
         if (isset($details['gd_id'])) {
             $this->gd_id = $details['gd_id'];
+            $this->grader = $this->core->getQueries()->getUserById($details['gd_grader_id']);
             $this->overall_comment = $details['gd_overall_comment'];
             $this->status = $details['gd_status'];
             $this->graded_version = $details['gd_active_version'];
