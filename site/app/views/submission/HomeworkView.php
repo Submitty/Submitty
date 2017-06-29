@@ -713,6 +713,33 @@ HTML;
 HTML;
                                     }
 
+                                    $myDifferenceImage = $diff_viewer->getDifferenceFilename();
+                                    if($myDifferenceImage != "")
+                                    {
+                                        $return .= <<<HTML
+                                    <div class='diff-element'>
+                                    <h4>Difference {$description}</h4>
+HTML;
+                                    for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
+                                        $return .= <<<HTML
+                                    <br />
+HTML;
+                                        }
+                                        // borrowed from file-display.php
+                                        $content_type = FileUtils::getContentType($myDifferenceImage);
+                                        if (substr($content_type, 0, 5) === "image") {
+                                           // Read image path, convert to base64 encoding
+                                           $differenceImageData = base64_encode(file_get_contents($myDifferenceImage));
+                                           // Format the image SRC:  data:{mime};base64,{data};
+                                           $differenceImagesrc = 'data: '.mime_content_type($myDifferenceImage).';charset=utf-8;base64,'.$differenceImageData;
+                                           // insert the sample image data
+                                           $return .= '<img src="'.$differenceImagesrc.'">';
+                                        }
+                                    $return .= <<<HTML
+                                    </div>
+HTML;
+                                    }
+
                                     $return .= <<<HTML
                 </div>
 HTML;

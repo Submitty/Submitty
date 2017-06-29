@@ -67,11 +67,14 @@ class GradeableAutocheck extends AbstractModel {
             $_SESSION['messages']['error'][] = "Expected file not found.";
         }
 
-    
         if(isset($details["difference_file"]) && file_exists($result_path . "/" . $details["difference_file"])) {
             $difference_file = $result_path . "/" . $details["difference_file"];
         }
-        
-        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $this->index);
+
+        var_dump($details);
+        if(isset($details["image_difference"]) && file_exists($result_path . "/" . $details["image_difference"])) {
+            $image_difference = $result_path . "/" . $details["image_difference"];
+        }        
+        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $image_difference, $this->index);
     }
 }

@@ -125,8 +125,8 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert(my_category);
   }
 
-  
-  // ---------------------------------------------------------------
+  std::cout << "My program is " << my_program << std::endl;
+  // --------------------------------------------------------------
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/bin/cp") {
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
@@ -158,6 +158,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // ---------------------------------------------------------------
   // PYTHON 
   else if (my_program.find("/usr/bin/python") != std::string::npos) {
+    categories = restricted_categories; //TODO: fix
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("FILE_MANAGEMENT_RARE");

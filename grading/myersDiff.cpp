@@ -244,17 +244,23 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j) {
   float difference = values[1];
   float similarity = 1 - difference;
 
-  
+  std::string diff_file_name = "differences.png";
+  diff_file_name = tc.getPrefix() + "_" + diff_file_name;
+  diff_file_name = replace_slash_with_double_underscore(diff_file_name);
+
+  std::cout << "About to compose." << std::endl;
+  std::string command2 = "compare " + actual_file + " " + expected_file + " -compose Src " + diff_file_name;
+  system(command2.c_str());
+  std::cout << "COMPOSED" <<std::endl;
 
   if(difference >= acceptable_threshold){
-    return new TestResults(0.0, {"ERROR: Your image does not match the professor's."});
+    return new TestResults(0.0, {"ERROR: Your image does not match the instructor's."});
   }
    else{
          return new TestResults(1.0, {""});
   }
 
-  // std::string command2 = "compare " + actual_file + " " + expected_file + " -compose Src differences.png";
-  // system(command2.c_str());
+
   //   return new TestResults(0.0, {"ERROR: File comparison failed."});
 
 }
