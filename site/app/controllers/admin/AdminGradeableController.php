@@ -26,6 +26,9 @@ class AdminGradeableController extends AbstractController {
             case 'upload_new_template':
                 $this->uploadNewTemplate();
                 break;
+            case 'quick_link':
+                $this->quickLink();
+                break;
             default:
                 $this->viewPage();
                 break;
@@ -210,10 +213,25 @@ class AdminGradeableController extends AbstractController {
         $this->returnToNav();
     }
 
+    private function quickLink() {
+        $g_id = $_REQUEST['id'];
+        $action = $_REQUEST['quick_link_action'];
+        $gradeable = $this->core->getQueries()->getGradeable($g_id);
+        if ($action === "release_grades_now") { //what happens on the quick link depends on the action
+            $gradeable->setGradeReleasedDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+        } else if ($action === "open_ta_now") {
+            $gradeable->setTaViewDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+        } else if ($action === "open_grading_now") {
+            $gradeable->setGradeStartDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+        } else if ($action === "open_students_now") {
+            $gradeable->setOpenDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+        } 
+        $gradeable->updateGradeable();
+        $this->returnToNav();
+    }
     //return to the navigation page
     private function returnToNav() {
         $url = $this->core->buildUrl(array());
         header('Location: '. $url);
     }
-
 }
