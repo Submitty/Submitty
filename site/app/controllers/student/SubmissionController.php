@@ -178,7 +178,7 @@ class SubmissionController extends AbstractController {
         }
 
         if (!isset($_POST['user_id'])) {
-            return $this->uploadResult("Invalid user id '{$_REQUEST['user_id']}'", false);
+            return $this->uploadResult("Invalid user id.", false);
         }
 
         $original_user_id = $this->core->getUser()->getId();
