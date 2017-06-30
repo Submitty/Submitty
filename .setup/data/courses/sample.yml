@@ -1,9 +1,10 @@
 code: sample
 instructor: instructor
-registered_students: 20
-no_registration_students: 5
-no_rotating_students: 5
-unregistered_students: 5
+registration_sections: 10
+registered_students: 80
+no_registration_students: 15
+no_rotating_students: 15
+unregistered_students: 15
 gradeables:
 - g_id: future_no_tas_homework
   g_title: Future (No TAs) Homework

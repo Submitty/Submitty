@@ -489,7 +489,7 @@ class User(object):
         if 'rotating_section' in user:
             self.rotating_section = int(user['rotating_section'])
         if 'grading_registration_section' in user:
-            self.grading_registration_section = int(user['grading_registration_section'])
+            self.grading_registration_section = user['grading_registration_section']
         if 'unix_groups' in user:
             self.unix_groups = user['unix_groups']
         if 'manual_registration' in user:
@@ -670,10 +670,15 @@ class Course(object):
                          manual_registration=user.get_detail(self.code, "manual"))
 
             if user.get_detail(self.code, "grading_registration_section") is not None:
-                conn.execute(reg_table.insert(),
-                             user_id=user.get_detail(self.code, "id"),
-                             sections_registration_id=
-                             user.get_detail(self.code, "grading_registration_section"))
+                try:
+                    grading_registration_sections = str(user.get_detail(self.code,"grading_registration_section"))
+                    grading_registration_sections = [int(x) for x in grading_registration_sections.split(",")]
+                except ValueError:
+                    grading_registration_sections = []
+                for grading_registration_section in grading_registration_sections:
+                    conn.execute(reg_table.insert(),
+                                 user_id=user.get_detail(self.code, "id"),
+                                 sections_registration_id=grading_registration_section)
 
             if user.unix_groups is None:
                 if user.get_detail(self.code, "group") <= 1:
