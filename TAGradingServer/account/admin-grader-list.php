@@ -102,7 +102,7 @@ HTML;
 			if ($output === false) {
 				terminate_on_error("Error parsing xlsx to csv.");
 			}
-
+			print_r($output);
 			$output = json_decode($output, true);
 			if ($output === null) {
 				terminate_on_error("Error parsing JSON response: " . json_last_error_msg());
