@@ -529,7 +529,7 @@ $(function() {
     setupNumericTextCells();
 });
 
-function setupNumericTextCells() { 
+function setupNumericTextCells() {
     $("input[class=option-small-box]").keydown(function(key){
         var cell=this.id.split('-');
         // right
@@ -583,7 +583,7 @@ function setupNumericTextCells() {
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
             {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
             function() {
-                $(elem).css("background-color", "#ffffff"); 
+                $(elem).css("background-color", "#ffffff");
             },
             function() {
                 $(elem).css("background-color", "#ff7777");

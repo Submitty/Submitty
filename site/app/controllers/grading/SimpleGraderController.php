@@ -21,7 +21,7 @@ class SimpleGraderController extends AbstractController  {
                 $this->save('numeric');
                 break;
             case 'upload_csv_numeric':
-                $this->csv('numeric');
+                $this->UploadCSV('numeric');
                 break;
             default:
                 break;
@@ -135,7 +135,7 @@ class SimpleGraderController extends AbstractController  {
         return $response;
     }
 
-    public function csv($action) {
+    public function UploadCSV($action) {
 
         $users = $_POST['users'];
         $g_id = $_POST['g_id'];
@@ -157,8 +157,6 @@ class SimpleGraderController extends AbstractController  {
                 if($username === $data_array[$j][0]) {
                     $temp_array = array();
                     $temp_array['username'] = $username;
-                    $num_questions = 0;
-                    $num_text = 0;
                     $index1 = 0; 
                     $index2 = 3; //3 is the starting index of the grades in the csv
                     $value_str = "value_";
@@ -171,6 +169,8 @@ class SimpleGraderController extends AbstractController  {
                         if (isset($data_array[$j][$index2])) {
                             if ($component->getIsText()){
                                 $component->setComment($data_array[$j][$index2]);
+                                $component->setGrader($this->core->getUser());
+                                $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                                 $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                 $temp_array[$status_temp_str] = "OK";
                             }
@@ -180,6 +180,8 @@ class SimpleGraderController extends AbstractController  {
                                     $temp_array[$status_temp_str] = "ERROR";
                                 } else {
                                     $component->setScore($data_array[$j][$index2]);
+                                    $component->setGrader($this->core->getUser());
+                                	$component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                                     $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                     $temp_array[$status_temp_str] = "OK";
                                 }

@@ -289,7 +289,6 @@ HTML;
                  </button>
 HTML;
 						}
-
 						else { 
 							$gradeable_open_range = <<<HTML
                  <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">
