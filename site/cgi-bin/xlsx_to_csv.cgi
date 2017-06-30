@@ -40,7 +40,7 @@ if __name__ == "__main__":
         return
 
     # XLSX to CSV conversion
-    #xlsx2csv.xlsx2csv(xlsx_file, csv_file)
+    xlsx2csv.xlsx2csv(xlsx_file, csv_file)
 
     # Validate result after conversion
     with open(csv_file, "r") as read_file:
