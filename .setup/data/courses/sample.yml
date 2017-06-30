@@ -92,7 +92,6 @@ gradeables:
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grades Released Homework
   gradeable_config: python_simple_homework
-  eg_max_random_submissions: 15
 - components:
   - gc_title: Question 1
   - gc_is_extra_credit: true

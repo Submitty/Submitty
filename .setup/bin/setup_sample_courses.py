@@ -855,8 +855,8 @@ class Gradeable(object):
             else:
                 self.id = gradeable['gradeable_config']
 
-            if 'max_random_submissions' in gradeable:
-                self.max_random_submissions = int(gradeable['max_random_submissions'])
+            if 'eg_max_random_submissions' in gradeable:
+                self.max_random_submissions = int(gradeable['eg_max_random_submissions'])
 
             if 'config_path' in gradeable:
                 self.config_path = gradeable['config_path']
