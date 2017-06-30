@@ -641,9 +641,15 @@ HTML;
                                     $return .= <<<HTML
                                 <h4>{$title}</h4>
 HTML;
+                                    //////
                                     foreach ($autocheck->getMessages() as $message) {
                                         $return .= <<<HTML
                                 <span class="red-message">{$message}</span><br />
+HTML;
+                                    }
+                                    foreach ($autocheck->getMessages2() as $message) {
+                                        $return .= <<<HTML
+                                <span class="{$message['color']}">{$message['message']}</span><br />
 HTML;
                                     }
 

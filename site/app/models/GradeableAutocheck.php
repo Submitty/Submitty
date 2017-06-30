@@ -28,6 +28,8 @@ class GradeableAutocheck extends AbstractModel {
     
     /** @var String[] Message to show underneath the description for a diff */
     protected $messages = array();
+    /** @var */
+    protected $messages2 = array();
     
     /**
      * GradeableAutocheck constructor.
@@ -47,7 +49,12 @@ class GradeableAutocheck extends AbstractModel {
         
         if (isset($details['messages'])) {
             foreach ($details['messages'] as $message) {
-                $this->messages[] = Utils::prepareHtmlString($message);
+                if (isset($message['message']) && isset($message['color']))
+                    $this->messages2[] = array(
+                        'message' => Utils::prepareHtmlString($message['message']),
+                        'color' => Utils::prepareHtmlString($message['color']));
+                else
+                    $this->messages[] = Utils::prepareHtmlString($message);
             }
         }
         
