@@ -12,16 +12,16 @@ float Tokens::grade() {
   return my_grade;
   // FIXME
   / *
-	for (unsigned int i = 0; i < tokens_found.size(); i++) {
-		if (tokens_found[i] != -1)
-			tokensfound++;
-	}
-	if (partial)
-		return (float) tokensfound / (float) num_tokens;
-	else if (tokensfound == num_tokens || (!harsh && tokensfound != 0)) {
-		return 1;
-	}
-	return 0;
+  for (unsigned int i = 0; i < tokens_found.size(); i++) {
+    if (tokens_found[i] != -1)
+      tokensfound++;
+  }
+  if (partial)
+    return (float) tokensfound / (float) num_tokens;
+  else if (tokensfound == num_tokens || (!harsh && tokensfound != 0)) {
+    return 1;
+  }
+  return 0;
   * /
 }
 */
