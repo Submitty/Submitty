@@ -159,7 +159,7 @@ HTML;
             if($current_version_number === $gradeable->getHighestVersion()
                 && $current_version_number > 0) {
                 $return .= <<<HTML
-    <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Files</button>
+    <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
             }
 
