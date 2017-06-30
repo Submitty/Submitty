@@ -164,29 +164,35 @@ ALTER TABLE ONLY sessions
 --
 
 --
--- NEW Code by PDB
+-- NEW Code by pbailie
 --
 
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 
-CREATE OR REPLACE FUNCTION sync_user()
-	RETURNS trigger AS
-$func$
+CREATE OR REPLACE FUNCTION new_fdw(varchar) RETURNS void AS
+-- IN: expected to be NEW.user_id from trigger function.
+-- PURPOSE: Setup foreign data wrapper to sync data to users table in course DB.
+$$
 DECLARE
+	sync_user_id ALIAS FOR $1; -- Expected to be NEW.user_id from trigger
 	sync_semester text;
 	sync_course text;
 	sync_db_conn text;
 BEGIN
+
+	-- There may be a left over fdw server from the last sync.  If so, drop.
+ 	DROP SERVER IF EXISTS data_sync CASCADE;
+
 	-- First, determine which course DB the student data needs to be synced with.
 	-- Because DB can change student to student, wrapper connection needs to be dynamically built.
 	SELECT
-		courses_users.semester,
-		courses_users.course
+		semester,
+		course
 	INTO
 		sync_semester,
 		sync_course
 	FROM courses_users
-	WHERE courses_users.user_id = NEW.user_id;
+	WHERE courses_users.user_id = sync_user_id;
 
 	sync_db_conn := format(
 		'CREATE SERVER data_sync FOREIGN DATA WRAPPER postgres_fdw OPTIONS (dbname ''submitty_%s_%s'')',
@@ -205,6 +211,16 @@ BEGIN
 		user_email character varying NOT NULL,
 		user_group integer NOT NULL
 	) SERVER data_sync OPTIONS (table_name 'users');
+
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION sync_courses_user() RETURNS TRIGGER AS
+-- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
+-- table courses_user.
+$$
+BEGIN
+	PERFORM new_fdw(NEW.user_id);
 
 	IF (TG_OP = 'INSERT') THEN
 		-- FULL data sync on INSERT of a new record.
@@ -230,16 +246,26 @@ BEGIN
 
 	END IF;
 
-	-- We're done, drop server to avoid conflicts.
- 	DROP SERVER data_sync CASCADE;
+	-- All done.
+	RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
+-- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
+-- table users.  NOTE: INSERT should not trigger this function as function
+-- sync_courses_users will also sync users -- but only on INSERT.
+$$
+BEGIN
+	PERFORM new_fdw(NEW.user_id);
+	-- TO DO: Write Update SQL
 
 	-- All done.
 	RETURN NULL;
 END;
-$func$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- Foreign Key Constraint *REQUIRES* insert trigger to be assigned to course_users.
--- Otherwise, we can't determine what course DB to sync with.
-CREATE TRIGGER user_sync_insert AFTER INSERT ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_user();
-
-CREATE TRIGGER user_sync_update AFTER UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE sync_user();
+-- Updates can happen in either users and/or courses_users.
+CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_courses_user();
+CREATE TRIGGER user_sync_users AFTER UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE sync_user();
