@@ -462,7 +462,15 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
+                    // var keep_check = false;
+                    // if ($("#radio_student").is(":checked"));
+                    //      keep_check = true;
                     window.location.href = return_url;
+                    // console.log("here i am!!! ");
+                    // if (keep_check) {
+                    //     console.log("it true!!!");
+                    //     $("#radio_student").prop("checked", true);
+                    // }
                 }
                 else {
                     alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);

@@ -28,6 +28,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['svn_checkout'] = false;
         $_POST['previous_files'] = "";
         $_POST['csrf_token'] = "";
+        $_POST['user_id'] = "testUser";
 
         $config['tmp_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $config['semester'] = "test";
@@ -78,6 +79,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn("test");
         $gradeable->method('getName')->willReturn("Test Gradeable");
+        $gradeable->method('getUser')->willReturn("testUser");
 
         $gradeable->method('getHighestVersion')->willReturn(intval($highest_version));
         $gradeable->method('getNumParts')->willReturn(intval($num_parts));

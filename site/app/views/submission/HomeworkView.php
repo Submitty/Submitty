@@ -65,7 +65,7 @@ HTML;
             $return .= <<<HTML
     <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
         <div >
-            <input type='radio' id="radio_normal" name="submission_type"> 
+            <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
                 Normal Submission
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
@@ -87,11 +87,21 @@ HTML;
             $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
+            var cookie = document.cookie;
+            if (cookie.indexOf("student_checked=") !== -1) {
+                var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
+                $("#radio_student").prop("checked", cookieValue==1);
+            }
+            if ($("#radio_student").is(":checked")) {
+                $('#student_id_input').show();
+            }
             $('#radio_normal').click(function() {
                 $('#student_id_input').hide();
+                document.cookie="student_checked="+0;
             });
             $('#radio_student').click(function() {
                 $('#student_id_input').show();
+                document.cookie="student_checked="+1;
             });
         });
     </script>

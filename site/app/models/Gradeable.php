@@ -559,7 +559,7 @@ class Gradeable extends AbstractModel {
         if (!$this->hasConfig()) {
             return;
         }
-        $user_id = $this->user->getId();
+        $user_id = $this->getUser()->getId();
         if ($this->team_assignment) {
             $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
             if ($team !== null) {
