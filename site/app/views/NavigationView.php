@@ -56,7 +56,7 @@ HTML;
         $display_iris_grades_summary = $this->core->getConfig()->displayIrisGradesSummary();
         if ($display_iris_grades_summary) {
         $return .= <<<HTML
-        <button class="btn btn-primary" onclick="window.location.href='{$this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow'))}'">View Grades</button>
+        <a="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow'))}">View Grades</a>
 HTML;
           }
         $return .= <<<HTML
