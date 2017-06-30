@@ -567,6 +567,7 @@ class Course(object):
         instructor
         gradeables
         users
+        max_random_submissions
     """
     def __init__(self, course):
         self.semester = get_current_semester()
@@ -728,10 +729,14 @@ class Course(object):
                 os.makedirs(gradeable_path)
                 os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
 
+            submission_count = 0
+            max_submissions = gradeable.max_random_submissions
             for user in self.users:
                 submitted = False
                 active = 1
                 submission_path = os.path.join(gradeable_path, user.id)
+                if max_submissions is not None and submission_count >= max_submissions:
+                    break
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
                     if gradeable.gradeable_config is None or \
@@ -741,6 +746,7 @@ class Course(object):
                     else:
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
+                        submission_count += 1
                         current_time = (gradeable.submission_due_date - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time)
@@ -773,6 +779,8 @@ class Course(object):
                 if gradeable.grade_start_date < NOW:
                     if gradeable.grade_released_date < NOW or random.random() < 0.8:
                         status = 1 if gradeable.type != 0 or submitted else 0
+                        #if not submitted:
+                        #    print("Buster debug: Gradable {} cheating count for {}".format(gradeable.id, user.id))
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
                                                              gd_overall_comment="lorem ipsum lodar",
@@ -838,6 +846,7 @@ class Gradeable(object):
         self.min_grading_group = 3
         self.grading_rotating = []
         self.submissions = []
+        self.max_random_submissions = None
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -847,6 +856,9 @@ class Gradeable(object):
                 self.id = gradeable['g_id']
             else:
                 self.id = gradeable['gradeable_config']
+
+            if 'max_random_submissions' in gradeable:
+                self.max_random_submissions = int(gradeable['max_random_submissions'])
 
             if 'config_path' in gradeable:
                 self.config_path = gradeable['config_path']
