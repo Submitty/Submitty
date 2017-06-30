@@ -20,7 +20,7 @@
     // These are the default curves applied to each benchmark
     // (can be overridden per item below)
     "benchmark_percent": {
-	"lowest_a-": 0.9,
+    "lowest_a-": 0.9,
 	"lowest_b-": 0.8,
 	"lowest_c-": 0.7,
 	"lowest_d": 0.6
