@@ -20,6 +20,7 @@ use app\libraries\Utils;
  *
  * @method string getId()
  * @method string getName()
+ * @method string getTaInstructions()
  * @method int getType()
  * @method array getPartNames()
  * @method array getTextboxes()
@@ -30,18 +31,30 @@ use app\libraries\Utils;
  * @method float getMaxSize()
  * @method GradeableVersion[] getVersions()
  * @method float getNormalPoints() Returns the total number of points for testcases that are not hidden nor are extra credit
+ * @method bool setTeamAssignment()
+ * @method bool getTeamAssignment()
+ * @method setTaViewDate()
+ * @method getOpenDate()
+ * @method setOpenDate()
  * @method getDueDate()
  * @method getGradeStartDate()
+ * @method setGradeStartDate(Date $datetime)
  * @method getGradeReleasedDate()
+ * @method setGradeReleasedDate(Datetime $datetime)
+ * @method bool getGradeByRegistration()
  * @method getOpenDate()
  * @method array getSubmittedFiles()
  * @method array getSvnFiles()
  * @method array getTestcases()
+ * @method bool getIsRepository()
+ * @method string getSubdirectory()
+ * @method string getConfigPath()
  * @method string getGradeFile()
  * @method int getInteractiveQueuePosition()
  * @method int getInteractiveQueueTotal()
  * @method int getBatchQueuePosition()
  * @method int getBatchQueueTotal()
+ * @method float getPointPrecision()
  * @method User getUser()
  * @method void setUser(User $user)
  * @method GradeableComponent[] getComponents()
@@ -51,6 +64,8 @@ use app\libraries\Utils;
  * @method void setOverallComment(string $comment)
  * @method int getStatus()
  * @method void setStatus(int $status)
+ * @method int getMinimumGradingGroup()
+ * @method string getBucket()
  * @method int|null getGdId()
  * @method void setGdId(int $gd_id)
  * @method getUserViewedDate()
@@ -816,6 +831,14 @@ class Gradeable extends AbstractModel {
         $this->core->getQueries()->updateUserViewedDate($this);
     }
 
+    public function updateGradeable() {
+        $this->core->getQueries()->updateGradeable2($this);
+    }
+  
+    public function getGraderId() {
+        return $this->grader_id;
+    }
+  
     public function getActiveDaysLate() {
         $return =  DateUtils::calculateDayDiff($this->due_date->add(new \DateInterval("PT5M")), $this->submission_time);
         if ($return < 0) {
@@ -837,7 +860,7 @@ class Gradeable extends AbstractModel {
         }
         $this->core->getDatabase()->commit();
     }
-
+      
     public function getSyllabusBucket() {
         return $this->bucket;
     }
