@@ -21,7 +21,6 @@ class Output {
     private $use_footer = true;
     
     private $start_time;
-    private $display_output = true;
     
     /**
      * @var Core
@@ -86,11 +85,12 @@ class Output {
     }
     
     public function renderFile($contents, $filename, $filetype = "text/plain") {
-        $this->display_output = false;
+        $this->useFooter(false);
+        $this->useHeader(false);
+        $this->output_buffer = $contents;
         header("Content-Type: ".$filetype);
         header("Content-Disposition: attachment; filename=".$filename);
         header("Content-Length: " . strlen($contents));
-        echo $contents;
     }
 
     /**
@@ -129,9 +129,7 @@ class Output {
      * @return string
      */
     public function displayOutput() {
-        if($this->display_ouput===true) {
-            print($this->getOutput());
-        }
+        echo($this->getOutput());
     }
 
     /**
