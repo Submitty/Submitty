@@ -779,8 +779,6 @@ class Course(object):
                 if gradeable.grade_start_date < NOW:
                     if gradeable.grade_released_date < NOW or random.random() < 0.8:
                         status = 1 if gradeable.type != 0 or submitted else 0
-                        #if not submitted:
-                        #    print("Buster debug: Gradable {} cheating count for {}".format(gradeable.id, user.id))
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
                                                              gd_overall_comment="lorem ipsum lodar",
