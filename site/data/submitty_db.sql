@@ -180,18 +180,18 @@ BEGIN
 	-- First, determine which course DB the student data needs to be synced with.
 	-- Because DB can change student to student, wrapper connection needs to be dynamically built.
 	SELECT
-	    courses_users.semester,
-	    courses_users.course
+		courses_users.semester,
+		courses_users.course
 	INTO
-	    sync_semester,
-	    sync_course
+		sync_semester,
+		sync_course
 	FROM courses_users
 	WHERE courses_users.user_id = NEW.user_id;
 
 	sync_db_conn := format(
-        'CREATE SERVER data_sync FOREIGN DATA WRAPPER postgres_fdw OPTIONS (dbname ''submitty_%s_%s'')',
-        lower(sync_semester),
-        lower(sync_course)
+		'CREATE SERVER data_sync FOREIGN DATA WRAPPER postgres_fdw OPTIONS (dbname ''submitty_%s_%s'')',
+		lower(sync_semester),
+		lower(sync_course)
 	);
 
 	--Create foreign data wrapper.
@@ -206,24 +206,29 @@ BEGIN
 		user_group integer NOT NULL
 	) SERVER data_sync OPTIONS (table_name 'users');
 
-	-- FULL data sync on INSERT of a new record.
-	INSERT INTO table_sync (
-		user_id,
-		user_firstname,
-		user_preferred_firstname,
-		user_lastname,
-		user_email,
-		user_group
-	) SELECT
-		users.user_id,
-		users.user_firstname,
-		users.user_preferred_firstname,
-		users.user_lastname,
-		users.user_email,
-		courses_users.user_group
-	FROM users
-	INNER JOIN courses_users ON courses_users.user_id = users.user_id
-	WHERE users.user_id = NEW.user_id;
+	IF (TG_OP = 'INSERT') THEN
+		-- FULL data sync on INSERT of a new record.
+		INSERT INTO table_sync (
+			user_id,
+			user_firstname,
+			user_preferred_firstname,
+			user_lastname,
+			user_email,
+			user_group
+		) SELECT
+			users.user_id,
+			users.user_firstname,
+			users.user_preferred_firstname,
+			users.user_lastname,
+			users.user_email,
+			courses_users.user_group
+		FROM users
+		INNER JOIN courses_users ON courses_users.user_id = users.user_id
+		WHERE users.user_id = NEW.user_id;
+	ELSE
+		-- TO DO: Write Update SQL
+
+	END IF;
 
 	-- We're done, drop server to avoid conflicts.
  	DROP SERVER data_sync CASCADE;
@@ -232,7 +237,6 @@ BEGIN
 	RETURN NULL;
 END;
 $func$ LANGUAGE plpgsql;
-
 
 -- Foreign Key Constraint *REQUIRES* insert trigger to be assigned to course_users.
 -- Otherwise, we can't determine what course DB to sync with.
