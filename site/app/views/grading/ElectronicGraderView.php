@@ -88,7 +88,7 @@ HTML;
         if($percentage !== -1 || $this->core->getUser()->accessFullGrading()){
             $return .= <<<HTML
             <a class="btn btn-primary" 
-                href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
+                href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
                 Grading Details
             </a>
 HTML;
@@ -140,12 +140,13 @@ HTML;
             $return .= <<<HTML
     <div style="float: right; margin-bottom: 10px">
         <a class="btn btn-default"
-            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}">
+            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}">
             $text
         </a>
     </div>
 HTML;
         }
+        $show_auto_grading_points = true;
         $return .= <<<HTML
     <h2>Grade Details for {$gradeable->getName()}</h2>
     <table class="table table-striped table-bordered persist-area">
@@ -156,15 +157,30 @@ HTML;
                 <td width="20%">User ID</td>
                 <td width="15%">First Name</td>
                 <td width="15%">Last Name</td>
-                <td width="14%">Autograding</td>
-                <td width="10%">TA Grading</td>
-                <td width="10%">Total</td>
+HTML;
+
+        if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
+            $return .= <<<HTML
+                <td width="9%">Autograding</td>
+                <td width="8%">TA Grading</td>
+                <td width="7%">Total</td>
+                <td width="10%">Active Version</td>
                 <td width="8%">Viewed Grade</td>
             </tr>
         </thead>
 HTML;
+        }
+        else {
+            $show_auto_grading_points = false;
             $return .= <<<HTML
+                <td width="12%">TA Grading</td>
+                <td width="12%">Total</td>
+                <td width="10%">Active Version</td>
+                <td width="8%">Viewed Grade</td>
+            </tr>
+        </thead>
 HTML;
+        }
             $count = 1;
             $last_section = false;
             $tbody_open = false;
@@ -186,6 +202,8 @@ HTML;
                     $grade_viewed = "";
                     $grade_viewed_color = "";
                 }
+                $active_version = $row->getActiveVersion();
+                $highest_version = $row->getHighestVersion();
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
                 $graded = $row->getGradedAutograderPoints() + $row->getGradedTAPoints();
                 if ($graded < 0) $graded = 0;
@@ -210,13 +228,13 @@ HTML;
                     else {
                         $section_graders = "Nobody";
                     }
-
+                    $cols = ($show_auto_grading_points) ? 10 : 9;
                     $return .= <<<HTML
         <tr class="info persist-header">
-            <td colspan="9" style="text-align: center">Students Enrolled in Section {$display_section}</td>
+            <td colspan="{$cols}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
         </tr>
         <tr class="info">
-            <td colspan="9" style="text-align: center">Graders: {$section_graders}</td>
+            <td colspan="{$cols}" style="text-align: center">Graders: {$section_graders}</td>
         </tr>
         <tbody id="section-{$section}">
 HTML;
@@ -228,23 +246,66 @@ HTML;
                 <td>{$row->getUser()->getId()}</td>
                 <td>{$row->getUser()->getDisplayedFirstName()}</td>
                 <td>{$row->getUser()->getLastName()}</td>
-                <td>{$row->getGradedAutograderPoints()} / {$row->getTotalAutograderNonExtraCreditPoints()}</td>
+HTML;
+
+                if($show_auto_grading_points) {
+                    if ($highest_version != 0) {
+                        $return .= <<<HTML
+                <td>{$row->getGradedAutograderPoints()}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
+HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+                <td></td>
+HTML;
+                    }
+                }
+                if ($highest_version != 0) {
+                    $return .= <<<HTML
                 <td>
 HTML;
-                if ($row->beenTAgraded()) {
-                    $btn_class = "btn-default";
-                    $contents = "{$row->getGradedTAPoints()} / {$row->getTotalTANonExtraCreditPoints()}";
-                }
-                else {
-                    $btn_class = "btn-primary";
-                    $contents = "Grade";
-                }
-                $return .= <<<HTML
+                    $box_background = "";
+                    if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
+                        $box_background = "late-box";
+                    }
+                    
+                    if ($row->beenTAgraded()) {
+                        $btn_class = "btn-default";
+                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                    }
+                    else {
+                        $btn_class = "btn-primary";
+                        $contents = "Grade";
+                    }
+                    $return .= <<<HTML
                     <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
                         {$contents}
                     </a>
                 </td>
-                <td>{$graded} / {$total_possible}</td>
+                <td><div class="{$box_background}">{$graded}&nbsp;/&nbsp;{$total_possible}</div></td>
+HTML;
+                    if($active_version == $highest_version) {
+                        $return .= <<<HTML
+                <td>{$active_version}</td>
+HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+                <td>{$active_version}&nbsp;/&nbsp;{$highest_version}</td>
+HTML;
+                    }
+                }
+                else {
+                    $return .= <<<HTML
+                <td>
+                    <a class="btn btn-default" style="color:#a5a5a5;" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">Grade
+                    </a>
+                </td>
+                <td></td>
+                <td></td>
+HTML;
+                }
+                $return .= <<<HTML
                 <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
             </tr>
 HTML;
@@ -252,8 +313,6 @@ HTML;
             }
             $return .= <<<HTML
         </tbody>
-HTML;
-        $return .= <<<HTML
     </table>
 </div>
 HTML;
@@ -266,7 +325,7 @@ HTML;
         $return = <<<HTML
 <div class="grading_toolbar">
     <a {$prev_href}><i title="Go to the previous student" class="icon-left"></i></a>
-    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'summary', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="icon-home" ></i></a>
+    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="icon-home" ></i></a>
     <a {$next_href}><i title="Go to the next student" class="icon-right"></i></a>
     <i title="Reset Rubric Panel Positions (Press R)" class="icon-refresh" onclick="handleKeyPress('KeyR');"></i>
     <i title="Show/Hide Auto-Grading Testcases (Press A)" class="icon-auto-grading-results" onclick="handleKeyPress('KeyA');"></i>

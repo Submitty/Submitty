@@ -10,8 +10,8 @@ use app\models\HWReport;
 class ElectronicGraderController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
-            case 'summary':
-                $this->showSummary();
+            case 'details':
+                $this->showDetails();
                 break;
             case 'grade':
                 $this->showGrading();
@@ -85,10 +85,10 @@ class ElectronicGraderController extends AbstractController {
     /**
      * This loads a gradeable and
      */
-    public function showSummary() {
+    public function showDetails() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        $this->core->getOutput()->addBreadcrumb("Summary {$gradeable->getName()}");
+        $this->core->getOutput()->addBreadcrumb("Details {$gradeable->getName()}");
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
@@ -171,7 +171,7 @@ class ElectronicGraderController extends AbstractController {
         $_SESSION['messages']['success'][] = "Successfully uploaded grade for {$who_id}";
 
         if ($individual == 1) {
-            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'summary','gradeable_id'=>$gradeable_id)));
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id)));
         }
         else {
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable_id, 'individual'=>'0')));

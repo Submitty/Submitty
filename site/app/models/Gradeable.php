@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DatabaseUtils;
 use app\libraries\FileUtils;
+use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\libraries\Utils;
 
@@ -267,6 +268,10 @@ class Gradeable extends AbstractModel {
                 $this->graded_auto_hidden_non_extra_credit = floatval($details['autograding_hidden_non_extra_credit']);
                 $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
                 $this->submission_time = new \DateTime($details['submission_time'], $timezone);
+            }
+            
+            if (isset($details['highest_version']) && $details['highest_version']!== null) {
+               $this->highest_version = $details['highest_version']; 
             }
             $this->loadGradeableConfig();
         }
@@ -582,9 +587,6 @@ class Gradeable extends AbstractModel {
         $results_path = $course_path."/results/".$this->id."/".$user_id;
 
         //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
-        if (count($this->versions) > 0) {
-            $this->highest_version = Utils::getLastArrayElement($this->versions)->getVersion();
-        }
 
         $this->submissions = count($this->versions);
 
@@ -822,6 +824,14 @@ class Gradeable extends AbstractModel {
         $this->core->getQueries()->updateUserViewedDate($this);
     }
 
+    public function getActiveDaysLate() {
+        $return =  DateUtils::calculateDayDiff($this->due_date->add(new \DateInterval("PT5M")), $this->submission_time);
+        if ($return < 0) {
+            $return = 0;
+        }
+        return $return;
+    }
+  
     public function saveData() {
         $this->core->getDatabase()->beginTransaction();
         if ($this->gd_id === null) {
