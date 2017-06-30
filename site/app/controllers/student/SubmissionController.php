@@ -182,7 +182,7 @@ class SubmissionController extends AbstractController {
         }
 
         $original_user_id = $this->core->getUser()->getId();
-        $user_id = $_REQUEST['user_id'];
+        $user_id = $_POST['user_id'];
         if ($user_id == $original_user_id) {
             $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
         }
