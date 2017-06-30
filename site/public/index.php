@@ -208,5 +208,4 @@ switch($_REQUEST['component']) {
         $control->run();
         break;
 }
-
-echo($core->getOutput()->getOutput());
+$core->getOutput()->displayOutput();

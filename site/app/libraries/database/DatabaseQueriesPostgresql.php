@@ -275,7 +275,8 @@ SELECT";
   egd.autograding_non_hidden_extra_credit,
   egd.autograding_hidden_non_extra_credit,
   egd.autograding_hidden_extra_credit,
-  egd.submission_time
+  egd.submission_time,
+  egv.highest_version
 FROM users AS u
 NATURAL JOIN gradeable AS g";
         }
@@ -346,7 +347,16 @@ LEFT JOIN (
     SELECT
       t.user_id
     FROM gradeable_teams AS gt, teams AS t
-    WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egd.team_id AND t.state = 1))";
+    WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egd.team_id AND t.state = 1)
+) 
+LEFT JOIN (
+  SELECT
+    g_id,
+    user_id,
+    count(*) as highest_version
+  FROM electronic_gradeable_data
+  GROUP BY g_id, user_id
+) as egv ON g.g_id = egv.g_id AND u.user_id = egv.user_id";
         }
 
         $where = array();
