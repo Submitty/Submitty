@@ -621,7 +621,7 @@ class Gradeable extends AbstractModel {
             $this->svn_files[$file] = $details;
         }
 
-        $results_current_path = $results_path."/".$this->current_version;
+        $results_current_path = FileUtils::joinPaths($results_path,$this->current_version);
         $results_files = FileUtils::getAllFiles($results_current_path, array(), true);
         foreach ($results_files as $file => $details) {
             $this->results_files[$file] = $details;

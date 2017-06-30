@@ -56,7 +56,7 @@ HTML;
 	}
 
     private function sourceSettingsJS($filename, $number) {
-        $type = $this->getContentType($filename);
+        $type = FileUtils::getContentType($filename);
         $number = intval($number);
         return <<<HTML
     <script>

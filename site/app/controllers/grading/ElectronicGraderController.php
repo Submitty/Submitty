@@ -121,6 +121,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'summaryPage', $gradeable, $rows, $graders);
     }
 
+    //TODO (issue #1128) refactor this function to set data in the gradeable model then call $gradeable->saveData()
     public function submitGrade() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             $_SESSION['messages']['error'][] = "Invalid CSRF Token";
@@ -131,7 +132,7 @@ class ElectronicGraderController extends AbstractController {
         $who_id = $_POST['u_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
 
-        $now = new \DateTime('now');
+        $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
         $homeworkDate = $gradeable->getGradeStartDate();
         if ($now < $homeworkDate) {
             $_SESSION['messages']['error'][] = "Grading is not open yet for {$gradeable->getName()}";
@@ -182,6 +183,8 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
 
+        $graded = 0;
+        $total = 0;
         if ($gradeable->isGradeByRegistration()) {
             $sections = $this->core->getUser()->getGradingRegistrationSections();
             $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
@@ -196,9 +199,11 @@ class ElectronicGraderController extends AbstractController {
         }
 
         if($total == 0) {
-            $total = 0.001;
+            $progress = 100;
         }
-        $progress = round(($graded / $total) * 100, 1);
+        else {
+            $progress = round(($graded / $total) * 100, 1);
+        }
 
         $user_ids_to_grade = array();
         foreach ($users_to_grade as $u) {
