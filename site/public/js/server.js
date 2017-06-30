@@ -419,13 +419,16 @@ function setupCheckboxCells() {
             elems.push(this);
         }
         var scores = {};
-        parent.children("td.cell-grade").each(function() {
-            scores[$(this).data("id")] = $(this).data("score");
-        });
+        scores[$(this).data('id')] = $(this).data('score');
 
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
-            {'csrf_token': csrfToken, 'user_id': parent.data("user"), 'g_id': parent.data('gradeable'), 'scores': scores},
+            {
+              'csrf_token': csrfToken,
+              'user_id': parent.data("user"),
+              'g_id': parent.data('gradeable'),
+              'scores': scores
+            },
             function() {
                 elems.forEach(function(elem) {
                     $(elem).animate({"border-right-width": "0px"}, 400);
@@ -442,6 +445,74 @@ function setupCheckboxCells() {
     });
 }
 
+function setupNumericTextCells() {
+  $("input[class=option-small-box]").keydown(function(key){
+    var cell=this.id.split('-');
+    // right
+    if(key.keyCode === 39){
+      if(this.selectionEnd == this.value.length){
+        $('#cell-'+cell[1]+'-'+(++cell[2])).focus();
+      }
+    }
+    // left
+    else if(key.keyCode == 37){
+      if(this.selectionStart == 0){
+        $('#cell-'+cell[1]+'-'+(--cell[2])).focus();
+      }
+    }
+    // up
+    else if(key.keyCode == 38){
+      $('#cell-'+(--cell[1])+'-'+cell[2]).focus();
+
+    }
+    // down
+    else if(key.keyCode == 40){
+      $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
+    }
+  });
+
+  $("input[class=option-small-box]").change(function() {
+    var elem = this;
+    if(this.value == 0){
+      $(this).css("color", "#bbbbbb");
+    }
+    else{
+      $(this).css("color", "");
+    }
+    var scores = {};
+    var total = 0;
+    var parent = $(this).parent().parent();
+    scores[$(this).data('id')] = this.value;
+
+    $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
+      $(this).children(".option-small-box").each(function(){
+        if($(this).data('num') === true){
+          total += parseFloat(this.value);
+        }
+        if($(this).data('total') === true){
+          this.value = total;
+        }
+      });
+    });
+
+    submitAJAX(
+      buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
+      {
+        'csrf_token': csrfToken,
+        'user_id': parent.data('user'),
+        'g_id': parent.data('gradeable'),
+        scores: scores
+      },
+      function() {
+        $(elem).css("background-color", "#ffffff");
+      },
+      function() {
+        $(elem).css("background-color", "#ff7777");
+      }
+    );
+  });
+}
+
 $(function() {
     if (window.location.hash !== "") {
         if ($(window.location.hash).offset().top > 0) {
@@ -456,7 +527,6 @@ $(function() {
 
     setupCheckboxCells();
     setupNumericTextCells();
-
 });
 
 function setupNumericTextCells() { 
@@ -652,4 +722,109 @@ function setupNumericTextCells() {
             f.replaceWith(f = f.clone(true));
         }
     });
+}
+
+function updateHomeworkExtensions(data) {
+    var fd = new FormData($('#excusedAbsenseForm').get(0));
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        success: function(data) {
+            var json = JSON.parse(data);
+            if(json['error']){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            var form = $("#load-homework-extensions");
+            $('#my_table tr:gt(0)').remove();
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            $('#title').replaceWith(title);
+            if(json['users'].length === 0){
+                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+            }
+            json['users'].forEach(function(elem){
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
+                $('#my_table').append(bits.join('</td><td>'));
+            });
+            $('#user_id').val(this.defaultValue);
+            $('#late_days').val(this.defaultValue);
+            $('#csv_upload').val(this.defaultValue);
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
+            $('#messages').append(message);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    })
+    return false;
+}
+
+function loadHomeworkExtensions(g_id) {
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            var json = JSON.parse(data);
+            var form = $("#load-homework-extensions");
+            $('#my_table tr:gt(0)').remove();
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            $('#title').replaceWith(title);
+            if(json['users'].length === 0){
+                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+            }
+            json['users'].forEach(function(elem){
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
+                $('#my_table').append(bits.join('</td><td>'));
+            });
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    });
+}
+
+
+function updateLateDays(data) {
+    var fd = new FormData($('#lateDayForm').get(0));
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late'});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(data) {
+            var json = JSON.parse(data);
+            if(json['error']){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            var form = $("#load-late-days");
+            $('#late_day_table tr:gt(0)').remove();
+            if(json['users'].length === 0){
+                $('#late_day_table').append('<tr><td colspan="4">No late days are currently entered.</td></tr>');
+            }
+            json['users'].forEach(function(elem){
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'] + '</td></tr>'];
+                $('#late_day_table').append(bits.join('</td><td>'));
+            });
+            $('#user_id').val(this.defaultValue);
+            $('#datestamp').val(this.defaultValue);
+            $('#late_days').val(this.defaultValue);
+            $('#csv_upload').val(this.defaultValue);
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days have been updated.</div>';
+            $('#messages').append(message);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    })
+    return false;
 }
