@@ -30,6 +30,11 @@ class MiscController extends AbstractController {
                 throw new \InvalidArgumentException("File does not exist");
             }
         }
+        else if ($_REQUEST['dir'] === "submissions") {
+            if (!file_exists($_REQUEST['path'])) {
+                throw new \InvalidArgumentException("File does not exist");
+            }
+        }
         else {
             throw new \InvalidArgumentException("Invalid dir used");
         }
@@ -44,7 +49,13 @@ class MiscController extends AbstractController {
         }
         else {
             $contents = htmlentities(file_get_contents($_REQUEST['path']), ENT_SUBSTITUTE);
-            $this->core->getOutput()->renderOutput('Misc', 'displayFile', $contents);
+            if ($_REQUEST['dir'] === "submissions") {
+                $filename = htmlentities($_REQUEST['file'], ENT_SUBSTITUTE);
+                $this->core->getOutput()->renderOutput('Misc', 'displayCode', $filename, $contents);
+            }
+            else {
+                $this->core->getOutput()->renderOutput('Misc', 'displayFile', $contents);
+            }
         }
     }
 }
