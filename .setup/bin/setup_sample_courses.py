@@ -790,11 +790,15 @@ class Course(object):
                     print("Creating queue file:", queue_file)
                     queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
                     with open(queue_file, "w") as open_file:
+                        # FIXME: This will need to be adjusted for team assignments!
                         json.dump({"semester": self.semester,
                                    "course": self.code,
                                    "gradeable": gradeable.id,
                                    "user": user.id,
-                                   "version": 1}, open_file)
+                                   "version": 1,
+                                   "who": user.id,
+                                   "is_team": false,
+                                   "team": ""}, open_file)
         conn.close()
         os.environ['PGPASSWORD'] = ""
 
