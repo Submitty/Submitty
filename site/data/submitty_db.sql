@@ -164,7 +164,7 @@ ALTER TABLE ONLY sessions
 --
 
 --
--- NEW Code by pbailie
+-- NEW Code by pbailie, June 30 2017
 --
 
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
@@ -175,16 +175,19 @@ CREATE OR REPLACE FUNCTION new_fdw(varchar) RETURNS void AS
 $$
 DECLARE
 	sync_user_id ALIAS FOR $1; -- Expected to be NEW.user_id from trigger
-	sync_semester text;
-	sync_course text;
-	sync_db_conn text;
+	sync_semester varchar;
+	sync_course varchar;
+	sync_db_conn varchar;
 BEGIN
 
-	-- There may be a left over fdw server from the last sync.  If so, drop.
+	-- There is likely an fdw server from the last row sync'd.  If so, DROP.
+	-- NOTE: ALTER SERVER (as opposed to DROP/CREATE) did not produce expected
+	--       results in local testing.
  	DROP SERVER IF EXISTS data_sync CASCADE;
 
-	-- First, determine which course DB the student data needs to be synced with.
-	-- Because DB can change student to student, wrapper connection needs to be dynamically built.
+	-- Determine which course DB the student data needs to be synced with.
+	-- Because DB can change student to student, wrapper connection needs to be
+	-- dynamically built for every row that is sync'd.
 	SELECT
 		semester,
 		course
@@ -209,7 +212,9 @@ BEGIN
 		user_preferred_firstname character varying,
 		user_lastname character varying NOT NULL,
 		user_email character varying NOT NULL,
-		user_group integer NOT NULL
+		user_group integer NOT NULL,
+		registration_section integer,
+		rotating_section integer
 	) SERVER data_sync OPTIONS (table_name 'users');
 
 END;
@@ -219,31 +224,47 @@ CREATE OR REPLACE FUNCTION sync_courses_user() RETURNS TRIGGER AS
 -- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
 -- table courses_user.
 $$
+DECLARE
+	check_null integer; -- ON UPDATE, is column registration_section NULL?
 BEGIN
+
 	PERFORM new_fdw(NEW.user_id);
 
 	IF (TG_OP = 'INSERT') THEN
-		-- FULL data sync on INSERT of a new record.
+		-- FULL data sync on INSERT of a new user record.
 		INSERT INTO table_sync (
 			user_id,
 			user_firstname,
 			user_preferred_firstname,
 			user_lastname,
 			user_email,
-			user_group
+			user_group,
+			registration_section
 		) SELECT
 			users.user_id,
 			users.user_firstname,
 			users.user_preferred_firstname,
 			users.user_lastname,
 			users.user_email,
-			courses_users.user_group
+			courses_users.user_group,
+			courses_users.registration_section
 		FROM users
 		INNER JOIN courses_users ON courses_users.user_id = users.user_id
 		WHERE users.user_id = NEW.user_id;
 	ELSE
-		-- TO DO: Write Update SQL
-
+		-- User update on registration_section
+		-- CASE clause ensures user's rotating section is set NULL when
+		-- registration is updated to NULL.  (e.g. student has dropped)
+		UPDATE table_sync
+		SET registration_section = courses_users.registration_section,
+		    rotating_section = CASE WHEN courses_users.registration_section IS NULL
+			THEN NULL
+			ELSE rotating_section
+			END
+		FROM courses_users
+		WHERE table_sync.user_id = courses_users.user_id
+		AND table_sync.user_id = OLD.user_id
+		AND OLD.manual_registration = FALSE;
 	END IF;
 
 	-- All done.
