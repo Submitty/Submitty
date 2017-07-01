@@ -110,7 +110,7 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
                 $methods[] = $method->getName();
             }
         }
-        $builder->setMethods($methods);
+        $builder->setMethods(array_unique($methods));
         return $builder->getMock();
     }
 }
