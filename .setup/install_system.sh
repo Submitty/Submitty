@@ -537,7 +537,7 @@ if [[ ${VAGRANT} == 1 ]]; then
     chmod 770 ${SUBMITTY_DATA_DIR}/tagrading_logs
 
     # Call helper script that makes the courses and refreshes the database
-    ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py sample
+    ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py
 
     #################################################################
     # SET CSV FIELDS (for classlist upload data)

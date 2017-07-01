@@ -35,36 +35,36 @@ TestResults* PacmanGrader_doit (const TestCase &tc, const nlohmann::json& j) {
     std::string word;
     while (line_ss >> word) {
       if (word == "###") {
-	// parse each question score
-	line_ss >> word;
-	if (word == "Question") {
-	  line_ss >> word;
-	  int which = atoi(word.substr(1,word.size()-1).c_str())-1;
-	  if (num_pacman_tests < 0 || which >= num_pacman_tests) {
-	    messages.push_back("ERROR: Invalid question number " + word);
-	    return new TestResults(0.0,messages);
-	  }
-	  char c;
-	  line_ss >> awarded[which] >> c >> possible[which];
-	  if (awarded[which] < 0 ||
-	      c != '/' ||
-	      possible[which] <= 0 ||
-	      awarded[which] > possible[which]) {
-	    messages.push_back("ERROR: Could not parse question points");
-	    return new TestResults(0.0,messages);
-	  }
-	}
+        // parse each question score
+        line_ss >> word;
+        if (word == "Question") {
+          line_ss >> word;
+          int which = atoi(word.substr(1,word.size()-1).c_str())-1;
+          if (num_pacman_tests < 0 || which >= num_pacman_tests) {
+            messages.push_back("ERROR: Invalid question number " + word);
+            return new TestResults(0.0,messages);
+          }
+          char c;
+          line_ss >> awarded[which] >> c >> possible[which];
+          if (awarded[which] < 0 ||
+              c != '/' ||
+              possible[which] <= 0 ||
+              awarded[which] > possible[which]) {
+            messages.push_back("ERROR: Could not parse question points");
+            return new TestResults(0.0,messages);
+          }
+        }
       } else if (word == "Total:") {
-	// parse the total points
-	char c;
-	line_ss >> total_awarded >> c >> total_possible;
-	if (total_awarded < 0 ||
-	    c != '/' ||
-	    total_possible <= 0 ||
-	    total_awarded > total_possible) {
-	  messages.push_back("ERROR: Could not parse total points");
-	  return new TestResults(0.0,messages);
-	}
+        // parse the total points
+        char c;
+        line_ss >> total_awarded >> c >> total_possible;
+        if (total_awarded < 0 ||
+            c != '/' ||
+            total_possible <= 0 ||
+            total_awarded > total_possible) {
+          messages.push_back("ERROR: Could not parse total points");
+          return new TestResults(0.0,messages);
+        }
       }
     }
   }
@@ -74,14 +74,14 @@ TestResults* PacmanGrader_doit (const TestCase &tc, const nlohmann::json& j) {
   int check_possible = 0;
   for (int i = 0; i < num_pacman_tests; i++) {
     if (awarded[i] < 0 ||
-	possible[i] < 0) {
+        possible[i] < 0) {
       messages.push_back("ERROR: Missing question " + std::to_string(i+1));
     } else {
       check_awarded += awarded[i];
       check_possible += possible[i];
       messages.push_back("Question " + std::to_string(i+1) + ": " 
-			 + std::to_string(awarded[i]) + " / " 
-			 + std::to_string(possible[i]));
+       + std::to_string(awarded[i]) + " / " 
+       + std::to_string(possible[i]));
     }
   }
   if (total_possible == -1 ||
