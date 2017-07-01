@@ -340,6 +340,7 @@ table tr.table-header {
 
 #footer {
     margin-top: 30px;
+    z-index: 9999;
 }
 
 #push, #footer {
@@ -756,6 +757,16 @@ table .instructor .two-options{
 .tooltip {
     position: relative;
     display: inline-block;
+}
+
+.late-box {
+    background:#d9534f;
+    padding:3px;
+    margin-top:3px;
+    margin-bottom:3px;
+    margin-left:5%;
+    margin-right:5%;
+    border-radius:4px;
 }
 
 .tooltip .tooltiptext {
