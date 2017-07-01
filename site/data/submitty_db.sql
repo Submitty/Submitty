@@ -216,7 +216,8 @@ BEGIN
     user_email character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section integer,
-    rotating_section integer
+    rotating_section integer,
+    manual_registration BOOLEAN
   ) SERVER data_sync OPTIONS (table_name 'users');
 
 END;
@@ -258,11 +259,14 @@ BEGIN
     -- CASE clause ensures user's rotating section is set NULL when
     -- registration is updated to NULL.  (e.g. student has dropped)
     UPDATE table_sync
-    SET registration_section = courses_users.registration_section,
-        rotating_section = CASE WHEN courses_users.registration_section IS NULL
-      THEN NULL
-      ELSE rotating_section
-      END
+    SET
+      user_group = courses_users.user_group,
+      registration_section = courses_users.registration_section,
+      rotating_section = CASE WHEN courses_users.registration_section IS NULL
+        THEN NULL
+        ELSE rotating_section
+      END,
+      manual_registration = courses_users.manual_registration
     FROM courses_users
     WHERE table_sync.user_id = courses_users.user_id
     AND table_sync.user_id = OLD.user_id;
