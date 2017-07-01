@@ -37,7 +37,7 @@ abstract class AbstractDatabaseQueries {
      * Gets a user from the submitty database given a user_id.
      * @param $user_id
      *
-     * @return array
+     * @return User
      */
     abstract public function getSubmittyUser($user_id);
 
@@ -62,12 +62,19 @@ abstract class AbstractDatabaseQueries {
      */
     abstract public function getAllGraders();
 
-    abstract public function createUser(User $user);
+    /**
+     * @param User $user
+     * @param string $semester
+     * @param string $course
+     */
+    abstract public function insertUser(User $user, $semester, $course);
 
     /**
      * @param User $user
+     * @param string $semester
+     * @param string $course
      */
-    abstract public function updateUser(User $user);
+    abstract public function updateUser(User $user, $semester, $course);
 
     /**
      * @param string    $user_id

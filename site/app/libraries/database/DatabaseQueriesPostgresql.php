@@ -29,6 +29,15 @@ LEFT JOIN (
 WHERE u.user_id=?", array($user_id));
         return new User($this->core, $this->course_db->row());
     }
+
+    public function getGradingSectionsByUserId($user_id) {
+        $this->course_db->query("
+SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+FROM grading_registration
+GROUP BY user_id
+WHERE user_id=?", array($user_id));
+        return $this->course_db->row();
+    }
     
     public function getAllUsers($section_key="registration_section") {
         $keys = array("registration_section", "rotating_section");
@@ -67,26 +76,41 @@ ORDER BY u.registration_section, u.user_id");
         return $return;
     }
 
-    public function createUser(User $user) {
-        $array = array($user->getId(), $user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(),
-            $user->getEmail(), $user->getGroup(), $user->getRegistrationSection(), $user->getRotatingSection(),
-            Utils::convertBooleanToString($user->isManualRegistration()));
+    public function insertUser(User $user, $semester, $course) {
+        $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
+                       $user->getLastName(), $user->getEmail());
 
-        $this->course_db->query("
-INSERT INTO users (user_id, user_firstname, user_preferred_firstname, user_lastname, user_email, 
-                   user_group, registration_section, rotating_section, manual_registration) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
+        $this->submitty_db->query("
+INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email) 
+VALUES (?, ?, ?, ?, ?, ?)", $array);
+
+        $params = array($semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
+                        Utils::convertBooleanToString($user->isManualRegistration()));
+        $this->submitty_db->query("
+INSERT INTO courses_users (semester, course, user_id, user_group, registration_section, manual_registration) 
+VALUES (?,?,?,?,?,?)", $params);
+
+        $params = array($user->getRotatingSection(), $user->getId());
+        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
-    public function updateUser(User $user) {
-        $array = array($user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(),
-            $user->getEmail(), $user->getGroup(), $user->getRegistrationSection(), $user->getRotatingSection(),
-            Utils::convertBooleanToString($user->isManualRegistration()), $user->getId());
-        $this->course_db->query("
-UPDATE users SET user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?, user_group=?, 
-registration_section=?, rotating_section=?, manual_registration=?
+    public function updateUser(User $user, $semester, $course) {
+        $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
+                       $user->getLastName(), $user->getEmail(), $user->getId());
+        $this->submitty_db->query("
+UPDATE users SET user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
 WHERE user_id=?", $array);
+
+        $params = array($user->getGroup(), $user->getRegistrationSection(),
+                        Utils::convertBooleanToString($user->isManualRegistration()), $semester, $course,
+                        $user->getId());
+        $this->submitty_db->query("
+UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=? 
+WHERE semester=? AND course=? AND user_id=?", $params);
+
+        $params = array($user->getRotatingSection(), $user->getId());
+        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 

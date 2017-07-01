@@ -93,7 +93,7 @@ class User extends AbstractModel {
 
         $this->last_name = $details['user_lastname'];
         $this->email = $details['user_email'];
-        $this->group = intval($details['user_group']);
+        $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
             $this->group = 4;
         }
