@@ -219,8 +219,8 @@ void parse_strace_output(std::ifstream &strace_output_file,
       }
 
       if (itr == all_system_calls.end()) {
-	std::cout << "ERROR!  couldn't find system call " << full_name << std::endl;
-	continue;
+        std::cout << "ERROR!  couldn't find system call " << full_name << std::endl;
+        continue;
       }
       assert (itr != all_system_calls.end());
       std::string which_category = itr->second;

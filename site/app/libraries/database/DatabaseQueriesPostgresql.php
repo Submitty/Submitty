@@ -250,6 +250,7 @@ SELECT";
         if ($user_ids !== null) {
             $query .= ",
   gd.gd_id,
+  gd.gd_grader_id,
   gd.gd_overall_comment,
   gd.gd_status,
   gd.gd_user_viewed_date,
@@ -1203,6 +1204,31 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
         else {
             $team = new Team($this->core, $this->database->rows());
             return $team;
+        }
+    }
+
+    public function submitTAGrade($details) {
+        if ($details['gd_id'] === null) {
+            $params = array($details['g_id'], $details['u_id'], $details['grader_id'], $details['comment'], $details['status'], $details['late_charged'], $details['active_version']);
+            $this->database->query("INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version, gd_user_viewed_date ) VALUES(?,?,?,?,?,?,?,NULL)", $params);
+            $details['gd_id'] = $this->database->getLastInsertId('gradeable_data_gd_id_seq');
+
+            $params = array($details['u_id'], $details['g_id'], $details['late_charged']);
+            $this->database->query("INSERT INTO late_days_used (user_id, g_id, late_days_used) VALUES (?,?,?)", $params);
+
+            foreach($details['components'] as $gc_id => $data) {
+                $params = array($details['gd_id'], $gc_id, $data['grade'], $data['comment'], $details['grader_id'], $details['time']);
+                $this->database->query("INSERT INTO gradeable_component_data (gd_id, gc_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grade_time) VALUES (?,?,?,?,?,?)", $params);
+            }
+        }
+        else {
+            $params = array($details['grader_id'], $details['active_version'], $details['comment'], $details['status'], $details['late_charged'], $details['gd_id']);
+            $this->database->query("UPDATE gradeable_data SET gd_grader_id=?, gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=?, gd_user_viewed_date=NULL WHERE gd_id=?", $params);
+
+            foreach($details['components'] as $gc_id => $data) {
+                $params = array($data['grade'], $data['comment'], $details['grader_id'], $details['time'], $details['gd_id'], $gc_id);
+                $this->database->query("UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_grade_time=? WHERE gd_id=? AND gc_id=?", $params);
+            }
         }
     }
 

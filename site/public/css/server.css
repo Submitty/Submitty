@@ -340,6 +340,7 @@ table tr.table-header {
 
 #footer {
     margin-top: 30px;
+    z-index: 9999;
 }
 
 #push, #footer {
