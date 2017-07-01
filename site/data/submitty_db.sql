@@ -185,8 +185,8 @@ BEGIN
 	--       results in local testing.
  	DROP SERVER IF EXISTS data_sync CASCADE;
 
-	-- Determine which course DB the student data needs to be synced with.
-	-- Because DB can change student to student, wrapper connection needs to be
+	-- Determine which course DB the user data needs to be synced with.
+	-- Because DB can change user to user, wrapper connection needs to be
 	-- dynamically built for every row that is sync'd.
 	SELECT
 		semester,
@@ -203,9 +203,11 @@ BEGIN
 		lower(sync_course)
 	);
 
-	--Create foreign data wrapper.
+	-- Create foreign data wrapper to access a course DB.
+	-- TO DO: hsdbu_password needs to be altered by setup scripts OR perhaps
+	--        implement a different authentication method for hsdbu.
 	EXECUTE sync_db_conn;
-	CREATE USER MAPPING FOR CURRENT_USER SERVER data_sync OPTIONS (user 'hsdbu');
+	CREATE USER MAPPING FOR CURRENT_USER SERVER data_sync OPTIONS (user 'hsdbu', password 'hsdbu_password');
 	CREATE FOREIGN TABLE IF NOT EXISTS table_sync (
 		user_id character varying NOT NULL,
 		user_firstname character varying NOT NULL,
@@ -263,8 +265,7 @@ BEGIN
 			END
 		FROM courses_users
 		WHERE table_sync.user_id = courses_users.user_id
-		AND table_sync.user_id = OLD.user_id
-		AND OLD.manual_registration = FALSE;
+		AND table_sync.user_id = OLD.user_id;
 	END IF;
 
 	-- All done.
@@ -279,7 +280,16 @@ CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
 $$
 BEGIN
 	PERFORM new_fdw(NEW.user_id);
-	-- TO DO: Write Update SQL
+
+	-- Data sync on UPDATE for users table
+	UPDATE table_sync
+	SET user_firstname = users.user_firstname,
+        user_preferred_firstname = users.user_preferred_firstname,
+        user_lastname = users.user_lastname,
+        user_email = users.user_email
+    FROM users
+    WHERE table_sync.user_id = users.user_id
+    AND table_sync.user_id = OLD.user_id;
 
 	-- All done.
 	RETURN NULL;
