@@ -174,50 +174,50 @@ CREATE OR REPLACE FUNCTION new_fdw(varchar) RETURNS void AS
 -- PURPOSE: Setup foreign data wrapper to sync data to users table in course DB.
 $$
 DECLARE
-	sync_user_id ALIAS FOR $1; -- Expected to be NEW.user_id from trigger
-	sync_semester varchar;
-	sync_course varchar;
-	sync_db_conn varchar;
+  sync_user_id ALIAS FOR $1; -- Expected to be NEW.user_id from trigger
+  sync_semester varchar;
+  sync_course varchar;
+  sync_db_conn varchar;
 BEGIN
 
-	-- There is likely an fdw server from the last row sync'd.  If so, DROP.
-	-- NOTE: ALTER SERVER (as opposed to DROP/CREATE) did not produce expected
-	--       results in local testing.
- 	DROP SERVER IF EXISTS data_sync CASCADE;
+  -- There is likely an fdw server from the last row sync'd.  If so, DROP.
+  -- NOTE: ALTER SERVER (as opposed to DROP/CREATE) did not produce expected
+  --       results in local testing.
+   DROP SERVER IF EXISTS data_sync CASCADE;
 
-	-- Determine which course DB the user data needs to be synced with.
-	-- Because DB can change user to user, wrapper connection needs to be
-	-- dynamically built for every row that is sync'd.
-	SELECT
-		semester,
-		course
-	INTO
-		sync_semester,
-		sync_course
-	FROM courses_users
-	WHERE courses_users.user_id = sync_user_id;
+  -- Determine which course DB the user data needs to be synced with.
+  -- Because DB can change user to user, wrapper connection needs to be
+  -- dynamically built for every row that is sync'd.
+  SELECT
+    semester,
+    course
+  INTO
+    sync_semester,
+    sync_course
+  FROM courses_users
+  WHERE courses_users.user_id = sync_user_id;
 
-	sync_db_conn := format(
-		'CREATE SERVER data_sync FOREIGN DATA WRAPPER postgres_fdw OPTIONS (dbname ''submitty_%s_%s'')',
-		lower(sync_semester),
-		lower(sync_course)
-	);
+  sync_db_conn := format(
+    'CREATE SERVER data_sync FOREIGN DATA WRAPPER postgres_fdw OPTIONS (dbname ''submitty_%s_%s'')',
+    lower(sync_semester),
+    lower(sync_course)
+  );
 
-	-- Create foreign data wrapper to access a course DB.
-	-- TO DO: hsdbu_password needs to be altered by setup scripts OR perhaps
-	--        implement a different authentication method for hsdbu.
-	EXECUTE sync_db_conn;
-	CREATE USER MAPPING FOR CURRENT_USER SERVER data_sync; --OPTIONS (user 'hsdbu', password 'hsdbu_password');
-	CREATE FOREIGN TABLE IF NOT EXISTS table_sync (
-		user_id character varying NOT NULL,
-		user_firstname character varying NOT NULL,
-		user_preferred_firstname character varying,
-		user_lastname character varying NOT NULL,
-		user_email character varying NOT NULL,
-		user_group integer NOT NULL,
-		registration_section integer,
-		rotating_section integer
-	) SERVER data_sync OPTIONS (table_name 'users');
+  -- Create foreign data wrapper to access a course DB.
+  -- TO DO: hsdbu_password needs to be altered by setup scripts OR perhaps
+  --        implement a different authentication method for hsdbu.
+  EXECUTE sync_db_conn;
+  CREATE USER MAPPING FOR CURRENT_USER SERVER data_sync; --OPTIONS (user 'hsdbu', password 'hsdbu_password');
+  CREATE FOREIGN TABLE IF NOT EXISTS table_sync (
+    user_id character varying NOT NULL,
+    user_firstname character varying NOT NULL,
+    user_preferred_firstname character varying,
+    user_lastname character varying NOT NULL,
+    user_email character varying NOT NULL,
+    user_group integer NOT NULL,
+    registration_section integer,
+    rotating_section integer
+  ) SERVER data_sync OPTIONS (table_name 'users');
 
 END;
 $$ LANGUAGE plpgsql;
@@ -227,49 +227,49 @@ CREATE OR REPLACE FUNCTION sync_courses_user() RETURNS TRIGGER AS
 -- table courses_user.
 $$
 DECLARE
-	check_null integer; -- ON UPDATE, is column registration_section NULL?
+  check_null integer; -- ON UPDATE, is column registration_section NULL?
 BEGIN
 
-	PERFORM new_fdw(NEW.user_id);
+  PERFORM new_fdw(NEW.user_id);
 
-	IF (TG_OP = 'INSERT') THEN
-		-- FULL data sync on INSERT of a new user record.
-		INSERT INTO table_sync (
-			user_id,
-			user_firstname,
-			user_preferred_firstname,
-			user_lastname,
-			user_email,
-			user_group,
-			registration_section
-		) SELECT
-			users.user_id,
-			users.user_firstname,
-			users.user_preferred_firstname,
-			users.user_lastname,
-			users.user_email,
-			courses_users.user_group,
-			courses_users.registration_section
-		FROM users
-		INNER JOIN courses_users ON courses_users.user_id = users.user_id
-		WHERE users.user_id = NEW.user_id;
-	ELSE
-		-- User update on registration_section
-		-- CASE clause ensures user's rotating section is set NULL when
-		-- registration is updated to NULL.  (e.g. student has dropped)
-		UPDATE table_sync
-		SET registration_section = courses_users.registration_section,
-		    rotating_section = CASE WHEN courses_users.registration_section IS NULL
-			THEN NULL
-			ELSE rotating_section
-			END
-		FROM courses_users
-		WHERE table_sync.user_id = courses_users.user_id
-		AND table_sync.user_id = OLD.user_id;
-	END IF;
+  IF (TG_OP = 'INSERT') THEN
+    -- FULL data sync on INSERT of a new user record.
+    INSERT INTO table_sync (
+      user_id,
+      user_firstname,
+      user_preferred_firstname,
+      user_lastname,
+      user_email,
+      user_group,
+      registration_section
+    ) SELECT
+      users.user_id,
+      users.user_firstname,
+      users.user_preferred_firstname,
+      users.user_lastname,
+      users.user_email,
+      courses_users.user_group,
+      courses_users.registration_section
+    FROM users
+    INNER JOIN courses_users ON courses_users.user_id = users.user_id
+    WHERE users.user_id = NEW.user_id;
+  ELSE
+    -- User update on registration_section
+    -- CASE clause ensures user's rotating section is set NULL when
+    -- registration is updated to NULL.  (e.g. student has dropped)
+    UPDATE table_sync
+    SET registration_section = courses_users.registration_section,
+        rotating_section = CASE WHEN courses_users.registration_section IS NULL
+      THEN NULL
+      ELSE rotating_section
+      END
+    FROM courses_users
+    WHERE table_sync.user_id = courses_users.user_id
+    AND table_sync.user_id = OLD.user_id;
+  END IF;
 
-	-- All done.
-	RETURN NULL;
+  -- All done.
+  RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -279,20 +279,20 @@ CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
 -- sync_courses_users will also sync users -- but only on INSERT.
 $$
 BEGIN
-	PERFORM new_fdw(NEW.user_id);
+  PERFORM new_fdw(NEW.user_id);
 
-	-- Data sync on UPDATE for users table
-	UPDATE table_sync
-	SET user_firstname = users.user_firstname,
-        user_preferred_firstname = users.user_preferred_firstname,
-        user_lastname = users.user_lastname,
-        user_email = users.user_email
+  -- Data sync on UPDATE for users table
+  UPDATE table_sync
+  SET user_firstname = users.user_firstname,
+      user_preferred_firstname = users.user_preferred_firstname,
+      user_lastname = users.user_lastname,
+      user_email = users.user_email
     FROM users
     WHERE table_sync.user_id = users.user_id
     AND table_sync.user_id = OLD.user_id;
 
-	-- All done.
-	RETURN NULL;
+  -- All done.
+  RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
