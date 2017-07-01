@@ -1087,7 +1087,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
         }
     }
 
-    public function getNumberRotatingSessions() {
+    public function getNumberRotatingSections() {
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM sections_rotating");
         return $this->course_db->row()['cnt'];
     }

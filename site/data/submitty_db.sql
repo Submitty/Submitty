@@ -207,7 +207,7 @@ BEGIN
 	-- TO DO: hsdbu_password needs to be altered by setup scripts OR perhaps
 	--        implement a different authentication method for hsdbu.
 	EXECUTE sync_db_conn;
-	CREATE USER MAPPING FOR CURRENT_USER SERVER data_sync OPTIONS (user 'hsdbu', password 'hsdbu_password');
+	CREATE USER MAPPING FOR CURRENT_USER SERVER data_sync; --OPTIONS (user 'hsdbu', password 'hsdbu_password');
 	CREATE FOREIGN TABLE IF NOT EXISTS table_sync (
 		user_id character varying NOT NULL,
 		user_firstname character varying NOT NULL,

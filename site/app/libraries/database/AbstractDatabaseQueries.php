@@ -196,7 +196,7 @@ abstract class AbstractDatabaseQueries {
 
     abstract public function getMaxRotatingSection();
 
-    abstract public function getNumberRotatingSessions();
+    abstract public function getNumberRotatingSections();
 
     abstract public function getGradersForAllRotatingSections($gradeable_id);
 
