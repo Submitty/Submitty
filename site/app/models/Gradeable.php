@@ -33,16 +33,15 @@ use app\libraries\Utils;
  * @method float getNormalPoints() Returns the total number of points for testcases that are not hidden nor are extra credit
  * @method bool setTeamAssignment()
  * @method bool getTeamAssignment()
- * @method setTaViewDate()
- * @method getOpenDate()
- * @method setOpenDate()
- * @method getDueDate()
- * @method getGradeStartDate()
- * @method setGradeStartDate(Date $datetime)
- * @method getGradeReleasedDate()
- * @method setGradeReleasedDate(Datetime $datetime)
+ * @method setTaViewDate(\DateTime $datetime)
+ * @method \DateTime getOpenDate(\DateTime $datetime)
+ * @method setOpenDate(\DateTime $datetime)
+ * @method \DateTime getDueDate()
+ * @method \DateTime getGradeStartDate()
+ * @method setGradeStartDate(\DateTime $datetime)
+ * @method \DateTime getGradeReleasedDate()
+ * @method setGradeReleasedDate(\DateTime $datetime)
  * @method bool getGradeByRegistration()
- * @method getOpenDate()
  * @method array getSubmittedFiles()
  * @method array getSvnFiles()
  * @method array getTestcases()
@@ -68,7 +67,7 @@ use app\libraries\Utils;
  * @method string getBucket()
  * @method int|null getGdId()
  * @method void setGdId(int $gd_id)
- * @method getUserViewedDate()
+ * @method \DateTime getUserViewedDate()
  */
 class Gradeable extends AbstractModel {
     
