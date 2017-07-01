@@ -735,13 +735,13 @@ class Course(object):
                 submitted = False
                 active = 1
                 submission_path = os.path.join(gradeable_path, user.id)
-                if max_submissions is not None and submission_count >= max_submissions:
-                    break
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
                     if gradeable.gradeable_config is None or \
                             (gradeable.submission_due_date < NOW and random.random() < 0.5) or \
                             (random.random() < 0.3):
+                        active = -1
+                    elif max_submissions is not None and submission_count >= max_submissions:
                         active = -1
                     else:
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
@@ -776,6 +776,7 @@ class Course(object):
                                 dst = os.path.join(submission_path, "1")
                                 create_gradeable_submission(src, dst)
 
+                #if gradeable.grade_start_date < NOW and gradeable.use_ta_grading:
                 if gradeable.grade_start_date < NOW:
                     if gradeable.grade_released_date < NOW or random.random() < 0.8:
                         status = 1 if gradeable.type != 0 or submitted else 0
@@ -787,7 +788,12 @@ class Course(object):
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         for component in gradeable.components:
-                            score = 0 if status == 0 else (random.randint(0, component.max_value * 2) / 2)
+                            if status == 0:
+                                score = 0
+                            elif component.max_value > 0:
+                                score = (random.randint(0, component.max_value * 2) / 2)
+                            else:
+                                score = (random.randint(component.max_value * 2, 0) / 2)
                             grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S")
                             conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="lorem ipsum",
