@@ -63,9 +63,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "tail",                    "/usr/bin/tail" },
 
     // Submitty Analysis Tools
-    { "submitty_count_token",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" },
-    { "submitty_count_node",     SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_node" },
-    { "submitty_count_function", SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_function" },
+    { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
 
     // for Computer Science I
     { "python",                  "/usr/bin/python" },
@@ -261,8 +259,8 @@ std::string validate_option(const std::string &program, const std::string &optio
   if (option[0] == '-') {
     // probably a normal option
   } else if (last_option == "-o" &&
-	     option.size() > 4 &&
-	     option.substr(option.size()-4,4) == ".out") {
+       option.size() > 4 &&
+       option.substr(option.size()-4,4) == ".out") {
     // ok, it's an executable name
   } else if (local_executable(program)) {
     // custom
@@ -387,12 +385,12 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
       if (ent == NULL) break;
       std::string thing = ent->d_name;
       if (wildcard_match(file_pattern,thing,logfile)) {
-	std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
-	validate_filename(directory+thing);
-	my_args.push_back(directory+thing);
-	count_matches++;
+        std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
+        validate_filename(directory+thing);
+        my_args.push_back(directory+thing);
+        count_matches++;
       } else {
-	//std::cout << "   no match  '" << thing << "'" << std::endl;
+        //std::cout << "   no match  '" << thing << "'" << std::endl;
       }
     }
     closedir(dir);
@@ -422,13 +420,61 @@ std::string get_program_name(const std::string &cmd, const nlohmann::json &whole
 }
 
 
+std::vector<std::string> break_into_tokens(const std::string &cmd) {
+  std::vector<std::string> answer;
+  std::string current_token;
+  std::stringstream ss(cmd);
+  char c;
+  bool quoted = false;
+
+  while (ss >> std::noskipws >> c) {
+    //std::cout << "char is '" << c << "'" << std::endl;
+
+    // ESCAPED CHARACTER
+    if (c == '\\') {
+      ss >> std::noskipws >> c;
+      current_token.push_back(c);
+    }
+
+    // SINGLE QUOTED STRING
+    else if (c =='\'') {
+
+    }
+
+    // WHITE SPACE
+    else if (c == ' ' ||
+             c == '\t' ||
+             c == '\n') {
+      if (current_token != "") {
+        answer.push_back(current_token);
+        //std::cout << "--->  '" << current_token << "'" << std::endl;
+        current_token = "";
+      }
+    }
+
+    // ALL OTHER CHARACTERS
+    else {
+      current_token.push_back(c);
+    }
+  }
+
+  // HANDLE LAST TOKEN
+  if (current_token != "") {
+    //std::cout << "--->  '" << current_token << "'" << std::endl;
+    answer.push_back(current_token);
+  }
+
+  return answer;
+}
+
+
 void parse_command_line(const std::string &cmd,
-			std::string &my_program,
-			std::vector<std::string> &my_args,
-			std::string &my_stdin,
-			std::string &my_stdout,
-			std::string &my_stderr,
-			std::ofstream &logfile, 
+      std::string &my_program,
+      std::vector<std::string> &my_args,
+      std::string &my_stdin,
+      std::string &my_stdout,
+      std::string &my_stderr,
+      std::ofstream &logfile, 
                         const nlohmann::json &whole_config) {
 
   std::cout << "PARSE COMMAND LINE " << cmd << std::endl;
@@ -436,19 +482,11 @@ void parse_command_line(const std::string &cmd,
   my_args.clear();
   my_program = my_stdin = my_stdout = my_stderr = "";
 
-  std::stringstream ss(cmd);
-  std::string token,token2;
+  std::vector<std::string> tokens = break_into_tokens(cmd);
 
-  while (ss >> token) {
-    assert (token.size() >= 1);
-
-    // handle escaped spaces in the command line
-    while (token.back() == '\\') {
-      token.pop_back();
-      token2 = " ";
-      ss >> token2;
-      token = token + ' ' + token2;
-    }
+  int which = 0;
+  while (which < tokens.size()) {
+    std::string token = tokens[which];
 
     // grab the program name
     if (my_program == "") {
@@ -462,9 +500,9 @@ void parse_command_line(const std::string &cmd,
     else if (token.substr(0,1) == "<") {
       assert (my_stdin == "");
       if (token.size() == 1) {
-        ss >> token; bool success = ss.good();
-        assert (success);
-        my_stdin = token;
+        which++;
+        assert (which < tokens.size());
+        my_stdin = tokens[which];
       } else {
         my_stdin = token.substr(1,token.size()-1);
       }
@@ -473,9 +511,9 @@ void parse_command_line(const std::string &cmd,
     else if (token.size() >= 2 && token.substr(0,2) == "1>") {
       assert (my_stdout == "");
       if (token.size() == 2) {
-        ss >> token; bool success = ss.good();
-        assert (success);
-        my_stdout = token;
+        which++;
+        assert (which < tokens.size());
+        my_stdout = tokens[which];
       } else {
         my_stdout = token.substr(2,token.size()-2);
       }
@@ -484,9 +522,9 @@ void parse_command_line(const std::string &cmd,
     else if (token.size() >= 2 && token.substr(0,2) == "2>") {
       assert (my_stderr == "");
       if (token.size() == 2) {
-        ss >> token; bool success = ss.good();
-        assert (success);
-        my_stderr = token;
+        which++;
+        assert (which < tokens.size());
+        my_stderr = tokens[which];
       } else {
         my_stderr = token.substr(2,token.size()-2);
       }
@@ -501,7 +539,9 @@ void parse_command_line(const std::string &cmd,
     // special exclude file option
     // FIXME: this is ugly, don't know how I want it to be done though
     else if (token == "-EXCLUDE_FILE") {
-      ss >> token;
+      which++;
+      assert (which < tokens.size());
+      token = tokens[which];
       std::cout << "EXCLUDE THIS FILE " << token << std::endl;
       for (std::vector<std::string>::iterator itr = my_args.begin();
            itr != my_args.end(); ) {
@@ -518,6 +558,8 @@ void parse_command_line(const std::string &cmd,
       //std::cout << "after  TOKEN IS " << token << std::endl;
       my_args.push_back(token);
     }
+
+    which++;
   }
 
 
@@ -529,7 +571,10 @@ void parse_command_line(const std::string &cmd,
   std::cout << "MY STDOUT:  '" << my_stdout  << "'" << std::endl;
   std::cout << "MY STDERR:  '" << my_stderr  << "'" << std::endl;
   std::cout << "MY ARGS (" << my_args.size() << ") :";
-
+  for (int i = 0; i < my_args.size(); i++) {
+    std::cout << "'" << my_args[i] << "' ";
+  }
+  std::cout << "\n" << std::endl;
 }
 
 // =====================================================================================
@@ -590,7 +635,7 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
   // output message to behind-the-scenes logfile (stdout), and to execute logfile (available to students)
   std::cout << message << std::endl;
   logfile   << message << "\nProgram Terminated " << std::endl;
-	    
+      
 }
 #endif
 
@@ -627,14 +672,14 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   char** temp_args = new char* [my_args.size()+2];   //memory leak here
   temp_args[0] = (char*) my_program.c_str();
   for (int i = 0; i < my_args.size(); i++) {
-    std::cout << "'" << my_args[i] << "' ";
+    //std::cout << "'" << my_args[i] << "' ";
     temp_args[i+1] = (char*) my_args[i].c_str();
   }
   temp_args[my_args.size()+1] = (char *)NULL;
 
   char** const my_char_args = temp_args;
 
-  std::cout << std::endl << std::endl;
+  //std::cout << std::endl << std::endl;
 
 
   // print out the command line to be executed
@@ -737,7 +782,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
 
   // SECCOMP: install the filter (system calls restrictions)
-  if (install_syscall_filter(prog_is_32bit, my_program,logfile)) {
+  if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
     std::cout << "seccomp filter install failed" << std::endl;
     return 1;
   }
@@ -800,7 +845,7 @@ void TerminateProcess(float &elapsed, int childPID) {
   if (kill_counter >= 5) {
     std::cout << "ERROR! kill counter for pid " << childPID << " is " << kill_counter << std::endl;
     std::cout << "  Check /var/log/syslog (or other logs) for possible kernel bug \n"
-	      << "  or hardware bug that is preventing killing this job. " << std::endl;
+        << "  or hardware bug that is preventing killing this job. " << std::endl;
   }
   usleep(10000); /* wait 1/100th of a second for the process to die */
   elapsed+=0.001;
@@ -884,10 +929,10 @@ int execute(const std::string &cmd,
             }
           }
           else{ //if we could not find out anything about our expected window 
-          	if(windowName != "" && !windowExists(windowName)){ //If we had a window but it no longer exists (crashed/shut)
-          		windowName = "";  //reset it's name to nothing so we can begin searching again.
+            if(windowName != "" && !windowExists(windowName)){ //If we had a window but it no longer exists (crashed/shut)
+              windowName = "";  //reset it's name to nothing so we can begin searching again.
               std::cout << "The students window shut midrun." << std::endl;
-          	}
+            }
           }
           wpid = waitpid(childPID, &status, WNOHANG);
           if (wpid == 0){
@@ -935,14 +980,14 @@ int execute(const std::string &cmd,
         }
       }
       if (time_kill){
-	     logfile << "ERROR: Maximum run time exceeded" << std::endl;
-	     logfile << "Program Terminated" << std::endl;
-	     result=3;
+       logfile << "ERROR: Maximum run time exceeded" << std::endl;
+       logfile << "Program Terminated" << std::endl;
+       result=3;
       }
       if (memory_kill){
-	     logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
-	     logfile << "Program Terminated" << std::endl;
-	     result=3;
+       logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
+       logfile << "Program Terminated" << std::endl;
+       result=3;
       }
       std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
       parent_result = system("date");

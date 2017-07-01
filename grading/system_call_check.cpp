@@ -219,8 +219,8 @@ void parse_strace_output(std::ifstream &strace_output_file,
       }
 
       if (itr == all_system_calls.end()) {
-	std::cout << "ERROR!  couldn't find system call " << full_name << std::endl;
-	continue;
+        std::cout << "ERROR!  couldn't find system call " << full_name << std::endl;
+        continue;
       }
       assert (itr != all_system_calls.end());
       std::string which_category = itr->second;
@@ -301,7 +301,7 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
 
   if (restricted_count > 0) {
     std::cout << "\nTo enable these system calls, add this block to the config.json for this gradeable:\n" << std::endl;
-    std::cout << "    \"resource_limits\" : {" << std::endl;
+    std::cout << "    \"allow_system_calls\" : [" << std::endl;
     for (std::map<std::string,std::map<std::string,int> >::const_iterator itr = USED_CATEGORIES.begin(); 
          itr != USED_CATEGORIES.end(); itr++) {
       std::map<std::string,std::string>::const_iterator cat_itr = categories.find(itr->first);
@@ -312,7 +312,7 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
       std::cout << std::endl;    
       restricted_count--;
     }
-    std::cout << "    }" << std::endl;
+    std::cout << "    ]" << std::endl;
   }
 
   

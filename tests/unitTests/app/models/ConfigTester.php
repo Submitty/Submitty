@@ -3,15 +3,28 @@
 namespace tests\unitTests\app\models;
 
 use app\exceptions\ConfigException;
+use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\IniParser;
 use app\libraries\Utils;
 use app\models\Config;
 
 class ConfigTester extends \PHPUnit_Framework_TestCase {
+    private $core;
+
     private $temp_dir = null;
     private $master = null;
 
+    public function setUp() {
+        $this->core = $this->createMock(Core::class);
+    }
+
+    public function tearDown() {
+        if ($this->temp_dir !== null && is_dir($this->temp_dir)) {
+            FileUtils::recursiveRmdir($this->temp_dir);
+        }
+    }
+    
     /**
      * This test ensures that the default value of the DEBUG flag within the config model is always false. This
      * means that if the value is not found within the ini file, we don't have to worry about accidently
@@ -21,12 +34,6 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $class = new \ReflectionClass('app\models\Config');
         $properties = $class->getDefaultProperties();
         $this->assertFalse($properties['debug']);
-    }
-
-    public function tearDown() {
-        if (is_dir($this->temp_dir)) {
-            FileUtils::recursiveRmdir($this->temp_dir);
-        }
     }
 
     private function createConfigFile($extra = array()) {
@@ -85,7 +92,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
 
     public function testConfig() {
         $this->createConfigFile();
-        $config = new Config("s17", "csci0000", $this->master);
+
+        $config = new Config($this->core, "s17", "csci0000", $this->master);
 
         $this->assertFalse($config->isDebug());
         $this->assertEquals("s17", $config->getSemester());
@@ -150,7 +158,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'display_custom_message' => false,
             'hidden_details' => array(
                 'database_name' => 'submitty_s17_csci0000'
-            )
+            ),
+            'modified' => false
         );
         $actual = $config->toArray();
 
@@ -162,7 +171,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
     public function testHiddenCourseUrl() {
         $extra = array('hidden_details' => array('course_url' => 'http://example.com/course'));
         $this->createConfigFile($extra);
-        $config = new Config("s17", "csci0000", $this->master);
+
+        $config = new Config($this->core, "s17", "csci0000", $this->master);
         $this->assertEquals("http://example.com/course/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/course", $config->getHiddenDetails()['course_url']);
     }
@@ -170,7 +180,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
     public function testHiddenTABaseUrl() {
         $extra = array('hidden_details' => array('ta_base_url' => 'http://example.com/hwgrading'));
         $this->createConfigFile($extra);
-        $config = new Config("s17", "csci0000", $this->master);
+
+        $config = new Config($this->core, "s17", "csci0000", $this->master);
         $this->assertEquals("http://example.com/hwgrading/", $config->getTaBaseUrl());
         $this->assertEquals("http://example.com/hwgrading", $config->getHiddenDetails()['ta_base_url']);
     }
@@ -178,21 +189,23 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
     public function testDefaultTimezone() {
         $extra = array('site_details' => array('timezone' => null));
         $this->createConfigFile($extra);
-        $config = new Config("s17", "csci0000", $this->master);
+        $config = new Config($this->core, "s17", "csci0000", $this->master);
         $this->assertEquals("America/New_York", $config->getTimezone()->getName());
     }
 
     public function testDebugTrue() {
         $extra = array('site_details' => array('debug' => true));
         $this->createConfigFile($extra);
-        $config = new Config("s17", "csci0000", $this->master);
+
+        $config = new Config($this->core, "s17", "csci0000", $this->master);
         $this->assertTrue($config->isDebug());
     }
 
     public function testDatabaseType() {
         $extra = array('database_details' => array('database_type' => 'mysql'));
         $this->createConfigFile($extra);
-        $config = new Config("s17", "csci0000", $this->master);
+
+        $config = new Config($this->core, "s17", "csci0000", $this->master);
         $this->assertEquals("mysql", $config->getDatabaseType());
     }
 
@@ -215,7 +228,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         try {
             $extra = array($section => null);
             $this->createConfigFile($extra);
-            new Config("s17", "csci0000", $this->master);
+    
+            new Config($this->core, "s17", "csci0000", $this->master);
             $this->fail("Should have thrown ConfigException");
         }
         catch (ConfigException $exception) {
@@ -262,7 +276,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         try {
             $extra = array($section => array($setting => null));
             $this->createConfigFile($extra);
-            new Config("s17", "csci0000", $this->master);
+    
+            new Config($this->core, "s17", "csci0000", $this->master);
             $this->fail("Should have thrown ConfigException for {$section}.{$setting}");
         }
         catch (ConfigException $exception) {
@@ -279,7 +294,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
     public function testInvalidTimezone() {
         $extra = array('site_details' => array('timezone' => "invalid"));
         $this->createConfigFile($extra);
-        new Config("s17", "csci0000", $this->master);
+
+        new Config($this->core, "s17", "csci0000", $this->master);
     }
 
     /**
@@ -288,7 +304,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
      */
     public function testInvalidSemester() {
         $this->createConfigFile();
-        new Config("invalid", "csci0000", $this->master);
+
+        new Config($this->core, "invalid", "csci0000", $this->master);
     }
 
     /**
@@ -297,7 +314,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
      */
     public function testInvalidCourse() {
         $this->createConfigFile();
-        new Config("s17", "invalid", $this->master);
+
+        new Config($this->core, "s17", "invalid", $this->master);
     }
 
     /**
@@ -307,7 +325,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
     public function testInvalidSubmittyPath() {
         $extra = array('site_details' => array('submitty_path' => '/invalid'));
         $this->createConfigFile($extra);
-        new Config("s17", "csci0000", $this->master);
+
+        new Config($this->core, "s17", "csci0000", $this->master);
     }
 
     /**
@@ -317,6 +336,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
     public function testInvalidLogPath() {
         $extra = array('logging_details' => array('submitty_log_path' => '/invalid'));
         $this->createConfigFile($extra);
-        new Config("s17", "csci0000", $this->master);
+
+        new Config($this->core, "s17", "csci0000", $this->master);
     }
 }

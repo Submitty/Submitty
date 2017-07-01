@@ -167,15 +167,15 @@ void IMPROVE(Change &c,
 
 
 void INSPECT_IMPROVE_CHANGES(std::ostream& ostr, Change &c,
-			    const std::vector<std::string> &adata,
-			    const std::vector<std::string> &bdata,
-			    const nlohmann::json& j,
-			    bool &only_whitespace,
-			    bool extra_student_output_ok,
-			    int &line_added,
-			    int &line_deleted,
-			    int &char_added,
-			    int &char_deleted) {
+                             const std::vector<std::string> &adata,
+                             const std::vector<std::string> &bdata,
+                             const nlohmann::json& j,
+                             bool &only_whitespace,
+                             bool extra_student_output_ok,
+                             int &line_added,
+                             int &line_deleted,
+                             int &char_added,
+                             int &char_deleted) {
 
   //  std::cout << "IN INSPECT IMPROVE CHANGES" << std::endl;
 
@@ -237,9 +237,7 @@ void INSPECT_IMPROVE_CHANGES(std::ostream& ostr, Change &c,
   // if there are more lines in a (student), that might be ok...
   if (c.a_changes.size() != c.b_changes.size()) {
     // but if extra student output is not ok
-    if (!extra_student_output_ok
-	||
-	c.b_changes.size() != 0)
+    if (!extra_student_output_ok || c.b_changes.size() != 0)
       only_whitespace = false;
   }
 
@@ -280,7 +278,7 @@ void INSPECT_IMPROVE_CHANGES(std::ostream& ostr, Change &c,
   char_added += tmp_char_added;
   char_deleted += tmp_char_deleted;
 
-#if 1
+#if 0
   if (j != nlohmann::json()) {
     std::cout << "line_added=" << std::setw(6) << tmp_line_added << " " << " line_deleted=" << std::setw(6) << tmp_line_deleted
               << " char_added=" << std::setw(6) << tmp_char_added << " " << " char_deleted=" << std::setw(6) << tmp_char_deleted << "  | cumm:  ";

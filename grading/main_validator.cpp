@@ -64,8 +64,7 @@ bool ShowHelper(const std::string& when, bool success) {
 double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::json &autocheck_js, 
                       const std::string &hw_id, std::string &testcase_message) {
 
-  //std::cerr << "----------------------------------------" << std::endl;
-  std::cerr << "autocheck #" << which_grader << std::endl;
+  std::cerr << "autocheck #" << which_grader+1 << " / " << my_testcase.numFileGraders() << std::endl;
 
   TestResultsFixedSize result = my_testcase.do_the_grading(which_grader);
 
@@ -81,7 +80,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
   double score = deduction*(1-grade);
   std::cout << "score=" << score << std::endl;
 
-  bool full_points = my_testcase.getPoints();
+  int full_points = my_testcase.getPoints();
   std::cout << "FULL POINTS " << full_points << std::endl;
 
   bool test_case_success = (result.getMessages().size() == 0);
@@ -97,7 +96,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
   //std::cout << "sm=" << show_message << "  sa=" << show_actual << "  se=" << show_expected << std::endl;
 
   if (show_actual == false && show_expected == true) {
-    std::cout << "ERROR show_actual == false & show_expected == true" << std::endl;
+    //std::cout << "ERROR show_actual == false & show_expected == true" << std::endl;
   }
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"actual_file");
@@ -122,7 +121,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       std::vector<std::string> files;
       wildcard_expansion(files, actual_file, std::cout);
       for (int i = 0; i < files.size(); i++) {
-	      actual_file = files[i];
+        actual_file = files[i];
       }
       bool studentFileExists, studentFileEmpty;
       bool expectedFileExists=false, expectedFileEmpty=false;
@@ -131,38 +130,38 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       if (studentFileExists) {
         if (show_actual) {
           autocheck_j["actual_file"] = actual_file;
-	      }
+        }
         expected = tcg.value("expected_file", "");
-	      if (expected != "") {
-	        fileStatus(expected, expectedFileExists,expectedFileEmpty);
-	        if (!expectedFileExists) {
-	          BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
-	          std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
-	        }
-	        else {
-  	        // PREPARE THE JSON DIFF FILE
-  	        std::stringstream diff_path;
-  	        diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
-  	        std::ofstream diff_stream(diff_path.str().c_str());
-  	        result.printJSON(diff_stream);
-  	        std::stringstream expected_path;
-  	        std::string id = hw_id;
-  	        std::string expected_out_dir = "test_output/" + id + "/";
-  	        expected_path << expected_out_dir << expected;
-  	        if (show_expected) {
-  	         autocheck_j["expected_file"] = expected_path.str();
-  	        }
-  	        if (show_actual) {
-  	         autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
-  	        }
-	        }
-	      }
+        if (expected != "") {
+          fileStatus(expected, expectedFileExists,expectedFileEmpty);
+          if (!expectedFileExists) {
+            BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
+            std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
+          }
+          else {
+            // PREPARE THE JSON DIFF FILE
+            std::stringstream diff_path;
+            diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
+            std::ofstream diff_stream(diff_path.str().c_str());
+            result.printJSON(diff_stream);
+            std::stringstream expected_path;
+            std::string id = hw_id;
+            std::string expected_out_dir = "test_output/" + id + "/";
+            expected_path << expected_out_dir << expected;
+            if (show_expected) {
+             autocheck_j["expected_file"] = expected_path.str();
+            }
+            if (show_actual) {
+             autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+            }
+          }
+        }
       }
-      std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
-      std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
+      //std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
+      //std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
 
       if (studentFileExists && !studentFileEmpty) {
-	      actual_file_to_print = true;
+        actual_file_to_print = true;
       }
     }
 
@@ -292,10 +291,13 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       if (autocheck_js.size() > 0) {
         tc_j["autochecks"] = autocheck_js;
       }
-      assert (my_score <= 1.00001);
+      assert (my_score <= 1.00002);
+      my_score += 0.00001;
+      assert (my_score <= 1.00002);
       my_score = std::max(0.0,std::min(1.0,my_score));
       std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
-      testcase_pts = (int)floor(my_score * my_testcase.getPoints());
+      testcase_pts = /*(int)*/ /*floor*/(my_score * my_testcase.getPoints());
+      std::cout << "thing " << testcase_pts << " " << my_score * my_testcase.getPoints() << std::endl;
       std::cout << "Grade: " << testcase_pts << std::endl;
     }
     if (testcase_message != "") tc_j["testcase_message"] = testcase_message;

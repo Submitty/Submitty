@@ -99,7 +99,7 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
 
 
 bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, 
-		     std::vector<std::string> &messages) {
+                     std::vector<std::string> &messages) {
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(j,"actual_file");
   if (filenames.size() != 1) {
@@ -134,8 +134,8 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
     messages.push_back("ERROR!  Student file '" + p_filename + "' too large for grader (" +
-		       std::to_string(student_file_contents.size()) + " vs. " +
-		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
+                       std::to_string(student_file_contents.size()) + " vs. " +
+                       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
     return false;
   }
   return true;
@@ -143,7 +143,7 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 
 
 bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, 
-		      std::vector<std::string> &messages) {
+                      std::vector<std::string> &messages) {
 
   std::string filename = j.value("expected_file","");
   if (filename == "") {
@@ -156,8 +156,8 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
   }
   if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
     messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader (" +
-		       std::to_string(expected_file_contents.size()) + " vs. " +
-		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
+                       std::to_string(expected_file_contents.size()) + " vs. " +
+                       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
     return false;
   }
   return true;
@@ -684,7 +684,7 @@ TestResultsFixedSize TestCase::do_the_grading (int j) const {
 
     // write answer to shared memory and terminate this process
     answer_ptr->PACK(tr_ptr);
-    std::cout << "do_the_grading, child completed successfully " << std::endl;
+    //std::cout << "do_the_grading, child completed successfully " << std::endl;
     exit(0);
 
   } else {
@@ -729,8 +729,8 @@ TestResultsFixedSize TestCase::do_the_grading (int j) const {
         }
         if (elapsed >= next_checkpoint) {
           rss_memory = resident_set_size(childPID);
-          std::cout << "do_the_grading running, time elapsed = " << elapsed
-                    << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
+          //std::cout << "do_the_grading running, time elapsed = " << elapsed
+          //          << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
           next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
         }
       }

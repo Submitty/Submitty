@@ -14,6 +14,7 @@ if sys.version_info[0] == 3:
 
 # global variable available to be used by the test suite modules
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
+SUBMITTY_TUTORIAL_DIR = "__INSTALL__FILLIN__SUBMITTY_TUTORIAL_DIR__"
 
 GRADING_SOURCE_DIR =  SUBMITTY_INSTALL_DIR + "/src/grading"
 
@@ -130,7 +131,7 @@ def run_tests(names):
             totalmodules -= 1
     if totalmodules == len(names):
         with bold + green:
-            print("All modules passed")
+            print("All " + str(len(names)) + " modules passed")
     else:
         with bold + red:
             print(str(totalmodules) + "/" + str(len(names)) + " modules passed")

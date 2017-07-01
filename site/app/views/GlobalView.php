@@ -87,16 +87,13 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections'))}">Setup Rotating Sections</a>
             </li>
             <li>
-                <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%20Days%20Allowed">Late Days Allowed</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late'))}">Late Days Allowed</a>
             </li>
             <li>
-                <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Excused%20Absense%20Extensions">Excused Absense Extensions</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">Excused Absense Extensions</a>
             </li>
             <li>
-                <a href="{$ta_base_url}/account/admin-csv-report.php?course={$course}&semester={$semester}&this=CSV%20Report">CSV Report</a>
-            </li>
-            <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">HWReports and Grade Summaries</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">HWReports, CSV Reports, and Grade Summaries</a>
             </li>
 
 HTML;

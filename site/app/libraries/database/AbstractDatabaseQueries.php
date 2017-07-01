@@ -136,6 +136,8 @@ abstract class AbstractDatabaseQueries {
 
     abstract public function getGradersForRotatingSections($g_id, $sections);
 
+    abstract public function getGradersFromUserType($user_type);
+
     /**
      * Gets all registration sections from the sections_registration table
 
@@ -149,6 +151,20 @@ abstract class AbstractDatabaseQueries {
      * @return array
      */
     abstract public function getRotatingSections();
+
+    /**
+     * Gets all the gradeable IDs of the rotating sections
+     *
+     * @return array
+     */
+    abstract public function getRotatingSectionsGradeableIDS();
+
+    /**
+     * Get gradeables graded by rotating section in the past and the sections each grader graded
+     *
+     * @return array
+     */
+    abstract public function getGradeablesPastAndSection();
 
     /**
      * Returns the count of all users in rotating sections that are in a non-null registration section. These are
@@ -180,7 +196,13 @@ abstract class AbstractDatabaseQueries {
 
     abstract public function getMaxRotatingSection();
 
+    abstract public function getNumberRotatingSessions();
+
+    abstract public function getGradersForAllRotatingSections($gradeable_id);
+
     abstract public function insertNewRotatingSection($section);
+
+    abstract public function setupRotatingSections($graders, $gradeable_id);
 
     abstract public function updateUsersRotatingSection($section, $users);
 
@@ -210,12 +232,49 @@ abstract class AbstractDatabaseQueries {
     abstract public function updateActiveVersion($g_id, $user_id, $team_id, $version);
 
     /**
-     * Given a gradeable objec, this updates all gradeable_component_data rows that are associated, updating the scores
-     * and comments that were left.
-     *
-     * @param \app\models\Gradeable $gradeable
+     * @param Gradeable $gradeable
+     */
+    abstract public function insertGradeableData(Gradeable $gradeable);
+
+    /**
+     * @param Gradeable $gradeable
      */
     abstract public function updateGradeableData(Gradeable $gradeable);
+
+    /**
+     * @param string             $gd_id
+     * @param GradeableComponent $component
+     */
+    abstract public function insertGradeableComponentData($gd_id, GradeableComponent $component);
+
+    /**
+     * @param string             $gd_id
+     * @param GradeableComponent $component
+     */
+    abstract public function updateGradeableComponentData($gd_id, GradeableComponent $component);
+
+    /**
+     * Creates a new gradeable in the database
+     *
+     * @param array $details
+     */
+    abstract public function createNewGradeable($details);
+
+    /**
+     * Gets an array that contains all revelant data in a gradeable.
+     * Uses the gradeable id to use the data in the database.
+     *
+     * @param $gradeable_id
+     *
+     */
+    abstract public function getGradeableData($gradeable_id);
+
+    /**
+     * Updates the current gradeable with new properties.
+     *
+     * @param array $details
+     */
+    abstract public function updateGradeable($details);
 
     /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
@@ -263,6 +322,12 @@ abstract class AbstractDatabaseQueries {
     abstract public function removeSessionById($session_id);
 
     /**
+     * gets ids of all electronic gradeables
+     */
+    abstract public function getAllElectronicGradeablesIds();
+
+
+    /**
      * Create a new team id and team in gradeable_teams for given gradeable, add $user_id as a member
      * @param string $g_id
      * @param string $user_id
@@ -293,6 +358,7 @@ abstract class AbstractDatabaseQueries {
     /**
      * Return an array of Team objects for all teams on given gradeable
      * @param string $g_id
+     * @return \app\models\Team[]
      */
     abstract public function getTeamsByGradeableId($g_id);
 
@@ -300,6 +366,41 @@ abstract class AbstractDatabaseQueries {
      * Return Team object for team which the given user belongs to on the given gradeable
      * @param string $g_id
      * @param string $user_id
+     * @return \app\models\Team
      */
     abstract public function getTeamByUserId($g_id, $user_id);
+
+    /**
+     * Update/Insert data from TA grading form to gradeable_data, gradeable_component_data, late_days_used
+     *
+     * @param array $details
+     */
+    abstract public function submitTAGrade($details);
+
+    /**
+     * Return an array of users with late days
+     */
+    abstract public function getUsersWithLateDays();
+
+    /**
+     * Return an array of users with extensions
+     * @param string $gradeable_id
+     */
+    abstract public function getUsersWithExtensions($gradeable_id);
+
+    /**
+     * Updates a given user's late days allowed effective at a given time
+     * @param string $user_id
+     * @param string $timestamp
+     * @param integer $days
+     */
+    abstract public function updateLateDays($user_id, $timestamp, $days);
+
+    /**
+     * Updates a given user's extensions for a given homework
+     * @param string $user_id
+     * @param string $g_id
+     * @param integer $days
+     */
+    abstract public function updateExtensions($user_id, $g_id, $days);
 }
