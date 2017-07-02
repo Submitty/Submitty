@@ -141,11 +141,16 @@ def main():
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S"))
     submitty_conn.close()
 
+    today = datetime.today()
+    semester = 'Fall'
+    if today.month < 7:
+        semester = 'Spring'
+
     list_of_courses_file = "/usr/local/submitty/site/app/views/current_courses.php"
     with open(list_of_courses_file, "w") as courses_file:
         courses_file.write("")
         for course_id in courses.keys():
-            courses_file.write('<a href="http://192.168.56.101/index.php?semester=s17&course='+course_id+'">'+course_id+', Spring 2017</a>')
+            courses_file.write('<a href="http://192.168.56.101/index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
             courses_file.write('<br />')
 
     for course_id in courses.keys():
@@ -704,7 +709,6 @@ class Course(object):
             }).where(users_table.c.user_id == bindparam('b_user_id'))
 
             conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
-
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 conn.execute(reg_table.insert(),
                              user_id=user.get_detail(self.code, "id"),
