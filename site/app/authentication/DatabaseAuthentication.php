@@ -16,9 +16,9 @@ class DatabaseAuthentication extends AbstractAuthentication {
 
     public function authenticate() {
         $user = $this->core->getQueries()->getSubmittyUser($this->user_id);
-        if (!isset($user['user_id'])) {
+        if (!$user->isLoaded()) {
             return false;
         }
-        return password_verify($this->password, $user['user_password']);
+        return password_verify($this->password, $user->getPassword());
     }
 }
