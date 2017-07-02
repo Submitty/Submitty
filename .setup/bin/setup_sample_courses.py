@@ -123,7 +123,7 @@ def main():
     for course_id in courses.keys():
 
         with open(list_of_courses_file, "a") as courses_file:
-            print('<a href="http://192.168.56.101/index.php?semester=s17&course='+course_id+'">'+course_id+', Spring 2017</a>',file=courses_file)
+            print('<a href="http://192.168.56.101/index.php?semester=f17&course='+course_id+'">'+course_id+', Fall 2017</a>',file=courses_file)
             print("<br>", file=courses_file)
 
         course = courses[course_id]
@@ -807,11 +807,15 @@ class Course(object):
                     print("Creating queue file:", queue_file)
                     queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
                     with open(queue_file, "w") as open_file:
+                        # FIXME: This will need to be adjusted for team assignments!
                         json.dump({"semester": self.semester,
                                    "course": self.code,
                                    "gradeable": gradeable.id,
                                    "user": user.id,
-                                   "version": 1}, open_file)
+                                   "version": 1,
+                                   "who": user.id,
+                                   "is_team": False,
+                                   "team": ""}, open_file)
         conn.close()
         os.environ['PGPASSWORD'] = ""
 
