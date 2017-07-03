@@ -286,7 +286,7 @@ class SubmissionController extends AbstractController {
                 for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
                     $textbox_answer_val = $textbox_answer_array[$i];
                     if ($textbox_answer_val != "") $empty_textboxes = false;
-                    $filename = $gradeable->getTextBoxes()[$i]['filename'];
+                    $filename = $gradeable->getTextboxes()[$i]['filename'];
                     $dst = FileUtils::joinPaths($version_path, $filename);
                     // FIXME: add error checking
                     $file = fopen($dst, "w");
