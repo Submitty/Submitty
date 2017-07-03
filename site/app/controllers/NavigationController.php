@@ -14,28 +14,38 @@ use app\models\Gradeable;
 use app\models\GradeableList;
 
 class NavigationController extends AbstractController {
-    /**
-     * @var GradeableList
-     */
-    private $gradeables_list;
-    
     public function __construct(Core $core) {
         parent::__construct($core);
-        $this->gradeables_list = new GradeableList($this->core);
     }
 
     public function run() {
+        switch ($_REQUEST['page']) {
+            case 'no_access':
+                $this->noAccess();
+                break;
+            default:
+                $this->navigationPage();
+                break;
+        }
+    }
+
+    private function noAccess() {
+        $this->core->getOUtput()->renderOutput('Navigation', 'noAccessCourse');
+    }
+
+    private function navigationPage() {
+        $gradeables_list = new GradeableList($this->core);
         $this->core->getOutput()->addCSS("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
         $this->core->getOutput()->addCSS("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic");
         $this->core->getOutput()->addCSS("https://fonts.googleapis.com/css?family=PT+Sans:700,700italic");
   		$this->core->getOutput()->addCSS("https://fonts.googleapis.com/css?family=Inconsolata");
         
-        $future_gradeables_list = $this->gradeables_list->getFutureGradeables();
-        $beta_gradeables_list = $this->gradeables_list->getBetaGradeables();
-        $open_gradeables_list = $this->gradeables_list->getOpenGradeables();
-        $closed_gradeables_list = $this->gradeables_list->getClosedGradeables();
-        $grading_gradeables_list = $this->gradeables_list->getGradingGradeables();
-        $graded_gradeables_list = $this->gradeables_list->getGradedGradeables();
+        $future_gradeables_list = $gradeables_list->getFutureGradeables();
+        $beta_gradeables_list = $gradeables_list->getBetaGradeables();
+        $open_gradeables_list = $gradeables_list->getOpenGradeables();
+        $closed_gradeables_list = $gradeables_list->getClosedGradeables();
+        $grading_gradeables_list = $gradeables_list->getGradingGradeables();
+        $graded_gradeables_list = $gradeables_list->getGradedGradeables();
         
         $sections_to_lists = array("FUTURE" => $future_gradeables_list,
                                    "BETA" => $beta_gradeables_list,

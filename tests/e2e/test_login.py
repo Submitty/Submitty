@@ -45,8 +45,8 @@ class TestLogin(BaseTestCase):
         self.driver.find_element_by_name("user_id").send_keys("pearsr")
         self.driver.find_element_by_name("password").send_keys("pearsr")
         self.driver.find_element_by_name("login").click()
-        error = self.driver.find_element_by_id("error-0")
-        self.assertEqual("Could not login using that user id or password", error.text)
+        element = self.driver.find_element_by_class_name("content")
+        self.assertEqual("You don't have access to Course Name. If you think this is mistake, please contact your instructor to gain access.", element.text)
 
 if __name__ == "__main__":
     unittest2.main()

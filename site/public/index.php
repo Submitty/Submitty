@@ -156,7 +156,15 @@ if (!$logged_in) {
         $_REQUEST['page'] = 'login';
     }
 }
+elseif ($core->getUser() === null) {
+    $core->loadSubmittyUser();
+    if ($_REQUEST['component'] !== 'authentication') {
+        $_REQUEST['component'] = 'navigation';
+        $_REQUEST['page'] = 'no_access';
+    }
+}
 
+// Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
     $log = false;
     $action = "";

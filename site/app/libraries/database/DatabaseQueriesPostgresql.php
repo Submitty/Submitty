@@ -14,7 +14,7 @@ class DatabaseQueriesPostgresql extends AbstractDatabaseQueries{
 
     public function getSubmittyUser($user_id) {
         $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
-        return new User($this->core, $this->submitty_db->row());
+        return ($this->submitty_db->rowCount() > 0) ? new User($this->core, $this->submitty_db->row()) : null;
     }
 
     public function getUserById($user_id) {
@@ -27,7 +27,7 @@ LEFT JOIN (
 	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_id=?", array($user_id));
-        return new User($this->core, $this->course_db->row());
+        return ($this->course_db->rowCount() > 0) ? new User($this->core, $this->course_db->row()) : null;
     }
 
     public function getGradingSectionsByUserId($user_id) {
