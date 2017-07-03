@@ -776,8 +776,8 @@ class Course(object):
                                 dst = os.path.join(submission_path, "1")
                                 create_gradeable_submission(src, dst)
 
-                #if gradeable.grade_start_date < NOW and gradeable.use_ta_grading:
-                if gradeable.grade_start_date < NOW:
+                if gradeable.grade_start_date < NOW and gradeable.use_ta_grading:
+                #if gradeable.grade_start_date < NOW:
                     if gradeable.grade_released_date < NOW or random.random() < 0.8:
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
@@ -867,6 +867,9 @@ class Gradeable(object):
 
             if 'eg_max_random_submissions' in gradeable:
                 self.max_random_submissions = int(gradeable['eg_max_random_submissions'])
+
+            if 'g_bucket' in gradeable:
+                self.syllabus_bucket = gradeable['g_bucket']
 
             if 'config_path' in gradeable:
                 self.config_path = gradeable['config_path']
