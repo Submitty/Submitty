@@ -144,8 +144,10 @@ class Core {
      */
     public function __destruct() {
         if ($this->course_db !== null) {
-            $this->getSubmittyDB()->disconnect();
-            $this->getCourseDB()->disconnect();
+            $this->course_db->disconnect();
+        }
+        if ($this->submitty_db !== null) {
+            $this->submitty_db->disconnect();
         }
     }
 

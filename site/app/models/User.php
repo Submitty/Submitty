@@ -76,7 +76,7 @@ class User extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details) {
+    public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;

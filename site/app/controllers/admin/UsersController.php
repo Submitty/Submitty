@@ -79,10 +79,17 @@ class UsersController extends AbstractController {
             $this->core->addErrorMessage("Invalid CSRF token.");
             $this->core->redirect($return_url);
         }
-        $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
-        if (!$user->isLoaded() && $_POST['edit_user'] == "true") {
-            $this->core->addErrorMessage("No user found with that user id");
-            $this->core->redirect($return_url);
+
+        if ($_POST['edit_user'] == "true") {
+            $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
+            if ($user === null) {
+                $this->core->addErrorMessage("No user found with that user id");
+                $this->core->redirect($return_url);
+            }
+        }
+        else {
+            $user = $this->core->loadModel(User::class);
+            $user->setId($_POST['user_id']);
         }
 
         $user->setFirstName($_POST['user_firstname']);
