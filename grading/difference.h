@@ -17,25 +17,25 @@
 class Change {
 public:
 
-	// Starting changeblock line for input (student)
-	int a_start;
+  // Starting changeblock line for input (student)
+  int a_start;
 
-	// Same for (expected)
-	int b_start;
+  // Same for (expected)
+  int b_start;
 
-	// Vector of lines in changeblock that contain discrepancies (student)
-	std::vector<int> a_changes;
+  // Vector of lines in changeblock that contain discrepancies (student)
+  std::vector<int> a_changes;
 
-	// Same for (expected)
-	std::vector<int> b_changes;
+  // Same for (expected)
+  std::vector<int> b_changes;
 
-	// Structure for changed character/word indices (student)
-	std::vector<std::vector<int> > a_characters;
+  // Structure for changed character/word indices (student)
+  std::vector<std::vector<int> > a_characters;
 
-	// Same for (expected)
-	std::vector<std::vector<int> > b_characters;
+  // Same for (expected)
+  std::vector<std::vector<int> > b_characters;
 
-	void clear();
+  void clear();
 };
 
 
@@ -48,16 +48,16 @@ public:
  * PURPOSE: Inspect the changes for student output and expected output
  */
 inline void INSPECT_IMPROVE_CHANGES(std::ostream& ostr,
-			    Change &c,
-			    const std::vector<std::vector<std::string> > &a,
-			    const std::vector<std::vector<std::string> >  &b,
-			    const nlohmann::json& j,
-			    bool &only_whitespace,
-			    bool extra_student_output_ok,
-			    int &line_added,
-			    int &line_deleted,
-			    int &char_added,
-			    int &char_deleted) {
+          Change &c,
+          const std::vector<std::vector<std::string> > &a,
+          const std::vector<std::vector<std::string> >  &b,
+          const nlohmann::json& j,
+          bool &only_whitespace,
+          bool extra_student_output_ok,
+          int &line_added,
+          int &line_deleted,
+          int &char_added,
+          int &char_deleted) {
   std::cout << "NOT HANDLING THINGS IN THIS CASE... " << std::endl;
   only_whitespace = false;
 }
@@ -89,9 +89,9 @@ void INSPECT_IMPROVE_CHANGES(std::ostream& ostr, Change &c,
  * PUROSE: Clear and reset data for next block to check
  */
 inline void Change::clear() {
-	a_start = b_start = -1;
-	a_changes.clear();
-	b_changes.clear();
+  a_start = b_start = -1;
+  a_changes.clear();
+  b_changes.clear();
 }
 
 

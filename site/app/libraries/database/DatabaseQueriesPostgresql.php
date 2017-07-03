@@ -34,7 +34,7 @@ LEFT JOIN (
 	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_id=?", array($user_id));
-        return new User($this->database->row());
+        return new User($this->core, $this->database->row());
     }
     
     public function getAllUsers($section_key="registration_section") {
@@ -51,7 +51,7 @@ LEFT JOIN (
 ORDER BY u.{$section_key}, u.user_id");
         $return = array();
         foreach ($this->database->rows() as $row) {
-            $return[] = new User($row);
+            $return[] = new User($this->core, $row);
         }
         return $return;
     }
@@ -69,7 +69,7 @@ WHERE u.user_group < 4
 ORDER BY u.registration_section, u.user_id");
         $return = array();
         foreach ($this->database->rows() as $row) {
-            $return[] = new User($row);
+            $return[] = new User($this->core, $row);
         }
         return $return;
     }
@@ -122,7 +122,7 @@ WHERE gc.g_id=?
 
         $return = array();
         foreach ($this->database->rows() as $row) {
-            $return[$row['gc_id']] = new GradeableComponent($row);
+            $return[$row['gc_id']] = new GradeableComponent($this->core, $row);
         }
         return $return;
     }
@@ -154,7 +154,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         $return = array();
         foreach ($this->database->rows() as $row) {
             $row['submission_time'] = new \DateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
-            $return[$row['g_version']] = new GradeableVersion($row, $due_date);
+            $return[$row['g_version']] = new GradeableVersion($this->core, $row, $due_date);
         }
 
         return $return;
@@ -176,11 +176,10 @@ ORDER BY egd.g_version", array($g_id, $user_id));
      *      components for the SELECT cause and in the FROM clause (don't need gradeable_data if this is null, etc.)
      *  section_key:
      */
-    public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
+    public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id") {
         $return = array();
         $g_ids_query = "";
         $users_query = "";
-        $g_type_query = "";
         $params = array();
         if ($g_ids !== null) {
             if (!is_array($g_ids)) {
@@ -203,19 +202,6 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                 $users_query = implode(",", array_fill(0, count($user_ids), "?"));
                 $params = array_merge($params, $user_ids);
             }
-            else {
-                return $return;
-            }
-        }
-        // added toggling of gradeable type to only grab Homeworks for HWReport generation
-        if ($g_type !== null) {
-            if (!is_array($g_type)) {
-                $g_type = array($g_type);
-            }
-            if (count($g_type) > 0) {
-                $g_type_query = implode(",", array_fill(0, count($g_type), "?"));
-                $params = array_merge($params, $g_type);
-            } 
             else {
                 return $return;
             }
@@ -267,12 +253,19 @@ SELECT";
   gd.gd_grader_id,
   gd.gd_overall_comment,
   gd.gd_status,
+  gd.gd_user_viewed_date,
   gd.gd_late_days_used,
   gd.gd_active_version,
   gd.array_gcd_gc_id,
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
-  gd.gd_user_viewed_date,
+  gd.array_gcd_grade_time,
+  gd.array_gcd_user_id,
+  gd.array_gcd_user_firstname,
+  gd.array_gcd_user_preferred_firstname,
+  gd.array_gcd_user_lastname,
+  gd.array_gcd_user_email,
+  gd.array_gcd_user_group,
   CASE WHEN egd.active_version IS NULL THEN 
     0 ELSE 
     egd.active_version 
@@ -283,7 +276,8 @@ SELECT";
   egd.autograding_non_hidden_extra_credit,
   egd.autograding_hidden_non_extra_credit,
   egd.autograding_hidden_extra_credit,
-  egd.submission_time
+  egd.submission_time,
+  egv.highest_version
 FROM users AS u
 NATURAL JOIN gradeable AS g";
         }
@@ -317,15 +311,30 @@ LEFT JOIN (
     in_gd.*,
     in_gcd.array_gcd_gc_id,
     in_gcd.array_gcd_score,
-    in_gcd.array_gcd_component_comment
+    in_gcd.array_gcd_component_comment,
+    in_gcd.array_gcd_grade_time,
+    in_gcd.array_gcd_user_id,
+    in_gcd.array_gcd_user_firstname,
+    in_gcd.array_gcd_user_preferred_firstname,
+    in_gcd.array_gcd_user_lastname,
+    in_gcd.array_gcd_user_email,
+    in_gcd.array_gcd_user_group
   FROM gradeable_data as in_gd
   LEFT JOIN (
     SELECT
       gd_id,
       array_agg(gc_id) AS array_gcd_gc_id,
       array_agg(gcd_score) as array_gcd_score,
-      array_agg(gcd_component_comment) as array_gcd_component_comment
-    FROM gradeable_component_data
+      array_agg(gcd_component_comment) as array_gcd_component_comment,
+      array_agg(gcd_grade_time) AS array_gcd_grade_time,
+      array_agg(u.user_id) AS array_gcd_user_id,
+      array_agg(u.user_firstname) AS array_gcd_user_firstname,
+      array_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
+      array_agg(u.user_lastname) AS array_gcd_user_lastname,
+      array_agg(u.user_email) AS array_gcd_user_email,
+      array_agg(u.user_group) AS array_gcd_user_group
+    FROM gradeable_component_data AS gcd
+    INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id 
     GROUP BY gd_id
   ) AS in_gcd ON in_gd.gd_id = in_gcd.gd_id
 ) AS gd ON gd.gd_user_id = u.user_id AND g.g_id = gd.g_id
@@ -339,7 +348,16 @@ LEFT JOIN (
     SELECT
       t.user_id
     FROM gradeable_teams AS gt, teams AS t
-    WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egd.team_id AND t.state = 1))";
+    WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egd.team_id AND t.state = 1)
+) 
+LEFT JOIN (
+  SELECT
+    g_id,
+    user_id,
+    count(*) as highest_version
+  FROM electronic_gradeable_data
+  GROUP BY g_id, user_id
+) as egv ON g.g_id = egv.g_id AND u.user_id = egv.user_id";
         }
 
         $where = array();
@@ -348,9 +366,6 @@ LEFT JOIN (
         }
         if ($user_ids !== null) {
             $where[] = "u.user_id IN ({$users_query})";
-        }
-        if ($g_type !== null) {
-            $where[] = "g.g_gradeable_type IN ({$g_type_query})";
         }
         if (count($where) > 0) {
             $query .= "
@@ -365,83 +380,11 @@ ORDER BY u.{$section_key}, {$sort_key}";
         $this->database->query($query, $params);
 
         foreach ($this->database->rows() as $row) {
-            $user = (isset($row['user_id']) && $row['user_id'] !== null) ? new User($row) : null;
+            $user = (isset($row['user_id']) && $row['user_id'] !== null) ? new User($this->core, $row) : null;
             $return[] = new Gradeable($this->core, $row, $user);
         }
 
         return $return;
-    }
-    
-    // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query 
-    public function getLateDayUpdates() {
-        $this->database->query("SELECT * FROM late_days");
-        return $this->database->rows();
-    }
-    
-    // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
-    public function getLateDayInformation() {
-        $params = array(300);
-
-        $query = "SELECT
-                      submissions.*
-                      , coalesce(late_day_exceptions, 0) extensions
-                      , greatest(0, ceil((extract(EPOCH FROM(coalesce(submission_time, eg_submission_due_date) - eg_submission_due_date)) - (?*60))/86400):: integer) as days_late
-                    FROM
-                      (
-                        SELECT
-                        base.g_id
-                        , g_title
-                        , base.assignment_allowed
-                        , base.user_id
-                        , eg_submission_due_date
-                        , coalesce(active_version, -1) as active_version
-                        , submission_time
-                      FROM
-                      (
-                        --Begin BASE--
-                        SELECT
-                          g.g_id,
-                          u.user_id,
-                          g.g_title,
-                          eg.eg_submission_due_date,
-                          eg.eg_late_days AS assignment_allowed
-                        FROM
-                          users u
-                          , gradeable g
-                          , electronic_gradeable eg
-                        WHERE
-                          g.g_id = eg.g_id
-                        --End Base--
-                      ) as base
-                    FULL JOIN
-                    (
-                      --Begin Details--
-                      SELECT
-                        g_id
-                        , user_id
-                        , active_version
-                        , g_version
-                        , submission_time
-                      FROM
-                        electronic_gradeable_version egv NATURAL JOIN electronic_gradeable_data egd
-                      WHERE
-                        egv.active_version = egd.g_version
-                      --End Details--
-                    ) as details
-                    ON
-                      base.user_id = details.user_id
-                      AND base.g_id = details.g_id
-                    ) 
-                      AS submissions 
-                      FULL OUTER JOIN 
-                        late_day_exceptions AS lde 
-                      ON submissions.g_id = lde.g_id 
-                      AND submissions.user_id = lde.user_id";
-
-        //Query database and return results.
-        
-        $this->database->query($query, $params);
-        return $this->core->getDatabase()->rows();
     }
 
     public function getUsersByRegistrationSections($sections) {
@@ -450,7 +393,7 @@ ORDER BY u.{$section_key}, {$sort_key}";
             $query = implode(",", array_fill(0, count($sections), "?"));
             $this->database->query("SELECT * FROM users WHERE registration_section IN ({$query}) ORDER BY registration_section", $sections);
             foreach ($this->database->rows() as $row) {
-                $return[] = new User($row);
+                $return[] = new User($this->core, $row);
             }
         }
         return $return;
@@ -531,7 +474,7 @@ ORDER BY g.sections_registration_id, g.user_id", $params);
                 $return[$row['sections_registration_id']] = array();
             }
             if (!isset($user_store[$row['user_id']])) {
-                $user_store[$row['user_id']] = new User($row);
+                $user_store[$row['user_id']] = new User($this->core, $row);
             }
             $return[$row['sections_registration_id']][] = $user_store[$row['user_id']];
         }
@@ -553,7 +496,7 @@ ORDER BY g.sections_registration_id, g.user_id", $params);
             $query = implode(",", array_fill(0, count($sections), "?"));
             $this->database->query("SELECT * FROM users WHERE rotating_section IN ({$query}) ORDER BY rotating_section", $sections);
             foreach ($this->database->rows() as $row) {
-                $return[] = new User($row);
+                $return[] = new User($this->core, $row);
             }
         }
         return $return;
@@ -634,7 +577,7 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
                 $return[$row['sections_rotating_id']] = array();
             }
             if (!isset($user_store[$row['user_id']])) {
-                $user_store[$row['user_id']] = new User($row);
+                $user_store[$row['user_id']] = new User($this->core, $row);
             }
             $return[$row['sections_rotating_id']][] = $user_store[$row['user_id']];
         }
@@ -690,6 +633,27 @@ ORDER BY rotating_section");
         return $this->database->rows();
     }
 
+        public function getGradersForAllRotatingSections($gradeable_id) {
+        $this->database->query("
+    SELECT 
+        u.user_id, array_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
+    FROM 
+        users AS u INNER JOIN grading_rotating AS gr ON u.user_id = gr.user_id
+    WHERE 
+        g_id=?
+    AND 
+        u.user_group BETWEEN 1 AND 3
+    GROUP BY 
+        u.user_id
+    ",array($gradeable_id));
+        return $this->database->rows();
+    }
+
+    public function getGradersFromUserType($user_type) {
+        $this->database->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array($user_type));
+        return $this->database->rows();
+    }
+
     public function getCountNullUsersRotatingSections() {
         $this->database->query("
 SELECT rotating_section, count(*) as count
@@ -740,27 +704,6 @@ ORDER BY user_id ASC");
         return $row['max'];
     }
 
-    public function getGradersForAllRotatingSections($gradeable_id) {
-        $this->database->query("
-    SELECT 
-        u.user_id, array_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
-    FROM 
-        users AS u INNER JOIN grading_rotating AS gr ON u.user_id = gr.user_id
-    WHERE 
-        g_id=?
-    AND 
-        u.user_group BETWEEN 1 AND 3
-    GROUP BY 
-        u.user_id
-    ",array($gradeable_id));
-        return $this->database->rows();
-    }
-
-    public function getGradersFromUserType($user_type) {
-        $this->database->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array($user_type));
-        return $this->database->rows();
-    }
-
     public function insertNewRotatingSection($section) {
         $this->database->query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", array($section));
     }
@@ -779,7 +722,6 @@ ORDER BY user_id ASC");
         $update_string = implode(",", array_pad(array(), count($users), "?"));
         $this->database->query("UPDATE users SET rotating_section=? WHERE user_id IN ({$update_string})", $update_array);
     }
-
     public function insertVersionDetails($g_id, $user_id, $team_id, $version, $timestamp) {
         $this->database->query("
 INSERT INTO electronic_gradeable_data 
@@ -815,39 +757,32 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
         }  
     }
 
-    public function updateGradeableData(Gradeable $gradeable) {
-        $this->database->beginTransaction();
-        if ($gradeable->getGdId() === null) {
-            $params = array($gradeable->getId(), $gradeable->getUser()->getId(), $gradeable->getGrader()->getId(),
-                            $gradeable->getOverallComment(), $gradeable->getStatus(), 0,
-                            $gradeable->getActiveVersion());
-            $this->database->query("INSERT INTO 
-gradeable_data (g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version)
-VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
-            $gradeable->setGdId($this->database->getLastInsertId("gradeable_data_gd_id_seq"));
-        }
-        else {
-            $this->database->query("UPDATE gradeable_data SET gd_grader_id=? WHERE gd_id=?", array($gradeable->getGrader()->getId(), $gradeable->getGdId()));
-        }
-
-        foreach ($gradeable->getComponents() as $component) {
-            if ($component->getHasGrade()) {
-                $params = array($component->getScore(), $component->getComment(), $component->getId(), $gradeable->getGdId());
-                $this->database->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=? WHERE gc_id=? AND gd_id=?", $params);
-            }
-            else {
-                $params = array($component->getId(), $gradeable->getGdId(), $component->getScore(),
-                                $component->getComment());
-                $this->database->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment) 
-VALUES (?, ?, ?, ?)", $params);
-            }
-
-        }
-        $this->database->commit();
+    public function insertGradeableData(Gradeable $gradeable) {
+        $params = array($gradeable->getId(), $gradeable->getUser()->getId(),
+                        $gradeable->getOverallComment(), $gradeable->getStatus(), 0,
+                        $gradeable->getActiveVersion());
+        $this->database->query("INSERT INTO 
+gradeable_data (g_id, gd_user_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version)
+VALUES (?, ?, ?, ?, ?, ?)", $params);
+        return $this->database->getLastInsertId("gradeable_data_gd_id_seq");
     }
 
+    public function insertGradeableComponentData($gd_id, GradeableComponent $component) {
+        $params = array($component->getId(), $gd_id, $component->getScore(),
+                        $component->getComment(), $component->getGrader()->getId(), $component->getGradeTime()->format("Y-m-d H:i:s"));
+        $this->database->query("
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grade_time) 
+VALUES (?, ?, ?, ?, ?, ?)", $params);
+    }
+
+    public function updateGradeableComponentData($gd_id, GradeableComponent $component) {
+        $params = array($component->getScore(), $component->getComment(), $component->getGrader()->getId(),
+                        $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
+        $this->database->query("
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?",
+            $params);
+    }
+  
     public function createNewGradeable($details) {
         $this->database->beginTransaction();
 
@@ -1090,6 +1025,68 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
         $this->database->commit();
     }
 
+    public function updateGradeableData(Gradeable $gradeable) {
+        $this->database->beginTransaction();
+        if ($gradeable->getGdId() === null) {
+            $params = array($gradeable->getId(), $gradeable->getUser()->getId(), $gradeable->getGrader()->getId(),
+                            $gradeable->getOverallComment(), $gradeable->getStatus(), 0,
+                            $gradeable->getActiveVersion());
+            $this->database->query("INSERT INTO 
+gradeable_data (g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version)
+VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
+            $gradeable->setGdId($this->database->getLastInsertId("gradeable_data_gd_id_seq"));
+        }
+        else {
+            $this->database->query("UPDATE gradeable_data SET gd_grader_id=? WHERE gd_id=?", array($gradeable->getGrader()->getId(), $gradeable->getGdId()));
+        }
+
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->getHasGrade()) {
+                $params = array($component->getScore(), $component->getComment(), $component->getId(), $gradeable->getGdId());
+                $this->database->query("
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=? WHERE gc_id=? AND gd_id=?", $params);
+            }
+            else {
+                $params = array($component->getId(), $gradeable->getGdId(), $component->getScore(),
+                                $component->getComment());
+                $this->database->query("
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment) 
+VALUES (?, ?, ?, ?)", $params);
+            }
+
+        }
+        $this->database->commit();
+    }
+
+        //the better way to update a gradeable, this way should eventually replace the old way
+        public function updateGradeable2(Gradeable $gradeable) {
+        $this->database->beginTransaction();
+        $tempTeam = ($gradeable->isTeamAssignment() == 1) ? '1' : '0';
+        $tempRegistration = ($gradeable->getGradeByRegistration() == 1) ? '1' : '0';
+        //updates the data common for all gradeables.
+        $params = array($gradeable->getName(), $gradeable->getTaInstructions(), $tempTeam, $gradeable->getType(),
+                        $tempRegistration, $gradeable->getGradeStartDate()->format('Y/m/d H:i:s'), $gradeable->getGradeReleasedDate()->format('Y/m/d H:i:s'),
+                        $gradeable->getBucket(), $gradeable->getMinimumGradingGroup(), $gradeable->getInstructionsURL(),
+                        $gradeable->getTAViewDate()->format('Y/m/d H:i:s'), $gradeable->getId());
+        $this->database->query("
+UPDATE gradeable SET g_title=?, g_overall_ta_instructions=?, g_team_assignment=?, g_gradeable_type=?, 
+g_grade_by_registration=?, g_grade_start_date=?, g_grade_released_date=?, g_syllabus_bucket=?, 
+g_min_grading_group=?, g_instructions_url=?, g_ta_view_start_date=? WHERE g_id=?", $params);
+
+        if($gradeable->getType() === 0) {
+            $tempRepository = ($gradeable->getIsRepository() == 1 ) ? '1' : '0';
+            $tempTAgrading = ($gradeable->useTAGrading() == 1) ? '1' : '0';
+            $params = array($gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'),
+                    $tempRepository, $gradeable->getSubdirectory(), $tempTAgrading,  
+                    $gradeable->getAllowedLateDays(), $gradeable->getPointPrecision(), $gradeable->getId());
+            $this->database->query("
+UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?, 
+eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params); 
+        }
+
+        $this->database->commit();
+      }
+
     public function updateUserViewedDate(Gradeable $gradeable) {
         if ($gradeable->getGdId() !== null) {
             $this->database->query("UPDATE gradeable_data SET gd_user_viewed_date = NOW() WHERE gd_id=?",
@@ -1097,20 +1094,26 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
         }
     }
 
-    public function getSession($session_id) {
-        $this->database->query("SELECT * FROM sessions WHERE session_id=?", array($session_id));
-        return $this->database->row();
-    }
-
     public function getNumberRotatingSessions() {
         $this->database->query("SELECT COUNT(*) AS cnt FROM sections_rotating");
         return $this->database->row()['cnt'];
+    }
+
+    public function getSession($session_id) {
+        $this->database->query("SELECT * FROM sessions WHERE session_id=?", array($session_id));
+        return $this->database->row();
     }
 
     public function updateSessionExpiration($session_id) {
         $this->database->query("UPDATE sessions SET session_expires=(current_timestamp + interval '336 hours') 
         WHERE session_id=?", array($session_id));
     }
+
+    public function getAllGradeablesIdsAndTitles() {
+        $this->database->query("SELECT g_id, g_title FROM gradeable ORDER BY g_title ASC");
+        return $this->database->rows();
+    }
+    
 
     public function newSession($session_id, $user_id, $csrf_token) {
         $this->database->query("INSERT INTO sessions (session_id, user_id, csrf_token, session_expires) VALUES(?,?,?,current_timestamp + interval '336 hours')",
@@ -1130,14 +1133,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
         $this->database->query("SELECT g_id FROM gradeable ORDER BY g_id");
         return $this->database->rows();
     }
-
     public function getAllElectronicGradeablesIds() {
         $this->database->query("SELECT g_id, g_title FROM gradeable WHERE g_gradeable_type=0 ORDER BY g_grade_released_date DESC");
-        return $this->database->rows();
-    }
-
-    public function getAllGradeablesIdsAndTitles() {
-        $this->database->query("SELECT g_id, g_title FROM gradeable ORDER BY g_title ASC");
         return $this->database->rows();
     }
       
@@ -1186,7 +1183,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
         }
         $teams = array();
         foreach($team_rows as $team_row) {
-            $teams[] = new Team($team_row);
+            $teams[] = new Team($this->core, $team_row);
         }
         return $teams;
     }
@@ -1205,8 +1202,33 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
             return null;
         }
         else {
-            $team = new Team($this->database->rows());
+            $team = new Team($this->core, $this->database->rows());
             return $team;
+        }
+    }
+
+    public function submitTAGrade($details) {
+        if ($details['gd_id'] === null) {
+            $params = array($details['g_id'], $details['u_id'], $details['grader_id'], $details['comment'], $details['status'], $details['late_charged'], $details['active_version']);
+            $this->database->query("INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version, gd_user_viewed_date ) VALUES(?,?,?,?,?,?,?,NULL)", $params);
+            $details['gd_id'] = $this->database->getLastInsertId('gradeable_data_gd_id_seq');
+
+            $params = array($details['u_id'], $details['g_id'], $details['late_charged']);
+            $this->database->query("INSERT INTO late_days_used (user_id, g_id, late_days_used) VALUES (?,?,?)", $params);
+
+            foreach($details['components'] as $gc_id => $data) {
+                $params = array($details['gd_id'], $gc_id, $data['grade'], $data['comment'], $details['grader_id'], $details['time']);
+                $this->database->query("INSERT INTO gradeable_component_data (gd_id, gc_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grade_time) VALUES (?,?,?,?,?,?)", $params);
+            }
+        }
+        else {
+            $params = array($details['grader_id'], $details['active_version'], $details['comment'], $details['status'], $details['late_charged'], $details['gd_id']);
+            $this->database->query("UPDATE gradeable_data SET gd_grader_id=?, gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=?, gd_user_viewed_date=NULL WHERE gd_id=?", $params);
+
+            foreach($details['components'] as $gc_id => $data) {
+                $params = array($data['grade'], $data['comment'], $details['grader_id'], $details['time'], $details['gd_id'], $gc_id);
+                $this->database->query("UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_grade_time=? WHERE gd_id=? AND gc_id=?", $params);
+            }
         }
     }
 

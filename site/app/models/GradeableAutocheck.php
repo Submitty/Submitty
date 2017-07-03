@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\libraries\Core;
 use app\libraries\DiffViewer;
 use app\libraries\Utils;
 
@@ -34,13 +35,14 @@ class GradeableAutocheck extends AbstractModel {
     /**
      * GradeableAutocheck constructor.
      *
+     * @param $core
      * @param $details
      * @param $course_path
      * @param $result_path
      * @param $idx
      */
-    public function __construct($details, $course_path, $result_path, $idx) {
-        parent::__construct();
+    public function __construct(Core $core, $details, $course_path, $result_path, $idx) {
+        parent::__construct($core);
         $this->index = $idx;
         
         if (isset($details['description'])) {

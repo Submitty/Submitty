@@ -259,8 +259,8 @@ std::string validate_option(const std::string &program, const std::string &optio
   if (option[0] == '-') {
     // probably a normal option
   } else if (last_option == "-o" &&
-	     option.size() > 4 &&
-	     option.substr(option.size()-4,4) == ".out") {
+       option.size() > 4 &&
+       option.substr(option.size()-4,4) == ".out") {
     // ok, it's an executable name
   } else if (local_executable(program)) {
     // custom
@@ -385,12 +385,12 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
       if (ent == NULL) break;
       std::string thing = ent->d_name;
       if (wildcard_match(file_pattern,thing,logfile)) {
-	std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
-	validate_filename(directory+thing);
-	my_args.push_back(directory+thing);
-	count_matches++;
+        std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
+        validate_filename(directory+thing);
+        my_args.push_back(directory+thing);
+        count_matches++;
       } else {
-	//std::cout << "   no match  '" << thing << "'" << std::endl;
+        //std::cout << "   no match  '" << thing << "'" << std::endl;
       }
     }
     closedir(dir);
@@ -469,12 +469,12 @@ std::vector<std::string> break_into_tokens(const std::string &cmd) {
 
 
 void parse_command_line(const std::string &cmd,
-			std::string &my_program,
-			std::vector<std::string> &my_args,
-			std::string &my_stdin,
-			std::string &my_stdout,
-			std::string &my_stderr,
-			std::ofstream &logfile, 
+      std::string &my_program,
+      std::vector<std::string> &my_args,
+      std::string &my_stdin,
+      std::string &my_stdout,
+      std::string &my_stderr,
+      std::ofstream &logfile, 
                         const nlohmann::json &whole_config) {
 
   std::cout << "PARSE COMMAND LINE " << cmd << std::endl;
@@ -635,7 +635,7 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
   // output message to behind-the-scenes logfile (stdout), and to execute logfile (available to students)
   std::cout << message << std::endl;
   logfile   << message << "\nProgram Terminated " << std::endl;
-	    
+      
 }
 #endif
 
@@ -845,7 +845,7 @@ void TerminateProcess(float &elapsed, int childPID) {
   if (kill_counter >= 5) {
     std::cout << "ERROR! kill counter for pid " << childPID << " is " << kill_counter << std::endl;
     std::cout << "  Check /var/log/syslog (or other logs) for possible kernel bug \n"
-	      << "  or hardware bug that is preventing killing this job. " << std::endl;
+        << "  or hardware bug that is preventing killing this job. " << std::endl;
   }
   usleep(10000); /* wait 1/100th of a second for the process to die */
   elapsed+=0.001;
@@ -929,10 +929,10 @@ int execute(const std::string &cmd,
             }
           }
           else{ //if we could not find out anything about our expected window 
-          	if(windowName != "" && !windowExists(windowName)){ //If we had a window but it no longer exists (crashed/shut)
-          		windowName = "";  //reset it's name to nothing so we can begin searching again.
+            if(windowName != "" && !windowExists(windowName)){ //If we had a window but it no longer exists (crashed/shut)
+              windowName = "";  //reset it's name to nothing so we can begin searching again.
               std::cout << "The students window shut midrun." << std::endl;
-          	}
+            }
           }
           wpid = waitpid(childPID, &status, WNOHANG);
           if (wpid == 0){
@@ -980,14 +980,14 @@ int execute(const std::string &cmd,
         }
       }
       if (time_kill){
-	     logfile << "ERROR: Maximum run time exceeded" << std::endl;
-	     logfile << "Program Terminated" << std::endl;
-	     result=3;
+       logfile << "ERROR: Maximum run time exceeded" << std::endl;
+       logfile << "Program Terminated" << std::endl;
+       result=3;
       }
       if (memory_kill){
-	     logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
-	     logfile << "Program Terminated" << std::endl;
-	     result=3;
+       logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
+       logfile << "Program Terminated" << std::endl;
+       result=3;
       }
       std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
       parent_result = system("date");
