@@ -564,6 +564,25 @@ void parse_command_line(const std::string &cmd,
 
 
 
+  // Usually we should call python with a single argument, the script to run.
+  if (my_program.find("python")) {
+    if (my_args.size() == 0) {
+      // If nothing matched the wild card search
+      std::cout << "ERROR!  ATTEMPTING TO RUN PYTHON IN INTERACTIVE MODE" << std::endl;
+      logfile << "ERROR!  ATTEMPTING TO RUN PYTHON IN INTERACTIVE MODE" << std::endl;
+      // FIXME:  Hack a file name for now, but this should be handled more elegantly
+      my_args.push_back(" ");
+      // because we don't want to run in interactive mode and wait for it to time out!
+    } else if (my_args.size() > 1) {
+      // FIXME: This might be an ok way to call the program...  (but
+      // not if multiple things matched a wildcard search *py)
+      std::cout << "WARNING!  RUNNING PYTHON WITH MULTIPLE ARGS" << std::endl;
+      logfile << "WARNING!  RUNNING PYTHON WITH MULTIPLE ARGS" << std::endl;
+    }
+  }
+
+
+
   // FOR DEBUGGING
   std::cout << std::endl << std::endl;
   std::cout << "MY PROGRAM: '" << my_program << "'" << std::endl;
