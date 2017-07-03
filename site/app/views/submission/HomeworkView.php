@@ -641,15 +641,19 @@ HTML;
                                     $return .= <<<HTML
                                 <h4>{$title}</h4>
 HTML;
-                                    //////
                                     foreach ($autocheck->getMessages() as $message) {
                                         $return .= <<<HTML
                                 <span class="red-message">{$message}</span><br />
 HTML;
                                     }
                                     foreach ($autocheck->getMessages2() as $message) {
+                                        $type_class = "";
+                                        if ($message['type'] == "neutral") $type_class = "black-message";
+                                        else if ($message['type'] == "success") $type_class = "green-message";
+                                        else if ($message['type'] == "failure") $type_class = "red-message";
+                                        else if ($message['type'] == "warning") $type_class = "yellow-message";
                                         $return .= <<<HTML
-                                <span class="{$message['color']}">{$message['message']}</span><br />
+                                <span class="{$type_class}">{$message['message']}</span><br />
 HTML;
                                     }
 

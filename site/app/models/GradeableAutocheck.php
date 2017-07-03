@@ -51,10 +51,10 @@ class GradeableAutocheck extends AbstractModel {
         
         if (isset($details['messages'])) {
             foreach ($details['messages'] as $message) {
-                if (isset($message['message']) && isset($message['color']))
+                if (isset($message['message']) && isset($message['type']))
                     $this->messages2[] = array(
                         'message' => Utils::prepareHtmlString($message['message']),
-                        'color' => Utils::prepareHtmlString($message['color']));
+                        'type' => Utils::prepareHtmlString($message['type']));
                 else
                     $this->messages[] = Utils::prepareHtmlString($message);
             }

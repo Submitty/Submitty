@@ -167,9 +167,11 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
 
 
     std::vector<std::string> messages = result.getMessages();
+    std::vector<std::pair<std::string, std::string> > messages2 = result.getMessages2();
 
     if (BROKEN_CONFIG_ERROR_MESSAGE != "") {
       messages.push_back(BROKEN_CONFIG_ERROR_MESSAGE);
+      messages2.push_back(std::make_pair(BROKEN_CONFIG_ERROR_MESSAGE, "failure"));
     }
 
     std::string fm = tcg.value("failure_message","");
@@ -182,6 +184,15 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
             if (messages[m] == fm) failure_message_already_added = true;
             autocheck_j["messages"].push_back(messages[m]);
           }
+        }
+        messages2.push_back(std::make_pair("test whoohoo", "neutral"));
+        for (int m = 0; m < messages2.size(); m++) {
+          // if (messages2[m] != null) {
+            nlohmann::json new_message;
+            new_message["message"] = std::get<0>(messages2[m]);
+            new_message["type"] = std::get<1>(messages2[m]);
+            autocheck_j["messages"].push_back(new_message);
+          // }
         }
       }
 

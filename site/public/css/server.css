@@ -531,6 +531,16 @@ table tr.table-header {
     color: #af0000;
 }
 
+.yellow-message {
+    font-style: italic;
+    color: #eac73d;
+}
+
+.black-message {
+    font-style: italic;
+    color: #000000;
+}
+
 .sub-text {
     margin-left: 20px;
     margin-top: 10px;
