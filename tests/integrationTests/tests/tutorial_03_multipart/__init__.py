@@ -11,7 +11,6 @@ import glob
 SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_TUTORIAL_DIR + "/examples/03_multipart/config"
 SAMPLE_SUBMISSIONS       = SUBMITTY_TUTORIAL_DIR + "/examples/03_multipart/submissions"
 
-@prebuild
 def initialize(test):
     try:
         os.mkdir(os.path.join(test.testcase_path, "assignment_config"))
