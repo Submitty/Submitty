@@ -76,7 +76,7 @@ HTML;
             </div>
             <div class="sub">
                 <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                user_id: <input type="text" float="right" id= "student_id" name="student_id" placeholder="{$gradeable->getUser()->getId()}"/>
+                user_id: <input type="text" float="right" id= "student_id" name="student_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
             </div class="sub">
         </div>
 
