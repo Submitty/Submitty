@@ -565,7 +565,7 @@ void parse_command_line(const std::string &cmd,
 
 
   // Usually we should call python with a single argument, the script to run.
-  if (my_program.find("python")) {
+  if (my_program.find("python") != std::string::npos) {
     if (my_args.size() == 0) {
       // If nothing matched the wild card search
       std::cout << "ERROR!  ATTEMPTING TO RUN PYTHON IN INTERACTIVE MODE" << std::endl;
