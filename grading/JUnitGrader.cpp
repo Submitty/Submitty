@@ -69,15 +69,15 @@ TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::j
       char c;
       junit_output >> c;
       if (c != '(') {
-	return new TestResults(0.0,{"ERROR: FORMATTING!"});
+        return new TestResults(0.0,{"ERROR: FORMATTING!"});
       }
       int num;
       junit_output >> num;
       if (num == 0) // No tests ran, awarding 0
-	return new TestResults(0.0,{"ERROR: No tests ran!"});
+        return new TestResults(0.0,{"ERROR: No tests ran!"});
       junit_output >> token2;
       if (token2 != "tests)") {
-	return new TestResults(0.0,{"ERROR: FORMATTING!"});
+        return new TestResults(0.0,{"ERROR: FORMATTING!"});
       }
       return new TestResults(1.0); // Awarding full credit
     }
@@ -88,7 +88,7 @@ TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::j
       // Parses the following: Tests run: 13, Failures: 13
       junit_output >> token2 >> token3;
       if (token2 != "Tests" || token3 != "run:") {
-	return new TestResults(0.0,{"ERROR: FORMATTING!"});
+        return new TestResults(0.0,{"ERROR: FORMATTING!"});
       }
       int tests_run;
       junit_output >> tests_run;
@@ -96,17 +96,17 @@ TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::j
       char comma;
       junit_output >> comma;
       if (comma != ',') {
-	return new TestResults(0.0,{"ERROR: FORMATTING!"});
+        return new TestResults(0.0,{"ERROR: FORMATTING!"});
       }
       junit_output >> token4;
       if (token4 != "Failures:") {
-	return new TestResults(0.0,{"ERROR: FORMATTING!"});
+        return new TestResults(0.0,{"ERROR: FORMATTING!"});
       }
       int tests_failed;
       junit_output >> tests_failed;
       assert (tests_failed > 0);
       if (tests_run == 0) { // Fixture creation failure (likely), award 0 credit
-	return new TestResults(0.0,{"ERROR: No tests ran. Could not create fixture."});
+        return new TestResults(0.0,{"ERROR: No tests ran. Could not create fixture."});
       }
 
       int successful_tests = std::max(0,tests_run-tests_failed);
@@ -169,19 +169,19 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
       char c;
       junit_output >> c;
       if (c != '(') {
-	return new TestResults(0.0,{"ERROR: FORMATTING!"});
+        return new TestResults(0.0,{"ERROR: FORMATTING!"});
       }
       int num;
       junit_output >> num;
       if (num != num_junit_tests) {
-	return new TestResults(0.0,{"ERROR: Number of tests specified in configuration does not match!"});
+        return new TestResults(0.0,{"ERROR: Number of tests specified in configuration does not match!"});
       }
       ok = true;
     }
 
     // look for problems in the output
     if (token1.find("Failure") != std::string::npos ||
-	token1.find("failure") != std::string::npos) {
+        token1.find("failure") != std::string::npos) {
       assert (ok == false);
       failure = true;
     }
@@ -194,15 +194,15 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
     if (token1 == "Tests") {
       junit_output >> token1;
       if (token1 == "run:") {
-	junit_output >> tests_run;
-	assert (tests_run >= 0);
-	char c;
-	junit_output >> c;
-	assert (c == ',');
-	junit_output >> token1;
-	assert (token1 == "Failures:");
-	junit_output >> test_failures;
-	assert (test_failures >= 0);
+        junit_output >> tests_run;
+        assert (tests_run >= 0);
+        char c;
+        junit_output >> c;
+        assert (c == ',');
+        junit_output >> token1;
+        assert (token1 == "Failures:");
+        junit_output >> test_failures;
+        assert (test_failures >= 0);
       }
     }
   }
@@ -264,10 +264,10 @@ TestResults* EmmaInstrumentationGrader_doit (const TestCase &tc, const nlohmann:
     if (token == "EMMA:") {
       junit_output >> token;
       if (token == "metadata") {
-	junit_output >> token;
-	if (token == "merged") {
-	  return new TestResults(1.0); // Awarding full credit, no message
-	}
+        junit_output >> token;
+        if (token == "merged") {
+          return new TestResults(1.0); // Awarding full credit, no message
+        }
       }
     }
   }
@@ -331,17 +331,17 @@ TestResults* EmmaCoverageReportGrader_doit (const TestCase &tc, const nlohmann::
       assert (coverage_threshold >= 0.0 && coverage_threshold <= 100.0);
 
       if (block_p >= coverage_threshold) {
-	// && line_p >= coverage_threshold) {
-	return new TestResults(1.0); // Awarding full credit, no message
+        // && line_p >= coverage_threshold) {
+        return new TestResults(1.0); // Awarding full credit, no message
       }
 
       else {
-	// simple formula for partial credit based on coverage.
-	// float partial = float(std::min(block_p,line_p)) / coverage_threshold;
-	float partial = float(block_p) / coverage_threshold;
-	ss2 << "ERROR: Insuffficient block coverage below threshold for... " << name
-	    << " (" << block_p << "/" << coverage_threshold << " = " << partial << ")";
-	return new TestResults(partial,{ss2.str()});
+        // simple formula for partial credit based on coverage.
+        // float partial = float(std::min(block_p,line_p)) / coverage_threshold;
+        float partial = float(block_p) / coverage_threshold;
+        ss2 << "ERROR: Insuffficient block coverage below threshold for... " << name
+            << " (" << block_p << "/" << coverage_threshold << " = " << partial << ")";
+        return new TestResults(partial,{ss2.str()});
       }
     }
   }

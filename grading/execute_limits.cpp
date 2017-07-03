@@ -126,7 +126,7 @@ void CheckResourceLimits(nlohmann::json &resource_limits) {
 
 
 rlim_t get_the_limit(const std::string &program_name,
-		     int which_limit,
+         int which_limit,
                      const nlohmann::json &test_case_limits_const,
                      const nlohmann::json &assignment_limits_const) {
 
@@ -152,8 +152,8 @@ rlim_t get_the_limit(const std::string &program_name,
     // check to see if the test case specific value exceeds the system limit
     if (val > s_itr->second) {
       std::cout << "ERROR: Test_Case limit value " << val
-		<< " for " << which_limit_name
-		<< " exceeds system limit " << s_itr->second << std::endl;
+        << " for " << which_limit_name
+        << " exceeds system limit " << s_itr->second << std::endl;
       return s_itr->second;
     } else {
       return val;
@@ -168,8 +168,8 @@ rlim_t get_the_limit(const std::string &program_name,
     // check to see if the test case specific value exceeds the system limit
     if (val > s_itr->second) {
       std::cout << "ERROR: Assignment limit value " << val
-		<< " for " << which_limit_name
-		<< " exceeds system limit " << s_itr->second << std::endl;
+        << " for " << which_limit_name
+        << " exceeds system limit " << s_itr->second << std::endl;
       return s_itr->second;
     } else {
       return val;
@@ -226,8 +226,8 @@ void enable_all_setrlimit(const std::string &program_name,
       // otherwise print a warning
       /*
         std::cout << " WARNING: no change for limit " << rlimit_name_decoder(limit_names[i]) 
-		<< " requested " << new_limit
-		<< " but keeping " << current_rl.rlim_max << std::endl;
+        << " requested " << new_limit
+        << " but keeping " << current_rl.rlim_max << std::endl;
       */
     }
   }

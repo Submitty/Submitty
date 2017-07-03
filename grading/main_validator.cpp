@@ -121,7 +121,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       std::vector<std::string> files;
       wildcard_expansion(files, actual_file, std::cout);
       for (int i = 0; i < files.size(); i++) {
-	      actual_file = files[i];
+        actual_file = files[i];
       }
       bool studentFileExists, studentFileEmpty;
       bool expectedFileExists=false, expectedFileEmpty=false;
@@ -130,38 +130,38 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       if (studentFileExists) {
         if (show_actual) {
           autocheck_j["actual_file"] = actual_file;
-	      }
+        }
         expected = tcg.value("expected_file", "");
-	      if (expected != "") {
-	        fileStatus(expected, expectedFileExists,expectedFileEmpty);
-	        if (!expectedFileExists) {
-	          BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
-	          std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
-	        }
-	        else {
-  	        // PREPARE THE JSON DIFF FILE
-  	        std::stringstream diff_path;
-  	        diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
-  	        std::ofstream diff_stream(diff_path.str().c_str());
-  	        result.printJSON(diff_stream);
-  	        std::stringstream expected_path;
-  	        std::string id = hw_id;
-  	        std::string expected_out_dir = "test_output/" + id + "/";
-  	        expected_path << expected_out_dir << expected;
-  	        if (show_expected) {
-  	         autocheck_j["expected_file"] = expected_path.str();
-  	        }
-  	        if (show_actual) {
-  	         autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
-  	        }
-	        }
-	      }
+        if (expected != "") {
+          fileStatus(expected, expectedFileExists,expectedFileEmpty);
+          if (!expectedFileExists) {
+            BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
+            std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
+          }
+          else {
+            // PREPARE THE JSON DIFF FILE
+            std::stringstream diff_path;
+            diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
+            std::ofstream diff_stream(diff_path.str().c_str());
+            result.printJSON(diff_stream);
+            std::stringstream expected_path;
+            std::string id = hw_id;
+            std::string expected_out_dir = "test_output/" + id + "/";
+            expected_path << expected_out_dir << expected;
+            if (show_expected) {
+             autocheck_j["expected_file"] = expected_path.str();
+            }
+            if (show_actual) {
+             autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+            }
+          }
+        }
       }
       //std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
       //std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
 
       if (studentFileExists && !studentFileEmpty) {
-	      actual_file_to_print = true;
+        actual_file_to_print = true;
       }
     }
 
