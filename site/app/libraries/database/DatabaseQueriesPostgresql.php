@@ -720,7 +720,7 @@ ORDER BY rotating_section");
         return $this->database->rows();
     }
 
-        public function getGradersForAllRotatingSections($gradeable_id) {
+    public function getGradersForAllRotatingSections($gradeable_id) {
         $this->database->query("
     SELECT 
         u.user_id, array_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
