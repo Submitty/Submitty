@@ -64,7 +64,7 @@ class AuthenticationController extends AbstractController {
      * is not strictly necessary, but still good to tidy up.
      */
     public function logout() {
-        $cookie_id = $this->core->getConfig()->getSemester()."_".$this->core->getConfig()->getCourse()."_session_id";
+        $cookie_id = 'submitty_session_id';
         Utils::setCookie($cookie_id, '', time() - 3600);
         $this->core->removeCurrentSession();
         $this->core->redirect($this->core->buildUrl());

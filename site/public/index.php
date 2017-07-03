@@ -117,7 +117,7 @@ if($core->getConfig()->isDebug()) {
 // Check if we have a saved cookie with a session id and then that there exists a session with that id
 // If there is no session, then we delete the cookie
 $logged_in = false;
-$cookie_key = $semester."_".$course."_session_id";
+$cookie_key = 'submitty_session_id';
 if (isset($_COOKIE[$cookie_key])) {
     $cookie = json_decode($_COOKIE[$cookie_key], true);
     $logged_in = $core->getSession($cookie['session_id']);

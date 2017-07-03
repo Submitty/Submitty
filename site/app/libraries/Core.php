@@ -286,7 +286,7 @@ class Core {
             if ($this->authentication->authenticate()) {
                 $auth = true;
                 $session_id = $this->session_manager->newSession($user_id);
-                $cookie_id = $this->getConfig()->getSemester()."_".$this->getConfig()->getCourse()."_session_id";
+                $cookie_id = 'submitty_session_id';
                 // Set the cookie to last for 7 days
                 $cookie_data = array('session_id' => $session_id);
                 $cookie_data['expire_time'] = ($persistent_cookie === true) ? time() + (7 * 24 * 60 * 60) : 0;
