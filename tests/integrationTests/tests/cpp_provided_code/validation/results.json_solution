@@ -1,0 +1,27 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 2,
+            "test_name": "Test 1 Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        "ERROR!  Could not open expected file: 'output.txt",
+                        "ERROR!  Expected File 'output.txt' does not exist"
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 2 Testing"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 3 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
