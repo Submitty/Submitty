@@ -574,10 +574,20 @@ void parse_command_line(const std::string &cmd,
       my_args.push_back(" ");
       // because we don't want to run in interactive mode and wait for it to time out!
     } else if (my_args.size() > 1) {
-      // FIXME: This might be an ok way to call the program...  (but
-      // not if multiple things matched a wildcard search *py)
-      std::cout << "WARNING!  RUNNING PYTHON WITH MULTIPLE ARGS" << std::endl;
-      logfile << "WARNING!  RUNNING PYTHON WITH MULTIPLE ARGS" << std::endl;
+      bool multiple_py_files = false;
+      for (int i = 1; i < my_args.size(); i++) {
+        if (my_args[i].find(".py") != std::string::npos) {
+          multiple_py_files = true;
+          std::cout << "WARNING!  .py file as arg " << my_args[i] << std::endl;
+          logfile << "WARNING!  .py file as arg " << my_args[i] << std::endl;
+        }
+      }
+      if (multiple_py_files == true) {
+        // FIXME: This might be an ok way to call the program...  (but
+        // not if multiple things matched a wildcard search *py)
+        std::cout << "WARNING!  RUNNING PYTHON WITH MULTIPLE ARGS" << std::endl;
+        logfile << "WARNING!  RUNNING PYTHON WITH MULTIPLE ARGS" << std::endl;
+      }
     }
   }
 
