@@ -314,13 +314,24 @@ def main():
 
     os.chdir(bin_path)
     
+    # save the old results path!
+    if os.path.isdir(os.path.join(results_path,"OLD")):
+        shutil.move(os.path.join(results_path,"OLD"),
+                    os.path.join(tmp,"OLD_RESULTS"))
+
     # clean out all of the old files if this is a re-run
-    #shutil.rmtree(results_path)
-    if os.path.isdir(results_path):
-        shutil.move(results_path,results_path+"_OLD")
+    shutil.rmtree(results_path)
 
     # Make directory structure in results if it doesn't exist
     os.makedirs(results_path)
+
+    # bring back the old results!
+    if os.path.isdir(os.path.join(tmp,"OLD_RESULTS")):
+        shutil.move(os.path.join(tmp,"OLD_RESULTS"),
+                    os.path.join(results_path,"OLD"))
+    
+
+
     shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
     shutil.copy(os.path.join(tmp_work,"results.json"),results_path)
     shutil.copy(os.path.join(tmp_work,"results_grade.txt"),results_path)
@@ -330,22 +341,23 @@ def main():
     
     print ("wrote to ",results_path)
 
-    if os.path.isdir(results_path+"_OLD"):
-        shutil.move(results_path+"_OLD",os.path.join(results_path,"OLD"))
+    print ("RESULTS PATH ", results_path)
+    subprocess.call(["ls","-la",results_path])
+
+
+    if os.path.isdir(os.path.join(results_path,"OLD")):
         print ("OLD EXISTS: ",os.path.join(results_path,"OLD"))
+        m = filecmp.cmp(os.path.join(results_path,"OLD","results.json"),
+                        os.path.join(results_path,"results.json"))
+        if not m: print ("OOPS!  results.json does not match")
+        m = filecmp.cmp(os.path.join(results_path,"OLD","results_grade.txt"),
+                        os.path.join(results_path,"results_grade.txt"))
+        if not m: print ("OOPS!  results_grade.txt does not match")
+
     else:
         print ("NO OLD: ",results_path+"_OLD")
 
-    print ("RESULTS PATH ", results_path)
-    subprocess.call(["ls","-la",results_path])
         
-    m = filecmp.cmp(os.path.join(results_path,"OLD","results.json"),
-                    os.path.join(results_path,"results.json"))
-    if not m: print ("OOPS!  results.json does not match")
-    m = filecmp.cmp(os.path.join(results_path,"OLD","results_grade.txt"),
-                    os.path.join(results_path,"results_grade.txt"))
-    if not m: print ("OOPS!  results_grade.txt does not match")    
-
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
     shutil.rmtree(tmp)

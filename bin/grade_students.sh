@@ -233,13 +233,17 @@ function log_exit {
 
 function grade_this_item {
 
+    
     NEXT_DIRECTORY=$1
     NEXT_TO_GRADE=$2
 
-    ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
-    
     echo "========================================================================"
     echo "GRADE $NEXT_TO_GRADE"
+
+    echo "NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW"
+    ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
+
+    echo "OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD"
 
     # --------------------------------------------------------------------
     # The queue file name contains the necessary information to
@@ -385,10 +389,12 @@ function grade_this_item {
     test_input_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_input/$gradeable"
     test_output_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_output/$gradeable"
     checkout_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/checkout/$gradeable/$who/$version"
-    results_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
+    results_path_tmp="$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
     bin_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/bin"
 
+    results_path="$results_path_tmp/OLD"
 
+    
     # grab a copy of the current results_history.json file (if it exists)
     global_results_history_file_location=${results_path}/results_history.json
     if [ -e "$global_results_history_file_location" ]
@@ -848,35 +854,39 @@ while true; do
 	ELAPSED=$(($ENDTIME - $STARTTIME))
 
 	# -------------------------------------------------------------
-    # create/append to the results history
-    sec_deadline=`date -d "${global_gradeable_deadline}" +%s`
-    sec_submission=`date -d "${global_submission_time}" +%s`
-    seconds_late=$((sec_submission-sec_deadline))
-    ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py  \
-        "$global_results_history_file_location" \
-        "$global_gradeable_deadline" \
-        "$global_submission_time" \
-        "$seconds_late" \
-         "`date -d @$FILE_TIMESTAMP`" \
-        "$IS_BATCH_JOB" \
-        "`date -d @$STARTTIME`" \
-        "$WAITTIME" \
-        "`date -d @$ENDTIME`" \
-        "$ELAPSED" \
-        "$global_grade_result"
+        # create/append to the results history
+        sec_deadline=`date -d "${global_gradeable_deadline}" +%s`
+        sec_submission=`date -d "${global_submission_time}" +%s`
+        seconds_late=$((sec_submission-sec_deadline))
+        ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py  \
+                               "$global_results_history_file_location" \
+                               "$global_gradeable_deadline" \
+                               "$global_submission_time" \
+                               "$seconds_late" \
+                               "`date -d @$FILE_TIMESTAMP`" \
+                               "$IS_BATCH_JOB" \
+                               "`date -d @$STARTTIME`" \
+                               "$WAITTIME" \
+                               "`date -d @$ENDTIME`" \
+                               "$ELAPSED" \
+                               "$global_grade_result"
+        
+        #---------------------------------------------------------------------
+        # WRITE OUT VERSION DETAILS
 
-    #---------------------------------------------------------------------
-    # WRITE OUT VERISON DETAILS
-    ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
-        "${semester}" \
-        "${course}" \
-        "${gradeable}" \
-        "${user}" \
-        "${team}" \
-        "${who}" \
-        "${is_team}" \
-        "${version}"
-
+        echo "GOING TO INSERT INTO DATABASE"
+        ls -lta 
+        
+        ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
+                               "${semester}" \
+                               "${course}" \
+                               "${gradeable}" \
+                               "${user}" \
+                               "${team}" \
+                               "${who}" \
+                               "${is_team}" \
+                               "${version}"
+        
 	echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
 
 	# -------------------------------------------------------------

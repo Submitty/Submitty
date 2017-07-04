@@ -297,4 +297,5 @@ def get_result_details(semester, course, g_id, who_id, version):
 
 
 if __name__ == "__main__":
+    quit()
     main()
