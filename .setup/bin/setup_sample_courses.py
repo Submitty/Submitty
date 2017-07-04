@@ -868,9 +868,6 @@ class Gradeable(object):
             if 'eg_max_random_submissions' in gradeable:
                 self.max_random_submissions = int(gradeable['eg_max_random_submissions'])
 
-            if 'g_bucket' in gradeable:
-                self.syllabus_bucket = gradeable['g_bucket']
-
             if 'config_path' in gradeable:
                 self.config_path = gradeable['config_path']
             else:
@@ -899,6 +896,9 @@ class Gradeable(object):
             self.type = int(gradeable['g_type'])
             self.config_path = None
             self.sample_path = None
+
+        if 'g_bucket' in gradeable:
+            self.syllabus_bucket = gradeable['g_bucket']
 
         assert 0 <= self.type <= 2
 
