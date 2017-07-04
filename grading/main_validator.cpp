@@ -64,7 +64,7 @@ bool ShowHelper(const std::string& when, bool success) {
 double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::json &autocheck_js, 
                       const std::string &hw_id, std::string &testcase_message) {
 
-  std::cerr << "autocheck #" << which_grader+1 << " / " << my_testcase.numFileGraders() << std::endl;
+  //std::cerr << "autocheck #" << which_grader+1 << " / " << my_testcase.numFileGraders() << std::endl;
 
   TestResultsFixedSize result = my_testcase.do_the_grading(which_grader);
 

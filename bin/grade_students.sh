@@ -236,6 +236,8 @@ function grade_this_item {
     NEXT_DIRECTORY=$1
     NEXT_TO_GRADE=$2
 
+    ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
+    
     echo "========================================================================"
     echo "GRADE $NEXT_TO_GRADE"
 

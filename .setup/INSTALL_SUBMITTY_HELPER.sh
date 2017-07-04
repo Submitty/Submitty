@@ -270,6 +270,7 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 #replace necessary variables in the copied scripts
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
@@ -306,6 +307,8 @@ chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 # fix the permissions specifically of the grade_students.sh script
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
 
@@ -450,26 +453,26 @@ echo -e "Generate & install the crontab file for hwcron user"
 # name of temporary file
 HWCRON_CRONTAB_FILE=my_hwcron_crontab_file.txt
 
-# calculate the frequency -- once every how many minutes?
-GRADE_STUDENTS_FREQUENCY=$(( 60 / ${GRADE_STUDENTS_STARTS_PER_HOUR} ))
-
-# sanity check
-if [[ "$GRADE_STUDENTS_FREQUENCY" -lt 1 ||
-      "$GRADE_STUDENTS_FREQUENCY" -ge 60 ]] ; then
-    echo "ERROR: Bad value for GRADE_STUDENTS_FREQUENCY = $GRADE_STUDENTS_FREQUENCY"
-    exit 1
-fi
 
 # generate the file
 echo -e "\n\n"                                                                                >  ${HWCRON_CRONTAB_FILE}
 echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
-minutes=0
-while [ $minutes -lt 60 ]; do
-    printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
-    minutes2=$(($minutes + 1))
-    printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py > /dev/null\n"                 $minutes2          >> ${HWCRON_CRONTAB_FILE}
-    minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
-done
+
+# sanity check
+if [[ "$GRADE_STUDENTS_STARTS_PER_HOUR" -lt 1 ||
+      "$GRADE_STUDENTS_STARTS_PER_HOUR" -gt 60 ]] ; then
+    echo "WARNING: Bad value for GRADE_STUDENTS_STARTS_PER_HOUR = $GRADE_STUDENTS_STARTS_PER_HOUR"
+else
+    # calculate the frequency -- once every how many minutes?
+    GRADE_STUDENTS_FREQUENCY=$(( 60 / ${GRADE_STUDENTS_STARTS_PER_HOUR} ))
+    minutes=0
+    while [ $minutes -lt 60 ]; do
+        printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
+        minutes2=$(($minutes + 1))
+        printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py > /dev/null\n"                 $minutes2          >> ${HWCRON_CRONTAB_FILE}
+        minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
+    done
+fi
 
 ## NOTE:  the build_config_upload script is hardcoded to run for ~5 minutes and then exit
 minutes=0
