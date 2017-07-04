@@ -28,7 +28,6 @@ def cleanup(test):
     if os.path.isdir(os.path.join(test.testcase_path, "data")):
         shutil.rmtree(os.path.join(test.testcase_path, "data"))
     os.mkdir(os.path.join(test.testcase_path, "data"))
-    
 
 @testcase
 def solution(test):
@@ -41,6 +40,8 @@ def solution(test):
         shutil.copy(f,os.path.join(test.testcase_path, "data"))
     test.run_compile()
     test.run_run()
+    shutil.copy(os.path.join(test.testcase_path,"assignment_config","test_output","output.txt"),
+                os.path.join(test.testcase_path, "data"))
     test.run_validator()
     test.diff("results_grade.txt", "results_grade.txt_solution", "-b")
     test.json_diff("results.json", "results.json_solution")

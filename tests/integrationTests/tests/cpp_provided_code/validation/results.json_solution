@@ -9,13 +9,11 @@
                 {
                     "actual_file": "test02_STDOUT.txt",
                     "description": "STDOUT.txt",
-                    "messages": [
-                        "ERROR!  Could not open expected file: 'output.txt",
-                        "ERROR!  Expected File 'output.txt' does not exist"
-                    ]
+                    "difference_file": "test02_0_diff.json",
+                    "expected_file": "test_output/testassignment/output.txt"
                 }
             ],
-            "points_awarded": 0,
+            "points_awarded": 5,
             "test_name": "Test 2 Testing"
         },
         {
