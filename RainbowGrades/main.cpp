@@ -1550,7 +1550,7 @@ void load_student_grades(std::vector<Student*> &students) {
                   std::string gradeable_id = (*itr2).value("id","ERROR BAD ID");
                   std::string gradeable_name = (*itr2).value("name",gradeable_id);
                   std::string status = (*itr2).value("status","NOT ELECTRONIC");
-      float score = (*itr2).value("original_score",0.0);
+      /*float score = (*itr2).value("original_score",0.0);
       float score2 = (*itr2).value("actual_score",0.0);
                   if (status.find("Bad") != std::string::npos) {
                     assert (score2 == 0);
@@ -1559,7 +1559,13 @@ void load_student_grades(std::vector<Student*> &students) {
                     } else {
                       // already 0
                     }
-                  } else {
+                  } else {*/
+        float score = (*itr2).value("score",0.0);
+        if(status.find("Bad") != std::string::npos) {
+          if (score!=0) {
+            score = 0;
+          }
+        } else{
                       assert (status == "NO SUBMISSION" || status == "NOT ELECTRONIC" || status == "Good" || status == "Late");
                   }
 
