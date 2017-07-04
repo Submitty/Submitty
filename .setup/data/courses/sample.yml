@@ -237,8 +237,8 @@ gradeables:
   g_grade_start_date: 1973-01-01 23:59:59
   g_id: grades_released_homework_onlyauto
   g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Autograde Only Homework (Python Simple)
-  gradeable_config: python_simple_homework
+  g_title: Autograde Only Homework (Python Linehighlight)
+  gradeable_config: python_linehighlight
   eg_use_ta_grading: False
   g_bucket: homework
 
