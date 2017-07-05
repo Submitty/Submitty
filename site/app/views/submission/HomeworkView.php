@@ -628,9 +628,8 @@ HTML;
                                     $return .= <<<HTML
                 <div class="box-block"> 
                 <!-- Readded css here so the popup has the css -->
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
                 <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-                <span onclick="openPopUp({$count})"> <i class="fa fa-window-restore" id="popup_{$count}" style="visibility: visible; cursor: pointer;"></i> </span>
+                
 HTML;
 
                                     $title = "";
@@ -642,7 +641,12 @@ HTML;
                                     }
                                     $title .= $description;
                                     $return .= <<<HTML
-                                <h4>{$title}</h4>
+                                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 0)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i> </span> </h4>
+                                <div id="container_{$count}_{$autocheck_cnt}_0">
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />                               
 HTML;
                                     foreach ($autocheck->getMessages() as $message) {
                                         $return .= <<<HTML
@@ -670,12 +674,20 @@ HTML;
                                     }
                                     $return .= <<<HTML
                             </div>
+                            </div>
 HTML;
 
                                     if ($diff_viewer->hasDisplayExpected()) {
+                                        $title1 = "Expected ";
+                                        $title1 .= $description;
                                         $return .= <<<HTML
                             <div class='diff-element'>
-                                <h4>Expected {$description}</h4>
+                                <h4>Expected {$description} <span onclick="openPopUp('{$title1}', {$count}, {$autocheck_cnt}, 1)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i> </span></h4>
+                                <div id="container_{$count}_{$autocheck_cnt}_1">
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />
 HTML;
                                         for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
                                             $return .= <<<HTML
@@ -684,6 +696,7 @@ HTML;
                                         }
                                         $return .= <<<HTML
                                 {$diff_viewer->getDisplayExpected()}
+                            </div>
                             </div>
 HTML;
                                     }
