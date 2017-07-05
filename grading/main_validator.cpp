@@ -185,7 +185,10 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
             autocheck_j["messages"].push_back(messages[m]);
           }
         }
-        messages2.push_back(std::make_pair("test whoohoo", "neutral"));
+        messages2.push_back(std::make_pair("NEUTRAL TEST SUP", "neutral"));
+        messages2.push_back(std::make_pair("FAILURE TEST SUP", "failure"));
+        messages2.push_back(std::make_pair("SUCCESS TEST SUP", "success"));
+        messages2.push_back(std::make_pair("WARNING TEST SUP", "warning"));
         for (int m = 0; m < messages2.size(); m++) {
           // if (messages2[m] != null) {
             nlohmann::json new_message;
