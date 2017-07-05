@@ -178,17 +178,17 @@ def main():
     # Note: Must preserve the directory structure of compiled files (esp for Java)
 
     #FIXME INCOMPLETE COPY
-    for file in glob.glob(os.path.join(tmp_compilation,"*.out")):
-        #print ("FILE ",file)
-        shutil.copy(file,tmp_work)
-    for file in glob.glob(os.path.join(tmp_compilation,"*.py")):
-        #print ("FILE ",file)
-        shutil.copy(file,tmp_work)
+    patterns=["*.out","*.py","*/*.py"]
 
-
-    # remove the compilation directory
-    #shutil.rmtree(tmp_compilation)
-
+    for pattern in patterns:
+        for file in glob.glob(os.path.join(tmp_compilation,pattern)):
+            # grab the matched name
+            relpath=os.path.relpath(file,tmp_compilation)
+            # make the necessary directories leading to the file
+            os.makedirs(os.path.join(tmp_work,os.path.dirname(relpath)),exist_ok=True)
+            # copy the file
+            shutil.copy(file,os.path.join(tmp_work,relpath))
+        
     # copy input files to tmp_work directory
     if os.path.isdir(test_input_path) :
         for item in os.listdir(test_input_path):
@@ -250,6 +250,9 @@ def main():
     # copy results files from compilation...
     for filename in glob.glob(os.path.join(tmp_compilation,"test*.txt")):
         shutil.copy(filename,tmp_work)
+
+    # remove the compilation directory
+    shutil.rmtree(tmp_compilation)
 
     # copy output files to tmp_work directory
     if os.path.isdir(test_output_path) :

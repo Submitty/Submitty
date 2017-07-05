@@ -730,7 +730,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   int fd = open(my_program.c_str(), O_RDONLY);
   if (fd == -1) {
     perror("can't open");
-    std::cerr << "ERROR: cannot open program" << std::endl;
+    std::cerr << "ERROR: cannot open program '" << my_program << '"' << std::endl;
     exit(1);
   }
   int res = read(fd, &elf_hdr, sizeof(elf_hdr));

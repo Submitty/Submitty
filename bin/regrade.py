@@ -104,7 +104,7 @@ def main():
                     my_is_team = True
 
                 grade_queue.append({"semester": my_semester, "course": my_course, "gradeable": my_gradeable,
-                                    "user": my_user, "team": my_team, "who": my_who, "is_team": my_is_team, "version": int(my_version)})
+                                    "user": my_user, "team": my_team, "who": my_who, "is_team": my_is_team, "version": my_version})
 
     # Check before adding a very large number of systems to the queue
     if len(grade_queue) > 50:
