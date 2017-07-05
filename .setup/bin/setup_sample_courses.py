@@ -162,6 +162,9 @@ def main():
     os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
     os.system("rm /tmp/hwcron_cron_backup.txt")
 
+    # Needed for Rainbow Grades testing, updates customization_sample.json to reflect sample.yml
+    make_sample_json()
+
 
 def generate_random_users(total, real_users):
     """
@@ -441,6 +444,158 @@ def create_gradeable_submission(src, dst):
 
     if zip_dst is not None and isinstance(zip_dst, str):
         os.remove(zip_dst)
+
+
+def make_sample_json():
+    # Right now we don't use the fill-ins, and setup_sample_courses.py lives in the repository
+    # customization_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", "test_suite", "rainbowGrades")
+    # course_file = os.path.join("__INSTALL__FILLIN__SUBMITTY_REPOSITORY__", ".setup", "data", "courses", "sample.yml")
+
+    m = hashlib.md5()
+    m.update("sample")
+    random.seed(int(m.hexdigest(), 16))
+
+    customization_path = os.path.join(SUBMITTY_INSTALL_DIR, "test_suite", "rainbowGrades")
+    course_file = os.path.join(SUBMITTY_REPOSITORY, ".setup", "data", "courses", "sample.yml")
+    course_json = load_data_yaml(course_file)
+
+    course_id = course_json['code']
+    print("Making customization.json for course: {}".format(course_id))
+
+    gradeables = {}
+    gradeables_json_output = ""
+
+    for g in course_json['gradeables']:
+        gradeable = Gradeable(g)
+        if gradeable.syllabus_bucket not in gradeables:
+            gradeables[gradeable.syllabus_bucket] = []
+        gradeables[gradeable.syllabus_bucket].append(gradeable)
+
+    gradeables_percentages = []
+    gradeable_percentage_left = 100 - len(gradeables)
+    for i in range(len(gradeables)):
+        gradeables_percentages.append(random.randint(1,gradeable_percentage_left)+1)
+        gradeable_percentage_left -= (gradeables_percentages[-1] - 1)
+    if gradeable_percentage_left > 0:
+        gradeables_percentages[-1] += gradeable_percentage_left
+
+    bucket_no = 0
+    for bucket,g_list in gradeables.items():
+        gradeables_json_output += "    {\n" +\
+                                  "      \"type\": \"{}\",\n".format(bucket) + \
+                                  "      \"count\": {},\n".format(len(g_list)) + \
+                                  "      \"percent\" : {},\n".format(0.01*gradeables_percentages[bucket_no]) + \
+                                  "      \"ids\": [\n"
+        for g in g_list:
+            use_ta_grading = g.use_ta_grading
+            g_type = g.type
+            components = g.components
+            id = g.id
+            max_auto = 0
+            max_ta = 0
+
+            print_grades = True if g_type !=0 or (g.submission_open_date < NOW) else False
+            release_grades = (g.grade_released_date < NOW)
+
+            # gradeable_config_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses",
+            #                                    get_current_semester(), "sample", "config", "complete_config")
+
+            gradeable_config_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", get_current_semester(), "sample",
+                                                "config", "complete_config")
+
+            if os.path.isdir(gradeable_config_dir):
+                gradeable_config = os.path.join(gradeable_config_dir,"complete_config_" + id + ".json")
+                if os.path.isfile(gradeable_config):
+                    try:
+                        with open(gradeable_config,'r') as gradeable_config_file:
+                            gradeable_json = json.load(gradeable_config_file)
+
+                            # Not every config has AUTO_POINTS, so have to parse through test cases
+                            # Add points to max if not extra credit, and points>0 (not penalty)
+                            if "testcases" in gradeable_json:
+                                for test_case in gradeable_json["testcases"]:
+                                    if "extra_credit" in test_case:
+                                        continue
+                                    if "points" in test_case and test_case["points"] > 0:
+                                        max_auto += test_case["points"]
+                    except EnvironmentError:
+                        print("Failed to load JSON")
+
+            if use_ta_grading or g_type != 0:
+                for component in components:
+                    if component.is_extra_credit:
+                        continue
+                    if component.max_value >0:
+                        max_ta += component.max_value
+
+            max_points = max_auto+max_ta
+            if print_grades:
+                gradeables_json_output += "        {{\"id\":\"{}\", \"max\":{}".format(id,max_points)
+                if not release_grades:
+                    gradeables_json_output += ", \"released\":false"
+
+                if g != g_list[-1]:
+                    gradeables_json_output += "},\n"
+                else:
+                    gradeables_json_output += "}\n"
+        gradeables_json_output += "      ]\n" + "    }"
+        if bucket != gradeables.keys()[-1]:
+            gradeables_json_output += ",\n"
+        else:
+            gradeables_json_output += "\n"
+        bucket_no += 1
+
+    try:
+        with open(os.path.join(customization_path, "customization_sample.json"), 'w') as customization_file:
+            customization_file.write("{\n" +
+                                     "  \"display\": [\n" +
+                                     "    \"instructor_notes\",\n" +
+                                     "    \"grade_summary\",\n" +
+                                     "    \"grade_details\"\n" +
+                                     "  ],\n" +
+                                     "  \"display_benchmark\": [\n" +
+                                     "    \"average\",\n" +
+                                     "    \"stddev\",\n" +
+                                     "    \"perfect\",\n" +
+                                     "    \"lowest_a-\",\n" +
+                                     "    \"lowest_b-\",\n" +
+                                     "    \"lowest_c-\",\n" +
+                                     "    \"lowest_d\"\n" +
+                                     "  ],\n" +
+                                     "  \"benchmark_percent\": {\n" +
+                                     "    \"lowest_a-\": 0.9,\n" +
+                                     "    \"lowest_b-\": 0.8,\n" +
+                                     "    \"lowest_c-\": 0.7,\n" +
+                                     "    \"lowest_d\": 0.6\n" +
+                                     "  },\n" +
+                                     "  \"gradeables\": [\n" +
+                                     gradeables_json_output +
+                                     "  ],\n" +
+                                     "  \"section\": {\n" +
+                                     "    \"1\": \"TA_name_1\",\n" +
+                                     "    \"2\": \"TA_name_2\",\n" +
+                                     "    \"3\": \"TA_name_3\",\n" +
+                                     "    \"4\": \"TA_name_4\",\n" +
+                                     "    \"5\": \"TA_name_1\",\n" +
+                                     "    \"6\": \"TA_name_2\",\n" +
+                                     "    \"7\": \"TA_name_3\",\n" +
+                                     "    \"8\": \"TA_name_4\",\n" +
+                                     "    \"9\": \"TA_name_5\",\n" +
+                                     "    \"10\": \"TA_name_5\"\n" +
+                                     "  },\n" +
+                                     "  \"messages\": [\n" +
+                                     "    \"<b>My Favorite CS Class</b>\",\n" +
+                                     "    \"Note: Please be patient with data entry/grade corrections for the" +
+                                     " most recent lab, homework, and test.\",\n" +
+                                     "    \"Please contact your graduate lab TA if a grade remains missing or" +
+                                     " incorrect for more than a week.\"\n" +
+                                     "  ]\n" +
+                                     "}\n")
+
+            # Write out the gradeables
+            #TODO: Figure out what to do about "none" bucket items - does Rainbow Grades support this?
+    except EnvironmentError as e:
+        print("Failed to write to customization file: {}".format(e))
 
 
 class User(object):

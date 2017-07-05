@@ -122,7 +122,7 @@ def sample_rainbow_grades_test():
                     make_file.write("RAINBOW_GRADES_DIRECTORY=" + rainbow_tmp + "\n")
                 elif len(line) >= 18 and line[:18] == "REPORTS_DIRECTORY=":
                     make_file.write(os.path.join("REPORTS_DIRECTORY=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses",
-                                                 "s17", "sample", "reports") + "\n")
+                                                 "f17", "sample", "reports") + "\n")
                 else:
                     make_file.write(line)
     except Exception as e:

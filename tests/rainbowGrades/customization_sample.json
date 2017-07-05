@@ -1,17 +1,17 @@
 {
   "display": [
-      "instructor_notes",
-      "grade_summary",
-      "grade_details"
+    "instructor_notes",
+    "grade_summary",
+    "grade_details"
   ],
   "display_benchmark": [
-      "average",
-      "stddev",
-      "perfect",
-      "lowest_a-",
-      "lowest_b-",
-      "lowest_c-",
-      "lowest_d"
+    "average",
+    "stddev",
+    "perfect",
+    "lowest_a-",
+    "lowest_b-",
+    "lowest_c-",
+    "lowest_d"
   ],
   "benchmark_percent": {
     "lowest_a-": 0.9,
@@ -21,14 +21,41 @@
   },
   "gradeables": [
     {
-      "type" : "hw",
+      "type": "test",
       "count": 4,
-      "percent": 1.00,
+      "percent" : 0.75,
       "ids": [
-        { "id":"python_static_analysis", "max": 14, "curve": [4.50, 4.00, 3.50, 3.00]},
-        { "id":"03_multipart", "max": 15, "curve": [14.50, 14.00, 13.50, 13.00] },
-        { "id":"python_linehighlight", "max": 95, "curve": [94.50, 64.00, 23.50, 13.00] },
-        { "id":"python_simple_homework", "max": 5, "curve": [4.0, 4.0, 3.0, 3.0] }
+        {"id":"future_no_tas_test", "max":5.0, "released":false},
+        {"id":"future_tas_test", "max":5.0, "released":false},
+        {"id":"grading_test", "max":5.0, "released":false},
+        {"id":"grades_released_test", "max":5.0}
+      ]
+    },
+    {
+      "type": "lab",
+      "count": 4,
+      "percent" : 0.11,
+      "ids": [
+        {"id":"future_no_tas_lab", "max":1.0, "released":false},
+        {"id":"future_tas_lab", "max":1.0, "released":false},
+        {"id":"grading_lab", "max":1.0, "released":false},
+        {"id":"grades_released_lab", "max":1.0}
+      ]
+    },
+    {
+      "type": "homework",
+      "count": 11,
+      "percent" : 0.14,
+      "ids": [
+        {"id":"open_homework", "max":5.0, "released":false},
+        {"id":"closed_homework", "max":5.0, "released":false},
+        {"id":"grading_homework", "max":5.0, "released":false},
+        {"id":"grades_released_homework_onlyta", "max":5.0},
+        {"id":"grades_released_homework_onlyauto", "max":10},
+        {"id":"grades_released_homework_autota", "max":20.0},
+        {"id":"grades_released_homework_autohiddenEC", "max":19.0},
+        {"id":"grades_released_homework_onlytaEC", "max":5.0},
+        {"id":"grades_released_homework_onlytaPenalty", "max":5.0}
       ]
     }
   ],
@@ -50,4 +77,3 @@
     "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week."
   ]
 }
-
