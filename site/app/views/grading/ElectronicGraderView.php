@@ -667,6 +667,7 @@ HTML;
             <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
             <input type="hidden" name="u_id" value="{$user->getId()}" />
             <input type="hidden" name="individual" value="{$individual}" />
+            <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
 HTML;
 
         //Late day calculation
