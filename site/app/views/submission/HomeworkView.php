@@ -647,7 +647,7 @@ HTML;
 HTML;
                                     }
                                     foreach ($autocheck->getMessages2() as $message) {
-                                        $type_class = "";
+                                        $type_class = "black-message";
                                         if ($message['type'] == "neutral") $type_class = "black-message";
                                         else if ($message['type'] == "success") $type_class = "green-message";
                                         else if ($message['type'] == "failure") $type_class = "red-message";

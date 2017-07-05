@@ -115,6 +115,14 @@ int main(int argc, char *argv[]) {
   if (config_json.find("assignment_message") != config_json.end()) {
     j["assignment_message"] = config_json.value("assignment_message",""); 
   }
+  if (config_json.find("mid_assignment_message") != config_json.end()) {
+    nlohmann::json mid_assignment_message = config_json.value("mid_assignment_message",nlohmann::json::object());
+    nlohmann::json mid;
+    mid["message"] = mid_assignment_message.value("message","");
+    mid["days_before"] = mid_assignment_message.value("days_before",0);
+    mid["points_required"] = mid_assignment_message.value("points_required",0);
+    j["mid_assignment_message"] = mid; 
+  }
   j["max_submissions"] = max_submissions;
   j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
 
