@@ -1,0 +1,28 @@
+{
+    "assignment_message" : "You should not modify the provided main.cpp",
+
+    "testcases" : [
+
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            "command" : "clang++ -Wall -o a.out *cpp",
+            "executable_name" : "a.out",
+            "points" : 2
+        },
+
+        {
+            "title" : "Testing",
+            "command" : "./a.out",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLinebyChar",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "output.txt"
+                }
+            ]
+        }
+
+    ]
+}
