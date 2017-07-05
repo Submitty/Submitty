@@ -96,14 +96,10 @@ class GradeSummary extends AbstractModel {
     private function addLateDays(&$this_g, $ldu, $gradeable) {
         $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
 
-        if(!is_null($gradeable->getStatus())) {
-            if ($gradeable->getStatus() == 0 || $gradeable->getStatus() == 3) {
-                $this_g["score"] = 0;
-            }
+        if(substr($late_days['status'], 0, 3) == 'Bad') {
+            $this_g["score"] = 0;
         }
-        if(!is_null($late_days['status'])){
-            $this_g['status'] = $late_days['status'];
-        }
+        $this_g['status'] = $late_days['status'];
 
         if (array_key_exists('late_days_charged', $late_days) && $late_days['late_days_used'] > 0) {
 
