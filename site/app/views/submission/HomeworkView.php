@@ -91,17 +91,17 @@ HTML;
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
+                document.cookie="student_checked="+0;
             }
             if ($("#radio_student").is(":checked")) {
                 $('#student_id_input').show();
             }
             $('#radio_normal').click(function() {
                 $('#student_id_input').hide();
-                document.cookie="student_checked="+0;
+                $('#student_id').val('');
             });
             $('#radio_student').click(function() {
                 $('#student_id_input').show();
-                document.cookie="student_checked="+1;
             });
         });
     </script>
