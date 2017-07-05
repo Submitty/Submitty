@@ -61,8 +61,9 @@ def main():
 
     args = parse_args()
     obj = get_submission_path(args)
+    print("obj ",obj)
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
-                                   "submissions",obj["gradeable"],obj["who"],obj["version"])
+                                   "submissions",obj["gradeable"],obj["who"],str(obj["version"]))
 
     if not os.path.isdir(submission_path):
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
@@ -80,7 +81,7 @@ def main():
     #checkout_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/checkout/$gradeable/$who/$version"
 
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
-                                "results",obj["gradeable"],obj["who"],obj["version"])
+                                "results",obj["gradeable"],obj["who"],str(obj["version"]))
 
     # grab a copy of the current results_history.json file (if it exists)
     global_results_history_file_location=os.path.join(results_path,"results_history.json")
@@ -151,7 +152,7 @@ def main():
                                            os.path.join(tmp_compilation,"my_compile.out"),
                                            obj["gradeable"],
                                            obj["who"],
-                                           obj["version"],
+                                           str(obj["version"]),
                                            submission_time],
                                           stdout=logfile)
 
@@ -213,7 +214,7 @@ def main():
                                           os.path.join(tmp_work,"my_runner.out"),
                                           obj["gradeable"],
                                           obj["who"],
-                                          obj["version"],
+                                          str(obj["version"]),
                                           submission_time],
                                           stdout=logfile)
 
@@ -281,7 +282,7 @@ def main():
                                              os.path.join(tmp_work,"my_validator.out"),
                                              obj["gradeable"],
                                              obj["who"],
-                                             obj["version"],
+                                             str(obj["version"]),
                                              submission_time],
                                             stdout=logfile)
 
