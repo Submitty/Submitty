@@ -63,9 +63,9 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
             
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
-            $active_version = $gradeable->getActiveVersion();
+            $graded_version = $gradeable->getGradedVersion();
  
-            $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $active_version, "results_grade.txt");
+            $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $graded_version, "results_grade.txt");
             $auto_grading_awarded = 0;
             $auto_grading_max_score = 0;
             if(!file_exists($submit_file)) {
@@ -73,13 +73,10 @@ class HWReport extends AbstractModel {
             }
             else {
                 $auto_grading_awarded = $gradeable->getGradedAutoGraderPoints();
-                $auto_grading_max_score = 0;
-                foreach($gradeable->getTestcases() as $testcase) {
-                    $auto_grading_max_score += $testcase->getPoints();
-                }
+                $auto_grading_max_score = $gradeable->getTotalAutograderPoints();
                 $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
                 $gradefilecontents = file_get_contents($submit_file);
-                $student_output_text .= "submission version #" . $active_version .$nl;
+                $student_output_text .= "submission version #" . $graded_version .$nl;
                 $student_output_text .= $nl.$gradefilecontents.$nl;
             }
             foreach($gradeable->getComponents() as $component) {

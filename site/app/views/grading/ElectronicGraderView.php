@@ -113,7 +113,7 @@ HTML;
      * @param array       $graders
      * @return string
      */
-    public function summaryPage($gradeable, $rows, $graders) {
+    public function detailsPage($gradeable, $rows, $graders) {
         $return = <<<HTML
 <div class="content">
     
