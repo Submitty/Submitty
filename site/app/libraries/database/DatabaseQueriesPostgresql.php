@@ -1333,7 +1333,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
 
       $return = array();
       foreach($this->database->rows() as $row){
-        $return[] = new SimpleLateUser($row);
+        $return[] = new SimpleLateUser($this->core, $row);
       }
       return $return;
     }
@@ -1352,7 +1352,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
 
       $return = array();
       foreach($this->database->rows() as $row){
-        $return[] = new SimpleLateUser($row);
+        $return[] = new SimpleLateUser($this->core, $row);
       }
       return $return;
     }
