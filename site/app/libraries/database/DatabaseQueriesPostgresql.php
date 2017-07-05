@@ -849,7 +849,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
     public function insertGradeableData(Gradeable $gradeable) {
         $params = array($gradeable->getId(), $gradeable->getUser()->getId(),
                         $gradeable->getOverallComment(),
-                        $gradeable->getActiveVersion());
+                        $gradeable->getGradedVersion());
         $this->database->query("INSERT INTO 
 gradeable_data (g_id, gd_user_id, gd_overall_comment, gd_graded_version)
 VALUES (?, ?, ?, ?)", $params);
@@ -1119,7 +1119,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
         if ($gradeable->getGdId() === null) {
             $params = array($gradeable->getId(), $gradeable->getUser()->getId(), $gradeable->getGrader()->getId(),
                             $gradeable->getOverallComment(),
-                            $gradeable->getActiveVersion());
+                            $gradeable->getGradedVersion());
             $this->database->query("INSERT INTO 
 gradeable_data (g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_graded_version)
 VALUES (?, ?, ?, ?, ?)", $params);
