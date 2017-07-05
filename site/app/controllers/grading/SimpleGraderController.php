@@ -127,7 +127,6 @@ class SimpleGraderController extends AbstractController  {
             }
         }
 
-        $gradeable->setStatus(1);
         $gradeable->saveData();
 
         $response = array('status' => 'success', 'data' => null);
