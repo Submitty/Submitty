@@ -674,10 +674,6 @@ HTML;
         $return .= $ldu->generateTableForUserDate($user->getId(), $gradeable->getDueDate());
         $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
         $status = $late_days_data['status'];
-        $late_charged = $late_days_data['late_days_charged'];
-        $return .= <<<HTML
-            <input type="hidden" name="late" value="{$late_charged}" />
-HTML;
 
         $color = "green";
         if($status != "Good" && $status != "Late") {
