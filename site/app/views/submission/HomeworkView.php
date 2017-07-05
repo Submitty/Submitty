@@ -309,8 +309,9 @@ HTML;
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
                 var user_id = "";
-                if (document.getElementById("submissionForm"))
+                if (document.getElementById("submissionForm")) {
                     user_id = document.getElementById("submissionForm").student_id.value;
+                }
                 // no RCS entered, upload for whoever is logged in
                 if (user_id == ""){
                     handleSubmission("{$this->core->buildUrl(array('component' => 'student',
