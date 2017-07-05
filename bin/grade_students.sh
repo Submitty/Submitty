@@ -396,6 +396,7 @@ function grade_this_item {
 
     
     # grab a copy of the current results_history.json file (if it exists)
+    global_results_history_file_location_tmp=${results_path_tmp}/results_history.json
     global_results_history_file_location=${results_path}/results_history.json
     if [ -e "$global_results_history_file_location" ]
     then
@@ -691,6 +692,8 @@ function grade_this_item {
     find . -exec ls -lta {} \; > $results_path/results_log_done.txt 2>&1
     $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp  > /dev/null  2>&1
     rm -rf $tmp
+
+    echo "========================================================================"
 }
 
 
@@ -870,12 +873,25 @@ while true; do
                                "`date -d @$ENDTIME`" \
                                "$ELAPSED" \
                                "$global_grade_result"
+
+        cp "$global_results_history_file_location" "$global_results_history_file_location_tmp"  
         
         #---------------------------------------------------------------------
         # WRITE OUT VERSION DETAILS
 
         echo "GOING TO INSERT INTO DATABASE"
-        ls -lta 
+        echo "$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
+        ls -lta "$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
+        
+        echo "${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
+                               ${semester} \
+                               ${course} \
+                               ${gradeable} \
+                               ${user} \
+                               ${team} \
+                               ${who} \
+                               ${is_team} \
+                               ${version}"
         
         ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
                                "${semester}" \

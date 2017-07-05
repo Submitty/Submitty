@@ -320,7 +320,7 @@ def main():
                     os.path.join(tmp,"OLD_RESULTS"))
 
     # clean out all of the old files if this is a re-run
-    shutil.rmtree(results_path)
+    shutil.rmtree(results_path,ignore_errors=True)
 
     # Make directory structure in results if it doesn't exist
     os.makedirs(results_path)
@@ -335,9 +335,11 @@ def main():
     shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
     shutil.copy(os.path.join(tmp_work,"results.json"),results_path)
     shutil.copy(os.path.join(tmp_work,"results_grade.txt"),results_path)
-    os.makedirs(os.path.join(results_path,"data"))
+    os.makedirs(os.path.join(results_path,"details"))
     for filename in glob.glob(os.path.join(tmp_work,"test*.txt")):
-        shutil.copy(filename,os.path.join(results_path,"data"))
+        shutil.copy(filename,os.path.join(results_path,"details"))
+    for filename in glob.glob(os.path.join(tmp_work,"test*_diff.json")):
+        shutil.copy(filename,os.path.join(results_path,"details"))
     
     print ("wrote to ",results_path)
 

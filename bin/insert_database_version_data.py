@@ -84,6 +84,10 @@ def parse_arguments():
 
 
 def main():
+
+    print ("------------------------------------------------------------------------------")
+    print ("INSERT DATABASE VERSION DATA")
+  
     """
     Program execution
     """
@@ -106,6 +110,8 @@ def main():
         hidden_ec = 0
         testcases = get_testcases(semester, course, gradeable_id)
         results = get_result_details(semester, course, gradeable_id, who_id, version)
+        if not len(testcases) == len(results['testcases']):
+            print ("ERROR!  mismatched # of testcases ",len(testcases)," != ",len(results['testcases']))
         for i in range(len(testcases)):
             if testcases[i]['hidden'] and testcases[i]['extra_credit']:
                 hidden_ec += results['testcases'][i]['points']
@@ -216,6 +222,7 @@ def main():
                    autograding_hidden_extra_credit=hidden_ec,
                    submission_time=submission_time)
 
+    print ("------------------------------------------------------------------------------")
 
 def parse_default_int(arg):
     """
@@ -280,6 +287,9 @@ def get_result_details(semester, course, g_id, who_id, version):
     result_details = {'testcases': [], 'submission_time': None}
     result_dir = os.path.join(DATA_DIR, "courses", semester, course, "results", g_id, who_id,
                               str(version))
+
+    print ("GET RESULT DETAILS " , os.path.join(result_dir, "results.json"))
+    
     if os.path.isfile(os.path.join(result_dir, "results.json")):
         with open(os.path.join(result_dir, "results.json")) as result_file:
             result_json = json.load(result_file)
@@ -297,5 +307,4 @@ def get_result_details(semester, course, g_id, who_id, version):
 
 
 if __name__ == "__main__":
-    quit()
     main()
