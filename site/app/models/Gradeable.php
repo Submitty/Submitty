@@ -855,7 +855,7 @@ class Gradeable extends AbstractModel {
     }
   
     public function saveData() {
-        $this->core->getDatabase()->beginTransaction();
+        $this->core->getCourseDB()->beginTransaction();
         if ($this->gd_id === null) {
             $this->gd_id = $this->core->getQueries()->insertGradeableData($this);
         }
@@ -865,7 +865,7 @@ class Gradeable extends AbstractModel {
         foreach ($this->components as $component) {
             $component->saveData($this->gd_id);
         }
-        $this->core->getDatabase()->commit();
+        $this->core->getCourseDB()->commit();
     }
       
     public function getSyllabusBucket() {
