@@ -163,6 +163,12 @@ class Gradeable extends AbstractModel {
     /** @property @var string Message to show for the gradeable above all submission results */
     protected $message = "";
 
+    /** */
+    ////////
+    protected $conditional_message = "";
+    protected $days_before = 0;
+    protected $points_required = 0;
+
     /** @property @var string[] */
     protected $part_names = array();
 
@@ -400,6 +406,12 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['assignment_message'])) {
             $this->message = Utils::prepareHtmlString($details['assignment_message']);
+        }
+
+        if (isset($details['conditional_message'])) {
+            $this->conditional_message = Utils::prepareHtmlString($details['conditional_message']['message']);
+            $this->days_before = intval($details['conditional_message']['days_before']);
+            $this->points_required = intval($details['conditional_message']['points_required']);
         }
 
         $num_parts = 1;
@@ -755,6 +767,10 @@ class Gradeable extends AbstractModel {
         return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysLate() : 0;
     }
 
+    public function getDaysEarly() {
+        return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysEarly() : 0;
+    }
+
     public function getInstructionsURL(){
         return $this->instructions_url;
     }
@@ -780,6 +796,10 @@ class Gradeable extends AbstractModel {
 
     public function getAssignmentMessage() {
         return $this->message;
+    }
+
+    public function hasConditionalMessage() {
+        return trim($this->message) !== "";
     }
 
     public function useSvnCheckout() {

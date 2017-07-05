@@ -37,6 +37,8 @@ class GradeableVersion extends AbstractModel {
     protected $active = false;
     /** @property @var int */
     protected $days_late = 0;
+    /** @property @var int */
+    protected $days_early = 0;
 
     /**
      * GradeableVersion constructor.
@@ -60,7 +62,11 @@ class GradeableVersion extends AbstractModel {
         // We add a 5 minute buffer for submissions before they're considered "late"
         $this->days_late = DateUtils::calculateDayDiff($due_date->add(new \DateInterval("PT5M")), $this->submission_time);
         if ($this->days_late < 0) {
+            $this->days_early = abs($this->days_late);
             $this->days_late = 0;
+        }
+        else {
+            $days_early = 0;
         }
         $this->active = isset($details['active_version']) && $details['active_version'] === true;
     }

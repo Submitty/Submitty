@@ -363,6 +363,13 @@ HTML;
         </p>
     </div>
 HTML;
+                    if ($gradeable->hasConditionalMessage()) {
+                        $return .= <<<HTML
+    <div class="sub" id="conditional_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>
+    </div>
+HTML;
+                    }
                 }
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
@@ -520,7 +527,23 @@ HTML;
         </div>
 HTML;
                     }
-
+                    $return.= <<<HTML
+<script type="text/javascript">
+        $(document).ready(function() {
+            // $('#conditional_message').show();
+            console.log({$gradeable->getDaysBefore()});
+            console.log({$gradeable->getDaysEarly()});
+            if ({$gradeable->hasConditionalMessage()} &&
+                    ({$current_version->getNonHiddenTotal()} >= {$gradeable->getPointsRequired()}) &&
+                    ({$gradeable->getDaysBefore()} <= {$gradeable->getDaysEarly()})) {
+                $('#conditional_message').show();
+            }
+            // if (($gradeable->hasConditionalMessage()) &&
+            //     ($current_version->getNonHiddenTotal() >= $gradeable->getPointsRequired()))
+            //     $('#conditional_message').show();
+        });
+</script>
+HTML;
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
                     foreach ($gradeable->getTestcases() as $testcase) {
