@@ -627,9 +627,7 @@ HTML;
                                     $diff_viewer = $autocheck->getDiffViewer();
                                     $return .= <<<HTML
                 <div class="box-block"> 
-                <!-- Readded css here so the popup has the css -->
-                <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-                
+                <!-- Readded css here so the popups have the css -->
 HTML;
 
                                     $title = "";
