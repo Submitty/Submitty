@@ -603,7 +603,9 @@ HTML;
                 if (!is_array($contents)) {
                     $dir = htmlentities($dir);
                     $contents = urlencode(htmlentities($contents));
+                    $content_url = urldecode($contents); 
                     $indent_offset = $indent * -15;
+                    $super_url = $content_url;
                     $return .= <<<HTML
                 <div>
                     <div class="file-viewer">
@@ -611,6 +613,7 @@ HTML;
                             <span class='icon-plus' style='vertical-align:text-bottom;'></span>
                         {$dir}</a> &nbsp;
                         <a onclick='openFile("{$dir}", "{$contents}")'>(Popout)</a>
+                        <a onclick='downloadFile("{$dir}", "{$contents}")'> (Download) </a>
                     </div><br/>
                     <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px"></div>
                 </div>
@@ -871,6 +874,20 @@ HTML;
             iframe.removeClass('shown');
             $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-minus').addClass('icon-plus');
         }
+        return false;
+    }
+
+    function downloadFile(html_file, url_file) {
+        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=download_file&dir=submissions&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        /*
+        $.ajax({
+            type : "POST",
+            data : {
+                'path' : url_file
+            },
+            url : buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': html_file, 'path': url_file})
+        });
+        */
         return false;
     }
 

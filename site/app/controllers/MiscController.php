@@ -11,6 +11,10 @@ class MiscController extends AbstractController {
         switch($_REQUEST['page']) {
             case 'display_file':
                 $this->display_file();
+                break;
+            case 'download_file':
+                $this->downloadFile();
+                break;
         }
     }
 
@@ -57,5 +61,14 @@ class MiscController extends AbstractController {
                 $this->core->getOutput()->renderOutput('Misc', 'displayFile', $contents);
             }
         }
+    }
+
+    private function downloadFile() {
+        $file_url = $_POST['path'];
+        header('Content-Type: application/octet-stream');
+        header("Content-Transfer-Encoding: Binary"); 
+        header("Content-disposition: attachment; filename=\"" . basename($file_url) . "\""); 
+        readfile($file_url);
+        exit;
     }
 }
