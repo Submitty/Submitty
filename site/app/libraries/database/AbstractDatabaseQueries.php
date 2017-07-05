@@ -290,6 +290,8 @@ abstract class AbstractDatabaseQueries {
      */
     abstract public function updateUserViewedDate(Gradeable $gradeable);
 
+    abstract public function getAllGradeablesIdsAndTitles();
+
     /**
      * @todo: write phpdoc
      *
