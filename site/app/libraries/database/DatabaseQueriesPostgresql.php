@@ -422,8 +422,8 @@ ORDER BY u.{$section_key}, {$sort_key}";
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query 
     public function getLateDayUpdates() {
-        $this->database->query("SELECT * FROM late_days");
-        return $this->database->rows();
+        $this->course_db->query("SELECT * FROM late_days");
+        return $this->course_db->rows();
     }
     
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
@@ -486,8 +486,8 @@ ORDER BY u.{$section_key}, {$sort_key}";
                       AND submissions.user_id = lde.user_id";
         //Query database and return results.
         
-        $this->database->query($query, $params);
-        return $this->core->getDatabase()->rows();
+        $this->course_db->query($query, $params);
+        return $this->course_db->rows();
     }
 
     public function getUsersByRegistrationSections($sections) {
