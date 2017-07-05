@@ -39,18 +39,18 @@ def get_submission_path(args):
 
 def untrusted_execute():
     print("foo")
-    
+
 
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
         os.chmod(item,os.stat(item).st_mode | perms)
     # else, can't change permissions on this file/directory!
 
-    
+
 def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
     for root, dirs, files in os.walk(top_dir):
         add_permissions(root,root_perms)
-        for d in dirs:  
+        for d in dirs:
             add_permissions(os.path.join(root, d),dir_perms)
         for f in files:
             add_permissions(os.path.join(root, f),file_perms)
@@ -60,15 +60,12 @@ def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
 def main():
 
     args = parse_args()
-
     obj = get_submission_path(args)
-    
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
                                    "submissions",obj["gradeable"],obj["who"],obj["version"])
-    
+
     if not os.path.isdir(submission_path):
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
-       
     print ("GRADE THIS", submission_path)
 
     test_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
@@ -79,12 +76,12 @@ def main():
                                     "test_output",obj["gradeable"])
 
     bin_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"bin")
-    
+
     #checkout_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/checkout/$gradeable/$who/$version"
 
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
                                 "results",obj["gradeable"],obj["who"],obj["version"])
-    
+
     # grab a copy of the current results_history.json file (if it exists)
     global_results_history_file_location=os.path.join(results_path,"results_history.json")
     #FIXME
@@ -110,7 +107,7 @@ def main():
 
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
-    
+
     # copy submitted files to the tmp compilation directory
     tmp_compilation = os.path.join(tmp,"TMP_COMPILATION")
     shutil.copytree(submission_path,tmp_compilation)
@@ -125,7 +122,7 @@ def main():
     gradeable_upload_type=gradeable_config_obj["upload_type"]
     #print ("UPLOAD TYPE ",gradeable_upload_type)
     #FIXME:  deal with svn/git/whatever
-    
+
     gradeable_deadline = gradeable_config_obj["date_due"]
 
     # copy any instructor provided code files to tmp compilation directory
@@ -140,7 +137,7 @@ def main():
 
     # copy compile.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"compile.out"),os.path.join(tmp_compilation,"my_compile.out"))
-    
+
     # give the untrusted user read/write/execute permissions on the tmp directory & files
     add_permissions_recursive(tmp_compilation,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
@@ -149,7 +146,7 @@ def main():
 
     add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH)
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-    
+
     with open(os.path.join(tmp_logs,"compilation_log.txt"), 'w') as logfile:
         compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
                                            args.which_untrusted,
@@ -160,14 +157,14 @@ def main():
                                            submission_time],
                                           stdout=logfile)
 
-    if compile_success == 0: 
+    if compile_success == 0:
         print ("NEW COMPILATION OK")
     else:
         print ("NEW COMPILATION FAILURE")
 
     # remove the compilation program
     os.remove(os.path.join(tmp_compilation,"my_compile.out"))
-        
+
     # return to the main tmp directory
     os.chdir(tmp)
 
@@ -177,10 +174,10 @@ def main():
     tmp_work=os.path.join(tmp,"TMP_WORK")
     os.makedirs(tmp_work)
     os.chdir(tmp_work)
-        
+
     # move all executable files from the compilation directory to the main tmp directory
     # Note: Must preserve the directory structure of compiled files (esp for Java)
-    
+
     #FIXME INCOMPLETE COPY
     for file in glob.glob(os.path.join(tmp_compilation,"*.out")):
         print ("FILE ",file)
@@ -189,7 +186,7 @@ def main():
         print ("FILE ",file)
         shutil.copy(file,tmp_work)
 
-        
+
     # remove the compilation directory
     #shutil.rmtree(tmp_compilation)
 
@@ -204,7 +201,7 @@ def main():
 
     # copy runner.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"run.out"),os.path.join(tmp_work,"my_runner.out"))
-                 
+
     # give the untrusted user read/write/execute permissions on the tmp directory & files
     add_permissions_recursive(tmp_work,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
@@ -224,15 +221,15 @@ def main():
 
 
 
-        
-    if runner_success == 0: 
+
+    if runner_success == 0:
         print ("NEW RUNNER OK")
     else:
         print ("NEW RUNNER FAILURE")
 
-        
+
     #$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -exec /bin/chmod o+r {} \;   >>  results_log_runner.txt 2>&1
-        
+
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
                      args.which_untrusted,
                      "/usr/bin/find",
@@ -243,11 +240,11 @@ def main():
                      "/bin/chmod",
                      "o+r",
                      "{}",
-                     ";"])    
+                     ";"])
 
     print ("finishing runner")
-        
-        
+
+
     # --------------------------------------------------------------------
     # RUN VALIDATOR
 
@@ -268,7 +265,7 @@ def main():
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"validate.out"),os.path.join(tmp_work,"my_validator.out"))
 
     print ("going to change more permissions")
-    
+
     # give the untrusted user read/write/execute permissions on the tmp directory & files
     add_permissions_recursive(tmp_work,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
@@ -278,7 +275,7 @@ def main():
     add_permissions(os.path.join(tmp_work,"my_validator.out"),stat.S_IROTH | stat.S_IXOTH)
 
     print ("going to run the validator")
-    
+
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
         validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
@@ -290,7 +287,7 @@ def main():
                                              submission_time],
                                             stdout=logfile)
 
-    if validator_success == 0: 
+    if validator_success == 0:
         print ("NEW VALIDATOR OK")
     else:
         print ("NEW VALIDATOR FAILURE")
@@ -306,14 +303,13 @@ def main():
                      "o+r",
                      "{}",
                      ";"])
-    
-    
-    
+
+
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
 
     os.chdir(bin_path)
-    
+
     # save the old results path!
     if os.path.isdir(os.path.join(results_path,"OLD")):
         shutil.move(os.path.join(results_path,"OLD"),
@@ -329,7 +325,7 @@ def main():
     if os.path.isdir(os.path.join(tmp,"OLD_RESULTS")):
         shutil.move(os.path.join(tmp,"OLD_RESULTS"),
                     os.path.join(results_path,"OLD"))
-    
+
 
 
     shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
@@ -340,7 +336,7 @@ def main():
         shutil.copy(filename,os.path.join(results_path,"details"))
     for filename in glob.glob(os.path.join(tmp_work,"test*_diff.json")):
         shutil.copy(filename,os.path.join(results_path,"details"))
-    
+
     print ("wrote to ",results_path)
 
     print ("RESULTS PATH ", results_path)
@@ -359,7 +355,7 @@ def main():
     else:
         print ("NO OLD: ",results_path+"_OLD")
 
-        
+
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
     shutil.rmtree(tmp)
