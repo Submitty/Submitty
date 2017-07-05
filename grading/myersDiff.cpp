@@ -213,6 +213,7 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
 
 TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::string> messages;
+  std::vector<std::pair<std::string, std::string> > messages2;
   std::string student_file_contents;
   std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
@@ -745,6 +746,7 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
     if (char_changes < lower_bar) {
       std::cout << "too few char changes (zero credit)" << std::endl;
       messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly fewer character changes than allowed.");
+      messages2.push_back(std::make_pair("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly fewer character changes than allowed.","failure"));
     } else if (char_changes < min_char_changes) {
       std::cout << "less than min char changes (partial credit)" << std::endl;
       float numer = min_char_changes - char_changes;
@@ -753,8 +755,10 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       assert (denom > 0);
       grade = 1 - numer/denom;
       messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Fewer character changes than allowed.");
+      messages2.push_back(std::make_pair("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Fewer character changes than allowed.","failure"));
     } else if (char_changes < max_char_changes) {
       messages.push_back("Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Character changes within allowed range.");
+      messages2.push_back(std::make_pair("Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Character changes within allowed range.","success"));
       std::cout << "between min and max char changes (full credit)" << std::endl;
       grade = 1.0;
     } else if (char_changes < upper_bar) {
@@ -765,9 +769,11 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       grade = 1 - numer/denom;
       std::cout << "numer " << numer << " denom= " << denom << std::endl;
       messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  More character changes than allowed.");
+      messages2.push_back(std::make_pair("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  More character changes than allowed.","failure"));
     } else {
       std::cout << "too many char changes (zero credit)" << std::endl;
       messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly more character changes than allowed.");
+      messages2.push_back(std::make_pair("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly more character changes than allowed.","failure"));
       grade = 0.0;
     }
     std::cout << "grade " << grade << std::endl;
