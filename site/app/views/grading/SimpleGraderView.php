@@ -74,12 +74,27 @@ HTML;
         else{
             $info = "Red - [SAVE ERROR] Refresh Page";
         }
-            $return .= <<<HTML
-    <i class="fa fa-question-circle tooltip" style="float: right" aria-hidden="true"><span class="tooltiptext">$info</span></i>
+        if($action === 'numeric') {
+            if ($this->core->getUser()->accessAdmin()) {
+                $return .= <<<HTML
+    <input class ="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
+    <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
 HTML;
-
+            }            
+        }
         $return .= <<<HTML
     <h2>{$gradeable->getName()}</h2>
+    <p style="float: left;">$info</p>
+HTML;
+
+        if ($this->core->getUser()->accessAdmin()) {
+            $return .= <<<HTML
+    <p style="float: right;">The CSV file should be formated as such: <br />
+    user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...</p>
+HTML;
+        }
+        $return .= <<<HTML
+    <!-- <i class="fa fa-question-circle tooltip" style="float: right;" aria-hidden="true"><span class="tooltiptext">$info</span></i> -->
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
@@ -89,6 +104,9 @@ HTML;
                 <td width="92" style="text-align: left"> <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => $action, 'g_id' => $gradeable->getId(), 'sort' => 'first', 'view' => $view))}"><span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fa fa-sort"></i></a></td>
                 <td width="91" style="text-align: left"> <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => $action, 'g_id' => $gradeable->getId(), 'sort' => 'last', 'view' => $view))}"><span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i></a></td>
 HTML;
+        $num_text = 0;
+        $num_numeric = 0;
+        $comp_ids = array();
         if($action == 'lab'){
             foreach ($gradeable->getComponents() as $component) {
                 $return .= <<<HTML
@@ -113,6 +131,7 @@ HTML;
                         $return .= <<<HTML
                 <td width="35" style="text-align: center">{$component->getTitle()}({$component->getMaxValue()})</td>
 HTML;
+                        $comp_ids[] = $component->getId();
                     }
                 }
                 $return .= <<<HTML
@@ -183,17 +202,18 @@ HTML;
                     </a>
 HTML;
                 }
+                $component_ids = json_encode($comp_ids);
                 $return .= <<<HTML
                 </td>
             </tr>
             <tr class="info">
                 <td colspan="{$colspan}" style="text-align: center">Graders: {$section_graders}</td>
             </tr>
-        <tbody id="section-{$section}">
+        <tbody id="section-{$section}" data-numnumeric="{$num_numeric}" data-numtext="{$num_text}" data-compids = "{$component_ids}">
 HTML;
             }
             $return .= <<<HTML
-            <tr data-gradeable="{$gradeable->getId()}" data-user="{$gradeable_row->getUser()->getId()}">
+            <tr data-gradeable="{$gradeable->getId()}" data-user="{$gradeable_row->getUser()->getId()}" data-row="{$row}"> 
                 <td class="">{$count}</td>
                 <td class="">{$gradeable_row->getUser()->getRegistrationSection()}</td>
                 <td class="cell-all" style="text-align: left">{$gradeable_row->getUser()->getId()}</td>
@@ -255,7 +275,7 @@ HTML;
                         }
                     }
                     $return .= <<<HTML
-                <td class="option-small-output"><input class="option-small-box" style="text-align: center" type="text" border="none" value=$total data-total="true" readonly></td>
+                <td class="option-small-output"><input class="option-small-box" style="text-align: center" type="text" border="none" id="total-{$row}" value=$total data-total="true" readonly></td>
 HTML;
                 }
 

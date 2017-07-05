@@ -33,16 +33,15 @@ use app\libraries\Utils;
  * @method float getNormalPoints() Returns the total number of points for testcases that are not hidden nor are extra credit
  * @method bool setTeamAssignment()
  * @method bool getTeamAssignment()
- * @method setTaViewDate()
- * @method getOpenDate()
- * @method setOpenDate()
- * @method getDueDate()
- * @method getGradeStartDate()
- * @method setGradeStartDate(Date $datetime)
- * @method getGradeReleasedDate()
- * @method setGradeReleasedDate(Datetime $datetime)
+ * @method setTaViewDate(\DateTime $datetime)
+ * @method \DateTime getOpenDate(\DateTime $datetime)
+ * @method setOpenDate(\DateTime $datetime)
+ * @method \DateTime getDueDate()
+ * @method \DateTime getGradeStartDate()
+ * @method setGradeStartDate(\DateTime $datetime)
+ * @method \DateTime getGradeReleasedDate()
+ * @method setGradeReleasedDate(\DateTime $datetime)
  * @method bool getGradeByRegistration()
- * @method getOpenDate()
  * @method array getSubmittedFiles()
  * @method array getSvnFiles()
  * @method array getTestcases()
@@ -68,7 +67,7 @@ use app\libraries\Utils;
  * @method string getBucket()
  * @method int|null getGdId()
  * @method void setGdId(int $gd_id)
- * @method getUserViewedDate()
+ * @method \DateTime getUserViewedDate()
  */
 class Gradeable extends AbstractModel {
     
@@ -187,6 +186,7 @@ class Gradeable extends AbstractModel {
      * and then each element is an array that contains filename, file path, and the file size. */
     protected $submitted_files = array();
     protected $svn_files = array();
+    protected $results_files = array();
     protected $meta_files = array();
     protected $previous_files = array();
 
@@ -253,6 +253,7 @@ class Gradeable extends AbstractModel {
         $this->user = ($user === null) ? $this->core->getUser() : $user;
         if (isset($details['gd_id'])) {
             $this->gd_id = $details['gd_id'];
+            $this->grader = $this->core->getQueries()->getUserById($details['gd_grader_id']);
             $this->overall_comment = $details['gd_overall_comment'];
             $this->status = $details['gd_status'];
             $this->graded_version = $details['gd_active_version'];
@@ -463,7 +464,7 @@ class Gradeable extends AbstractModel {
         $interactive_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive";
         $batch_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_batch";
 
-        $user_id = $this->core->getUser()->getId();
+        $user_id = $this->user->getId();
         if ($this->team_assignment) {
             $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
             if ($team !== null) {
@@ -580,7 +581,7 @@ class Gradeable extends AbstractModel {
             return;
         }
 
-        $user_id = $this->core->getUser()->getId();
+        $user_id = $this->user->getId();
         if ($this->team_assignment) {
             $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
             if ($team !== null) {
@@ -634,6 +635,12 @@ class Gradeable extends AbstractModel {
         $svn_files = FileUtils::getAllFiles($svn_current_path, array(), true);
         foreach ($svn_files as $file => $details) {
             $this->svn_files[$file] = $details;
+        }
+
+        $results_current_path = FileUtils::joinPaths($results_path,$this->current_version);
+        $results_files = FileUtils::getAllFiles($results_current_path, array(), true);
+        foreach ($results_files as $file => $details) {
+            $this->results_files[$file] = $details;
         }
 
         if ($this->getNumParts() > 1) {
