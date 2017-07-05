@@ -283,14 +283,14 @@ HTML;
 						if (($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() != 0 && $g_data->getActiveVersion() >= 1
 							&& $title_save == "CLOSED" && $points_percent >= 50) || ($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() == 0 && $g_data->getActiveVersion() >= 1)) {
 						$gradeable_open_range = <<<HTML
-                 <a class="btn btn-default" style="width:100%; padding: 0px; padding-top: 10px; padding-bottom: 10px;" href="{$site_url}&component=student&gradeable_id={$gradeable}">
+                 <a class="btn btn-default btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable}">
                      {$button_text}
                  </a>
 HTML;
 						}
 						else { 
 							$gradeable_open_range = <<<HTML
-                 <a class="btn {$title_to_button_type_submission[$title]}" style="width:100%; padding: 0px; padding-top: 10px; padding-bottom: 10px;" href="{$site_url}&component=student&gradeable_id={$gradeable}">
+                 <a class="btn {$title_to_button_type_submission[$title]} btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable}">
                      {$button_text}
                  </a>
 HTML;
@@ -422,19 +422,19 @@ HTML;
                             //if $TA_percent is 100, change the text to REGRADE
                             if ($TA_percent == 100 && $title_save=='ITEMS BEING GRADED') {
                                 $gradeable_grade_range = <<<HTML
-                                <a class="btn btn-default" style="width:100%; padding: 0px; padding-top: 10px; padding-bottom: 10px;" \\
+                                <a class="btn btn-default btn-nav" \\
                                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
                                 {$temp_regrade_text}</a>
 HTML;
                             } else if ($TA_percent == 100 && $title_save=='GRADED') {
                                 $gradeable_grade_range = <<<HTML
-                                <a class="btn btn-default" style="width:100%; padding: 0px; padding-top: 10px; padding-bottom: 10px;" \\
+                                <a class="btn btn-default btn-nav" \\
                                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
                                 REGRADE</a>
 HTML;
                             } else {
                                 $gradeable_grade_range = <<<HTML
-                                <a class="btn {$title_to_button_type_grading[$title_save]}" style="width:100%; padding: 0px; padding-top: 10px; padding-bottom: 10px;" \\
+                                <a class="btn {$title_to_button_type_grading[$title_save]} btn-nav" \\
                                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
                                 {$gradeable_grade_range}</a>
 HTML;
@@ -485,7 +485,7 @@ HTML;
                     //<!--onclick="location.href='{$ta_base_url}/account/account-checkpoints-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">-->
                     if($g_data->getType() == GradeableType::CHECKPOINTS){
                        $gradeable_grade_range = <<<HTML
-                <a class="btn {$title_to_button_type_grading[$title]}" style="width:100%; padding: 0px; padding-top: 10px; padding-bottom: 10px;" \\
+                <a class="btn {$title_to_button_type_grading[$title]} btn-nav" \\
                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable))}">
                 {$gradeable_grade_range}</a>
 HTML;
@@ -493,7 +493,7 @@ HTML;
                     // onclick="location.href='{$ta_base_url}/account/account-numerictext-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                     elseif($g_data->getType() == GradeableType::NUMERIC_TEXT){
                         $gradeable_grade_range = <<<HTML
-                <a class="btn {$title_to_button_type_grading[$title]}" style="width:100%; padding: 0px; padding-top: 10px; padding-bottom: 10px;" \\
+                <a class="btn {$title_to_button_type_grading[$title]} btn-nav" \\
                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable))}">
                 {$gradeable_grade_range}</a>
 HTML;
