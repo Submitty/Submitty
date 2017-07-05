@@ -90,13 +90,11 @@ def main():
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
     tmp=tempfile.mkdtemp()
 
-    print ("my tmp directory ", tmp)
+    #print ("my tmp directory ", tmp)
 
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
         submission_time=submission_time_file.read()
-
-    print("submission_time = ",submission_time)
 
     # switch to tmp directory
     os.chdir(tmp)
@@ -180,10 +178,10 @@ def main():
 
     #FIXME INCOMPLETE COPY
     for file in glob.glob(os.path.join(tmp_compilation,"*.out")):
-        print ("FILE ",file)
+        #print ("FILE ",file)
         shutil.copy(file,tmp_work)
     for file in glob.glob(os.path.join(tmp_compilation,"*.py")):
-        print ("FILE ",file)
+        #print ("FILE ",file)
         shutil.copy(file,tmp_work)
 
 
@@ -193,7 +191,7 @@ def main():
     # copy input files to tmp_work directory
     if os.path.isdir(test_input_path) :
         for item in os.listdir(test_input_path):
-            print ("copy input ", item)
+            #print ("copy input ", item)
             if os.path.isdir(item):
                 shutil.copytree(os.path.join(test_input_path,item),tmp_work)
             else:
@@ -242,7 +240,7 @@ def main():
                      "{}",
                      ";"])
 
-    print ("finishing runner")
+    #print ("finishing runner")
 
 
     # --------------------------------------------------------------------
@@ -255,7 +253,7 @@ def main():
     # copy output files to tmp_work directory
     if os.path.isdir(test_output_path) :
         for item in os.listdir(test_output_path):
-            print ("copy output ", item)
+            #print ("copy output ", item)
             if os.path.isdir(item):
                 shutil.copytree(os.path.join(test_output_path,item),tmp_work)
             else:
@@ -264,7 +262,7 @@ def main():
     # copy validator.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"validate.out"),os.path.join(tmp_work,"my_validator.out"))
 
-    print ("going to change more permissions")
+    #print ("going to change more permissions")
 
     # give the untrusted user read/write/execute permissions on the tmp directory & files
     add_permissions_recursive(tmp_work,
@@ -274,7 +272,7 @@ def main():
 
     add_permissions(os.path.join(tmp_work,"my_validator.out"),stat.S_IROTH | stat.S_IXOTH)
 
-    print ("going to run the validator")
+    #print ("going to run the validator")
 
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
@@ -330,30 +328,32 @@ def main():
 
     shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
     shutil.copy(os.path.join(tmp_work,"results.json"),results_path)
-    shutil.copy(os.path.join(tmp_work,"results_grade.txt"),results_path)
+    shutil.copy(os.path.join(tmp_work,"grade.txt"),results_path)
     os.makedirs(os.path.join(results_path,"details"))
     for filename in glob.glob(os.path.join(tmp_work,"test*.txt")):
         shutil.copy(filename,os.path.join(results_path,"details"))
     for filename in glob.glob(os.path.join(tmp_work,"test*_diff.json")):
         shutil.copy(filename,os.path.join(results_path,"details"))
 
-    print ("wrote to ",results_path)
+    #print ("wrote to ",results_path)
 
     print ("RESULTS PATH ", results_path)
-    subprocess.call(["ls","-la",results_path])
+    #subprocess.call(["ls","-la",results_path])
+    #if (os.path.isdir(os.path.join(results_path,"OLD"))):
+    #    subprocess.call(["ls","-la",results_path+"/OLD"])
 
 
     if os.path.isdir(os.path.join(results_path,"OLD")):
         print ("OLD EXISTS: ",os.path.join(results_path,"OLD"))
         m = filecmp.cmp(os.path.join(results_path,"OLD","results.json"),
                         os.path.join(results_path,"results.json"))
-        if not m: print ("OOPS!  results.json does not match")
-        m = filecmp.cmp(os.path.join(results_path,"OLD","results_grade.txt"),
-                        os.path.join(results_path,"results_grade.txt"))
-        if not m: print ("OOPS!  results_grade.txt does not match")
+        if not m: print ("********************************************************** OOPS!  results.json does not match")
+        m = filecmp.cmp(os.path.join(results_path,"OLD","grade.txt"),
+                        os.path.join(results_path,"grade.txt"))
+        if not m: print ("********************************************************** OOPS!  grade.txt does not match")
 
-    else:
-        print ("NO OLD: ",results_path+"_OLD")
+    #else:
+    #print ("NO OLD: ",results_path+"_OLD")
 
 
     # --------------------------------------------------------------------

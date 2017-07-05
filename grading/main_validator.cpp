@@ -226,7 +226,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   sstr >> config_json;
   AddSubmissionLimitTestCase(config_json);
 
-  std::string grade_path = "results_grade.txt";
+  std::string grade_path = "grade.txt";
   std::ofstream gradefile(grade_path.c_str());
 
   int automated_points_awarded = 0;

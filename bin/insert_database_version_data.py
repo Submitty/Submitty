@@ -85,9 +85,6 @@ def parse_arguments():
 
 def main():
 
-    print ("------------------------------------------------------------------------------")
-    print ("INSERT DATABASE VERSION DATA")
-  
     """
     Program execution
     """
@@ -222,8 +219,6 @@ def main():
                    autograding_hidden_extra_credit=hidden_ec,
                    submission_time=submission_time)
 
-    print ("------------------------------------------------------------------------------")
-
 def parse_default_int(arg):
     """
     Defaults value to 0 for numeric argument if the argument is not set (None)
@@ -287,8 +282,6 @@ def get_result_details(semester, course, g_id, who_id, version):
     result_details = {'testcases': [], 'submission_time': None}
     result_dir = os.path.join(DATA_DIR, "courses", semester, course, "results", g_id, who_id,
                               str(version))
-
-    print ("GET RESULT DETAILS " , os.path.join(result_dir, "results.json"))
     
     if os.path.isfile(os.path.join(result_dir, "results.json")):
         with open(os.path.join(result_dir, "results.json")) as result_file:

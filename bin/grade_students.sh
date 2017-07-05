@@ -240,10 +240,10 @@ function grade_this_item {
     echo "========================================================================"
     echo "GRADE $NEXT_TO_GRADE"
 
-    echo "NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW"
+    #    echo "NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW"
     ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
 
-    echo "OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD"
+    #echo "OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD"
 
     # --------------------------------------------------------------------
     # The queue file name contains the necessary information to
@@ -654,22 +654,22 @@ function grade_this_item {
     # Make directory structure in results if it doesn't exist
     mkdir -p "$results_path" || log_error "$NEXT_TO_GRADE" "Could not create results path $results_path"
 
-    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.png $tmp/test*.html $tmp/results_log_*txt $tmp/results.json $tmp/results_grade.txt $tmp/test*.json "$results_path"
+    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.png $tmp/test*.html $tmp/results_log_*txt $tmp/results.json $tmp/grade.txt $tmp/test*.json "$results_path"
 
 
     # FIXME: a global variable
 
-    if [ -e $results_path/results_grade.txt ] ;
+    if [ -e $results_path/grade.txt ] ;
     then
-	global_grade_result=`grep "Automatic grading total:" $results_path/results_grade.txt`
+	global_grade_result=`grep "Automatic grading total:" $results_path/grade.txt`
     else
-	global_grade_result="ERROR: $results_path/results_grade.txt does not exist"
+	global_grade_result="ERROR: $results_path/grade.txt does not exist"
     fi
 
 
     if [[ $global_grade_result == "" ]] ;
     then
-	global_grade_result="WARNING: $results_path/results_grade.txt does not have a total score"
+	global_grade_result="WARNING: $results_path/grade.txt does not have a total score"
     fi
 
 
@@ -879,19 +879,19 @@ while true; do
         #---------------------------------------------------------------------
         # WRITE OUT VERSION DETAILS
 
-        echo "GOING TO INSERT INTO DATABASE"
-        echo "$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
-        ls -lta "$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
+        #echo "GOING TO INSERT INTO DATABASE"
+        #echo "$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
+        #ls -lta "$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
         
-        echo "${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
-                               ${semester} \
-                               ${course} \
-                               ${gradeable} \
-                               ${user} \
-                               ${team} \
-                               ${who} \
-                               ${is_team} \
-                               ${version}"
+        #echo "${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
+        #                       ${semester} \
+        #                       ${course} \
+        #                       ${gradeable} \
+        #                       ${user} \
+        #                       ${team} \
+        #                       ${who} \
+        #                       ${is_team} \
+        #                       ${version}"
         
         ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
                                "${semester}" \
