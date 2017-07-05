@@ -31,7 +31,7 @@ class SimpleLateUser extends AbstractModel {
      * @param array $details
      */
     public function __construct($details) {
-        parent::__construct();
+        parent::__construct($core);
         if (count($details) == 0) {
             return;
         }
