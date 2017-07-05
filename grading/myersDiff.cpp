@@ -77,7 +77,7 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
       return new TestResults(1.0);
     } else {
       std::cout << "FILES NOT FOUND " + files_not_found << std::endl;
-      return new TestResults(0.0,{"ERROR: required files not found: " + files_not_found});
+      return new TestResults(0.0,{"ERROR: required files not found: " + files_not_found},{std::make_pair("ERROR: required files not found: " + files_not_found, "failure")});
     }
   }
 }
@@ -104,11 +104,11 @@ TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) 
   }
   if (student_file_contents != "") {
     if (student_file_contents.find("error") != std::string::npos)
-      return new TestResults(0.0,{"ERROR: This file should be empty!"},"",true,true);
+      return new TestResults(0.0,{"ERROR: This file should be empty!"},{std::make_pair("ERROR: This file should be empty!","failure")},"",true,true);
     else if (student_file_contents.find("warning") != std::string::npos)
-      return new TestResults(0.0,{"ERROR: This file should be empty!"},"",false,true);
+      return new TestResults(0.0,{"ERROR: This file should be empty!"},{std::make_pair("ERROR: This file should be empty!","failure")},"",false,true);
     else
-      return new TestResults(0.0,{"ERROR: This file should be empty!"});
+      return new TestResults(0.0,{"ERROR: This file should be empty!"},{std::make_pair("ERROR: This file should be empty!","failure")});
   }
   return new TestResults(1.0);
 }
@@ -370,7 +370,7 @@ TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
     ss << "ERROR: " << missing << " missing line(s)";
   }
 
-  return new TestResults(score,{ss.str()},swap_difference.str());
+  return new TestResults(score,{ss.str()},{std::make_pair(ss.str(),"failure")},swap_difference.str());
 }
 
 // ===============================================================================

@@ -119,9 +119,10 @@ public:
           msg = "";
           color = "";
         } else if (color == "") {
+          i++;
           color.push_back(messages2[i]);
         }
-      } else if (color == ""){
+      } else if (color == "") {
         msg.push_back(messages2[i]);
       } else {
         color.push_back(messages2[i]);
@@ -161,10 +162,10 @@ public:
   // CONSTRUCTOR
   TestResults(float g=0.0, 
               const std::vector<std::string> &m = {},
+              const std::vector<std::pair<std::string, std::string> > &m2 = {},
               const std::string &sd="",
               bool ce=false,
-              bool cw=false, 
-              const std::vector<std::pair<std::string, std::string> > &m2 = {}) :
+              bool cw=false) :
     my_grade(g),swap_difference(sd),distance(0) {
     for (int i= 0; i < m.size(); i++) {
       if (m[i].size() != 0) {
