@@ -43,7 +43,7 @@ def solution(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_solution","-b")
+    test.diff("grade.txt","grade.txt_solution","-b")
 
 
 @testcase
@@ -54,7 +54,7 @@ def buggy(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_buggy","-b")
+    test.diff("grade.txt","grade.txt_buggy","-b")
 
 
 

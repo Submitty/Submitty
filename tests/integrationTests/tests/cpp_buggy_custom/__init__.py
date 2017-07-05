@@ -54,7 +54,7 @@ def correct(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_correct","-b")
+    test.diff("grade.txt","grade.txt_correct","-b")
     test.json_diff("results.json","results.json_correct")
 
 

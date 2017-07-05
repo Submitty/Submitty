@@ -34,7 +34,7 @@ def solution(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_solution", "-b")
+    test.diff("grade.txt", "grade.txt_solution", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "solution.cpp")])
 
 
@@ -46,7 +46,7 @@ def buggy(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_buggy", "-b")
+    test.diff("grade.txt", "grade.txt_buggy", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "buggy.cpp")])
 
 
@@ -58,7 +58,7 @@ def buggy2(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_buggy2", "-b")
+    test.diff("grade.txt", "grade.txt_buggy2", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "buggy2.cpp")])
 
     
@@ -70,5 +70,5 @@ def buggy3(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_buggy3", "-b")
+    test.diff("grade.txt", "grade.txt_buggy3", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "buggy3.cpp")])

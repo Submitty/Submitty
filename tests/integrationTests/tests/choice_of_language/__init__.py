@@ -51,7 +51,7 @@ def python2(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_python2", "-b")
+    test.diff("grade.txt", "grade.txt_python2", "-b")
     test.json_diff("results.json", "results.json_python2")
 
     
@@ -64,7 +64,7 @@ def python3(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_python3", "-b")
+    test.diff("grade.txt", "grade.txt_python3", "-b")
     test.json_diff("results.json", "results.json_python3")
 
 
@@ -77,7 +77,7 @@ def c(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_c", "-b")
+    test.diff("grade.txt", "grade.txt_c", "-b")
     test.json_diff("results.json", "results.json_c")
 
 
@@ -90,6 +90,6 @@ def cpp(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_cpp", "-b")
+    test.diff("grade.txt", "grade.txt_cpp", "-b")
     test.json_diff("results.json", "results.json_cpp")
 

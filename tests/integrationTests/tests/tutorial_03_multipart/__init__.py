@@ -62,7 +62,7 @@ def solution(test):
                      os.path.join(test.testcase_path, "data", "part3")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_solution", "-b")
+    test.diff("grade.txt", "grade.txt_solution", "-b")
     test.json_diff("results.json", "results.json_solution")
 
 
@@ -81,7 +81,7 @@ def buggy(test):
                      os.path.join(test.testcase_path, "data", "part3")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_buggy", "-b")
+    test.diff("grade.txt", "grade.txt_buggy", "-b")
     test.json_diff("results.json", "results.json_buggy")
 
 
@@ -93,7 +93,7 @@ def buggy2(test):
                      os.path.join(test.testcase_path, "data", "part1")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_buggy2", "-b")
+    test.diff("grade.txt", "grade.txt_buggy2", "-b")
     test.json_diff("results.json", "results.json_buggy2")
 
 
@@ -111,6 +111,6 @@ def wrong(test):
                      os.path.join(test.testcase_path, "data", "part3")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_wrong", "-b")
+    test.diff("grade.txt", "grade.txt_wrong", "-b")
     test.json_diff("results.json", "results.json_wrong")
     

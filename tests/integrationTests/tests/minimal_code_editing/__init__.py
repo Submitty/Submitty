@@ -53,7 +53,7 @@ def add_delete_lines(test):
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
                      os.path.join(test.testcase_path, "data")])
     test.run_validator()
-    test.diff("results_grade.txt","add_delete_lines_results_grade.txt","-b")
+    test.diff("grade.txt","add_delete_lines_grade.txt","-b")
     test.json_diff("results.json","add_delete_lines_results.json")
     test.json_diff("test02_0_diff.json","add_delete_lines_test02_0_diff.json")
 
@@ -69,7 +69,7 @@ def curly_brace_placement(test):
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
                      os.path.join(test.testcase_path, "data")])
     test.run_validator()
-    test.diff("results_grade.txt","curly_brace_placement_results_grade.txt","-b")
+    test.diff("grade.txt","curly_brace_placement_grade.txt","-b")
     test.json_diff("results.json","curly_brace_placement_results.json")
     test.json_diff("test02_0_diff.json","curly_brace_placement_test02_0_diff.json")
 
@@ -85,7 +85,7 @@ def edits_neighboring_lines(test):
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
                      os.path.join(test.testcase_path, "data")])
     test.run_validator()
-    test.diff("results_grade.txt","edits_neighboring_lines_results_grade.txt","-b")
+    test.diff("grade.txt","edits_neighboring_lines_grade.txt","-b")
     test.json_diff("results.json","edits_neighboring_lines_results.json")
     test.json_diff("test02_0_diff.json","edits_neighboring_lines_test02_0_diff.json")
 
@@ -101,7 +101,7 @@ def extra_spaces(test):
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
                      os.path.join(test.testcase_path, "data")])
     test.run_validator()
-    test.diff("results_grade.txt","extra_spaces_results_grade.txt","-b")
+    test.diff("grade.txt","extra_spaces_grade.txt","-b")
     test.json_diff("results.json","extra_spaces_results.json")
     test.json_diff("test02_0_diff.json","extra_spaces_test02_0_diff.json")
 
@@ -117,7 +117,7 @@ def fancy_hello_world(test):
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
                      os.path.join(test.testcase_path, "data")])
     test.run_validator()
-    test.diff("results_grade.txt","fancy_hello_world_results_grade.txt","-b")
+    test.diff("grade.txt","fancy_hello_world_grade.txt","-b")
     test.json_diff("results.json","fancy_hello_world_results.json")
     test.json_diff("test02_0_diff.json","fancy_hello_world_test02_0_diff.json")
 
@@ -133,7 +133,7 @@ def four_space_indent(test):
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
                      os.path.join(test.testcase_path, "data")])
     test.run_validator()
-    test.diff("results_grade.txt","four_space_indent_results_grade.txt","-b")
+    test.diff("grade.txt","four_space_indent_grade.txt","-b")
     test.json_diff("results.json","four_space_indent_results.json")
     test.json_diff("test02_0_diff.json","four_space_indent_test02_0_diff.json")
 
@@ -149,7 +149,7 @@ def noise(test):
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
                      os.path.join(test.testcase_path, "data")])
     test.run_validator()
-    test.diff("results_grade.txt","noise_results_grade.txt","-b")
+    test.diff("grade.txt","noise_grade.txt","-b")
     test.json_diff("results.json","noise_results.json")
     test.json_diff("test02_0_diff.json","noise_test02_0_diff.json")
 
@@ -165,7 +165,7 @@ def tabs(test):
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
                      os.path.join(test.testcase_path, "data")])
     test.run_validator()
-    test.diff("results_grade.txt","tabs_results_grade.txt","-b")
+    test.diff("grade.txt","tabs_grade.txt","-b")
     test.json_diff("results.json","tabs_results.json")
     test.json_diff("test02_0_diff.json","tabs_test02_0_diff.json")
 

@@ -52,7 +52,7 @@ def correct(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","correct_results_grade.txt","-b")
+    test.diff("grade.txt","correct_grade.txt","-b")
     test.json_diff("results.json","correct_results.json")
 
 @testcase
@@ -63,7 +63,7 @@ def noerrorchecking(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","noerrorchecking_results_grade.txt","-b")
+    test.diff("grade.txt","noerrorchecking_grade.txt","-b")
     test.json_diff("results.json","noerrorchecking_results.json")
 
 @testcase
@@ -74,7 +74,7 @@ def hardcoded(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","hardcoded_results_grade.txt","-b")
+    test.diff("grade.txt","hardcoded_grade.txt","-b")
     test.json_diff("results.json","hardcoded_results.json")
 
 @testcase
@@ -85,7 +85,7 @@ def buggy(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","buggy_results_grade.txt","-b")
+    test.diff("grade.txt","buggy_grade.txt","-b")
     test.json_diff("results.json","buggy_results.json")
 
 
@@ -97,7 +97,7 @@ def subnum_3(test):
     test.run_compile()
     test.run_run()
     test.run_validator("testuser","3","0")
-    test.diff("results_grade.txt","correct_results_grade.txt","-b")
+    test.diff("grade.txt","correct_grade.txt","-b")
     test.json_diff("results.json","correct_results.json")
 
 
@@ -109,7 +109,7 @@ def subnum_4(test):
     test.run_compile()
     test.run_run()
     test.run_validator("testuser","4","0")
-    test.diff("results_grade.txt","correct_penalty1_results_grade.txt","-b")
+    test.diff("grade.txt","correct_penalty1_grade.txt","-b")
     test.json_diff("results.json","correct_penalty1_results.json")
 
 @testcase
@@ -119,7 +119,7 @@ def subnum_5(test):
     test.run_compile()
     test.run_run()
     test.run_validator("testuser","5","0")
-    test.diff("results_grade.txt","correct_penalty1_results_grade.txt","-b")
+    test.diff("grade.txt","correct_penalty1_grade.txt","-b")
     test.json_diff("results.json","correct_penalty1_results.json")
 
 
@@ -131,7 +131,7 @@ def subnum_6(test):
     test.run_compile()
     test.run_run()
     test.run_validator("testuser","6","0")
-    test.diff("results_grade.txt","correct_penalty2_results_grade.txt","-b")
+    test.diff("grade.txt","correct_penalty2_grade.txt","-b")
     test.json_diff("results.json","correct_penalty2_results.json")
 
 @testcase
@@ -141,7 +141,7 @@ def subnum_7(test):
     test.run_compile()
     test.run_run()
     test.run_validator("testuser","7","0")
-    test.diff("results_grade.txt","correct_penalty2_results_grade.txt","-b")
+    test.diff("grade.txt","correct_penalty2_grade.txt","-b")
     test.json_diff("results.json","correct_penalty2_results.json")
 
 
@@ -157,7 +157,7 @@ def subnum_12(test):
     test.run_compile()
     test.run_run()
     test.run_validator("testuser","12","0")
-    test.diff("results_grade.txt","correct_penalty5_results_grade.txt","-b")
+    test.diff("grade.txt","correct_penalty5_grade.txt","-b")
     test.json_diff("results.json","correct_penalty5_results.json")
 
 @testcase
@@ -167,7 +167,7 @@ def subnum_100(test):
     test.run_compile()
     test.run_run()
     test.run_validator("testuser","100","0")
-    test.diff("results_grade.txt","correct_penalty5_results_grade.txt","-b")
+    test.diff("grade.txt","correct_penalty5_grade.txt","-b")
     test.json_diff("results.json","correct_penalty5_results.json")
 
 
@@ -180,7 +180,7 @@ def subnum_buggy_100(test):
     test.run_compile()
     test.run_run()
     test.run_validator("testuser","100","0")
-    test.diff("results_grade.txt","buggy_penalty5_results_grade.txt","-b")
+    test.diff("grade.txt","buggy_penalty5_grade.txt","-b")
     test.json_diff("results.json","buggy_penalty5_results.json")
 
  

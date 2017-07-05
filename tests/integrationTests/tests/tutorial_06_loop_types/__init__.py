@@ -43,7 +43,7 @@ def solution(test):
 
     print ("TODO:  FIX TUTORIAL 06 LOOP TYPES TEST - SOLUTION")
 
-    #test.diff("results_grade.txt", "results_grade.txt_solution", "-b")
+    #test.diff("grade.txt", "grade.txt_solution", "-b")
     #test.json_diff("results.json", "results.json_solution")
 
 
@@ -59,7 +59,7 @@ def buggy(test):
 
     print ("TODO:  FIX TUTORIAL 06 LOOP TYPES TEST - BUGGY")
     
-    #test.diff("results_grade.txt", "results_grade.txt_buggy", "-b")
+    #test.diff("grade.txt", "grade.txt_buggy", "-b")
     #test.json_diff("results.json", "results.json_buggy")
 
 

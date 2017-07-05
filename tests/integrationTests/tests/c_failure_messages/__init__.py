@@ -40,7 +40,7 @@ def correct(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_correct", "-b")
+    test.diff("grade.txt", "grade.txt_correct", "-b")
 
 
 @testcase
@@ -52,7 +52,7 @@ def buggy(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_buggy", "-b")
+    test.diff("grade.txt", "grade.txt_buggy", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "buggy.c")])
 
 
@@ -65,7 +65,7 @@ def alternate(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_alternate", "-b")
+    test.diff("grade.txt", "grade.txt_alternate", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "alternate.c")])
 
 
@@ -78,5 +78,5 @@ def hello_world(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_hello_world", "-b")
+    test.diff("grade.txt", "grade.txt_hello_world", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "hello_world.c")])
