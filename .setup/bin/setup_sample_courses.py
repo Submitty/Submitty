@@ -447,6 +447,19 @@ def create_gradeable_submission(src, dst):
 
 
 def make_sample_json():
+    """
+    This function generates customization_sample.json in case it has changed from the provided version in the test suite
+    within the Submitty repository. Ideally this function will be pulled out and made independent, or better yet when
+    the code for the web interface is done, that will become the preferred route and this function can be retired.
+
+    Keeping this function after the web interface would mean we have another place where we need to update code anytime
+    the expected format of customization.json changes.
+
+    Right now the code uses the Gradeable and Component classes, so to avoid code duplication the function lives inside
+    setup_sample_courses.py
+
+    :return:
+    """
     # Right now we don't use the fill-ins, and setup_sample_courses.py lives in the repository so can't do:
     # customization_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", "test_suite", "rainbowGrades")
     # course_file = os.path.join("__INSTALL__FILLIN__SUBMITTY_REPOSITORY__", ".setup", "data", "courses", "sample.yml")
@@ -456,7 +469,11 @@ def make_sample_json():
     m.update("sample")
     random.seed(int(m.hexdigest(), 16))
 
-    customization_path = os.path.join(SUBMITTY_INSTALL_DIR, "test_suite", "rainbowGrades")
+    # This won't work because test_suite may not yet exist, also the .json would then be at risk of
+    # "INSTALL_SUBMITTY.sh clean" destroying the .json file.
+    # customization_path = os.path.join(SUBMITTY_INSTALL_DIR, "test_suite", "rainbowGrades")
+
+    customization_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup")
     course_file = os.path.join(SUBMITTY_REPOSITORY, ".setup", "data", "courses", "sample.yml")
     course_json = load_data_yaml(course_file)
 
