@@ -74,9 +74,9 @@ class AdminGradeableView extends AbstractView {
             $string = "Edit";
             $button_string = "Edit";
             $extra = ($data[2]) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
-            $TA_beta_date = date('m/d/Y h:i:s', strtotime($data[0]['g_ta_view_start_date']));
-            $TA_grade_open_date = date('m/d/Y h:i:s', strtotime($data[0]['g_grade_start_date']));
-            $TA_grade_release_date = date('m/d/Y h:i:s', strtotime($data[0]['g_grade_released_date']));
+            $TA_beta_date = date('m/d/Y H:i:s', strtotime($data[0]['g_ta_view_start_date']));
+            $TA_grade_open_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_start_date']));
+            $TA_grade_release_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_released_date']));
             $gradeable_submission_id = $data[0]['g_id'];
             $gradeable_name = $data[0]['g_title'];
             $g_instructions_url = $data[0]['g_instructions_url'];
@@ -88,8 +88,8 @@ class AdminGradeableView extends AbstractView {
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) { //if the gradeable edited is electronic gradeable
-                $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y h:i:s', strtotime($data[3]['eg_submission_open_date']));
-                $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y h:i:s', strtotime($data[3]['eg_submission_due_date']));
+                $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_open_date']));
+                $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_due_date']));
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
