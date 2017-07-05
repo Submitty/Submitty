@@ -447,10 +447,11 @@ def create_gradeable_submission(src, dst):
 
 
 def make_sample_json():
-    # Right now we don't use the fill-ins, and setup_sample_courses.py lives in the repository
+    # Right now we don't use the fill-ins, and setup_sample_courses.py lives in the repository so can't do:
     # customization_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", "test_suite", "rainbowGrades")
     # course_file = os.path.join("__INSTALL__FILLIN__SUBMITTY_REPOSITORY__", ".setup", "data", "courses", "sample.yml")
 
+    # Reseed to minimize the situations under which customization_sample.json changes
     m = hashlib.md5()
     m.update("sample")
     random.seed(int(m.hexdigest(), 16))
@@ -460,25 +461,29 @@ def make_sample_json():
     course_json = load_data_yaml(course_file)
 
     course_id = course_json['code']
-    print("Making customization.json for course: {}".format(course_id))
+    print("Generating customization_{}.json".format(course_id))
 
     gradeables = {}
     gradeables_json_output = ""
 
+    # Read in sample.yml and create gradeables by syllabus bucket
     for g in course_json['gradeables']:
         gradeable = Gradeable(g)
         if gradeable.syllabus_bucket not in gradeables:
             gradeables[gradeable.syllabus_bucket] = []
         gradeables[gradeable.syllabus_bucket].append(gradeable)
 
+    # Randomly generate the impact of each bucket on the overall grade
     gradeables_percentages = []
     gradeable_percentage_left = 100 - len(gradeables)
     for i in range(len(gradeables)):
-        gradeables_percentages.append(random.randint(1,gradeable_percentage_left)+1)
+        gradeables_percentages.append(random.randint(1, gradeable_percentage_left) + 1)
         gradeable_percentage_left -= (gradeables_percentages[-1] - 1)
     if gradeable_percentage_left > 0:
         gradeables_percentages[-1] += gradeable_percentage_left
 
+    # Compute totals and write out each syllabus bucket in the "gradeables" field of customization.json
+    # TODO: Figure out what to do about "none" bucket items - does Rainbow Grades support this?
     bucket_no = 0
     for bucket,g_list in gradeables.items():
         gradeables_json_output += "    {\n" +\
@@ -486,6 +491,8 @@ def make_sample_json():
                                   "      \"count\": {},\n".format(len(g_list)) + \
                                   "      \"percent\" : {},\n".format(0.01*gradeables_percentages[bucket_no]) + \
                                   "      \"ids\": [\n"
+
+        # Manually total up the non-penalty non-extra-credit max scores, and decide which gradeables are 'released'
         for g in g_list:
             use_ta_grading = g.use_ta_grading
             g_type = g.type
@@ -494,20 +501,22 @@ def make_sample_json():
             max_auto = 0
             max_ta = 0
 
-            print_grades = True if g_type !=0 or (g.submission_open_date < NOW) else False
+            print_grades = True if g_type != 0 or (g.submission_open_date < NOW) else False
             release_grades = (g.grade_released_date < NOW)
 
+            # Another spot where if INSTALL_SUBMITTY_HELPER.sh is used we could use fill-in paths
             # gradeable_config_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses",
             #                                    get_current_semester(), "sample", "config", "complete_config")
 
             gradeable_config_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", get_current_semester(), "sample",
                                                 "config", "complete_config")
 
+            # For electronic gradeables there is a config file - read through to get the total
             if os.path.isdir(gradeable_config_dir):
-                gradeable_config = os.path.join(gradeable_config_dir,"complete_config_" + id + ".json")
+                gradeable_config = os.path.join(gradeable_config_dir, "complete_config_" + id + ".json")
                 if os.path.isfile(gradeable_config):
                     try:
-                        with open(gradeable_config,'r') as gradeable_config_file:
+                        with open(gradeable_config, 'r') as gradeable_config_file:
                             gradeable_json = json.load(gradeable_config_file)
 
                             # Not every config has AUTO_POINTS, so have to parse through test cases
@@ -521,6 +530,7 @@ def make_sample_json():
                     except EnvironmentError:
                         print("Failed to load JSON")
 
+            # For non-electronic gradeables, or electronic gradeables with TA grading, read through components
             if use_ta_grading or g_type != 0:
                 for component in components:
                     if component.is_extra_credit:
@@ -528,16 +538,18 @@ def make_sample_json():
                     if component.max_value >0:
                         max_ta += component.max_value
 
-            max_points = max_auto+max_ta
+            # Add the specific associative array for this gradeable in customization.json to the output string
+            max_points = max_auto + max_ta
             if print_grades:
                 gradeables_json_output += "        {{\"id\":\"{}\", \"max\":{}".format(id,max_points)
                 if not release_grades:
                     gradeables_json_output += ", \"released\":false"
-
                 if g != g_list[-1]:
                     gradeables_json_output += "},\n"
                 else:
                     gradeables_json_output += "}\n"
+
+        # Close the bucket's array in customization.json
         gradeables_json_output += "      ]\n" + "    }"
         if bucket != gradeables.keys()[-1]:
             gradeables_json_output += ",\n"
@@ -545,6 +557,7 @@ def make_sample_json():
             gradeables_json_output += "\n"
         bucket_no += 1
 
+    # Attempt to write the customization.json file, incorporating the output buffer from above (gradeables_json_output)
     try:
         with open(os.path.join(customization_path, "customization_sample.json"), 'w') as customization_file:
             customization_file.write("{\n" +
@@ -591,9 +604,6 @@ def make_sample_json():
                                      " incorrect for more than a week.\"\n" +
                                      "  ]\n" +
                                      "}\n")
-
-            # Write out the gradeables
-            #TODO: Figure out what to do about "none" bucket items - does Rainbow Grades support this?
     except EnvironmentError as e:
         print("Failed to write to customization file: {}".format(e))
 
