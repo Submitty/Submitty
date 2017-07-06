@@ -177,12 +177,15 @@ def sample_rainbow_grades_test():
 
     if len(known_files) != len(summary_files):
         file_diff = len(known_files) - len(summary_files)
-        if len(known_files) > len(summary_files):
+        if len(summary_files) == 0:
+            error_and_cleanup(test_tmp, "There were no files in the rsync'd raw_data. Did you forget to generate grade "
+                                        "summaries?")
+        elif len(known_files) > len(summary_files):
             error_and_cleanup(test_tmp,
-                              "There are {} more files in the rsync'd raw_data than expected.".format(file_diff))
+                              "There are {} fewer files in the rsync'd raw_data than expected.".format(file_diff))
         else:
             error_and_cleanup(test_tmp,
-                              "There are {} fewer files in the rsync'd raw_data than expected.".format(-1 * file_diff))
+                              "There are {} more files in the rsync'd raw_data than expected.".format(-1 * file_diff))
 
     # Verify the content (except for time-dependent fields) of Submitty raw_data files match with test version
     for f in known_files:

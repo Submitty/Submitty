@@ -990,11 +990,11 @@ class Course(object):
             gradeables_json_output["benchmark_percent"]["lowest_" + benchmarks[i]] = 0.9 - 0.1*i
         # Generate the section labels
         section_ta_mapping = {}
-        for section in range(self.registration_sections):
+        for section in range(1,self.registration_sections+1):
             section_ta_mapping[section] = []
         for user in self.users:
-            if user.get_detail(self.code, "grading_registration_section") is not None:
-                grading_registration_sections = str(user.get_detail(self.code, "grading_registration_section"))
+            if user.get_detail(course_id, "grading_registration_section") is not None:
+                grading_registration_sections = str(user.get_detail(course_id, "grading_registration_section"))
                 grading_registration_sections = [int(x) for x in grading_registration_sections.split(",")]
                 for section in grading_registration_sections:
                         section_ta_mapping[section].append(user.id)
@@ -1003,11 +1003,11 @@ class Course(object):
             if len(section_ta_mapping[section]) == 0:
                 section_ta_mapping[section] = "TBA"
             else:
-                section_ta_mapping[section] = ",".join(section_ta_mapping[section])
+                section_ta_mapping[section] = ", ".join(section_ta_mapping[section])
 
         gradeables_json_output["section"] = section_ta_mapping
-        messages = ["<b>My Favorite CS Class</b>",
-                    "Note: Please be patient with data entry/grade corrections for the most recent " +
+        messages = ["<b>{} Course</b>".format(course_id),
+                    "Note: Please be patient with data entry/grade corrections for the most recent " 
                     "lab, homework, and test.",
                     "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week."]
         gradeables_json_output["messages"] = messages
