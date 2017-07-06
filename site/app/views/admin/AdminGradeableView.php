@@ -583,13 +583,14 @@ HTML;
     $html_output .= <<<HTML
             </select>
             <br />
+            <div id="ta_instructions_id">
             What overall instructions should be provided to the TA?:<br /><textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;">
 HTML;
     $tmp = htmlspecialchars($g_overall_ta_instructions);
     $html_output .= <<<HTML
 {$tmp}
 </textarea>
-            
+            </div>
             <br />
             <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
             <br />
@@ -1019,6 +1020,7 @@ function createCrossBrowserJSDate(val){
                 if($(this).val() == 'true'){ 
                     $('#rubric_questions').show();
                     $('#grading_questions').show();
+                    $('#ta_instructions_id').hide();
                     $('#grades_released_compare_date').html('TA Grading Open Date');
                 } else {
                     $('#grades_released_compare_date').html('Due Date');
@@ -1048,6 +1050,7 @@ function createCrossBrowserJSDate(val){
             $('input[name=config_path]').val('{$electronic_gradeable['eg_config_path']}');
             $('input[name=eg_late_days]').val('{$electronic_gradeable['eg_late_days']}');
             $('input[name=point_precision]').val('{$electronic_gradeable['eg_precision']}');
+            $('#ta_instructions_id').hide();
             
             if($('#repository_radio').is(':checked')){
                 $('#repository').show();
@@ -1109,12 +1112,14 @@ function createCrossBrowserJSDate(val){
                 }
             }
             else if ($(this).val() == 'Checkpoints'){ 
+                $('#ta_instructions_id').show();
                 $('#checkpoints').show();
                 $('#grading_questions').show();
                 $('#ta_grading_compare_date').html('TA Beta Testing Date');
                 $('#grades_released_compare_date').html('TA Grading Open Date');
             }
             else if ($(this).val() == 'Numeric'){ 
+                $('#ta_instructions_id').show();
                 $('#numeric').show();
                 $('#grading_questions').show();
                 $('#ta_grading_compare_date').html('TA Beta Testing Date');

@@ -74,20 +74,29 @@ HTML;
         else{
             $info = "Red - [SAVE ERROR] Refresh Page";
         }
+
+        if($gradeable->getTaInstructions() != "") {
+            $ta_instruct = "Overall TA Instructions: " . $gradeable->getTaInstructions();
+        }
+        else {
+            $ta_instruct = "";
+        }
+        
+        $return .= <<<HTML
+    <h2>{$gradeable->getName()}</h2><p>{$ta_instruct}</p><br>
+    <p style="float: left;">$info</p>
+HTML;
+        
         if($action === 'numeric') {
             if ($this->core->getUser()->accessAdmin()) {
                 $return .= <<<HTML
     <input class ="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
-    <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
+    <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label> <br> <br>
 HTML;
             }            
         }
-        $return .= <<<HTML
-    <h2>{$gradeable->getName()}</h2>
-    <p style="float: left;">$info</p>
-HTML;
 
-        if ($this->core->getUser()->accessAdmin()) {
+        if ($this->core->getUser()->accessAdmin() && $action === 'numeric') {
             $return .= <<<HTML
     <p style="float: right;">The CSV file should be formated as such: <br />
     user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...</p>
