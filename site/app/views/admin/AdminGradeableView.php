@@ -74,9 +74,9 @@ class AdminGradeableView extends AbstractView {
             $string = "Edit";
             $button_string = "Edit";
             $extra = ($data[2]) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
-            $TA_beta_date = date('m/d/Y h:i:s', strtotime($data[0]['g_ta_view_start_date']));
-            $TA_grade_open_date = date('m/d/Y h:i:s', strtotime($data[0]['g_grade_start_date']));
-            $TA_grade_release_date = date('m/d/Y h:i:s', strtotime($data[0]['g_grade_released_date']));
+            $TA_beta_date = date('m/d/Y H:i:s', strtotime($data[0]['g_ta_view_start_date']));
+            $TA_grade_open_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_start_date']));
+            $TA_grade_release_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_released_date']));
             $gradeable_submission_id = $data[0]['g_id'];
             $gradeable_name = $data[0]['g_title'];
             $g_instructions_url = $data[0]['g_instructions_url'];
@@ -88,8 +88,8 @@ class AdminGradeableView extends AbstractView {
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) { //if the gradeable edited is electronic gradeable
-                $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y h:i:s', strtotime($data[3]['eg_submission_open_date']));
-                $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y h:i:s', strtotime($data[3]['eg_submission_due_date']));
+                $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_open_date']));
+                $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_due_date']));
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
@@ -110,6 +110,7 @@ class AdminGradeableView extends AbstractView {
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
+            $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
@@ -643,14 +644,14 @@ HTML;
         <tr>
 HTML;
 //display the appropriate graders for each user group 
-function display_graders($graders, $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, &$html_output){
+function display_graders($graders, $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, &$html_output, $type_of_action){
     foreach($graders as $grader){
        $html_output .= <<<HTML
         <tr>
             <td>{$grader['user_id']}</td>
             <td><input style="width: 227px" type="text" name="grader_{$grader['user_id']}" class="grader" disabled value="
 HTML;
-        if($have_old && !$g_grade_by_registration) {
+        if(($have_old && !$g_grade_by_registration) || $type_of_action === "add_template") {
             $html_output .= (isset($graders_to_sections[$grader['user_id']])) ? $graders_to_sections[$grader['user_id']] : '';
         }
         else{
@@ -697,7 +698,7 @@ HTML;
         <table>
                 <th>Instructor Graders</th>
 HTML;
-    display_graders($initial_data[4][0], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);
+    display_graders($initial_data[4][0], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output, $type_of_action);
     
   $html_output .= <<<HTML
         </table>
@@ -708,7 +709,7 @@ HTML;
                 <th>Full Access Graders</th>
 HTML;
     
-  display_graders($initial_data[4][1], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);
+  display_graders($initial_data[4][1], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output, $type_of_action);
     
   $html_output .= <<<HTML
             </table>
@@ -722,7 +723,7 @@ HTML;
                 <th>Limited Access Graders</th>
 HTML;
 
-  display_graders($initial_data[4][2], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);    
+  display_graders($initial_data[4][2], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output, $type_of_action);    
   
     $html_output .= <<<HTML
         </table>

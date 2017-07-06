@@ -89,8 +89,7 @@ CREATE FUNCTION csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader
         -- Remove any existing record for this student for this gradeable
         DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
 
-        INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status
-          , gd_late_days_used, gd_active_version) VALUES (gradeable_id, line[1],grader_id, '', 0,0,1);
+        INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_graded_version) VALUES (gradeable_id, line[1],grader_id, '', 1);
 
         SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
 
@@ -248,9 +247,7 @@ CREATE TABLE gradeable_data (
     gd_user_id character varying(255) NOT NULL,
     gd_grader_id character varying(255),
     gd_overall_comment character varying NOT NULL,
-    gd_status integer NOT NULL,
-    gd_late_days_used integer NOT NULL,
-    gd_active_version integer NOT NULL,
+    gd_graded_version integer NOT NULL,
     gd_user_viewed_date timestamp(6) without time zone DEFAULT NULL
 );
 
@@ -318,17 +315,6 @@ CREATE TABLE late_days (
 
 
 --
--- Name: late_days_used; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE late_days_used (
-    user_id character varying(255) NOT NULL,
-    g_id character varying(255) NOT NULL,
-    late_days_used integer NOT NULL
-);
-
-
---
 -- Name: sections_registration; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -364,7 +350,6 @@ CREATE TABLE sessions (
 
 CREATE TABLE users (
     user_id character varying NOT NULL,
-    user_password character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
@@ -373,6 +358,7 @@ CREATE TABLE users (
     registration_section integer,
     rotating_section integer,
     manual_registration boolean DEFAULT false,
+    last_updated TIMESTAMP WITHOUT time zone,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 0) AND (user_group <= 4)))
 );
 
@@ -490,14 +476,6 @@ ALTER TABLE ONLY late_day_exceptions
 
 ALTER TABLE ONLY late_days
     ADD CONSTRAINT late_days_pkey PRIMARY KEY (user_id, since_timestamp);
-
-
---
--- Name: late_days_used_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY late_days_used
-    ADD CONSTRAINT late_days_used_pkey PRIMARY KEY (user_id, g_id);
 
 
 --
@@ -720,22 +698,6 @@ ALTER TABLE ONLY late_day_exceptions
 
 ALTER TABLE ONLY late_day_exceptions
     ADD CONSTRAINT late_day_exceptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
-
-
---
--- Name: late_days_used_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY late_days_used
-    ADD CONSTRAINT late_days_used_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
-
-
---
--- Name: late_days_used_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY late_days_used
-    ADD CONSTRAINT late_days_used_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --

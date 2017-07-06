@@ -27,6 +27,8 @@ use app\libraries\Utils;
  * @method int getHighestVersion()
  * @method int getActiveVersion()
  * @method void setActiveVersion(int $version)
+ * @method int getGradedVersion()
+ * @method void setGradedVersion(int $version)
  * @method int getMaxSubmissions()
  * @method float getMaxSize()
  * @method GradeableVersion[] getVersions()
@@ -61,8 +63,6 @@ use app\libraries\Utils;
  * @method void setGrader(User $user)
  * @method string getOverallComment()
  * @method void setOverallComment(string $comment)
- * @method int getStatus()
- * @method void setStatus(int $status)
  * @method int getMinimumGradingGroup()
  * @method string getBucket()
  * @method int|null getGdId()
@@ -178,6 +178,9 @@ class Gradeable extends AbstractModel {
     protected $current_version = -1;
     /** @property @var int $highest Highest version submitted for an assignment */
     protected $highest_version = 0;
+    /** @property @var int */
+    protected $graded_version = null;
+
 
     /** @property @var array */
     protected $versions = array();
@@ -204,11 +207,6 @@ class Gradeable extends AbstractModel {
     protected $grader = null;
     /** @property @var string */
     protected $overall_comment = "";
-    /** @property @var int code representing the state of electronic submission where 0 = not submitted, 1 = fine, 2 = late,
-     * 3 = too late */
-    protected $status = 0;
-
-    protected $graded_version = null;
 
     /** @property @var int */
     protected $interactive_queue_total = 0;
@@ -255,8 +253,7 @@ class Gradeable extends AbstractModel {
             $this->gd_id = $details['gd_id'];
             $this->grader = $this->core->getQueries()->getUserById($details['gd_grader_id']);
             $this->overall_comment = $details['gd_overall_comment'];
-            $this->status = $details['gd_status'];
-            $this->graded_version = $details['gd_active_version'];
+            $this->graded_version = $details['gd_graded_version'];
         }
 
         $timezone = $this->core->getConfig()->getTimezone();
@@ -855,7 +852,7 @@ class Gradeable extends AbstractModel {
     }
   
     public function saveData() {
-        $this->core->getDatabase()->beginTransaction();
+        $this->core->getCourseDB()->beginTransaction();
         if ($this->gd_id === null) {
             $this->gd_id = $this->core->getQueries()->insertGradeableData($this);
         }
@@ -865,7 +862,7 @@ class Gradeable extends AbstractModel {
         foreach ($this->components as $component) {
             $component->saveData($this->gd_id);
         }
-        $this->core->getDatabase()->commit();
+        $this->core->getCourseDB()->commit();
     }
       
     public function getSyllabusBucket() {

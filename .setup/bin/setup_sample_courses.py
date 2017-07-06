@@ -31,7 +31,7 @@ import uuid
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
 
-from sqlalchemy import create_engine, Table, MetaData
+from sqlalchemy import create_engine, Table, MetaData, bindparam
 import yaml
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -116,16 +116,44 @@ def main():
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
-    list_of_courses_file="/usr/local/submitty/site/app/views/current_courses.php"
+    submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
+    submitty_conn = submitty_engine.connect()
+    submitty_metadata = MetaData(bind=submitty_engine)
+    user_table = Table('users', submitty_metadata, autoload=True)
+    for user_id, user in users.items():
+        submitty_conn.execute(user_table.insert(),
+                              user_id=user.id,
+                              user_password=get_php_db_password(user.password),
+                              user_firstname=user.firstname,
+                              user_preferred_firstname=user.preferred_firstname,
+                              user_lastname=user.lastname,
+                              user_email=user.email,
+                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S"))
+
+    for user in extra_students:
+        submitty_conn.execute(user_table.insert(),
+                              user_id=user.id,
+                              user_password=get_php_db_password(user.password),
+                              user_firstname=user.firstname,
+                              user_preferred_firstname=user.preferred_firstname,
+                              user_lastname=user.lastname,
+                              user_email=user.email,
+                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S"))
+    submitty_conn.close()
+
+    today = datetime.today()
+    semester = 'Fall'
+    if today.month < 7:
+        semester = 'Spring'
+
+    list_of_courses_file = "/usr/local/submitty/site/app/views/current_courses.php"
     with open(list_of_courses_file, "w") as courses_file:
-        print("", file=courses_file)
+        courses_file.write("")
+        for course_id in courses.keys():
+            courses_file.write('<a href="http://192.168.56.101/index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
+            courses_file.write('<br />')
 
     for course_id in courses.keys():
-
-        with open(list_of_courses_file, "a") as courses_file:
-            print('<a href="http://192.168.56.101/index.php?semester=f17&course='+course_id+'">'+course_id+', Fall 2017</a>',file=courses_file)
-            print("<br>", file=courses_file)
-
         course = courses[course_id]
         students = random.sample(extra_students, course.registered_students + course.no_registration_students +
                                  course.no_rotating_students + course.unregistered_students)
@@ -621,10 +649,17 @@ class Course(object):
         database = "submitty_" + self.semester + "_" + self.code
         os.system('psql -d postgres -h {} -U hsdbu -c "CREATE DATABASE {}"'.format(DB_HOST,
                                                                                    database))
-        os.system("psql -d {} -h {} -U {} -f {}/site/data/tables.sql"
+        os.system("psql -d {} -h {} -U {} -f {}/site/data/course_tables.sql"
                   .format(database, DB_HOST, DB_USER, SUBMITTY_REPOSITORY))
 
         print("Database created, now populating ", end="")
+        submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
+        submitty_conn = submitty_engine.connect()
+        submitty_metadata = MetaData(bind=submitty_engine)
+
+        courses_table = Table('courses', submitty_metadata, autoload=True)
+        submitty_conn.execute(courses_table.insert(), semester=self.semester, course=self.code)
+
         engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                                  database))
         conn = engine.connect()
@@ -645,6 +680,7 @@ class Course(object):
             conn.execute(table.insert(), sections_rotating_id=section)
 
         print("Create users ", end="")
+        submitty_users = Table("courses_users", submitty_metadata, autoload=True)
         users_table = Table("users", metadata, autoload=True)
         reg_table = Table("grading_registration", metadata, autoload=True)
         print("(tables loaded)...")
@@ -658,17 +694,21 @@ class Course(object):
             rot_section = user.get_detail(self.code, "rotating_section")
             if rot_section is not None and rot_section > self.rotating_sections:
                 rot_section = None
-            conn.execute(users_table.insert(), user_id=user.get_detail(self.code, "id"),
-                         user_password=get_php_db_password(user.get_detail(self.code, "password")),
-                         user_firstname=user.get_detail(self.code, "firstname"),
-                         user_preferred_firstname=user.get_detail(self.code, "preferred_firstname"),
-                         user_lastname=user.get_detail(self.code, "lastname"),
-                         user_email=user.get_detail(self.code, "email"),
-                         user_group=user.get_detail(self.code, "group"),
-                         registration_section=reg_section,
-                         rotating_section=rot_section,
-                         manual_registration=user.get_detail(self.code, "manual"))
+            # We already have a row in submitty.users for this user,
+            # just need to add a row in courses_users which will put a
+            # a row in the course specific DB, and off we go.
+            submitty_conn.execute(submitty_users.insert(),
+                                  semester=self.semester,
+                                  course=self.code,
+                                  user_id=user.get_detail(self.code, "id"),
+                                  user_group=user.get_detail(self.code, "group"),
+                                  registration_section=reg_section,
+                                  manual_registration=user.get_detail(self.code, "manual"))
+            update = users_table.update(values={
+                users_table.c.rotating_section: bindparam('rotating_section')
+            }).where(users_table.c.user_id == bindparam('b_user_id'))
 
+            conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 conn.execute(reg_table.insert(),
                              user_id=user.get_detail(self.code, "id"),
@@ -725,14 +765,14 @@ class Course(object):
 
             for user in self.users:
                 submitted = False
-                active = 1
+                graded = 1
                 submission_path = os.path.join(gradeable_path, user.id)
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
                     if gradeable.gradeable_config is None or \
                             (gradeable.submission_due_date < NOW and random.random() < 0.5) or \
                             (random.random() < 0.3):
-                        active = -1
+                        graded = -1
                     else:
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
@@ -771,8 +811,7 @@ class Course(object):
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
                                                              gd_overall_comment="lorem ipsum lodar",
-                                                             gd_status=status, gd_late_days_used=0,
-                                                             gd_active_version=active, gd_grader_id=self.instructor.id)
+                                                             gd_graded_version=graded, gd_grader_id=self.instructor.id)
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         for component in gradeable.components:
@@ -800,6 +839,7 @@ class Course(object):
                                    "is_team": False,
                                    "team": ""}, open_file)
         conn.close()
+        submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
 
     def check_rotating(self, users):

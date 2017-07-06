@@ -102,6 +102,9 @@ class LateDaysCalculation extends AbstractModel {
 
                 $curr_bad_modifier = "";
                 $curr_late_used = $submissions[$i]['days_late'];
+                // if($submissions[$i]['user_id']== 'student' && $submissions[$i]['g_title'] == 'c_failure_messages'){
+                //     echo($curr_late_used);
+                // }
                 $curr_status = $status;
                 $curr_late_charged = 0;
 
