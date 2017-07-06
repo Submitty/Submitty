@@ -612,8 +612,8 @@ HTML;
                         <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count})'>
                             <span class='icon-plus' style='vertical-align:text-bottom;'></span>
                         {$dir}</a> &nbsp;
-                        <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true"></i></a>
-                        <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true"></i></a>
+                        <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                        <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
                     </div><br/>
                     <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px"></div>
                 </div>
@@ -631,7 +631,7 @@ HTML;
                     <a class='openAllDiv' onclick='openDiv({$count});'>
                         <span class='icon-folder-closed' style='vertical-align:text-top;'></span>
                     {$dir}</a> 
-                  <!--  <a onclick='downloadZip("{$dir}","{$url}")'><i class="fa fa-download" aria-hidden="true"></i></a> -->
+                    <a onclick='downloadZip("{$dir}","{$url}")'><i class="fa fa-download" aria-hidden="true" title="Download zip of all files in directory"></i></a>
                 </div><br/>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none'>
 HTML;
@@ -876,12 +876,11 @@ HTML;
         return false;
     }
 
-    function downloadZip(test1, test2) {
-        var to = test2.lastIndexOf('/');
+    function downloadZip(name, path) {
+        var to = path.lastIndexOf('/');
         to = to == -1 ? url.length : to;
-        test2 = test2.substring(0, to);
-        alert (test2);
-        window.location = buildUrl({'component': 'misc', 'page': 'download_zip', 'dir': 'submissions', 'file': test1, 'path': test2});
+        path = path.substring(0, to);
+        window.location = buildUrl({'component': 'misc', 'page': 'download_zip', 'dir': 'submissions', 'file': name, 'path': path});
         return false;
     }
 

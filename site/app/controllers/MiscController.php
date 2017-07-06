@@ -85,21 +85,44 @@ class MiscController extends AbstractController {
     }
 
     private function downloadZip() {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
         // Initialize archive object
+        $temp_dir = "/tmp";
+        //makes a random zip file name on the server
+        $temp_name = md5(uniqid($this->core->getUser()->getId(), true));
+        $zip_name = $temp_dir . "/" . $temp_name . ".zip";
+        chdir ($temp_dir);
         $zip = new \ZipArchive();
-        $zip->open('file.zip', \ZipArchive::CREATE);
+        $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
         // Create recursive directory iterator
-        /** @var SplFileInfo[] $files */
-        if ($handle = opendir('.')) {
-            while (false !== ($entry = readdir($handle))) {
-                if ($entry != "." && $entry != ".." && !strstr($entry,'.php')) {
-                    $zip->addFile($entry);
-                }
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($_REQUEST['path']),
+            \RecursiveIteratorIterator::LEAVES_ONLY
+        );
+
+        foreach ($files as $name => $file)
+        {
+            // Skip directories (they would be added automatically)
+            if (!$file->isDir())
+            {
+                // Get real and relative path for current file
+                $filePath = $file->getRealPath();
+                $relativePath = substr($filePath, strlen($_REQUEST['path']) + 1);
+
+                // Add current file to archive
+                $zip->addFile($filePath, $relativePath);
             }
-            closedir($handle);
         }
         // Zip archive will be created only after closing object
         $zip->close();
+        header("Content-type: application/zip"); 
+        header("Content-Disposition: attachment; filename=zip_file.zip");
+        header("Content-length: " . filesize($zip_name));
+        header("Pragma: no-cache"); 
+        header("Expires: 0"); 
+        readfile("$zip_name");
+        unlink($zip_name); //deletes the random zip file
     }
 }
