@@ -702,9 +702,9 @@ table .instructor .two-options{
 
 .btn-nav {
     width:100%;
-    padding: 0px; 
-    padding-top: 10px; 
-    padding-bottom: 10px;
+    padding: 0px !important;
+    padding-top: 10px !important; 
+    padding-bottom: 10px !important;
 }
 
 .rainbow {
