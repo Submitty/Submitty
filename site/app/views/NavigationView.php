@@ -6,10 +6,16 @@ use \app\libraries\GradeableType;
 use app\models\Gradeable;
 
 class NavigationView extends AbstractView {
+    public function noAccessCourse() {
+        return <<<HTML
+<div class="content">
+   You don't have access to {$this->core->getConfig()->getCourseName()}. If you think this is mistake,
+   please contact your instructor to gain access.
+</div>
+HTML;
+    }
+
     public function showGradeables($sections_to_list) {
-
-        $return = "";
-
         $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();

@@ -27,6 +27,8 @@ use app\libraries\Utils;
  * @method int getHighestVersion()
  * @method int getActiveVersion()
  * @method void setActiveVersion(int $version)
+ * @method int getGradedVersion()
+ * @method void setGradedVersion(int $version)
  * @method int getMaxSubmissions()
  * @method float getMaxSize()
  * @method GradeableVersion[] getVersions()
@@ -176,6 +178,9 @@ class Gradeable extends AbstractModel {
     protected $current_version = -1;
     /** @property @var int $highest Highest version submitted for an assignment */
     protected $highest_version = 0;
+    /** @property @var int */
+    protected $graded_version = null;
+
 
     /** @property @var array */
     protected $versions = array();
@@ -202,8 +207,6 @@ class Gradeable extends AbstractModel {
     protected $grader = null;
     /** @property @var string */
     protected $overall_comment = "";
-
-    protected $graded_version = null;
 
     /** @property @var int */
     protected $interactive_queue_total = 0;
@@ -849,7 +852,7 @@ class Gradeable extends AbstractModel {
     }
   
     public function saveData() {
-        $this->core->getDatabase()->beginTransaction();
+        $this->core->getCourseDB()->beginTransaction();
         if ($this->gd_id === null) {
             $this->gd_id = $this->core->getQueries()->insertGradeableData($this);
         }
@@ -859,7 +862,7 @@ class Gradeable extends AbstractModel {
         foreach ($this->components as $component) {
             $component->saveData($this->gd_id);
         }
-        $this->core->getDatabase()->commit();
+        $this->core->getCourseDB()->commit();
     }
       
     public function getSyllabusBucket() {

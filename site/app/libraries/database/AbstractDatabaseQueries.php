@@ -2,6 +2,8 @@
 
 namespace app\libraries\database;
 
+use app\libraries\Core;
+use app\libraries\Database;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableVersion;
@@ -14,7 +16,30 @@ use app\models\User;
  * all queries that any implemented database type must also support for full system operation.
  * The "get" queries should return models if possible.
  */
-interface IDatabaseQueries {
+abstract class AbstractDatabaseQueries {
+
+    /** @var Core */
+    protected $core;
+
+    /** @var Database */
+    protected $submitty_db;
+
+    /** @var Database */
+    protected $course_db;
+
+    public function __construct(Core $core) {
+        $this->core = $core;
+        $this->submitty_db = $core->getSubmittyDB();
+        $this->course_db = $core->getCourseDB();
+    }
+
+    /**
+     * Gets a user from the submitty database given a user_id.
+     * @param $user_id
+     *
+     * @return User
+     */
+    abstract public function getSubmittyUser($user_id);
 
     /**
      * Gets a user from the database given a user_id.
@@ -22,39 +47,47 @@ interface IDatabaseQueries {
      *
      * @return User
      */
-    public function getUserById($user_id);
+    abstract public function getUserById($user_id);
 
     /**
      * Fetches all students from the users table, ordering by course section than user_id.
      *
+     * @param string $section_key
      * @return User[]
      */
-    public function getAllUsers($section_key="registration_section");
+    abstract public function getAllUsers($section_key="registration_section");
 
     /**
      * @return User[]
      */
-    public function getAllGraders();
-
-    public function createUser(User $user);
+    abstract public function getAllGraders();
 
     /**
      * @param User $user
+     * @param string $semester
+     * @param string $course
      */
-    public function updateUser(User $user);
+    abstract public function insertUser(User $user, $semester, $course);
+
+    /**
+     * @param User $user
+     * @param string $semester
+     * @param string $course
+     */
+    abstract public function updateUser(User $user, $semester, $course);
 
     /**
      * @param string    $user_id
      * @param integer   $user_group
      * @param integer[] $sections
      */
-    public function updateGradingRegistration($user_id, $user_group, $sections);
+    abstract public function updateGradingRegistration($user_id, $user_group, $sections);
 
     /**
      * @param $user_id
      * @return Gradeable[]
      */
-    public function getAllGradeables($user_id = null);
+    abstract public function getAllGradeables($user_id = null);
 
     /**
      * @param $g_id
@@ -62,7 +95,7 @@ interface IDatabaseQueries {
      *
      * @return Gradeable
      */
-    public function getGradeable($g_id, $user_id = null);
+    abstract public function getGradeable($g_id, $user_id = null);
 
     /**
      * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
@@ -73,7 +106,7 @@ interface IDatabaseQueries {
      *
      * @return Gradeable[]
      */
-    public function getGradeables($g_ids = null, $user_id = null, $section_key = "registration_section");
+    abstract public function getGradeables($g_ids = null, $user_id = null, $section_key = "registration_section");
 
     /**
      * @param $g_id
@@ -81,63 +114,64 @@ interface IDatabaseQueries {
      *
      * @return GradeableComponent[]
      */
-    public function getGradeableComponents($g_id, $gd_id);
+    abstract public function getGradeableComponents($g_id, $gd_id);
 
     /**
      * @param string   $g_id
      * @param string   $user_id
+     * @param string   $team_id
      * @param \DateTime $due_date
      * @return GradeableVersion[]
      */
-    public function getGradeableVersions($g_id, $user_id, $team_id, $due_date);
+    abstract public function getGradeableVersions($g_id, $user_id, $team_id, $due_date);
 
-    public function getUsersByRegistrationSections($sections);
+    abstract public function getUsersByRegistrationSections($sections);
 
-    public function getTotalUserCountByRegistrationSections($sections);
+    abstract public function getTotalUserCountByRegistrationSections($sections);
 
-    public function getGradedUserCountByRegistrationSections($g_id, $sections);
+    abstract public function getGradedUserCountByRegistrationSections($g_id, $sections);
 
-    public function getGradersForRegistrationSections($sections);
+    abstract public function getGradersForRegistrationSections($sections);
 
-    public function getRotatingSectionsForGradeableAndUser($g_id, $user_id);
+    abstract public function getRotatingSectionsForGradeableAndUser($g_id, $user_id);
 
-    public function getUsersByRotatingSections($sections);
+    abstract public function getUsersByRotatingSections($sections);
 
-    public function getTotalUserCountByRotatingSections($sections);
+    abstract public function getTotalUserCountByRotatingSections($sections);
 
-    public function getGradedUserCountByRotatingSections($g_id, $sections);
+    abstract public function getGradedUserCountByRotatingSections($g_id, $sections);
 
-    public function getGradersForRotatingSections($g_id, $sections);
+    abstract public function getGradersForRotatingSections($g_id, $sections);
 
-    public function getGradersFromUserType($user_type);
+    abstract public function getGradersFromUserType($user_type);
 
     /**
      * Gets all registration sections from the sections_registration table
 
      * @return array
      */
-    public function getRegistrationSections();
+    abstract public function getRegistrationSections();
 
     /**
      * Gets all rotating sections from the sections_rotating table
      *
      * @return array
      */
-    public function getRotatingSections();
+    abstract public function getRotatingSections();
 
     /**
      * Gets all the gradeable IDs of the rotating sections
      *
      * @return array
      */
-    public function getRotatingSectionsGradeableIDS();
+    abstract public function getRotatingSectionsGradeableIDS();
 
     /**
      * Get gradeables graded by rotating section in the past and the sections each grader graded
      *
      * @return array
      */
-    public function getGradeablesPastAndSection();
+    abstract public function getGradeablesPastAndSection();
 
     /**
      * Returns the count of all users in rotating sections that are in a non-null registration section. These are
@@ -146,7 +180,7 @@ interface IDatabaseQueries {
      *
      * @return array
      */
-    public function getCountUsersRotatingSections();
+    abstract public function getCountUsersRotatingSections();
 
     /**
      * Returns the count of all users that are in a rotating section, but are not in an assigned registration section.
@@ -155,29 +189,29 @@ interface IDatabaseQueries {
      *
      * @return array
      */
-    public function getCountNullUsersRotatingSections();
+    abstract public function getCountNullUsersRotatingSections();
 
-    public function getRegisteredUserIdsWithNullRotating();
+    abstract public function getRegisteredUserIdsWithNullRotating();
 
-    public function getRegisteredUserIds();
+    abstract public function getRegisteredUserIds();
 
-    public function setAllUsersRotatingSectionNull();
+    abstract public function setAllUsersRotatingSectionNull();
 
-    public function setNonRegisteredUsersRotatingSectionNull();
+    abstract public function setNonRegisteredUsersRotatingSectionNull();
 
-    public function deleteAllRotatingSections();
+    abstract public function deleteAllRotatingSections();
 
-    public function getMaxRotatingSection();
+    abstract public function getMaxRotatingSection();
 
-    public function getNumberRotatingSessions();
+    abstract public function getNumberRotatingSections();
 
-    public function getGradersForAllRotatingSections($gradeable_id);
+    abstract public function getGradersForAllRotatingSections($gradeable_id);
 
-    public function insertNewRotatingSection($section);
+    abstract public function insertNewRotatingSection($section);
 
-    public function setupRotatingSections($graders, $gradeable_id);
+    abstract public function setupRotatingSections($graders, $gradeable_id);
 
-    public function updateUsersRotatingSection($section, $users);
+    abstract public function updateUsersRotatingSection($section, $users);
 
     /**
      * This inserts an row in the electronic_gradeable_data table for a given gradeable/user/version combination.
@@ -191,7 +225,7 @@ interface IDatabaseQueries {
      * @param $user_id
      * @param $version
      */
-    public function insertVersionDetails($g_id, $user_id, $team_id, $version, $timestamp);
+    abstract public function insertVersionDetails($g_id, $user_id, $team_id, $version, $timestamp);
 
     /**
      * Updates the row in electronic_gradeable_version table for a given gradeable and student. This function should
@@ -202,36 +236,36 @@ interface IDatabaseQueries {
      * @param $user_id
      * @param $version
      */
-    public function updateActiveVersion($g_id, $user_id, $team_id, $version);
+    abstract public function updateActiveVersion($g_id, $user_id, $team_id, $version);
 
     /**
      * @param Gradeable $gradeable
      */
-    public function insertGradeableData(Gradeable $gradeable);
+    abstract public function insertGradeableData(Gradeable $gradeable);
 
     /**
      * @param Gradeable $gradeable
      */
-    public function updateGradeableData(Gradeable $gradeable);
+    abstract public function updateGradeableData(Gradeable $gradeable);
 
     /**
      * @param string             $gd_id
      * @param GradeableComponent $component
      */
-    public function insertGradeableComponentData($gd_id, GradeableComponent $component);
+    abstract public function insertGradeableComponentData($gd_id, GradeableComponent $component);
 
     /**
      * @param string             $gd_id
      * @param GradeableComponent $component
      */
-    public function updateGradeableComponentData($gd_id, GradeableComponent $component);
+    abstract public function updateGradeableComponentData($gd_id, GradeableComponent $component);
 
     /**
      * Creates a new gradeable in the database
      *
      * @param array $details
      */
-    public function createNewGradeable($details);
+    abstract public function createNewGradeable($details);
 
     /**
      * Gets an array that contains all revelant data in a gradeable.
@@ -240,21 +274,27 @@ interface IDatabaseQueries {
      * @param $gradeable_id
      *
      */
-    public function getGradeableData($gradeable_id);
+    abstract public function getGradeableData($gradeable_id);
 
     /**
      * Updates the current gradeable with new properties.
      *
      * @param array $details
      */
-    public function updateGradeable($details);
+    abstract public function updateGradeable($details);
 
     /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
      *
      * @param \app\models\Gradeable $gradeable
      */
-    public function updateUserViewedDate(Gradeable $gradeable);
+    abstract public function updateUserViewedDate(Gradeable $gradeable);
+
+    abstract public function getAllGradeablesIdsAndTitles();
+
+    abstract public function getLateDayInformation();
+
+    abstract public function getLateDayUpdates();
 
     /**
      * @todo: write phpdoc
@@ -263,7 +303,7 @@ interface IDatabaseQueries {
      *
      * @return array
      */
-    public function getSession($session_id);
+    abstract public function getSession($session_id);
 
     /**
      * @todo: write phpdoc
@@ -274,30 +314,30 @@ interface IDatabaseQueries {
      *
      * @return string
      */
-    public function newSession($session_id, $user_id, $csrf_token);
+    abstract public function newSession($session_id, $user_id, $csrf_token);
 
     /**
      * Updates a given session by setting it's expiration date to be 2 weeks into the future
      * @param string $session_id
      */
-    public function updateSessionExpiration($session_id);
+    abstract public function updateSessionExpiration($session_id);
 
     /**
      * Remove sessions which have their expiration date before the
      * current timestamp
      */
-    public function removeExpiredSessions();
+    abstract public function removeExpiredSessions();
 
     /**
      * Remove a session associated with a given session_id
      * @param $session_id
      */
-    public function removeSessionById($session_id);
+    abstract public function removeSessionById($session_id);
 
     /**
      * gets ids of all electronic gradeables
      */
-    public function getAllElectronicGradeablesIds();
+    abstract public function getAllElectronicGradeablesIds();
 
 
     /**
@@ -305,35 +345,35 @@ interface IDatabaseQueries {
      * @param string $g_id
      * @param string $user_id
      */
-    public function newTeam($g_id, $user_id);
+    abstract public function newTeam($g_id, $user_id);
 
     /**
      * Add user $user_id to team $team_id as an invited user
      * @param string $team_id
      * @param string $user_id
      */
-    public function newTeamInvite($team_id, $user_id);
+    abstract public function newTeamInvite($team_id, $user_id);
 
     /**
      * Add user $user_id to team $team_id as a team member
      * @param string $team_id
      * @param string $user_id
      */
-    public function newTeamMember($team_id, $user_id);
+    abstract public function newTeamMember($team_id, $user_id);
 
     /**
      * Remove a user from their current team, decline all invitiations for that user
      * @param string $g_id
      * @param string $user_id
      */
-    public function removeTeamUser($g_id, $user_id);
+    abstract public function removeTeamUser($g_id, $user_id);
 
     /**
      * Return an array of Team objects for all teams on given gradeable
      * @param string $g_id
      * @return \app\models\Team[]
      */
-    public function getTeamsByGradeableId($g_id);
+    abstract public function getTeamsByGradeableId($g_id);
 
     /**
      * Return Team object for team which the given user belongs to on the given gradeable
@@ -341,25 +381,25 @@ interface IDatabaseQueries {
      * @param string $user_id
      * @return \app\models\Team
      */
-    public function getTeamByUserId($g_id, $user_id);
+    abstract public function getTeamByUserId($g_id, $user_id);
 
     /**
      * Update/Insert data from TA grading form to gradeable_data, gradeable_component_data
      *
      * @param array $details
      */
-    public function submitTAGrade($details);
+    abstract public function submitTAGrade($details);
 
     /**
      * Return an array of users with late days
      */
-    public function getUsersWithLateDays();
+    abstract public function getUsersWithLateDays();
 
     /**
      * Return an array of users with extensions
      * @param string $gradeable_id
      */
-    public function getUsersWithExtensions($gradeable_id);
+    abstract public function getUsersWithExtensions($gradeable_id);
 
     /**
      * Updates a given user's late days allowed effective at a given time
@@ -367,7 +407,7 @@ interface IDatabaseQueries {
      * @param string $timestamp
      * @param integer $days
      */
-    public function updateLateDays($user_id, $timestamp, $days);
+    abstract public function updateLateDays($user_id, $timestamp, $days);
 
     /**
      * Updates a given user's extensions for a given homework
@@ -375,6 +415,5 @@ interface IDatabaseQueries {
      * @param string $g_id
      * @param integer $days
      */
-    public function updateExtensions($user_id, $g_id, $days);
-
+    abstract public function updateExtensions($user_id, $g_id, $days);
 }
