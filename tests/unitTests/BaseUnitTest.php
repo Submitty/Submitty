@@ -3,7 +3,7 @@
 namespace tests\unitTests;
 
 use app\libraries\Core;
-use app\libraries\database\IDatabaseQueries;
+use app\libraries\database\AbstractDatabaseQueries;
 use app\libraries\GradeableType;
 use app\libraries\Output;
 use app\libraries\Utils;
@@ -57,7 +57,7 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
             $core->method('isTesting')->willReturn(true);
         }
 
-        $queries = $this->createMock(IDatabaseQueries::class);
+        $queries = $this->createMock(AbstractDatabaseQueries::class);
         $core->method('getQueries')->willReturn($queries);
 
         $user = $this->createMockModel(User::class);
