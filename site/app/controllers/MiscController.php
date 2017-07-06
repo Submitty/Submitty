@@ -15,6 +15,9 @@ class MiscController extends AbstractController {
             case 'download_file':
                 $this->downloadFile();
                 break;
+            case 'download_zip':
+                $this->downloadZip();
+                break;
         }
     }
 
@@ -64,11 +67,39 @@ class MiscController extends AbstractController {
     }
 
     private function downloadFile() {
-        $file_url = $_POST['path'];
+        if (!file_exists($_REQUEST['path'])) {
+            throw new \InvalidArgumentException("File does not exist");
+        }
+        foreach (explode(DIRECTORY_SEPARATOR, $_REQUEST['path']) as $part) {
+            if ($part == ".." || $part == ".") {
+                throw new \InvalidArgumentException("Cannot have a part of the path just be dots");
+            }
+        }
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        $file_url = $_REQUEST['path'];
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
         header("Content-disposition: attachment; filename=\"" . basename($file_url) . "\""); 
         readfile($file_url);
-        exit;
+    }
+
+    private function downloadZip() {
+        // Initialize archive object
+        $zip = new \ZipArchive();
+        $zip->open('file.zip', \ZipArchive::CREATE);
+
+        // Create recursive directory iterator
+        /** @var SplFileInfo[] $files */
+        if ($handle = opendir('.')) {
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry != "." && $entry != ".." && !strstr($entry,'.php')) {
+                    $zip->addFile($entry);
+                }
+            }
+            closedir($handle);
+        }
+        // Zip archive will be created only after closing object
+        $zip->close();
     }
 }

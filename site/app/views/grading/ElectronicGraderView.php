@@ -612,8 +612,8 @@ HTML;
                         <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count})'>
                             <span class='icon-plus' style='vertical-align:text-bottom;'></span>
                         {$dir}</a> &nbsp;
-                        <a onclick='openFile("{$dir}", "{$contents}")'>(Popout)</a>
-                        <a onclick='downloadFile("{$dir}", "{$contents}")'> (Download) </a>
+                        <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true"></i></a>
+                        <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true"></i></a>
                     </div><br/>
                     <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px"></div>
                 </div>
@@ -624,12 +624,14 @@ HTML;
             foreach ($files as $dir => $contents) {
                 if (is_array($contents)) {
                     $dir = htmlentities($dir);
+                    $url = reset($contents);
                     $return .= <<<HTML
             <div>
                 <div class="div-viewer">
                     <a class='openAllDiv' onclick='openDiv({$count});'>
                         <span class='icon-folder-closed' style='vertical-align:text-top;'></span>
-                    {$dir}</a>
+                    {$dir}</a> 
+                  <!--  <a onclick='downloadZip("{$dir}","{$url}")'><i class="fa fa-download" aria-hidden="true"></i></a> -->
                 </div><br/>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none'>
 HTML;
@@ -877,17 +879,17 @@ HTML;
         return false;
     }
 
-    function downloadFile(html_file, url_file) {
-        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=download_file&dir=submissions&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
-        /*
-        $.ajax({
-            type : "POST",
-            data : {
-                'path' : url_file
-            },
-            url : buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': html_file, 'path': url_file})
-        });
-        */
+    function downloadZip(test1, test2) {
+        var to = test2.lastIndexOf('/');
+        to = to == -1 ? url.length : to;
+        test2 = test2.substring(0, to);
+        alert (test2);
+        window.location = buildUrl({'component': 'misc', 'page': 'download_zip', 'dir': 'submissions', 'file': test1, 'path': test2});
+        return false;
+    }
+
+    function downloadFile(html_file, url_file) {        
+        window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': html_file, 'path': url_file});
         return false;
     }
 

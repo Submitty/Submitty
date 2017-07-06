@@ -40,7 +40,7 @@ HTML;
 <head>
     <title>{$this->core->getFullCourseName()}</title>
     <link rel="shortcut icon" href="{$this->core->getConfig()->getBaseUrl()}img/favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css{$extra}" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css{$extra}" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css{$extra}" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css{$extra}" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css{$extra}" />
