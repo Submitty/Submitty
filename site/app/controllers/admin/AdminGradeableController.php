@@ -43,7 +43,7 @@ class AdminGradeableController extends AbstractController {
         }
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSessions();
+        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
         $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections($_REQUEST['template_id']);
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
@@ -60,7 +60,7 @@ class AdminGradeableController extends AbstractController {
     private function viewPage() {
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSessions();
+        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
         $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections("");
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
@@ -76,7 +76,7 @@ class AdminGradeableController extends AbstractController {
     private function editPage() {
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSessions();
+        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
         $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections($_REQUEST['id']);
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
