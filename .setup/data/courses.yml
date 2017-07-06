@@ -23,6 +23,10 @@
 #   unregistered_students: int for number of students to have that are not in either rotating or registration sections.
 #     The default for this is 50.
 #
+#   make_customization: if set to true the script will make a customization_X.json where X is the course code.
+#     The default is false.
+#
+#
 #   gradeables: a list of gradeables to be used for this course. Each gradeable is defined as:
 #
 #     g_id: what is the id for this gradeable. This is optional for electronic gradeables and will default to the

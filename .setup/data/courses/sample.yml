@@ -5,6 +5,7 @@ registered_students: 80
 no_registration_students: 15
 no_rotating_students: 15
 unregistered_students: 15
+make_customization: true
 gradeables:
 - g_id: future_no_tas_homework
   g_title: Future (No TAs) Homework
