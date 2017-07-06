@@ -60,6 +60,56 @@ HTML;
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
+HTML;
+        if ($this->core->getUser()->accessAdmin()) {
+            $return .= <<<HTML
+    <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
+        <div >
+            <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
+                Normal Submission
+            <input type='radio' id="radio_student" name="submission_type">
+                Make Submission for a Student
+        </div>
+        <div id="student_id_input" style="display: none">
+            <div class="sub">
+                Input the user_id of the student you wish to submit for. This <i>permanently</i> affects the student's submissions, so please use with caution.
+            </div>
+            <div class="sub">
+                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                user_id: <input type="text" float="right" id= "student_id" name="student_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
+            </div class="sub">
+        </div>
+
+    </form>
+HTML;
+        }   
+
+            $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var cookie = document.cookie;
+            if (cookie.indexOf("student_checked=") !== -1) {
+                var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
+                $("#radio_student").prop("checked", cookieValue==1);
+                document.cookie="student_checked="+0;
+            }
+            if ($("#radio_student").is(":checked")) {
+                $('#student_id_input').show();
+            }
+            $('#radio_normal').click(function() {
+                $('#student_id_input').hide();
+                $('#student_id').val('');
+            });
+            $('#radio_student').click(function() {
+                $('#student_id_input').show();
+            });
+        });
+    </script>
+HTML;
+
+
+
+        $return .= <<<HTML
     <div class="sub">
 HTML;
         if ($gradeable->hasAssignmentMessage()) {
@@ -240,9 +290,31 @@ HTML;
 
         $return .= <<<HTML
     <script type="text/javascript">
+        function submitStudentGradeable(student_id, highest_version) {
+            handleSubmission("{$this->core->buildUrl(array('component' => 'student',
+                                                            'page' => 'submission',
+                                                            'action' => 'upload',
+                                                            'gradeable_id' => $gradeable->getId()))}",
+                                 "{$this->core->buildUrl(array('component' => 'student',
+                                                               'gradeable_id' => $gradeable->getId()))}",
+                                 {$days_late},
+                                 {$gradeable->getAllowedLateDays()},
+                                 highest_version,
+                                 {$gradeable->getMaxSubmissions()},
+                                 "{$this->core->getCsrfToken()}",
+                                 {$svn_string},
+                                 {$gradeable->getNumTextBoxes()},
+                                 student_id);           
+        }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
-                handleSubmission("{$this->core->buildUrl(array('component' => 'student',
+                var user_id = "";
+                if (document.getElementById("submissionForm")) {
+                    user_id = document.getElementById("submissionForm").student_id.value;
+                }
+                // no RCS entered, upload for whoever is logged in
+                if (user_id == ""){
+                    handleSubmission("{$this->core->buildUrl(array('component' => 'student',
                                                                'page' => 'submission',
                                                                'action' => 'upload',
                                                                'gradeable_id' => $gradeable->getId()))}",
@@ -254,7 +326,12 @@ HTML;
                                  {$gradeable->getMaxSubmissions()},
                                  "{$this->core->getCsrfToken()}",
                                  {$svn_string},
-                                 {$gradeable->getNumTextBoxes()});
+                                 {$gradeable->getNumTextBoxes()},
+                                 "{$gradeable->getUser()->getId()}");
+                }
+                else {
+                    validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, submitStudentGradeable);
+                }
                 e.stopPropagation();
             });
         });
