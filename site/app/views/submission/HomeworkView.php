@@ -56,10 +56,12 @@ HTML;
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
+        $time = " @ H:i";
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
+    <span>{$gradeable->getDueDate()->format("m/d/Y{$time}")}</span> 
 HTML;
         if ($this->core->getUser()->accessAdmin()) {
             $return .= <<<HTML
@@ -443,7 +445,7 @@ HTML;
                     if ($gradeable->hasConditionalMessage()) {
                         $return .= <<<HTML
     <div class="sub" id="conditional_message" style="display: none;">
-        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>
+        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
     </div>
 HTML;
                     }
@@ -608,16 +610,13 @@ HTML;
 <script type="text/javascript">
         $(document).ready(function() {
             // $('#conditional_message').show();
-            console.log({$gradeable->getDaysBefore()});
-            console.log({$gradeable->getDaysEarly()});
             if ({$gradeable->hasConditionalMessage()} &&
                     ({$current_version->getNonHiddenTotal()} >= {$gradeable->getPointsRequired()}) &&
-                    ({$gradeable->getDaysBefore()} <= {$gradeable->getDaysEarly()})) {
+                    ({$gradeable->getDaysBefore()} < {$gradeable->getDaysEarly()})) {
                 $('#conditional_message').show();
             }
-            // if (($gradeable->hasConditionalMessage()) &&
-            //     ($current_version->getNonHiddenTotal() >= $gradeable->getPointsRequired()))
-            //     $('#conditional_message').show();
+            console.log({$gradeable->getDaysLate()});
+            console.log({$gradeable->getDaysEarly()});
         });
 </script>
 HTML;
