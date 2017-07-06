@@ -31,8 +31,9 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
   }
   for (int f = 0; f < filenames.size(); f++) {
     if (!tc.isCompilation()) {
-      filenames[f] = tc.getPrefix() + "_" + filenames[f];
-      filenames[f] = replace_slash_with_double_underscore(filenames[f]);
+      //filenames[f] = tc.getPrefix() + "_" + filenames[f];
+      //filenames[f] = tc.getPrefix() + "_" + filenames[f];
+      //filenames[f] = replace_slash_with_double_underscore(filenames[f]);
     }
   }
 

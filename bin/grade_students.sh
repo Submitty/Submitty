@@ -232,18 +232,11 @@ function log_exit {
 # =====================================================================
 
 function grade_this_item {
-
     
     NEXT_DIRECTORY=$1
     NEXT_TO_GRADE=$2
 
-    echo "========================================================================"
     echo "GRADE $NEXT_TO_GRADE"
-
-    #    echo "NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW"
-    ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
-
-    #echo "OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD"
 
     # --------------------------------------------------------------------
     # The queue file name contains the necessary information to
@@ -548,14 +541,16 @@ function grade_this_item {
     #  --include="*.XXX"  grab all .XXX files
     #  --exclude="*"  exclude everything else
 
+    $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp_compilation -user "${ARGUMENT_UNTRUSTED_USER}" -exec /bin/chmod o+r {} \;   >>  results_log_runner.txt 2>&1
+    
     rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"  --include="*.class"  --include="*.py" --include="*.s" --include="*.pl"  --include="*.rkt" --include="*.png" --include="*.pdf" --include="*.jpg"  --include="*README*"  --include="test*.txt" --include="data/*" 	--exclude="*"  $tmp_compilation/  $tmp
     # NOTE: Also grabbing all student data files (files with 'data/' directory in path)
 
     # remove the compilation directory
     $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp_compilation  > /dev/null  2>&1
     $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation  > /dev/null  2>&1
-    rm -rf $tmp_compilation
-
+    rm -rf $tmp_compilation   
+    
     # --------------------------------------------------------------------
     # RUN RUNNER
 
@@ -692,8 +687,6 @@ function grade_this_item {
     find . -exec ls -lta {} \; > $results_path/results_log_done.txt 2>&1
     $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp  > /dev/null  2>&1
     rm -rf $tmp
-
-    echo "========================================================================"
 }
 
 
@@ -848,7 +841,14 @@ while true; do
 	global_submission_time=""
 	global_gradeable_deadline=""
 	# call the helper function
+        echo "========================================================================"
 	grade_this_item $NEXT_DIRECTORY $NEXT_ITEM
+
+        #    echo "NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW"
+        ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
+        echo "========================================================================"
+
+        #echo "OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD"
 
 	# mark the end time
 	ENDTIME=$(date +%s)

@@ -32,12 +32,24 @@ nlohmann::json printTestCase(TestCase test) {
   return j;
 }
 
+void AddAutogradingConfiguration(nlohmann::json &whole_config) {
+  whole_config["autograding"]["submission_to_compilation"] = { "**/*.cpp", "**/*.c", "**/*.h" };
+  whole_config["autograding"]["submission_to_runner"] = { "**/*.py" };
+  whole_config["autograding"]["compilation_to_runner"] = { "**/*.out", "**/*.class" };
+  whole_config["autograding"]["compilation_to_validation"] = { "test*.txt" };
+  whole_config["autograding"]["submission_to_validation"] = { "**/README.txt", "**/*.pdf" };
+  whole_config["autograding"]["work_to_details"] = { "test*.txt", "test*_diff.json", "**/README.txt" };
+}
+
+
 int main(int argc, char *argv[]) {
 
   nlohmann::json config_json;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
   AddSubmissionLimitTestCase(config_json);
+
+  AddAutogradingConfiguration(config_json);
 
   nlohmann::json j;
 

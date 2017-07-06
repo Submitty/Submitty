@@ -116,8 +116,11 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
     if (my_testcase.isCompilation() && autocheck_j.value("description","") == "Create Executable") {
       // MISSING EXECUTABLE
     } else {
-      std::string actual_file = my_testcase.getPrefix() + "_" + filenames[FN];
-      actual_file = replace_slash_with_double_underscore(actual_file);
+      std::string actual_file = filenames[FN];
+      if (!my_testcase.isFileCheck()) {
+        actual_file = my_testcase.getPrefix() + "_" + actual_file;
+      }
+      //actual_file = replace_slash_with_double_underscore(actual_file);
       std::vector<std::string> files;
       wildcard_expansion(files, actual_file, std::cout);
       for (int i = 0; i < files.size(); i++) {

@@ -114,7 +114,7 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
   if (p_filename.find('*') != std::string::npos) {
     std::cout << "HAS WILDCARD!  MUST EXPAND '" << p_filename << "'" << std::endl;
     std::vector<std::string> files;
-    p_filename = replace_slash_with_double_underscore(p_filename);
+    //p_filename = replace_slash_with_double_underscore(p_filename);
     wildcard_expansion(files, p_filename, std::cout);
     if (files.size() == 0) {
       messages.push_back("ERROR!  No matches to wildcard pattern");

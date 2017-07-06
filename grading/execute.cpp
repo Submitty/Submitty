@@ -719,9 +719,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   std::cout << std::endl;
 
 
-
-
-
   // SECCOMP:  Used to restrict allowable system calls.
   // First we determine if the program we will run is a 64 or 32 bit
   // executable (the system calls are different on 64 vs. 32 bit)
@@ -729,8 +726,9 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   std::cout << "reading " <<  my_program << std::endl;
   int fd = open(my_program.c_str(), O_RDONLY);
   if (fd == -1) {
-    perror("can't open");
-    std::cerr << "ERROR: cannot open program '" << my_program << '"' << std::endl;
+    //perror("can't open");
+    logfile << "ERROR: cannot open program '" << my_program << '"' << std::endl;
+    std::cout << "ERROR: cannot open program '" << my_program << '"' << std::endl;
     exit(1);
   }
   int res = read(fd, &elf_hdr, sizeof(elf_hdr));
