@@ -981,29 +981,31 @@ class Course(object):
             gradeables_json_output["gradeables"].append(bucket_json)
             bucket_no += 1
 
-        benchmarks = ["a-","b-","c-","d"]
-        gradeables_json_output["display"] = ["instructor_notes", "grade_summary", "grade_details"]
-        gradeables_json_output["display_benchmark"] = ["average","stddev","perfect"]
-        gradeables_json_output["benchmark_percent"] = {}
-        for i in range(len(benchmarks)):
-            gradeables_json_output["display_benchmark"].append("lowest_" + benchmarks[i])
-            gradeables_json_output["benchmark_percent"]["lowest_" + benchmarks[i]] = 0.9 - 0.1*i
         # Generate the section labels
         section_ta_mapping = {}
-        for section in range(1,self.registration_sections+1):
+        for section in range(1, self.registration_sections + 1):
             section_ta_mapping[section] = []
         for user in self.users:
             if user.get_detail(course_id, "grading_registration_section") is not None:
                 grading_registration_sections = str(user.get_detail(course_id, "grading_registration_section"))
                 grading_registration_sections = [int(x) for x in grading_registration_sections.split(",")]
                 for section in grading_registration_sections:
-                        section_ta_mapping[section].append(user.id)
+                    section_ta_mapping[section].append(user.id)
 
         for section in section_ta_mapping:
             if len(section_ta_mapping[section]) == 0:
                 section_ta_mapping[section] = "TBA"
             else:
                 section_ta_mapping[section] = ", ".join(section_ta_mapping[section])
+
+        # Construct the rest of the JSON dictionary
+        benchmarks = ["a-", "b-", "c-", "d"]
+        gradeables_json_output["display"] = ["instructor_notes", "grade_summary", "grade_details"]
+        gradeables_json_output["display_benchmark"] = ["average", "stddev", "perfect"]
+        gradeables_json_output["benchmark_percent"] = {}
+        for i in range(len(benchmarks)):
+            gradeables_json_output["display_benchmark"].append("lowest_" + benchmarks[i])
+            gradeables_json_output["benchmark_percent"]["lowest_" + benchmarks[i]] = 0.9 - (0.1 * i)
 
         gradeables_json_output["section"] = section_ta_mapping
         messages = ["<b>{} Course</b>".format(course_id),
