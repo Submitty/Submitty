@@ -163,7 +163,7 @@ def main():
     os.system("rm /tmp/hwcron_cron_backup.txt")
 
     # Needed for Rainbow Grades testing, updates customization_sample.json to reflect sample.yml
-    make_sample_json()
+    make_course_json("sample")
 
 
 def generate_random_users(total, real_users):
@@ -446,7 +446,7 @@ def create_gradeable_submission(src, dst):
         os.remove(zip_dst)
 
 
-def make_sample_json():
+def make_course_json(course_id):
     """
     This function generates customization_sample.json in case it has changed from the provided version in the test suite
     within the Submitty repository. Ideally this function will be pulled out and made independent, or better yet when
@@ -460,30 +460,28 @@ def make_sample_json():
 
     :return:
     """
+
     # Right now we don't use the fill-ins, and setup_sample_courses.py lives in the repository so can't do:
     # customization_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", "test_suite", "rainbowGrades")
     # course_file = os.path.join("__INSTALL__FILLIN__SUBMITTY_REPOSITORY__", ".setup", "data", "courses", "sample.yml")
 
-    # Reseed to minimize the situations under which customization_sample.json changes
+    # Reseed to minimize the situations under which customization.json changes
     m = hashlib.md5()
     m.update("sample")
     random.seed(int(m.hexdigest(), 16))
 
-    # This won't work because test_suite may not yet exist, also the .json would then be at risk of
-    # "INSTALL_SUBMITTY.sh clean" destroying the .json file.
-    # customization_path = os.path.join(SUBMITTY_INSTALL_DIR, "test_suite", "rainbowGrades")
-
     customization_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup")
-    course_file = os.path.join(SUBMITTY_REPOSITORY, ".setup", "data", "courses", "sample.yml")
+    # TODO: Once this function is folded into Course there's no more need to read the yaml
+    course_file = os.path.join(SUBMITTY_REPOSITORY, ".setup", "data", "courses", course_id + ".yml")
     course_json = load_data_yaml(course_file)
 
     course_id = course_json['code']
     print("Generating customization_{}.json".format(course_id))
 
     gradeables = {}
-    gradeables_json_output = ""
+    gradeables_json_output = {}
 
-    # Read in sample.yml and create gradeables by syllabus bucket
+    # Read in the course YAML and create gradeables by syllabus bucket
     for g in course_json['gradeables']:
         gradeable = Gradeable(g)
         if gradeable.syllabus_bucket not in gradeables:
@@ -500,21 +498,18 @@ def make_sample_json():
         gradeables_percentages[-1] += gradeable_percentage_left
 
     # Compute totals and write out each syllabus bucket in the "gradeables" field of customization.json
-    # TODO: Figure out what to do about "none" bucket items - does Rainbow Grades support this?
     bucket_no = 0
+
     for bucket,g_list in gradeables.items():
-        gradeables_json_output += "    {\n" +\
-                                  "      \"type\": \"{}\",\n".format(bucket) + \
-                                  "      \"count\": {},\n".format(len(g_list)) + \
-                                  "      \"percent\" : {},\n".format(0.01*gradeables_percentages[bucket_no]) + \
-                                  "      \"ids\": [\n"
+        bucket_json = {"type": bucket, "count": len(g_list), "percent": 0.01*gradeables_percentages[bucket_no],
+                       "ids" : []}
 
         # Manually total up the non-penalty non-extra-credit max scores, and decide which gradeables are 'released'
         for g in g_list:
             use_ta_grading = g.use_ta_grading
             g_type = g.type
             components = g.components
-            id = g.id
+            g_id = g.id
             max_auto = 0
             max_ta = 0
 
@@ -530,7 +525,7 @@ def make_sample_json():
 
             # For electronic gradeables there is a config file - read through to get the total
             if os.path.isdir(gradeable_config_dir):
-                gradeable_config = os.path.join(gradeable_config_dir, "complete_config_" + id + ".json")
+                gradeable_config = os.path.join(gradeable_config_dir, "complete_config_" + g_id + ".json")
                 if os.path.isfile(gradeable_config):
                     try:
                         with open(gradeable_config, 'r') as gradeable_config_file:
@@ -558,69 +553,37 @@ def make_sample_json():
             # Add the specific associative array for this gradeable in customization.json to the output string
             max_points = max_auto + max_ta
             if print_grades:
-                gradeables_json_output += "        {{\"id\":\"{}\", \"max\":{}".format(id,max_points)
+                bucket_json["ids"].append({"id": g_id, "max": max_points})
                 if not release_grades:
-                    gradeables_json_output += ", \"released\":false"
-                if g != g_list[-1]:
-                    gradeables_json_output += "},\n"
-                else:
-                    gradeables_json_output += "}\n"
+                    bucket_json["ids"][-1]["released"] = False
 
         # Close the bucket's array in customization.json
-        gradeables_json_output += "      ]\n" + "    }"
-        if bucket != gradeables.keys()[-1]:
-            gradeables_json_output += ",\n"
-        else:
-            gradeables_json_output += "\n"
+        if "gradeables" not in gradeables_json_output:
+            gradeables_json_output["gradeables"] = []
+        gradeables_json_output["gradeables"].append(bucket_json)
         bucket_no += 1
+
+    grade_letters = ["a","b","c","d"]
+    gradeables_json_output["display"] = ["instructor_notes", "grade_summary", "grade_details"]
+    gradeables_json_output["display_benchmark"] = ["average","stddev","perfect"]
+    gradeables_json_output["benchmark_percent"] = []
+    for letter in grade_letters:
+        gradeables_json_output["display_benchmark"].append("lowest_" + letter)
+        gradeables_json_output["benchmark_percent"].append("lowest_" + letter)
+    # TODO: Make the section generation work for any course ( see if the Course knows # of sections and who the TAs for
+    # TODO: each section are )
+    section_ta_mapping = {}
+    gradeables_json_output["section"] = section_ta_mapping
+    messages = []
+    messages.append("<b>My Favorite CS Class</b>")
+    messages.append("Note: Please be patient with data entry/grade corrections for the most recent lab, homework, and test.")
+    messages.append("Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week.")
+    gradeables_json_output["messages"] = messages
 
     # Attempt to write the customization.json file, incorporating the output buffer from above (gradeables_json_output)
     try:
-        with open(os.path.join(customization_path, "customization_sample.json"), 'w') as customization_file:
-            customization_file.write("{\n" +
-                                     "  \"display\": [\n" +
-                                     "    \"instructor_notes\",\n" +
-                                     "    \"grade_summary\",\n" +
-                                     "    \"grade_details\"\n" +
-                                     "  ],\n" +
-                                     "  \"display_benchmark\": [\n" +
-                                     "    \"average\",\n" +
-                                     "    \"stddev\",\n" +
-                                     "    \"perfect\",\n" +
-                                     "    \"lowest_a-\",\n" +
-                                     "    \"lowest_b-\",\n" +
-                                     "    \"lowest_c-\",\n" +
-                                     "    \"lowest_d\"\n" +
-                                     "  ],\n" +
-                                     "  \"benchmark_percent\": {\n" +
-                                     "    \"lowest_a-\": 0.9,\n" +
-                                     "    \"lowest_b-\": 0.8,\n" +
-                                     "    \"lowest_c-\": 0.7,\n" +
-                                     "    \"lowest_d\": 0.6\n" +
-                                     "  },\n" +
-                                     "  \"gradeables\": [\n" +
-                                     gradeables_json_output +
-                                     "  ],\n" +
-                                     "  \"section\": {\n" +
-                                     "    \"1\": \"TA_name_1\",\n" +
-                                     "    \"2\": \"TA_name_2\",\n" +
-                                     "    \"3\": \"TA_name_3\",\n" +
-                                     "    \"4\": \"TA_name_4\",\n" +
-                                     "    \"5\": \"TA_name_1\",\n" +
-                                     "    \"6\": \"TA_name_2\",\n" +
-                                     "    \"7\": \"TA_name_3\",\n" +
-                                     "    \"8\": \"TA_name_4\",\n" +
-                                     "    \"9\": \"TA_name_5\",\n" +
-                                     "    \"10\": \"TA_name_5\"\n" +
-                                     "  },\n" +
-                                     "  \"messages\": [\n" +
-                                     "    \"<b>My Favorite CS Class</b>\",\n" +
-                                     "    \"Note: Please be patient with data entry/grade corrections for the" +
-                                     " most recent lab, homework, and test.\",\n" +
-                                     "    \"Please contact your graduate lab TA if a grade remains missing or" +
-                                     " incorrect for more than a week.\"\n" +
-                                     "  ]\n" +
-                                     "}\n")
+        json.dump(gradeables_json_output,
+                  open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'w'),indent=2)
     except EnvironmentError as e:
         print("Failed to write to customization file: {}".format(e))
 
