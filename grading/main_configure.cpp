@@ -34,7 +34,7 @@ nlohmann::json printTestCase(TestCase test) {
 
 void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   whole_config["autograding"]["submission_to_compilation"] = { "**/*.cpp", "**/*.c", "**/*.h" };
-  whole_config["autograding"]["submission_to_runner"] = { "**/*.py" };
+  whole_config["autograding"]["submission_to_runner"] = { "**/*.py", "**/*.pdf" };
   whole_config["autograding"]["compilation_to_runner"] = { "**/*.out", "**/*.class" };
   whole_config["autograding"]["compilation_to_validation"] = { "test*.txt" };
   whole_config["autograding"]["submission_to_validation"] = { "**/README.txt", "**/*.pdf" };

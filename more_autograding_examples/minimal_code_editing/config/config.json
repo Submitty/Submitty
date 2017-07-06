@@ -12,7 +12,7 @@
         // *************** COMPILATION *****************
         {
             "title" : "Reasonable Code Changes",
-            "command" : "cat test01*.cpp.txt",
+            "command" : "cat *.cpp",
             "points" : 5,
             "validation" : [
                 {

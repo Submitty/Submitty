@@ -14,8 +14,8 @@
 
         {
             "title" : "Required 500-1000 Words",
-            "command" : [ "pdftotext test01_*pdf plaintext.txt",
-                          "wc -w < plaintext.txt" ],
+            "command" : [ "pdftotext *.pdf plaintext.txt",
+                          "wc -w < test02_plaintext.txt" ],
             "points" : 1,
             "validation" : [
                 {

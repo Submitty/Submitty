@@ -93,7 +93,7 @@ def pattern_copy(patterns,source,target):
             os.makedirs(os.path.join(target,os.path.dirname(relpath)),exist_ok=True)
             # copy the file
             shutil.copy(file,os.path.join(target,relpath))
-            #print ("COPY ",file," TO ",os.path.join(target,relpath))
+            print ("COPY ",file," TO ",os.path.join(target,relpath))
             
 # ==================================================================================
 # ==================================================================================

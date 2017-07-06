@@ -4,7 +4,7 @@
 			"test_name": "Test 1 README",
                         "autochecks": [
                          {                               "description": "README.txt",
-                               "actual_file": "test01_README.txt"
+                               "actual_file": "README.txt"
                          }
                          ],
 			"points_awarded": 2
