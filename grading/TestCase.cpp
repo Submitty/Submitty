@@ -99,11 +99,11 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
 
 
 bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, 
-                     std::vector<std::string> &messages) {
+                     std::vector<std::pair<std::string, std::string> > &messages) {
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(j,"actual_file");
   if (filenames.size() != 1) {
-    messages.push_back("ERROR!  STUDENT FILENAME MISSING");
+    messages.push_back(std::make_pair("ERROR!  STUDENT FILENAME MISSING","failure"));
     return false;
   }
 
@@ -117,10 +117,10 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
     p_filename = replace_slash_with_double_underscore(p_filename);
     wildcard_expansion(files, p_filename, std::cout);
     if (files.size() == 0) {
-      messages.push_back("ERROR!  No matches to wildcard pattern");
+      messages.push_back(std::make_pair("ERROR!  No matches to wildcard pattern","failure"));
       return false;
     } else if (files.size() > 1) {
-      messages.push_back("ERROR!  Multiple matches to wildcard pattern");
+      messages.push_back(std::make_pair("ERROR!  Multiple matches to wildcard pattern","failure"));
       return false;
     } else {
       p_filename = files[0];
@@ -129,13 +129,13 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
   }
 
   if (!getFileContents(p_filename,student_file_contents)) {
-    messages.push_back("ERROR!  Could not open student file: '" + filename + "'");
+    messages.push_back(std::make_pair("ERROR!  Could not open student file: '" + filename + "'","failure"));
     return false;
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
-    messages.push_back("ERROR!  Student file '" + p_filename + "' too large for grader (" +
+    messages.push_back(std::make_pair("ERROR!  Student file '" + p_filename + "' too large for grader (" +
                        std::to_string(student_file_contents.size()) + " vs. " +
-                       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
+                       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")","failure"));
     return false;
   }
   return true;
