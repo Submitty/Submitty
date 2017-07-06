@@ -68,6 +68,18 @@ class GradeSummary extends AbstractModel {
         
         $autograding_score = $gradeable->getGradedAutoGraderPoints();
         $ta_grading_score = $gradeable->getGradedTAPoints();
+
+        $gradedVersion = $gradeable->getGradedVersion();
+        $activeVersion = $gradeable->getActiveVersion();
+        if(!isset($gradedVersion) || $gradedVersion == "" || $gradedVersion == null) {
+            $this_g['NOTE'] = "SCORE BASED ON CURRENT ACTIVE VERSION";            
+        }
+        else if($gradedVersion !== $activeVersion){
+            $gradeable->loadResultDetails();
+            $autograding_score = $gradeable->getVersions()[$gradedVersion]->getNonHiddenTotal() + $gradeable->getVersions()[$gradedVersion]->getHiddenTotal();
+            $this_g['NOTE'] = "GRADED VERSION DOES NOT MATCH ACTIVE VERSION";
+        }
+                
         
         $this_g['id'] = $gradeable->getId();
         $this_g['name'] = $gradeable->getName();
