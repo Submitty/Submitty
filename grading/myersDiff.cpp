@@ -27,7 +27,7 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
   // grab the required files
   std::vector<std::string> filenames = stringOrArrayOfStrings(j,"actual_file");
   if (filenames.size() == 0) {
-    return new TestResults(0.0,{"ERROR: no required files specified"});
+    return new TestResults(0.0,{"ERROR: no required files specified"},{std::make_pair("ERROR: no required files specified","failure")});
   }
   for (int f = 0; f < filenames.size(); f++) {
     if (!tc.isCompilation()) {
@@ -70,7 +70,7 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
       return new TestResults(1.0);
     } else {
       std::cout << "FILE NOT FOUND " + files_not_found << std::endl;
-      return new TestResults(0.0,{"ERROR: required file not found: " + files_not_found});
+      return new TestResults(0.0,{"ERROR: required file not found: " + files_not_found},{std::make_pair("ERROR: required file not found: " + files_not_found, "failure")});
     }
   } else {
     if (found_count == filenames.size()) {
@@ -90,7 +90,7 @@ TestResults* warnIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
     return new TestResults(1.0,messages);
   }
   if (student_file_contents != "") {
-    return new TestResults(1.0,{"WARNING: This file should be empty"});
+    return new TestResults(1.0,{"WARNING: This file should be empty"},{std::make_pair("WARNING: This file should be empty","warning")});
   }
   return new TestResults(1.0);
 }
@@ -121,7 +121,7 @@ TestResults* warnIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
     return new TestResults(1.0,messages);
   }
   if (student_file_contents == "") {
-    return new TestResults(1.0,{"WARNING: This file should not be empty"});
+    return new TestResults(1.0,{"WARNING: This file should not be empty"},{std::make_pair("WARNING: This file should not be empty","warning")});
   }
   return new TestResults(1.0);
 }
@@ -134,7 +134,7 @@ TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
     return new TestResults(0.0,messages);
   }
   if (student_file_contents == "") {
-    return new TestResults(0.0,{"ERROR: This file should not be empty!"});
+    return new TestResults(0.0,{"ERROR: This file should not be empty!"},{std::make_pair("ERROR: This file should not be empty!","failure")});
   }
   return new TestResults(1.0);
 }
@@ -154,7 +154,7 @@ TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::jso
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
       student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"},{std::make_pair("ERROR: Student file too large for grader","failure")});
   }
   vectorOfWords text_a = stringToWords( student_file_contents );
   vectorOfWords text_b = stringToWords( expected_file_contents );
@@ -176,7 +176,7 @@ TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::js
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
       student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"},{std::make_pair("ERROR: Student file too large for grader","failure")});
   }
   vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
   vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
@@ -198,7 +198,7 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
       student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"},{std::make_pair("ERROR: Student file too large for grader","failure")});
   }
   vectorOfLines text_a = stringToLines( student_file_contents, j );
   vectorOfLines text_b = stringToLines( expected_file_contents, j );
@@ -224,7 +224,7 @@ TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::jso
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
       student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"},{std::make_pair("ERROR: Student file too large for grader","failure")});
   }
 
   bool extraStudentOutputOk = j.value("extra_student_output",false);
@@ -288,7 +288,7 @@ TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
 
   // check for an empty solution file
   if (expected.size() < 1) {
-    return new TestResults(0.0,{"ERROR!  expected file is empty"});
+    return new TestResults(0.0,{"ERROR!  expected file is empty"},{std::make_pair("ERROR!  expected file is empty","failure")});
   }
   assert (expected.size() > 0);
 
