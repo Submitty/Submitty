@@ -102,6 +102,9 @@ class LateDaysCalculation extends AbstractModel {
 
                 $curr_bad_modifier = "";
                 $curr_late_used = $submissions[$i]['days_late'];
+                // if($submissions[$i]['user_id']== 'student' && $submissions[$i]['g_title'] == 'c_failure_messages'){
+                //     echo($curr_late_used);
+                // }
                 $curr_status = $status;
                 $curr_late_charged = 0;
 
@@ -165,18 +168,18 @@ class LateDaysCalculation extends AbstractModel {
     public function generateTableForUser($user_id){
         //table header row.
         $table = <<<HTML
-                <h4>Overall Late Day Usage</h4>
+                <h3>Overall Late Day Usage</h3><br/>
                 <table>
                     <thead>
                         <tr>
                             <th></th>
-                            <th style="border:thin solid black">Allowed per term</th>
-                            <th style="border:thin solid black">Allowed per assignment</th>
-                            <th style="border:thin solid black">Late days used</th>
-                            <th style="border:thin solid black">Extensions</th>
-                            <th style="border:thin solid black">Status</th>
-                            <th style="border:thin solid black">Late Days Charged</th>
-                            <th style="border:thin solid black">Remaining Days</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Late days used</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -191,14 +194,14 @@ HTML;
             foreach ($student as $submission) {
                 $table .= <<<HTML
                 <tr>
-                    <th style="border:thin solid black">{$submission['g_title']}</th>
-                    <td align="center" style="border:thin solid black">{$submission['allowed_per_term']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['allowed_per_assignment']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['late_days_used']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['extensions']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['status']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['late_days_charged']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['remaining_days']}</td>
+                    <th style="padding:5px; border:thin solid black">{$submission['g_title']}</th>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['allowed_per_term']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['allowed_per_assignment']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['late_days_used']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['extensions']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['status']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['late_days_charged']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['remaining_days']}</td>
                 </tr>
 HTML;
             }
@@ -221,18 +224,18 @@ HTML;
     public function generateTableForUserDate($user_id, $endDate){
         //table header row.
         $table = <<<HTML
-                <h4>Overall Late Day Usage</h4>
+                <h3>Overall Late Day Usage</h3><br/>
                 <table>
                     <thead>
                         <tr>
                             <th></th>
-                            <th style="border:thin solid black">Allowed per term</th>
-                            <th style="border:thin solid black">Allowed per assignment</th>
-                            <th style="border:thin solid black">Late days used</th>
-                            <th style="border:thin solid black">Extensions</th>
-                            <th style="border:thin solid black">Status</th>
-                            <th style="border:thin solid black">Late Days Charged</th>
-                            <th style="border:thin solid black">Remaining Days</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Late days used</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -248,14 +251,14 @@ HTML;
                 if ($submission['eg_submission_due_date'] <= $endDate) {
                     $table .= <<<HTML
                 <tr>
-                    <th style="border:thin solid black">{$submission['g_title']}</th>
-                    <td align="center" style="border:thin solid black">{$submission['allowed_per_term']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['allowed_per_assignment']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['late_days_used']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['extensions']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['status']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['late_days_charged']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['remaining_days']}</td>
+                    <th style="padding:5px; border:thin solid black">{$submission['g_title']}</th>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['allowed_per_term']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['allowed_per_assignment']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['late_days_used']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['extensions']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['status']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['late_days_charged']}</td>
+                    <td align="center" style="padding:5px; border:thin solid black">{$submission['remaining_days']}</td>
                 </tr>
 HTML;
                 }
