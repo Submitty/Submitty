@@ -898,16 +898,16 @@ class Course(object):
             max_submissions = gradeable.max_random_submissions
             for user in self.users:
                 submitted = False
-                active = 1
+                graded = 1
                 submission_path = os.path.join(gradeable_path, user.id)
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
                     if gradeable.gradeable_config is None or \
                             (gradeable.submission_due_date < NOW and random.random() < 0.5) or \
                             (random.random() < 0.3):
-                        active = -1
+                        graded = -1
                     elif max_submissions is not None and submission_count >= max_submissions:
-                        active = -1
+                        graded = -1
                     else:
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
@@ -948,8 +948,7 @@ class Course(object):
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
                                                              gd_overall_comment="lorem ipsum lodar",
-                                                             gd_status=status, gd_late_days_used=0,
-                                                             gd_active_version=active, gd_grader_id=self.instructor.id)
+                                                             gd_graded_version=graded, gd_grader_id=self.instructor.id)
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:

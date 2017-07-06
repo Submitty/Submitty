@@ -52,7 +52,7 @@ class HWReport extends AbstractModel {
                 $student_output_text_main .= "You have a ".$late_days['extensions']." day extension on this assignment.".$nl;
             }
             // 3 is too late, 0 is no submission 
-            if($gradeable->getStatus() == 3 || $gradeable->getStatus() == 0) {
+            if(substr($late_days['status'], 0, 3) == 'Bad') {
                 $student_output_text_main .= "NOTE: THIS ASSIGNMENT WILL BE RECORDED AS ZERO".$nl;
                 $student_output_text_main .= "  Contact your TA or instructor if you believe this is an error".$nl;
             }

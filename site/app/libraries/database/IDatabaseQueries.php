@@ -344,7 +344,7 @@ interface IDatabaseQueries {
     public function getTeamByUserId($g_id, $user_id);
 
     /**
-     * Update/Insert data from TA grading form to gradeable_data, gradeable_component_data, late_days_used
+     * Update/Insert data from TA grading form to gradeable_data, gradeable_component_data
      *
      * @param array $details
      */
