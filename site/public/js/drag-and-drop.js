@@ -321,6 +321,53 @@ function isValidSubmission(){
 }
 
 /**
+ * @param csrf_token
+ * @param gradeable_id
+ * @param student_id
+ * @param submitStudentGradeable, a callback function
+ */
+function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGradeable) {
+    $("#submit").prop("disabled", true);
+
+    var formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+    formData.append('gradeable_id', gradeable_id);
+    formData.append('student_id', student_id);
+
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify'});
+
+    $.ajax({
+        url: url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            $("#submit").prop("disabled", false);
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    submitStudentGradeable(student_id, data['highest_version']);
+                    return data;
+                }
+                else {
+                    alert("ERROR! \n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function() {
+            $("#submit").prop("disabled", false);
+            alert("Something went wrong. Please try again.");
+        }
+    });
+}
+
+/**
  *
  * @param submit_url
  * @param return_url
@@ -330,9 +377,19 @@ function isValidSubmission(){
  * @param versions_allowed
  * @param csrf_token
  * @param svn_checkout
+ * @param num_textboxes
+ * @param user_id
  */
-function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes) {
+function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id) {
     $("#submit").prop("disabled", true);
+
+    // depending on which is checked, update cookie
+    if ($('#radio_normal').is(':checked')) {
+        document.cookie="student_checked="+0;
+    };
+    if ($('#radio_student').is(':checked')) {
+        document.cookie="student_checked="+1;
+    };
 
     var message = "";
     // check versions used
@@ -356,11 +413,11 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         }
     }
 
-
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
     formData.append('svn_checkout', svn_checkout);
+    formData.append('user_id', user_id);
 
     if (!svn_checkout) {
         // Check if new submission

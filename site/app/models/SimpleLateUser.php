@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\libraries\Core;
 use app\libraries\DatabaseUtils;
 
 class SimpleLateUser extends AbstractModel {
@@ -30,8 +31,8 @@ class SimpleLateUser extends AbstractModel {
      * User constructor.
      * @param array $details
      */
-    public function __construct($details) {
-        parent::__construct();
+    public function __construct(Core $core, $details) {
+        parent::__construct($core);
         if (count($details) == 0) {
             return;
         }
