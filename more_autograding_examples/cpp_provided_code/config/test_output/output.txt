@@ -1,0 +1,2 @@
+Foo(1).value() = 10
+Foo(2).value() = 20

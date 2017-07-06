@@ -1,0 +1,25 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 2,
+            "test_name": "Test 1 Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test02_0_diff.json",
+                    "expected_file": "test_output/testassignment/output.txt"
+                }
+            ],
+            "points_awarded": 5,
+            "test_name": "Test 2 Testing"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 3 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

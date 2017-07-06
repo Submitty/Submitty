@@ -123,7 +123,7 @@ def main():
     for course_id in courses.keys():
 
         with open(list_of_courses_file, "a") as courses_file:
-            print('<a href="http://192.168.56.101/index.php?semester=s17&course='+course_id+'">'+course_id+', Spring 2017</a>',file=courses_file)
+            print('<a href="http://192.168.56.101/index.php?semester=f17&course='+course_id+'">'+course_id+', Fall 2017</a>',file=courses_file)
             print("<br>", file=courses_file)
 
         course = courses[course_id]
@@ -725,14 +725,14 @@ class Course(object):
 
             for user in self.users:
                 submitted = False
-                active = 1
+                graded = 1
                 submission_path = os.path.join(gradeable_path, user.id)
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
                     if gradeable.gradeable_config is None or \
                             (gradeable.submission_due_date < NOW and random.random() < 0.5) or \
                             (random.random() < 0.3):
-                        active = -1
+                        graded = -1
                     else:
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
@@ -771,8 +771,7 @@ class Course(object):
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
                                                              gd_overall_comment="lorem ipsum lodar",
-                                                             gd_status=status, gd_late_days_used=0,
-                                                             gd_active_version=active, gd_grader_id=self.instructor.id)
+                                                             gd_graded_version=graded, gd_grader_id=self.instructor.id)
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         for component in gradeable.components:
@@ -790,11 +789,15 @@ class Course(object):
                     print("Creating queue file:", queue_file)
                     queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
                     with open(queue_file, "w") as open_file:
+                        # FIXME: This will need to be adjusted for team assignments!
                         json.dump({"semester": self.semester,
                                    "course": self.code,
                                    "gradeable": gradeable.id,
                                    "user": user.id,
-                                   "version": 1}, open_file)
+                                   "version": 1,
+                                   "who": user.id,
+                                   "is_team": False,
+                                   "team": ""}, open_file)
         conn.close()
         os.environ['PGPASSWORD'] = ""
 

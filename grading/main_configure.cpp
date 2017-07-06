@@ -92,17 +92,17 @@ int main(int argc, char *argv[]) {
 
   if (total_nonec != AUTO_POINTS) {
     std::cout << "\n" << start_red_text << "ERROR: Automated Points do not match testcases." << total_nonec 
-	      << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
+        << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
     return 1;
   }
   if (total_ec != EXTRA_CREDIT_POINTS) {
     std::cout << "\n" << start_red_text << "ERROR: Extra Credit Points do not match testcases." << total_ec 
-	      << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
+        << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
     return 1;
   }
   if (total_nonec + TA_POINTS != TOTAL_POINTS) {
     std::cout << "\n" << start_red_text << "ERROR: Automated Points and TA Points do not match total." 
-	      << end_red_text << "\n" << std::endl;
+        << end_red_text << "\n" << std::endl;
     return 1;
   }
 
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
 
   if (!init.is_open()) {
     std::cout << "\n" << start_red_text << "ERROR: unable to open new file for initialization... Now Exiting" 
-	      << end_red_text << "\n" << std::endl;
+        << end_red_text << "\n" << std::endl;
     return 0;
   }
 
