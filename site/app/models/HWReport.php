@@ -75,7 +75,7 @@ class HWReport extends AbstractModel {
                 $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
             }
             else {
-                // used only for setting $auto_grading_awarded...not sure if this is worth it since it's in the file anyways
+                // used only for setting $auto_grading_awarded...not sure if this is worth it since it's in the file anyways, or write a new query
                 $gradeable->loadResultDetails();
                 $auto_grading_awarded = $gradeable->getVersions()[$graded_version]->getNonHiddenTotal() + $gradeable->getVersions()[$graded_version]->getHiddenTotal();
                 $auto_grading_max_score = $gradeable->getTotalAutograderNonExtraCreditPoints();
