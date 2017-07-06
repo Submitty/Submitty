@@ -99,7 +99,7 @@ class Database {
             $this->results = $statement->fetchAll();
             $lower = strtolower($query);
             if (Utils::startsWith($lower, "update") || Utils::startsWith($lower, "delete")
-                || Utils::startsWith($lower, "update")) {
+                || Utils::startsWith($lower, "insert")) {
                 $this->row_count = $statement->rowCount();
             }
             else {
