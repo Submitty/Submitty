@@ -44,7 +44,7 @@ class AdminGradeableController extends AbstractController {
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
         $num_sections = $this->core->getQueries()->getNumberRotatingSessions();
-        $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections("");
+        $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections($_REQUEST['template_id']);
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
         $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
