@@ -350,7 +350,6 @@ CREATE TABLE sessions (
 
 CREATE TABLE users (
     user_id character varying NOT NULL,
-    user_password character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
@@ -359,6 +358,7 @@ CREATE TABLE users (
     registration_section integer,
     rotating_section integer,
     manual_registration boolean DEFAULT false,
+    last_updated TIMESTAMP WITHOUT time zone,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 0) AND (user_group <= 4)))
 );
 
