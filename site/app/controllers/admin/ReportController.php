@@ -58,7 +58,13 @@ class ReportController extends AbstractController {
 
             $autograding_score = $gradeable->getGradedAutograderPoints();
             $ta_grading_score = $gradeable->getGradedTAPoints();
-            
+            $gradedVersion = $gradeable->getGradedVersion();
+            $activeVersion = $gradeable->getActiveVersion();
+            if(isset($gradedVersion) && $gradedVersion !== null && $gradedVersion !== "" && $gradedVersion !== $activeVersion){
+                // should probably write a new query instead of this
+                $gradeable->loadResultDetails();
+                $autograding_score = $gradeable->getVersions()[$gradedVersion]->getNonHiddenTotal() + $gradeable->getVersions()[$gradedVersion]->getHiddenTotal();
+            }
             $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
             if(substr($late_days['status'], 0, 3) == 'Bad') {
                 $results[$student_id][$g_id] = 0;
