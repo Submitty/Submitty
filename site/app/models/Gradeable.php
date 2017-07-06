@@ -61,8 +61,6 @@ use app\libraries\Utils;
  * @method void setGrader(User $user)
  * @method string getOverallComment()
  * @method void setOverallComment(string $comment)
- * @method int getStatus()
- * @method void setStatus(int $status)
  * @method int getMinimumGradingGroup()
  * @method string getBucket()
  * @method int|null getGdId()
@@ -210,9 +208,6 @@ class Gradeable extends AbstractModel {
     protected $grader = null;
     /** @property @var string */
     protected $overall_comment = "";
-    /** @property @var int code representing the state of electronic submission where 0 = not submitted, 1 = fine, 2 = late,
-     * 3 = too late */
-    protected $status = 0;
 
     protected $graded_version = null;
 
@@ -261,8 +256,7 @@ class Gradeable extends AbstractModel {
             $this->gd_id = $details['gd_id'];
             $this->grader = $this->core->getQueries()->getUserById($details['gd_grader_id']);
             $this->overall_comment = $details['gd_overall_comment'];
-            $this->status = $details['gd_status'];
-            $this->graded_version = $details['gd_active_version'];
+            $this->graded_version = $details['gd_graded_version'];
         }
 
         $timezone = $this->core->getConfig()->getTimezone();
