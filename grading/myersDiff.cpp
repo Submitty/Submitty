@@ -31,8 +31,9 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
   }
   for (int f = 0; f < filenames.size(); f++) {
     if (!tc.isCompilation()) {
-      filenames[f] = tc.getPrefix() + "_" + filenames[f];
-      filenames[f] = replace_slash_with_double_underscore(filenames[f]);
+      //filenames[f] = tc.getPrefix() + "_" + filenames[f];
+      //filenames[f] = tc.getPrefix() + "_" + filenames[f];
+      //filenames[f] = replace_slash_with_double_underscore(filenames[f]);
     }
   }
 
@@ -46,6 +47,7 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
     std::cout << "  file exists check: '" << filenames[f] << "' : ";
     std::vector<std::string> files;
     wildcard_expansion(files, filenames[f], std::cout);
+    wildcard_expansion(files, tc.getPrefix() + "_" + filenames[f], std::cout);
     bool found = false;
     // loop over the available files
     for (int i = 0; i < files.size(); i++) {
