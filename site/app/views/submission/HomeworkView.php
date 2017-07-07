@@ -56,12 +56,10 @@ HTML;
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
-        $time = " @ H:i";
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
-    <span>{$gradeable->getDueDate()->format("m/d/Y{$time}")}</span> 
 HTML;
         if ($this->core->getUser()->accessAdmin()) {
             $return .= <<<HTML
@@ -606,20 +604,18 @@ HTML;
         </div>
 HTML;
                     }
-                    $return.= <<<HTML
+                    if ($gradeable->hasConditionalMessage()) {
+                        $return.= <<<HTML
 <script type="text/javascript">
         $(document).ready(function() {
-            // $('#conditional_message').show();
-            if ({$gradeable->hasConditionalMessage()} &&
-                    ({$current_version->getNonHiddenTotal()} >= {$gradeable->getPointsRequired()}) &&
-                    ({$gradeable->getDaysBefore()} < {$gradeable->getDaysEarly()})) {
+            if (({$current_version->getNonHiddenTotal()} >= {$gradeable->getMinimumPoints()}) &&
+                    ({$gradeable->getDaysEarly()} > {$gradeable->getMinimumDaysEarly()})) {
                 $('#conditional_message').show();
             }
-            console.log({$gradeable->getDaysLate()});
-            console.log({$gradeable->getDaysEarly()});
         });
 </script>
 HTML;
+                    }
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
                     foreach ($gradeable->getTestcases() as $testcase) {
@@ -741,11 +737,6 @@ HTML;
                                 <h4>{$title}</h4>
 HTML;
                                     foreach ($autocheck->getMessages() as $message) {
-                                        $return .= <<<HTML
-                                <span class="red-message">{$message}</span><br />
-HTML;
-                                    }
-                                    foreach ($autocheck->getMessages2() as $message) {
                                         $type_class = "black-message";
                                         if ($message['type'] == "neutral") $type_class = "black-message";
                                         else if ($message['type'] == "success") $type_class = "green-message";

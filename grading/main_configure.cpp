@@ -119,8 +119,8 @@ int main(int argc, char *argv[]) {
     nlohmann::json conditional_message = config_json.value("conditional_message",nlohmann::json::object());
     nlohmann::json cond;
     cond["message"] = conditional_message.value("message","");
-    cond["days_before"] = conditional_message.value("days_before",0);
-    cond["points_required"] = conditional_message.value("points_required",0);
+    cond["minimum_days_early"] = conditional_message.value("minimum_days_early",0);
+    cond["minimum_points"] = conditional_message.value("minimum_points",0);
     j["conditional_message"] = cond; 
   }
   j["max_submissions"] = max_submissions;

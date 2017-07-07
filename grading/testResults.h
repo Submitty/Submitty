@@ -73,27 +73,27 @@ public:
     int length = strlen(messages);
     std::vector<std::pair<std::string, std::string> > answer;
     std::string msg = "";
-    std::string color = "";
+    std::string type = "";
     for (int i = 0; i < length; i++) {
       if (messages[i] == '\n') {
-        if (msg != "" && color != "") {
-          answer.push_back(std::make_pair(msg,color));
+        if (msg != "" && type != "") {
+          answer.push_back(std::make_pair(msg,type));
           msg = "";
-          color = "";
-        } else if (color == "") {
+          type = "";
+        } else if (type == "") {
           i++;
-          color.push_back(messages[i]);
+          type.push_back(messages[i]);
         }
-      } else if (color == "") {
+      } else if (type== "") {
         msg.push_back(messages[i]);
       } else {
-        color.push_back(messages[i]);
+        type.push_back(messages[i]);
       }
     }
-    if (msg != "" && color != "") {
-      answer.push_back(std::make_pair(msg,color));
+    if (msg != "" && type != "") {
+      answer.push_back(std::make_pair(msg,type));
       msg = "";
-      color = "";
+      type = "";
     }
     return answer;
   }

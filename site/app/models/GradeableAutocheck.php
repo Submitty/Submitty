@@ -14,7 +14,7 @@ use app\libraries\Utils;
  *
  * @method DiffViewer getDiffViewer()
  * @method string getDescription()
- * @method String[] getMessages()
+ * @method String[][] getMessages()
  */
 class GradeableAutocheck extends AbstractModel {
     
@@ -27,10 +27,8 @@ class GradeableAutocheck extends AbstractModel {
     /** @var string Description to show for displaying the diff */
     protected $description = "";
     
-    /** @var String[] Message to show underneath the description for a diff */
-    protected $messages = array();
     /** @var String[][] Message to show underneath the description for a diff */
-    protected $messages2 = array();
+    protected $messages = array();
     
     /**
      * GradeableAutocheck constructor.
@@ -51,12 +49,8 @@ class GradeableAutocheck extends AbstractModel {
         
         if (isset($details['messages'])) {
             foreach ($details['messages'] as $message) {
-                if (isset($message['message']) && isset($message['type']))
-                    $this->messages2[] = array(
-                        'message' => Utils::prepareHtmlString($message['message']),
-                        'type' => Utils::prepareHtmlString($message['type']));
-                else
-                    $this->messages[] = Utils::prepareHtmlString($message);
+                $this->messages[] = array('message' => Utils::prepareHtmlString($message['message']),
+                                            'type' => Utils::prepareHtmlString($message['type']));
             }
         }
         

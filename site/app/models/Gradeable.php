@@ -163,10 +163,10 @@ class Gradeable extends AbstractModel {
 
     /** @property @var string Message to show when conditions are met */
     protected $conditional_message = "";
-    /** @property @var int Days before deadline that a submission must be made by to get the conditional message */
-    protected $days_before = 0;
-    /** @property @var int Points required that a submission must have to get the conditional message */
-    protected $points_required = 0;
+    /** @property @var int Minimum days before deadline that a submission must be made by to get the conditional message */
+    protected $minimum_days_early = 0;
+    /** @property @var int Minimum points that a submission must have to get the conditional message */
+    protected $minimum_points = 0;
 
     /** @property @var string[] */
     protected $part_names = array();
@@ -405,8 +405,8 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['conditional_message'])) {
             $this->conditional_message = Utils::prepareHtmlString($details['conditional_message']['message']);
-            $this->days_before = intval($details['conditional_message']['days_before']);
-            $this->points_required = intval($details['conditional_message']['points_required']);
+            $this->minimum_days_early = intval($details['conditional_message']['minimum_days_early']);
+            $this->minimum_points = intval($details['conditional_message']['minimum_points']);
         }
 
         $num_parts = 1;
@@ -794,7 +794,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function hasConditionalMessage() {
-        return trim($this->message) !== "";
+        return trim($this->conditional_message) !== "";
     }
 
     public function useSvnCheckout() {
