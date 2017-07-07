@@ -166,12 +166,10 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
     }
 
 
-    std::vector<std::string> messages = result.getMessages();
-    std::vector<std::pair<std::string, std::string> > messages2 = result.getMessages2();
+    std::vector<std::pair<std::string, std::string> > messages = result.getMessages();
 
     if (BROKEN_CONFIG_ERROR_MESSAGE != "") {
-      messages.push_back(BROKEN_CONFIG_ERROR_MESSAGE);
-      messages2.push_back(std::make_pair(BROKEN_CONFIG_ERROR_MESSAGE, "failure"));
+      messages.push_back(std::make_pair(BROKEN_CONFIG_ERROR_MESSAGE, "failure"));
     }
 
     std::string fm = tcg.value("failure_message","");
@@ -180,27 +178,20 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       bool failure_message_already_added = false;
       if (FN==0) {
         for (int m = 0; m < messages.size(); m++) {
-          if (messages[m] != "") {
-            if (messages[m] == fm) failure_message_already_added = true;
-            autocheck_j["messages"].push_back(messages[m]);
-          }
-        }
-        messages2.push_back(std::make_pair("NEUTRAL TEST SUP", "neutral"));
-        messages2.push_back(std::make_pair("FAILURE TEST SUP", "failure"));
-        messages2.push_back(std::make_pair("SUCCESS TEST SUP", "success"));
-        messages2.push_back(std::make_pair("WARNING TEST SUP", "warning"));
-        for (int m = 0; m < messages2.size(); m++) {
-          // if (messages2[m] != null) {
+          if (std::get<0>(messages[m]) != "") {
             nlohmann::json new_message;
-            new_message["message"] = std::get<0>(messages2[m]);
-            new_message["type"] = std::get<1>(messages2[m]);
+            new_message["message"] = std::get<0>(messages[m]);
+            new_message["type"] = std::get<1>(messages[m]);
             autocheck_j["messages"].push_back(new_message);
-          // }
+          }
         }
       }
 
       if (fm != "" && !failure_message_already_added) {
-        autocheck_j["messages"].push_back(fm);
+        nlohmann::json new_message;
+        new_message["message"] = fm;
+        new_message["type"] = "failure";
+        autocheck_j["messages"].push_back(new_message);
       }
     }
 
@@ -216,7 +207,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
 
-      if (my_testcase.isFileCheck() && num_messages > 0 && messages[0].find("README") != std::string::npos)
+      if (my_testcase.isFileCheck() && num_messages > 0 && std::get<0>(messages[0]).find("README") != std::string::npos)
         testcase_message = "README missing.";
       else if (my_testcase.isCompilation() && num_messages > 0) {
         if (result.hasCompilationError())

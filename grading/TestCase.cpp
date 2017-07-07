@@ -143,21 +143,21 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 
 
 bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, 
-                      std::vector<std::string> &messages) {
+                      std::vector<std::pair<std::string, std::string> > &messages) {
 
   std::string filename = j.value("expected_file","");
   if (filename == "") {
-    messages.push_back("ERROR!  EXPECTED FILENAME MISSING");
+    messages.push_back(std::make_pair("ERROR!  EXPECTED FILENAME MISSING","failure"));
     return false;
   }
   if (!getFileContents(filename,expected_file_contents)) {
-    messages.push_back("ERROR!  Could not open expected file: '" + filename);
+    messages.push_back(std::make_pair("ERROR!  Could not open expected file: '" + filename,"failure"));
     return false;
   }
   if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
-    messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader (" +
-                       std::to_string(expected_file_contents.size()) + " vs. " +
-                       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
+    messages.push_back(std::make_pair("ERROR!  Expected file '" + filename + "' too large for grader (" +
+                                       std::to_string(expected_file_contents.size()) + " vs. " +
+                                       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")","failure"));
     return false;
   }
   return true;
@@ -166,19 +166,19 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
 
 TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
   std::string student_file_contents;
-  std::vector<std::string> error_messages;
+  std::vector<std::pair<std::string, std::string> > error_messages;
   if (!openStudentFile(tc,j,student_file_contents,error_messages)) {
     return new TestResults(0.0,error_messages);
   }
   if (student_file_contents.size() == 0) {
-    return new TestResults(0.0,{"ERROR!  FILE EMPTY"});
+    return new TestResults(0.0,{std::make_pair("ERROR!  FILE EMPTY","failure")});
   }
   try {
     int value = std::stoi(student_file_contents);
     std::cout << "DONE STOI " << value << std::endl;
     nlohmann::json::const_iterator itr = j.find("term");
     if (itr == j.end() || !itr->is_number()) {
-      return new TestResults(0.0,{"ERROR!  integer \"term\" not specified"});
+      return new TestResults(0.0,{std::make_pair("ERROR!  integer \"term\" not specified","failure")});
     }
     int term = (*itr);
     std::string cmpstr = j.value("comparison","MISSING COMPARISON");
@@ -190,16 +190,16 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
     else if (cmpstr == "ge") success = (value >= term);
     else if (cmpstr == "le") success = (value <= term);
     else {
-      return new TestResults(0.0, {"ERROR! UNKNOWN COMPARISON "+cmpstr});
+      return new TestResults(0.0, {std::make_pair("ERROR! UNKNOWN COMPARISON "+cmpstr,"failure")});
     }
     if (success)
       return new TestResults(1.0);
     std::string description = j.value("description","MISSING DESCRIPTION");
     std::string failure_message = j.value("failure_message",
                                           "ERROR! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term));
-    return new TestResults(0.0,{failure_message});
+    return new TestResults(0.0,{std::make_pair(failure_message,"failure")});
   } catch (...) {
-    return new TestResults(0.0,{"int comparison do it error stoi"});
+    return new TestResults(0.0,{std::make_pair("int comparison do it error stoi","failure")});
   }
 }
 
