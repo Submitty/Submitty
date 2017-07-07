@@ -5,7 +5,7 @@
                 {
                     "description": "part1/README.txt",
                     "messages": [
-                        "ERROR: required files not found:  test01_part1__README.txt"
+                        "ERROR: required files not found:  part1/README.txt"
                     ]
                 }
             ],

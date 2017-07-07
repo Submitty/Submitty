@@ -3,7 +3,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test01_words_249.pdf",
+                    "actual_file": "words_249.pdf",
                     "description": "*.pdf"
                 }
             ],
