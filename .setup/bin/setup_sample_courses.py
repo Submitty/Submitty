@@ -31,7 +31,7 @@ import uuid
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
 
-from sqlalchemy import create_engine, Table, MetaData
+from sqlalchemy import create_engine, Table, MetaData, bindparam
 import yaml
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -116,16 +116,44 @@ def main():
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
-    list_of_courses_file="/usr/local/submitty/site/app/views/current_courses.php"
+    submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
+    submitty_conn = submitty_engine.connect()
+    submitty_metadata = MetaData(bind=submitty_engine)
+    user_table = Table('users', submitty_metadata, autoload=True)
+    for user_id, user in users.items():
+        submitty_conn.execute(user_table.insert(),
+                              user_id=user.id,
+                              user_password=get_php_db_password(user.password),
+                              user_firstname=user.firstname,
+                              user_preferred_firstname=user.preferred_firstname,
+                              user_lastname=user.lastname,
+                              user_email=user.email,
+                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S"))
+
+    for user in extra_students:
+        submitty_conn.execute(user_table.insert(),
+                              user_id=user.id,
+                              user_password=get_php_db_password(user.password),
+                              user_firstname=user.firstname,
+                              user_preferred_firstname=user.preferred_firstname,
+                              user_lastname=user.lastname,
+                              user_email=user.email,
+                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S"))
+    submitty_conn.close()
+
+    today = datetime.today()
+    semester = 'Fall'
+    if today.month < 7:
+        semester = 'Spring'
+
+    list_of_courses_file = "/usr/local/submitty/site/app/views/current_courses.php"
     with open(list_of_courses_file, "w") as courses_file:
-        print("", file=courses_file)
+        courses_file.write("")
+        for course_id in courses.keys():
+            courses_file.write('<a href="http://192.168.56.101/index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
+            courses_file.write('<br />')
 
     for course_id in courses.keys():
-
-        with open(list_of_courses_file, "a") as courses_file:
-            print('<a href="http://192.168.56.101/index.php?semester=f17&course='+course_id+'">'+course_id+', Fall 2017</a>',file=courses_file)
-            print("<br>", file=courses_file)
-
         course = courses[course_id]
         students = random.sample(extra_students, course.registered_students + course.no_registration_students +
                                  course.no_rotating_students + course.unregistered_students)
@@ -158,6 +186,8 @@ def main():
         courses[course].instructor = users[courses[course].instructor]
         courses[course].check_rotating(users)
         courses[course].create()
+        if courses[course].make_customization:
+            courses[course].make_course_json()
 
     os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
     os.system("rm /tmp/hwcron_cron_backup.txt")
@@ -489,7 +519,7 @@ class User(object):
         if 'rotating_section' in user:
             self.rotating_section = int(user['rotating_section'])
         if 'grading_registration_section' in user:
-            self.grading_registration_section = int(user['grading_registration_section'])
+            self.grading_registration_section = user['grading_registration_section']
         if 'unix_groups' in user:
             self.unix_groups = user['unix_groups']
         if 'manual_registration' in user:
@@ -567,12 +597,14 @@ class Course(object):
         instructor
         gradeables
         users
+        max_random_submissions
     """
     def __init__(self, course):
         self.semester = get_current_semester()
         self.code = course['code']
         self.instructor = course['instructor']
         self.gradeables = []
+        self.make_customization = False
         ids = []
         for gradeable in course['gradeables']:
             self.gradeables.append(Gradeable(gradeable))
@@ -597,6 +629,8 @@ class Course(object):
             self.no_rotating_students = course['no_rotating_students']
         if 'unregistered_students' in course:
             self.unregistered_students = course['unregistered_students']
+        if 'make_customization' in course:
+            self.make_customization = course['make_customization']
 
     def create(self):
 
@@ -621,10 +655,17 @@ class Course(object):
         database = "submitty_" + self.semester + "_" + self.code
         os.system('psql -d postgres -h {} -U hsdbu -c "CREATE DATABASE {}"'.format(DB_HOST,
                                                                                    database))
-        os.system("psql -d {} -h {} -U {} -f {}/site/data/tables.sql"
+        os.system("psql -d {} -h {} -U {} -f {}/site/data/course_tables.sql"
                   .format(database, DB_HOST, DB_USER, SUBMITTY_REPOSITORY))
 
         print("Database created, now populating ", end="")
+        submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
+        submitty_conn = submitty_engine.connect()
+        submitty_metadata = MetaData(bind=submitty_engine)
+
+        courses_table = Table('courses', submitty_metadata, autoload=True)
+        submitty_conn.execute(courses_table.insert(), semester=self.semester, course=self.code)
+
         engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                                  database))
         conn = engine.connect()
@@ -645,6 +686,7 @@ class Course(object):
             conn.execute(table.insert(), sections_rotating_id=section)
 
         print("Create users ", end="")
+        submitty_users = Table("courses_users", submitty_metadata, autoload=True)
         users_table = Table("users", metadata, autoload=True)
         reg_table = Table("grading_registration", metadata, autoload=True)
         print("(tables loaded)...")
@@ -658,22 +700,31 @@ class Course(object):
             rot_section = user.get_detail(self.code, "rotating_section")
             if rot_section is not None and rot_section > self.rotating_sections:
                 rot_section = None
-            conn.execute(users_table.insert(), user_id=user.get_detail(self.code, "id"),
-                         user_password=get_php_db_password(user.get_detail(self.code, "password")),
-                         user_firstname=user.get_detail(self.code, "firstname"),
-                         user_preferred_firstname=user.get_detail(self.code, "preferred_firstname"),
-                         user_lastname=user.get_detail(self.code, "lastname"),
-                         user_email=user.get_detail(self.code, "email"),
-                         user_group=user.get_detail(self.code, "group"),
-                         registration_section=reg_section,
-                         rotating_section=rot_section,
-                         manual_registration=user.get_detail(self.code, "manual"))
+            # We already have a row in submitty.users for this user,
+            # just need to add a row in courses_users which will put a
+            # a row in the course specific DB, and off we go.
+            submitty_conn.execute(submitty_users.insert(),
+                                  semester=self.semester,
+                                  course=self.code,
+                                  user_id=user.get_detail(self.code, "id"),
+                                  user_group=user.get_detail(self.code, "group"),
+                                  registration_section=reg_section,
+                                  manual_registration=user.get_detail(self.code, "manual"))
+            update = users_table.update(values={
+                users_table.c.rotating_section: bindparam('rotating_section')
+            }).where(users_table.c.user_id == bindparam('b_user_id'))
 
+            conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
             if user.get_detail(self.code, "grading_registration_section") is not None:
-                conn.execute(reg_table.insert(),
-                             user_id=user.get_detail(self.code, "id"),
-                             sections_registration_id=
-                             user.get_detail(self.code, "grading_registration_section"))
+                try:
+                    grading_registration_sections = str(user.get_detail(self.code,"grading_registration_section"))
+                    grading_registration_sections = [int(x) for x in grading_registration_sections.split(",")]
+                except ValueError:
+                    grading_registration_sections = []
+                for grading_registration_section in grading_registration_sections:
+                    conn.execute(reg_table.insert(),
+                                 user_id=user.get_detail(self.code, "id"),
+                                 sections_registration_id=grading_registration_section)
 
             if user.unix_groups is None:
                 if user.get_detail(self.code, "group") <= 1:
@@ -723,19 +774,24 @@ class Course(object):
                 os.makedirs(gradeable_path)
                 os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
 
+            submission_count = 0
+            max_submissions = gradeable.max_random_submissions
             for user in self.users:
                 submitted = False
-                active = 1
+                graded = 1
                 submission_path = os.path.join(gradeable_path, user.id)
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
                     if gradeable.gradeable_config is None or \
                             (gradeable.submission_due_date < NOW and random.random() < 0.5) or \
                             (random.random() < 0.3):
-                        active = -1
+                        graded = -1
+                    elif max_submissions is not None and submission_count >= max_submissions:
+                        graded = -1
                     else:
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
+                        submission_count += 1
                         current_time = (gradeable.submission_due_date - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time)
@@ -771,16 +827,21 @@ class Course(object):
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
                                                              gd_overall_comment="lorem ipsum lodar",
-                                                             gd_status=status, gd_late_days_used=0,
-                                                             gd_active_version=active, gd_grader_id=self.instructor.id)
+                                                             gd_graded_version=graded, gd_grader_id=self.instructor.id)
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
-                        for component in gradeable.components:
-                            score = 0 if status == 0 else (random.randint(0, component.max_value * 2) / 2)
-                            grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S")
-                            conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
-                                         gcd_score=score, gcd_component_comment="lorem ipsum",
-                                         gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time)
+                        if gradeable.type !=0 or gradeable.use_ta_grading:
+                            for component in gradeable.components:
+                                if status == 0:
+                                    score = 0
+                                elif component.max_value > 0:
+                                    score = random.randint(0, component.max_value * 2) / 2
+                                else:
+                                    score = random.randint(component.max_value * 2, 0) / 2
+                                grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S")
+                                conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
+                                             gcd_score=score, gcd_component_comment="lorem ipsum",
+                                             gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time)
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
@@ -800,6 +861,7 @@ class Course(object):
                                    "is_team": False,
                                    "team": ""}, open_file)
         conn.close()
+        submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
 
     def check_rotating(self, users):
@@ -810,6 +872,156 @@ class Course(object):
                 if grading_rotating['user_id'] not in users:
                     raise ValueError(string)
 
+    def make_course_json(self):
+        """
+        This function generates customization_sample.json in case it has changed from the provided version in the test suite
+        within the Submitty repository. Ideally this function will be pulled out and made independent, or better yet when
+        the code for the web interface is done, that will become the preferred route and this function can be retired.
+
+        Keeping this function after the web interface would mean we have another place where we need to update code anytime
+        the expected format of customization.json changes.
+
+        Right now the code uses the Gradeable and Component classes, so to avoid code duplication the function lives inside
+        setup_sample_courses.py
+
+        :return:
+        """
+
+        course_id = self.code
+
+        # Reseed to minimize the situations under which customization.json changes
+        m = hashlib.md5()
+        m.update(course_id)
+        random.seed(int(m.hexdigest(), 16))
+
+        customization_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup")
+        print("Generating customization_{}.json".format(course_id))
+
+        gradeables = {}
+        gradeables_json_output = {}
+
+        # Create gradeables by syllabus bucket
+        for gradeable in self.gradeables:
+            if gradeable.syllabus_bucket not in gradeables:
+                gradeables[gradeable.syllabus_bucket] = []
+            gradeables[gradeable.syllabus_bucket].append(gradeable)
+
+        # Randomly generate the impact of each bucket on the overall grade
+        gradeables_percentages = []
+        gradeable_percentage_left = 100 - len(gradeables)
+        for i in range(len(gradeables)):
+            gradeables_percentages.append(random.randint(1, gradeable_percentage_left) + 1)
+            gradeable_percentage_left -= (gradeables_percentages[-1] - 1)
+        if gradeable_percentage_left > 0:
+            gradeables_percentages[-1] += gradeable_percentage_left
+
+        # Compute totals and write out each syllabus bucket in the "gradeables" field of customization.json
+        bucket_no = 0
+
+        for bucket,g_list in gradeables.items():
+            bucket_json = {"type": bucket, "count": len(g_list), "percent": 0.01*gradeables_percentages[bucket_no],
+                           "ids" : []}
+
+            # Manually total up the non-penalty non-extra-credit max scores, and decide which gradeables are 'released'
+            for gradeable in g_list:
+                use_ta_grading = gradeable.use_ta_grading
+                g_type = gradeable.type
+                components = gradeable.components
+                g_id = gradeable.id
+                max_auto = 0
+                max_ta = 0
+
+                print_grades = True if g_type != 0 or (gradeable.submission_open_date < NOW) else False
+                release_grades = (gradeable.grade_released_date < NOW)
+
+                # Another spot where if INSTALL_SUBMITTY_HELPER.sh is used we could use fill-in paths
+                # gradeable_config_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses",
+                #                                    get_current_semester(), "sample", "config", "complete_config")
+
+                gradeable_config_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", get_current_semester(), "sample",
+                                                    "config", "complete_config")
+
+                # For electronic gradeables there is a config file - read through to get the total
+                if os.path.isdir(gradeable_config_dir):
+                    gradeable_config = os.path.join(gradeable_config_dir, "complete_config_" + g_id + ".json")
+                    if os.path.isfile(gradeable_config):
+                        try:
+                            with open(gradeable_config, 'r') as gradeable_config_file:
+                                gradeable_json = json.load(gradeable_config_file)
+
+                                # Not every config has AUTO_POINTS, so have to parse through test cases
+                                # Add points to max if not extra credit, and points>0 (not penalty)
+                                if "testcases" in gradeable_json:
+                                    for test_case in gradeable_json["testcases"]:
+                                        if "extra_credit" in test_case:
+                                            continue
+                                        if "points" in test_case and test_case["points"] > 0:
+                                            max_auto += test_case["points"]
+                        except EnvironmentError:
+                            print("Failed to load JSON")
+
+                # For non-electronic gradeables, or electronic gradeables with TA grading, read through components
+                if use_ta_grading or g_type != 0:
+                    for component in components:
+                        if component.is_extra_credit:
+                            continue
+                        if component.max_value >0:
+                            max_ta += component.max_value
+
+                # Add the specific associative array for this gradeable in customization.json to the output string
+                max_points = max_auto + max_ta
+                if print_grades:
+                    bucket_json["ids"].append({"id": g_id, "max": max_points})
+                    if not release_grades:
+                        bucket_json["ids"][-1]["released"] = False
+
+            # Close the bucket's array in customization.json
+            if "gradeables" not in gradeables_json_output:
+                gradeables_json_output["gradeables"] = []
+            gradeables_json_output["gradeables"].append(bucket_json)
+            bucket_no += 1
+
+        # Generate the section labels
+        section_ta_mapping = {}
+        for section in range(1, self.registration_sections + 1):
+            section_ta_mapping[section] = []
+        for user in self.users:
+            if user.get_detail(course_id, "grading_registration_section") is not None:
+                grading_registration_sections = str(user.get_detail(course_id, "grading_registration_section"))
+                grading_registration_sections = [int(x) for x in grading_registration_sections.split(",")]
+                for section in grading_registration_sections:
+                    section_ta_mapping[section].append(user.id)
+
+        for section in section_ta_mapping:
+            if len(section_ta_mapping[section]) == 0:
+                section_ta_mapping[section] = "TBA"
+            else:
+                section_ta_mapping[section] = ", ".join(section_ta_mapping[section])
+
+        # Construct the rest of the JSON dictionary
+        benchmarks = ["a-", "b-", "c-", "d"]
+        gradeables_json_output["display"] = ["instructor_notes", "grade_summary", "grade_details"]
+        gradeables_json_output["display_benchmark"] = ["average", "stddev", "perfect"]
+        gradeables_json_output["benchmark_percent"] = {}
+        for i in range(len(benchmarks)):
+            gradeables_json_output["display_benchmark"].append("lowest_" + benchmarks[i])
+            gradeables_json_output["benchmark_percent"]["lowest_" + benchmarks[i]] = 0.9 - (0.1 * i)
+
+        gradeables_json_output["section"] = section_ta_mapping
+        messages = ["<b>{} Course</b>".format(course_id),
+                    "Note: Please be patient with data entry/grade corrections for the most recent " 
+                    "lab, homework, and test.",
+                    "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week."]
+        gradeables_json_output["messages"] = messages
+
+        # Attempt to write the customization.json file
+        try:
+            json.dump(gradeables_json_output,
+                      open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'w'),indent=2)
+        except EnvironmentError as e:
+            print("Failed to write to customization file: {}".format(e))
+
+        print("Wrote customization_{}.json".format(course_id))
 
 class Gradeable(object):
     """
@@ -837,6 +1049,7 @@ class Gradeable(object):
         self.min_grading_group = 3
         self.grading_rotating = []
         self.submissions = []
+        self.max_random_submissions = None
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -846,6 +1059,9 @@ class Gradeable(object):
                 self.id = gradeable['g_id']
             else:
                 self.id = gradeable['gradeable_config']
+
+            if 'eg_max_random_submissions' in gradeable:
+                self.max_random_submissions = int(gradeable['eg_max_random_submissions'])
 
             if 'config_path' in gradeable:
                 self.config_path = gradeable['config_path']
@@ -875,6 +1091,9 @@ class Gradeable(object):
             self.type = int(gradeable['g_type'])
             self.config_path = None
             self.sample_path = None
+
+        if 'g_bucket' in gradeable:
+            self.syllabus_bucket = gradeable['g_bucket']
 
         assert 0 <= self.type <= 2
 

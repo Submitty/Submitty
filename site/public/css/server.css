@@ -700,6 +700,13 @@ table .instructor .two-options{
     float: right;
 }
 
+.btn-nav {
+    width:100%;
+    padding: 0px; 
+    padding-top: 10px; 
+    padding-bottom: 10px;
+}
+
 .rainbow {
     background: -moz-linear-gradient( left ,
     rgba(255, 0, 0, 1) 0%,

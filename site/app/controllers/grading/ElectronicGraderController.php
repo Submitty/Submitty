@@ -145,11 +145,9 @@ class ElectronicGraderController extends AbstractController {
         $submit_data['g_id'] = $gradeable_id;
         $submit_data['u_id'] = $who_id;
         $submit_data['gd_id'] = $regrade ? $gradeable->getGdId() : null;
-        $submit_data['status'] = $regrade ? $gradeable->getStatus() : 1;
         $submit_data['grader_id'] = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getGrader()->getId();
-        $submit_data['late_charged'] = intval($_POST['late']);
         $submit_data['comment'] = $_POST['comment-general'];
-        $submit_data['active_version'] = $gradeable->getActiveVersion();
+        $submit_data['graded_version'] = $_POST['graded_version'];
         $submit_data['time'] = $now->format("Y-m-d H:i:s");
         
         $submit_data['components'] = array();

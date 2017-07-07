@@ -104,7 +104,7 @@ date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
-$core->loadDatabase();
+$core->loadDatabases();
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
@@ -117,7 +117,7 @@ if($core->getConfig()->isDebug()) {
 // Check if we have a saved cookie with a session id and then that there exists a session with that id
 // If there is no session, then we delete the cookie
 $logged_in = false;
-$cookie_key = $semester."_".$course."_session_id";
+$cookie_key = 'submitty_session_id';
 if (isset($_COOKIE[$cookie_key])) {
     $cookie = json_decode($_COOKIE[$cookie_key], true);
     $logged_in = $core->getSession($cookie['session_id']);
@@ -156,7 +156,15 @@ if (!$logged_in) {
         $_REQUEST['page'] = 'login';
     }
 }
+elseif ($core->getUser() === null) {
+    $core->loadSubmittyUser();
+    if ($_REQUEST['component'] !== 'authentication') {
+        $_REQUEST['component'] = 'navigation';
+        $_REQUEST['page'] = 'no_access';
+    }
+}
 
+// Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
     $log = false;
     $action = "";
