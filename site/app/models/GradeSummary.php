@@ -72,13 +72,13 @@ class GradeSummary extends AbstractModel {
         $gradedVersion = $gradeable->getGradedVersion();
         $activeVersion = $gradeable->getActiveVersion();
         if(!isset($gradedVersion) || $gradedVersion == "" || $gradedVersion == null) {
-            $this_g['NOTE'] = "SCORE BASED ON CURRENT ACTIVE VERSION";            
+            $this_g['note'] = "SCORE BASED ON CURRENT ACTIVE VERSION";            
         }
         else if($gradedVersion !== $activeVersion){
             // should probably write a new query instead of this
             $gradeable->loadResultDetails();
             $autograding_score = $gradeable->getVersions()[$gradedVersion]->getNonHiddenTotal() + $gradeable->getVersions()[$gradedVersion]->getHiddenTotal();
-            $this_g['NOTE'] = "GRADED VERSION DOES NOT MATCH ACTIVE VERSION";
+            $this_g['note'] = "GRADED VERSION DOES NOT MATCH ACTIVE VERSION";
         }
                 
         

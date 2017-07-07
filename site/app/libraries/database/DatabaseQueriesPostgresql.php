@@ -1291,7 +1291,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
         if ($details['gd_id'] === null) {
             $params = array($details['g_id'], $details['u_id'], $details['grader_id'], $details['comment'], $details['graded_version']);
             $this->course_db->query("INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_graded_version, gd_user_viewed_date ) VALUES(?,?,?,?,?,NULL)", $params);
-            $details['gd_id'] = $this->database->getLastInsertId('gradeable_data_gd_id_seq');
+            $details['gd_id'] = $this->course_db->getLastInsertId('gradeable_data_gd_id_seq');
 
             foreach($details['components'] as $gc_id => $data) {
                 $params = array($details['gd_id'], $gc_id, $data['grade'], $data['comment'], $details['grader_id'], $details['time']);
