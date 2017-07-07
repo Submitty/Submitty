@@ -874,9 +874,9 @@ VALUES (?, ?, ?, ?)", $params);
 
     public function updateGradeableData(Gradeable $gradeable) {
         $params = array($gradeable->getGrader()->getId(), $gradeable->getOverallComment(),
-                        $gradeable->getGradedVersion(), $gradeable->getId());
+                        $gradeable->getGradedVersion(), $gradeable->getGdId());
 
-        $this->course_db->query("UPDATE gradeable_data SET gd_grader_id=?, gd_overall_comment=?, gd_graded_version=? WHERE gd_id=?", array($params));
+        $this->course_db->query("UPDATE gradeable_data SET gd_grader_id=?, gd_overall_comment=?, gd_graded_version=? WHERE gd_id=?", $params);
     }
 
     public function insertGradeableComponentData($gd_id, GradeableComponent $component) {
