@@ -121,7 +121,7 @@ if ($DEBUG && isset($_GET['useUser'])) {
     $suggested_username = $_GET['userUser'];
 }
 else {
-    $key = $_GET['semester'].'_'.$_GET['course'].'_session_id';
+    $key = 'submitty_session_id';
     if (isset($_COOKIE[$key])) {
         $cookie = json_decode($_COOKIE[$key], true);
         $db->query("SELECT * FROM sessions WHERE session_id=?", array($cookie['session_id']));

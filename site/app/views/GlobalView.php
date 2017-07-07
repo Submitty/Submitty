@@ -159,9 +159,9 @@ HTML;
         if ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) {
             $return .= <<<HTML
 <div id='page-info'>
-    Total Queries: {$this->core->getDatabase()->totalQueries()}<br />
+    Total Queries: {$this->core->getCourseDB()->totalQueries()}<br />
     Runtime: {$runtime}<br />
-    Queries: <br /> {$this->core->getDatabase()->getQueries()}
+    Queries: <br /> {$this->core->getCourseDB()->getQueries()}
 </div>
 HTML;
         }

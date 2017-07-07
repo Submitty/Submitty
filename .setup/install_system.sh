@@ -520,6 +520,9 @@ sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
 apache2ctl -t
 
+PGPASSWORD=hsdbu psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/submitty_db.sql
+
 if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much
     echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini

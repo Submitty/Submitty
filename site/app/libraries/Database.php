@@ -21,6 +21,8 @@ class Database {
      */
     private $results = array();
 
+    private $row_count = 0;
+
     /**
      * @var int
      */
@@ -95,6 +97,14 @@ class Database {
             $statement = $this->link->prepare($query);
             $statement->execute($parameters);
             $this->results = $statement->fetchAll();
+            $lower = strtolower($query);
+            if (Utils::startsWith($lower, "update") || Utils::startsWith($lower, "delete")
+                || Utils::startsWith($lower, "insert")) {
+                $this->row_count = $statement->rowCount();
+            }
+            else {
+                $this->row_count = count($this->results);
+            }
             $this->query_count++;
             $this->all_queries[] = array($query, $parameters);
         }
@@ -159,6 +169,19 @@ class Database {
         else {
             return array();
         }
+    }
+
+    /**
+     * If the last query was a SELECT, returns the number of rows returned else if
+     * it's a UPDATE, DELETE, or INSERT, we use PDOStatement::rowCount to get the
+     * number of affected rows.
+     *
+     * @link http://php.net/manual/en/pdostatement.rowcount.php
+     *
+     * @return int
+     */
+    public function rowCount() {
+        return $this->row_count;
     }
 
     /**
