@@ -1,14 +1,9 @@
 {
+    "autograding" : {
+        "submission_to_runner" : [ "*.cpp" ]
+    },
     "testcases" : 
     [
-        // *************** README *****************
-        {
-            "type" : "FileCheck",
-            "title" : "copy the cpp files..",
-            "actual_file" : "*.cpp",
-            "points" : 0
-        },
-
         // *************** COMPILATION *****************
         {
             "title" : "Reasonable Code Changes",

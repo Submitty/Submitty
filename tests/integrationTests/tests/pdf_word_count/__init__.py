@@ -47,6 +47,7 @@ def too_few(test):
     subprocess.call(["cp",os.path.join(SAMPLE_SUBMISSIONS, "words_249.pdf"),
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
+    subprocess.call(["rm","-f",os.path.join(test.testcase_path, "data", "test01_words_249.pdf")])
     test.run_run()
     test.run_validator()
     test.diff("grade.txt","too_few_grade.txt","-b")
@@ -62,6 +63,7 @@ def too_many(test):
     subprocess.call(["cp",os.path.join(SAMPLE_SUBMISSIONS, "words_1463.pdf"),
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
+    subprocess.call(["rm","-f",os.path.join(test.testcase_path, "data", "test01_words_1463.pdf")])
     test.run_run()
     test.run_validator()
     test.diff("grade.txt","too_many_grade.txt","-b")
@@ -77,6 +79,7 @@ def just_right(test):
     subprocess.call(["cp",os.path.join(SAMPLE_SUBMISSIONS, "words_881.pdf"),
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
+    subprocess.call(["rm","-f",os.path.join(test.testcase_path, "data", "test01_words_881.pdf")])
     test.run_run()
     test.run_validator()
     test.diff("grade.txt","just_right_grade.txt","-b")

@@ -117,14 +117,20 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       // MISSING EXECUTABLE
     } else {
       std::string actual_file = filenames[FN];
-      if (!my_testcase.isFileCheck()) {
-        actual_file = my_testcase.getPrefix() + "_" + actual_file;
-      }
+      //if (!my_testcase.isFileCheck()) {
+      //  actual_file = my_testcase.getPrefix() + "_" + actual_file;
+      //}
       //actual_file = replace_slash_with_double_underscore(actual_file);
       std::vector<std::string> files;
+
+      // try with and without the prefix
       wildcard_expansion(files, actual_file, std::cout);
+      if (files.size() == 0) {
+        wildcard_expansion(files, my_testcase.getPrefix() + "_" + actual_file, std::cout);
+      }
       for (int i = 0; i < files.size(); i++) {
         actual_file = files[i];
+        std::cout << "MATCH " << files[i] << std::endl;
       }
       bool studentFileExists, studentFileEmpty;
       bool expectedFileExists=false, expectedFileEmpty=false;

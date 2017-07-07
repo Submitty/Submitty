@@ -47,6 +47,7 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
     std::cout << "  file exists check: '" << filenames[f] << "' : ";
     std::vector<std::string> files;
     wildcard_expansion(files, filenames[f], std::cout);
+    wildcard_expansion(files, tc.getPrefix() + "_" + filenames[f], std::cout);
     bool found = false;
     // loop over the available files
     for (int i = 0; i < files.size(); i++) {

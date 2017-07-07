@@ -1,5 +1,4 @@
-Testcase  1: copy the cpp files..                                 0 /  0  
-Testcase  2: Reasonable Code Changes                              0 /  5  
-Testcase  3: Submission Limit                                             
+Testcase  1: Reasonable Code Changes                              0 /  5  
+Testcase  2: Submission Limit                                             
 Automatic grading total:                                          0 /  5
 Non-hidden automatic grading total:                               0 /  5

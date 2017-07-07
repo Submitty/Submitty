@@ -84,16 +84,19 @@ def copy_contents_into(source,target):
 
     
 
-def pattern_copy(patterns,source,target):
-    for pattern in patterns:
-        for file in glob.glob(os.path.join(source,pattern),recursive=True):
-            # grab the matched name
-            relpath=os.path.relpath(file,source)
-            # make the necessary directories leading to the file
-            os.makedirs(os.path.join(target,os.path.dirname(relpath)),exist_ok=True)
-            # copy the file
-            shutil.copy(file,os.path.join(target,relpath))
-            print ("COPY ",file," TO ",os.path.join(target,relpath))
+def pattern_copy(what,patterns,source,target,tmp_logs):
+    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        print (what," pattern copy ", patterns, " from ", source, " -> ", target, file=f)
+        for pattern in patterns:
+            for file in glob.glob(os.path.join(source,pattern),recursive=True):
+                # grab the matched name
+                relpath=os.path.relpath(file,source)
+                # make the necessary directories leading to the file
+                os.makedirs(os.path.join(target,os.path.dirname(relpath)),exist_ok=True)
+                # copy the file
+                shutil.copy(file,os.path.join(target,relpath))
+                print ("    COPY ",file,
+                       " -> ",os.path.join(target,relpath), file=f)
             
 # ==================================================================================
 # ==================================================================================
@@ -132,10 +135,6 @@ def main():
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
     tmp=tempfile.mkdtemp()
 
-    # grab the submission time
-    with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
-        submission_time=submission_time_file.read()
-
     # switch to tmp directory
     os.chdir(tmp)
 
@@ -143,9 +142,17 @@ def main():
     tmp_logs = os.path.join(tmp,"tmp_logs")
     os.makedirs(tmp_logs)
 
+    # grab the submission time
+    with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
+        submission_time=submission_time_file.read()
+
+    
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
 
+    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        print ("====================================\nCOMPILATION STARTS", file=f)
+    
     # copy submitted files to the tmp compilation directory
     tmp_compilation = os.path.join(tmp,"TMP_COMPILATION")
     os.mkdir(tmp_compilation)
@@ -169,13 +176,15 @@ def main():
 
     #copy_contents_into(submission_path,tmp_compilation)
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
-    pattern_copy(patterns_submission_to_compilation,submission_path,tmp_compilation)
+    pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
     copy_contents_into(test_code_path,tmp_compilation)
 
     # FIXME:  delete any submitted .out or .exe executable files
 
+    subprocess.call("ls -la "+tmp_compilation+" >> "+tmp_logs+"/overall.txt",shell=True) #+" >> "+tmp_logs+"/overall.txt")
+    
     # copy compile.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"compile.out"),os.path.join(tmp_compilation,"my_compile.out"))
 
@@ -225,6 +234,10 @@ def main():
 
     # --------------------------------------------------------------------
     # make the runner directory
+
+    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        print ("====================================\nRUNNER STARTS", file=f)
+        
     tmp_work=os.path.join(tmp,"TMP_WORK")
     os.makedirs(tmp_work)
     os.chdir(tmp_work)
@@ -233,14 +246,16 @@ def main():
     # Note: Must preserve the directory structure of compiled files (esp for Java)
 
     patterns_submission_to_runner = complete_config_obj["autograding"]["submission_to_runner"]
-    pattern_copy(patterns_submission_to_runner,submission_path,tmp_work)
+    pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work,tmp_logs)
 
     patterns_compilation_to_runner = complete_config_obj["autograding"]["compilation_to_runner"]
-    pattern_copy(patterns_compilation_to_runner,tmp_compilation,tmp_work)
+    pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
         
     # copy input files to tmp_work directory
     copy_contents_into(test_input_path,tmp_work)
 
+    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True) #+" >> "+tmp_logs+"/overall.txt")
+    
     # copy runner.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"run.out"),os.path.join(tmp_work,"my_runner.out"))
 
@@ -290,11 +305,14 @@ def main():
     # --------------------------------------------------------------------
     # RUN VALIDATOR
 
+    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        print ("====================================\nVALIDATION STARTS", file=f)
+
     # copy results files from compilation...
     patterns_submission_to_validation = complete_config_obj["autograding"]["submission_to_validation"]
-    pattern_copy(patterns_submission_to_validation,submission_path,tmp_work)
+    pattern_copy("submission_to_validation",patterns_submission_to_validation,submission_path,tmp_work,tmp_logs)
     patterns_compilation_to_validation = complete_config_obj["autograding"]["compilation_to_validation"]
-    pattern_copy(patterns_compilation_to_validation,tmp_compilation,tmp_work)
+    pattern_copy("compilation_to_validation",patterns_compilation_to_validation,tmp_compilation,tmp_work,tmp_logs)
     
     
     # remove the compilation directory
@@ -302,14 +320,9 @@ def main():
 
     # copy output files to tmp_work directory
     copy_contents_into(test_output_path,tmp_work)
-    #if os.path.isdir(test_output_path) :
-    #    for item in os.listdir(test_output_path):
-    #        #print ("copy output ", item)
-    #        if os.path.isdir(item):
-    #            shutil.copytree(os.path.join(test_output_path,item),tmp_work)
-    #        else:
-    #            shutil.copy(os.path.join(test_output_path,item),tmp_work)
 
+    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True) #+" >> "+tmp_logs+"/overall.txt")
+        
     # copy validator.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"validate.out"),os.path.join(tmp_work,"my_validator.out"))
 
@@ -357,6 +370,11 @@ def main():
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
 
+    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        print ("====================================\nARCHIVING STARTS", file=f)
+
+    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True) #+" >> "+tmp_logs+"/overall.txt")
+        
     os.chdir(bin_path)
 
     # save the old results path!
@@ -383,7 +401,7 @@ def main():
     os.makedirs(os.path.join(results_path,"details"))
 
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
-    pattern_copy(patterns_work_to_details,tmp_work,os.path.join(results_path,"details"))
+    pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(results_path,"details"),tmp_logs)
 
     # TEMPORARY ERROR CHECKING
     if os.path.isdir(os.path.join(results_path,"OLD")):
@@ -396,10 +414,16 @@ def main():
             print ("********************************************************** OOPS!  grade.txt does not match")
             touch (os.path.join(results_path,"MISMATCH_GRADE_TXT"))
 
+
+    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        f.write("finished")
+            
+            
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
     shutil.rmtree(tmp)
 
+    
 # ==================================================================================
 if __name__ == "__main__":
     main()

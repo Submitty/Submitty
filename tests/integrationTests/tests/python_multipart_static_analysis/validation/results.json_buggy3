@@ -21,7 +21,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_part2__p2_bug3.txt",
+                    "actual_file": "part2/p2_bug3.txt",
                     "description": "Program Output",
                     "difference_file": "test02_0_diff.json"
                 }
