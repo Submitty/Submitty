@@ -38,14 +38,11 @@ def get_submission_path(args):
     return obj
 
 
-def untrusted_execute():
-    print("foo")
-
-
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
         os.chmod(item,os.stat(item).st_mode | perms)
     # else, can't change permissions on this file/directory!
+
 
 def touch(file):
     with open(file,'a') as tmp:
@@ -83,7 +80,8 @@ def copy_contents_into(source,target):
                 shutil.copy(os.path.join(source,item),target)
 
     
-
+# copy files that match one of the patterns from the source directory
+# to the target directory.  
 def pattern_copy(what,patterns,source,target,tmp_logs):
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print (what," pattern copy ", patterns, " from ", source, " -> ", target, file=f)
@@ -129,7 +127,7 @@ def main():
 
     # grab a copy of the current results_history.json file (if it exists)
     global_results_history_file_location=os.path.join(results_path,"results_history.json")
-    #FIXME
+    # FIXME - HISTORY FILE NEEDS WORK
 
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
@@ -181,9 +179,7 @@ def main():
     # copy any instructor provided code files to tmp compilation directory
     copy_contents_into(test_code_path,tmp_compilation)
 
-    # FIXME:  delete any submitted .out or .exe executable files
-
-    subprocess.call("ls -la "+tmp_compilation+" >> "+tmp_logs+"/overall.txt",shell=True) #+" >> "+tmp_logs+"/overall.txt")
+    subprocess.call("ls -la "+tmp_compilation+" >> "+tmp_logs+"/overall.txt",shell=True)
     
     # copy compile.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"compile.out"),os.path.join(tmp_compilation,"my_compile.out"))
@@ -284,9 +280,7 @@ def main():
     else:
         print ("NEW RUNNER FAILURE")
 
-
-    #$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -exec /bin/chmod o+r {} \;   >>  results_log_runner.txt 2>&1
-
+    # give permissions to all created files to the hwcron user
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
                      args.which_untrusted,
                      "/usr/bin/find",
@@ -298,9 +292,6 @@ def main():
                      "o+r",
                      "{}",
                      ";"])
-
-    #print ("finishing runner")
-
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
@@ -314,19 +305,16 @@ def main():
     patterns_compilation_to_validation = complete_config_obj["autograding"]["compilation_to_validation"]
     pattern_copy("compilation_to_validation",patterns_compilation_to_validation,tmp_compilation,tmp_work,tmp_logs)
     
-    
     # remove the compilation directory
     shutil.rmtree(tmp_compilation)
 
     # copy output files to tmp_work directory
     copy_contents_into(test_output_path,tmp_work)
 
-    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True) #+" >> "+tmp_logs+"/overall.txt")
+    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True)
         
     # copy validator.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"validate.out"),os.path.join(tmp_work,"my_validator.out"))
-
-    #print ("going to change more permissions")
 
     # give the untrusted user read/write/execute permissions on the tmp directory & files
     add_permissions_recursive(tmp_work,
@@ -335,8 +323,6 @@ def main():
                               stat.S_IROTH)
 
     add_permissions(os.path.join(tmp_work,"my_validator.out"),stat.S_IROTH | stat.S_IXOTH)
-
-    #print ("going to run the validator")
 
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
@@ -354,6 +340,7 @@ def main():
     else:
         print ("NEW VALIDATOR FAILURE")
 
+    # give permissions to all created files to the hwcron user
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
                      args.which_untrusted,
                      "/usr/bin/find",
@@ -366,14 +353,13 @@ def main():
                      "{}",
                      ";"])
 
-
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print ("====================================\nARCHIVING STARTS", file=f)
 
-    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True) #+" >> "+tmp_logs+"/overall.txt")
+    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True)
         
     os.chdir(bin_path)
 
@@ -392,8 +378,6 @@ def main():
     if os.path.isdir(os.path.join(tmp,"OLD_RESULTS")):
         shutil.move(os.path.join(tmp,"OLD_RESULTS"),
                     os.path.join(results_path,"OLD"))
-
-
 
     shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
     shutil.copy(os.path.join(tmp_work,"results.json"),results_path)
@@ -427,5 +411,3 @@ def main():
 # ==================================================================================
 if __name__ == "__main__":
     main()
-
-
