@@ -64,7 +64,7 @@ bool ShowHelper(const std::string& when, bool success) {
 double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::json &autocheck_js, 
                       const std::string &hw_id, std::string &testcase_message) {
 
-  std::cerr << "autocheck #" << which_grader+1 << " / " << my_testcase.numFileGraders() << std::endl;
+  //std::cerr << "autocheck #" << which_grader+1 << " / " << my_testcase.numFileGraders() << std::endl;
 
   TestResultsFixedSize result = my_testcase.do_the_grading(which_grader);
 
@@ -116,12 +116,21 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
     if (my_testcase.isCompilation() && autocheck_j.value("description","") == "Create Executable") {
       // MISSING EXECUTABLE
     } else {
-      std::string actual_file = my_testcase.getPrefix() + "_" + filenames[FN];
-      actual_file = replace_slash_with_double_underscore(actual_file);
+      std::string actual_file = filenames[FN];
+      //if (!my_testcase.isFileCheck()) {
+      //  actual_file = my_testcase.getPrefix() + "_" + actual_file;
+      //}
+      //actual_file = replace_slash_with_double_underscore(actual_file);
       std::vector<std::string> files;
+
+      // try with and without the prefix
       wildcard_expansion(files, actual_file, std::cout);
+      if (files.size() == 0) {
+        wildcard_expansion(files, my_testcase.getPrefix() + "_" + actual_file, std::cout);
+      }
       for (int i = 0; i < files.size(); i++) {
         actual_file = files[i];
+        std::cout << "MATCH " << files[i] << std::endl;
       }
       bool studentFileExists, studentFileEmpty;
       bool expectedFileExists=false, expectedFileEmpty=false;
@@ -226,7 +235,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   sstr >> config_json;
   AddSubmissionLimitTestCase(config_json);
 
-  std::string grade_path = "results_grade.txt";
+  std::string grade_path = "grade.txt";
   std::ofstream gradefile(grade_path.c_str());
 
   int automated_points_awarded = 0;

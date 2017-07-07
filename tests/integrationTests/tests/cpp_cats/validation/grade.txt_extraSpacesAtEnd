@@ -1,0 +1,9 @@
+Testcase  1: README                          2 /  2
+Testcase  2: Compilation                     3 /  3
+Testcase  3: Regular char by char comparision  0 /  4
+Testcase  4: Test of by word comparison      4 /  4
+Testcase  5: Test of by line comparison      0 /  4
+Testcase  6: Test of by line without whitespace comparison  4 /  4
+Testcase  7: Submission Limit 
+Automatic grading total:                           13 / 21
+Non-hidden automatic grading total:                           13 / 21

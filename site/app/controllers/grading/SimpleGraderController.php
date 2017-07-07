@@ -127,6 +127,8 @@ class SimpleGraderController extends AbstractController  {
             }
         }
 
+        $gradeable->setGradedVersion(0);
+        $gradeable->setOverallComment("");
         $gradeable->saveData();
 
         $response = array('status' => 'success', 'data' => null);
@@ -198,8 +200,8 @@ class SimpleGraderController extends AbstractController  {
                     $user = $this->core->getQueries()->getUserById($username);
                     $gradeable->setUser($user);
                     $gradeable->setGrader($this->core->getUser());
-                    $gradeable->setStatus(1);
-                    $gradeable->setActiveVersion(1);
+                    $gradeable->setGradedVersion(1);
+                    $gradeable->setOverallComment("");
                     $gradeable->saveData();
                     $return_data[] = $temp_array;
                     $j = $arr_length; //stops the for loop early to not waste resources

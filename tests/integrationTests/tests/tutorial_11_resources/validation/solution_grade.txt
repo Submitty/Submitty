@@ -1,0 +1,5 @@
+Testcase  1: C++ - Compilation                                    5 /  5  
+Testcase  2: C++ - Execution                                      4 /  4  
+Testcase  3: Submission Limit                                             
+Automatic grading total:                                          9 /  9
+Non-hidden automatic grading total:                               9 /  9

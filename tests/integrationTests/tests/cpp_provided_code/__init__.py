@@ -43,7 +43,7 @@ def solution(test):
     shutil.copy(os.path.join(test.testcase_path,"assignment_config","test_output","output.txt"),
                 os.path.join(test.testcase_path, "data"))
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_solution", "-b")
+    test.diff("grade.txt", "grade.txt_solution", "-b")
     test.json_diff("results.json", "results.json_solution")
 
 
