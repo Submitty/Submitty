@@ -18,6 +18,9 @@ class MiscController extends AbstractController {
             case 'download_zip':
                 $this->downloadZip();
                 break;
+            case 'download_all_assigned':
+                $this->downloadAssignedZips();
+                break;
         }
     }
 
@@ -67,6 +70,10 @@ class MiscController extends AbstractController {
     }
 
     private function downloadFile() {
+        //Additional security
+        if (!($this->core->getUser()->accessGrading())) {
+            return false;
+        }
         if (!file_exists($_REQUEST['path'])) {
             throw new \InvalidArgumentException("File does not exist");
         }
@@ -85,15 +92,35 @@ class MiscController extends AbstractController {
     }
 
     private function downloadZip() {
+        //Additional security
+        if (!($this->core->getUser()->accessGrading())) {
+            return false;
+        }
+        $zip_file_name = $_REQUEST['gradeable_id'] . "_" . $_REQUEST['user_id'] . "_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        // Initialize archive object
         $temp_dir = "/tmp";
         //makes a random zip file name on the server
         $temp_name = md5(uniqid($this->core->getUser()->getId(), true));
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
-        chdir ($temp_dir);
+        $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
+        $gradeable_path = $this->core->getConfig()->getCoursePath();
+        $active_version = $gradeable->getActiveVersion();
+        $graded_version = $gradeable->getGradedVersion();
+        print $gradeable_path;
+        chdir ($temp_dir); //changes the directory to tmps
+
+        /*
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        $temp_dir = "/tmp";
+        //makes a random zip file name on the server
+        $temp_name = md5(uniqid($this->core->getUser()->getId(), true));
+        $zip_name = $temp_dir . "/" . $temp_name . ".zip";
+        chdir ($temp_dir); //changes the directory to tmp
         $zip = new \ZipArchive();
+        //code from https://stackoverflow.com/questions/4914750/how-to-zip-a-whole-folder-using-php 
+        //by user, Dador
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
         // Create recursive directory iterator
@@ -119,6 +146,116 @@ class MiscController extends AbstractController {
         $zip->close();
         header("Content-type: application/zip"); 
         header("Content-Disposition: attachment; filename=zip_file.zip");
+        header("Content-length: " . filesize($zip_name));
+        header("Pragma: no-cache"); 
+        header("Expires: 0"); 
+        readfile("$zip_name");
+        unlink($zip_name); //deletes the random zip file
+        */
+    }
+
+    private function downloadAssignedZips() { 
+        //Additional security
+        if (!($this->core->getUser()->accessGrading())) {
+            return false;
+        }
+        $zip_file_name = $_REQUEST['gradeable_id'] . "_section_students_" . date("m-d-Y") . ".zip";
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        if(isset($_REQUEST['type']) && $_REQUEST['type'] === "All") {
+            $type = "all";
+            $zip_file_name = $_REQUEST['gradeable_id'] . "_all_students_" . date("m-d-Y") . ".zip";
+            if (!($this->core->getUser()->accessFullGrading())) {
+                return false;
+            }
+        }
+        else
+        {
+            $type = "";
+        }
+
+        $temp_dir = "/tmp";
+        //makes a random zip file name on the server
+        $temp_name = md5(uniqid($this->core->getUser()->getId(), true));
+        $zip_name = $temp_dir . "/" . $temp_name . ".zip";
+        $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']);
+        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
+            $gradeable->getId());
+        chdir ($temp_dir); //changes the directory to tmp
+        $zip = new \ZipArchive();
+        $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        if($type === "all") {
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($gradeable_path),
+                \RecursiveIteratorIterator::LEAVES_ONLY
+            );
+
+            foreach ($files as $name => $file)
+            {
+                // Skip directories (they would be added automatically)
+                if (!$file->isDir())
+                {
+                    // Get real and relative path for current file
+                    $filePath = $file->getRealPath();
+                    $relativePath = substr($filePath, strlen($gradeable_path) + 1);
+
+                    // Add current file to archive
+                    $zip->addFile($filePath, $relativePath);
+                }
+            }
+        } else {
+                //gets the students that are part of the sections
+            if ($gradeable->isGradeByRegistration()) {
+                $section_key = "registration_section";
+                $sections = $this->core->getUser()->getGradingRegistrationSections();
+                $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            }
+            else {
+                $section_key = "rotating_section";
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
+                    $this->core->getUser()->getId());
+                $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
+            $students_array = array();
+            foreach($students as $student) {
+                $students_array[] = $student->getId();
+            }
+            $files = scandir($gradeable_path);
+            $arr_length = count($students_array); 
+            foreach($files as $file) {
+                for ($x = 0; $x < $arr_length; $x++) {
+                    if ($students_array[$x] === $file) {
+                        $temp_path = $gradeable_path . "/" . $file;
+                        $files_in_folder = new \RecursiveIteratorIterator(
+                            new \RecursiveDirectoryIterator($temp_path),
+                            \RecursiveIteratorIterator::LEAVES_ONLY
+                        );
+
+                        //makes a new directory in the zip to add the files in
+                        $zip -> addEmptyDir($file); 
+
+                        foreach ($files_in_folder as $name => $file_in_folder)
+                        {
+                            // Skip directories (they would be added automatically)
+                            if (!$file_in_folder->isDir())
+                            {
+                                // Get real and relative path for current file
+                                $filePath = $file_in_folder->getRealPath();
+                                $relativePath = substr($filePath, strlen($temp_path) + 1);
+                                // Add current file to archive
+                                $zip->addFile($filePath, $file . "/" . $relativePath);
+                            }
+                        }
+                        $x = $arr_length; //cuts the for loop early when found 
+                    }
+                } 
+            }
+        }
+        
+        // Zip archive will be created only after closing object
+        $zip->close();
+        header("Content-type: application/zip"); 
+        header("Content-Disposition: attachment; filename=$zip_file_name");
         header("Content-length: " . filesize($zip_name));
         header("Pragma: no-cache"); 
         header("Expires: 0"); 

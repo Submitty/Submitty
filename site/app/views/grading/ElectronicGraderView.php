@@ -98,11 +98,26 @@ HTML;
                 href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'individual'=>'0'))}">
                 Grade Next Student
             </a>
+            <a class="btn btn-primary"
+                href="{$this->core->buildUrl(array('component'=>'misc', 'page'=>'download_all_assigned', 'dir'=>'submissions', 'gradeable_id'=>$gradeable->getId()))}">
+                Download Zip of All Assigned Students
+            </a>
+HTML;
+            }
+            if($this->core->getUser()->accessFullGrading()) {
+            $return .= <<<HTML
+            <a class="btn btn-primary" 
+                href="{$this->core->buildUrl(array('component'=>'misc', 'page'=>'download_all_assigned', 'dir'=>'submissions', 'gradeable_id'=>$gradeable->getId(), 'type'=>'All'))}">
+                Download Zip of All Students
+            </a>
+HTML;
+            }
+            $return .= <<<HTML
         </div>
     </div>
 </div>
 HTML;
-            }
+            
         }
         return $return;
     }
@@ -580,6 +595,7 @@ HTML;
     <span class="grading_label">Submissions and Results Browser</span>
     <button class="btn btn-default" onclick="openAll()">Expand All</button>
     <button class="btn btn-default" onclick="closeAll()">Close All</button>
+    <button class="btn btn-default" onclick="downloadZip('{$gradeable->getId()}','{$gradeable->getUser()->getId()}')">Download Zip File</button>
     <br />
     <div class="inner-container">
 HTML;
@@ -631,7 +647,6 @@ HTML;
                     <a class='openAllDiv' onclick='openDiv({$count});'>
                         <span class='icon-folder-closed' style='vertical-align:text-top;'></span>
                     {$dir}</a> 
-                    <a onclick='downloadZip("{$dir}","{$url}")'><i class="fa fa-download" aria-hidden="true" title="Download zip of all files in directory"></i></a>
                 </div><br/>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none'>
 HTML;
@@ -876,11 +891,8 @@ HTML;
         return false;
     }
 
-    function downloadZip(name, path) {
-        var to = path.lastIndexOf('/');
-        to = to == -1 ? url.length : to;
-        path = path.substring(0, to);
-        window.location = buildUrl({'component': 'misc', 'page': 'download_zip', 'dir': 'submissions', 'file': name, 'path': path});
+    function downloadZip(grade_id, user_id) {
+        window.location = buildUrl({'component': 'misc', 'page': 'download_zip', 'dir': 'submissions', 'gradeable_id': grade_id, 'user_id': user_id});
         return false;
     }
 
