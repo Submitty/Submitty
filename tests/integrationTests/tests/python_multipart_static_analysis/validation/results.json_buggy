@@ -23,7 +23,7 @@
                 {
                     "description": "Program Output",
                     "difference_file": "test02_0_diff.json",
-                    "actual_file": "test02_part2__p2_bug.txt"
+                    "actual_file": "part2/p2_bug.txt"
                 }
             ],
             "points_awarded": 0,

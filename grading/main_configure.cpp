@@ -32,12 +32,37 @@ nlohmann::json printTestCase(TestCase test) {
   return j;
 }
 
+void AddAutogradingConfiguration(nlohmann::json &whole_config) {
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cpp");
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.c");
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.h");
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.java");
+
+  whole_config["autograding"]["submission_to_runner"].push_back("**/*.py");
+  whole_config["autograding"]["submission_to_runner"].push_back("**/*.pdf");
+
+  whole_config["autograding"]["compilation_to_runner"].push_back("**/*.out");
+  whole_config["autograding"]["compilation_to_runner"].push_back("**/*.class");
+
+  whole_config["autograding"]["compilation_to_validation"].push_back("test*.txt");
+
+  whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
+  whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
+
+  whole_config["autograding"]["work_to_details"].push_back("test*.txt");
+  whole_config["autograding"]["work_to_details"].push_back("test*_diff.json");
+  whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
+}
+
+
 int main(int argc, char *argv[]) {
 
   nlohmann::json config_json;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
   AddSubmissionLimitTestCase(config_json);
+
+  AddAutogradingConfiguration(config_json);
 
   nlohmann::json j;
 
