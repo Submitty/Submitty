@@ -21,13 +21,13 @@ import xlsx2csv
 def print_error(message):
     print(json.dumps({"success": False, "error": True, "error_message": message}))
 
-if __name__ == "__main__":
+def main():
     print("Content-type: text/html")
     print()
 
     args = cgi.FieldStorage()
-    xlsx_file = args['xlsx_file'].value
-    csv_file = args['csv_file'].value
+    xlsx_file = "/tmp/" + os.path.basename(args['xlsx_file'].value)
+    csv_file = "/tmp/" + os.path.basename(args['csv_file'].value)
 
     if (not os.path.isfile(xlsx_file)):
         print_error("XLSX spreadsheet not found")
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         return
 
     # XLSX to CSV conversion
-    xlsx2csv.xlsx2csv(xlsx_file, csv_file)
+    xlsx2csv.Xlsx2csv(xlsx_file, outputencoding='utf-8', skip_empty_lines=True).convert(csv_file)
 
     # Validate result after conversion
     with open(csv_file, "r") as read_file:
@@ -50,3 +50,6 @@ if __name__ == "__main__":
             return
 
     print(json.dumps({"success": True, "error": False}))
+
+if __name__ == "__main__":
+    main()
