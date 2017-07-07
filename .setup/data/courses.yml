@@ -23,6 +23,10 @@
 #   unregistered_students: int for number of students to have that are not in either rotating or registration sections.
 #     The default for this is 50.
 #
+#   make_customization: if set to true the script will make a customization_X.json where X is the course code.
+#     The default is false.
+#
+#
 #   gradeables: a list of gradeables to be used for this course. Each gradeable is defined as:
 #
 #     g_id: what is the id for this gradeable. This is optional for electronic gradeables and will default to the
@@ -83,6 +87,9 @@
 #
 #     eg_precision: [optional] what is the precision to be used on the rubric page per item when grading.
 #         Defaults to 0.5.
+#
+#     eg_max_random_submissions: [optional] integer limiting how many random submissions should be generated.
+#         Defaults to no limit.
 #
 # To make how the order of the time fields work more explicit:
 # g_ta_view_start_date < eg_submission_open_date < eg_submission_due_date < g_grade_start_date < g_grade_released_date

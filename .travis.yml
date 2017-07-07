@@ -96,6 +96,8 @@ before_script:
   # https://github.com/SeleniumHQ/docker-selenium/issues/87
   - export DBUS_SESSION_BUS_ADDRESS=/dev/null
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
+  - PGPASSWORD=hsdbu psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+  - PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${TRAVIS_BUILD_DIR}/site/data/submitty_db.sql
   - travis_wait sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
   - if [ ${INTEGRATION_SUITE} = false ]; then sudo python /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample; fi
