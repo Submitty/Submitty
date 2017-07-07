@@ -168,6 +168,7 @@ HTML;
 	foreach($contents as $content) {
 		$row_being_processed++;
 		$vals = explode(",", trim($content));
+		$vals[4] = intval($vals[4]); //change float read from xlsx to int
 
 		//Data checks
 		//No check on user_id (computing login ID) -- different Univeristies have different formats.
@@ -203,7 +204,6 @@ HTML;
 		$error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_being_processed}: {$vals[3]}" . PHP_EOL;
 
 		//grader-level check is a digit between 1 - 4.
-		$vals[4] = intval($vals[4]); //change float read from xlsx to int
 		$error_message .= preg_match("~[1-4]{1}~", $vals[4]) ? "" : "Error in grader-level column, row #{$row_being_processed}: {$vals[4]}" . PHP_EOL;
 
 		//Append content to data rows for processing.
