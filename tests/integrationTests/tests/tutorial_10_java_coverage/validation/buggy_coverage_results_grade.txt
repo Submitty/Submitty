@@ -1,9 +1,0 @@
-Testcase  1: Java - Compilation                                   2 /  2  
-Testcase  2: Java - Student and Instructor JUnit Test Compilation   2 /  2  
-Testcase  3: Java - Instrumentation of Student Code               0 /  0  
-Testcase  4: Java - Running Student JUnit Tests in hw0/tests/     1 /  4  
-Testcase  5: Java - Generating Coverage Report for Student Tests   3 /  6  
-Testcase  6: Java - Instructor JUnit Tests                        1 /  6  
-Testcase  7: Submission Limit                                             
-Automatic grading total:                                          9 / 20
-Non-hidden automatic grading total:                               9 / 20

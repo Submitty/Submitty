@@ -1,6 +1,0 @@
-Testcase  1: Compilation                                          2 /  2  
-Testcase  2: ./a.out 10                                           0 /  4  
-Testcase  3: ./a.out 30                                           0 /  4  
-Testcase  4: Submission Limit                                             
-Automatic grading total:                                          2 / 10
-Non-hidden automatic grading total:                               2 / 10

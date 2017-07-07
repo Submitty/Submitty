@@ -1,5 +1,0 @@
-Testcase  1: Submitted a .pdf file                                1 /  1  
-Testcase  2: Required 500-1000 Words                              0 /  1  
-Testcase  3: Submission Limit                                             
-Automatic grading total:                                          1 /  2
-Non-hidden automatic grading total:                               1 /  2

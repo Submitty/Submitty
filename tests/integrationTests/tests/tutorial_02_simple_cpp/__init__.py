@@ -45,7 +45,7 @@ def solution(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_solution","-b")
+    test.diff("grade.txt","grade.txt_solution","-b")
     test.json_diff("results.json", "results.json_solution")
 
 @testcase
@@ -56,7 +56,7 @@ def buggy(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_buggy","-b")
+    test.diff("grade.txt","grade.txt_buggy","-b")
     test.json_diff("results.json", "results.json_buggy")
     test.diff("test02_0_diff.json","test02_0_diff.json_buggy")
 

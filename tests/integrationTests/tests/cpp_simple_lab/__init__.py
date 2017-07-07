@@ -65,7 +65,7 @@ def full_credit(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "full_credit_results_grade.txt", "-b")
+    test.diff("grade.txt", "full_credit_grade.txt", "-b")
     test.json_diff("results.json", "full_credit_results.json")
 
 @testcase
@@ -79,7 +79,7 @@ def extra_credit(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","extra_credit_results_grade.txt","-b")
+    test.diff("grade.txt","extra_credit_grade.txt","-b")
     test.json_diff("results.json","extra_credit_results.json")
 
 @testcase
@@ -93,7 +93,7 @@ def warning(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","warning_results_grade.txt","-b")
+    test.diff("grade.txt","warning_grade.txt","-b")
     test.json_diff("results.json","warning_results.json")
 
 @testcase
@@ -104,7 +104,7 @@ def missing_README(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","missing_README_results_grade.txt","-b")
+    test.diff("grade.txt","missing_README_grade.txt","-b")
     test.json_diff("results.json","missing_README_results.json")
 
 
@@ -119,7 +119,7 @@ def compilation_error(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","compile_error_results_grade.txt","-b")
+    test.diff("grade.txt","compile_error_grade.txt","-b")
     test.json_diff("results.json","compile_error_results.json")
 
 @testcase
@@ -132,7 +132,7 @@ def buggy(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","buggy_results_grade.txt","-b")
+    test.diff("grade.txt","buggy_grade.txt","-b")
     test.json_diff("results.json","buggy_results.json")
 
 

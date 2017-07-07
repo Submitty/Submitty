@@ -1,0 +1,245 @@
+{
+    "differences": [
+        {
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0
+                        ],
+                        "line_number": 4
+                    },
+                    {
+                        "char_number": [
+                            0
+                        ],
+                        "line_number": 5
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1
+                        ],
+                        "line_number": 6
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2
+                        ],
+                        "line_number": 7
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3
+                        ],
+                        "line_number": 8
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2
+                        ],
+                        "line_number": 9
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3
+                        ],
+                        "line_number": 10
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2
+                        ],
+                        "line_number": 11
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3
+                        ],
+                        "line_number": 12
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2
+                        ],
+                        "line_number": 13
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1
+                        ],
+                        "line_number": 14
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1
+                        ],
+                        "line_number": 15
+                    },
+                    {
+                        "char_number": [
+                            0
+                        ],
+                        "line_number": 16
+                    }
+                ],
+                "start": 4
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1
+                        ],
+                        "line_number": 4
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1
+                        ],
+                        "line_number": 5
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3
+                        ],
+                        "line_number": 6
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 7
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 8
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 9
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 10
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 11
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 12
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 13
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3
+                        ],
+                        "line_number": 14
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3
+                        ],
+                        "line_number": 15
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1
+                        ],
+                        "line_number": 16
+                    }
+                ],
+                "start": 4
+            }
+        }
+    ]
+}

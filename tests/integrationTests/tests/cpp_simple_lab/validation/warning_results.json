@@ -3,7 +3,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test01_part1__README.txt",
+                    "actual_file": "part1/README.txt",
                     "description": "part1/README.txt"
                 }
             ],
