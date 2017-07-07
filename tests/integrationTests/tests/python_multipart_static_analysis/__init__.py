@@ -63,6 +63,11 @@ def correct(test):
     test.debug_print("data/grade.txt")
     test.debug_print("log/run_output.txt")
     test.debug_print("log/validate_output.txt")
+    test.debug_print("data/test01_STDOUT_0.txt")
+    test.debug_print("data/test01_STDERR_0.txt")
+    test.debug_print("data/test01_STDOUT_1.txt")
+    test.debug_print("data/test01_STDERR_1.txt")
+    test.debug_print("data/test01_execute_logfile.txt")
     test.diff("grade.txt", "grade.txt_correct", "-b")
     test.json_diff("results.json", "results.json_correct")
 
