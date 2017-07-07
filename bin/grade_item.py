@@ -44,9 +44,9 @@ def add_permissions(item,perms):
     # else, can't change permissions on this file/directory!
 
 
-def touch(file):
-    with open(file,'a') as tmp:
-        os.utime(file, None)
+def touch(my_file):
+    with open(my_file,'a') as tmp:
+        os.utime(my_file, None)
 
                 
 def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
@@ -86,16 +86,32 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print (what," pattern copy ", patterns, " from ", source, " -> ", target, file=f)
         for pattern in patterns:
-            for file in glob.glob(os.path.join(source,pattern),recursive=True):
+            for my_file in glob.glob(os.path.join(source,pattern),recursive=True):
                 # grab the matched name
-                relpath=os.path.relpath(file,source)
+                relpath=os.path.relpath(my_file,source)
                 # make the necessary directories leading to the file
                 os.makedirs(os.path.join(target,os.path.dirname(relpath)),exist_ok=True)
                 # copy the file
-                shutil.copy(file,os.path.join(target,relpath))
-                print ("    COPY ",file,
+                shutil.copy(my_file,os.path.join(target,relpath))
+                print ("    COPY ",my_file,
                        " -> ",os.path.join(target,relpath), file=f)
             
+
+# give permissions to all created files to the hwcron user
+def untrusted_grant_read_access(args,my_dir):
+    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                     args.which_untrusted,
+                     "/usr/bin/find",
+                     my_dir,
+                     "-user",
+                     args.which_untrusted,
+                     "-exec",
+                     "/bin/chmod",
+                     "o+r",
+                     "{}",
+                     ";"])
+
+
 # ==================================================================================
 # ==================================================================================
 def main():
@@ -178,7 +194,7 @@ def main():
     # copy any instructor provided code files to tmp compilation directory
     copy_contents_into(test_code_path,tmp_compilation)
 
-    subprocess.call("ls -la "+tmp_compilation+" >> "+tmp_logs+"/overall.txt",shell=True)
+    subprocess.call(['ls', '-la', tmp_compilation], stdout=open(tmp_logs + "/overall.txt", 'a'))
     
     # copy compile.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"compile.out"),os.path.join(tmp_compilation,"my_compile.out"))
@@ -207,18 +223,7 @@ def main():
     else:
         print ("NEW COMPILATION FAILURE")
 
-    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                     args.which_untrusted,
-                     "/usr/bin/find",
-                     tmp_compilation,
-                     "-user",
-                     args.which_untrusted,
-                     "-exec",
-                     "/bin/chmod",
-                     "o+r",
-                     "{}",
-                     ";"])
-
+    untrusted_grant_read_access(args,tmp_compilation)
         
     # remove the compilation program
     os.remove(os.path.join(tmp_compilation,"my_compile.out"))
@@ -249,7 +254,7 @@ def main():
     # copy input files to tmp_work directory
     copy_contents_into(test_input_path,tmp_work)
 
-    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True)
+    subprocess.call(['ls', '-la', tmp_work], stdout=open(tmp_logs + "/overall.txt", 'a'))
     
     # copy runner.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"run.out"),os.path.join(tmp_work,"my_runner.out"))
@@ -279,18 +284,7 @@ def main():
     else:
         print ("NEW RUNNER FAILURE")
 
-    # give permissions to all created files to the hwcron user
-    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                     args.which_untrusted,
-                     "/usr/bin/find",
-                     tmp_work,
-                     "-user",
-                     args.which_untrusted,
-                     "-exec",
-                     "/bin/chmod",
-                     "o+r",
-                     "{}",
-                     ";"])
+    untrusted_grant_read_access(args,tmp_work)
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
@@ -310,7 +304,7 @@ def main():
     # copy output files to tmp_work directory
     copy_contents_into(test_output_path,tmp_work)
 
-    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True)
+    subprocess.call(['ls', '-la', tmp_work], stdout=open(tmp_logs + "/overall.txt", 'a'))
         
     # copy validator.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"validate.out"),os.path.join(tmp_work,"my_validator.out"))
@@ -339,18 +333,8 @@ def main():
     else:
         print ("NEW VALIDATOR FAILURE")
 
-    # give permissions to all created files to the hwcron user
-    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                     args.which_untrusted,
-                     "/usr/bin/find",
-                     tmp_work,
-                     "-user",
-                     args.which_untrusted,
-                     "-exec",
-                     "/bin/chmod",
-                     "o+r",
-                     "{}",
-                     ";"])
+
+    untrusted_grant_read_access(args,tmp_work)
 
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
@@ -358,7 +342,7 @@ def main():
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print ("====================================\nARCHIVING STARTS", file=f)
 
-    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True)
+    subprocess.call(['ls', '-la', tmp_work], stdout=open(tmp_logs + "/overall.txt", 'a'))
         
     os.chdir(bin_path)
 
@@ -370,7 +354,7 @@ def main():
     # clean out all of the old files if this is a re-run
     shutil.rmtree(results_path,ignore_errors=True)
 
-    # Make directory structure in results if it doesn't exist
+    # create the directory (and the full path if it doesn't already exist)
     os.makedirs(results_path)
 
     # bring back the old results!
