@@ -60,6 +60,9 @@ def correct(test):
     test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
+    test.debug_print("data/grade.txt")
+    test.debug_print("log/run_output.txt")
+    test.debug_print("log/validate_output.txt")
     test.diff("grade.txt", "grade.txt_correct", "-b")
     test.json_diff("results.json", "results.json_correct")
 
