@@ -6,12 +6,6 @@
 
     "assignment_message" : "The homework submission area & autograding points for Lab 1 are just practice.<br>The only grades for Lab 1 are the 3 checkpoints recorded by your TA & mentors.",
 
-    "conditional_message" : {
-        "message" : "Successfully reached the point minimum by the due date. You get another late day.",
-        "minimum_days_early" : 7,
-        "minimum_points" : 10
-    },
-
     "part_names" : [ "README", "CODE" ],
 
     "testcases" : [
