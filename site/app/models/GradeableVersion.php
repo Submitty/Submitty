@@ -60,8 +60,9 @@ class GradeableVersion extends AbstractModel {
         $this->hidden_extra_credit = $details['autograding_hidden_extra_credit'];
         $this->submission_time = $details['submission_time'];
         // We add a 5 minute buffer for submissions before they're considered "late"
-        $this->days_late = DateUtils::calculateDayDiff($due_date->add(new \DateInterval("PT5M")), $this->submission_time);
-        $this->days_early = DateUtils::calculateDayDiff($this->submission_time, $due_date->add(new \DateInterval("PT5M")));
+        $extended_due_date = clone $due_date;
+        $this->days_late = DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);
+        $this->days_early = DateUtils::calculateDayDiff($this->submission_time, $extended_due_date);
         if ($this->days_late < 0) {
             $this->days_late = 0;
         }

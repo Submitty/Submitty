@@ -8,7 +8,7 @@
 
     "conditional_message" : {
         "message" : "Successfully reached the point minimum by the due date. You get another late day.",
-        "days_before" : 1,
+        "days_before" : 7,
         "points_required" : 10
     },
 

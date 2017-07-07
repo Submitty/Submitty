@@ -29,7 +29,7 @@ class GradeableAutocheck extends AbstractModel {
     
     /** @var String[] Message to show underneath the description for a diff */
     protected $messages = array();
-    /** @var */
+    /** @var String[][] Message to show underneath the description for a diff */
     protected $messages2 = array();
     
     /**

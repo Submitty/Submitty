@@ -161,10 +161,11 @@ class Gradeable extends AbstractModel {
     /** @property @var string Message to show for the gradeable above all submission results */
     protected $message = "";
 
-    /** */
-    ////////
+    /** @property @var string Message to show when conditions are met */
     protected $conditional_message = "";
+    /** @property @var int Days before deadline that a submission must be made by to get the conditional message */
     protected $days_before = 0;
+    /** @property @var int Points required that a submission must have to get the conditional message */
     protected $points_required = 0;
 
     /** @property @var string[] */
@@ -861,7 +862,8 @@ class Gradeable extends AbstractModel {
     }
   
     public function getActiveDaysLate() {
-        $return =  DateUtils::calculateDayDiff($this->due_date->add(new \DateInterval("PT5M")), $this->submission_time);
+        $extended_due_date = clone $this->due_date;
+        $return =  DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);
         if ($return < 0) {
             $return = 0;
         }
