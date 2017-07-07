@@ -172,7 +172,6 @@ def main():
 
     gradeable_deadline = gradeable_config_obj["date_due"]
 
-    #copy_contents_into(submission_path,tmp_compilation)
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
     pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
     
@@ -250,7 +249,7 @@ def main():
     # copy input files to tmp_work directory
     copy_contents_into(test_input_path,tmp_work)
 
-    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True) #+" >> "+tmp_logs+"/overall.txt")
+    subprocess.call("ls -la "+tmp_work+" >> "+tmp_logs+"/overall.txt",shell=True)
     
     # copy runner.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"run.out"),os.path.join(tmp_work,"my_runner.out"))
