@@ -51,6 +51,7 @@ use app\libraries\Utils;
  * @method string getSubdirectory()
  * @method string getConfigPath()
  * @method string getGradeFile()
+ * @method string getTaInstructions()
  * @method int getInteractiveQueuePosition()
  * @method int getInteractiveQueueTotal()
  * @method int getBatchQueuePosition()
