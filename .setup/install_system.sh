@@ -494,11 +494,12 @@ fi
 #################
 
 if [ ${VAGRANT} == 1 ]; then
-	echo -e "/var/run/postgresql
+    echo -e "/var/run/postgresql
 hsdbu
 hsdbu
 http://192.168.56.101
-y" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
+1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+
 else
 	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 fi

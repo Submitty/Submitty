@@ -26,14 +26,11 @@ TAGRADING_URL=${SUBMISSION_URL}/hwgrading/
 CGI_URL=${SUBMISSION_URL}/cgi-bin/
 
 DEBUGGING_ENABLED=false
-# FIXME:  Replace with a safety check for a live installation
-# (localhost could be a valid database for live installation)
-if [ "$DATABASE_HOST" = "localhost" ] ; then
-    echo "Would you like to enable debugging? (NOT RECOMMENDED FOR LIVE INSTALLATION) y/n"
-    read en_debug
-    if [ "$en_debug" = "y" ] ; then
+
+echo "Would you like to enable debugging? (NOT RECOMMENDED FOR LIVE INSTALLATION) yes/no"
+read en_debug
+if [ "$en_debug" = "yes" ] ; then
 	DEBUGGING_ENABLED=true
-    fi
 fi
 
 
