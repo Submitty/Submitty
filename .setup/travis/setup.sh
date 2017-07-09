@@ -52,11 +52,11 @@ sudo chown hwphp:hwphp ${SUBMITTY_DATA_DIR}
 sudo chmod 777         ${SUBMITTY_INSTALL_DIR}
 sudo chmod 777         ${SUBMITTY_DATA_DIR}
 
-sudo echo -e "/var/run/postgresql
+echo -e "/var/run/postgresql
 hsdbu
 hsdbu
-http://localhost
-y" | sudo bash ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
+http://192.168.56.101
+1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 sudo bash ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
 sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
