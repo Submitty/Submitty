@@ -69,7 +69,7 @@ git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GI
 pushd /usr/local/submitty/GIT_CHECKOUT_AnalysisTools
 
 
-git checkout -b  VERSION_2_1  v0.2.1
+# git checkout -b  VERSION_2_2  v0.2.2
 stack --allow-different-user --install-ghc --copy-bins build
 
 
