@@ -51,14 +51,14 @@ TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::j
 
   // check to see if the file was opened successfully
   if (!junit_output.good()) {
-    return new TestResults(0.0,{std::make_pair("ERROR: JUnit output does not exist","failure")});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit output does not exist")});
   }
 
   // look for version number on opening line
   std::string token1, token2, token3, token4, token5, token6;
   junit_output >> token1 >> token2 >> token3;
   if (token1 != "JUnit" || token2 != "version" || token3 != "4.12") {
-    return new TestResults(0.0,{std::make_pair("ERROR: TestRunner output format and/or version number incompatible with grader","failure")});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: TestRunner output format and/or version number incompatible with grader")});
   }
 
   while (junit_output >> token1) {
@@ -69,15 +69,15 @@ TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::j
       char c;
       junit_output >> c;
       if (c != '(') {
-        return new TestResults(0.0,{std::make_pair("ERROR: FORMATTING!","failure")});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: FORMATTING!")});
       }
       int num;
       junit_output >> num;
       if (num == 0) // No tests ran, awarding 0
-        return new TestResults(0.0,{std::make_pair("ERROR: No tests ran!","failure")});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: No tests ran!")});
       junit_output >> token2;
       if (token2 != "tests)") {
-        return new TestResults(0.0,{std::make_pair("ERROR: FORMATTING!","failure")});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: FORMATTING!")});
       }
       return new TestResults(1.0); // Awarding full credit
     }
@@ -88,7 +88,7 @@ TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::j
       // Parses the following: Tests run: 13, Failures: 13
       junit_output >> token2 >> token3;
       if (token2 != "Tests" || token3 != "run:") {
-        return new TestResults(0.0,{std::make_pair("ERROR: FORMATTING!","failure")});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: FORMATTING!")});
       }
       int tests_run;
       junit_output >> tests_run;
@@ -96,17 +96,17 @@ TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::j
       char comma;
       junit_output >> comma;
       if (comma != ',') {
-        return new TestResults(0.0,{std::make_pair("ERROR: FORMATTING!","failure")});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: FORMATTING!")});
       }
       junit_output >> token4;
       if (token4 != "Failures:") {
-        return new TestResults(0.0,{std::make_pair("ERROR: FORMATTING!","failure")});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: FORMATTING!")});
       }
       int tests_failed;
       junit_output >> tests_failed;
       assert (tests_failed > 0);
       if (tests_run == 0) { // Fixture creation failure (likely), award 0 credit
-        return new TestResults(0.0,{std::make_pair("ERROR: No tests ran. Could not create fixture.","failure")});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: No tests ran. Could not create fixture.")});
       }
 
       int successful_tests = std::max(0,tests_run-tests_failed);
@@ -117,12 +117,12 @@ TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::j
 
       std::cout << "JUNIT Multiple junit tests, partial = " << partial << std::endl;
       assert (partial >= 0.0 && partial <= 1.0);
-      return new TestResults(partial,{std::make_pair(ss.str(),"failure")});
+      return new TestResults(partial,{std::make_pair(MESSAGE_FAILURE,ss.str())});
     }
   }
 
   std::cout << "ERROR: TestRunner output did not say 'TEST-RUNNER-OK' or 'TEST-RUNNER-FAILURES!!!'.  This should not happen!" << std::endl;
-  return new TestResults(0.0,{std::make_pair("ERROR: TestRunner output did not say 'TEST-RUNNER-OK' or 'TEST-RUNNER-FAILURES!!!'.  This should not happen!","failure")});
+  return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: TestRunner output did not say 'TEST-RUNNER-OK' or 'TEST-RUNNER-FAILURES!!!'.  This should not happen!")});
 }
 
 // =============================================================================
@@ -139,7 +139,7 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
 
   // check to see if the file was opened successfully
   if (!junit_output.good()) {
-    return new TestResults(0.0,{std::make_pair("ERROR: JUnit output does not exist","failure")});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit output does not exist")});
   }
 
   int num_junit_tests = j.value("num_tests",1);
@@ -148,7 +148,7 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
   std::string token1, token2, token3;
   junit_output >> token1 >> token2 >> token3;
   if (token1 != "JUnit" || token2 != "version" || token3 != "4.12") {
-    return new TestResults(0.0,{std::make_pair("ERROR: JUnit output format and/or version number incompatible with grader","failure")});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit output format and/or version number incompatible with grader")});
   }
 
   bool ok = false;
@@ -169,12 +169,12 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
       char c;
       junit_output >> c;
       if (c != '(') {
-        return new TestResults(0.0,{std::make_pair("ERROR: FORMATTING!","failure")});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: FORMATTING!")});
       }
       int num;
       junit_output >> num;
       if (num != num_junit_tests) {
-        return new TestResults(0.0,{std::make_pair("ERROR: Number of tests specified in configuration does not match!","failure")});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Number of tests specified in configuration does not match!")});
       }
       ok = true;
     }
@@ -215,11 +215,11 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
 
   if (failure || exception) {
     if (tests_run > num_junit_tests) {
-      return new TestResults(0.0,{std::make_pair("ERROR: Number of tests specified in configuration does not match!","failure")});
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Number of tests specified in configuration does not match!")});
     }
     std::cout << "tests_run " << tests_run << " test_failures " << test_failures << std::endl;
     if (test_failures == -1) {
-      return new TestResults(0.0,{std::make_pair("ERROR: Failure to read number of test failures","failure")});
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Failure to read number of test failures")});
     }
     assert (tests_run >= 0);
     assert (test_failures >= 0);
@@ -230,11 +230,11 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
     float partial = float(successful_tests) / float(num_junit_tests);
     std::stringstream ss;
     ss << "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = " << successful_tests << "/" << num_junit_tests;
-    return new TestResults(partial,{std::make_pair(ss.str(),"failure")});
+    return new TestResults(partial,{std::make_pair(MESSAGE_FAILURE,ss.str())});
   }
 
   std::cout << "ERROR: JUnit output did not say 'OK' or 'Failure' or 'Exception'.  This should not happen!" << std::endl;
-  return new TestResults(0.0,{std::make_pair("ERROR: JUnit output did not say 'OK' or 'Failure' or 'Exception'.  This should not happen!","failure")});
+  return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit output did not say 'OK' or 'Failure' or 'Exception'.  This should not happen!")});
 }
 
 // =============================================================================
@@ -249,7 +249,7 @@ TestResults* EmmaInstrumentationGrader_doit (const TestCase &tc, const nlohmann:
 
   // check to see if the file was opened successfully
   if (!junit_output.good()) {
-    return new TestResults(0.0,{std::make_pair("ERROR: JUnit output does not exist","failure")});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit output does not exist")});
   }
 
   // look for version number on opening line
@@ -272,7 +272,7 @@ TestResults* EmmaInstrumentationGrader_doit (const TestCase &tc, const nlohmann:
     }
   }
 
-  return new TestResults(0.0,{std::make_pair("ERROR: JUnit EMMA instrumentation not verified","failure")});
+  return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit EMMA instrumentation not verified")});
 }
 
 // =============================================================================
@@ -286,7 +286,7 @@ TestResults* EmmaCoverageReportGrader_doit (const TestCase &tc, const nlohmann::
 
   // check to see if the file was opened successfully
   if (!junit_output.good()) {
-    return new TestResults(0.0,{std::make_pair("ERROR: JUnit output does not exist","failure")});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit output does not exist")});
   }
 
   float coverage_threshold = j.value("coverage_threshold",100);
@@ -295,7 +295,7 @@ TestResults* EmmaCoverageReportGrader_doit (const TestCase &tc, const nlohmann::
   std::string token1, token2;
   junit_output >> token1 >> token2;
   if (token1 != "[EMMA" || token2 != "v2.0.5312") {
-    return new TestResults(0.0,{std::make_pair("ERROR: JUnit EMMA output format and/or version number incompatible with grader","failure")});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JUnit EMMA output format and/or version number incompatible with grader")});
   }
 
   // read the rest of the file, one line at a time.
@@ -341,12 +341,12 @@ TestResults* EmmaCoverageReportGrader_doit (const TestCase &tc, const nlohmann::
         float partial = float(block_p) / coverage_threshold;
         ss2 << "ERROR: Insuffficient block coverage below threshold for... " << name
             << " (" << block_p << "/" << coverage_threshold << " = " << partial << ")";
-        return new TestResults(partial,{std::make_pair(ss2.str(),"failure")});
+        return new TestResults(partial,{std::make_pair(MESSAGE_FAILURE,ss2.str())});
       }
     }
   }
 
-  return new TestResults(0.0,{std::make_pair("ERROR: Did not successfully parse EMMA output.","failure")});
+  return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Did not successfully parse EMMA output.")});
 }
 
 // =============================================================================

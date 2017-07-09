@@ -13,7 +13,7 @@ TestResults* DrMemoryGrader_doit (const TestCase &tc, const nlohmann::json& j) {
 
   // check to see if the file was opened successfully
   if (!drmemory_output.good()) {
-    return new TestResults(0.0,{std::make_pair("ERROR: DrMemory output does not exist","failure")});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: DrMemory output does not exist")});
   }
 
   std::vector<std::vector<std::string> > file_contents;
@@ -66,22 +66,22 @@ TestResults* DrMemoryGrader_doit (const TestCase &tc, const nlohmann::json& j) {
   }
 
   float result = 1.0;
-  std::vector<std::pair<std::string, std::string> > messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
 
   if (num_errors > 0) {
-    messages.push_back(std::make_pair(std::to_string(num_errors) + " DrMemory Errors","failure"));
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,std::to_string(num_errors) + " DrMemory Errors"));
     result = 0;
   }
   if (result > 0.01 && 
       (no_errors_message == false ||
        non_zero_unique_errors == true ||
        zero_unique_errors != 6)) {
-    messages.push_back(std::make_pair("Program Contains Memory Errors","failure"));
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"Program Contains Memory Errors"));
     result = 0;
   }
   if (no_errors_message == true &&
       result < 0.99) {
-    messages.push_back(std::make_pair("Your Program *does* contains memory errors (misleading DrMemory Output \"NO ERRORS FOUND\")","failure"));
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"Your Program *does* contains memory errors (misleading DrMemory Output \"NO ERRORS FOUND\")"));
   }
 
 

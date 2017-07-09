@@ -14,6 +14,9 @@
 #define TEST_RESULT_MESSAGES_SIZE 10000
 
 
+enum TEST_RESULTS_MESSAGE_TYPE { MESSAGE_FAILURE, MESSAGE_WARNING, MESSAGE_SUCCESS, MESSAGE_INFORMATION };
+
+
 // ===================================================================================
 // ===================================================================================
 // helper class needed to allow validation to use shared memory
@@ -32,13 +35,13 @@ public:
     strcpy(messages,default_message);
   }
 
-  void PACK(std::string d, int dist, std::vector<std::pair<std::string, std::string> > m, float g, bool ce, bool cw) {
+  void PACK(std::string d, int dist, std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > m, float g, bool ce, bool cw) {
     grade = g;
     distance = dist;
     compilation_error = ce;
     compilation_warning = cw;
     if (d.size() >= TEST_RESULT_DIFF_SIZE-1) {
-      m.push_back(std::make_pair("ERROR: diff too large to calculate/display.", "failure"));
+      m.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR: diff too large to calculate/display."));
       strcpy(diff,"");
     } else {
       assert (d.size() < TEST_RESULT_DIFF_SIZE-1);
@@ -69,31 +72,24 @@ public:
     }
   }
   float getGrade() const { return grade; }
-  const std::vector<std::pair<std::string, std::string> > getMessages() const { 
+  const std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > getMessages() const { 
     int length = strlen(messages);
-    std::vector<std::pair<std::string, std::string> > answer;
+    std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > answer;
     std::string msg = "";
-    std::string type = "";
+    TEST_RESULTS_MESSAGE_TYPE type = MESSAGE_FAILURE;
     for (int i = 0; i < length; i++) {
       if (messages[i] == '\n') {
-        if (msg != "" && type != "") {
-          answer.push_back(std::make_pair(msg,type));
+        if (msg != "") {
+          answer.push_back(std::make_pair(type,msg));
           msg = "";
-          type = "";
-        } else if (type == "") {
-          i++;
-          type.push_back(messages[i]);
+          type = MESSAGE_FAILURE;
         }
-      } else if (type== "") {
-        msg.push_back(messages[i]);
-      } else {
-        type.push_back(messages[i]);
       }
     }
-    if (msg != "" && type != "") {
-      answer.push_back(std::make_pair(msg,type));
+    if (msg != "") {
+      answer.push_back(std::make_pair(type,msg));
       msg = "";
-      type = "";
+      type = MESSAGE_FAILURE;
     }
     return answer;
   }
@@ -122,17 +118,14 @@ public:
 
   // CONSTRUCTOR
   TestResults(float g=0.0, 
-              const std::vector<std::pair<std::string, std::string> > &m = {},
+              const std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &m = {},
               const std::string &sd="",
               bool ce=false,
               bool cw=false) :
     my_grade(g),swap_difference(sd),distance(0) {
     for (int i= 0; i < m.size(); i++) {
-      if (std::get<0>(m[i]).size() != 0) {
-        messages.push_back(m[i]);
-      } else {
-        std::cout << "warning: a blank message string" << std::endl;
-      }
+      assert (m[i].second != "");
+      messages.push_back(m[i]);
     }
     compilation_error = ce;
     compilation_warning = cw;
@@ -149,7 +142,7 @@ public:
 
   // ACCESSORS
   float getGrade() const { assert (my_grade >= 0); return my_grade; }
-  const std::vector<std::pair<std::string, std::string> >& getMessages() const { return messages; }
+  const std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> >& getMessages() const { return messages; }
   int getDistance() const { return distance; }
   bool hasCompilationError() const { return compilation_error; }
   bool hasCompilationWarning() const { return compilation_warning; }
@@ -169,7 +162,7 @@ public:
 protected:
 
   // REPRESENTATION
-  std::vector<std::pair<std::string, std::string> > messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   float my_grade;
   std::string swap_difference;
   int distance;

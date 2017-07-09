@@ -139,8 +139,10 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json);
 std::string getAssignmentIdFromCurrentDirectory(std::string);
 
 bool getFileContents(const std::string &filename, std::string &file_contents);
-bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::vector<std::pair<std::string, std::string> > &messages);
-bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, std::vector<std::pair<std::string, std::string> > &messages);
+bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents,
+                     std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages);
+bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents,
+                      std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages);
 
 void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty);
 
