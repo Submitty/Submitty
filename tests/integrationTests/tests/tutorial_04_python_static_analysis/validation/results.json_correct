@@ -5,13 +5,11 @@
                 {
                     "actual_file": "test01_STDOUT_0.txt",
                     "description": "Program Output",
-                    "messages": [
-                        "ERROR!  Could not open expected file: 'output.txt",
-                        "ERROR!  Expected File 'output.txt' does not exist"
-                    ]
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/output.txt"
                 }
             ],
-            "points_awarded": 3,
+            "points_awarded": 4,
             "test_name": "Test 1 Python - Static Analysis"
         },
         {

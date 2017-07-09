@@ -16,7 +16,10 @@
                     "actual_file": "test02_STDOUT_1.txt",
                     "description": "Word Count",
                     "messages": [
-                        "Too few words"
+                        {
+                            "message": "Too few words",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {

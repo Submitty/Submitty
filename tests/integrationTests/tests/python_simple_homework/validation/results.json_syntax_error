@@ -1,27 +1,35 @@
 {
-"testcases": [
-		{
-			"test_name": "Test 1 Lab 1 Checkpoint 1",
-			"autochecks": [
-			    {
-                                "actual_file": "test01_execute_logfile.txt",                                "description": "Execution Logfile"
-                            },
-				{					"actual_file":"test01_STDOUT.txt",
-					"expected_file":"test_output/testassignment/hw01part1_sol.txt",
-					"difference_file":"test01_0_diff.json",
-					"description": "Program Output"
-				},
-				{					"actual_file":"test01_STDERR.txt",
-					"description": "syntax error output from running python",
-					"messages": ["WARNING: This file should be empty"]
-				}
-			],
-			"points_awarded": 0
-		},
+    "testcases": [
+        {
+            "autochecks": [
                 {
-                        "points_awarded": 0,
-                        "test_name": "Test 2 Submission Limit",
-                        "view_testcase": false
-		}
-	]
+                    "actual_file": "test01_STDOUT.txt",
+                    "description": "Program Output",
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/hw01part1_sol.txt"
+                },
+                {
+                    "actual_file": "test01_STDERR.txt",
+                    "description": "syntax error output from running python",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test01_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 1 Lab 1 Checkpoint 1"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 2 Submission Limit",
+            "view_testcase": false
+        }
+    ]
 }

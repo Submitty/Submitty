@@ -38,7 +38,10 @@
                     "actual_file": "test05_emma_report.txt",
                     "description": "JUnit EMMA coverage report",
                     "messages": [
-                        "ERROR: Insuffficient block coverage below threshold for... hw0 (42/90 = 0.466667)"
+                        {
+                            "message": "ERROR: Insuffficient block coverage below threshold for... hw0 (42/90 = 0.466667)",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],
@@ -51,7 +54,10 @@
                     "actual_file": "test06_STDOUT.txt",
                     "description": "JUnit output",
                     "messages": [
-                        "ERROR: Number of tests specified in configuration does not match!"
+                        {
+                            "message": "ERROR: Number of tests specified in configuration does not match!",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],

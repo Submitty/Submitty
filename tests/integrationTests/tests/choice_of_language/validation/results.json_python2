@@ -24,7 +24,10 @@
                     "actual_file": "test02_STDERR.txt",
                     "description": "Standard Error (STDERR)",
                     "messages": [
-                        "WARNING: This file should be empty"
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
                     ]
                 },
                 {
@@ -41,13 +44,19 @@
                     "actual_file": "test03_STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
-                        "ERROR: This file should be empty!"
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Create Executable",
                     "messages": [
-                        "ERROR: required files not found:  p3.out"
+                        {
+                            "message": "ERROR: required files not found:  p3.out",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -64,13 +73,19 @@
                 {
                     "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDOUT.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Standard Error (STDERR)",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -87,13 +102,19 @@
                     "actual_file": "test05_STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
-                        "ERROR: This file should be empty!"
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Create Executable",
                     "messages": [
-                        "ERROR: required files not found:  p4.out"
+                        {
+                            "message": "ERROR: required files not found:  p4.out",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -110,13 +131,19 @@
                 {
                     "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDOUT.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Standard Error (STDERR)",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
