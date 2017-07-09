@@ -50,9 +50,9 @@ public:
     std::string tmp = "";
     for (int i = 0; i < m.size(); i++) {
       if (i != 0) tmp += "\n";
-      tmp += std::get<0>(m[i]);
+      tmp += m[i].first;
       tmp += "\n";
-      tmp += std::get<1>(m[i]);
+      tmp += m[i].second;
     }
     if (tmp.size() >= TEST_RESULT_MESSAGES_SIZE-1) {
       char default_message[] = "ERROR: messages too large to display.\nfailure";

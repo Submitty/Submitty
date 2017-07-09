@@ -60,7 +60,7 @@
             "title" : "Frame Size 13",
             "command" : "./a.out 13",
             "points" : 2,
-            "hidden" : true,
+//            "hidden" : true,
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
@@ -93,7 +93,7 @@
             "title" : "Error Checking: Frame Size Negative",
             "command" : "./a.out -10",
             "points" : 2,
-            "hidden" : true,
+//            "hidden" : true,
             "validation" : [
                 {
                     "method" : "warnIfNotEmpty",
@@ -133,7 +133,7 @@
             "command" : "./a.out 1 2 3",
             "extra_credit" : true,
             "points" : 2,
-            "hidden" : true,
+//            "hidden" : true,
             "validation" : [
                 {
                     "method" : "warnIfNotEmpty",

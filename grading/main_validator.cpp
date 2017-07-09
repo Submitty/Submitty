@@ -188,6 +188,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       if (FN==0) {
         for (int m = 0; m < messages.size(); m++) {
           assert (messages[m].second != "");
+          if (messages[m].second == fm) failure_message_already_added = true;
           nlohmann::json new_message;
           new_message["message"] = messages[m].second;
           if (messages[m].first == MESSAGE_FAILURE) new_message["type"] = "failure";
