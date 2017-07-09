@@ -52,7 +52,7 @@ sudo chown hwphp:hwphp ${SUBMITTY_DATA_DIR}
 sudo chmod 777         ${SUBMITTY_INSTALL_DIR}
 sudo chmod 777         ${SUBMITTY_DATA_DIR}
 
-echo -e "/var/run/postgresql
+sudo echo -e "/var/run/postgresql
 hsdbu
 hsdbu
 http://192.168.56.101
