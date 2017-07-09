@@ -5,13 +5,13 @@ dist: trusty
 matrix:
   include:
     - php: 5.6
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
+      env: AUTH_METHOD=2 INTEGRATION_SUITE=false
     - php: 7.0
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
+      env: AUTH_METHOD=2 INTEGRATION_SUITE=false
     - php: 7.0
-      env: AUTH_METHOD=PamAuthentication INTEGRATION_SUITE=false
+      env: AUTH_METHOD=1 INTEGRATION_SUITE=false
     - php: 7.0
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=true
+      env: AUTH_METHOD=2 INTEGRATION_SUITE=true
 
 cache:
   pip: true

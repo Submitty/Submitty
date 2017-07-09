@@ -56,7 +56,7 @@ echo -e "/var/run/postgresql
 hsdbu
 hsdbu
 http://192.168.56.101
-1" | sudo ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+${AUTH_METHOD}" | sudo ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors

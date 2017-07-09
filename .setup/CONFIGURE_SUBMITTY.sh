@@ -48,8 +48,8 @@ SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
 # Log locations
-TAGRADING_LOG_PATH=$SUBMITTY_DATA_DIR/tagrading_logs/
-AUTOGRADING_LOG_PATH=$SUBMITTY_DATA_DIR/autograding_logs/
+TAGRADING_LOG_PATH=$SUBMITTY_DATA_DIR/logs/site/
+AUTOGRADING_LOG_PATH=$SUBMITTY_DATA_DIR/logs/autograding/
 
 # recommended names for special users & groups related to the SUBMITTY system
 HWPHP_USER=hwphp

@@ -44,7 +44,7 @@ def num_to_weekday(num):
         6: "Sat"
     }[num]
 
-path = '/var/local/submitty/autograding_logs/'
+path = '/var/local/submitty/logs/autograding/'
 submissions_per_hour = [0]*24
 avg_hours_ot_week = [[0]*24 for _ in range(7)]
 avg_hours_ot_week_datastructures = [[0]*24 for _ in range(7)]
