@@ -162,6 +162,7 @@ echo "SUBMISSION_URL="${SUBMISSION_URL}                                         
 echo "CGI_URL="${CGI_URL}                                                                     >> $CONFIGURATION_FILE
 echo "TAGRADING_LOG_PATH="${TAGRADING_LOG_PATH}                                               >> $CONFIGURATION_FILE
 
+echo "AUTHENTICATION_METHOD=PamAuthentication"                                                >> $CONFIGURATION_FILE
 echo "DEBUGGING_ENABLED="${DEBUGGING_ENABLED}                                                 >> $CONFIGURATION_FILE
 echo "AUTOGRADING_LOG_PATH="${AUTOGRADING_LOG_PATH}                                           >> $CONFIGURATION_FILE
 
