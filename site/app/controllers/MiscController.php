@@ -25,6 +25,10 @@ class MiscController extends AbstractController {
     }
 
     private function display_file() {
+        //Additional security
+        if (!($this->core->getUser()->accessGrading())) {
+            return false;
+        }
         foreach (explode(DIRECTORY_SEPARATOR, $_REQUEST['path']) as $part) {
             if ($part == ".." || $part == ".") {
                 throw new \InvalidArgumentException("Cannot have a part of the path just be dots");
