@@ -30,8 +30,8 @@ class LoggerTester extends \PHPUnit_Framework_TestCase {
         Logger::setLogPath($this->directory);
         $date = getdate(time());
         $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']);
-        $this->error = FileUtils::joinPaths($this->directory, $filename."_error.log");
-        $this->access = FileUtils::joinPaths($this->directory, $filename."_access.log");
+        $this->error = FileUtils::joinPaths($this->directory, 'error', $filename.".log");
+        $this->access = FileUtils::joinPaths($this->directory, 'access', $filename.".log");
     }
 
     public function tearDown() {
