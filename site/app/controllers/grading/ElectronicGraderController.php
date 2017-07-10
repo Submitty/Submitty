@@ -184,13 +184,27 @@ class ElectronicGraderController extends AbstractController {
         $graded = 0;
         $total = 0;
         if ($gradeable->isGradeByRegistration()) {
+            $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
+            if ($this->core->getUser()->accessAdmin() && $sections == null) {
+                $sections = $this->core->getQueries()->getRegistrationSections();
+                for ($i = 0; $i < count($sections); $i++) {
+                    $sections[$i] = $sections[$i]['sections_registration_id'];
+                }
+            }
             $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
             $total = array_sum($this->core->getQueries()->getTotalUserCountByRegistrationSections($sections));
             $graded = array_sum($this->core->getQueries()->getGradedUserCountByRegistrationSections($gradeable_id, $sections));
         }
         else {
+            $section_key = "rotating_section";
             $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+            if ($this->core->getUser()->accessAdmin() && $sections == null) {
+                $sections = $this->core->getQueries()->getRotatingSections();
+                for ($i = 0; $i < count($sections); $i++) {
+                    $sections[$i] = $sections[$i]['sections_rotating_id'];
+                }
+            }
             $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
             $total = array_sum($this->core->getQueries()->getTotalUserCountByRotatingSections($sections));
             $graded = array_sum($this->core->getQueries()->getGradedUserCountByRotatingSections($gradeable_id, $sections));
@@ -203,43 +217,30 @@ class ElectronicGraderController extends AbstractController {
             $progress = round(($graded / $total) * 100, 1);
         }
 
-        $user_ids_to_grade = array();
-        foreach ($users_to_grade as $u) {
-            $user_ids_to_grade[] = $u->getId();
-        }
+        $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
+        $gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
-        if (isset($_REQUEST['who_id'])) {
-            $who_id = $_REQUEST['who_id'];
-        }
-        else {
-            $gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade);
-            $who_id = "";
-            foreach ($gradeables_to_grade as $g) {
-                if (!$g->beenTAgraded()) {
-                    $who_id = $g->getUser()->getId();
-                    break; 
-                }
-            }
-            if ($who_id === "") {
-                $_SESSION['messages']['success'][] = "Finished grading for {$gradeable->getName()}";
-                $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
-            }
-        }
-
+        $who_id = "";
         $prev_id = "";
         $next_id = "";
         $break_next = false;
-        foreach ($user_ids_to_grade as $u_id) {
+        foreach ($gradeables_to_grade as $g) {
+            $id = $g->getUser()->getId();
             if ($break_next) {
-                $next_id = $u_id;
+                $next_id = $id;
                 break;
             }
-            if ($u_id === $who_id) {
+            if ((!isset($_REQUEST['who_id']) && !$g->beenTAgraded()) || ($id === $_REQUEST['who_id'])) {
+                $who_id = $id;
                 $break_next = true;
             }
             else {
-                $prev_id = $u_id;
+                $prev_id = $id;
             }
+        }
+        if ($who_id === "") {
+            $_SESSION['messages']['success'][] = "Finished grading for {$gradeable->getName()}";
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
