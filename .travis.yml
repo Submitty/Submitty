@@ -118,8 +118,6 @@ before_script:
   - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
   - sudo service apache2 restart
   #- ./.setup/travis/start.sh
-  - sudo sed -e "s?debug = false?debug = true?g" --in-place /usr/local/submitty/site/config/master.ini
-  - sudo sed -e "s?PamAuthentication?${AUTH_METHOD}?g" --in-place /usr/local/submitty/site/config/master.ini
   - sudo cat /usr/local/submitty/site/config/master.ini
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
