@@ -734,9 +734,16 @@ HTML;
                                         $title = "Student ";
                                     }
                                     if ($diff_viewer->hasDisplayActual()) {
-                                        //This gets rid of all the html tags, spaces and other things before checking length
-                                        //It doesn't get rid of line numbers though
-                                        if (strlen(trim(html_entity_decode(strip_tags($diff_viewer->getDisplayActual())), "\xC2\xA0\n\t")) < 110) {
+                                        $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayActual())), "\xC2\xA0\t")); 
+                                        $less_than_30 = true;
+                                        $arr_count = count($tmp_array_string);
+                                        for ($x = 0; $x < $arr_count; $x++) {
+                                            if(strlen($tmp_array_string[$x]) > 30) {
+                                                $less_than_30 = false;
+                                                $x = $arr_count;
+                                            }
+                                        }
+                                        if (substr_count($diff_viewer->getDisplayActual(), 'line_number') < 10 && $less_than_30) {
                                             $visible1 = "hidden";
                                         }
                                     } else {
@@ -787,7 +794,16 @@ HTML;
 
                                     if ($diff_viewer->hasDisplayExpected()) {
                                         $visible2 = "visible";
-                                        if (strlen(trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\n\t")) < 110) {
+                                        $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\t")); 
+                                        $less_than_30 = true;
+                                        $arr_count = count($tmp_array_string);
+                                        for ($x = 0; $x < $arr_count; $x++) {
+                                            if(strlen($tmp_array_string[$x]) > 30) {
+                                                $less_than_30 = false;
+                                                $x = $arr_count;
+                                            }
+                                        }
+                                        if (substr_count($diff_viewer->getDisplayExpected(), 'line_number') < 10 && $less_than_30) {
                                             $visible2 = "hidden";
                                         }
                                         $title1 = "Expected ";
