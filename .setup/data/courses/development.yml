@@ -11,6 +11,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
 
 - components:
   - gc_max_value: 5
@@ -21,6 +22,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -31,6 +33,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -41,6 +44,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -51,6 +55,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -61,6 +66,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -71,6 +77,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -81,6 +88,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -91,6 +99,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -101,6 +110,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -111,6 +121,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -121,6 +132,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
   
 - components:
   - gc_max_value: 5
@@ -131,4 +143,26 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
-  
+  eg_max_random_submissions: 0
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: choice_of_language
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: cpp_provided_code
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0

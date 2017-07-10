@@ -24,7 +24,7 @@
  * ARGS: token: string with token to search for, searchstring: string of where to search for token
  * RETURN: int
  * PURPOSE: Looks for a single token in a string using the Rabin-Karp rolling hash
- * method.  Returns starting index if found, -1 if not.	
+ * method.  Returns starting index if found, -1 if not.  
  */
 int RabinKarpSingle ( std::string token, std::string searchstring );
 
@@ -46,7 +46,7 @@ std::vector< std::string > splitTokens ( const std::string& tokens );
  * time where N is the length of the student and M is the length of the token.
  */
 TestResults* searchToken_doit (const TestCase &tc, const nlohmann::json& j);
-//( const std::string& student,			   			   const std::vector<std::string>& tokens );
+//( const std::string& student, const std::vector<std::string>& tokens );
 
 /* METHOD: searchTokens
  * ARGS: student: string of student output, token_vec: vector of strings based
@@ -55,7 +55,7 @@ TestResults* searchToken_doit (const TestCase &tc, const nlohmann::json& j);
  * PURPOSE: Another way of searching for tokens in the student output
  */
 TestResults* searchTokens ( const std::string& student,
-			    		    const std::vector<std::string>& tokens );
+                            const std::vector<std::string>& tokens );
 
 /* METHOD: searchAnyTokens
  * ARGS: student: string of student output, token_vec: vector of strings based
@@ -64,7 +64,7 @@ TestResults* searchTokens ( const std::string& student,
  * PURPOSE: Another way of searching for tokens in the student output
  */
 TestResults* searchAnyTokens ( const std::string& student,
-			       			   const std::vector<std::string>& tokens );
+                               const std::vector<std::string>& tokens );
 
 /* METHOD: searchAllTokens
  * ARGS: student: string of student output, token_vec: vector of strings based
@@ -77,7 +77,7 @@ TestResults* searchAnyTokens ( const std::string& student,
  * time where N is the length of the student and M is the length of the token.
  */
 TestResults* searchAllTokens ( const std::string& student,
-			       			   const std::vector<std::string>& tokens );
+                               const std::vector<std::string>& tokens );
 
 /* METHOD: buildTable
  * ARGS: buffer: integer the same size as the string keyword, keyword: string

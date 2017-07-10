@@ -26,6 +26,7 @@ use app\libraries\DatabaseUtils;
  * @method void setManualRegistration(bool $flag)
  * @method bool isManualRegistration()
  * @method array getGradingRegistrationSections()
+ * @method bool isLoaded()
  */
 class User extends AbstractModel {
     
@@ -75,7 +76,7 @@ class User extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details) {
+    public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;
@@ -93,7 +94,7 @@ class User extends AbstractModel {
 
         $this->last_name = $details['user_lastname'];
         $this->email = $details['user_email'];
-        $this->group = intval($details['user_group']);
+        $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
             $this->group = 4;
         }
@@ -104,14 +105,6 @@ class User extends AbstractModel {
         if (isset($details['grading_registration_sections'])) {
             $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
         }
-    }
-    
-    /**
-     * Gets whether the user was actually loaded from the DB with the given user id
-     * @return bool
-     */
-    public function isLoaded() {
-        return $this->loaded;
     }
     
     /**

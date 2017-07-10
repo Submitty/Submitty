@@ -104,8 +104,10 @@ def main():
 
     if cmd_exists('psql'):
         os.environ['PGPASSWORD'] = 'hsdbu'
-        os.system("psql -h localhost -U hsdbu --list | grep submitty_* | awk '{print $1}' | "
+        os.system("psql -U hsdbu --list | grep submitty* | awk '{print $1}' | "
                   "xargs -I \"@@\" dropdb -h localhost -U hsdbu \"@@\"")
+        os.system('psql -d postgres -U hsdbu -c "CREATE DATABASE submitty"')
+        os.system('psql -d submitty -U hsdbu -f {}/site/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
         del os.environ['PGPASSWORD']
 
     for user_file in glob.iglob(os.path.join(args.users_path, "*.yml")):

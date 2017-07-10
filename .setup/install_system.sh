@@ -372,23 +372,12 @@ fi
 
 a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
 
-echo -e "#%PAM-1.0
-auth required pam_unix.so
-account required pam_unix.so" > /etc/pam.d/httpd
-
+# A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
+# asking the user questions as well as searching the filesystem for certificates, etc.
 if [ ${VAGRANT} == 1 ]; then
-    # Loosen password requirements on vagrant box
-	sed -i '25s/^/\#/' /etc/pam.d/common-password
-	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
-    # Set the ServerName
-	# echo -e "\nServerName 10.0.2.15\n" >> /etc/apache2/apache2.conf
-fi
+    # comment out directory configs - should be converted to something more flexible
+    sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
-
-# comment out directory configs - should be converted to something more flexible
-sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
-
-if [ ${VAGRANT} == 1 ]; then
     # remove default sites which would cause server to mess up
     rm /etc/apache2/sites*/000-default.conf
     rm /etc/apache2/sites*/default-ssl.conf
@@ -399,9 +388,12 @@ if [ ${VAGRANT} == 1 ]; then
     # permissions: rw- r-- ---
     chmod 0640 /etc/apache2/sites-available/*.conf
     a2ensite submitty
+
+    sed -i '25s/^/\#/' /etc/pam.d/common-password
+	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 fi
 
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
+cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
 chmod 0640 /etc/apache2/suexec/www-data
 
 
@@ -527,6 +519,9 @@ sudo mkdir -p /usr/lib/cgi-bin
 sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
 apache2ctl -t
+
+PGPASSWORD=hsdbu psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/submitty_db.sql
 
 if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much

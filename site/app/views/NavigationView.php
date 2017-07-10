@@ -6,10 +6,16 @@ use \app\libraries\GradeableType;
 use app\models\Gradeable;
 
 class NavigationView extends AbstractView {
+    public function noAccessCourse() {
+        return <<<HTML
+<div class="content">
+   You don't have access to {$this->core->getConfig()->getCourseName()}. If you think this is mistake,
+   please contact your instructor to gain access.
+</div>
+HTML;
+    }
+
     public function showGradeables($sections_to_list) {
-
-        $return = "";
-
         $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -44,7 +50,6 @@ HTML;
         // ======================================================================================
         if ($this->core->getUser()->accessAdmin()) {
             $return .= <<<HTML
-        <!-- <button class="btn btn-primary" onclick="window.location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&this=New%20Gradeable'">New Gradeable</button> -->
         <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page'))}">New Gradeable</a>
         <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config'))}">Upload Config & Review Build Output</a>
 
@@ -57,7 +62,7 @@ HTML;
         $display_iris_grades_summary = $this->core->getConfig()->displayIrisGradesSummary();
         if ($display_iris_grades_summary) {
         $return .= <<<HTML
-        <button class="btn btn-primary" onclick="window.location.href='{$this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow'))}'">View Grades</button>
+        <a="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow'))}">View Grades</a>
 HTML;
           }
         $return .= <<<HTML
@@ -142,7 +147,7 @@ HTML;
 
             $lower_title = str_replace(" ", "_", strtolower($title));
             $return .= <<<HTML
-        <tr class="bar"><td colspan="4"></td></tr>
+        <tr class="bar"><td colspan="10"></td></tr>
         <tr class="colspan nav-title-row" id="{$lower_title}"><td colspan="4">{$title_to_category_title[$title]}</td></tr>
         <tbody id="{$lower_title}_tbody">
 HTML;
@@ -227,14 +232,14 @@ HTML;
                 }
                 $time = " @ H:i";
 
-                $gradeable_grade_range = 'VIEW FORM<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/y{$time}").")</span>";
+                $gradeable_grade_range = 'VIEW FORM<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}").")</span>";
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
-                  $gradeable_grade_range = 'VIEW SUBMISSIONS<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/y{$time}")."</span>)";
+                  $gradeable_grade_range = 'VIEW SUBMISSIONS<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}")."</span>)";
                 }
                 $temp_regrade_text = "";
                 if ($title_save=='ITEMS BEING GRADED') {
-                  $gradeable_grade_range = 'GRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/y{$time}").'</span>)';
-                  $temp_regrade_text = 'REGRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/y{$time}").'</span>)';
+                  $gradeable_grade_range = 'GRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/Y{$time}").'</span>)';
+                  $temp_regrade_text = 'REGRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/Y{$time}").'</span>)';
                 }
                 if ($title_save=='GRADED') {
                   $gradeable_grade_range = 'GRADE';
@@ -249,7 +254,7 @@ HTML;
 
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
 
-                    $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getOpenDate()->format("m/d/y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getDueDate()->format("m/d/y{$time}")."</span>)";
+                    $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getOpenDate()->format("m/d/Y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getDueDate()->format("m/d/Y{$time}")."</span>)";
                     if ($title=="GRADED" || $title=="ITEMS BEING GRADED") { $display_date = ""; }
                     if ($g_data->getActiveVersion() >= 1 && $title == "OPEN") { //if the user submitted something on time
                         $button_text = "RESUBMIT {$submission_status["SUBMITTED"]} {$submission_status["AUTOGRADE"]} {$display_date}";
@@ -284,18 +289,20 @@ HTML;
 						if (($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() != 0 && $g_data->getActiveVersion() >= 1
 							&& $title_save == "CLOSED" && $points_percent >= 50) || ($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() == 0 && $g_data->getActiveVersion() >= 1)) {
 						$gradeable_open_range = <<<HTML
-                 <button class="btn btn-default" style="width:100%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">
+                 <a class="btn btn-default btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable}">
                      {$button_text}
-                 </button>
+                 </a>
 HTML;
 						}
 						else { 
 							$gradeable_open_range = <<<HTML
-                 <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">
+                 <a class="btn {$title_to_button_type_submission[$title]} btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable}">
                      {$button_text}
-                 </button>
+                 </a>
 HTML;
 						}
+
+                        
                         
 						//If the button is autograded and has been submitted once, give a progress bar.
 						if ($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() != 0 && $g_data->getActiveVersion() >= 1
@@ -421,21 +428,21 @@ HTML;
                             //if $TA_percent is 100, change the text to REGRADE
                             if ($TA_percent == 100 && $title_save=='ITEMS BEING GRADED') {
                                 $gradeable_grade_range = <<<HTML
-                                <button class="btn btn-default" style="width:100%;" \\
-                                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}'">
-                                {$temp_regrade_text}</button>
+                                <a class="btn btn-default btn-nav" \\
+                                href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
+                                {$temp_regrade_text}</a>
 HTML;
                             } else if ($TA_percent == 100 && $title_save=='GRADED') {
                                 $gradeable_grade_range = <<<HTML
-                                <button class="btn btn-default" style="width:100%;" \\
-                                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}'">
-                                REGRADE</button>
+                                <a class="btn btn-default btn-nav" \\
+                                href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
+                                REGRADE</a>
 HTML;
                             } else {
                                 $gradeable_grade_range = <<<HTML
-                                <button class="btn {$title_to_button_type_grading[$title_save]}" style="width:100%;" \\
-                                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}'">
-                                {$gradeable_grade_range}</button>
+                                <a class="btn {$title_to_button_type_grading[$title_save]} btn-nav" \\
+                                href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
+                                {$gradeable_grade_range}</a>
 HTML;
                             }                           
                             //Give the TAs a progress bar too                        
@@ -484,17 +491,17 @@ HTML;
                     //<!--onclick="location.href='{$ta_base_url}/account/account-checkpoints-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">-->
                     if($g_data->getType() == GradeableType::CHECKPOINTS){
                        $gradeable_grade_range = <<<HTML
-                <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
-                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable))}'">
-                {$gradeable_grade_range}</button>
+                <a class="btn {$title_to_button_type_grading[$title]} btn-nav" \\
+                href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable))}">
+                {$gradeable_grade_range}</a>
 HTML;
                     }
                     // onclick="location.href='{$ta_base_url}/account/account-numerictext-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                     elseif($g_data->getType() == GradeableType::NUMERIC_TEXT){
                         $gradeable_grade_range = <<<HTML
-                <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
-                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable))}'">
-                {$gradeable_grade_range}</button>
+                <a class="btn {$title_to_button_type_grading[$title]} btn-nav" \\
+                href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable))}">
+                {$gradeable_grade_range}</a>
 HTML;
                     }
                 }
@@ -504,24 +511,20 @@ HTML;
                 $admin_team_list = '';
                 if (($g_data->isTeamAssignment()) && (($title == "OPEN") || ($title == "BETA"))) {
                     $gradeable_team_range = <<<HTML
-                <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable, 'page' => 'team'))}'"> MANAGE TEAM
-                </button>
+                <a class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable, 'page' => 'team'))}"> MANAGE TEAM
+                </a>
 HTML;
                 }
                     // View teams button, only visible to instructors on team assignments
                 if (($this->core->getUser()->accessAdmin()) && ($g_data->isTeamAssignment())) {
                     $admin_team_list .= <<<HTML
-                <button class="btn btn-default" style="width:100%;" onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'team_list', 'gradeable_id' => $gradeable))}'"> View Teams
-                </button>
+                <a class="btn btn-default" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'team_list', 'gradeable_id' => $gradeable))}"> View Teams
+                </a>
 HTML;
                 }
 
                 if ($this->core->getUser()->accessAdmin()) {
                     $admin_button = <<<HTML
-            <!--<button class="btn btn-default" style="width:100%;" \\
-                onclick="location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&action=edit&id={$gradeable}&this=Edit%20Gradeable'">
-                    Edit
-                </button> -->
                 <a class="btn btn-default" style="width:100%;" \\
                 href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable))}">
                     Edit
@@ -532,6 +535,37 @@ HTML;
                     $admin_button = "";
                 }
 
+                if ($title_save === "ITEMS BEING GRADED" && $this->core->getUser()->accessAdmin()) {
+                    $quick_links = <<<HTML
+                        <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable, 'quick_link_action' => 'release_grades_now'))}">
+                        RELEASE GRADES NOW
+                        </a>
+HTML;
+                } else if ($title_save === "FUTURE" && $this->core->getUser()->accessAdmin()) {
+                    $quick_links = <<<HTML
+                        <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable, 'quick_link_action' => 'open_ta_now'))}">
+                        OPEN TO TAS NOW
+                        </a>
+HTML;
+                }
+                else if($title_save === "BETA" && $this->core->getUser()->accessAdmin()) {
+                    if($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
+                        $quick_links = <<<HTML
+                        <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable, 'quick_link_action' => 'open_students_now'))}">
+                        OPEN NOW
+                        </a>
+HTML;
+                    } else {
+                        $quick_links = <<<HTML
+                        <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable, 'quick_link_action' => 'open_grading_now'))}">
+                        OPEN TO GRADING NOW
+                        </a>
+HTML;
+                    }
+                } else {
+                    $quick_links = "";
+                }
+
                 if (!$this->core->getUser()->accessGrading()) {
                     $gradeable_grade_range = "";
 
@@ -540,21 +574,22 @@ HTML;
                 $return .= <<<HTML
             <tr class="gradeable_row">
                 <td>{$gradeable_title}</td>
-                <td style="padding: 10px;">{$gradeable_team_range}</td>
-                <td style="padding: 10px;">{$admin_team_list}</td>
-                <td style="padding: 10px;">{$gradeable_open_range}</td>
+                <td style="padding: 20px;">{$gradeable_team_range}</td>
+                <td style="padding: 20px;">{$admin_team_list}</td>
+                <td style="padding: 20px;">{$gradeable_open_range}</td>
 HTML;
                 if ($this->core->getUser()->accessGrading()) {
                     $return .= <<<HTML
-                <td style="padding: 10px;">{$gradeable_grade_range}</td>
-                <td>{$admin_button}</td>
+                <td style="padding: 20px;">{$gradeable_grade_range}</td>
+                <td style="padding: 20px;">{$admin_button}</td>
+                <td style="padding: 20px;">{$quick_links}</td>
 HTML;
                 }
                 $return .= <<<HTML
             </tr>
 HTML;
             }
-            $return .= '</tbody><tr class="colspan"><td colspan="4" style="border-bottom:2px black solid;"></td></tr>';
+            $return .= '</tbody><tr class="colspan"><td colspan="10" style="border-bottom:2px black solid;"></td></tr>';
         }
 
         if ($found_assignment == false) {

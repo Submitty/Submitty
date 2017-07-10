@@ -18,18 +18,18 @@
  * PURPOSE: Removes all instances of \r\n and replaces with \n
  */
  void clean(std::string & content) {
-	int pos = (int) content.find('\r');
-	while (pos != std::string::npos) {
-		if (content[pos + 1] == '\n') {
-			content.erase(pos, 1);
-		} else if (content[pos - 1] == '\n') {
-			content.erase(pos, 1);
-		} else {
-			content[pos] = '\n';
-		}
-		pos = (int) content.find('\r');
-	}
-	return;
+  int pos = (int) content.find('\r');
+  while (pos != std::string::npos) {
+    if (content[pos + 1] == '\n') {
+      content.erase(pos, 1);
+    } else if (content[pos - 1] == '\n') {
+      content.erase(pos, 1);
+    } else {
+      content[pos] = '\n';
+    }
+    pos = (int) content.find('\r');
+  }
+  return;
 }
 
 /* METHOD: stringToWords
@@ -40,20 +40,20 @@
  * lines in the body of text
  */
 vectorOfWords stringToWords(std::string text) {
-	vectorOfWords contents;
-	std::stringstream input(text);
-	
-	std::string word;
-	while (getline(input, word)) {
-		std::vector<std::string> text;
-		std::stringstream line;
-		line << word;
-		while (line >> word) {
-			text.push_back(word);
-		}
-		contents.push_back(text);
-	}
-	return contents;
+  vectorOfWords contents;
+  std::stringstream input(text);
+  
+  std::string word;
+  while (getline(input, word)) {
+    std::vector<std::string> text;
+    std::stringstream line;
+    line << word;
+    while (line >> word) {
+      text.push_back(word);
+    }
+    contents.push_back(text);
+  }
+  return contents;
 }
 
 std::string LimitLineLength(std::string word) {
@@ -66,20 +66,20 @@ std::string LimitLineLength(std::string word) {
 
 
 vectorOfWords stringToWordsLimitLineLength(std::string text) {
-	vectorOfWords contents;
-	std::stringstream input(text);
-	
-	std::string word;
-	while (getline(input, word)) {
-		std::vector<std::string> text;
-		std::stringstream line;
-		line << word;
-		while (line >> word) {
-   		  text.push_back(LimitLineLength(word));
-		}
-		contents.push_back(text);
-	}
-	return contents;
+  vectorOfWords contents;
+  std::stringstream input(text);
+  
+  std::string word;
+  while (getline(input, word)) {
+    std::vector<std::string> text;
+    std::stringstream line;
+    line << word;
+    while (line >> word) {
+         text.push_back(LimitLineLength(word));
+    }
+    contents.push_back(text);
+  }
+  return contents;
 }
 
 
@@ -104,30 +104,30 @@ int removeDOSnewlines(std::string& line) {
  * PURPOSE: eachstring is a line of text from the input
  */
 vectorOfLines stringToLines(std::string text, const nlohmann::json &j) {
-	vectorOfLines contents;
-	std::stringstream input(text);
+  vectorOfLines contents;
+  std::stringstream input(text);
 
-	bool has_DOS_newline = false;
-	int DOS_newline_count = 0;
+  bool has_DOS_newline = false;
+  int DOS_newline_count = 0;
 
-	bool ignore_line_endings = j.value("ignore_line_endings",false);
+  bool ignore_line_endings = j.value("ignore_line_endings",false);
 
-	std::string line;
-	while (getline(input, line)) {
-		if (line.find('\r') != std::string::npos) {
-		  has_DOS_newline = true;
-		  if (ignore_line_endings) {
-		    DOS_newline_count += removeDOSnewlines(line);
-		  }
-		}
-		contents.push_back(line);
-	}
-	if (has_DOS_newline && DOS_newline_count == 0) {
-	  std::cout << "WARNING:  This file has DOS newlines." << std::endl;
-	} else if (DOS_newline_count > 0) {
-	  std::cout << "NOTE:  Removed " << DOS_newline_count << " DOS newlines" << std::endl;
-	}
-	return contents;
+  std::string line;
+  while (getline(input, line)) {
+    if (line.find('\r') != std::string::npos) {
+      has_DOS_newline = true;
+      if (ignore_line_endings) {
+        DOS_newline_count += removeDOSnewlines(line);
+      }
+    }
+    contents.push_back(line);
+  }
+  if (has_DOS_newline && DOS_newline_count == 0) {
+    std::cout << "WARNING:  This file has DOS newlines." << std::endl;
+  } else if (DOS_newline_count > 0) {
+    std::cout << "NOTE:  Removed " << DOS_newline_count << " DOS newlines" << std::endl;
+  }
+  return contents;
 }
 
 /* METHOD: linesToString
@@ -138,12 +138,12 @@ vectorOfLines stringToLines(std::string text, const nlohmann::json &j) {
  * PURPOSE: string converted from the vector input
  */
 std::string linesToString(vectorOfLines text) {
-	std::string contents;
-	
-	for (int a = 0; a < text.size(); a++) {
-		contents += text[a] + '\n';
-	}
-	return contents;
+  std::string contents;
+  
+  for (int a = 0; a < text.size(); a++) {
+    contents += text[a] + '\n';
+  }
+  return contents;
 }
 
 /* METHOD: linesToWords
@@ -156,17 +156,17 @@ std::string linesToString(vectorOfLines text) {
  * lines in the body of text
  */
 vectorOfWords linesToWords(vectorOfLines text) {
-	vectorOfWords contents;
-	for (int a = 0; a < text.size(); a++) {
-		std::string word;
-		std::stringstream line(text[a]);
-		std::vector<std::string> temp;
-		while (line >> word) {
-			temp.push_back(word);
-		}
-		contents.push_back(temp);
-	}
-	return contents;
+  vectorOfWords contents;
+  for (int a = 0; a < text.size(); a++) {
+    std::string word;
+    std::stringstream line(text[a]);
+    std::vector<std::string> temp;
+    while (line >> word) {
+      temp.push_back(word);
+    }
+    contents.push_back(temp);
+  }
+  return contents;
 }
 
 /* METHOD: wordsToString
@@ -179,21 +179,21 @@ vectorOfWords linesToWords(vectorOfLines text) {
  * PURPOSE: convert text back to original raw form
  */
 std::string wordsToString(vectorOfWords text) {
-	std::string contents;
-	for (int a = 0; a < text.size(); a++) {
-		std::string line;
-		if (a > 0) {
-			contents += "\n";
-		}
-		for (int b = 0; b < text[a].size(); b++) {
-			if (b > 0) {
-				line += " ";
-			}
-			line += text[a][b];
-		}
-		contents += line;
-	}
-	return contents;
+  std::string contents;
+  for (int a = 0; a < text.size(); a++) {
+    std::string line;
+    if (a > 0) {
+      contents += "\n";
+    }
+    for (int b = 0; b < text[a].size(); b++) {
+      if (b > 0) {
+        line += " ";
+      }
+      line += text[a][b];
+    }
+    contents += line;
+  }
+  return contents;
 }
 
 /* METHOD: wordsToLines
@@ -206,16 +206,16 @@ std::string wordsToString(vectorOfWords text) {
  * is a line of text
  */
 vectorOfLines wordsToLines(vectorOfWords text) {
-	vectorOfLines contents;
-	for (int a = 0; a < text.size(); a++) {
-		std::string line;
-		for (int b = 0; b < text[a].size(); b++) {
-			if (b > 0) {
-				line += " ";
-			}
-			line += text[a][b];
-		}
-		contents.push_back(line);
-	}
-	return contents;
+  vectorOfLines contents;
+  for (int a = 0; a < text.size(); a++) {
+    std::string line;
+    for (int b = 0; b < text[a].size(); b++) {
+      if (b > 0) {
+        line += " ";
+      }
+      line += text[a][b];
+    }
+    contents.push_back(line);
+  }
+  return contents;
 }

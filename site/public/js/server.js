@@ -372,8 +372,7 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
         try{
             response = JSON.parse(response);
             if (response['status'] === 'success') {
-                console.log("Success");
-                callbackSuccess();
+                callbackSuccess(response);
             }
             else {
                 console.log(response['message']);
@@ -381,7 +380,6 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
                 if (response['status'] === 'error') {
                     window.alert("[SAVE ERROR] Refresh Page");
                 }
-
             }
         }
         catch (e) {
@@ -590,6 +588,138 @@ function setupNumericTextCells() {
                 $(elem).css("background-color", "#ff7777");
             }
         );
+    });
+
+    $("input[class=csvButtonUpload]").change(function() { 
+        var confirmation = window.confirm("WARNING! \nPreviously entered data may be overwritten! " +
+        "This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for " +
+        "student id and one column for each field. Columns and field types must match.");
+        if (confirmation) {
+            var f = $('#csvUpload').get(0).files[0];                        
+            if(f) {
+                var reader = new FileReader();
+                reader.readAsText(f);
+                reader.onload = function(evt) {
+                    var breakOut = false; //breakOut is used to break out of the function and alert the user the format is wrong
+                    var lines = (reader.result).trim().split(/\r\n|\n/);
+                    var tempArray = lines[0].split(','); 
+                    var csvLength = tempArray.length; //gets the length of the array, all the tempArray should be the same length
+                    for (var k = 0; k < lines.length && !breakOut; k++) {                        
+                        tempArray = lines[k].split(',');
+                        breakOut = (tempArray.length === csvLength) ? false : true; //if tempArray is not the same length, break out
+                    }
+                    var textChecker = 0;
+                    var num_numeric = 0;
+                    var num_text = 0;
+                    var user_ids = [];
+                    var component_ids = [];
+                    var get_once = true;
+                    var gradeable_id = "";
+                    if (!breakOut){
+                        $('.cell-all').each(function() {
+                            user_ids.push($(this).parent().data("user"));
+                            if(get_once) {
+                                num_numeric = $(this).parent().parent().data("numnumeric");
+                                num_text = $(this).parent().parent().data("numtext");
+                                component_ids = $(this).parent().parent().data("compids");
+                                gradeable_id = $(this).parent().data("gradeable");
+                                get_once = false;
+                                if (csvLength !== 4 + num_numeric + num_text) {
+                                    breakOut = true;
+                                    return false;
+                                }
+                                var k = 3; //checks if the file has the right number of numerics
+                                tempArray = lines[0].split(','); 
+                                if(num_numeric > 0) {
+                                    for (k = 3; k < num_numeric + 4; k++) { 
+                                        if (isNaN(Number(tempArray[k]))) {
+                                            breakOut = true;
+                                            return false;                                           
+                                        }
+                                    }
+                                }
+                                    
+                                //checks if the file has the right number of texts
+                                while (k < csvLength) {
+                                    textChecker++;
+                                    k++;
+                                }
+                                if (textChecker !== num_text) {
+                                    breakOut = true;
+                                    return false;
+                                }
+                            }
+                        });
+                    }
+                    if (!breakOut){
+                        submitAJAX(
+                            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'upload_csv_numeric'}),
+                            {'csrf_token': csrfToken, 'g_id': gradeable_id, 'users': user_ids, 'component_ids' : component_ids,
+                            'num_numeric' : num_numeric, 'num_text' : num_text, 'big_file': reader.result},
+                            function(returned_data) {
+                                $('.cell-all').each(function() {
+                                    for (var x = 0; x < returned_data['data'].length; x++) {
+                                        if ($(this).parent().data("user") === returned_data['data'][x]['username']) {
+                                            var starting_index1 = 0;
+                                            var starting_index2 = 3;
+                                            var value_str = "value_";
+                                            var status_str = "status_";
+                                            var value_temp_str = "value_";
+                                            var status_temp_str = "status_";
+                                            var total = 0;
+                                            var y = starting_index1;
+                                            var z = starting_index2; //3 is the starting index of the grades in the csv
+                                            //puts all the data in the form
+                                            for (z = starting_index2; z < num_numeric + starting_index2; z++, y++) {
+                                                value_temp_str = value_str + y;
+                                                status_temp_str = status_str + y;
+                                                $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val(returned_data['data'][x][value_temp_str]);
+                                                if (returned_data['data'][x][status_temp_str] === "OK") {
+                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ffffff"); 
+                                                } else {
+                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ff7777");
+                                                }
+
+                                                if($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val() == 0) {
+                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "#bbbbbb");
+                                                } else {
+                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "");
+                                                }
+
+                                                total += Number($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val());
+                                            }
+                                            $('#total-'+$(this).parent().data("row")).val(total);
+                                            z++;
+                                            var counter = 0;
+                                            while (counter < num_text) {
+                                                value_temp_str = value_str + y;
+                                                status_temp_str = status_str + y;
+                                                $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2-1)).val(returned_data['data'][x][value_temp_str]);
+                                                z++;
+                                                y++;
+                                                counter++;
+                                            }
+
+                                            x = returned_data['data'].length;
+                                        }
+                                    }
+                                });
+                            },
+                            function() {
+                                alert("submission error");
+                            }
+                        );
+                    }
+
+                    if (breakOut) {
+                        alert("CVS upload failed! Format file incorrect.");
+                    }
+                }
+            }
+        } else {
+            var f = $('#csvUpload');
+            f.replaceWith(f = f.clone(true));
+        }
     });
 }
 

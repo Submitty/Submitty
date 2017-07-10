@@ -1,127 +1,147 @@
 {
-"testcases": [
-		{
-			"test_name": "Test 1 CORRECT SOLUTION",
-			"autochecks": [
-				{
-					"actual_file":"test01_output_correct.txt",
-					"expected_file":"test_output/testassignment/output_instructor.txt",
-					"difference_file":"test01_0_diff.json",
-					"description": "output_correct.txt"
-				},
-				{
-					"actual_file":"test01_output_correct.txt",
-					"expected_file":"test_output/testassignment/output_instructor.txt",
-					"difference_file":"test01_1_diff.json",
-					"description": "output_correct.txt"
-				}
-			],
-			"points_awarded": 10
-		},
-		{
-			"test_name": "Test 2 DUPLICATE LINES - Required Order",
-			"autochecks": [
-				{
-					"actual_file":"test02_output_duplicates.txt",
-					"expected_file":"test_output/testassignment/output_instructor.txt",
-					"difference_file":"test02_0_diff.json",
-					"description": "output_duplicates.txt"
-				}
-			],
-			"points_awarded": 8
-		},
-		{
-			"test_name": "Test 3 DUPLICATE LINES - Re-Ordering OK",
-			"autochecks": [
-				{
-					"actual_file":"test03_output_duplicates.txt",
-					"expected_file":"test_output/testassignment/output_instructor.txt",
-					"difference_file":"test03_0_diff.json",
-					"description": "output_duplicates.txt",
-					"messages": ["ERROR: 17 duplicate line(s)"]
-				}
-			],
-			"points_awarded": 8
-		},
-		{
-			"test_name": "Test 4 EXTRA LINES - Required Order",
-			"autochecks": [
-				{
-					"actual_file":"test04_output_extra.txt",
-					"expected_file":"test_output/testassignment/output_instructor.txt",
-					"difference_file":"test04_0_diff.json",
-					"description": "output_extra.txt"
-				}
-			],
-			"points_awarded": 8
-		},
-		{
-			"test_name": "Test 5 EXTRA LINES - Re-Ordering OK",
-			"autochecks": [
-				{
-					"actual_file":"test05_output_extra.txt",
-					"expected_file":"test_output/testassignment/output_instructor.txt",
-					"difference_file":"test05_0_diff.json",
-					"description": "output_extra.txt",
-					"messages": ["ERROR: 21 incorrect line(s)"]
-				}
-			],
-			"points_awarded": 7
-		},
-		{
-			"test_name": "Test 6 MISSING LINES - Required Order",
-			"autochecks": [
-				{
-					"actual_file":"test06_output_missing.txt",
-					"expected_file":"test_output/testassignment/output_instructor.txt",
-					"difference_file":"test06_0_diff.json",
-					"description": "output_missing.txt"
-				}
-			],
-			"points_awarded": 7
-		},
-		{
-			"test_name": "Test 7 MISSING LINES - Re-Ordering OK",
-			"autochecks": [
-				{
-					"actual_file":"test07_output_missing.txt",
-					"expected_file":"test_output/testassignment/output_instructor.txt",
-					"difference_file":"test07_0_diff.json",
-					"description": "output_missing.txt",
-					"messages": ["ERROR: 21 missing line(s)"]
-				}
-			],
-			"points_awarded": 7
-		},
-		{
-			"test_name": "Test 8 OUT OF ORDER - Required Order",
-			"autochecks": [
-				{
-					"actual_file":"test08_output_reordered.txt",
-					"expected_file":"test_output/testassignment/output_instructor.txt",
-					"difference_file":"test08_0_diff.json",
-					"description": "output_reordered.txt"
-				}
-			],
-			"points_awarded": 1
-		},
-		{
-			"test_name": "Test 9 OUT OF ORDER - Re-Ordering OK",
-			"autochecks": [
-				{
-					"actual_file":"test09_output_reordered.txt",
-					"expected_file":"test_output/testassignment/output_instructor.txt",
-					"difference_file":"test09_0_diff.json",
-					"description": "output_reordered.txt",
-					"messages": ["ERROR: 3 incorrect line(s), ERROR: 3 duplicate line(s), ERROR: 3 missing line(s)"]
-				}
-			],
-			"points_awarded": 9
-		},
+    "testcases": [
+        {
+            "autochecks": [
                 {
-                    "points_awarded": 0,
-                    "test_name": "Test 10 Submission Limit",
-                    "view_testcase": false
+                    "actual_file": "test01_output_correct.txt",
+                    "description": "output_correct.txt",
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_instructor.txt"
+                },
+                {
+                    "actual_file": "test01_output_correct.txt",
+                    "description": "output_correct.txt",
+                    "difference_file": "test01_1_diff.json",
+                    "expected_file": "test_output/testassignment/output_instructor.txt"
                 }
-	]
+            ],
+            "points_awarded": 10,
+            "test_name": "Test 1 CORRECT SOLUTION"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_output_duplicates.txt",
+                    "description": "output_duplicates.txt",
+                    "difference_file": "test02_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_instructor.txt"
+                }
+            ],
+            "points_awarded": 8,
+            "test_name": "Test 2 DUPLICATE LINES - Required Order"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03_output_duplicates.txt",
+                    "description": "output_duplicates.txt",
+                    "difference_file": "test03_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_instructor.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: 17 duplicate line(s)",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 8,
+            "test_name": "Test 3 DUPLICATE LINES - Re-Ordering OK"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04_output_extra.txt",
+                    "description": "output_extra.txt",
+                    "difference_file": "test04_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_instructor.txt"
+                }
+            ],
+            "points_awarded": 8,
+            "test_name": "Test 4 EXTRA LINES - Required Order"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test05_output_extra.txt",
+                    "description": "output_extra.txt",
+                    "difference_file": "test05_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_instructor.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: 21 incorrect line(s)",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 7,
+            "test_name": "Test 5 EXTRA LINES - Re-Ordering OK"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test06_output_missing.txt",
+                    "description": "output_missing.txt",
+                    "difference_file": "test06_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_instructor.txt"
+                }
+            ],
+            "points_awarded": 7,
+            "test_name": "Test 6 MISSING LINES - Required Order"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test07_output_missing.txt",
+                    "description": "output_missing.txt",
+                    "difference_file": "test07_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_instructor.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: 21 missing line(s)",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 7,
+            "test_name": "Test 7 MISSING LINES - Re-Ordering OK"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test08_output_reordered.txt",
+                    "description": "output_reordered.txt",
+                    "difference_file": "test08_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_instructor.txt"
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 8 OUT OF ORDER - Required Order"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test09_output_reordered.txt",
+                    "description": "output_reordered.txt",
+                    "difference_file": "test09_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_instructor.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: 3 incorrect line(s), ERROR: 3 duplicate line(s), ERROR: 3 missing line(s)",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 9,
+            "test_name": "Test 9 OUT OF ORDER - Re-Ordering OK"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 10 Submission Limit",
+            "view_testcase": false
+        }
+    ]
 }

@@ -68,6 +68,19 @@ class GradeSummary extends AbstractModel {
         
         $autograding_score = $gradeable->getGradedAutoGraderPoints();
         $ta_grading_score = $gradeable->getGradedTAPoints();
+
+        $gradedVersion = $gradeable->getGradedVersion();
+        $activeVersion = $gradeable->getActiveVersion();
+        if(!isset($gradedVersion) || $gradedVersion == "" || $gradedVersion == null) {
+            $this_g['note'] = "SCORE BASED ON CURRENT ACTIVE VERSION";            
+        }
+        else if($gradedVersion !== $activeVersion){
+            // should probably write a new query instead of this
+            $gradeable->loadResultDetails();
+            $autograding_score = $gradeable->getVersions()[$gradedVersion]->getNonHiddenTotal() + $gradeable->getVersions()[$gradedVersion]->getHiddenTotal();
+            $this_g['note'] = "GRADED VERSION DOES NOT MATCH ACTIVE VERSION";
+        }
+                
         
         $this_g['id'] = $gradeable->getId();
         $this_g['name'] = $gradeable->getName();
@@ -96,14 +109,10 @@ class GradeSummary extends AbstractModel {
     private function addLateDays(&$this_g, $ldu, $gradeable) {
         $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
 
-        if(!is_null($gradeable->getStatus())) {
-            if ($gradeable->getStatus() == 0 || $gradeable->getStatus() == 3) {
-                $this_g["score"] = 0;
-            }
+        if(substr($late_days['status'], 0, 3) == 'Bad') {
+            $this_g["score"] = 0;
         }
-        if(!is_null($late_days['status'])){
-            $this_g['status'] = $late_days['status'];
-        }
+        $this_g['status'] = $late_days['status'];
 
         if (array_key_exists('late_days_charged', $late_days) && $late_days['late_days_used'] > 0) {
 
