@@ -1,10 +1,10 @@
 <?php
 
-namespace app\libraries;
+namespace app\views;
 
-class AutogradingResultsViewer {
+class AutogradingView extends AbstractView {
 
-    function DisplayResults($gradeable, $show_hidden=false) {
+    public function showResults($gradeable, $show_hidden=false) {
         $return = "";
         $has_badges = false;
         if ($gradeable->getNormalPoints() > 0) {
@@ -37,7 +37,7 @@ HTML;
                     $background = "red-background";
                 }
                 $return .= <<<HTML
-<div class="box">
+<div class="box" style="background-color:#D3D3D3;">
     <div class="box-title">
         <span class="badge {$background}">{$gradeable->getGradedAutograderPoints()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</span>
         <h4>Total (With Hidden Points)</h4>
@@ -74,12 +74,18 @@ HTML;
             if (!$testcase->viewTestcase()) {
                 continue;
             }
+            $background = "";
+            $hidden_title = "";
+            if ($testcase->isHidden() && $show_hidden) {
+                $background = "style=\"background-color:#D3D3D3;\"";
+                $hidden_title = "HIDDEN: ";
+            }
             $div_click = "";
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
                 $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
             }
             $return .= <<<HTML
-<div class="box">
+<div class="box" {$background}>
     <div class="box-title" {$div_click}>
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
@@ -88,12 +94,12 @@ HTML;
 HTML;
             }
             if ($testcase->hasPoints()) {
-                if ($testcase->isHidden()) {
+                if ($testcase->isHidden() && !$show_hidden) {
                     $return .= <<<HTML
         <div class="badge">Hidden</div>
 HTML;
                 }
-                if (!$testcase->isHidden() || $show_hidden) {
+                else {
                     $showed_badge = false;
                     $background = "";
                     if ($testcase->isExtraCredit()) {
@@ -159,7 +165,7 @@ HTML;
 HTML;
             }
             $return .= <<<HTML
-            <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}&nbsp;&nbsp;{$testcase_message}</h4>
+            <h4>{$hidden_title}{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}&nbsp;&nbsp;{$testcase_message}</h4>
     </div>
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
@@ -185,10 +191,6 @@ HTML;
                     $return .= <<<HTML
                 <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 0)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i></span></h4>
                 <div id="container_{$count}_{$autocheck_cnt}_0">
-                    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
-                    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
-                    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
-                    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />
 HTML;
                     foreach ($autocheck->getMessages() as $message) {
                         $type_class = "black-message";
@@ -229,10 +231,6 @@ HTML;
             <div class='diff-element'>
                 <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 1)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i></span></h4>
                 <div id="container_{$count}_{$autocheck_cnt}_1">
-                    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
-                    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
-                    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
-                    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />
 HTML;
                         for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
                             $return .= <<<HTML

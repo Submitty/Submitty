@@ -582,7 +582,7 @@ HTML;
 HTML;
                 }
                 else {
-                    $return .= AutogradingResultsViewer::DisplayResults($gradeable);
+                    $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable);
                 }
                 $return .= <<<HTML
     </div>

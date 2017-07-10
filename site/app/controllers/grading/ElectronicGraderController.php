@@ -220,7 +220,7 @@ class ElectronicGraderController extends AbstractController {
         $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
         $gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
-        $who_id = "";
+        $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
         $prev_id = "";
         $next_id = "";
         $break_next = false;
@@ -230,7 +230,7 @@ class ElectronicGraderController extends AbstractController {
                 $next_id = $id;
                 break;
             }
-            if ((!isset($_REQUEST['who_id']) && !$g->beenTAgraded()) || ($id === $_REQUEST['who_id'])) {
+            if (($who_id === "" && !$g->beenTAgraded()) || $who_id === $id) {
                 $who_id = $id;
                 $break_next = true;
             }
