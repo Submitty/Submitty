@@ -89,17 +89,18 @@ CREATE FUNCTION csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader
         -- Remove any existing record for this student for this gradeable
         DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
 
-        INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_graded_version) VALUES (gradeable_id, line[1],grader_id, '', 1);
+        INSERT INTO gradeable_data(g_id, gd_user_id, gd_overall_comment) VALUES (gradeable_id, line[1], '', 1);
 
         SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
 
         FOR j IN 1..size
         LOOP
           IF istext[j] THEN
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_component_comment) VALUES (gcids[j], gdid,0, line[j+1]);
+          --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
           ELSE
             score := CAST(line[j+1] AS NUMERIC);
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_component_comment) VALUES (gcids[j], gdid, score, '');
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
           END IF;
         END LOOP;
 
@@ -625,14 +626,6 @@ ALTER TABLE ONLY gradeable_component
 
 ALTER TABLE ONLY gradeable_data
     ADD CONSTRAINT gradeable_data_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
-
-
---
--- Name: gradeable_data_gd_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY gradeable_data
-    ADD CONSTRAINT gradeable_data_gd_grader_id_fkey FOREIGN KEY (gd_grader_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --
