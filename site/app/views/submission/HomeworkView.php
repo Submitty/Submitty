@@ -726,15 +726,25 @@ HTML;
 HTML;
 
                                     $title = "";
+                                    $visible1 = "visible";
                                     $return .= <<<HTML
                             <div class='diff-element'>
 HTML;
                                     if ($diff_viewer->hasDisplayExpected()) {
                                         $title = "Student ";
                                     }
+                                    if ($diff_viewer->hasDisplayActual()) {
+                                        //I unfornately have no idea how the strlen is measured. It's not the number of characters in there
+                                        //an extra 250ish characters are added on for some reason.
+                                        if (strlen($diff_viewer->getDisplayActual()) < 350) {
+                                            $visible1 = "hidden";
+                                        }
+                                    } else {
+                                        $visible1 = "hidden";
+                                    }
                                     $title .= $description;
                                     $return .= <<<HTML
-                                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 0)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i> </span> </h4>
+                                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 0)" style="visibility: {$visible1}"> <i class="fa fa-window-restore" style="visibility: {$visible1}; cursor: pointer;"></i> </span> </h4>
                                 <div id="container_{$count}_{$autocheck_cnt}_0">
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
@@ -776,11 +786,15 @@ HTML;
 HTML;
 
                                     if ($diff_viewer->hasDisplayExpected()) {
+                                        $visible2 = "visible";
+                                        if (strlen($diff_viewer->getDisplayExpected()) < 350) {
+                                            $visible2 = "hidden";
+                                        }
                                         $title1 = "Expected ";
                                         $title1 .= $description;
                                         $return .= <<<HTML
                             <div class='diff-element'>
-                                <h4>Expected {$description} <span onclick="openPopUp('{$title1}', {$count}, {$autocheck_cnt}, 1)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i> </span></h4>
+                                <h4>Expected {$description} <span onclick="openPopUp('{$title1}', {$count}, {$autocheck_cnt}, 1)" style="visibility: {$visible2}"> <i class="fa fa-window-restore" style="visibility: {$visible2}; cursor: pointer;"></i> </span></h4>
                                 <div id="container_{$count}_{$autocheck_cnt}_1">
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
