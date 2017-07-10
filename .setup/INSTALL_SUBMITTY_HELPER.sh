@@ -142,14 +142,14 @@ mkdir -p ${SUBMITTY_DATA_DIR}/logs/site/error
 
 
 # set the permissions of these directories
-chown  root:${COURSE_BUILDERS_GROUP}   $SUBMITTY_DATA_DIR
-chmod  751                           $SUBMITTY_DATA_DIR
-chown  root:${COURSE_BUILDERS_GROUP}   $SUBMITTY_DATA_DIR/courses
-chmod  751                           $SUBMITTY_DATA_DIR/courses
-chown  -R $HWPHP_USER:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/logs/site
-chmod  -R u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/logs/site
-chown  $HWCRON_USER:${COURSE_BUILDERS_GROUP} $SUBMITTY_DATA_DIR/logs/autograding
-chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/logs/autograding
+chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
+chmod  751                                        ${SUBMITTY_DATA_DIR}
+chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
+chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
+chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
+chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs
+chown  ${HWCRON_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/autograding
+chmod  u+rwx,g+rxs                                ${SUBMITTY_DATA_DIR}/logs/autograding
 
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_interactive
