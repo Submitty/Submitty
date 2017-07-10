@@ -118,7 +118,7 @@ class ElectronicGraderController extends AbstractController {
         $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
 
         $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'summaryPage', $gradeable, $rows, $graders);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders);
     }
 
     //TODO (issue #1128) refactor this function to set data in the gradeable model then call $gradeable->saveData()

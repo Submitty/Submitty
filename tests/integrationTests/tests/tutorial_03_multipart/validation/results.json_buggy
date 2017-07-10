@@ -12,7 +12,10 @@
                     "actual_file": "test01_STDERR.txt",
                     "description": "syntax error output from running python",
                     "messages": [
-                        "WARNING: This file should be empty"
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
                     ]
                 },
                 {
@@ -35,7 +38,10 @@
                     "actual_file": "test02_STDERR.txt",
                     "description": "syntax error output from running python",
                     "messages": [
-                        "WARNING: This file should be empty"
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
                     ]
                 },
                 {
@@ -58,7 +64,10 @@
                     "actual_file": "test03_STDERR.txt",
                     "description": "syntax error output from running python",
                     "messages": [
-                        "WARNING: This file should be empty"
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
                     ]
                 },
                 {

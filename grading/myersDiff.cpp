@@ -27,12 +27,13 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
   // grab the required files
   std::vector<std::string> filenames = stringOrArrayOfStrings(j,"actual_file");
   if (filenames.size() == 0) {
-    return new TestResults(0.0,{"ERROR: no required files specified"});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: no required files specified")});
   }
   for (int f = 0; f < filenames.size(); f++) {
     if (!tc.isCompilation()) {
-      filenames[f] = tc.getPrefix() + "_" + filenames[f];
-      filenames[f] = replace_slash_with_double_underscore(filenames[f]);
+      //filenames[f] = tc.getPrefix() + "_" + filenames[f];
+      //filenames[f] = tc.getPrefix() + "_" + filenames[f];
+      //filenames[f] = replace_slash_with_double_underscore(filenames[f]);
     }
   }
 
@@ -46,6 +47,7 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
     std::cout << "  file exists check: '" << filenames[f] << "' : ";
     std::vector<std::string> files;
     wildcard_expansion(files, filenames[f], std::cout);
+    wildcard_expansion(files, tc.getPrefix() + "_" + filenames[f], std::cout);
     bool found = false;
     // loop over the available files
     for (int i = 0; i < files.size(); i++) {
@@ -70,71 +72,72 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
       return new TestResults(1.0);
     } else {
       std::cout << "FILE NOT FOUND " + files_not_found << std::endl;
-      return new TestResults(0.0,{"ERROR: required file not found: " + files_not_found});
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: required file not found: " + files_not_found)});
     }
   } else {
     if (found_count == filenames.size()) {
       return new TestResults(1.0);
     } else {
       std::cout << "FILES NOT FOUND " + files_not_found << std::endl;
-      return new TestResults(0.0,{"ERROR: required files not found: " + files_not_found});
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: required files not found: " + files_not_found)});
     }
   }
 }
 
 
 TestResults* warnIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::string> messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
+  std::cout << "WARNING IF NOT EMPTY DO IT" << std::endl;
   std::string student_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(1.0,messages);
   }
   if (student_file_contents != "") {
-    return new TestResults(1.0,{"WARNING: This file should be empty"});
+    return new TestResults(1.0,{std::make_pair(MESSAGE_WARNING,"WARNING: This file should be empty")});
   }
   return new TestResults(1.0);
 }
 
 
 TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::string> messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
   if (student_file_contents != "") {
     if (student_file_contents.find("error") != std::string::npos)
-      return new TestResults(0.0,{"ERROR: This file should be empty!"},"",true,true);
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")},"",true,true);
     else if (student_file_contents.find("warning") != std::string::npos)
-      return new TestResults(0.0,{"ERROR: This file should be empty!"},"",false,true);
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")},"",false,true);
     else
-      return new TestResults(0.0,{"ERROR: This file should be empty!"});
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")});
   }
   return new TestResults(1.0);
 }
 
 
 TestResults* warnIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::string> messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(1.0,messages);
   }
   if (student_file_contents == "") {
-    return new TestResults(1.0,{"WARNING: This file should not be empty"});
+    return new TestResults(1.0,{std::make_pair(MESSAGE_WARNING,"WARNING: This file should not be empty")});
   }
   return new TestResults(1.0);
 }
 
 
 TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::string> messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
   if (student_file_contents == "") {
-    return new TestResults(0.0,{"ERROR: This file should not be empty!"});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should not be empty!")});
   }
   return new TestResults(1.0);
 }
@@ -143,7 +146,7 @@ TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
 // ==============================================================================
 
 TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::string> messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
   std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
@@ -154,7 +157,7 @@ TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::jso
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
       student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
   }
   vectorOfWords text_a = stringToWords( student_file_contents );
   vectorOfWords text_b = stringToWords( expected_file_contents );
@@ -165,7 +168,7 @@ TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::jso
 
 
 TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::string> messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
   std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
@@ -176,7 +179,7 @@ TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::js
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
       student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
   }
   vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
   vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
@@ -187,7 +190,7 @@ TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::js
 
 
 TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::string> messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
   std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
@@ -198,7 +201,7 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
       student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
   }
   vectorOfLines text_a = stringToLines( student_file_contents, j );
   vectorOfLines text_b = stringToLines( expected_file_contents, j );
@@ -212,7 +215,7 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
 
 
 TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::string> messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
   std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
@@ -223,7 +226,7 @@ TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::jso
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
       student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
   }
 
   bool extraStudentOutputOk = j.value("extra_student_output",false);
@@ -270,7 +273,7 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
 // FIXME: might be nice to highlight small errors on a line
 //
 TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::string> messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
   std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
@@ -287,7 +290,7 @@ TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
 
   // check for an empty solution file
   if (expected.size() < 1) {
-    return new TestResults(0.0,{"ERROR!  expected file is empty"});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR!  expected file is empty")});
   }
   assert (expected.size() > 0);
 
@@ -370,7 +373,7 @@ TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
     ss << "ERROR: " << missing << " missing line(s)";
   }
 
-  return new TestResults(score,{ss.str()},swap_difference.str());
+  return new TestResults(score,{std::make_pair(MESSAGE_FAILURE,ss.str())},swap_difference.str());
 }
 
 // ===============================================================================
@@ -744,7 +747,7 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
     float grade;
     if (char_changes < lower_bar) {
       std::cout << "too few char changes (zero credit)" << std::endl;
-      messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly fewer character changes than allowed.");
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly fewer character changes than allowed."));
     } else if (char_changes < min_char_changes) {
       std::cout << "less than min char changes (partial credit)" << std::endl;
       float numer = min_char_changes - char_changes;
@@ -752,9 +755,9 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       std::cout << "numer " << numer << " denom= " << denom << std::endl;
       assert (denom > 0);
       grade = 1 - numer/denom;
-      messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Fewer character changes than allowed.");
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Fewer character changes than allowed."));
     } else if (char_changes < max_char_changes) {
-      messages.push_back("Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Character changes within allowed range.");
+      messages.push_back(std::make_pair(MESSAGE_SUCCESS,"Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Character changes within allowed range."));
       std::cout << "between min and max char changes (full credit)" << std::endl;
       grade = 1.0;
     } else if (char_changes < upper_bar) {
@@ -764,10 +767,10 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       assert (denom > 0);
       grade = 1 - numer/denom;
       std::cout << "numer " << numer << " denom= " << denom << std::endl;
-      messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  More character changes than allowed.");
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  More character changes than allowed."));
     } else {
       std::cout << "too many char changes (zero credit)" << std::endl;
-      messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly more character changes than allowed.");
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly more character changes than allowed."));
       grade = 0.0;
     }
     std::cout << "grade " << grade << std::endl;

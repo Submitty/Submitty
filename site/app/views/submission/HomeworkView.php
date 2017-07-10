@@ -209,7 +209,7 @@ HTML;
             if($current_version_number === $gradeable->getHighestVersion()
                 && $current_version_number > 0) {
                 $return .= <<<HTML
-    <button type="button" id= "getprev" class="btn btn-primary">Get Most Recent Files</button>
+    <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
             }
 
@@ -440,6 +440,13 @@ HTML;
         </p>
     </div>
 HTML;
+                    if ($gradeable->hasConditionalMessage()) {
+                        $return .= <<<HTML
+    <div class="sub" id="conditional_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
+    </div>
+HTML;
+                    }
                 }
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
@@ -597,15 +604,26 @@ HTML;
         </div>
 HTML;
                     }
-
+                    if ($gradeable->hasConditionalMessage()) {
+                        $return.= <<<HTML
+<script type="text/javascript">
+        $(document).ready(function() {
+            if (({$current_version->getNonHiddenTotal()} >= {$gradeable->getMinimumPoints()}) &&
+                    ({$gradeable->getDaysEarly()} > {$gradeable->getMinimumDaysEarly()})) {
+                $('#conditional_message').show();
+            }
+        });
+</script>
+HTML;
+                    }
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
-                    foreach ($gradeable->getTestcases() as $testcase) {
+                    foreach ($gradeable->getTestcases() as $testcase) { 
                         if (!$testcase->viewTestcase()) {
                           continue;
                         }
                         $div_click = "";
-                        if ($testcase->hasDetails()) {
+                        if ($testcase->hasDetails()) { 
                             $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
                         }
                         $return .= <<<HTML
@@ -685,7 +703,7 @@ HTML;
                         $testcase_message = "";
                         if (!$testcase->isHidden() && $testcase->viewTestcaseMessage()) {
                             $testcase_message = <<<HTML
-                        <span class='italics'><font color="#c00000">{$testcase->getTestcaseMessage()}</font></span>
+                        <span class='italics'><font color="#af0000">{$testcase->getTestcaseMessage()}</font></span>
 HTML;
                         }
                         $return .= <<<HTML
@@ -702,9 +720,9 @@ HTML;
                                 foreach ($testcase->getAutochecks() as $autocheck) {
                                     $description = $autocheck->getDescription();
                                     $diff_viewer = $autocheck->getDiffViewer();
-
                                     $return .= <<<HTML
-                <div class="box-block">
+                <div class="box-block"> 
+                <!-- Readded css here so the popups have the css -->
 HTML;
 
                                     $title = "";
@@ -716,11 +734,21 @@ HTML;
                                     }
                                     $title .= $description;
                                     $return .= <<<HTML
-                                <h4>{$title}</h4>
+                                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 0)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i> </span> </h4>
+                                <div id="container_{$count}_{$autocheck_cnt}_0">
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />                               
 HTML;
                                     foreach ($autocheck->getMessages() as $message) {
+                                        $type_class = "black-message";
+                                        if ($message['type'] == "information") $type_class = "black-message";
+                                        else if ($message['type'] == "success") $type_class = "green-message";
+                                        else if ($message['type'] == "failure") $type_class = "red-message";
+                                        else if ($message['type'] == "warning") $type_class = "yellow-message";
                                         $return .= <<<HTML
-                                <span class="red-message">{$message}</span><br />
+                                <span class="{$type_class}">{$message['message']}</span><br />
 HTML;
                                     }
 
@@ -744,12 +772,20 @@ HTML;
                                     }
                                     $return .= <<<HTML
                             </div>
+                            </div>
 HTML;
 
                                     if ($diff_viewer->hasDisplayExpected()) {
+                                        $title1 = "Expected ";
+                                        $title1 .= $description;
                                         $return .= <<<HTML
                             <div class='diff-element'>
-                                <h4>Expected {$description}</h4>
+                                <h4>Expected {$description} <span onclick="openPopUp('{$title1}', {$count}, {$autocheck_cnt}, 1)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i> </span></h4>
+                                <div id="container_{$count}_{$autocheck_cnt}_1">
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />
 HTML;
                                         for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
                                             $return .= <<<HTML
@@ -759,13 +795,14 @@ HTML;
                                         $return .= <<<HTML
                                 {$diff_viewer->getDisplayExpected()}
                             </div>
+                            </div>
 HTML;
                                     }
 
                                     $return .= <<<HTML
                 </div>
 HTML;
-                                    if (++$autocheck_cnt < $autocheck_len) {
+                                    if (++$autocheck_cnt < $autocheck_len) { 
                                         $return .= <<<HTML
                 <div class="clear"></div>
 HTML;
@@ -811,6 +848,13 @@ HTML;
 HTML;
         }
 
+        return $return;
+    }
+
+    public function showPopUp($gradeable) {
+        $return = <<<HTML
+            <p>Banana</p>
+HTML;
         return $return;
     }
 }

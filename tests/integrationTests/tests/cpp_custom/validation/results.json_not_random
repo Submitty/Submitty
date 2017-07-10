@@ -6,8 +6,9 @@
         },
         {
             "autochecks": [
-                {                    "description": "STDOUT.txt",
-                    "actual_file": "test02_STDOUT.txt"
+                {
+                    "actual_file": "test02_STDOUT.txt",
+                    "description": "STDOUT.txt"
                 }
             ],
             "points_awarded": 8,
@@ -15,8 +16,9 @@
         },
         {
             "autochecks": [
-                {                    "description": "STDOUT.txt",
-                    "actual_file": "test03_STDOUT.txt"
+                {
+                    "actual_file": "test03_STDOUT.txt",
+                    "description": "STDOUT.txt"
                 }
             ],
             "points_awarded": 6,
@@ -24,14 +26,19 @@
         },
         {
             "autochecks": [
-                {                    "description": "STDOUT_0.txt",
+                {
+                    "actual_file": "test04_STDOUT_0.txt",
+                    "description": "STDOUT_0.txt",
                     "messages": [
-                        "ERROR!  NOT RANDOM"
-                    ],
-                    "actual_file": "test04_STDOUT_0.txt"
+                        {
+                            "message": "ERROR!  NOT RANDOM",
+                            "type": "failure"
+                        }
+                    ]
                 },
-                {                    "description": "STDOUT_1.txt",
-                    "actual_file": "test04_STDOUT_1.txt"
+                {
+                    "actual_file": "test04_STDOUT_1.txt",
+                    "description": "STDOUT_1.txt"
                 }
             ],
             "points_awarded": 2,
