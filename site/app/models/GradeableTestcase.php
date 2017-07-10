@@ -152,7 +152,7 @@ class GradeableTestcase extends AbstractModel {
     }
     
     public function hasDetails() {
-      return (!$this->isHidden() && count($this->autochecks) > 0);
+      return (count($this->autochecks) > 0);
     }
 
     public function viewTestcaseMessage() {
