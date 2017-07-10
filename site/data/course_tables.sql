@@ -213,6 +213,7 @@ CREATE TABLE gradeable_component_data (
     gcd_score numeric NOT NULL,
     gcd_component_comment character varying NOT NULL,
     gcd_grader_id character varying(255) NOT NULL,
+    gcd_graded_version integer,
     gcd_grade_time timestamp(6) without time zone NOT NULL,
     CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id))
 );
@@ -245,9 +246,7 @@ CREATE TABLE gradeable_data (
     gd_id integer NOT NULL,
     g_id character varying(255) NOT NULL,
     gd_user_id character varying(255) NOT NULL,
-    gd_grader_id character varying(255),
     gd_overall_comment character varying NOT NULL,
-    gd_graded_version integer NOT NULL,
     gd_user_viewed_date timestamp(6) without time zone DEFAULT NULL
 );
 
