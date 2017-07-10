@@ -5,19 +5,28 @@
                 {
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Create Executable",
                     "messages": [
-                        "ERROR: required files not found:  a.out"
+                        {
+                            "message": "ERROR: required files not found:  a.out",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Standard Output (STDOUT)",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDOUT.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],

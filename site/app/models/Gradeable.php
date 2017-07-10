@@ -51,6 +51,7 @@ use app\libraries\Utils;
  * @method string getSubdirectory()
  * @method string getConfigPath()
  * @method string getGradeFile()
+ * @method string getTaInstructions()
  * @method int getInteractiveQueuePosition()
  * @method int getInteractiveQueueTotal()
  * @method int getBatchQueuePosition()
@@ -162,6 +163,13 @@ class Gradeable extends AbstractModel {
 
     /** @property @var string Message to show for the gradeable above all submission results */
     protected $message = "";
+
+    /** @property @var string Message to show when conditions are met */
+    protected $conditional_message = "";
+    /** @property @var int Minimum days before deadline that a submission must be made by to get the conditional message */
+    protected $minimum_days_early = 0;
+    /** @property @var int Minimum points that a submission must have to get the conditional message */
+    protected $minimum_points = 0;
 
     /** @property @var string[] */
     protected $part_names = array();
@@ -397,6 +405,12 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['assignment_message'])) {
             $this->message = Utils::prepareHtmlString($details['assignment_message']);
+        }
+
+        if (isset($details['conditional_message'])) {
+            $this->conditional_message = Utils::prepareHtmlString($details['conditional_message']['message']);
+            $this->minimum_days_early = intval($details['conditional_message']['minimum_days_early']);
+            $this->minimum_points = intval($details['conditional_message']['minimum_points']);
         }
 
         $num_parts = 1;
@@ -752,6 +766,10 @@ class Gradeable extends AbstractModel {
         return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysLate() : 0;
     }
 
+    public function getDaysEarly() {
+        return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysEarly() : 0;
+    }
+
     public function getInstructionsURL(){
         return $this->instructions_url;
     }
@@ -777,6 +795,10 @@ class Gradeable extends AbstractModel {
 
     public function getAssignmentMessage() {
         return $this->message;
+    }
+
+    public function hasConditionalMessage() {
+        return trim($this->conditional_message) !== "";
     }
 
     public function useSvnCheckout() {
@@ -844,7 +866,8 @@ class Gradeable extends AbstractModel {
     }
   
     public function getActiveDaysLate() {
-        $return =  DateUtils::calculateDayDiff($this->due_date->add(new \DateInterval("PT5M")), $this->submission_time);
+        $extended_due_date = clone $this->due_date;
+        $return =  DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);
         if ($return < 0) {
             $return = 0;
         }
