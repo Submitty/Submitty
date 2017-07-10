@@ -132,7 +132,7 @@ class SubmissionController extends AbstractController {
         $student_id = $_POST['student_id'];
         $student_user = $this->core->getQueries()->getUserById($student_id);
 
-        if (!$student_user === null) {
+        if ($student_user == null) {
             $msg = "Invalid student id '{$_POST['student_id']}'";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
