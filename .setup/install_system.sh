@@ -536,6 +536,8 @@ if [[ ${VAGRANT} == 1 ]]; then
     chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
     mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/site
+    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/site/access
+    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/site/error
     ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/site ${SUBMITTY_DATA_DIR}/logs/site
     chown hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site
     chmod 770 ${SUBMITTY_DATA_DIR}/logs/site

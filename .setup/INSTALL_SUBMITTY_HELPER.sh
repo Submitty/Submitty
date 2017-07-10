@@ -135,16 +135,19 @@ echo -e "Make top level directores & set permissions"
 mkdir -p $SUBMITTY_DATA_DIR
 mkdir -p $SUBMITTY_DATA_DIR/courses
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
-mkdir -p $SUBMITTY_DATA_DIR/logs/site
-mkdir -p $SUBMITTY_DATA_DIR/logs/autograding
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/site
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/site/access
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/site/error
+
 
 # set the permissions of these directories
 chown  root:${COURSE_BUILDERS_GROUP}   $SUBMITTY_DATA_DIR
 chmod  751                           $SUBMITTY_DATA_DIR
 chown  root:${COURSE_BUILDERS_GROUP}   $SUBMITTY_DATA_DIR/courses
 chmod  751                           $SUBMITTY_DATA_DIR/courses
-chown  $HWPHP_USER:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/logs/site
-chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/logs/site
+chown  -R $HWPHP_USER:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/logs/site
+chmod  -R u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/logs/site
 chown  $HWCRON_USER:${COURSE_BUILDERS_GROUP} $SUBMITTY_DATA_DIR/logs/autograding
 chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/logs/autograding
 

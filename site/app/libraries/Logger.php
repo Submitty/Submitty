@@ -145,7 +145,7 @@ class Logger {
         $log_message .= str_repeat("=-", 30)."="."\n";
 
         // Appends to the file using a locking mechanism, and supressing any potential error from this
-        @file_put_contents(FileUtils::joinPaths(static::$log_path, "{$filename}_error.log"), $log_message, FILE_APPEND | LOCK_EX);
+        @file_put_contents(FileUtils::joinPaths(static::$log_path, 'error', "{$filename}_error.log"), $log_message, FILE_APPEND | LOCK_EX);
     }
 
     /**
@@ -194,6 +194,6 @@ class Logger {
         //$log_message[] = $_SERVER['REQUEST_URI'];
         $log_message[] = $_SERVER['HTTP_USER_AGENT'];
         $log_message = implode(" | ", $log_message)."\n";
-        @file_put_contents(FileUtils::joinPaths(static::$log_path, "{$filename}_access.log"), $log_message, FILE_APPEND | LOCK_EX);
+        @file_put_contents(FileUtils::joinPaths(static::$log_path, 'access', "{$filename}.log"), $log_message, FILE_APPEND | LOCK_EX);
     }
 }

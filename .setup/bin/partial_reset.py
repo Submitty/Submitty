@@ -100,6 +100,8 @@ def main():
                   .format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
 
         os.system('mkdir {}/.vagrant/logs/site'.format(SUBMITTY_REPOSITORY))
+        os.system('mkdir {}/.vagrant/logs/site/access'.format(SUBMITTY_REPOSITORY))
+        os.system('mkdir {}/.vagrant/logs/site/error'.format(SUBMITTY_REPOSITORY))
         os.system('ln -s {}/.vagrant/logs/site {}/logs/site'
                   .format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
 
