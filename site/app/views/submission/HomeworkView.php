@@ -734,9 +734,9 @@ HTML;
                                         $title = "Student ";
                                     }
                                     if ($diff_viewer->hasDisplayActual()) {
-                                        //I unfornately have no idea how the strlen is measured. It's not the number of characters in there
-                                        //an extra 250ish characters are added on for some reason.
-                                        if (strlen($diff_viewer->getDisplayActual()) < 350) {
+                                        //This gets rid of all the html tags, spaces and other things before checking length
+                                        //It doesn't get rid of line numbers though
+                                        if (strlen(trim(html_entity_decode(strip_tags($diff_viewer->getDisplayActual())), "\xC2\xA0\n\t")) < 110) {
                                             $visible1 = "hidden";
                                         }
                                     } else {
@@ -787,7 +787,7 @@ HTML;
 
                                     if ($diff_viewer->hasDisplayExpected()) {
                                         $visible2 = "visible";
-                                        if (strlen($diff_viewer->getDisplayExpected()) < 350) {
+                                        if (strlen(trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\n\t")) < 110) {
                                             $visible2 = "hidden";
                                         }
                                         $title1 = "Expected ";
