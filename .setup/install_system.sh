@@ -501,7 +501,7 @@ http://192.168.56.101
 1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 else
-	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
+	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
 fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
@@ -528,19 +528,19 @@ if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much
     echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
 
-    rm -rf ${SUBMITTY_DATA_DIR}/logs
+    rm -rf ${SUBMITTY_DATA_DIR}/logs/*
     rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/logs/*
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding
     ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
     chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/logs/autograding
     chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/site
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/site/access
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/site/error
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/site
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/site/access
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/site/error
     ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/site ${SUBMITTY_DATA_DIR}/logs/site
-    chown hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site
-    chmod 770 ${SUBMITTY_DATA_DIR}/logs/site
+    chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site
+    chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site
 
     # Call helper script that makes the courses and refreshes the database
     ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py

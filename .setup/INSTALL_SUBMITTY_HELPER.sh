@@ -73,7 +73,7 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $1
     sed -i -e "s|__INSTALL__FILLIN__CGI_URL__|$CGI_URL|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SITE_LOG_PATH__|$TAGRADING_LOG_PATH|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SITE_LOG_PATH__|$SITE_LOG_PATH|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__AUTHENTICATION_METHOD__|${AUTHENTICATION_METHOD}|g" $1
 
@@ -132,8 +132,8 @@ chmod  751                          ${SUBMITTY_INSTALL_DIR}
 
 echo -e "Make top level directores & set permissions"
 
-mkdir -p $SUBMITTY_DATA_DIR
-mkdir -p $SUBMITTY_DATA_DIR/courses
+mkdir -p ${SUBMITTY_DATA_DIR}
+mkdir -p ${SUBMITTY_DATA_DIR}/courses
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/site

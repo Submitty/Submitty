@@ -28,7 +28,7 @@ class LoggerTester extends \PHPUnit_Framework_TestCase {
         FileUtils::createDir($this->directory);
         FileUtils::createDir(FileUtils::joinPaths($this->directory, 'access'));
         FileUtils::createDir(FileUtils::joinPaths($this->directory, 'error'));
-        $this->assertFileExists($this->directory);
+        $this->assertDirectoryExists($this->directory);
         Logger::setLogPath($this->directory);
         $date = getdate(time());
         $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']);

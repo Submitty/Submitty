@@ -37,6 +37,7 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
     public function testExceptionHandlerLog() {
         $tmp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $this->assertTrue(FileUtils::createDir($tmp_dir));
+        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($tmp_dir, 'error')));
         Logger::setLogPath($tmp_dir);
         date_default_timezone_set("America/New_York");
         $date = getdate(time());

@@ -142,6 +142,8 @@ after_script:
   # - sudo ./.setup/travis/print_debug.sh
   # if this fails, it only prints, travis does not fail
   - sudo cat /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh
+  - sudo cat /usr/local/submitty/site/config/master.ini
+  - sudo cat /var/local/submitty/logs/site/error/*
   - sudo /usr/local/submitty/bin/check_everything.py
 
 after_success:

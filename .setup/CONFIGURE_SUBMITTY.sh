@@ -160,7 +160,7 @@ echo "DATABASE_PASSWORD="${DATABASE_PASSWORD}                                   
 echo "TAGRADING_URL="${TAGRADING_URL}                                                         >> $CONFIGURATION_FILE
 echo "SUBMISSION_URL="${SUBMISSION_URL}                                                       >> $CONFIGURATION_FILE
 echo "CGI_URL="${CGI_URL}                                                                     >> $CONFIGURATION_FILE
-echo "TAGRADING_LOG_PATH="${TAGRADING_LOG_PATH}                                               >> $CONFIGURATION_FILE
+echo "SITE_LOG_PATH="${TAGRADING_LOG_PATH}                                                    >> $CONFIGURATION_FILE
 
 echo "AUTHENTICATION_METHOD=PamAuthentication"                                                >> $CONFIGURATION_FILE
 echo "DEBUGGING_ENABLED="${DEBUGGING_ENABLED}                                                 >> $CONFIGURATION_FILE
