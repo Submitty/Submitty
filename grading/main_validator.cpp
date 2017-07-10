@@ -175,10 +175,10 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
     }
 
 
-    std::vector<std::string> messages = result.getMessages();
+    std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages = result.getMessages();
 
     if (BROKEN_CONFIG_ERROR_MESSAGE != "") {
-      messages.push_back(BROKEN_CONFIG_ERROR_MESSAGE);
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,BROKEN_CONFIG_ERROR_MESSAGE));
     }
 
     std::string fm = tcg.value("failure_message","");
@@ -187,15 +187,23 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       bool failure_message_already_added = false;
       if (FN==0) {
         for (int m = 0; m < messages.size(); m++) {
-          if (messages[m] != "") {
-            if (messages[m] == fm) failure_message_already_added = true;
-            autocheck_j["messages"].push_back(messages[m]);
-          }
+          assert (messages[m].second != "");
+          if (messages[m].second == fm) failure_message_already_added = true;
+          nlohmann::json new_message;
+          new_message["message"] = messages[m].second;
+          if (messages[m].first == MESSAGE_FAILURE) new_message["type"] = "failure";
+          else if (messages[m].first == MESSAGE_WARNING) new_message["type"] = "warning";
+          else if (messages[m].first == MESSAGE_SUCCESS) new_message["type"] = "success";
+          else { assert (messages[m].first == MESSAGE_INFORMATION); new_message["type"] = "information"; }
+          autocheck_j["messages"].push_back(new_message);
         }
       }
 
       if (fm != "" && !failure_message_already_added) {
-        autocheck_j["messages"].push_back(fm);
+        nlohmann::json new_message;
+        new_message["message"] = fm;
+        new_message["type"] = "failure";
+        autocheck_j["messages"].push_back(new_message);
       }
     }
 
@@ -211,7 +219,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
 
-      if (my_testcase.isFileCheck() && num_messages > 0 && messages[0].find("README") != std::string::npos)
+      if (my_testcase.isFileCheck() && num_messages > 0 && messages[0].second.find("README") != std::string::npos)
         testcase_message = "README missing.";
       else if (my_testcase.isCompilation() && num_messages > 0) {
         if (result.hasCompilationError())

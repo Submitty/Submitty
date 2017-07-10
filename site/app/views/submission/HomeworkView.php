@@ -440,6 +440,13 @@ HTML;
         </p>
     </div>
 HTML;
+                    if ($gradeable->hasConditionalMessage()) {
+                        $return .= <<<HTML
+    <div class="sub" id="conditional_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
+    </div>
+HTML;
+                    }
                 }
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
@@ -597,7 +604,18 @@ HTML;
         </div>
 HTML;
                     }
-
+                    if ($gradeable->hasConditionalMessage()) {
+                        $return.= <<<HTML
+<script type="text/javascript">
+        $(document).ready(function() {
+            if (({$current_version->getNonHiddenTotal()} >= {$gradeable->getMinimumPoints()}) &&
+                    ({$gradeable->getDaysEarly()} > {$gradeable->getMinimumDaysEarly()})) {
+                $('#conditional_message').show();
+            }
+        });
+</script>
+HTML;
+                    }
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
                     foreach ($gradeable->getTestcases() as $testcase) { 
@@ -685,7 +703,7 @@ HTML;
                         $testcase_message = "";
                         if (!$testcase->isHidden() && $testcase->viewTestcaseMessage()) {
                             $testcase_message = <<<HTML
-                        <span class='italics'><font color="#c00000">{$testcase->getTestcaseMessage()}</font></span>
+                        <span class='italics'><font color="#af0000">{$testcase->getTestcaseMessage()}</font></span>
 HTML;
                         }
                         $return .= <<<HTML
@@ -724,8 +742,13 @@ HTML;
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />                               
 HTML;
                                     foreach ($autocheck->getMessages() as $message) {
+                                        $type_class = "black-message";
+                                        if ($message['type'] == "information") $type_class = "black-message";
+                                        else if ($message['type'] == "success") $type_class = "green-message";
+                                        else if ($message['type'] == "failure") $type_class = "red-message";
+                                        else if ($message['type'] == "warning") $type_class = "yellow-message";
                                         $return .= <<<HTML
-                                <span class="red-message">{$message}</span><br />
+                                <span class="{$type_class}">{$message['message']}</span><br />
 HTML;
                                     }
 

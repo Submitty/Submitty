@@ -528,7 +528,20 @@ table tr.table-header {
 
 .red-message {
     font-style: italic;
+    font-weight: bold;
     color: #af0000;
+}
+
+.yellow-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #eac73d;
+}
+
+.black-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #000000;
 }
 
 .sub-text {
