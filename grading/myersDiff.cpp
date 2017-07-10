@@ -87,6 +87,7 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
 
 TestResults* warnIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
+  std::cout << "WARNING IF NOT EMPTY DO IT" << std::endl;
   std::string student_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(1.0,messages);

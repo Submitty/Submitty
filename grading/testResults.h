@@ -13,8 +13,10 @@
 #define TEST_RESULT_DIFF_SIZE 1000000
 #define TEST_RESULT_MESSAGES_SIZE 10000
 
+#define TEST_RESULT_NUM_MESSAGES 10
 
-enum TEST_RESULTS_MESSAGE_TYPE { MESSAGE_FAILURE, MESSAGE_WARNING, MESSAGE_SUCCESS, MESSAGE_INFORMATION };
+
+enum TEST_RESULTS_MESSAGE_TYPE { MESSAGE_NONE, MESSAGE_FAILURE, MESSAGE_WARNING, MESSAGE_SUCCESS, MESSAGE_INFORMATION };
 
 
 // ===================================================================================
@@ -30,7 +32,8 @@ public:
     compilation_error = false;
     compilation_warning = false;
     strcpy(diff,"");
-    char default_message[] = "ERROR: TestResults not initialized. Probably caused by error in validation. If you cannot debug the issue, ask your instructor to check results_log_validator.txt\nfailure";
+    char default_message[] = "ERROR: TestResults not initialized. Probably caused by error in validation. If you cannot debug the issue, ask your instructor to check results_log_validator.txt";
+    types[0] = MESSAGE_FAILURE;
     assert (strlen(default_message) < TEST_RESULT_MESSAGES_SIZE-1);
     strcpy(messages,default_message);
   }
@@ -47,20 +50,21 @@ public:
       assert (d.size() < TEST_RESULT_DIFF_SIZE-1);
       strcpy(diff,d.c_str());
     }
-    std::string tmp = "";
-    for (int i = 0; i < m.size(); i++) {
-      if (i != 0) tmp += "\n";
-      tmp += m[i].first;
-      tmp += "\n";
-      tmp += m[i].second;
+    assert (m.size() <= TEST_RESULT_NUM_MESSAGES);
+    for (unsigned int i = 0; i < m.size(); i++) {
+      if (m[i].second.size() >= TEST_RESULT_MESSAGES_SIZE-1) {
+        char default_message[] = "ERROR: messages too large to display.";
+        assert (strlen(default_message) < TEST_RESULT_MESSAGES_SIZE-1);
+        strcpy(messages+i*TEST_RESULT_MESSAGES_SIZE,default_message);
+      } else {
+        assert (m[i].second.size() < TEST_RESULT_MESSAGES_SIZE-1);
+        strcpy(messages+i*TEST_RESULT_MESSAGES_SIZE,m[i].second.c_str());
+      }
+      types[i] = m[i].first;
     }
-    if (tmp.size() >= TEST_RESULT_MESSAGES_SIZE-1) {
-      char default_message[] = "ERROR: messages too large to display.\nfailure";
-      assert (strlen(default_message) < TEST_RESULT_MESSAGES_SIZE-1);
-      strcpy(messages,default_message);
-    } else {
-      assert (tmp.size() < TEST_RESULT_MESSAGES_SIZE-1);
-      strcpy(messages,tmp.c_str());
+    for (unsigned int i = m.size(); i < TEST_RESULT_NUM_MESSAGES; i++) {
+      strcpy(messages+i*TEST_RESULT_MESSAGES_SIZE,"");
+      types[i] = MESSAGE_NONE;
     }
   }
   virtual void printJSON(std::ostream & file_out) {
@@ -73,23 +77,12 @@ public:
   }
   float getGrade() const { return grade; }
   const std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > getMessages() const { 
-    int length = strlen(messages);
     std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > answer;
-    std::string msg = "";
-    TEST_RESULTS_MESSAGE_TYPE type = MESSAGE_FAILURE;
-    for (int i = 0; i < length; i++) {
-      if (messages[i] == '\n') {
-        if (msg != "") {
-          answer.push_back(std::make_pair(type,msg));
-          msg = "";
-          type = MESSAGE_FAILURE;
-        }
+    for (int i = 0; i < TEST_RESULT_NUM_MESSAGES; i++) {
+      if (types[i] != MESSAGE_NONE) {
+        std::string msg = messages+i*TEST_RESULT_MESSAGES_SIZE;
+        answer.push_back(std::make_pair(types[i],msg));
       }
-    }
-    if (msg != "") {
-      answer.push_back(std::make_pair(type,msg));
-      msg = "";
-      type = MESSAGE_FAILURE;
     }
     return answer;
   }
@@ -106,7 +99,8 @@ private:
   int distance;
   float grade;
   char diff[TEST_RESULT_DIFF_SIZE];
-  char messages[TEST_RESULT_MESSAGES_SIZE];
+  char messages[TEST_RESULT_NUM_MESSAGES*TEST_RESULT_MESSAGES_SIZE];
+  TEST_RESULTS_MESSAGE_TYPE types[TEST_RESULT_NUM_MESSAGES];
   bool compilation_error;
   bool compilation_warning;
 };
@@ -124,8 +118,8 @@ public:
               bool cw=false) :
     my_grade(g),swap_difference(sd),distance(0) {
     for (int i= 0; i < m.size(); i++) {
-      assert (m[i].second != "");
-      messages.push_back(m[i]);
+      if (m[i].second != "")
+        messages.push_back(m[i]);
     }
     compilation_error = ce;
     compilation_warning = cw;
