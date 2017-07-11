@@ -22,8 +22,8 @@ class ElectronicGraderView extends AbstractView {
             if ($key === "NULL") {
                 continue;
             }
-            $graded += $section['graded_students'];
-            $total += $section['total_students'];
+            $graded += $section['graded_components'];
+            $total += $section['total_components'];
         }
         if ($total === 0){
             $percentage = -1;
@@ -54,9 +54,9 @@ HTML;
         <div style="margin-left: 20px">
 HTML;
         foreach ($sections as $key => $section) {
-            $percentage = round(($section['graded_students'] / $section['total_students']) * 100);
+            $percentage = round(($section['graded_components'] / $section['total_components']) * 100);
             $return .= <<<HTML
-            Section {$key}: {$percentage}% ({$section['graded_students']} / {$section['total_students']})<br />
+            Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})<br />
 HTML;
         }
         $return .= <<<HTML

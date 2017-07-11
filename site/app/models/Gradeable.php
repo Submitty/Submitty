@@ -176,15 +176,12 @@ class Gradeable extends AbstractModel {
     /** @property @var int Variables for submission details (such as attempts used, etc.) */
     protected $submissions = 0;
 
-    // /** @property @var int $active_version  The set active version for the assignment */
-    // protected $active_version = -1;
-    // /** @property @var int $current The current version of the assignment being viewed */
-    // protected $current_version = -1;
-    // /** @property @var int $highest Highest version submitted for an assignment */
-    // protected $highest_version = 0;
-    // /** @property @var int */
-    // protected $graded_version = null;
-
+    /** @property @var int $active_version  The set active version for the assignment */
+    protected $active_version = -1;
+    /** @property @var int $current The current version of the assignment being viewed */
+    protected $current_version = -1;
+    /** @property @var int $highest Highest version submitted for an assignment */
+    protected $highest_version = 0;
 
     /** @property @var array */
     protected $versions = array();
