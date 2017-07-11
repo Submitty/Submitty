@@ -375,7 +375,7 @@ HTML;
                             $sections = array();
                             if ($gradeable_core->isGradeByRegistration()) {
                                 if(!$this->core->getUser()->accessFullGrading()){
-                                    $sections = $this->core->getUser()->getGradingRegistrationSections();
+                                    $sections = $this->core->getUser()->getGradingRegistrationSections(); 
                                 }
                                 if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
                                     $total = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
