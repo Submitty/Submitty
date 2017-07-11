@@ -193,6 +193,7 @@ HTML;
                 $graded_version = $row->getGradedVersion();
                 $active_version = $row->getActiveVersion();
                 $highest_version = $row->getHighestVersion();
+                $autograding_score = $row->getGradedAutograderPoints();
                 if ($row->beenTAgraded()){
                     if ($row->getUserViewedDate() === null || $row->getUserViewedDate() === "") {
                         $viewed_grade = "&#10008;";
@@ -216,7 +217,6 @@ HTML;
                     $viewed_grade = "";
                     $grade_viewed = "";
                     $grade_viewed_color = "";
-                    $autograding_score = $row->getGradedAutograderPoints();
                 }
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
                 $graded = $autograding_score + $row->getGradedTAPoints();
@@ -471,7 +471,6 @@ HTML;
             <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
             <input type="hidden" name="u_id" value="{$user->getId()}" />
             <input type="hidden" name="individual" value="{$individual}" />
-            <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
 HTML;
 
         //Late day calculation

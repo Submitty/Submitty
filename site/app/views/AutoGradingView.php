@@ -2,6 +2,9 @@
 
 namespace app\views;
 
+use app\models\Gradeable;
+use app\views\AbstractView;
+
 class AutogradingView extends AbstractView {
 
     public function showResults($gradeable, $show_hidden=false) {

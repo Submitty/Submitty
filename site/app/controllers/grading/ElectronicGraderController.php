@@ -138,43 +138,33 @@ class ElectronicGraderController extends AbstractController {
             $_SESSION['messages']['error'][] = "Grading is not open yet for {$gradeable->getName()}";
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
-        
-        $regrade = $gradeable->beenTAgraded();
-        
-        $submit_data = array();
-        $submit_data['g_id'] = $gradeable_id;
-        $submit_data['u_id'] = $who_id;
-        $submit_data['gd_id'] = $regrade ? $gradeable->getGdId() : null;
-        $submit_data['grader_id'] = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getGrader()->getId();
-        $submit_data['comment'] = $_POST['comment-general'];
-        $submit_data['graded_version'] = $_POST['graded_version'];
-        $submit_data['time'] = $now->format("Y-m-d H:i:s");
-        
-        $submit_data['components'] = array();
-        $comps = $gradeable->getComponents();
-        //update each gradeable component data
-        foreach($comps as $comp){
-            $gc_id = $comp->getId();
-            $submit_data['components'][$gc_id] = array();
-            $submit_data['components'][$gc_id]['grade'] = floatval($_POST["grade-{$comp->getOrder()}"]);
-            $submit_data['components'][$gc_id]['comment'] = isset($_POST["comment-{$comp->getOrder()}"]) ? $_POST["comment-{$comp->getOrder()}"] : '';
-        }
 
-        $this->core->getQueries()->submitTAGrade($submit_data);
+        if (isset($_POST['overwrite'])) $gradeable->setGrader($this->core->getUser());
+        $gradeable->setOverallComment($_POST['comment-general']);
+        $gradeable->setGradedVersion($gradeable->getActiveVersion());
+        
+        $comps = $gradeable->getComponents();
+        foreach($comps as $key => $data) {
+            if (isset($_POST['overwrite'])) $comps[$key]->setGrader($this->core->getUser());
+            $comps[$key]->setScore(floatval($_POST["grade-{$comps[$key]->getOrder()}"]));
+            $comps[$key]->setComment($_POST["comment-{$comps[$key]->getOrder()}"]);
+            $comps[$key]->setGradeTime($now);
+        }
+        $gradeable->setComponents($comps);
+
+        $gradeable->saveData();
 
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($who_id, $gradeable_id);
-        $individual = intval($_POST['individual']);
 
         $_SESSION['messages']['success'][] = "Successfully uploaded grade for {$who_id}";
-
+        $individual = intval($_POST['individual']);
         if ($individual == 1) {
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id)));
         }
         else {
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable_id, 'individual'=>'0')));
-        }
-        
+        }   
     }
 
     public function showGrading() {
