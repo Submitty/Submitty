@@ -16,13 +16,19 @@
                     "actual_file": "test02_STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
-                        "ERROR: This file should be empty!"
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Create Executable",
                     "messages": [
-                        "ERROR: required files not found:  a.out"
+                        {
+                            "message": "ERROR: required files not found:  a.out",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -40,13 +46,19 @@
                     "actual_file": "test03_STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
-                        "ERROR: This file should be empty!"
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Create Executable",
                     "messages": [
-                        "ERROR: required files not found:  a_2.out"
+                        {
+                            "message": "ERROR: required files not found:  a_2.out",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -63,13 +75,19 @@
                 {
                     "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDOUT.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Standard Error (STDERR)",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -85,13 +103,19 @@
                 {
                     "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDOUT.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Standard Error (STDERR)",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -107,13 +131,19 @@
                 {
                     "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDOUT.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Standard Error (STDERR)",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -129,13 +159,19 @@
                 {
                     "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDOUT.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Standard Error (STDERR)",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -151,13 +187,19 @@
                 {
                     "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDOUT.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Standard Error (STDERR)",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -173,13 +215,19 @@
                 {
                     "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDOUT.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "STDERR.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -195,13 +243,19 @@
                 {
                     "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDOUT.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "STDERR.txt",
                     "messages": [
-                        "ERROR!  Could not open student file: 'STDERR.txt'"
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -216,6 +270,6 @@
             "points_awarded": 0,
             "test_name": "Test 11 Submission Limit",
             "view_testcase": false
-       }
+        }
     ]
 }

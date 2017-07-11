@@ -24,7 +24,10 @@
                     "actual_file": "test04_STDOUT.txt",
                     "description": "TestRunner output",
                     "messages": [
-                        "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4"
+                        {
+                            "message": "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],
@@ -41,7 +44,10 @@
                     "actual_file": "test05_emma_report.txt",
                     "description": "JUnit EMMA coverage report",
                     "messages": [
-                        "ERROR: Insuffficient block coverage below threshold for... hw0 (55/90 = 0.611111)"
+                        {
+                            "message": "ERROR: Insuffficient block coverage below threshold for... hw0 (55/90 = 0.611111)",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],
@@ -54,7 +60,10 @@
                     "actual_file": "test06_STDOUT.txt",
                     "description": "JUnit output",
                     "messages": [
-                        "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4"
+                        {
+                            "message": "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {

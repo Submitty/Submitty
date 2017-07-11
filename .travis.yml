@@ -19,7 +19,6 @@ cache:
     - vendor
     - $HOME/.composer/cache
     - $HOME/.cache/pip
-    - $HOME/.stack
 
 addons:
   postgresql: "9.5"
@@ -61,7 +60,6 @@ before_install:
   - sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/${PY_VERSION_2}/bin:/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
   - mkdir -p ~/.local/bin
   - export PATH=$HOME/.local/bin:$PATH
-  - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 
 install:
   - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
@@ -130,7 +128,6 @@ script:
   - if [ ${INTEGRATION_SUITE} = false ]; then vendor/bin/phpunit --configuration tests/phpunit.xml; fi
   - if [ ${INTEGRATION_SUITE} = false ]; then TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"; fi
   - if [ ${INTEGRATION_SUITE} = true ]; then sudo python /usr/local/submitty/test_suite/integrationTests/run.py; fi
-  - sudo chown -R ${USER}:${USER} ${HOME}/.stack
 
 # Add more linters to the build process here
 after_script:

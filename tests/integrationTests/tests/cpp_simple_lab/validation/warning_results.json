@@ -16,7 +16,10 @@
                     "actual_file": "test02_STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
-                        "ERROR: This file should be empty!"
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],
@@ -30,7 +33,10 @@
                     "actual_file": "test03_STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
-                        "ERROR: This file should be empty!"
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],
@@ -138,7 +144,6 @@
             "points_awarded": 0,
             "test_name": "Test 11 Submission Limit",
             "view_testcase": false
-       }
+        }
     ]
 }
-

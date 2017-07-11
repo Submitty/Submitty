@@ -20,7 +20,7 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
     num = std::stoi(args.c_str());
     if (num <= 0) throw -1;
   } catch (...) {
-    return new TestResults(0.0,{"ERROR! args should be > 1 (specify number of values to sum)"});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR! args should be > 1 (specify number of values to sum)")});
   }
 
   // ========================================
@@ -31,7 +31,7 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
     std::string file_contents;
     std::string f = this->getPrefix() + "_" + filenames[i];
     if (!getFileContents(f,file_contents)) {
-      return new TestResults(0.0,{"ERROR!  Could not open student file: '" + f + "'"});
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR!  Could not open student file: '" + f + "'")});
     }    
     contents_of_files.push_back(file_contents);
   }
@@ -60,7 +60,7 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
       try {
         last_value = std::stoi(token.c_str());
       } catch (...) {
-        return new TestResults(0.0,{"ERROR! parser error!"});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR! parser error!")});
       }
       computed_total += last_value;
       num_values++;
@@ -73,7 +73,7 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
       try {
         total = std::stoi(token.c_str());
       } catch (...) {
-        return new TestResults(0.0,{"ERROR! could not parse total value as an integer"});
+        return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR! could not parse total value as an integer")});
       }
     }
     if (!found_total_string) {
@@ -96,24 +96,24 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
   
   // ========================================
   // PREPARE THE GRADE & ERROR MESSAGE(S)
-  std::vector<std::string> messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   float grade = 1.0;
 
   if (!found_total_string) {
-    messages.push_back("ERROR!  MISSING \"total = \" string"); 
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  MISSING \"total = \" string")); 
     grade -= 0.2;
   }
   if (!correct_total)  {
-    messages.push_back("ERROR!  INCORRECT TOTAL");
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  INCORRECT TOTAL"));
     grade -= 0.4;
   }
   if (!correct_num) {
     grade -= 0.4;
-    messages.push_back("ERROR!  WRONG NUMBER OF VALUES"); 
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  WRONG NUMBER OF VALUES")); 
   }
   if (!is_random) {
     grade -= 0.5;
-    messages.push_back("ERROR!  NOT RANDOM"); 
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  NOT RANDOM")); 
   }
   grade = std::max(0.0f,grade);
   return new TestResults(grade,messages);

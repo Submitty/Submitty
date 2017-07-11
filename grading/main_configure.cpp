@@ -140,6 +140,14 @@ int main(int argc, char *argv[]) {
   if (config_json.find("assignment_message") != config_json.end()) {
     j["assignment_message"] = config_json.value("assignment_message",""); 
   }
+  if (config_json.find("conditional_message") != config_json.end()) {
+    nlohmann::json conditional_message = config_json.value("conditional_message",nlohmann::json::object());
+    nlohmann::json cond;
+    cond["message"] = conditional_message.value("message","");
+    cond["minimum_days_early"] = conditional_message.value("minimum_days_early",0);
+    cond["minimum_points"] = conditional_message.value("minimum_points",0);
+    j["conditional_message"] = cond; 
+  }
   j["max_submissions"] = max_submissions;
   j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
 
