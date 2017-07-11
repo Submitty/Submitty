@@ -412,6 +412,7 @@ HTML;
                     <textarea name="student_comment_{$num}" id="student_{$num}" class="student_comment complex_type" rows="1" placeholder=" Message to Student (seen by both students and TAs)" onkeyup="autoResizeComment(event);"
                               style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                               display: block; height: auto;">{$question['student_grading_note']}</textarea>
+                    <div class="btn btn-xs btn-primary" id="rubric_add_deduct_{$num}" onclick="addDeduct({$num})" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div>
                 </td>
 
                 <td style="background-color:#EEE;">
@@ -1491,6 +1492,7 @@ $('#gradeable-form').on('submit', function(e){
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
                 <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
+                <div class="btn btn-xs btn-primary" id="rubric_add_deduct_'+newQ+'" onclick="addDeduct('+newQ+')" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
                 <br /> \
@@ -1504,6 +1506,27 @@ $('#gradeable-form').on('submit', function(e){
                     <i class="fa fa-arrow-up" aria-hidden="true"></i></a> \
             </td> \
         </tr>');
+    }
+
+    function addDeduct(num){
+        var last_num = -10;
+        var current = $('[name=deduct_'+num+']').last().attr('id');
+        if (current == null) {
+            last_num = -1;
+        } 
+        else {
+            last_num = parseInt($('[name=deduct_'+num+']').last().attr('id').split('-')[2]);
+        }
+        var new_num = last_num + 1;
+        $("#rubric_add_deduct_" + num).before('\
+<div id="duduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
+<i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" value="0" min="-1000" max="1000" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+<textarea rows="1" placeholder="Comment" style="resize: none; width: 82.5%;"></textarea> \
+<a onclick=""> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick=""> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick=""> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<br> \
+</div>');
     }
 
     $('input:radio[name="gradeable_type"]').change(
