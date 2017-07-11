@@ -531,7 +531,13 @@ ORDER BY registration_section", $params);
         return $return;
     }
 
-    public function getGradedUserCountByRegistrationSections($g_id, $sections) {
+    public function getTotalComponentCount($g_id) {
+      $params=$g_id;
+      return $this->course_db->query("SELECT count(*) FROM gradeable_component WHERE g_id=?", $params);
+      // return $this->course_db->rows();
+    }
+
+    public function getGradedComponentsCountByRegistrationSections($g_id, $sections) {
         $return = array();
         $params = array($g_id);
         $where = "";
@@ -635,7 +641,7 @@ ORDER BY rotating_section", $params);
         return $return;
     }
 
-    public function getGradedUserCountByRotatingSections($g_id, $sections) {
+    public function getGradedComponentsCountByRotatingSections($g_id, $sections) {
         $return = array();
         $params = array($g_id);
         $where = "";
