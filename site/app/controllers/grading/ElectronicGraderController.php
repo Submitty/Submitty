@@ -34,6 +34,11 @@ class ElectronicGraderController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $this->core->getOutput()->addBreadcrumb("Status {$gradeable->getName()}");
 
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         /*
          * we need number of students per section
          */
@@ -89,6 +94,12 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $this->core->getOutput()->addBreadcrumb("Details {$gradeable->getName()}");
+
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
@@ -132,6 +143,11 @@ class ElectronicGraderController extends AbstractController {
         $who_id = $_POST['u_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
 
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
         $homeworkDate = $gradeable->getGradeStartDate();
         if ($now < $homeworkDate) {
@@ -170,6 +186,11 @@ class ElectronicGraderController extends AbstractController {
     public function showGrading() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
 
         $graded = 0;
         $total = 0;
