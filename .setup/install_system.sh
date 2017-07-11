@@ -25,7 +25,7 @@ if [[ $1 == vagrant ]]; then
   VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
 else
-  #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.sh script
+  #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
   VAGRANT=0
 fi
 

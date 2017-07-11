@@ -30,6 +30,8 @@ def get_input(question, default=""):
     return user
 
 
+##############################################################################
+# this script must be run by root or sudo
 if os.getuid() != 0:
     raise SystemExit('ERROR: This script must be run by root or sudo')
 
@@ -37,7 +39,9 @@ parser = argparse.ArgumentParser(description='Submitty configuration script')
 parser.add_argument('--debug', action='store_true', default=False, help='Configure Submitty in debug mode')
 args = parser.parse_args()
 
-# Get directories
+# determine location of SUBMITTY GIT repository
+# this script (CONFIGURES_SUBMITTY.py) is in the top level directory of the repository
+# (this command works even if we run configure from a different directory)
 SETUP_SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 SUBMITTY_REPOSITORY = os.path.dirname(SETUP_SCRIPT_DIRECTORY)
 
@@ -51,12 +55,12 @@ AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
 
 ##############################################################################
 
-# System Users
+# recommended names for special users & groups related to the SUBMITTY system
 HWPHP_USER = 'hwphp'
-HWPHP_UID, HWPHP_GID = get_ids(HWPHP_USER)
 HWCGI_USER = 'hwcgi'
-HWCGI_UID, HWCGI_GID = get_ids(HWCGI_USER)
 HWCRON_USER = 'hwcron'
+HWPHP_UID, HWPHP_GID = get_ids(HWPHP_USER)
+HWCGI_UID, HWCGI_GID = get_ids(HWCGI_USER)
 HWCRON_UID, HWCRON_GID = get_ids(HWCRON_USER)
 
 # System Groups
@@ -149,6 +153,7 @@ TAGRADING_URL = SUBMISSION_URL + '/hwgrading'
 CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
 ##############################################################################
+# make the installation setup directory
 
 SETUP_DIR = os.path.join(SUBMITTY_INSTALL_DIR, '.setup')
 if os.path.isdir(SETUP_DIR):
@@ -158,7 +163,7 @@ shutil.chown(SETUP_DIR, 'root', 'root')
 os.chmod(SETUP_DIR, 700)
 
 ##############################################################################
-
+# WRITE THE VARIABLES TO A FILE
 
 CONFIGURATION_FILE = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'INSTALL_SUBMITTY.sh')
 with open(CONFIGURATION_FILE, 'w') as open_file:
@@ -167,8 +172,8 @@ with open(CONFIGURATION_FILE, 'w') as open_file:
     write('#!/bin/bash')
     write()
 
-    write('# Variables prepared by CONFIGURE_SUBMITTY.sh')
-    write('# Manual editing is allowed (but will be clobbered if CONFIGURE_SUBMITTY.sh is re-run)')
+    write('# Variables prepared by CONFIGURE_SUBMITTY.py')
+    write('# Manual editing is allowed (but will be clobbered if CONFIGURE_SUBMITTY.py is re-run)')
     write()
 
     write('SUBMITTY_INSTALL_DIR=' + SUBMITTY_INSTALL_DIR)
