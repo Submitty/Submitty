@@ -22,6 +22,9 @@ class GradeableVersion extends AbstractModel {
     protected $team_id;
     /** @property @var int */
     protected $version;
+    /** @property @var \app\models\GradeableComponent[] */
+    protected $components = array();
+    protected $been_graded = false;
     /** @property @var float */
     protected $non_hidden_non_extra_credit = 0;
     /** @property @var float */
@@ -54,6 +57,7 @@ class GradeableVersion extends AbstractModel {
         $this->user_id = $details['user_id'];
         $this->team_id = $details['team_id'];
         $this->version = $details['g_version'];
+        //need to put in constructor for components and been_graded
         $this->non_hidden_non_extra_credit = $details['autograding_non_hidden_non_extra_credit'];
         $this->non_hidden_extra_credit = $details['autograding_non_hidden_extra_credit'];
         $this->hidden_non_extra_credit = $details['autograding_hidden_non_extra_credit'];

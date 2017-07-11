@@ -180,14 +180,14 @@ class Gradeable extends AbstractModel {
     /** @property @var int Variables for submission details (such as attempts used, etc.) */
     protected $submissions = 0;
 
-    /** @property @var int $active_version  The set active version for the assignment */
-    protected $active_version = -1;
-    /** @property @var int $current The current version of the assignment being viewed */
-    protected $current_version = -1;
-    /** @property @var int $highest Highest version submitted for an assignment */
-    protected $highest_version = 0;
-    /** @property @var int */
-    protected $graded_version = null;
+    // /** @property @var int $active_version  The set active version for the assignment */
+    // protected $active_version = -1;
+    // /** @property @var int $current The current version of the assignment being viewed */
+    // protected $current_version = -1;
+    // /** @property @var int $highest Highest version submitted for an assignment */
+    // protected $highest_version = 0;
+    // /** @property @var int */
+    // protected $graded_version = null;
 
 
     /** @property @var array */
@@ -211,8 +211,6 @@ class Gradeable extends AbstractModel {
     protected $in_batch_queue = false;
     protected $grading_batch_queue = false;
 
-    /** @property @var User */
-    protected $grader = null;
     /** @property @var string */
     protected $overall_comment = "";
 
@@ -259,9 +257,7 @@ class Gradeable extends AbstractModel {
         $this->user = ($user === null) ? $this->core->getUser() : $user;
         if (isset($details['gd_id'])) {
             $this->gd_id = $details['gd_id'];
-            $this->grader = $this->core->getQueries()->getUserById($details['gd_grader_id']);
             $this->overall_comment = $details['gd_overall_comment'];
-            $this->graded_version = $details['gd_graded_version'];
         }
 
         $timezone = $this->core->getConfig()->getTimezone();
