@@ -69,6 +69,8 @@ HTML;
                 Normal Submission
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
+            <input type='radio' id="radio_batch" name="submission_type">
+                Batch Upload
         </div>
         <div id="student_id_input" style="display: none">
             <div class="sub">
@@ -76,10 +78,14 @@ HTML;
             </div>
             <div class="sub">
                 <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                user_id: <input type="text" float="right" id= "student_id" name="student_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
+                user_id: <input type="text" id= "student_id" name="student_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
             </div class="sub">
         </div>
-
+        <div class = "sub" id="pdf_submit_button" style="display: none">
+            <div class="sub">
+                # of page(s) for each exam: <input type="number" id= "num_pages" name= "num_pages" placeholder="required"/>
+            </div>
+        </div>
     </form>
 HTML;
         }   
@@ -91,24 +97,31 @@ HTML;
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
+                $("#radio_batch").prop("checked", cookieValue==2);
                 document.cookie="student_checked="+0;
             }
             if ($("#radio_student").is(":checked")) {
                 $('#student_id_input').show();
             }
+            if ($("#radio_batch").is(":checked")) {
+                $('#pdf_submit_button').show();
+            }
             $('#radio_normal').click(function() {
                 $('#student_id_input').hide();
+                $('#pdf_submit_button').hide();
                 $('#student_id').val('');
             });
             $('#radio_student').click(function() {
+                $('#pdf_submit_button').hide();
                 $('#student_id_input').show();
+            });
+            $('#radio_batch').click(function()  {
+                $('#student_id_input').hide();
+                $('#pdf_submit_button').show();
             });
         });
     </script>
 HTML;
-
-
-
         $return .= <<<HTML
     <div class="sub">
 HTML;
@@ -288,6 +301,17 @@ HTML;
 
         $svn_string = ($gradeable->useSvnCheckout()) ? "true" : "false";
 
+        $return.= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#pdf_submit").click(function(e){ // Submit button
+                console.log("AAAAAAAAA");
+            });
+        });
+    </script>
+
+HTML;
+
         $return .= <<<HTML
     <script type="text/javascript">
         function submitStudentGradeable(student_id, highest_version) {
@@ -312,8 +336,25 @@ HTML;
                 if (document.getElementById("submissionForm")) {
                     user_id = document.getElementById("submissionForm").student_id.value;
                 }
+                // batch upload
+                if ($("#radio_batch").is(":checked")) {
+                    var num_pages = document.getElementById("submissionForm").num_pages.value;
+                    handleBatch(num_pages, "{$gradeable->getId()}");
+                    // error checking with file name
+                    // make sure that submission is a pdf
+                        // if(url_file.substring(url_file.length - 3) == "pdf") {
+                        //     iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=submissions&file=" + html_file + "&path=" + url_file + "' width='750px' height='600px' style='border: 0'></iframe>");
+                        // }
+                    // get number of pages for the submitted pdf
+                    // make sure is a multiple of # of pages per exam
+                    // if not, popup error message
+                    // save this pdf somewhere
+                    // split this pdf with pdftk for loop and save those pdfs somewhere
+                    // for each pdf also get the cover image and name appropriately
+                    // display pdfs in new div
+                }
                 // no RCS entered, upload for whoever is logged in
-                if (user_id == ""){
+                else if (($("#radio_normal").is(":checked")) || user_id == ""){
                     handleSubmission("{$this->core->buildUrl(array('component' => 'student',
                                                                'page' => 'submission',
                                                                'action' => 'upload',
@@ -329,7 +370,8 @@ HTML;
                                  {$gradeable->getNumTextBoxes()},
                                  "{$gradeable->getUser()->getId()}");
                 }
-                else {
+                // student upload
+                else if (($("#radio_student").is(":checked"))) {
                     validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, submitStudentGradeable);
                 }
                 e.stopPropagation();

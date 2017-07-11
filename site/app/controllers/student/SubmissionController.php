@@ -43,6 +43,9 @@ class SubmissionController extends AbstractController {
             case 'pop_up':
                 return $this->popUp();
                 break;
+            case 'batch':
+                return $this->batchUpload();
+                break;
             case 'verify':
                 return $this->validGradeable();
                 break;
@@ -103,6 +106,103 @@ class SubmissionController extends AbstractController {
     }
 
     /**
+    *
+    */
+    private function batchUpload() {
+        if (!isset($_POST['num_pages'])) {
+            $msg = "Did not pass in number of pages.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        $num_pages = $_POST['num_pages'];
+        if (!isset($_POST['gradeable_id'])) {
+            $msg = "Did not pass in number of gradeable_id.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        $gradeable_id = $_POST['gradeable_id'];
+
+        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        $gradeable = $gradeable_list[$gradeable_id];
+        $gradeable->loadResultDetails();
+
+        // error checking with file name
+        // make sure that submission is a pdf
+
+        $uploaded_files = array();
+        for ($i = 1; $i <= $gradeable->getNumParts(); $i++){
+            if (isset($_FILES["files{$i}"])) {
+                $uploaded_files[$i] = $_FILES["files{$i}"];
+            }
+        }
+            
+        $errors = array();
+        $count = array();
+        for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+            if (isset($uploaded_files[$i])) {
+                $count[$i] = count($uploaded_files[$i]["name"]);
+                for ($j = 0; $j < $count[$i]; $j++) {
+                    if (!isset($uploaded_files[$i]["tmp_name"][$j]) || $uploaded_files[$i]["tmp_name"][$j] === "") {
+                        $error_message = $uploaded_files[$i]["name"][$j]." failed to upload. ";
+                        if (isset($uploaded_files[$i]["error"][$j])) {
+                            $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[$i]["error"][$j]). ".";
+                        }
+                        $errors[] = $error_message;
+                    }
+                }
+            }
+        }
+            
+        if (count($errors) > 0) {
+            $error_text = implode("\n", $errors);
+            return $this->uploadResult("Upload Failed: ".$error_text, false);
+        }
+
+        // $max_size = $gradeable->getMaxSize();
+        $max_size = 10000000;
+
+        // Determine the size of the uploaded files as well as whether or not they're a zip or not.
+        // We save that information for later so we know which files need unpacking or not and can save
+        // a check to getMimeType()
+        $file_size = 0;
+        for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+            if (isset($uploaded_files[$i])) {
+                for ($j = 0; $j < $count[$i]; $j++) {
+                    if(FileUtils::isValidFileName($uploaded_files[$i]["name"][$j]) === false) {
+                        return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[$i]["name"][$j].".", false);
+                    }
+                    if(substr($uploaded_files[$i]["name"][$j],-3) != "pdf") {
+                        return $this->uploadResult($uploaded_files[$i]["name"][$j]." is not a PDF!", false);
+                    }
+                    $file_size += $uploaded_files[$i]["size"][$j];
+                }
+            }
+        }
+            
+        if ($file_size > $max_size) {
+            return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.", false);
+        }
+
+        // save this pdf somewhere
+        
+
+        // get number of pages for the submitted pdf
+        // make sure is a multiple of # of pages per exam
+        // if not, popup error message
+        // save this pdf somewhere
+        // split this pdf with pdftk for loop and save those pdfs somewhere
+        // for each pdf also get the cover image and name appropriately
+        // display pdfs in new div
+
+        $return = array('success' => true);
+        $this->core->getOutput()->renderJson($return);
+        return $return;
+    }
+
+
+    /**\
     * Function for verification that a given RCS ID is valid and has a corresponding user and gradeable.
     * This should be called via AJAX, saving the result to the json_buffer of the Output object. 
     * If failure, also returns message explaining what happened.

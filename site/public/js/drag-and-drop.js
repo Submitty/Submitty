@@ -321,6 +321,83 @@ function isValidSubmission(){
 }
 
 /**
+ *
+ * @param 
+ */
+function handleBatch(num_pages, gradeable_id) {
+    $("#submit").prop("disabled", true);
+
+    var formData = new FormData();
+
+    var message = "";
+    if(num_pages == "") {
+        alert("You didn't enter the # of page(s)!");
+        $("#submit").prop("disabled", false);
+        return;
+    }
+    else if(num_pages < 1 || num_pages % 1 != 0) {
+        alert(num_pages + " is not a valid # of page(s)!");
+        $("#submit").prop("disabled", false);
+        return;
+    }
+
+    formData.append('num_pages', num_pages);
+    formData.append('gradeable_id', gradeable_id);
+
+    for (var i = 0; i < file_array.length; i++) {
+        for (var j = 0; j < file_array[i].length; j++) {
+            if (file_array[i][j].name.indexOf("'") != -1 ||
+                file_array[i][j].name.indexOf("\"") != -1) {
+                alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("\\") != -1 ||
+                file_array[i][j].name.indexOf("/") != -1) {
+                alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("<") != -1 ||
+                file_array[i][j].name.indexOf(">") != -1) {
+                alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                return;
+            }
+            formData.append('files' + (i + 1) + '[]', file_array[i][j]);
+        }
+    }
+
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'batch'});
+
+    $.ajax({
+        url: url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            $("#submit").prop("disabled", false);
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    console.log("success");
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function() {
+            $("#submit").prop("disabled", false);
+            alert("ERROR! Please contact administrator that you could not upload files.");
+        }
+    });
+}
+
+/**
  * @param csrf_token
  * @param gradeable_id
  * @param student_id
@@ -355,9 +432,9 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
                 }
             }
             catch (e) {
+                console.log(e);
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
-                console.log(data);
             }
         },
         error: function() {
@@ -389,6 +466,9 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
     };
     if ($('#radio_student').is(':checked')) {
         document.cookie="student_checked="+1;
+    };
+    if ($('#radio_batch').is(':checked')) {
+        document.cookie="student_checked="+2;
     };
 
     var message = "";
