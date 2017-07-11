@@ -182,6 +182,7 @@ HTML;
                     $diff_viewer = $autocheck->getDiffViewer();
                     $return .= <<<HTML
         <div class="box-block">
+        <!-- Readded css here so the popups have the css -->
 HTML;
                     $title = "";
                     $return .= <<<HTML
@@ -190,10 +191,32 @@ HTML;
                     if ($diff_viewer->hasDisplayExpected()) {
                         $title = "Student ";
                     }
+                    if ($diff_viewer->hasDisplayActual()) {
+                        $visible = "visible";
+                        $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayActual())), "\xC2\xA0\t")); 
+                        $less_than_30 = true;
+                        $arr_count = count($tmp_array_string);
+                        for ($x = 0; $x < $arr_count; $x++) {
+                            if(strlen($tmp_array_string[$x]) > 30) {
+                                $less_than_30 = false;
+                                $x = $arr_count;
+                            }
+                        }
+                        if (substr_count($diff_viewer->getDisplayActual(), 'line_number') < 10 && $less_than_30) {
+                            $visible = "hidden";
+                        }
+                    } else {
+                        $visible = "hidden";
+                    }
                     $title .= $description;
                     $return .= <<<HTML
-                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 0)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i></span></h4>
+                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 0)" style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
                 <div id="container_{$count}_{$autocheck_cnt}_0">
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/ta-grading.css" />
 HTML;
                     foreach ($autocheck->getMessages() as $message) {
                         $type_class = "black-message";
@@ -228,12 +251,30 @@ HTML;
             </div>
 HTML;
                     if ($diff_viewer->hasDisplayExpected()) {
+                        $visible = "visible";
+                        $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\t")); 
+                        $less_than_30 = true;
+                        $arr_count = count($tmp_array_string);
+                        for ($x = 0; $x < $arr_count; $x++) {
+                            if(strlen($tmp_array_string[$x]) > 30) {
+                                $less_than_30 = false;
+                                $x = $arr_count;
+                            }
+                        }
+                        if (substr_count($diff_viewer->getDisplayExpected(), 'line_number') < 10 && $less_than_30) {
+                            $visible = "hidden";
+                        }
                         $title = "Expected ";
                         $title .= $description;
                         $return .= <<<HTML
             <div class='diff-element'>
-                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 1)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i></span></h4>
+                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 1)" style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
                 <div id="container_{$count}_{$autocheck_cnt}_1">
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />
+                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/ta-grading.css" />
 HTML;
                         for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
                             $return .= <<<HTML
