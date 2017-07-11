@@ -826,8 +826,7 @@ class Course(object):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
-                                                             gd_overall_comment="lorem ipsum lodar",
-                                                             gd_graded_version=graded, gd_grader_id=self.instructor.id)
+                                                             gd_overall_comment="lorem ipsum lodar")
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:
@@ -841,7 +840,7 @@ class Course(object):
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S")
                                 conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                              gcd_score=score, gcd_component_comment="lorem ipsum",
-                                             gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time)
+                                             gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=1)
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
