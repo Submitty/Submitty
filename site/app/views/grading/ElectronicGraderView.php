@@ -185,7 +185,6 @@ HTML;
             $last_section = false;
             $tbody_open = false;
             foreach ($rows as $row) {
-                $row->loadResultDetails();
                 $graded_version = $row->getGradedVersion();
                 $active_version = $row->getActiveVersion();
                 $highest_version = $row->getHighestVersion();
@@ -201,11 +200,7 @@ HTML;
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
                     $different = false;
-                    if($graded_version !== $active_version){
-                        $different = true;
-                        // probably want to write a different query instead of this
-                        $autograding_score = $row->getVersions()[$graded_version]->getNonHiddenTotal() + $row->getVersions()[$graded_version]->getHiddenTotal();
-                    }
+                    // TODO: ADD RED FLAG IF GRADED VERSION IS NOT EQUAL TO ACTIVE VERSION
                 }
                 else{
                     $viewed_grade = "";

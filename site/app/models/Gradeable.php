@@ -860,18 +860,6 @@ class Gradeable extends AbstractModel {
         return $this->grader_id;
     }
     
-    public function getGradedVersion() {
-        if(count($this->versions) > 0) {
-            for($i = count($this->versions); $i > 0; $i--) {
-                if($this->versions[$i]->isGraded()) {
-                    return 
-                }
-            }
-        }
-        else {
-            return 0;
-        }
-    }
   
     public function getActiveDaysLate() {
         $extended_due_date = clone $this->due_date;
