@@ -27,7 +27,7 @@ class MiscController extends AbstractController {
     private function display_file() {
         //Additional security
         if (!($this->core->getUser()->accessGrading())) {
-            return false;
+            throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
         }
         foreach (explode(DIRECTORY_SEPARATOR, $_REQUEST['path']) as $part) {
             if ($part == ".." || $part == ".") {
@@ -51,6 +51,29 @@ class MiscController extends AbstractController {
         }
         else {
             throw new \InvalidArgumentException("Invalid dir used");
+        }
+        if (!FileUtils::isValidFileName($_REQUEST['path'])) {
+            throw new \InvalidArgumentException("Not a valid file name");
+        }
+        $gradeable_path = $this->core->getConfig()->getCoursePath();
+        $folder_names = array();
+        $folder_names[] = "submissions";
+        $folder_names[] = "results";
+        $folder_names[] = "checkout";
+        $path_anchors = array();
+        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[0]);
+        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[1]);
+        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[2]);
+        $arr_count = count($path_anchors);
+        $access = false;
+        for ($x = 0; $x < $arr_count; $x++) {
+            if(Utils::startsWith($_REQUEST['path'], $path_anchors[$x])){
+                $access = true;
+            }
+        }
+
+        if(!$access) {
+            throw new \InvalidArgumentException("You're not allowed access to that file");
         }
 
         $mime_type = FileUtils::getMimeType($_REQUEST['path']);
@@ -76,7 +99,7 @@ class MiscController extends AbstractController {
     private function downloadFile() {
         //Additional security
         if (!($this->core->getUser()->accessGrading())) {
-            return false;
+            throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
         }
         if (!file_exists($_REQUEST['path'])) {
             throw new \InvalidArgumentException("File does not exist");
@@ -86,6 +109,30 @@ class MiscController extends AbstractController {
                 throw new \InvalidArgumentException("Cannot have a part of the path just be dots");
             }
         }
+        if (!FileUtils::isValidFileName($_REQUEST['path'])) {
+            throw new \InvalidArgumentException("Not a valid file name");
+        }
+        $gradeable_path = $this->core->getConfig()->getCoursePath();
+        $folder_names = array();
+        $folder_names[] = "submissions";
+        $folder_names[] = "results";
+        $folder_names[] = "checkout";
+        $path_anchors = array();
+        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[0]);
+        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[1]);
+        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[2]);
+        $arr_count = count($path_anchors);
+        $access = false;
+        for ($x = 0; $x < $arr_count; $x++) {
+            if(Utils::startsWith($_REQUEST['path'], $path_anchors[$x])){
+                $access = true;
+            }
+        }
+
+        if(!$access) {
+            throw new \InvalidArgumentException("You're not allowed access to that file");
+        }
+        
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         $file_url = $_REQUEST['path'];
@@ -98,14 +145,14 @@ class MiscController extends AbstractController {
     private function downloadZip() {
         //Additional security
         if (!($this->core->getUser()->accessGrading())) {
-            return false;
+            throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
         }
         $zip_file_name = $_REQUEST['gradeable_id'] . "_" . $_REQUEST['user_id'] . "_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         $temp_dir = "/tmp";
         //makes a random zip file name on the server
-        $temp_name = md5(uniqid($this->core->getUser()->getId(), true));
+        $temp_name = uniqid($this->core->getUser()->getId(), true);
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
         $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
         $gradeable_path = $this->core->getConfig()->getCoursePath();
@@ -117,7 +164,6 @@ class MiscController extends AbstractController {
         $submissions_path = FileUtils::joinPaths($gradeable_path, $folder_names[0], $gradeable->getId(), $gradeable->getUser()->getId(), $active_version);
         $results_path = FileUtils::joinPaths($gradeable_path, $folder_names[1], $gradeable->getId(), $gradeable->getUser()->getId(), $active_version);
         $checkout_path = FileUtils::joinPaths($gradeable_path, $folder_names[2], $gradeable->getId(), $gradeable->getUser()->getId(), $active_version);
-        chdir ($temp_dir); //changes the directory to tmps
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         $paths = array();
@@ -160,7 +206,7 @@ class MiscController extends AbstractController {
     private function downloadAssignedZips() { 
         //Additional security
         if (!($this->core->getUser()->accessGrading())) {
-            return false;
+            throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
         }
         $zip_file_name = $_REQUEST['gradeable_id'] . "_section_students_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
@@ -169,7 +215,7 @@ class MiscController extends AbstractController {
             $type = "all";
             $zip_file_name = $_REQUEST['gradeable_id'] . "_all_students_" . date("m-d-Y") . ".zip";
             if (!($this->core->getUser()->accessFullGrading())) {
-                return false;
+                throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
             }
         }
         else
@@ -179,12 +225,11 @@ class MiscController extends AbstractController {
 
         $temp_dir = "/tmp";
         //makes a random zip file name on the server
-        $temp_name = md5(uniqid($this->core->getUser()->getId(), true));
+        $temp_name = uniqid($this->core->getUser()->getId(), true);
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
         $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']);
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
-        chdir ($temp_dir); //changes the directory to tmp
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         if($type === "all") {

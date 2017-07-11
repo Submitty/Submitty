@@ -911,12 +911,14 @@ HTML;
         return false;
     }
 
-    function downloadFile(html_file, url_file) {        
+    function downloadFile(html_file, url_file) {
+        url_file = decodeURIComponent(url_file);        
         window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': html_file, 'path': url_file});
         return false;
     }
 
     function openFile(html_file, url_file) {
+        url_file = decodeURIComponent(url_file);
         window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=submissions&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
