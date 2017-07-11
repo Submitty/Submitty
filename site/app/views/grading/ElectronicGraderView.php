@@ -185,6 +185,7 @@ HTML;
             $last_section = false;
             $tbody_open = false;
             foreach ($rows as $row) {
+                $row->loadResultDetails();
                 $graded_version = $row->getGradedVersion();
                 $active_version = $row->getActiveVersion();
                 $highest_version = $row->getHighestVersion();
@@ -203,7 +204,6 @@ HTML;
                     if($graded_version !== $active_version){
                         $different = true;
                         // probably want to write a different query instead of this
-                        $row->loadResultDetails();
                         $autograding_score = $row->getVersions()[$graded_version]->getNonHiddenTotal() + $row->getVersions()[$graded_version]->getHiddenTotal();
                     }
                 }

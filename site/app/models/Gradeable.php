@@ -27,7 +27,6 @@ use app\libraries\Utils;
  * @method int getHighestVersion()
  * @method int getActiveVersion()
  * @method void setActiveVersion(int $version)
- * @method int getGradedVersion()
  * @method void setGradedVersion(int $version)
  * @method int getMaxSubmissions()
  * @method float getMaxSize()
@@ -180,12 +179,12 @@ class Gradeable extends AbstractModel {
     /** @property @var int Variables for submission details (such as attempts used, etc.) */
     protected $submissions = 0;
 
-    // /** @property @var int $active_version  The set active version for the assignment */
-    // protected $active_version = -1;
-    // /** @property @var int $current The current version of the assignment being viewed */
-    // protected $current_version = -1;
-    // /** @property @var int $highest Highest version submitted for an assignment */
-    // protected $highest_version = 0;
+    /** @property @var int $active_version  The set active version for the assignment */
+    protected $active_version = -1;
+    /** @property @var int $current The current version of the assignment being viewed */
+    protected $current_version = -1;
+    /** @property @var int $highest Highest version submitted for an assignment */
+    protected $highest_version = 0;
     // /** @property @var int */
     // protected $graded_version = null;
 
@@ -859,6 +858,19 @@ class Gradeable extends AbstractModel {
   
     public function getGraderId() {
         return $this->grader_id;
+    }
+    
+    public function getGradedVersion() {
+        if(count($this->versions) > 0) {
+            for($i = count($this->versions); $i > 0; $i--) {
+                if($this->versions[$i]->isGraded()) {
+                    return 
+                }
+            }
+        }
+        else {
+            return 0;
+        }
     }
   
     public function getActiveDaysLate() {
