@@ -199,8 +199,19 @@ HTML;
                         $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
+<<<<<<< HEAD
                     $different = false;
                     // TODO: ADD RED FLAG IF GRADED VERSION IS NOT EQUAL TO ACTIVE VERSION
+=======
+                    // $different = false;
+                    // if($graded_version !== $active_version){
+                    //     $different = true;
+                    //     // probably want to write a different query instead of this
+                    //     $row->loadResultDetails();
+                    //     $autograding_score = $row->getVersions()[$graded_version]->getNonHiddenTotal() + $row->getVersions()[$graded_version]->getHiddenTotal();
+                    // }
+                    //TODO: need to add check for if any components have a version not matching the active version
+>>>>>>> 2313b7bf8f194024667e52b6d62f75478cf32f66
                 }
                 else{
                     $viewed_grade = "";
@@ -276,12 +287,12 @@ HTML;
                     
                     if ($row->beenTAgraded()) {
                         $btn_class = "btn-default";
-                        if($different) {
-                            $contents = "Graded " . $graded_version . "/" . $highest_version;
-                        }
-                        else{
+                        // if($different) {
+                        //     $contents = "Graded " . $graded_version . "/" . $highest_version;
+                        // }
+                        // else{
                             $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-                        }
+                        // }
                     }
                     else {
                         $btn_class = "btn-primary";
@@ -814,9 +825,10 @@ HTML;
         </div>
 HTML;
         if ($gradeable->beenTAgraded()) {
+            // assumes that the person who graded the first question graded everything... also in electronicGraderController:150...have to rewrite to be per component
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: {$gradeable->getGrader()->getId()}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
+            Graded By: {$gradeable->getComponents()[1]->getGrader()->getId()}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
         </div>
 HTML;
         }

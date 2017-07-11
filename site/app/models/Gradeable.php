@@ -59,8 +59,6 @@ use app\libraries\Utils;
  * @method User getUser()
  * @method void setUser(User $user)
  * @method GradeableComponent[] getComponents()
- * @method User getGrader()
- * @method void setGrader(User $user)
  * @method string getOverallComment()
  * @method void setOverallComment(string $comment)
  * @method int getMinimumGradingGroup()
@@ -297,7 +295,7 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment',
+                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
                             'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
@@ -326,6 +324,8 @@ class Gradeable extends AbstractModel {
                         if ($details['array_gcd_gc_id'][$j] === $component_details['gc_id']) {
                             $component_details['gcd_score'] = $details['array_gcd_score'][$j];
                             $component_details['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
+                            $component_details['gcd_grader_id'] = $details['array_gcd_grader_id'][$j];
+                            $component_details['gcd_graded_version'] = $details['array_gcd_graded_version'][$j];                            
                             $component_details['gcd_grade_time'] = $details['array_gcd_grade_time'][$j];
 
                             if (isset($details['array_gcd_user_id'][$j])) {
