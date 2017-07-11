@@ -2,7 +2,6 @@
 
 namespace app\views\submission;
 
-use app\libraries\AutogradingResultsViewer;
 use app\models\Gradeable;
 use app\views\AbstractView;
 

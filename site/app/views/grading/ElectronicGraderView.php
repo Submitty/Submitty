@@ -2,7 +2,6 @@
 
 namespace app\views\grading;
 
-use app\libraries\AutogradingResultsViewer;
 use app\models\Gradeable;
 use app\models\User;
 use app\models\LateDaysCalculation;
