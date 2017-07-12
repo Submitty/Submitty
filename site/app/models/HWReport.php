@@ -86,7 +86,7 @@ class HWReport extends AbstractModel {
                     $student_output_text .= $nl.$gradefilecontents.$nl;
                 }
                 foreach($gradeable->getComponents() as $component) {
-                    $student_output_text .= $component->getTitle() . "[" . $component->getScore() . "/" . $component->getMaxValue() . "]".$nl;
+                    $student_output_text .= $component->getTitle() . "[" . $component->getScore() . "/" . $component->getMaxValue() . "] (Graded by {$component->getGrader()->getId()})".$nl;
                     if($component->getStudentComment() != "") {
                         $student_output_text .= "Rubric: " . $component->getStudentComment() . $nl;
                     }
@@ -113,7 +113,7 @@ class HWReport extends AbstractModel {
                 $student_output_last .= "----------------------------------------------------------------------" . $nl;
             }
             else {
-                $student_final_output = "[ THERE ARE GRADING VERSION CONFLICTS WITH THIS ASSIGNMENT. PLEASE CONTACT YOUR INSTRUCTOR OR TA TO RESOLVE THE ISSUE]";
+                $student_output_last = "[ THERE ARE GRADING VERSION CONFLICTS WITH THIS ASSIGNMENT. PLEASE CONTACT YOUR INSTRUCTOR OR TA TO RESOLVE THE ISSUE]".$nl;
             }
 
             $student_final_output = $student_output_text_main . $student_output_text. $student_output_last;
