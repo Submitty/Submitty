@@ -412,7 +412,8 @@ HTML;
                     <textarea name="student_comment_{$num}" id="student_{$num}" class="student_comment complex_type" rows="1" placeholder=" Message to Student (seen by both students and TAs)" onkeyup="autoResizeComment(event);"
                               style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                               display: block; height: auto;">{$question['student_grading_note']}</textarea>
-                    <div class="btn btn-xs btn-primary" id="rubric_add_deduct_{$num}" onclick="addDeduct({$num})" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div>
+                    <div id="deduction_questions_{$num}">
+                    <div class="btn btn-xs btn-primary" id="rubric_add_deduct_{$num}" onclick="addDeduct(this,{$num});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div></div>
                 </td>
 
                 <td style="background-color:#EEE;">
@@ -425,6 +426,8 @@ HTML;
         $html_output .= <<<HTML
                 <br />
                 Extra Credit:&nbsp;&nbsp;<input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
+                Deduction/Addition:&nbsp;&nbsp;<input type="radio" id="deduct_radio_ded_id_{$num}" name="deduct_radio_{$num}" value="deduction" onclick="onDeduction(this);" checked> <i class="fa fa-minus-square" aria-hidden="true"> </i>
+                <input type="radio" id="deduct_radio_add_id_{$num}" name="deduct_radio_{$num}" value="addition" onclick="onAddition(this);"> <i class="fa fa-plus-square" aria-hidden="true"> </i>
                 <br />
 HTML;
         if ($num > 1){
@@ -1101,6 +1104,7 @@ function createCrossBrowserJSDate(val){
         if ($(this).is(':checked')){ 
             if($(this).val() == 'Electronic File'){ 
                 $('#electronic_file').show();
+                $('#ta_instructions_id').hide();
                 if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
                     $('#rubric_questions').hide();
                     $('#grading_questions').hide();
@@ -1376,6 +1380,16 @@ $('#gradeable-form').on('submit', function(e){
         document.getElementById("totalCalculation").innerHTML = total + " (" + ec + ")";
     }
 
+    function updateDeductIds(elem, old_id, new_id) {
+        elem.find('div[name=deduct_'+old_id+']').each(function () {
+            var deduct_id = $(this).attr('id');
+            var question_id = deduct_id.split('-')[1];
+            var current_id = deduct_id.split('-')[2];
+            $(this).attr('name', 'deduct_' + new_id);
+            $(this).attr('id', 'deduct_id-'+new_id+'-'+current_id+'');
+        });
+    }
+
     function deleteQuestion(question) {
         if (question <= 0) {
             return;
@@ -1401,6 +1415,12 @@ $('#gradeable-form').on('submit', function(e){
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
         row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
+        row.find('input[name=deduct_radio_'+ oldNum +']').attr('name', 'deduct_radio_' + newNum);
+        row.find('input[id=deduct_radio_ded_id_' + oldNum +']').attr('id', 'deduct_radio_ded_id_' + newNum);
+        row.find('input[id=deduct_radio_add_id_' + oldNum +']').attr('id', 'deduct_radio_add_id_' + newNum);
+        row.find('div[id=deduction_questions_'+oldNum+']').attr('id', 'deduction_questions_'+newNum);
+        row.find('div[id=rubric_add_deduct_' + oldNum + ']').attr('id','rubric_add_deduct_' + newNum).attr('onclick', 'addDeduct(this,' + newNum + ')'); 
+        updateDeductIds(row,oldNum,newNum);
     }
 
     function moveQuestionDown(question) {
@@ -1413,6 +1433,10 @@ $('#gradeable-form').on('submit', function(e){
         var child = 0;
         if (question == 1) {
             child = 1;
+        }
+
+        if(!newRow.length) {
+            return false;
         }
 
         //Move Question title
@@ -1441,6 +1465,50 @@ $('#gradeable-form').on('submit', function(e){
         temp = currentRow.children()[child].children[2].checked;
         currentRow.children()[child].children[2].checked = newRow.children()[1].children[2].checked;
         newRow.children()[1].children[2].checked = temp;
+
+        //Move the radio button
+        var new_question = parseInt(question) + 1;
+        var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
+        var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
+        document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + new_question).checked;
+        document.getElementById("deduct_radio_add_id_" + question).checked = document.getElementById("deduct_radio_add_id_" + new_question).checked;
+        document.getElementById("deduct_radio_ded_id_" + new_question).checked = ded_temp;
+        document.getElementById("deduct_radio_add_id_" + new_question).checked = add_temp;
+
+        //stores the point and text data so it can readded; the html earses it once moved
+        var current_deduct_points = [];
+        var current_deduct_texts = [];
+        currentRow.find('div[name=deduct_'+question+']').each(function () {
+            current_deduct_points.push($(this).find("input").val());
+            current_deduct_texts.push($(this).find("textarea").val());
+        });
+        var new_deduct_points = [];
+        var new_deduct_texts = [];
+        newRow.find('div[name=deduct_'+new_question+']').each(function () {
+            new_deduct_points.push($(this).find("input").val());
+            new_deduct_texts.push($(this).find("textarea").val());
+        });
+
+        //switchs the html between the table rows
+        var temp_html = currentRow.find('div[id=deduction_questions_'+question+']').html();
+        currentRow.find('div[id=deduction_questions_'+question+']').html(newRow.find('div[id=deduction_questions_'+new_question+']').html());
+        newRow.find('div[id=deduction_questions_'+new_question+']').html(temp_html);
+
+        //fixes the ids once switched
+        currentRow.find('div[id=rubric_add_deduct_' + new_question + ']').attr('id','rubric_add_deduct_' + question).attr('onclick', 'addDeduct(this,' + question + ')'); 
+        updateDeductIds(currentRow,new_question,question);
+        newRow.find('div[id=rubric_add_deduct_' + question + ']').attr('id','rubric_add_deduct_' + new_question).attr('onclick', 'addDeduct(this,' + new_question + ')'); 
+        updateDeductIds(newRow,question,new_question);
+
+        //readds the data
+        currentRow.find('div[name=deduct_'+question+']').each(function (index) {
+            $(this).find("input").val(new_deduct_points[index]);
+            $(this).find("textarea").val(new_deduct_texts[index]);
+        });
+        newRow.find('div[name=deduct_'+new_question+']').each(function (index) {
+            $(this).find("input").val(current_deduct_points[index]);
+            $(this).find("textarea").val(current_deduct_texts[index]);
+        });
     }
 
     function moveQuestionUp(question) {
@@ -1478,6 +1546,49 @@ $('#gradeable-form').on('submit', function(e){
         temp = currentRow.children()[1].children[2].checked;
         currentRow.children()[1].children[2].checked = newRow.children()[child].children[2].checked;
         newRow.children()[child].children[2].checked = temp;
+
+        //Move the radio button
+        var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
+        var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
+        document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + (question-1)).checked;
+        document.getElementById("deduct_radio_add_id_" + question).checked = document.getElementById("deduct_radio_add_id_" + (question-1)).checked;
+        document.getElementById("deduct_radio_ded_id_" + (question-1)).checked = ded_temp;
+        document.getElementById("deduct_radio_add_id_" + (question-1)).checked = add_temp;
+
+        //stores the point and text data so it can readded; the html earses it once moved
+        var current_deduct_points = [];
+        var current_deduct_texts = [];
+        currentRow.find('div[name=deduct_'+question+']').each(function () {
+            current_deduct_points.push($(this).find("input").val());
+            current_deduct_texts.push($(this).find("textarea").val());
+        });
+        var new_deduct_points = [];
+        var new_deduct_texts = [];
+        newRow.find('div[name=deduct_'+(question-1)+']').each(function () {
+            new_deduct_points.push($(this).find("input").val());
+            new_deduct_texts.push($(this).find("textarea").val());
+        });
+
+        //switchs the html between the table rows
+        var temp_html = currentRow.find('div[id=deduction_questions_'+question+']').html();
+        currentRow.find('div[id=deduction_questions_'+question+']').html(newRow.find('div[id=deduction_questions_'+(question-1)+']').html());
+        newRow.find('div[id=deduction_questions_'+(question-1)+']').html(temp_html);
+
+        //fixes the ids once switched
+        currentRow.find('div[id=rubric_add_deduct_' + (question-1) + ']').attr('id','rubric_add_deduct_' + question).attr('onclick', 'addDeduct(this,' + question + ')'); 
+        updateDeductIds(currentRow,(question-1),question);
+        newRow.find('div[id=rubric_add_deduct_' + question + ']').attr('id','rubric_add_deduct_' + (question-1)).attr('onclick', 'addDeduct(this,' + (question-1) + ')'); 
+        updateDeductIds(newRow,question,(question-1));
+
+        //readds the data
+        currentRow.find('div[name=deduct_'+question+']').each(function (index) {
+            $(this).find("input").val(new_deduct_points[index]);
+            $(this).find("textarea").val(new_deduct_texts[index]);
+        });
+        newRow.find('div[name=deduct_'+(question-1)+']').each(function (index) {
+            $(this).find("input").val(current_deduct_points[index]);
+            $(this).find("textarea").val(current_deduct_texts[index]);
+        });
     }
 
     function addQuestion(){
@@ -1486,17 +1597,20 @@ $('#gradeable-form').on('submit', function(e){
         var newQ = num+1;
         var sBox = selectBox(newQ);
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
-            <td style="overflow: hidden;"> \
+            <td style="overflow: hidden; border-top: 5px solid #dddddd;"> \
                 <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" placeholder="Rubric Item Title"></textarea> \
                 <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
                 <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
-                <div class="btn btn-xs btn-primary" id="rubric_add_deduct_'+newQ+'" onclick="addDeduct('+newQ+')" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div> \
+                <div id=deduction_questions_'+newQ+'> \
+                <div class="btn btn-xs btn-primary" id="rubric_add_deduct_'+newQ+'" onclick="addDeduct(this,'+newQ+')" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div> </div> \
             </td> \
-            <td style="background-color:#EEE;">' + sBox + ' \
+            <td style="background-color:#EEE; border-top: 5px solid #dddddd;">' + sBox + ' \
                 <br /> \
                 Extra Credit:&nbsp;&nbsp;<input onclick="calculatePercentageTotal();" name="eg_extra_'+newQ+'" type="checkbox" class="eg_extra extra" value="on"/> \
+                Deduction/Addition:&nbsp;&nbsp;<input type="radio" id="deduct_radio_ded_id_'+newQ+'" name="deduct_radio_'+newQ+'" value="deduction" onclick="onDeduction(this);" checked> <i class="fa fa-minus-square" aria-hidden="true"> </i> \
+                <input type="radio" id="deduct_radio_add_id_'+newQ+'" name="deduct_radio_'+newQ+'" value="addition" onclick="onAddition(this);"> <i class="fa fa-plus-square" aria-hidden="true"> </i> \
                 <br /> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <i class="fa fa-times" aria-hidden="true"></i></a> \
@@ -1508,8 +1622,122 @@ $('#gradeable-form').on('submit', function(e){
         </tr>');
     }
 
-    function addDeduct(num){
+    function deleteDeduct(me) {
+        var question_id = me.parentElement.id.split('-')[1];
+        var current_id = me.parentElement.id.split('-')[2];
+        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
+        current_row.remove();
+        var last_deduct = $('[name=deduct_'+question_id+']').last().attr('id');
+        if (last_deduct == null) {
+            totalD = -1;
+        } 
+        else {
+            totalD = parseInt($('[name=deduct_'+question_id+']').last().attr('id').split('-')[2]);
+        }
+        current_id = parseInt(current_id);
+        for(var i=current_id+1; i<= totalD; ++i){
+            updateDeduct(i,i-1, question_id);
+        }
+    }
+
+    function updateDeduct(old_num, new_num, question_num) {
+        var current_deduct = $('#deduct_id-'+question_num+'-'+old_num);
+        current_deduct.attr('id', 'deduct_id-'+question_num+'-'+new_num);
+    }
+
+    function moveDeductDown(me) {
+        var question_id = me.parentElement.id.split('-')[1];
+        var current_id = me.parentElement.id.split('-')[2];
+        current_id = parseInt(current_id);
+        //checks if the element exists
+        if (!($('#deduct_id-'+question_id+'-'+(current_id+1)).length)) {
+            return false;
+        }
+        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
+        var current_textarea_value = current_row.find("textarea").val();
+        var current_input_value = current_row.find("input").val();
+
+        var new_row = $('#deduct_id-'+question_id+'-'+(current_id+1));
+        var new_textarea_value = new_row.find("textarea").val();
+        var new_input_value = new_row.find("input").val();
+
+        var temp_textarea_value = new_textarea_value;
+        var temp_input_value = new_input_value;
+
+        new_row.find("textarea").val(current_textarea_value);
+        new_row.find("input").val(current_input_value);
+
+        current_row.find("textarea").val(temp_textarea_value);
+        current_row.find("input").val(temp_input_value);
+    }
+
+    function moveDeductUp(me) {
+        var question_id = me.parentElement.id.split('-')[1];
+        var current_id = me.parentElement.id.split('-')[2];
+        current_id = parseInt(current_id);
+        if (current_id == 0) {
+            return false;
+        }
+        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
+        var current_textarea_value = current_row.find("textarea").val();
+        var current_input_value = current_row.find("input").val();
+
+        var new_row = $('#deduct_id-'+question_id+'-'+(current_id-1));
+        var new_textarea_value = new_row.find("textarea").val();
+        var new_input_value = new_row.find("input").val();
+
+        var temp_textarea_value = new_textarea_value;
+        var temp_input_value = new_input_value;
+
+        new_row.find("textarea").val(current_textarea_value);
+        new_row.find("input").val(current_input_value);
+
+        current_row.find("textarea").val(temp_textarea_value);
+        current_row.find("input").val(temp_input_value);
+    }
+
+    function onDeduction(me) {
+        var current_row = $(me.parentElement.parentElement);
+        var current_question = parseInt(current_row.attr('id').split('-')[1]);
+        current_row.find('div[name=deduct_'+current_question+']').each(function () {
+            $(this).find("input").attr('min', -1000);
+            $(this).find("input").attr('max', 0);
+            if ($(this).find("input").val() > 0) {
+                $(this).find("input").val($(this).find("input").val() * -1);
+            }            
+        });
+    }
+
+    function onAddition(me) {
+        var current_row = $(me.parentElement.parentElement);
+        var current_question = parseInt(current_row.attr('id').split('-')[1]);
+        current_row.find('div[name=deduct_'+current_question+']').each(function () {
+            $(this).find("input").attr('min', 0);
+            $(this).find("input").attr('max', 1000);
+            if ($(this).find("input").val() < 0) {
+                $(this).find("input").val($(this).find("input").val() * -1);
+            }            
+        });
+    }
+
+    function addDeduct(me, num){
         var last_num = -10;
+        var min = 0;
+        var max = 0;
+        var current_row = $(me.parentElement.parentElement.parentElement);
+        var radio_value = current_row.find('input[name=deduct_radio_'+num+']:checked').val();
+        if(radio_value == "deduction") {
+            min = -1000;
+            max = 0;
+        }
+        else if(radio_value == "addition") {
+            min = 0;
+            max = 1000;
+        }
+        else {
+            min = 0;
+            max = 0;
+        }
         var current = $('[name=deduct_'+num+']').last().attr('id');
         if (current == null) {
             last_num = -1;
@@ -1519,12 +1747,12 @@ $('#gradeable-form').on('submit', function(e){
         }
         var new_num = last_num + 1;
         $("#rubric_add_deduct_" + num).before('\
-<div id="duduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
-<i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" value="0" min="-1000" max="1000" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
-<textarea rows="1" placeholder="Comment" style="resize: none; width: 82.5%;"></textarea> \
-<a onclick=""> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<a onclick=""> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<a onclick=""> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<div id="deduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
+<i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+<textarea rows="1" placeholder="Comment" style="resize: none; width: 81.5%;"></textarea> \
+<a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <br> \
 </div>');
     }
