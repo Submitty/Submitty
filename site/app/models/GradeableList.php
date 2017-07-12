@@ -23,17 +23,11 @@ use app\libraries\GradeableType;
  * @method Gradeable[] getGradedGradeables()
  */
 class GradeableList extends AbstractModel {
-    /**
-     * @var Core
-     */
-    protected $core;
 
     /** @property @var User */
     protected $user;
     
-    /**
-     * @property @var Gradeable[]
-     */
+    /** @property @var Gradeable[]  */
     protected $gradeables = array();
 
     /*
@@ -64,8 +58,7 @@ class GradeableList extends AbstractModel {
      * @param User $user
      */
     public function __construct(Core $core, User $user = null) {
-        parent::__construct();
-        $this->core = $core;
+        parent::__construct($core);
         $this->user = ($user === null) ? $this->core->getUser() : $user;
         foreach ($this->core->getQueries()->getAllGradeables($this->user->getId()) as $gradeable) {
             $this->gradeables[$gradeable->getId()] = $gradeable;

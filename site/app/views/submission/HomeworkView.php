@@ -53,6 +53,7 @@ HTML;
      * @return string
      */
     public function showGradeable($gradeable, $days_late) {
+        // var_dump($gradeable);
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
@@ -60,6 +61,56 @@ HTML;
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
+HTML;
+        if ($this->core->getUser()->accessAdmin()) {
+            $return .= <<<HTML
+    <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
+        <div >
+            <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
+                Normal Submission
+            <input type='radio' id="radio_student" name="submission_type">
+                Make Submission for a Student
+        </div>
+        <div id="student_id_input" style="display: none">
+            <div class="sub">
+                Input the user_id of the student you wish to submit for. This <i>permanently</i> affects the student's submissions, so please use with caution.
+            </div>
+            <div class="sub">
+                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                user_id: <input type="text" float="right" id= "student_id" name="student_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
+            </div class="sub">
+        </div>
+
+    </form>
+HTML;
+        }   
+
+            $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var cookie = document.cookie;
+            if (cookie.indexOf("student_checked=") !== -1) {
+                var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
+                $("#radio_student").prop("checked", cookieValue==1);
+                document.cookie="student_checked="+0;
+            }
+            if ($("#radio_student").is(":checked")) {
+                $('#student_id_input').show();
+            }
+            $('#radio_normal').click(function() {
+                $('#student_id_input').hide();
+                $('#student_id').val('');
+            });
+            $('#radio_student').click(function() {
+                $('#student_id_input').show();
+            });
+        });
+    </script>
+HTML;
+
+
+
+        $return .= <<<HTML
     <div class="sub">
 HTML;
         if ($gradeable->hasAssignmentMessage()) {
@@ -82,6 +133,15 @@ HTML;
 
 
             for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
+                $tester = $gradeable->getTextBoxDisplayImages($i);
+
+                //$gradeable->getTextboxes()[$i]['image']
+                foreach((array)$tester as $current_TextBox_Image)
+                {
+                    $return .= <<<HTML
+                    OHAI!
+HTML;
+                }
                 $label = $gradeable->getTextboxes()[$i]['label'];
                 $rows = $gradeable->getTextboxes()[$i]['rows'];
                 if ($rows == 0) {
@@ -159,7 +219,7 @@ HTML;
             if($current_version_number === $gradeable->getHighestVersion()
                 && $current_version_number > 0) {
                 $return .= <<<HTML
-    <button type="button" id= "getprev" class="btn btn-primary">Get Most Recent Files</button>
+    <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
             }
 
@@ -240,9 +300,31 @@ HTML;
 
         $return .= <<<HTML
     <script type="text/javascript">
+        function submitStudentGradeable(student_id, highest_version) {
+            handleSubmission("{$this->core->buildUrl(array('component' => 'student',
+                                                            'page' => 'submission',
+                                                            'action' => 'upload',
+                                                            'gradeable_id' => $gradeable->getId()))}",
+                                 "{$this->core->buildUrl(array('component' => 'student',
+                                                               'gradeable_id' => $gradeable->getId()))}",
+                                 {$days_late},
+                                 {$gradeable->getAllowedLateDays()},
+                                 highest_version,
+                                 {$gradeable->getMaxSubmissions()},
+                                 "{$this->core->getCsrfToken()}",
+                                 {$svn_string},
+                                 {$gradeable->getNumTextBoxes()},
+                                 student_id);           
+        }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
-                handleSubmission("{$this->core->buildUrl(array('component' => 'student',
+                var user_id = "";
+                if (document.getElementById("submissionForm")) {
+                    user_id = document.getElementById("submissionForm").student_id.value;
+                }
+                // no RCS entered, upload for whoever is logged in
+                if (user_id == ""){
+                    handleSubmission("{$this->core->buildUrl(array('component' => 'student',
                                                                'page' => 'submission',
                                                                'action' => 'upload',
                                                                'gradeable_id' => $gradeable->getId()))}",
@@ -254,7 +336,12 @@ HTML;
                                  {$gradeable->getMaxSubmissions()},
                                  "{$this->core->getCsrfToken()}",
                                  {$svn_string},
-                                 {$gradeable->getNumTextBoxes()});
+                                 {$gradeable->getNumTextBoxes()},
+                                 "{$gradeable->getUser()->getId()}");
+                }
+                else {
+                    validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, submitStudentGradeable);
+                }
                 e.stopPropagation();
             });
         });
@@ -363,6 +450,13 @@ HTML;
         </p>
     </div>
 HTML;
+                    if ($gradeable->hasConditionalMessage()) {
+                        $return .= <<<HTML
+    <div class="sub" id="conditional_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
+    </div>
+HTML;
+                    }
                 }
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
@@ -519,15 +613,26 @@ HTML;
         </div>
 HTML;
                     }
-
+                    if ($gradeable->hasConditionalMessage()) {
+                        $return.= <<<HTML
+<script type="text/javascript">
+        $(document).ready(function() {
+            if (({$current_version->getNonHiddenTotal()} >= {$gradeable->getMinimumPoints()}) &&
+                    ({$gradeable->getDaysEarly()} > {$gradeable->getMinimumDaysEarly()})) {
+                $('#conditional_message').show();
+            }
+        });
+</script>
+HTML;
+                    }
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
-                    foreach ($gradeable->getTestcases() as $testcase) {
+                    foreach ($gradeable->getTestcases() as $testcase) { 
                         if (!$testcase->viewTestcase()) {
                           continue;
                         }
                         $div_click = "";
-                        if ($testcase->hasDetails()) {
+                        if ($testcase->hasDetails()) { 
                             $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
                         }
                         $return .= <<<HTML
@@ -607,7 +712,7 @@ HTML;
                         $testcase_message = "";
                         if (!$testcase->isHidden() && $testcase->viewTestcaseMessage()) {
                             $testcase_message = <<<HTML
-                        <span class='italics'><font color="#c00000">{$testcase->getTestcaseMessage()}</font></span>
+                        <span class='italics'><font color="#af0000">{$testcase->getTestcaseMessage()}</font></span>
 HTML;
                         }
                         $return .= <<<HTML
@@ -624,9 +729,9 @@ HTML;
                                 foreach ($testcase->getAutochecks() as $autocheck) {
                                     $description = $autocheck->getDescription();
                                     $diff_viewer = $autocheck->getDiffViewer();
-
                                     $return .= <<<HTML
-                <div class="box-block">
+                <div class="box-block"> 
+                <!-- Readded css here so the popups have the css -->
 HTML;
 
                                     $title = "";
@@ -638,11 +743,21 @@ HTML;
                                     }
                                     $title .= $description;
                                     $return .= <<<HTML
-                                <h4>{$title}</h4>
+                                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 0)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i> </span> </h4>
+                                <div id="container_{$count}_{$autocheck_cnt}_0">
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />                               
 HTML;
                                     foreach ($autocheck->getMessages() as $message) {
+                                        $type_class = "black-message";
+                                        if ($message['type'] == "information") $type_class = "black-message";
+                                        else if ($message['type'] == "success") $type_class = "green-message";
+                                        else if ($message['type'] == "failure") $type_class = "red-message";
+                                        else if ($message['type'] == "warning") $type_class = "yellow-message";
                                         $return .= <<<HTML
-                                <span class="red-message">{$message}</span><br />
+                                <span class="{$type_class}">{$message['message']}</span><br />
 HTML;
                                     }
 
@@ -666,10 +781,8 @@ HTML;
                                     }
                                     $return .= <<<HTML
                             </div>
+                            </div>
 HTML;
-
-                                
-
 
                                     $myExpectedimage = $diff_viewer->getExpectedImageFilename();
                                     if($myExpectedimage != "")
@@ -700,7 +813,12 @@ HTML;
                                     else if ($diff_viewer->hasDisplayExpected()) {
                                         $return .= <<<HTML
                             <div class='diff-element'>
-                                <h4>Expected {$description}</h4>
+                                <h4>Expected {$description} <span onclick="openPopUp('{$title1}', {$count}, {$autocheck_cnt}, 1)"> <i class="fa fa-window-restore" style="visibility: visible; cursor: pointer;"></i> </span></h4>
+                                <div id="container_{$count}_{$autocheck_cnt}_1">
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />
 HTML;
                                         for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
                                             $return .= <<<HTML
@@ -710,13 +828,14 @@ HTML;
                                         $return .= <<<HTML
                                 {$diff_viewer->getDisplayExpected()}
                             </div>
+                            </div>
 HTML;
                                     }
 
                                     $return .= <<<HTML
                 </div>
 HTML;
-                                    if (++$autocheck_cnt < $autocheck_len) {
+                                    if (++$autocheck_cnt < $autocheck_len) { 
                                         $return .= <<<HTML
                 <div class="clear"></div>
 HTML;
@@ -762,6 +881,13 @@ HTML;
 HTML;
         }
 
+        return $return;
+    }
+
+    public function showPopUp($gradeable) {
+        $return = <<<HTML
+            <p>Banana</p>
+HTML;
         return $return;
     }
 }

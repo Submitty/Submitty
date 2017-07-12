@@ -1,0 +1,86 @@
+{
+    "assignment_message" : "Please submit your assignment in one of 4 languages.  Only submit to a single bucket.",
+    "part_names" : [ "Python 2", "Python 3", "C", "C++" ],
+
+    "one_part_only" : true,
+    
+    "testcases" : [
+
+        // ==========================================================
+        // Python 2
+        {
+            "title" : "Python 2 Testing",
+            "command" : "python2 part1/*.py",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLinebyChar",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "output.txt"
+                }
+            ]
+        },
+        
+        // ==========================================================
+        // Python 3
+        {
+            "title" : "Python 3 Testing",
+            "command" : "python3 part2/*.py",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLinebyChar",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "output.txt"
+                }
+            ]
+        },
+
+        // ==========================================================
+        // C
+        {
+            "type" : "Compilation",
+            "title" : "C Compilation",
+            "command" : "clang -Wall -o p3.out -- part3/*.c",
+            "executable_name" : "p3.out",
+            "points" : 2
+        },
+
+        {
+            "title" : "C Testing",
+            "command" : "./p3.out",
+            "points" : 3,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLinebyChar",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "output.txt"
+                }
+            ]
+        },
+
+        // ==========================================================
+        // C++
+        {
+            "type" : "Compilation",
+            "title" : "C++ Compilation",
+            "command" : "clang++ -Wall -o p4.out -- part4/*.cpp",
+            "executable_name" : "p4.out",
+            "points" : 2
+        },
+
+        {
+            "title" : "C++ Testing",
+            "command" : "./p4.out",
+            "points" : 3,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLinebyChar",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "output.txt"
+                }
+            ]
+        }
+
+    ]
+}

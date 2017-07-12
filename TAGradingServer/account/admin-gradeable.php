@@ -387,8 +387,9 @@ HTML;
 
 		<br />
                 <b>Full path to the directory containing the autograding config.json file:</b><br>
-                See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">Submitty GitHub sample assignment configurations</a><br>
-		<kbd>/usr/local/submitty/sample_files/sample_assignment_config/upload_only/</kbd>  (for an assignment with no autograding)<br>
+                See samples here: <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty Tutorial example autograding configurations</a><br>
+                See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/more_autograding_examples">Additional example autograding configurations</a><br>
+		<kbd>/usr/local/submitty/more_autograding_examples/upload_only/config/</kbd>  (for an assignment with no autograding)<br>
 		<kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
 		<kbd>/var/local/submitty/courses/{$_GET['semester']}/{$_GET['course']}/config_upload/#</kbd> (for an web uploaded configuration)<br>
 

@@ -74,9 +74,9 @@ class AdminGradeableView extends AbstractView {
             $string = "Edit";
             $button_string = "Edit";
             $extra = ($data[2]) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
-            $TA_beta_date = date('m/d/Y h:i:s', strtotime($data[0]['g_ta_view_start_date']));
-            $TA_grade_open_date = date('m/d/Y h:i:s', strtotime($data[0]['g_grade_start_date']));
-            $TA_grade_release_date = date('m/d/Y h:i:s', strtotime($data[0]['g_grade_released_date']));
+            $TA_beta_date = date('m/d/Y H:i:s', strtotime($data[0]['g_ta_view_start_date']));
+            $TA_grade_open_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_start_date']));
+            $TA_grade_release_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_released_date']));
             $gradeable_submission_id = $data[0]['g_id'];
             $gradeable_name = $data[0]['g_title'];
             $g_instructions_url = $data[0]['g_instructions_url'];
@@ -88,8 +88,8 @@ class AdminGradeableView extends AbstractView {
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) { //if the gradeable edited is electronic gradeable
-                $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y h:i:s', strtotime($data[3]['eg_submission_open_date']));
-                $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y h:i:s', strtotime($data[3]['eg_submission_due_date']));
+                $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_open_date']));
+                $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_due_date']));
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
@@ -110,6 +110,7 @@ class AdminGradeableView extends AbstractView {
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
+            $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
@@ -210,7 +211,7 @@ class AdminGradeableView extends AbstractView {
     .required::-webkit-input-placeholder { color: red; }
     .required:-moz-placeholder { color: red; }
     .required::-moz-placeholder { color: red; }
-    .required:-ms-input-placeholder { color: red; 
+    .required:-ms-input-placeholder { color: red; }
         
 </style>
 <div id="container-rubric">
@@ -350,7 +351,7 @@ HTML;
 		<br />
                 <b>Full path to the directory containing the autograding config.json file:</b><br>
                 See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">Submitty GitHub sample assignment configurations</a><br>
-		<kbd>/usr/local/submitty/sample_files/sample_assignment_config/no_autograding/</kbd>  (for an upload only homework)<br>
+		<kbd>/usr/local/submitty/more_autograding_examples/no_autograding/config</kbd>  (for an upload only homework)<br>
 		<kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
 		<kbd>/var/local/submitty/courses/{$_GET['semester']}/{$_GET['course']}/config_upload/#</kbd> (for an web uploaded configuration)<br>
 
@@ -501,7 +502,7 @@ HTML;
             </div>
             <div class="gradeable_type_options numeric" id="numeric">
                 <br />
-                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val"/> 
+                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val" onchange="calculateTotalScore();"/> 
                 &emsp;&emsp;
                 
                 How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val"/>
@@ -518,17 +519,25 @@ HTML;
                                 <th> Extra Credit?</th>
                             </tr>
                         </thead>
+                        <!-- Footers -->
+                        <tfoot style="background: #E1E1E1;">
+                            <tr>
+                                <td><strong> MAX SCORE </strong></td>
+                                <td><strong id="totalScore"></strong></td>
+                                <td><strong id="totalEC"></strong></td>
+                            </tr>
+                        </tfoot>
                         <tbody style="background: #f9f9f9;">
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0"/> 
+                               <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0" /> 
                            </td>  
                             <td>     
-                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" /> 
+                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" onchange="calculateTotalScore();"/> 
                            </td>                           
                            <td>     
-                                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" />
+                                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" onchange="calculateTotalScore();"/>
                            </td> 
                         </tr>
                     </table>
@@ -575,13 +584,14 @@ HTML;
     $html_output .= <<<HTML
             </select>
             <br />
+            <div id="ta_instructions_id">
             What overall instructions should be provided to the TA?:<br /><textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;">
 HTML;
     $tmp = htmlspecialchars($g_overall_ta_instructions);
     $html_output .= <<<HTML
 {$tmp}
 </textarea>
-            
+            </div>
             <br />
             <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
             <br />
@@ -635,14 +645,14 @@ HTML;
         <tr>
 HTML;
 //display the appropriate graders for each user group 
-function display_graders($graders, $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, &$html_output){
+function display_graders($graders, $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, &$html_output, $type_of_action){
     foreach($graders as $grader){
        $html_output .= <<<HTML
         <tr>
             <td>{$grader['user_id']}</td>
             <td><input style="width: 227px" type="text" name="grader_{$grader['user_id']}" class="grader" disabled value="
 HTML;
-        if($have_old && !$g_grade_by_registration) {
+        if(($have_old && !$g_grade_by_registration) || $type_of_action === "add_template") {
             $html_output .= (isset($graders_to_sections[$grader['user_id']])) ? $graders_to_sections[$grader['user_id']] : '';
         }
         else{
@@ -689,7 +699,7 @@ HTML;
         <table>
                 <th>Instructor Graders</th>
 HTML;
-    display_graders($initial_data[4][0], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);
+    display_graders($initial_data[4][0], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output, $type_of_action);
     
   $html_output .= <<<HTML
         </table>
@@ -700,7 +710,7 @@ HTML;
                 <th>Full Access Graders</th>
 HTML;
     
-  display_graders($initial_data[4][1], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);
+  display_graders($initial_data[4][1], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output, $type_of_action);
     
   $html_output .= <<<HTML
             </table>
@@ -714,7 +724,7 @@ HTML;
                 <th>Limited Access Graders</th>
 HTML;
 
-  display_graders($initial_data[4][2], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);    
+  display_graders($initial_data[4][2], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output, $type_of_action);    
   
     $html_output .= <<<HTML
         </table>
@@ -807,12 +817,46 @@ function createCrossBrowserJSDate(val){
         return new Date(momentDate.toString()) // Convert moment into RFC2822 and construct browser-specific jQuery Date object
     }
 
+    function calculateTotalScore(){
+        var total_score = 0;
+        var total_ec = 0;
+
+        $('.numerics-table').find('.multi-field').each(function(){
+            max_score = 0;
+            extra_credit = false;
+
+            max_score = parseFloat($(this).find('.max_score').val());
+            extra_credit = $(this).find('.numeric_extra').is(':checked') == true;
+
+            if (extra_credit === true) total_ec += max_score;
+            else total_score += max_score;
+        });
+
+        $("#totalScore").html(total_score);
+        $("#totalEC").html("(" + total_ec + ")");
+    }
+
     $(document).ready(function() {
 
         $(function() {
             $( ".date_picker" ).datetimepicker({
                 timeFormat: "HH:mm:ss",
-                showTimezone: false
+                showButtonPanel: true,
+                showTimezone: false,
+                beforeShow: function( input ) {
+                    setTimeout(function() {
+                        var buttonPane = $( input )
+                            .datepicker( "widget" )
+                            .find( ".ui-datepicker-buttonpane" );
+
+                        $( "<button>", {
+                            text: "Infinity",
+                            click: function() {
+                                $.datepicker._curInst.input.datepicker('setDate', "12/31/9999 23:59:59").datepicker('hide');
+                            }
+                        }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
+                    }, 1 );
+                }
             });
         });
 
@@ -865,6 +909,7 @@ function createCrossBrowserJSDate(val){
                 $('#mult-field-' + numNumeric,wrapper).find('.numeric_extra').attr('checked',true); 
             }
             $('#mult-field-' + numNumeric,wrapper).show();
+            calculateTotalScore();
         }
         
         function removeNumeric(){
@@ -976,6 +1021,7 @@ function createCrossBrowserJSDate(val){
                 if($(this).val() == 'true'){ 
                     $('#rubric_questions').show();
                     $('#grading_questions').show();
+                    $('#ta_instructions_id').hide();
                     $('#grades_released_compare_date').html('TA Grading Open Date');
                 } else {
                     $('#grades_released_compare_date').html('Due Date');
@@ -1005,6 +1051,7 @@ function createCrossBrowserJSDate(val){
             $('input[name=config_path]').val('{$electronic_gradeable['eg_config_path']}');
             $('input[name=eg_late_days]').val('{$electronic_gradeable['eg_late_days']}');
             $('input[name=point_precision]').val('{$electronic_gradeable['eg_precision']}');
+            $('#ta_instructions_id').hide();
             
             if($('#repository_radio').is(':checked')){
                 $('#repository').show();
@@ -1066,12 +1113,14 @@ function createCrossBrowserJSDate(val){
                 }
             }
             else if ($(this).val() == 'Checkpoints'){ 
+                $('#ta_instructions_id').show();
                 $('#checkpoints').show();
                 $('#grading_questions').show();
                 $('#ta_grading_compare_date').html('TA Beta Testing Date');
                 $('#grades_released_compare_date').html('TA Grading Open Date');
             }
             else if ($(this).val() == 'Numeric'){ 
+                $('#ta_instructions_id').show();
                 $('#numeric').show();
                 $('#grading_questions').show();
                 $('#ta_grading_compare_date').html('TA Beta Testing Date');
@@ -1440,7 +1489,7 @@ $('#gradeable-form').on('submit', function(e){
                 <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" placeholder="Rubric Item Title"></textarea> \
                 <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
-                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs"  onkeyup="autoResizeComment(event);" \
+                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
@@ -1602,6 +1651,7 @@ $('#gradeable-form').on('submit', function(e){
         
     }
 calculatePercentageTotal();
+calculateTotalScore();
     </script>
 HTML;
     $html_output .= <<<HTML

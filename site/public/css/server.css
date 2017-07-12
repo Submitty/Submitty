@@ -340,6 +340,7 @@ table tr.table-header {
 
 #footer {
     margin-top: 30px;
+    z-index: 9999;
 }
 
 #push, #footer {
@@ -527,7 +528,20 @@ table tr.table-header {
 
 .red-message {
     font-style: italic;
+    font-weight: bold;
     color: #af0000;
+}
+
+.yellow-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #eac73d;
+}
+
+.black-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #000000;
 }
 
 .sub-text {
@@ -699,6 +713,13 @@ table .instructor .two-options{
     float: right;
 }
 
+.btn-nav {
+    width:100%;
+    padding: 0px !important; 
+    padding-top: 10px !important; 
+    padding-bottom: 10px !important;
+}
+
 .rainbow {
     background: -moz-linear-gradient( left ,
     rgba(255, 0, 0, 1) 0%,
@@ -756,6 +777,16 @@ table .instructor .two-options{
 .tooltip {
     position: relative;
     display: inline-block;
+}
+
+.late-box {
+    background:#d9534f;
+    padding:3px;
+    margin-top:3px;
+    margin-bottom:3px;
+    margin-left:5%;
+    margin-right:5%;
+    border-radius:4px;
 }
 
 .tooltip .tooltiptext {

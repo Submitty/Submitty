@@ -106,6 +106,8 @@ def main():
         hidden_ec = 0
         testcases = get_testcases(semester, course, gradeable_id)
         results = get_result_details(semester, course, gradeable_id, who_id, version)
+        if not len(testcases) == len(results['testcases']):
+            print ("ERROR!  mismatched # of testcases ",len(testcases)," != ",len(results['testcases']))
         for i in range(len(testcases)):
             if testcases[i]['hidden'] and testcases[i]['extra_credit']:
                 hidden_ec += results['testcases'][i]['points']
@@ -124,7 +126,13 @@ def main():
         submission_time = parse_default_time(args.submission_time)
 
     db_name = "submitty_{}_{}".format(args.semester, args.course)
-    db = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name))
+
+    # If using a UNIX socket, have to specify a slightly different connection string
+    if os.path.isdir(DB_HOST):
+        conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD, db_name, DB_HOST)
+    else:
+        conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name)
+    db = create_engine(conn_string)
     metadata = MetaData(bind=db)
     data_table = Table('electronic_gradeable_data', metadata, autoload=True)
 
@@ -134,7 +142,7 @@ def main():
     we're using some other method of grading, we'll insert the row and whoever called the script
     will need to handle the active version afterwards.
     """
-    if (is_team == True):
+    if is_team is True:
         result = db.execute(select([func.count()]).select_from(data_table)
                             .where(data_table.c.g_id == bindparam('g_id'))
                             .where(data_table.c.team_id == bindparam('team_id'))

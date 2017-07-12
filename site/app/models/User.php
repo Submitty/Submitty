@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\libraries\Core;
 use app\libraries\DatabaseUtils;
 
 /**
@@ -20,9 +21,12 @@ use app\libraries\DatabaseUtils;
  * @method void setEmail(string $email)
  * @method int getGroup()
  * @method void setGroup(integer $group)
- * @method array getRegistrationSection()
+ * @method int getRegistrationSection()
+ * @method int getRotatingSection()
  * @method void setManualRegistration(bool $flag)
+ * @method bool isManualRegistration()
  * @method array getGradingRegistrationSections()
+ * @method bool isLoaded()
  */
 class User extends AbstractModel {
     
@@ -68,10 +72,12 @@ class User extends AbstractModel {
 
     /**
      * User constructor.
+     *
+     * @param Core  $core
      * @param array $details
      */
-    public function __construct($details) {
-        parent::__construct();
+    public function __construct(Core $core, $details=array()) {
+        parent::__construct($core);
         if (count($details) == 0) {
             return;
         }
@@ -86,23 +92,19 @@ class User extends AbstractModel {
             $this->setPreferredFirstName($details['user_preferred_firstname']);
         }
 
-        $this->setLastName($details['user_lastname']);
-        $this->setEmail($details['user_email']);
-        $this->setGroup($details['user_group']);
-        $this->setRegistrationSection($details['registration_section']);
-        $this->setRotatingSection($details['rotating_section']);
-        $this->setManualRegistration($details['manual_registration']);
+        $this->last_name = $details['user_lastname'];
+        $this->email = $details['user_email'];
+        $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
+        if ($this->group > 4 || $this->group < 0) {
+            $this->group = 4;
+        }
+
+        $this->registration_section = isset($details['registration_section']) ? intval($details['registration_section']) : null;
+        $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
+        $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
             $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
         }
-    }
-    
-    /**
-     * Gets whether the user was actually loaded from the DB with the given user id
-     * @return bool
-     */
-    public function isLoaded() {
-        return $this->loaded;
     }
     
     /**
@@ -157,7 +159,7 @@ class User extends AbstractModel {
         $this->setDisplayedFirstName();
     }
 
-    public function setDisplayedFirstName() {
+    private function setDisplayedFirstName() {
         if ($this->preferred_first_name !== "" && $this->preferred_first_name !== null) {
             $this->displayed_first_name = $this->preferred_first_name;
         }
@@ -167,29 +169,11 @@ class User extends AbstractModel {
     }
 
     public function setRegistrationSection($section) {
-        $section = ($section !== null) ? intval($section) : $section;
-        $this->registration_section = $section;
-    }
-    
-    /**
-     * Get the rotating section of the loaded user
-     * @return int
-     */
-    public function getRotatingSection() {
-        return $this->rotating_section;
+        $this->registration_section = ($section !== null) ? intval($section) : null;
     }
 
     public function setRotatingSection($section) {
-        $section = ($section !== null) ? intval($section) : $section;
-        $this->rotating_section = $section;
-    }
-    
-    /**
-     * Gets whether the user set as a manual registration
-     * @return bool
-     */
-    public function isManualRegistration() {
-        return $this->manual_registration;
+        $this->rotating_section = ($section !== null) ? intval($section) : null;
     }
 
     public function setGradingRegistrationSections($sections) {

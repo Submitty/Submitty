@@ -1,0 +1,135 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/output.txt"
+                },
+                {
+                    "actual_file": "test01_STDERR.txt",
+                    "description": "Standard Error (STDERR)",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test01_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 1 Python 2 Testing"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test02_0_diff.json",
+                    "expected_file": "test_output/testassignment/output.txt"
+                },
+                {
+                    "actual_file": "test02_STDERR.txt",
+                    "description": "Standard Error (STDERR)",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test02_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 2 Python 3 Testing"
+        },
+        {
+            "points_awarded": 2,
+            "test_name": "Test 3 C Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test04_0_diff.json",
+                    "expected_file": "test_output/testassignment/output.txt"
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Test 4 C Testing"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test05_STDERR.txt",
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Create Executable",
+                    "messages": [
+                        {
+                            "message": "ERROR: required files not found:  p4.out",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test05_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 5 C++ Compilation",
+            "testcase_message": "Compilation Error(s)."
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Standard Error (STDERR)",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test06_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 6 C++ Testing"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 7 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

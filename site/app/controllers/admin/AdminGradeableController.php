@@ -26,6 +26,9 @@ class AdminGradeableController extends AbstractController {
             case 'upload_new_template':
                 $this->uploadNewTemplate();
                 break;
+            case 'quick_link':
+                $this->quickLink();
+                break;
             default:
                 $this->viewPage();
                 break;
@@ -40,8 +43,8 @@ class AdminGradeableController extends AbstractController {
         }
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSessions();
-        $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections("");
+        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
+        $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections($_REQUEST['template_id']);
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
         $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
@@ -57,7 +60,7 @@ class AdminGradeableController extends AbstractController {
     private function viewPage() {
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSessions();
+        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
         $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections("");
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
@@ -73,7 +76,7 @@ class AdminGradeableController extends AbstractController {
     private function editPage() {
         $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
         $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSessions();
+        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
         $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections($_REQUEST['id']);
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
@@ -210,10 +213,25 @@ class AdminGradeableController extends AbstractController {
         $this->returnToNav();
     }
 
+    private function quickLink() {
+        $g_id = $_REQUEST['id'];
+        $action = $_REQUEST['quick_link_action'];
+        $gradeable = $this->core->getQueries()->getGradeable($g_id);
+        if ($action === "release_grades_now") { //what happens on the quick link depends on the action
+            $gradeable->setGradeReleasedDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+        } else if ($action === "open_ta_now") {
+            $gradeable->setTaViewDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+        } else if ($action === "open_grading_now") {
+            $gradeable->setGradeStartDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+        } else if ($action === "open_students_now") {
+            $gradeable->setOpenDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+        } 
+        $gradeable->updateGradeable();
+        $this->returnToNav();
+    }
     //return to the navigation page
     private function returnToNav() {
         $url = $this->core->buildUrl(array());
         header('Location: '. $url);
     }
-
 }

@@ -49,10 +49,16 @@ class GradeableTestcase extends AbstractModel {
     protected $testcase_message = "";
     /** @property @var bool */
     protected $view_testcase_message = true;
-    
+
+    /**
+     * GradeableTestcase constructor.
+     *
+     * @param Core  $core
+     * @param array $testcase
+     * @param int   $idx
+     */
     public function __construct(Core $core, $testcase, $idx) {
-        parent::__construct();
-        $this->core = $core;
+        parent::__construct($core);
         $this->index = $idx;
         
         if (isset($testcase['title'])) {
@@ -79,7 +85,7 @@ class GradeableTestcase extends AbstractModel {
         if (isset($testcase['autochecks'])) {
             foreach ($testcase['autochecks'] as $idx => $autocheck) {
                 $index = "id_{$this->index}_{$idx}";
-                $this->autochecks[] = new GradeableAutocheck($autocheck,
+                $this->autochecks[] = new GradeableAutocheck($this->core, $autocheck,
                                                              $this->core->getConfig()->getCoursePath(),
                                                              $result_path, $index);
             }

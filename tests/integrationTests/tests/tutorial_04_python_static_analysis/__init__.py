@@ -25,9 +25,7 @@ def initialize(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
         os.path.join(test.testcase_path, "assignment_config")])
-    subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "output.txt"),
-        os.path.join(test.testcase_path, "data")])
+
 
 
 def cleanup(test):
@@ -35,8 +33,10 @@ def cleanup(test):
             glob.glob(os.path.join(test.testcase_path, "data", "*")))
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data", "test*")))
-
-
+    subprocess.call(["cp",
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "output.txt"),
+        os.path.join(test.testcase_path, "data")])
+    
 @testcase
 def correct(test):
     cleanup(test)
@@ -45,7 +45,7 @@ def correct(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_correct", "-b")
+    test.diff("grade.txt", "grade.txt_correct", "-b")
     test.json_diff("results.json", "results.json_correct")
 
 
@@ -58,7 +58,7 @@ def buggy(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_buggy", "-b")
+    test.diff("grade.txt", "grade.txt_buggy", "-b")
     test.json_diff("results.json", "results.json_buggy")
 
 
@@ -71,7 +71,7 @@ def buggy2(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_buggy2", "-b")
+    test.diff("grade.txt", "grade.txt_buggy2", "-b")
     test.json_diff("results.json", "results.json_buggy2")
 
 
@@ -84,5 +84,5 @@ def buggy3(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt", "results_grade.txt_buggy3", "-b")
+    test.diff("grade.txt", "grade.txt_buggy3", "-b")
     test.json_diff("results.json", "results.json_buggy3")

@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 """
-This does a more partial reset of the system compared to reset_system.py, primarily not wiping various changes like
-removing DB users, all created users (including system ones like hwphp, hwcgi, etc.), removing networking stuff, etc.
+This does a more partial reset of the system compared to reset_system.py, primarily not wiping
+various changes like removing DB users, all created users (including system ones like hwphp,
+hwcgi, etc.), removing networking stuff, etc.
 
-This script acts more like the inverse of "setup_sample_courses.py" so that we could only run these two scripts in
-opposition and not run into a corrupted system state. This should then give us a nice stability that
+This script acts more like the inverse of "setup_sample_courses.py" so that we could only run
+these two scripts in opposition and not end up in a corrupted system state. This gives us a
+nice balance for developing when we're not actively changing integral parts of the system that
+would require a new vagrant install (or at least a rerun of install_system.sh).
 """
 import argparse
 import glob
 import os
 import pwd
 import shutil
-import sys
 
 import yaml
 
@@ -62,20 +64,22 @@ def cmd_exists(cmd):
 
 
 def parse_args():
+    """Generate arguments for the CLI"""
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("--force", action="store_true",
-                        help="Run this script skipping the 'are you sure' prompts. These are also bypassed if .vagrant "
-                             "folder is detected.")
+                        help="Run this script skipping the 'are you sure' prompts. These are also "
+                             "bypassed if .vagrant folder is detected.")
     parser.add_argument("--users_path", default=os.path.join(SETUP_DATA_PATH, "users"),
-                        help="Path to folder that contains .yml files to use for user creation. Defaults to "
-                             "../data/users")
+                        help="Path to folder that contains .yml files to use for user creation. "
+                             "Defaults to ../data/users")
     parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
-                        help="Path to the folder that contains .yml files to use for course creation. Defaults to "
-                             "../data/courses")
+                        help="Path to the folder that contains .yml files to use for course "
+                             "creation. Defaults to ../data/courses")
     return parser.parse_args()
 
 
 def main():
+    """Primary function"""
     args = parse_args()
     if not os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")) and not args.force:
         inp = input("Do you really want to reset the system? There's no undo! [y/n]")
@@ -91,15 +95,19 @@ def main():
         os.system("rm -rf {}/*_logs".format(SUBMITTY_DATA_DIR))
         os.system('rm -r {}/.vagrant/autograding_logs'.format(SUBMITTY_REPOSITORY))
         os.system('mkdir {}/.vagrant/autograding_logs'.format(SUBMITTY_REPOSITORY))
-        os.system('ln -s {}/.vagrant/autograding_logs {}/autograding_logs'.format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
+        os.system('ln -s {}/.vagrant/autograding_logs {}/autograding_logs'
+                  .format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
         os.system('rm -r {}/.vagrant/tagrading_logs'.format(SUBMITTY_REPOSITORY))
         os.system('mkdir {}/.vagrant/tagrading_logs'.format(SUBMITTY_REPOSITORY))
-        os.system('ln -s {}/.vagrant/tagrading_logs {}/tagrading_logs'.format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
+        os.system('ln -s {}/.vagrant/tagrading_logs {}/tagrading_logs'
+                  .format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
 
     if cmd_exists('psql'):
         os.environ['PGPASSWORD'] = 'hsdbu'
-        os.system("psql -h localhost -U hsdbu --list | grep submitty_* | awk '{print $1}' | "
+        os.system("psql -U hsdbu --list | grep submitty* | awk '{print $1}' | "
                   "xargs -I \"@@\" dropdb -h localhost -U hsdbu \"@@\"")
+        os.system('psql -d postgres -U hsdbu -c "CREATE DATABASE submitty"')
+        os.system('psql -d submitty -U hsdbu -f {}/site/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
         del os.environ['PGPASSWORD']
 
     for user_file in glob.iglob(os.path.join(args.users_path, "*.yml")):
@@ -118,7 +126,8 @@ def main():
         groups.append(course['code'] + "_archive")
         groups.append(course['code'] + "_tas_www")
         for queue in ["to_be_graded_batch", "to_be_graded_interactive"]:
-            for queue_file in glob.iglob(os.path.join(SUBMITTY_DATA_DIR, queue, "*__{}__*".format(course['code']))):
+            path = os.path.join(SUBMITTY_DATA_DIR, queue, "*__{}__*".format(course['code']))
+            for queue_file in glob.iglob(path):
                 os.remove(queue_file)
 
     for group in groups:

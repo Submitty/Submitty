@@ -148,5 +148,3 @@ class DatabaseUtils {
         return $text;
     }
 }
-
-?>

@@ -1,16 +1,20 @@
 {
-   "testcases": [
+    "testcases": [
         {
             "points_awarded": 2,
             "test_name": "Test 1 Compilation"
         },
         {
             "autochecks": [
-                {                    "description": "STDOUT.txt",
+                {
+                    "actual_file": "test02_STDOUT.txt",
+                    "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  INCORRECT TOTAL"
-                    ],
-                    "actual_file": "test02_STDOUT.txt"
+                        {
+                            "message": "ERROR!  INCORRECT TOTAL",
+                            "type": "failure"
+                        }
+                    ]
                 }
             ],
             "points_awarded": 4,
@@ -18,11 +22,15 @@
         },
         {
             "autochecks": [
-                {                    "description": "STDOUT.txt",
+                {
+                    "actual_file": "test03_STDOUT.txt",
+                    "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR!  INCORRECT TOTAL"
-                    ],
-                    "actual_file": "test03_STDOUT.txt"
+                        {
+                            "message": "ERROR!  INCORRECT TOTAL",
+                            "type": "failure"
+                        }
+                    ]
                 }
             ],
             "points_awarded": 3,
@@ -30,14 +38,19 @@
         },
         {
             "autochecks": [
-                {                    "description": "STDOUT_0.txt",
+                {
+                    "actual_file": "test04_STDOUT_0.txt",
+                    "description": "STDOUT_0.txt",
                     "messages": [
-                        "ERROR!  INCORRECT TOTAL"
-                    ],
-                    "actual_file": "test04_STDOUT_0.txt"
+                        {
+                            "message": "ERROR!  INCORRECT TOTAL",
+                            "type": "failure"
+                        }
+                    ]
                 },
-                {                    "description": "STDOUT_1.txt",
-                    "actual_file": "test04_STDOUT_1.txt"
+                {
+                    "actual_file": "test04_STDOUT_1.txt",
+                    "description": "STDOUT_1.txt"
                 }
             ],
             "points_awarded": 2,

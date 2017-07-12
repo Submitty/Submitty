@@ -63,9 +63,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "tail",                    "/usr/bin/tail" },
 
     // Submitty Analysis Tools
-    { "submitty_count_token",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" },
-    { "submitty_count_node",     SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_node" },
-    { "submitty_count_function", SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_function" },
+    { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
 
     // for Computer Science I
     { "python",                  "/usr/bin/python" },
@@ -261,8 +259,8 @@ std::string validate_option(const std::string &program, const std::string &optio
   if (option[0] == '-') {
     // probably a normal option
   } else if (last_option == "-o" &&
-	     option.size() > 4 &&
-	     option.substr(option.size()-4,4) == ".out") {
+       option.size() > 4 &&
+       option.substr(option.size()-4,4) == ".out") {
     // ok, it's an executable name
   } else if (local_executable(program)) {
     // custom
@@ -341,8 +339,14 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
 
   // if the pattern does not contain a wildcard, just return that
   if (full_pattern.find("*") == std::string::npos) {
-    my_finished_args.push_back(full_pattern);
-    return;
+    std::ifstream istr(full_pattern);
+    if (istr.good()) {
+      my_finished_args.push_back(full_pattern);
+      return;
+    } else {
+      std::cout << "ERROR: FOUND NO MATCHES" << std::endl;
+      return;
+    }
   }
 
   std::vector<std::string> my_args;
@@ -387,12 +391,12 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
       if (ent == NULL) break;
       std::string thing = ent->d_name;
       if (wildcard_match(file_pattern,thing,logfile)) {
-	std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
-	validate_filename(directory+thing);
-	my_args.push_back(directory+thing);
-	count_matches++;
+        std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
+        validate_filename(directory+thing);
+        my_args.push_back(directory+thing);
+        count_matches++;
       } else {
-	//std::cout << "   no match  '" << thing << "'" << std::endl;
+        //std::cout << "   no match  '" << thing << "'" << std::endl;
       }
     }
     closedir(dir);
@@ -471,12 +475,12 @@ std::vector<std::string> break_into_tokens(const std::string &cmd) {
 
 
 void parse_command_line(const std::string &cmd,
-			std::string &my_program,
-			std::vector<std::string> &my_args,
-			std::string &my_stdin,
-			std::string &my_stdout,
-			std::string &my_stderr,
-			std::ofstream &logfile, 
+      std::string &my_program,
+      std::vector<std::string> &my_args,
+      std::string &my_stdin,
+      std::string &my_stdout,
+      std::string &my_stderr,
+      std::ofstream &logfile, 
                         const nlohmann::json &whole_config) {
 
   std::cout << "PARSE COMMAND LINE " << cmd << std::endl;
@@ -566,6 +570,35 @@ void parse_command_line(const std::string &cmd,
 
 
 
+  // Usually we should call python with a single argument, the script to run.
+  if (my_program.find("python") != std::string::npos) {
+    if (my_args.size() == 0) {
+      // If nothing matched the wild card search
+      std::cout << "ERROR!  ATTEMPTING TO RUN PYTHON IN INTERACTIVE MODE" << std::endl;
+      logfile << "ERROR!  ATTEMPTING TO RUN PYTHON IN INTERACTIVE MODE" << std::endl;
+      // FIXME:  Hack a file name for now, but this should be handled more elegantly
+      my_args.push_back(" ");
+      // because we don't want to run in interactive mode and wait for it to time out!
+    } else if (my_args.size() > 1) {
+      bool multiple_py_files = false;
+      for (int i = 1; i < my_args.size(); i++) {
+        if (my_args[i].find(".py") != std::string::npos) {
+          multiple_py_files = true;
+          std::cout << "WARNING!  .py file as arg " << my_args[i] << std::endl;
+          logfile << "WARNING!  .py file as arg " << my_args[i] << std::endl;
+        }
+      }
+      if (multiple_py_files == true) {
+        // FIXME: This might be an ok way to call the program...  (but
+        // not if multiple things matched a wildcard search *py)
+        std::cout << "WARNING!  RUNNING PYTHON WITH MULTIPLE ARGS" << std::endl;
+        logfile << "WARNING!  RUNNING PYTHON WITH MULTIPLE ARGS" << std::endl;
+      }
+    }
+  }
+
+
+
   // FOR DEBUGGING
   std::cout << std::endl << std::endl;
   std::cout << "MY PROGRAM: '" << my_program << "'" << std::endl;
@@ -637,7 +670,7 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
   // output message to behind-the-scenes logfile (stdout), and to execute logfile (available to students)
   std::cout << message << std::endl;
   logfile   << message << "\nProgram Terminated " << std::endl;
-	    
+      
 }
 #endif
 
@@ -692,9 +725,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   std::cout << std::endl;
 
 
-
-
-
   // SECCOMP:  Used to restrict allowable system calls.
   // First we determine if the program we will run is a 64 or 32 bit
   // executable (the system calls are different on 64 vs. 32 bit)
@@ -702,8 +732,9 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   std::cout << "reading " <<  my_program << std::endl;
   int fd = open(my_program.c_str(), O_RDONLY);
   if (fd == -1) {
-    perror("can't open");
-    std::cerr << "ERROR: cannot open program" << std::endl;
+    //perror("can't open");
+    logfile << "ERROR: cannot open program '" << my_program << '"' << std::endl;
+    std::cout << "ERROR: cannot open program '" << my_program << '"' << std::endl;
     exit(1);
   }
   int res = read(fd, &elf_hdr, sizeof(elf_hdr));
@@ -847,7 +878,7 @@ void TerminateProcess(float &elapsed, int childPID) {
   if (kill_counter >= 5) {
     std::cout << "ERROR! kill counter for pid " << childPID << " is " << kill_counter << std::endl;
     std::cout << "  Check /var/log/syslog (or other logs) for possible kernel bug \n"
-	      << "  or hardware bug that is preventing killing this job. " << std::endl;
+        << "  or hardware bug that is preventing killing this job. " << std::endl;
   }
   usleep(10000); /* wait 1/100th of a second for the process to die */
   elapsed+=0.001;
@@ -931,10 +962,10 @@ int execute(const std::string &cmd,
             }
           }
           else{ //if we could not find out anything about our expected window 
-          	if(windowName != "" && !windowExists(windowName)){ //If we had a window but it no longer exists (crashed/shut)
-          		windowName = "";  //reset it's name to nothing so we can begin searching again.
+            if(windowName != "" && !windowExists(windowName)){ //If we had a window but it no longer exists (crashed/shut)
+              windowName = "";  //reset it's name to nothing so we can begin searching again.
               std::cout << "The students window shut midrun." << std::endl;
-          	}
+            }
           }
           wpid = waitpid(childPID, &status, WNOHANG);
           if (wpid == 0){
@@ -982,14 +1013,14 @@ int execute(const std::string &cmd,
         }
       }
       if (time_kill){
-	     logfile << "ERROR: Maximum run time exceeded" << std::endl;
-	     logfile << "Program Terminated" << std::endl;
-	     result=3;
+       logfile << "ERROR: Maximum run time exceeded" << std::endl;
+       logfile << "Program Terminated" << std::endl;
+       result=3;
       }
       if (memory_kill){
-	     logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
-	     logfile << "Program Terminated" << std::endl;
-	     result=3;
+       logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
+       logfile << "Program Terminated" << std::endl;
+       result=3;
       }
       std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
       parent_result = system("date");

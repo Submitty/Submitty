@@ -10,9 +10,10 @@
                     "actual_file": "test02_STDOUT.txt",
                     "description": "STDOUT.txt",
                     "messages": [
-                        "ERROR: TestResults not initialized.",
-                        "Probably caused by error in validation.",
-                        "If you cannot debug the issue, ask your instructor to check results_log_validator.txt"
+                        {
+                            "message": "ERROR: TestResults not initialized. Probably caused by error in validation. If you cannot debug the issue, ask your instructor to check results_log_validator.txt",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],
