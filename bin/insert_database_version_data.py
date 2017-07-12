@@ -106,6 +106,8 @@ def main():
         hidden_ec = 0
         testcases = get_testcases(semester, course, gradeable_id)
         results = get_result_details(semester, course, gradeable_id, who_id, version)
+        if not len(testcases) == len(results['testcases']):
+            print ("ERROR!  mismatched # of testcases ",len(testcases)," != ",len(results['testcases']))
         for i in range(len(testcases)):
             if testcases[i]['hidden'] and testcases[i]['extra_credit']:
                 hidden_ec += results['testcases'][i]['points']

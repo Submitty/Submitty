@@ -6,13 +6,19 @@
                     "actual_file": "test01_STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
-                        "ERROR: This file should be empty!"
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Create Executable",
                     "messages": [
-                        "ERROR: required files not found:  Factorial.class"
+                        {
+                            "message": "ERROR: required files not found:  Factorial.class",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -30,7 +36,10 @@
                     "actual_file": "test02_STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
-                        "ERROR: This file should be empty!"
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
@@ -48,7 +57,10 @@
                     "actual_file": "test03_STDOUT.txt",
                     "description": "JUnit output",
                     "messages": [
-                        "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 0/4"
+                        {
+                            "message": "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 0/4",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {

@@ -98,11 +98,26 @@ HTML;
                 href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'individual'=>'0'))}">
                 Grade Next Student
             </a>
+            <a class="btn btn-primary"
+                href="{$this->core->buildUrl(array('component'=>'misc', 'page'=>'download_all_assigned', 'dir'=>'submissions', 'gradeable_id'=>$gradeable->getId()))}">
+                Download Zip of All Assigned Students
+            </a>
+HTML;
+            }
+            if($this->core->getUser()->accessFullGrading()) {
+            $return .= <<<HTML
+            <a class="btn btn-primary" 
+                href="{$this->core->buildUrl(array('component'=>'misc', 'page'=>'download_all_assigned', 'dir'=>'submissions', 'gradeable_id'=>$gradeable->getId(), 'type'=>'All'))}">
+                Download Zip of All Students
+            </a>
+HTML;
+            }
+            $return .= <<<HTML
         </div>
     </div>
 </div>
 HTML;
-            }
+            
         }
         return $return;
     }
@@ -113,7 +128,7 @@ HTML;
      * @param array       $graders
      * @return string
      */
-    public function summaryPage($gradeable, $rows, $graders) {
+    public function detailsPage($gradeable, $rows, $graders) {
         $return = <<<HTML
 <div class="content">
     
@@ -185,6 +200,9 @@ HTML;
             $last_section = false;
             $tbody_open = false;
             foreach ($rows as $row) {
+                $graded_version = $row->getGradedVersion();
+                $active_version = $row->getActiveVersion();
+                $highest_version = $row->getHighestVersion();
                 if ($row->beenTAgraded()){
                     if ($row->getUserViewedDate() === null || $row->getUserViewedDate() === "") {
                         $viewed_grade = "&#10008;";
@@ -196,16 +214,23 @@ HTML;
                         $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
+                    $different = false;
+                    if($graded_version !== $active_version){
+                        $different = true;
+                        // probably want to write a different query instead of this
+                        $row->loadResultDetails();
+                        $autograding_score = $row->getVersions()[$graded_version]->getNonHiddenTotal() + $row->getVersions()[$graded_version]->getHiddenTotal();
+                    }
                 }
                 else{
                     $viewed_grade = "";
                     $grade_viewed = "";
                     $grade_viewed_color = "";
+                    $autograding_score = $row->getGradedAutograderPoints();
                 }
-                $active_version = $row->getActiveVersion();
-                $highest_version = $row->getHighestVersion();
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
-                $graded = $row->getGradedAutograderPoints() + $row->getGradedTAPoints();
+                $graded = $autograding_score + $row->getGradedTAPoints();
+
                 if ($graded < 0) $graded = 0;
                 if ($gradeable->isGradeByRegistration()) {
                     $section = $row->getUser()->getRegistrationSection();
@@ -251,7 +276,7 @@ HTML;
                 if($show_auto_grading_points) {
                     if ($highest_version != 0) {
                         $return .= <<<HTML
-                <td>{$row->getGradedAutograderPoints()}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
+                <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
 HTML;
                     }
                     else {
@@ -271,7 +296,12 @@ HTML;
                     
                     if ($row->beenTAgraded()) {
                         $btn_class = "btn-default";
-                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                        if($different) {
+                            $contents = "Graded " . $graded_version . "/" . $highest_version;
+                        }
+                        else{
+                            $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                        }
                     }
                     else {
                         $btn_class = "btn-primary";
@@ -580,6 +610,7 @@ HTML;
     <span class="grading_label">Submissions and Results Browser</span>
     <button class="btn btn-default" onclick="openAll()">Expand All</button>
     <button class="btn btn-default" onclick="closeAll()">Close All</button>
+    <button class="btn btn-default" onclick="downloadZip('{$gradeable->getId()}','{$gradeable->getUser()->getId()}')">Download Zip File</button>
     <br />
     <div class="inner-container">
 HTML;
@@ -603,14 +634,17 @@ HTML;
                 if (!is_array($contents)) {
                     $dir = htmlentities($dir);
                     $contents = urlencode(htmlentities($contents));
+                    $content_url = urldecode($contents); 
                     $indent_offset = $indent * -15;
+                    $super_url = $content_url;
                     $return .= <<<HTML
                 <div>
                     <div class="file-viewer">
                         <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count})'>
                             <span class='icon-plus' style='vertical-align:text-bottom;'></span>
                         {$dir}</a> &nbsp;
-                        <a onclick='openFile("{$dir}", "{$contents}")'>(Popout)</a>
+                        <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                        <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
                     </div><br/>
                     <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px"></div>
                 </div>
@@ -621,12 +655,13 @@ HTML;
             foreach ($files as $dir => $contents) {
                 if (is_array($contents)) {
                     $dir = htmlentities($dir);
+                    $url = reset($contents);
                     $return .= <<<HTML
             <div>
                 <div class="div-viewer">
                     <a class='openAllDiv' onclick='openDiv({$count});'>
                         <span class='icon-folder-closed' style='vertical-align:text-top;'></span>
-                    {$dir}</a>
+                    {$dir}</a> 
                 </div><br/>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none'>
 HTML;
@@ -871,7 +906,19 @@ HTML;
         return false;
     }
 
+    function downloadZip(grade_id, user_id) {
+        window.location = buildUrl({'component': 'misc', 'page': 'download_zip', 'dir': 'submissions', 'gradeable_id': grade_id, 'user_id': user_id});
+        return false;
+    }
+
+    function downloadFile(html_file, url_file) {
+        url_file = decodeURIComponent(url_file);        
+        window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': html_file, 'path': url_file});
+        return false;
+    }
+
     function openFile(html_file, url_file) {
+        url_file = decodeURIComponent(url_file);
         window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=submissions&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }

@@ -236,7 +236,6 @@ function grade_this_item {
     NEXT_DIRECTORY=$1
     NEXT_TO_GRADE=$2
 
-    echo "========================================================================"
     echo "GRADE $NEXT_TO_GRADE"
 
     # --------------------------------------------------------------------
@@ -383,11 +382,13 @@ function grade_this_item {
     test_input_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_input/$gradeable"
     test_output_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_output/$gradeable"
     checkout_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/checkout/$gradeable/$who/$version"
-    results_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
+    results_path_tmp="$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$gradeable/$who/$version"
     bin_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/bin"
 
+    results_path="$results_path_tmp/OLD"
 
     # grab a copy of the current results_history.json file (if it exists)
+    global_results_history_file_location_tmp=${results_path_tmp}/results_history.json
     global_results_history_file_location=${results_path}/results_history.json
     if [ -e "$global_results_history_file_location" ]
     then
@@ -539,6 +540,8 @@ function grade_this_item {
     #  --include="*.XXX"  grab all .XXX files
     #  --exclude="*"  exclude everything else
 
+    $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp_compilation -user "${ARGUMENT_UNTRUSTED_USER}" -exec /bin/chmod o+r {} \;   >>  results_log_runner.txt 2>&1
+    
     rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"  --include="*.class"  --include="*.py" --include="*.s" --include="*.pl"  --include="*.rkt" --include="*.png" --include="*.pdf" --include="*.jpg"  --include="*README*"  --include="test*.txt" --include="data/*" 	--exclude="*"  $tmp_compilation/  $tmp
     # NOTE: Also grabbing all student data files (files with 'data/' directory in path)
 
@@ -645,22 +648,22 @@ function grade_this_item {
     # Make directory structure in results if it doesn't exist
     mkdir -p "$results_path" || log_error "$NEXT_TO_GRADE" "Could not create results path $results_path"
 
-    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.png $tmp/test*.html $tmp/results_log_*txt $tmp/results.json $tmp/results_grade.txt $tmp/test*.json "$results_path"
+    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.png $tmp/test*.html $tmp/results_log_*txt $tmp/results.json $tmp/grade.txt $tmp/test*.json "$results_path"
 
 
     # FIXME: a global variable
 
-    if [ -e $results_path/results_grade.txt ] ;
+    if [ -e $results_path/grade.txt ] ;
     then
-	global_grade_result=`grep "Automatic grading total:" $results_path/results_grade.txt`
+	global_grade_result=`grep "Automatic grading total:" $results_path/grade.txt`
     else
-	global_grade_result="ERROR: $results_path/results_grade.txt does not exist"
+	global_grade_result="ERROR: $results_path/grade.txt does not exist"
     fi
 
 
     if [[ $global_grade_result == "" ]] ;
     then
-	global_grade_result="WARNING: $results_path/results_grade.txt does not have a total score"
+	global_grade_result="WARNING: $results_path/grade.txt does not have a total score"
     fi
 
 
@@ -837,7 +840,11 @@ while true; do
 	global_submission_time=""
 	global_gradeable_deadline=""
 	# call the helper function
+        echo "========================================================================"
 	grade_this_item $NEXT_DIRECTORY $NEXT_ITEM
+
+        ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
+        echo "========================================================================"
 
 	# mark the end time
 	ENDTIME=$(date +%s)
@@ -846,35 +853,38 @@ while true; do
 	ELAPSED=$(($ENDTIME - $STARTTIME))
 
 	# -------------------------------------------------------------
-    # create/append to the results history
-    sec_deadline=`date -d "${global_gradeable_deadline}" +%s`
-    sec_submission=`date -d "${global_submission_time}" +%s`
-    seconds_late=$((sec_submission-sec_deadline))
-    ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py  \
-        "$global_results_history_file_location" \
-        "$global_gradeable_deadline" \
-        "$global_submission_time" \
-        "$seconds_late" \
-         "`date -d @$FILE_TIMESTAMP`" \
-        "$IS_BATCH_JOB" \
-        "`date -d @$STARTTIME`" \
-        "$WAITTIME" \
-        "`date -d @$ENDTIME`" \
-        "$ELAPSED" \
-        "$global_grade_result"
+        # create/append to the results history
+        sec_deadline=`date -d "${global_gradeable_deadline}" +%s`
+        sec_submission=`date -d "${global_submission_time}" +%s`
+        seconds_late=$((sec_submission-sec_deadline))
+        ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py  \
+                               "$global_results_history_file_location" \
+                               "$global_gradeable_deadline" \
+                               "$global_submission_time" \
+                               "$seconds_late" \
+                               "`date -d @$FILE_TIMESTAMP`" \
+                               "$IS_BATCH_JOB" \
+                               "`date -d @$STARTTIME`" \
+                               "$WAITTIME" \
+                               "`date -d @$ENDTIME`" \
+                               "$ELAPSED" \
+                               "$global_grade_result"
 
-    #---------------------------------------------------------------------
-    # WRITE OUT VERISON DETAILS
-    ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
-        "${semester}" \
-        "${course}" \
-        "${gradeable}" \
-        "${user}" \
-        "${team}" \
-        "${who}" \
-        "${is_team}" \
-        "${version}"
+        cp "$global_results_history_file_location" "$global_results_history_file_location_tmp"  
+        
+        #---------------------------------------------------------------------
+        # WRITE OUT VERSION DETAILS
 
+        ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
+                               "${semester}" \
+                               "${course}" \
+                               "${gradeable}" \
+                               "${user}" \
+                               "${team}" \
+                               "${who}" \
+                               "${is_team}" \
+                               "${version}"
+        
 	echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
 
 	# -------------------------------------------------------------
