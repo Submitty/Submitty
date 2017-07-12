@@ -549,8 +549,7 @@ ORDER BY registration_section", $params);
 SELECT count(u.*) as cnt, u.registration_section
 FROM users AS u
 INNER JOIN (
-  SELECT gd.* FROM gradeable_data AS gd LEFT JOIN gradeable_component_data AS gcd ON gcd.gd_id = gd.gd_id WHERE g_id=?
---  SELECT * FROM gradeable_data WHERE g_id=? AND (gd_graded_version >= 0 OR gd_graded_version = -1)
+  SELECT gd.* FROM gradeable_data AS gd LEFT JOIN gradeable_component_data AS gcd ON gcd.gd_id = gd.gd_id WHERE g_id=? GROUP BY gd.gd_id
 ) AS gd ON u.user_id = gd.gd_user_id
 {$where}
 GROUP BY u.registration_section
@@ -653,8 +652,7 @@ ORDER BY rotating_section", $params);
 SELECT count(u.*) as cnt, u.rotating_section
 FROM users AS u
 INNER JOIN (
-  SELECT gd.* FROM gradeable_data AS gd LEFT JOIN gradeable_component_data AS gcd ON gcd.gd_id = gd.gd_id WHERE g_id=?
-  --SELECT * FROM gradeable_data WHERE g_id=? AND (gd_graded_version >= 0 OR gd_graded_version = -1)
+    SELECT gd.* FROM gradeable_data AS gd LEFT JOIN gradeable_component_data AS gcd ON gcd.gd_id = gd.gd_id WHERE g_id=? GROUP BY gd.gd_id
 ) AS gd ON u.user_id = gd.gd_user_id
 {$where}
 GROUP BY u.rotating_section
