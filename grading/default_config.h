@@ -20,7 +20,7 @@ const std::map<int,rlim_t> default_limits =
     { RLIMIT_NPROC,      0                 }, // no additional processes  
     { RLIMIT_NOFILE,     100               }, // 100 file descriptors 
     { RLIMIT_MEMLOCK,    500*1000*1000     }, // 500 MB RAM             }, // FIXME: set to 0
-    { RLIMIT_AS,         10*1000*1000*1000  }, // 10 GB virtual memory address space 
+    { RLIMIT_AS,         RLIM_INFINITY     }, // 
     { RLIMIT_LOCKS,      100               }, // 100 files open  }, // FIXME: set to 0 (except java?) 
     { RLIMIT_SIGPENDING, 0                 }, // 
     { RLIMIT_MSGQUEUE,   0                 }, //  

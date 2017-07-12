@@ -221,15 +221,11 @@ find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
 echo -e "Copy the sample files"
 
 # copy the files from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/sample_files ${SUBMITTY_INSTALL_DIR}
 rsync -rtz ${SUBMITTY_REPOSITORY}/more_autograding_examples ${SUBMITTY_INSTALL_DIR}
 
 # root will be owner & group of these files
-chown -R  root:root ${SUBMITTY_INSTALL_DIR}/sample_files
 chown -R  root:root ${SUBMITTY_INSTALL_DIR}/more_autograding_examples
 # but everyone can read all that files & directories, and cd into all the directories
-find ${SUBMITTY_INSTALL_DIR}/sample_files -type d -exec chmod 555 {} \;
-find ${SUBMITTY_INSTALL_DIR}/sample_files -type f -exec chmod 444 {} \;
 find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type d -exec chmod 555 {} \;
 find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type f -exec chmod 444 {} \;
 
@@ -274,6 +270,7 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 #replace necessary variables in the copied scripts
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
@@ -310,6 +307,8 @@ chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 # fix the permissions specifically of the grade_students.sh script
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
 
@@ -454,26 +453,26 @@ echo -e "Generate & install the crontab file for hwcron user"
 # name of temporary file
 HWCRON_CRONTAB_FILE=my_hwcron_crontab_file.txt
 
-# calculate the frequency -- once every how many minutes?
-GRADE_STUDENTS_FREQUENCY=$(( 60 / ${GRADE_STUDENTS_STARTS_PER_HOUR} ))
-
-# sanity check
-if [[ "$GRADE_STUDENTS_FREQUENCY" -lt 1 ||
-      "$GRADE_STUDENTS_FREQUENCY" -ge 60 ]] ; then
-    echo "ERROR: Bad value for GRADE_STUDENTS_FREQUENCY = $GRADE_STUDENTS_FREQUENCY"
-    exit 1
-fi
 
 # generate the file
 echo -e "\n\n"                                                                                >  ${HWCRON_CRONTAB_FILE}
 echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
-minutes=0
-while [ $minutes -lt 60 ]; do
-    printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
-    minutes2=$(($minutes + 1))
-    printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py > /dev/null\n"                 $minutes2          >> ${HWCRON_CRONTAB_FILE}
-    minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
-done
+
+# sanity check
+if [[ "$GRADE_STUDENTS_STARTS_PER_HOUR" -lt 1 ||
+      "$GRADE_STUDENTS_STARTS_PER_HOUR" -gt 60 ]] ; then
+    echo "WARNING: Bad value for GRADE_STUDENTS_STARTS_PER_HOUR = $GRADE_STUDENTS_STARTS_PER_HOUR"
+else
+    # calculate the frequency -- once every how many minutes?
+    GRADE_STUDENTS_FREQUENCY=$(( 60 / ${GRADE_STUDENTS_STARTS_PER_HOUR} ))
+    minutes=0
+    while [ $minutes -lt 60 ]; do
+        printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
+        minutes2=$(($minutes + 1))
+        printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py > /dev/null\n"                 $minutes2          >> ${HWCRON_CRONTAB_FILE}
+        minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
+    done
+fi
 
 ## NOTE:  the build_config_upload script is hardcoded to run for ~5 minutes and then exit
 minutes=0
@@ -495,27 +494,21 @@ rm ${HWCRON_CRONTAB_FILE}
 # COMPILE AND INSTALL ANALYSIS TOOLS
 
 echo -e "Compile and install analysis tools"
+
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#git pull origin master
-make
 
-# copy the necessary files out of the repo
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-#mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/config
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_node      ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_token     ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_function  ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang/*              ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/config/*            ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/config
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/*               ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-
-# change permissions
-chown -R hwcron:course_builders ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+# compile the tools
+./build.sh v0.2.1
 
 popd
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/plagiarism ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+# change permissions
+chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 ################################################################################################################
 ################################################################################################################
@@ -568,14 +561,24 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     # add a symlink to conveniently run the test suite or specific tests without the full reinstall
     #ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
 
-    echo -e "\nRun Autograding Test Suite...\n"
+    echo -e "\nRun Rainbow Grades Test Suite...\n"
+    rainbow_counter=0
+    rainbow_total=0
 
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
+    rainbow_total=$((rainbow_total+1))
     python ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+    
+    if [[ $? -ne 0 ]]; then
+        echo -e "\n[ FAILED ] sample test\n"
+    else
+        rainbow_counter=$((rainbow_counter+1))
+        echo -e "\n[ SUCCEEDED ] sample test\n"
+    fi
 
-    echo -e "\nCompleted Autograding Test Suite\n"
+    echo -e "\nCompleted Rainbow Grades Test Suite. $rainbow_counter of $rainbow_total tests succeeded.\n"
 fi
 
 ################################################################################################################

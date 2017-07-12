@@ -17,6 +17,11 @@ use app\libraries\FileUtils;
  */
 class PamAuthentication extends AbstractAuthentication {
     public function authenticate() {
+        $user = $this->core->getQueries()->getSubmittyUser($this->user_id);
+        if ($user === null) {
+            return false;
+        }
+
         do {
             $file = md5(uniqid(rand(), true));
         } while (file_exists(FileUtils::joinPaths("/tmp", $file)));
@@ -51,8 +56,7 @@ class PamAuthentication extends AbstractAuthentication {
         else if ($output['authenticated'] !== true) {
             return false;
         }
-        
-        $this->core->loadUser($this->user_id);
-        return $this->core->userLoaded();
+
+        return true;
     }
 }

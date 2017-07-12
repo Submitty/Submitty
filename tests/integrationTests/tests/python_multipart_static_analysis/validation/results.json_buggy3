@@ -11,7 +11,10 @@
                 {
                     "description": "Number of print statements",
                     "messages": [
-                        "Looks like you forgot the 'print' statement."
+                        {
+                            "message": "Looks like you forgot the 'print' statement.",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],
@@ -21,7 +24,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_part2__p2_bug3.txt",
+                    "actual_file": "part2/p2_bug3.txt",
                     "description": "Program Output",
                     "difference_file": "test02_0_diff.json"
                 }
@@ -40,19 +43,28 @@
                 {
                     "description": "Number of assignments",
                     "messages": [
-                        "Re-read the problem instructions."
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Number of multiplications",
                     "messages": [
-                        "Re-read the problem instructions."
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {
                     "description": "Number of additions",
                     "messages": [
-                        "Re-read the problem instructions."
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],
@@ -70,17 +82,20 @@
                 {
                     "description": "Number of while loops",
                     "messages": [
-                        "Re-read the problem instructions."
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],
             "points_awarded": 1,
             "test_name": "Test 4 Count Odd"
-         },
-         {
-             "points_awarded": 0,
-             "test_name": "Test 5 Submission Limit",
-             "view_testcase": false
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 5 Submission Limit",
+            "view_testcase": false
         }
     ]
 }

@@ -93,4 +93,3 @@ class AutoLoader {
 }
 
 spl_autoload_register(array('app\\libraries\\AutoLoader', 'loadClass'));
-?>

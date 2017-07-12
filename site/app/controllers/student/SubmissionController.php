@@ -25,7 +25,8 @@ class SubmissionController extends AbstractController {
 
     public function __construct(Core $core) {
         parent::__construct($core);
-        $this->gradeables_list = $this->core->loadModel("GradeableList", $this->core);
+        $this->gradeables_list = $this->core->loadModel(GradeableList::class);
+
     }
 
     public function run() {
@@ -39,11 +40,24 @@ class SubmissionController extends AbstractController {
             case 'check_refresh':
                 return $this->checkRefresh();
                 break;
+            case 'pop_up':
+                return $this->popUp();
+                break;
+            case 'verify':
+                return $this->validGradeable();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
                 break;
         }
+    }
+
+    private function popUp() {
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
+        $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
+                                                           'showPopUp', $gradeable);
     }
 
     private function showHomeworkPage() {
@@ -87,7 +101,72 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
     }
-    
+
+    /**
+    * Function for verification that a given RCS ID is valid and has a corresponding user and gradeable.
+    * This should be called via AJAX, saving the result to the json_buffer of the Output object. 
+    * If failure, also returns message explaining what happened.
+    * If success, also returns highest version of the student gradeable.
+    */
+    private function validGradeable() {
+        if (!isset($_POST['gradeable_id'])) {
+            $msg = "Did not pass in gradeable_id.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        if (!isset($_POST['student_id'])) {
+            $msg = "Did not pass in student_id.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
+            $msg = "Invalid CSRF token. Refresh the page and try again.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+
+        $gradeable_id = $_POST['gradeable_id'];
+        $student_id = $_POST['student_id'];
+        $student_user = $this->core->getQueries()->getUserById($student_id);
+
+        if (!$student_user === null) {
+            $msg = "Invalid student id '{$_POST['student_id']}'";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        if (!$student_user->isLoaded()) {
+            $msg = "Invalid student id '{$_POST['student_id']}'";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        $student_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $student_id);
+        if ($student_gradeable === null) {
+            $msg = "Invalid gradeable id '{$_POST['gradeable_id']}'";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        $student_gradeable->loadResultDetails();
+        if ($student_gradeable->isTeamAssignment()) {
+            $student_team = $this->core->getQueries()->getTeamByUserId($gradeable_id, $student_id);
+            if ($student_team === null) {
+                $msg = "Student '{$_POST['student_id']}' is not part of a team.";
+                $return = array('success' => false, 'message' => $msg);
+                $this->core->getOutput()->renderJson($return);
+                return $return;
+            }
+        }
+        $highest_version = $student_gradeable->getHighestVersion();
+        $return = array('success' => true, 'highest_version' => $highest_version);
+        $this->core->getOutput()->renderJson($return);
+        return $return;
+    }
+
     /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
@@ -107,8 +186,19 @@ class SubmissionController extends AbstractController {
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
         }
-        
-        $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+
+        if (!isset($_POST['user_id'])) {
+            return $this->uploadResult("Invalid user id.", false);
+        }
+
+        $original_user_id = $this->core->getUser()->getId();
+        $user_id = $_POST['user_id'];
+        if ($user_id == $original_user_id) {
+            $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+        }
+        else {
+            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $user_id);
+        }
         $gradeable->loadResultDetails();
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
@@ -123,8 +213,7 @@ class SubmissionController extends AbstractController {
         if (!FileUtils::createDir($gradeable_path)) {
             return $this->uploadResult("Failed to make folder for this assignment.", false);
         }
-
-        $user_id = $this->core->getUser()->getId();
+        
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
@@ -357,7 +446,9 @@ class SubmissionController extends AbstractController {
         if (!file_exists($settings_file)) {
             $json = array("active_version" => $new_version,
                           "history" => array(array("version" => $new_version,
-                                                   "time" => $current_time)));
+                                                   "time" => $current_time,
+                                                   "who" => $original_user_id,
+                                                   "type" => "upload")));
         }
         else {
             $json = FileUtils::readJsonFile($settings_file);
@@ -365,7 +456,7 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to open settings file.", false);
             }
             $json["active_version"] = $new_version;
-            $json["history"][] = array("version"=> $new_version, "time" => $current_time);
+            $json["history"][] = array("version"=> $new_version, "time" => $current_time, "who" => $original_user_id, "type" => "upload");
         }
     
         // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
@@ -418,7 +509,12 @@ class SubmissionController extends AbstractController {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
-        $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
+        if ($user_id == $original_user_id)
+            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
+        else
+            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}";
+            
+
         return $this->uploadResult("Successfully uploaded files");
     }
     
@@ -488,6 +584,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
 
+        $original_user_id = $this->core->getUser()->getId();
         $user_id = $this->core->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
@@ -507,7 +604,8 @@ class SubmissionController extends AbstractController {
         }
         $json["active_version"] = $new_version;
         $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s");
-        $json["history"][] = array("version" => $new_version, "time" => $current_time);
+
+        $json["history"][] = array("version" => $new_version, "time" => $current_time, "who" => $original_user_id, "type" => "select");
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $msg = "Could not write to settings file.";

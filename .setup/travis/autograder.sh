@@ -65,18 +65,18 @@ popd
 # --------------------------------------
 echo -e "Compile and install analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-git pull origin master
-sed -i "s/stack upgrade \-\-install\-ghc/stack upgrade \-\-install\-ghc \-\-allow\-different\-user/g" Makefile
-make
 
-mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
+pushd /usr/local/submitty/GIT_CHECKOUT_AnalysisTools
 
+
+git checkout -b  VERSION_2_1  v0.2.1
+stack --allow-different-user --install-ghc --copy-bins build
+
+
+popd
+mkdir /usr/local/submitty/SubmittyAnalysisTools
+cp /usr/local/submitty/GIT_CHECKOUT_AnalysisTools/count /usr/local/submitty/SubmittyAnalysisTools
 
 # --------------------------------------
 echo -e "Compile and install the tutorial repository"
 git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-
-popd

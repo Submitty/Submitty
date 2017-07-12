@@ -302,7 +302,7 @@ bool string_to_gradeable_enum(const std::string &s, GRADEABLE_ENUM &return_value
 //====================================================================
 
 
-void preprocesscustomizationfile(std::vector<Student*> &students) {	
+void preprocesscustomizationfile(std::vector<Student*> &students) {  
   /*
   std::ifstream istr(CUSTOMIZATION_FILE.c_str());
   assert (istr);
@@ -488,14 +488,14 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
     GRADEABLES.insert(std::make_pair(g,answer));
     assert (GRADEABLES[g].getCount() >= 0);
     assert (GRADEABLES[g].getPercent() >= 0.0 && GRADEABLES[g].getPercent() <= 1.0);
-	
+  
     // Set remove lowest for gradeable
     int num = one_gradeable_type.value("remove_lowest", 0);
     assert (num == 0 || (num >= 0 && num < GRADEABLES[g].getCount()));
     GRADEABLES[g].setRemoveLowest(num);
     ALL_GRADEABLES.push_back(g);
   }
-	
+  
   // Set Benchmark Percent
 
   std::vector<std::string> benchmark_percents;
@@ -591,49 +591,49 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
         lowest_c->setGradeableItemGrade(g,which, c_score);
         lowest_d->setGradeableItemGrade(g,which, d_score);
       }
-	  
-	  //std::cout << "it makes it to exam data" << std::endl;
-	  
-	  nlohmann::json exam_data = grade_id["exam_data"];
-	  //std::cout << exam_data << std::endl;
-	  if (!exam_data.empty()) {
-		//std::cout << "makes it into exam data" << std::endl;
-	    int active = exam_data["active"].get<int>();
-		if (active == 1) {
+    
+    //std::cout << "it makes it to exam data" << std::endl;
+    
+    nlohmann::json exam_data = grade_id["exam_data"];
+    //std::cout << exam_data << std::endl;
+    if (!exam_data.empty()) {
+    //std::cout << "makes it into exam data" << std::endl;
+      int active = exam_data["active"].get<int>();
+    if (active == 1) {
 
                   GLOBAL_ACTIVE_TEST_ZONE = k;
 
-	      for (nlohmann::json::iterator itr2 = (exam_data).begin(); itr2 != (exam_data).end(); itr2++) {
-	        std::string token2 = itr2.key();
-		    //std::cout << token2 << std::endl;
-		    if (token2 == "exam_title") {
-		      std::string value = itr2.value();
-		      GLOBAL_EXAM_TITLE = value;
-		    } else if (token2 == "exam_date") {
-		      std::string value = itr2.value();
-		      GLOBAL_EXAM_DATE = value;
-		    } else if (token2 == "exam_time") {
-		      std::string value = itr2.value();
-		      GLOBAL_EXAM_TIME = value;
-		    } else if (token2 == "exam_default_room") {
-		      std::string value = itr2.value();
-		      GLOBAL_EXAM_DEFAULT_ROOM = value;
-		    } else if (token2 == "min_overall_for_zone_assignment") {
-		      float value = itr2.value();
-		      GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = value;
-		    } else if (token2 == "exam_seating") {
-		      std::cout << "TOKEN IS EXAM SEATING" << std::endl;
+        for (nlohmann::json::iterator itr2 = (exam_data).begin(); itr2 != (exam_data).end(); itr2++) {
+          std::string token2 = itr2.key();
+        //std::cout << token2 << std::endl;
+        if (token2 == "exam_title") {
+          std::string value = itr2.value();
+          GLOBAL_EXAM_TITLE = value;
+        } else if (token2 == "exam_date") {
+          std::string value = itr2.value();
+          GLOBAL_EXAM_DATE = value;
+        } else if (token2 == "exam_time") {
+          std::string value = itr2.value();
+          GLOBAL_EXAM_TIME = value;
+        } else if (token2 == "exam_default_room") {
+          std::string value = itr2.value();
+          GLOBAL_EXAM_DEFAULT_ROOM = value;
+        } else if (token2 == "min_overall_for_zone_assignment") {
+          float value = itr2.value();
+          GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = value;
+        } else if (token2 == "exam_seating") {
+          std::cout << "TOKEN IS EXAM SEATING" << std::endl;
                       std::string value = itr2.value();
                       GLOBAL_EXAM_SEATING = value;
                     } else if (token2 == "exam_seating_count") {
-		      std::cout << "TOKEN IS EXAM SEATING COUNT" << std::endl;
+          std::cout << "TOKEN IS EXAM SEATING COUNT" << std::endl;
                       std::string value = itr2.value();
                       GLOBAL_EXAM_SEATING_COUNT = value;
                     }
-	      }
-		}
-	  }
-	}
+        }
+    }
+    }
+  }
   }
   students.push_back(perfect);
   students.push_back(student_average);
@@ -648,8 +648,8 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   // get display optioons
   std::vector<std::string> displays = j["display"].get<std::vector<std::string> >();
   for (std::size_t i=0; i<displays.size(); i++) {
-	token = displays[i];
-	if (token == "instructor_notes") {
+  token = displays[i];
+  if (token == "instructor_notes") {
       DISPLAY_INSTRUCTOR_NOTES = true;
     } else if (token == "exam_seating") {
       DISPLAY_EXAM_SEATING = true;
@@ -663,7 +663,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
       DISPLAY_GRADE_DETAILS = true;
     } else if (token == "iclicker") {
       DISPLAY_ICLICKER = true;
-	  
+    
     } else {
       std::cout << "OOPS " << token << std::endl;
       exit(0);
@@ -676,7 +676,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   std::vector<std::string> displayBenchmark = j["display_benchmark"].get<std::vector<std::string> >();
   for (std::size_t i=0; i<displayBenchmark.size(); i++) {
     token = displayBenchmark[i];
-	DisplayBenchmark(token);
+  DisplayBenchmark(token);
   }
   
   //std::cout << "5" << std::endl;
@@ -688,10 +688,10 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   nlohmann::json benchmarkColor = j["benchmark_color"];
   for (nlohmann::json::iterator itr = benchmarkColor.begin(); itr != benchmarkColor.end(); itr++) {
     token = itr.key();
-	std::string color;
-	color = itr.value();
-	
-	SetBenchmarkColor(token,color);
+  std::string color;
+  color = itr.value();
+  
+  SetBenchmarkColor(token,color);
   }
   
   //std::cout << "7" << std::endl;
@@ -700,20 +700,20 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   
   nlohmann::json useJSON = j["use"];
   for (nlohmann::json::iterator itr = useJSON.begin(); itr != useJSON.end(); itr++) {
-	token = itr.key();
-	if (token == "late_day_penalty") {
-	  LATE_DAY_PERCENTAGE_PENALTY = itr.value();
-	  assert (LATE_DAY_PERCENTAGE_PENALTY >= 0.0 && LATE_DAY_PERCENTAGE_PENALTY <= 0.5);
-	} else if (token == "test_improvement_averaging_adjustment") {
-		TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT = true;
-	} else if (token == "quiz_normalize_and_drop") {
+  token = itr.key();
+  if (token == "late_day_penalty") {
+    LATE_DAY_PERCENTAGE_PENALTY = itr.value();
+    assert (LATE_DAY_PERCENTAGE_PENALTY >= 0.0 && LATE_DAY_PERCENTAGE_PENALTY <= 0.5);
+  } else if (token == "test_improvement_averaging_adjustment") {
+    TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT = true;
+  } else if (token == "quiz_normalize_and_drop") {
           QUIZ_NORMALIZE_AND_DROP = itr.value();
-	} else if (token == "lowest_test_counts_half") {
-		LOWEST_TEST_COUNTS_HALF = true;
-	} else {
-	  std::cout << "ERROR: unknown use " << token << std::endl;
+  } else if (token == "lowest_test_counts_half") {
+    LOWEST_TEST_COUNTS_HALF = true;
+  } else {
+    std::cout << "ERROR: unknown use " << token << std::endl;
       exit(0);
-	}
+  }
   }
   
   //std::cout << "9" << std::endl;
@@ -1211,18 +1211,18 @@ void processcustomizationfile(std::vector<Student*> &students) {
   for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
     token = itr.key();
     //std::cout << token << std::endl;
-	if (token == "section") {
-	  // create sections
-	  int counter = 0;
-	  for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-		std::string temp = itr2.key();
-		int section = std::stoi(temp);
-		std::string section_name = itr2.value();
-		std::cout << "MAKE ASSOCIATION " << section << " " << section_name << std::endl;
-		//assert (!validSection(section));
-		sectionNames[section] = section_name;
-		if (sectionColors.find(section_name) == sectionColors.end()) {
-		  if (counter == 0) {
+  if (token == "section") {
+    // create sections
+    int counter = 0;
+    for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+    std::string temp = itr2.key();
+    int section = std::stoi(temp);
+    std::string section_name = itr2.value();
+    std::cout << "MAKE ASSOCIATION " << section << " " << section_name << std::endl;
+    //assert (!validSection(section));
+    sectionNames[section] = section_name;
+    if (sectionColors.find(section_name) == sectionColors.end()) {
+      if (counter == 0) {
             sectionColors[section_name] = "ccffcc"; // lt green
           } else if (counter == 1) {
             sectionColors[section_name] = "ffcccc"; // lt salmon
@@ -1260,21 +1260,21 @@ void processcustomizationfile(std::vector<Student*> &students) {
             sectionColors[section_name] = "ff6666"; // red
           } else {
             sectionColors[section_name] = "aaaaaa"; // grey 
-	  }
-		  counter++;
-		}
-	  }
-	} else if (token == "messages") {
-	  // general message at the top of the file
-	  for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+    }
+      counter++;
+    }
+    }
+  } else if (token == "messages") {
+    // general message at the top of the file
+    for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
             MESSAGES.push_back(*itr2);
-	  }
-	} else if (token == "warning") {
-	  // EWS early warning system [ per student ]
-	  std::vector<nlohmann::json> warning_list = j[token].get<std::vector<nlohmann::json> >();
-	  for (std::size_t i = 0; i<warning_list.size(); i++) {
+    }
+  } else if (token == "warning") {
+    // EWS early warning system [ per student ]
+    std::vector<nlohmann::json> warning_list = j[token].get<std::vector<nlohmann::json> >();
+    for (std::size_t i = 0; i<warning_list.size(); i++) {
             nlohmann::json warning = warning_list[i];
-	    //std::string username = warning_user["user"].get<std::string>();
+      //std::string username = warning_user["user"].get<std::string>();
             std::string message = warning["msg"].get<std::string>();
             std::vector<std::string> ids;
             float value = warning["value"].get<float>();
@@ -1305,116 +1305,116 @@ void processcustomizationfile(std::vector<Student*> &students) {
               }
             }
 
-	  }
+    }
 
-	} else if (token == "recommend") {
-	  // UTA/mentor recommendations [ per student ]
-	  std::vector<nlohmann::json> recommend_list = j[token].get<std::vector<nlohmann::json> >();
-	  for (std::size_t i = 0; i < recommend_list.size(); i++) {
-		nlohmann::json recommend_user = recommend_list[i];
-	    std::string username = recommend_user["user"].get<std::string>();
-		std::string message = recommend_user["msg"].get<std::string>();
-		Student *s = GetStudent(students,username);
-		if (s == NULL) {
+  } else if (token == "recommend") {
+    // UTA/mentor recommendations [ per student ]
+    std::vector<nlohmann::json> recommend_list = j[token].get<std::vector<nlohmann::json> >();
+    for (std::size_t i = 0; i < recommend_list.size(); i++) {
+    nlohmann::json recommend_user = recommend_list[i];
+      std::string username = recommend_user["user"].get<std::string>();
+    std::string message = recommend_user["msg"].get<std::string>();
+    Student *s = GetStudent(students,username);
+    if (s == NULL) {
           std::cout << username << std::endl;
         }
         assert (s != NULL);
-		s->addRecommendation(message);
-	  }
-	} else if (token == "note") {
-	  // other grading note [ per student ]
-	  std::vector<nlohmann::json> note_list = j[token].get<std::vector<nlohmann::json> >();
-	  for (std::size_t i = 0; i < note_list.size(); i++) {
-		nlohmann::json note_user = note_list[i];
-	    std::string username = note_user["user"].get<std::string>();
-		std::string message = note_user["msg"].get<std::string>();
-		Student *s = GetStudent(students,username);
-		if (s == NULL) {
+    s->addRecommendation(message);
+    }
+  } else if (token == "note") {
+    // other grading note [ per student ]
+    std::vector<nlohmann::json> note_list = j[token].get<std::vector<nlohmann::json> >();
+    for (std::size_t i = 0; i < note_list.size(); i++) {
+    nlohmann::json note_user = note_list[i];
+      std::string username = note_user["user"].get<std::string>();
+    std::string message = note_user["msg"].get<std::string>();
+    Student *s = GetStudent(students,username);
+    if (s == NULL) {
           std::cout << username << std::endl;
         }
         assert (s != NULL);
-		s->addNote(message);
-	  }
-	} else if (token == "earned_late_days") {
-	  DISPLAY_LATE_DAYS = true;
-	  std::vector<float> earnedLateDays = j[token].get<std::vector<float> >();
-	  GLOBAL_earned_late_days.clear();
-	  for (std::size_t i = 0; i < earnedLateDays.size(); i++) {
-	    float tmp = earnedLateDays[i];
-		assert (GLOBAL_earned_late_days.size() == 0 || tmp > GLOBAL_earned_late_days.back());
+    s->addNote(message);
+    }
+  } else if (token == "earned_late_days") {
+    DISPLAY_LATE_DAYS = true;
+    std::vector<float> earnedLateDays = j[token].get<std::vector<float> >();
+    GLOBAL_earned_late_days.clear();
+    for (std::size_t i = 0; i < earnedLateDays.size(); i++) {
+      float tmp = earnedLateDays[i];
+    assert (GLOBAL_earned_late_days.size() == 0 || tmp > GLOBAL_earned_late_days.back());
         GLOBAL_earned_late_days.push_back(tmp);
-	  }
-	} else if (token == "iclicker_ids") {
-	  iclicker_remotes_filename = itr.value();
-	} else if (token == "iclicker") {
-	  for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-	    std::string temp = itr2.key();
-		std::vector<nlohmann::json> iclickerLectures = j[token][temp];
-		for (std::size_t i = 0; i < iclickerLectures.size(); i++) {
-		  nlohmann::json iclickerLecture = iclickerLectures[i];
-		  int which_lecture = std::stoi(temp);
-		  std::string clicker_file = iclickerLecture["file"].get<std::string>();
-		  int which_column = iclickerLecture["column"].get<int>();
-		  std::string correct_answer = iclickerLecture["answer"].get<std::string>();
-		  assert (which_lecture >= 1 && which_lecture <= MAX_LECTURES);
-		  iclicker_questions[which_lecture].push_back(iClickerQuestion(clicker_file,which_column,correct_answer));
-		}
-	  }
-	} else if (token == "audit") {
-	  std::vector<nlohmann::json> audit_list = itr.value();
-	  for (std::size_t i = 0; i < audit_list.size(); i++) {
-	    std::string username = audit_list[i];
+    }
+  } else if (token == "iclicker_ids") {
+    iclicker_remotes_filename = itr.value();
+  } else if (token == "iclicker") {
+    for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+      std::string temp = itr2.key();
+    std::vector<nlohmann::json> iclickerLectures = j[token][temp];
+    for (std::size_t i = 0; i < iclickerLectures.size(); i++) {
+      nlohmann::json iclickerLecture = iclickerLectures[i];
+      int which_lecture = std::stoi(temp);
+      std::string clicker_file = iclickerLecture["file"].get<std::string>();
+      int which_column = iclickerLecture["column"].get<int>();
+      std::string correct_answer = iclickerLecture["answer"].get<std::string>();
+      assert (which_lecture >= 1 && which_lecture <= MAX_LECTURES);
+      iclicker_questions[which_lecture].push_back(iClickerQuestion(clicker_file,which_column,correct_answer));
+    }
+    }
+  } else if (token == "audit") {
+    std::vector<nlohmann::json> audit_list = itr.value();
+    for (std::size_t i = 0; i < audit_list.size(); i++) {
+      std::string username = audit_list[i];
         Student *s = GetStudent(students,username);
         assert (s != NULL);
         assert (s->getAudit() == false);
         s->setAudit();
         s->addNote("AUDIT");
-	  }
-	} else if (token == "withdraw") {
-	  std::vector<nlohmann::json> withdraw_list = itr.value();
-	  for (std::size_t i = 0; i < withdraw_list.size(); i++) {
-	    std::string username = withdraw_list[i];
+    }
+  } else if (token == "withdraw") {
+    std::vector<nlohmann::json> withdraw_list = itr.value();
+    for (std::size_t i = 0; i < withdraw_list.size(); i++) {
+      std::string username = withdraw_list[i];
         Student *s = GetStudent(students,username);
         assert (s != NULL);
         assert (s->getWithdraw() == false);
         s->setWithdraw();
         s->addNote("LATE WITHDRAW");
-	  }
-	} else if (token == "independentstudy") {
-	  std::vector<nlohmann::json> independent_study_list = itr.value();
-	  for (std::size_t i = 0; i < independent_study_list.size(); i++) {
-	    std::string username = independent_study_list[i];
+    }
+  } else if (token == "independentstudy") {
+    std::vector<nlohmann::json> independent_study_list = itr.value();
+    for (std::size_t i = 0; i < independent_study_list.size(); i++) {
+      std::string username = independent_study_list[i];
         Student *s = GetStudent(students,username);
         assert (s != NULL);
         assert (s->getIndependentStudy() == false);
         s->setIndependentStudy();
         s->addNote("INDEPENDENT STUDY");
-	  }
-	} else if (token == "manual_grade") {
-	  for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-	    std::string username = itr2.key();
-		std::string grade = (itr2.value())["grade"].get<std::string>();
-		std::string note = (itr2.value())["note"].get<std::string>();
-		Student *s = GetStudent(students,username);
+    }
+  } else if (token == "manual_grade") {
+    for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+      std::string username = itr2.key();
+    std::string grade = (itr2.value())["grade"].get<std::string>();
+    std::string note = (itr2.value())["note"].get<std::string>();
+    Student *s = GetStudent(students,username);
         assert (s != NULL);
         s->ManualGrade(grade,note);
-	  }
-	} else if (token == "moss") {
-	  for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-	    std::string username = itr2.key();
-		int hw = (itr2.value())["hw"].get<int>();
-		float penalty = (itr2.value())["penalty"].get<float>();
-		assert (hw >= 1 && hw <= 10);
+    }
+  } else if (token == "moss") {
+    for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+      std::string username = itr2.key();
+    int hw = (itr2.value())["hw"].get<int>();
+    float penalty = (itr2.value())["penalty"].get<float>();
+    assert (hw >= 1 && hw <= 10);
         assert (penalty >= -0.01 && penalty <= 1.01);
-		Student *s = GetStudent(students,username);
+    Student *s = GetStudent(students,username);
         assert (s != NULL);
         s->mossify(hw,penalty);
-	  }
-	} else if (token == "final_cutoff") {
-	  for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-	    std::string grade = itr2.key();
-		float cutoff = itr2.value();
-		assert (grade == "A" ||
+    }
+  } else if (token == "final_cutoff") {
+    for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+      std::string grade = itr2.key();
+    float cutoff = itr2.value();
+    assert (grade == "A" ||
               grade == "A-" ||
               grade == "B+" ||
               grade == "B" ||
@@ -1424,30 +1424,30 @@ void processcustomizationfile(std::vector<Student*> &students) {
               grade == "C-" ||
               grade == "D+" ||
               grade == "D");
-	    CUTOFFS[grade] = cutoff;
-	  }
-	} else if (token == "gradeables") {
-	  continue;
-	} else if (token == "bonus_latedays") {
-	  nlohmann::json bonusJson = j[token];
-	  for (nlohmann::json::iterator itr2 = bonusJson.begin(); itr2 != bonusJson.end(); itr2++) {
-	    std::string bonus = itr2.key();
-	    BONUS_WHICH_LECTURE = std::stoi(bonus);
-	    BONUS_FILE = j[token][bonus];
+      CUTOFFS[grade] = cutoff;
+    }
+  } else if (token == "gradeables") {
+    continue;
+  } else if (token == "bonus_latedays") {
+    nlohmann::json bonusJson = j[token];
+    for (nlohmann::json::iterator itr2 = bonusJson.begin(); itr2 != bonusJson.end(); itr2++) {
+      std::string bonus = itr2.key();
+      BONUS_WHICH_LECTURE = std::stoi(bonus);
+      BONUS_FILE = j[token][bonus];
         std::cout << "BONUS LATE DAYS" << std::endl;
-	    
-	    if (BONUS_FILE != "") {
+      
+      if (BONUS_FILE != "") {
           load_bonus_late_day(students,BONUS_WHICH_LECTURE,BONUS_FILE);
-	    }
-	  }
-	} else {
-	  if (token == "display" || token == "display_benchmark" || token == "benchmark_percent") {
-	    continue;
-	} else if (token == "use" || token == "hackmaxprojects" || token == "benchmark_color") {
-		continue;
-	}
-	  std::cout << "ERROR: UNKNOWN TOKEN  X " << token << std::endl;
-	}
+      }
+    }
+  } else {
+    if (token == "display" || token == "display_benchmark" || token == "benchmark_percent") {
+      continue;
+  } else if (token == "use" || token == "hackmaxprojects" || token == "benchmark_color") {
+    continue;
+  }
+    std::cout << "ERROR: UNKNOWN TOKEN  X " << token << std::endl;
+  }
   }
   
   if (GLOBAL_EXAM_SEATING_COUNT != "" && GLOBAL_EXAM_SEATING != "") {
@@ -1481,44 +1481,51 @@ void load_student_grades(std::vector<Student*> &students) {
   std::string filename;
   int count = 0;
   while (files_istr >> filename) {
-	std::ifstream istr(filename.c_str());
-	assert(istr);
-	Student *s = new Student();
-	
-	count++;
-	
-	nlohmann::json j;
-	j << istr;
+  std::ifstream istr(filename.c_str());
+  assert(istr);
+  Student *s = new Student();
+  
+  count++;
+  
+  nlohmann::json j;
+  j << istr;
 
-	for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
-	  std::string token = itr.key();
-	  // std::cout << "token: " << token << "!" << std::endl;
-	  GRADEABLE_ENUM g;
-	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
+  for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
+    std::string token = itr.key();
+    // std::cout << "token: " << token << "!" << std::endl;
+    GRADEABLE_ENUM g;
+    bool gradeable_enum_success = string_to_gradeable_enum(token,g);
           if (!gradeable_enum_success && token != "Other" && token != "rubric" && token != "Test") {
-		// non gradeables
-		if (token == "user_id") {
-			s->setUserName(j[token].get<std::string>());
-		} else if (token == "legal_first_name") {
-			s->setLegalFirstName(j[token].get<std::string>());
-		} else if (token == "preferred_first_name") {
+    // non gradeables
+    if (token == "user_id") {
+      s->setUserName(j[token].get<std::string>());
+    } else if (token == "legal_first_name") {
+      s->setLegalFirstName(j[token].get<std::string>());
+    } else if (token == "preferred_first_name") {
                   if (!j[token].is_null()) {
                     s->setPreferredFirstName(j[token].get<std::string>());
                   }
                 } else if (token == "last_name") {
-			s->setLastName(j[token].get<std::string>());
-		} else if (token == "last_update") {
-			s->setLastUpdate(j[token].get<std::string>());
-		} else if (token == "registration_section") {
-		  int a = j[token].get<int>();
-		  if (!validSection(a)) {
-		    // the "drop" section is 0 (really should be NULL)
-		    if (a != 0) {
-			  std::cerr << "WARNING: invalid section " << a << std::endl;
-		    }
-		  }
-		  s->setSection(a);
-		} else if (token == "default_allowed_late_days") {
+      s->setLastName(j[token].get<std::string>());
+    } else if (token == "last_update") {
+      s->setLastUpdate(j[token].get<std::string>());
+    } else if (token == "registration_section") {
+          int a;
+          if(!j[token].is_null()) {
+            a = j[token].get<int>();
+            if (!validSection(a)) {
+              // the "drop" section is 0 (really should be NULL)
+              if (a != 0) {
+                std::cerr << "WARNING: invalid section " << a << std::endl;
+              }
+            }
+          }
+          else{
+            a = 0;
+          }
+          s->setSection(a);
+
+    } else if (token == "default_allowed_late_days") {
                   int value = 0;
                   if (!j[token].is_null()) {
                     if (j[token].is_string()) {
@@ -1534,24 +1541,18 @@ void load_student_grades(std::vector<Student*> &students) {
                   }
                 } else {
             std::cout << "UNKNOWN TOKEN Y '" << token << "'" << std::endl;
-			exit(0);
-		}
-	  } else {
-	    for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-		  int which;
-		  bool invalid = false;
+      exit(0);
+    }
+    } else {
+      for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+      int which;
+      bool invalid = false;
                   std::string gradeable_id = (*itr2).value("id","ERROR BAD ID");
                   std::string gradeable_name = (*itr2).value("name",gradeable_id);
                   std::string status = (*itr2).value("status","NOT ELECTRONIC");
-		  float score = (*itr2).value("original_score",0.0);
-		  float score2 = (*itr2).value("actual_score",0.0);
+      float score = (*itr2).value("score",0.0);
                   if (status.find("Bad") != std::string::npos) {
-                    assert (score2 == 0);
-                    if (score != score2) {
-                      score = 0;
-                    } else {
-                      // already 0
-                    }
+                    assert (score == 0);
                   } else {
                       assert (status == "NO SUBMISSION" || status == "NOT ELECTRONIC" || status == "Good" || status == "Late");
                   }
@@ -1566,28 +1567,28 @@ void load_student_grades(std::vector<Student*> &students) {
                   }
 
 
-		  // Search through the gradeable categories as needed to find where this item belongs
-		  // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
-		  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-		    GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
-		    if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
-		      g = g2;
-		    }
-		  }
-		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-			invalid = true;
-			//std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
-		  } else {
-			invalid = false;
-			const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
+      // Search through the gradeable categories as needed to find where this item belongs
+      // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
+      for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
+        GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
+        if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
+          g = g2;
+        }
+      }
+      if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+      invalid = true;
+      //std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
+      } else {
+      invalid = false;
+      const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
                         which = c.first;
-			if (c.second == "") {
+      if (c.second == "") {
                           GRADEABLES[g].setCorrespondenceName(gradeable_id,gradeable_name); 
                         } else {
                           assert (c.second == gradeable_name);
                         }
-		  }
-		  
+      }
+      
                   if (gradeable_id == GLOBAL_recommend_id) {
                     nlohmann::json::iterator rec = itr2->find("text");
                     if (rec != itr2->end()) {
@@ -1600,9 +1601,9 @@ void load_student_grades(std::vector<Student*> &students) {
                     }
                   }
 
-		  if (!invalid) {
-			assert (which >= 0);
-			assert (score >= 0.0);
+      if (!invalid) {
+      assert (which >= 0);
+      assert (score >= 0.0);
                         int ldu = 0;
                         nlohmann::json::iterator itr3 = itr2->find("days_late");
                         if (itr3 != itr2->end()) {
@@ -1627,12 +1628,12 @@ void load_student_grades(std::vector<Student*> &students) {
                         if (GRADEABLES[g].isReleased(gradeable_id)) {
                           s->setGradeableItemGrade(g,which,score,ldu,other_note,status);
                         }
-		  }
+      }
 
-	    }  
-	  }
-	}
-	students.push_back(s);
+      }  
+    }
+  }
+  students.push_back(s);
   }
 
 }

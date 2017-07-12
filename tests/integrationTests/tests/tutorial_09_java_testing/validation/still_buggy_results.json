@@ -14,7 +14,10 @@
                     "actual_file": "test03_STDOUT.txt",
                     "description": "JUnit output",
                     "messages": [
-                        "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4"
+                        {
+                            "message": "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4",
+                            "type": "failure"
+                        }
                     ]
                 },
                 {

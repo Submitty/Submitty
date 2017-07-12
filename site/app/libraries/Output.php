@@ -83,6 +83,15 @@ class Output {
     public function renderString($string) {
         $this->output_buffer .= $string;
     }
+    
+    public function renderFile($contents, $filename, $filetype = "text/plain") {
+        $this->useFooter(false);
+        $this->useHeader(false);
+        $this->output_buffer = $contents;
+        header("Content-Type: ".$filetype);
+        header("Content-Disposition: attachment; filename=".$filename);
+        header("Content-Length: " . strlen($contents));
+    }
 
     /**
      * Returns the requested view, initializing it if it's never been called before.
@@ -113,7 +122,6 @@ class Output {
             $return .= $this->renderTemplate("Global", 'footer', (microtime(true) - $this->start_time));
         }
         return $return;
-        
     }
     /**
      * Returns the stored output buffer that we've been building
@@ -121,7 +129,7 @@ class Output {
      * @return string
      */
     public function displayOutput() {
-        print($this->getOutput());
+        echo($this->getOutput());
     }
 
     /**
@@ -196,11 +204,12 @@ class Output {
     
     public function addBreadcrumb($string, $url=null, $top=false) {
         if ($url !== null && $url !== "") {
-	    if ($top == true) {
-                $string = "<a target=\"_top\" href='{$url}'>{$string}</a>";
-	    } else {
-                $string = "<a href='{$url}'>{$string}</a>";
-	    }
+            if ($top === true) {
+                    $string = "<a target=\"_top\" href='{$url}'>{$string}</a>";
+            }
+            else {
+                    $string = "<a href='{$url}'>{$string}</a>";
+            }
         }
         $this->breadcrumbs[] = $string;
     }

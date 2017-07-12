@@ -6,7 +6,7 @@ use app\authentication\AbstractAuthentication;
 use app\exceptions\AuthenticationException;
 use app\exceptions\DatabaseException;
 use app\libraries\database\DatabaseQueriesPostgresql;
-use app\libraries\database\IDatabaseQueries;
+use app\libraries\database\AbstractDatabaseQueries;
 use app\models\Config;
 use app\models\User;
 
@@ -18,38 +18,39 @@ use app\models\User;
  */
 class Core {
     /**
-     * @var Config
+     * @var \app\models\Config
      */
     private $config = null;
 
-    /**
-     * @var Database
-     */
-    private $database = null;
+    /** @var Database */
+    private $submitty_db = null;
 
-    /**
-     * @var AbstractAuthentication
-     */
+    /** @var Database */
+    private $course_db = null;
+
+    /** @var AbstractAuthentication */
     private $authentication;
 
-    /**
-     * @var SessionManager
-     */
+    /** @var SessionManager */
     private $session_manager;
 
-    /**
-     * @var IDatabaseQueries
-     */
+    /** @var AbstractDatabaseQueries */
     private $database_queries;
 
-    /**
-     * @var User
-     */
+    /** @var User */
     private $user = null;
+
+    /** @var string */
+    private $user_id = null;
+
+    /** @var Output */
+    private $output = null;
 
     /**
      * Core constructor.
      *
+     * This sets up our core for usage, by starting up our Output class as well as any $_SESSION variables that we
+     * need. This should be called first, then loadConfig() and then loadDatabases().
      */
     public function __construct() {
         $this->output = new Output($this);
@@ -84,7 +85,7 @@ class Core {
      * @throws \Exception
      */
     public function loadConfig($semester, $course, $master_ini_path) {
-        $this->config = new Config($semester, $course, $master_ini_path);
+        $this->config = new Config($this, $semester, $course, $master_ini_path);
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
@@ -101,13 +102,18 @@ class Core {
      *
      * @throws \Exception if we have not loaded the config yet
      */
-    public function loadDatabase() {
+    public function loadDatabases() {
         if ($this->config === null) {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
-        $this->database = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
+
+        $this->submitty_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
+            $this->config->getDatabasePassword(), "submitty", $this->config->getDatabaseType());
+        $this->submitty_db->connect();
+
+        $this->course_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
             $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
-        $this->database->connect();
+        $this->course_db->connect();
 
         switch ($this->config->getDatabaseType()) {
             case 'pgsql':
@@ -118,21 +124,18 @@ class Core {
         }
     }
 
-    public function loadModel() {
-        if (func_num_args() == 0) {
-            throw new \InvalidArgumentException("loadModel requires at least one argument (Model)");
-        }
-        $args = func_get_args();
-        $model = $args[0];
-        foreach (AutoLoader::getClasses() as $class => $path) {
-            if (Utils::startsWith($class, "app\\models\\") && Utils::endsWith($class, $model)) {
-                // TODO: Once we drop PHP 5.5, we can drop this reflection and just use vargs
-                $reflect = new \ReflectionClass($class);
-                return $reflect->newInstanceArgs(array_slice($args, 1));
-            }
-        }
-        $error = "Could not find the model to load. Check for misspellings and that it was autoloaded";
-        throw new \InvalidArgumentException($error);
+    /**
+     * Utility function that helps us load our models, especially when called from within a controller as then we
+     * can mock this function to return a mock object instead of having to worry about dealing with setting up
+     * the whole object.
+     *
+     * @param string $model
+     * @param array ...$args
+     *
+     * @return object an instantiated instance of the given $model class using the AutoLoader.
+     */
+    public function loadModel($model, ...$args) {
+        return new $model($this, ...$args);
     }
 
     /**
@@ -140,8 +143,11 @@ class Core {
      * the database, running any open transactions that were left.
      */
     public function __destruct() {
-        if ($this->database !== null) {
-            $this->getDatabase()->disconnect();
+        if ($this->course_db !== null) {
+            $this->course_db->disconnect();
+        }
+        if ($this->submitty_db !== null) {
+            $this->submitty_db->disconnect();
         }
     }
 
@@ -167,12 +173,19 @@ class Core {
     /**
      * @return Database
      */
-    public function getDatabase() {
-        return $this->database;
+    public function getSubmittyDB() {
+        return $this->submitty_db;
     }
 
     /**
-     * @return IDatabaseQueries
+     * @return Database
+     */
+    public function getCourseDB() {
+        return $this->course_db;
+    }
+
+    /**
+     * @return AbstractDatabaseQueries
      */
     public function getQueries() {
         return $this->database_queries;
@@ -183,7 +196,19 @@ class Core {
      */
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
+        $this->user_id = $user_id;
         $this->user = $this->database_queries->getUserById($user_id);
+    }
+
+    /**
+     * Loads the user from the main Submitty database. We should only use this function
+     * because we're accessing either a non-course specific page or we're trying to access
+     * a page of a course that the user does not have access to so $this->loadUser() fails.
+     */
+    public function loadSubmittyUser() {
+        if ($this->user_id !== null) {
+            $this->user = $this->database_queries->getSubmittyUser($this->user_id);
+        }
     }
 
     /**
@@ -263,7 +288,7 @@ class Core {
             if ($this->authentication->authenticate()) {
                 $auth = true;
                 $session_id = $this->session_manager->newSession($user_id);
-                $cookie_id = $this->getConfig()->getSemester()."_".$this->getConfig()->getCourse()."_session_id";
+                $cookie_id = 'submitty_session_id';
                 // Set the cookie to last for 7 days
                 $cookie_data = array('session_id' => $session_id);
                 $cookie_data['expire_time'] = ($persistent_cookie === true) ? time() + (7 * 24 * 60 * 60) : 0;

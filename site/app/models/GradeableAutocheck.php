@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\libraries\Core;
 use app\libraries\DiffViewer;
 use app\libraries\Utils;
 
@@ -13,7 +14,7 @@ use app\libraries\Utils;
  *
  * @method DiffViewer getDiffViewer()
  * @method string getDescription()
- * @method String[] getMessages()
+ * @method String[][] getMessages()
  */
 class GradeableAutocheck extends AbstractModel {
     
@@ -26,19 +27,20 @@ class GradeableAutocheck extends AbstractModel {
     /** @var string Description to show for displaying the diff */
     protected $description = "";
     
-    /** @var String[] Message to show underneath the description for a diff */
+    /** @var String[][] Message to show underneath the description for a diff */
     protected $messages = array();
 
     /**
      * GradeableAutocheck constructor.
      *
+     * @param $core
      * @param $details
      * @param $course_path
      * @param $result_path
      * @param $idx
      */
-    public function __construct($details, $course_path, $result_path, $idx) {
-        parent::__construct();
+    public function __construct(Core $core, $details, $course_path, $result_path, $idx) {
+        parent::__construct($core);
         $this->index = $idx;
         
         if (isset($details['description'])) {
@@ -47,14 +49,15 @@ class GradeableAutocheck extends AbstractModel {
         
         if (isset($details['messages'])) {
             foreach ($details['messages'] as $message) {
-                $this->messages[] = Utils::prepareHtmlString($message);
+                $this->messages[] = array('message' => Utils::prepareHtmlString($message['message']),
+                                            'type' => Utils::prepareHtmlString($message['type']));
             }
         }
         
         $actual_file = $expected_file = $difference_file = "";
 
-        if(isset($details["actual_file"]) && file_exists($result_path . "/" . $details["actual_file"])) {
-            $actual_file = $result_path . "/" . $details["actual_file"];
+        if(isset($details["actual_file"]) && file_exists($result_path . "/details/" . $details["actual_file"])) {
+            $actual_file = $result_path . "/details/" . $details["actual_file"];
         }
     
         
@@ -66,14 +69,13 @@ class GradeableAutocheck extends AbstractModel {
            ! file_exists($course_path . "/" . $details["expected_file"])) {
             $_SESSION['messages']['error'][] = "Expected file not found.";
         }
-
-        if(isset($details["difference_file"]) && file_exists($result_path . "/" . $details["difference_file"])) {
-            $difference_file = $result_path . "/" . $details["difference_file"];
+        if(isset($details["difference_file"]) && file_exists($result_path . "/details/" . $details["difference_file"])) {
+            $difference_file = $result_path . "/details/" . $details["difference_file"];
         }
 
         var_dump($details);
-        if(isset($details["image_difference"]) && file_exists($result_path . "/" . $details["image_difference"])) {
-            $image_difference = $result_path . "/" . $details["image_difference"];
+        if(isset($details["image_difference"]) && file_exists($result_path . "/details/" . $details["image_difference"])) {
+            $image_difference = $result_path . "/details/" . $details["image_difference"];
         }        
         $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $image_difference, $this->index);
     }

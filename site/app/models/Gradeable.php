@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DatabaseUtils;
 use app\libraries\FileUtils;
+use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\libraries\Utils;
 
@@ -19,44 +20,57 @@ use app\libraries\Utils;
  *
  * @method string getId()
  * @method string getName()
+ * @method string getTaInstructions()
  * @method int getType()
  * @method array getPartNames()
  * @method array getTextboxes()
  * @method int getHighestVersion()
  * @method int getActiveVersion()
  * @method void setActiveVersion(int $version)
+ * @method int getGradedVersion()
+ * @method void setGradedVersion(int $version)
  * @method int getMaxSubmissions()
  * @method float getMaxSize()
  * @method GradeableVersion[] getVersions()
  * @method float getNormalPoints() Returns the total number of points for testcases that are not hidden nor are extra credit
- * @method getDueDate()
- * @method getGradeStartDate()
- * @method getGradeReleasedDate()
- * @method getOpenDate()
+ * @method bool setTeamAssignment()
+ * @method bool getTeamAssignment()
+ * @method setTaViewDate(\DateTime $datetime)
+ * @method \DateTime getOpenDate(\DateTime $datetime)
+ * @method setOpenDate(\DateTime $datetime)
+ * @method \DateTime getDueDate()
+ * @method \DateTime getGradeStartDate()
+ * @method setGradeStartDate(\DateTime $datetime)
+ * @method \DateTime getGradeReleasedDate()
+ * @method setGradeReleasedDate(\DateTime $datetime)
+ * @method bool getGradeByRegistration()
  * @method array getSubmittedFiles()
  * @method array getSvnFiles()
  * @method array getTestcases()
+ * @method bool getIsRepository()
+ * @method string getSubdirectory()
+ * @method string getConfigPath()
  * @method string getGradeFile()
+ * @method string getTaInstructions()
  * @method int getInteractiveQueuePosition()
  * @method int getInteractiveQueueTotal()
  * @method int getBatchQueuePosition()
  * @method int getBatchQueueTotal()
+ * @method float getPointPrecision()
  * @method User getUser()
  * @method void setUser(User $user)
  * @method GradeableComponent[] getComponents()
- * @method string getGrader()
+ * @method User getGrader()
  * @method void setGrader(User $user)
  * @method string getOverallComment()
  * @method void setOverallComment(string $comment)
- * @method int getStatus()
- * @method void setStatus(int $status)
- * @method int getGdId()
- * @method getUserViewedDate()
+ * @method int getMinimumGradingGroup()
+ * @method string getBucket()
+ * @method int|null getGdId()
+ * @method void setGdId(int $gd_id)
+ * @method \DateTime getUserViewedDate()
  */
 class Gradeable extends AbstractModel {
-
-    /** @var Core */
-    protected $core;
     
     /** @property @var string Id of the gradeable (must be unique) */
     protected $id;
@@ -150,6 +164,13 @@ class Gradeable extends AbstractModel {
     /** @property @var string Message to show for the gradeable above all submission results */
     protected $message = "";
 
+    /** @property @var string Message to show when conditions are met */
+    protected $conditional_message = "";
+    /** @property @var int Minimum days before deadline that a submission must be made by to get the conditional message */
+    protected $minimum_days_early = 0;
+    /** @property @var int Minimum points that a submission must have to get the conditional message */
+    protected $minimum_points = 0;
+
     /** @property @var string[] */
     protected $part_names = array();
 
@@ -165,6 +186,10 @@ class Gradeable extends AbstractModel {
     protected $current_version = -1;
     /** @property @var int $highest Highest version submitted for an assignment */
     protected $highest_version = 0;
+    /** @property @var int */
+    protected $graded_version = null;
+
+    protected $textBoxDisplayImages = array();
 
     /** @property @var array */
     protected $versions = array();
@@ -173,6 +198,7 @@ class Gradeable extends AbstractModel {
      * and then each element is an array that contains filename, file path, and the file size. */
     protected $submitted_files = array();
     protected $svn_files = array();
+    protected $results_files = array();
     protected $meta_files = array();
     protected $previous_files = array();
 
@@ -189,12 +215,7 @@ class Gradeable extends AbstractModel {
     /** @property @var User */
     protected $grader = null;
     /** @property @var string */
-    protected $grader_id = null;
     protected $overall_comment = "";
-    /** @property @var int code representing the state of electronic submission where 0 = not submitted, 1 = fine, 2 = late,
-     * 3 = too late */
-    protected $status;
-    protected $graded_version = null;
 
     /** @property @var int */
     protected $interactive_queue_total = 0;
@@ -233,17 +254,15 @@ class Gradeable extends AbstractModel {
     protected $user_viewed_date = null;
 
     public function __construct(Core $core, $details, User $user = null) {
-        parent::__construct();
-        $this->core = $core;
+        parent::__construct($core);
         $this->id = $details['g_id'];
 
         $this->user = ($user === null) ? $this->core->getUser() : $user;
         if (isset($details['gd_id'])) {
             $this->gd_id = $details['gd_id'];
-            $this->grader_id = $details['gd_grader_id'];
+            $this->grader = $this->core->getQueries()->getUserById($details['gd_grader_id']);
             $this->overall_comment = $details['gd_overall_comment'];
-            $this->status = $details['gd_status'];
-            $this->graded_version = $details['gd_active_version'];
+            $this->graded_version = $details['gd_graded_version'];
         }
 
         $timezone = $this->core->getConfig()->getTimezone();
@@ -270,6 +289,10 @@ class Gradeable extends AbstractModel {
                 $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
                 $this->submission_time = new \DateTime($details['submission_time'], $timezone);
             }
+            
+            if (isset($details['highest_version']) && $details['highest_version']!== null) {
+               $this->highest_version = $details['highest_version']; 
+            }
             $this->loadGradeableConfig();
         }
 
@@ -280,31 +303,51 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment');
+                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment',
+                            'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
+                            'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
+
+            $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
+                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order');
+            $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
+                                 'user_email', 'user_group');
+
             $bools = array('gc_is_text', 'gc_is_extra_credit');
             foreach ($fields as $key) {
                 if (isset($details['array_'.$key])) {
                     $details['array_'.$key] = DatabaseUtils::fromPGToPHPArray($details['array_'.$key], in_array($key, $bools));
                 }
             }
+
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {
                 $component_details = array();
-                $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                          'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order');
                 foreach ($component_fields as $key) {
                     $component_details[$key] = $details["array_{$key}"][$i];
                 }
+
+
 
                 if (isset($details['array_gcd_gc_id'])) {
                     for ($j = 0; $j < count($details['array_gcd_gc_id']); $j++) {
                         if ($details['array_gcd_gc_id'][$j] === $component_details['gc_id']) {
                             $component_details['gcd_score'] = $details['array_gcd_score'][$j];
                             $component_details['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
+                            $component_details['gcd_grade_time'] = $details['array_gcd_grade_time'][$j];
+
+                            if (isset($details['array_gcd_user_id'][$j])) {
+                                $user_details = array();
+                                foreach ($user_fields as $key) {
+                                    $user_details[$key] = $details["array_gcd_{$key}"][$j];
+                                }
+                                $component_details['gcd_grader'] = $this->core->loadModel(User::class, $user_details);
+                            }
+
                             break;
                         }
                     }
                 }
-                $this->components[$component_details['gc_order']] = new GradeableComponent($component_details);
+
+                $this->components[$component_details['gc_order']] = $this->core->loadModel(GradeableComponent::class, $component_details);
 
                 if (!$this->components[$component_details['gc_order']]->getIsText()) {
                     $max_value = $this->components[$component_details['gc_order']]->getMaxValue();
@@ -319,6 +362,7 @@ class Gradeable extends AbstractModel {
                     $this->graded_tagrading += $this->components[$component_details['gc_order']]->getScore();
                 }
             }
+
             // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
             // either write an inner JOIN on that aggregation to order stuff, and then have it aggregated, or we can
             // just order it here, which is simpler in the long run and not really a performance problem.
@@ -364,6 +408,12 @@ class Gradeable extends AbstractModel {
             $this->message = Utils::prepareHtmlString($details['assignment_message']);
         }
 
+        if (isset($details['conditional_message'])) {
+            $this->conditional_message = Utils::prepareHtmlString($details['conditional_message']['message']);
+            $this->minimum_days_early = intval($details['conditional_message']['minimum_days_early']);
+            $this->minimum_points = intval($details['conditional_message']['minimum_points']);
+        }
+
         $num_parts = 1;
         if (isset($details['part_names'])) {
           $num_parts = count($details['part_names']);
@@ -388,11 +438,12 @@ class Gradeable extends AbstractModel {
 
         for ($i = 0; $i < $num_textboxes; $i++) {
           $this->textboxes[$i] = $details['textboxes'][$i];
+          // if(isset($detailes['']))
         }
 
         if (isset($details['testcases'])) {
             foreach ($details['testcases'] as $idx => $testcase) {
-                $testcase = new GradeableTestcase($this->core, $testcase, $idx);
+                $testcase = $this->core->loadModel(GradeableTestcase::class, $testcase, $idx);
                 $this->testcases[] = $testcase;
                 if ($testcase->getPoints() > 0) {
                     if ($testcase->isHidden() && $testcase->isExtraCredit()) {
@@ -426,7 +477,7 @@ class Gradeable extends AbstractModel {
         $interactive_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive";
         $batch_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_batch";
 
-        $user_id = $this->core->getUser()->getId();
+        $user_id = $this->user->getId();
         if ($this->team_assignment) {
             $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
             if ($team !== null) {
@@ -543,7 +594,7 @@ class Gradeable extends AbstractModel {
             return;
         }
 
-        $user_id = $this->core->getUser()->getId();
+        $user_id = $this->user->getId();
         if ($this->team_assignment) {
             $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
             if ($team !== null) {
@@ -563,9 +614,6 @@ class Gradeable extends AbstractModel {
         $results_path = $course_path."/results/".$this->id."/".$user_id;
 
         //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
-        if (count($this->versions) > 0) {
-            $this->highest_version = Utils::getLastArrayElement($this->versions)->getVersion();
-        }
 
         $this->submissions = count($this->versions);
 
@@ -600,6 +648,12 @@ class Gradeable extends AbstractModel {
         $svn_files = FileUtils::getAllFiles($svn_current_path, array(), true);
         foreach ($svn_files as $file => $details) {
             $this->svn_files[$file] = $details;
+        }
+
+        $results_current_path = FileUtils::joinPaths($results_path,$this->current_version);
+        $results_files = FileUtils::getAllFiles($results_current_path, array(), true);
+        foreach ($results_files as $file => $details) {
+            $this->results_files[$file] = $details;
         }
 
         if ($this->getNumParts() > 1) {
@@ -714,6 +768,10 @@ class Gradeable extends AbstractModel {
         return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysLate() : 0;
     }
 
+    public function getDaysEarly() {
+        return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysEarly() : 0;
+    }
+
     public function getInstructionsURL(){
         return $this->instructions_url;
     }
@@ -739,6 +797,10 @@ class Gradeable extends AbstractModel {
 
     public function getAssignmentMessage() {
         return $this->message;
+    }
+
+    public function hasConditionalMessage() {
+        return trim($this->conditional_message) !== "";
     }
 
     public function useSvnCheckout() {
@@ -797,14 +859,37 @@ class Gradeable extends AbstractModel {
         $this->core->getQueries()->updateUserViewedDate($this);
     }
 
-    public function saveData() {
-        $this->core->getQueries()->updateGradeableData($this);
+    public function updateGradeable() {
+        $this->core->getQueries()->updateGradeable2($this);
     }
-    
+  
     public function getGraderId() {
         return $this->grader_id;
     }
-
+  
+    public function getActiveDaysLate() {
+        $extended_due_date = clone $this->due_date;
+        $return =  DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);
+        if ($return < 0) {
+            $return = 0;
+        }
+        return $return;
+    }
+  
+    public function saveData() {
+        $this->core->getCourseDB()->beginTransaction();
+        if ($this->gd_id === null) {
+            $this->gd_id = $this->core->getQueries()->insertGradeableData($this);
+        }
+        elseif ($this->modified) {
+            $this->core->getQueries()->updateGradeableData($this);
+        }
+        foreach ($this->components as $component) {
+            $component->saveData($this->gd_id);
+        }
+        $this->core->getCourseDB()->commit();
+    }
+      
     public function getSyllabusBucket() {
         return $this->bucket;
     }

@@ -6,14 +6,17 @@
     "resource_limits" : {
         "RLIMIT_CPU" : 60,
         "RLIMIT_NPROC" : 100,
-        "RLIMIT_AS" : "RLIM_INFINITY"
+        "RLIMIT_AS" : "RLIM_INFINITY",
+        "RLIMIT_SIGPENDING" : 100
     },
-
+    "autograding" : {
+        "submission_to_validation" : [ "part2/*.txt" ]
+    },
     "testcases" : [
         {
             "title" : "Convert Temperature",
-            "command" : [ "python part1/*.py",
-                          "submitty_count_node -l python2 print part1/*.py" ],
+            "command" : [ "python3 part1/*.py",
+                          "submitty_count call -l python print part1/*.py"],
             "points" : 2,
             "validation" : [
                 {
@@ -28,7 +31,7 @@
                     "method" : "intComparison",
                     "actual_file" : "STDOUT_1.txt",
                     "description" : "Number of print statements",
-		    "comparison" : "ge",
+                    "comparison" : "ge",
                     "term" : 1,
                     "failure_message" : "Looks like you forgot the 'print' statement.",
                     "show_message" : "on_failure",
@@ -56,10 +59,10 @@
         },
         {
             "title" : "Volume and Area",
-            "command" : [ "python part3/*.py",
-                          "submitty_count_node -l python2 assign part3/*.py",
-                          "submitty_count_node -l python2 mul part3/*.py",
-                          "submitty_count_node -l python2 add part3/*.py" ],
+            "command" : [ "python3 part3/*.py",
+                          "submitty_count token -l python Equal part3/*.py",
+                          "submitty_count token -l python Asterisk part3/*.py",
+                          "submitty_count token -l python Plus part3/*.py" ],
            "points" : 4,
             "validation" : [
                 {
@@ -106,8 +109,8 @@
         },
         {
             "title" : "Count Odd",
-            "command" : [ "python part4/*.py",
-                          "submitty_count_token while part4/*.py" ],
+            "command" : [ "python3 part4/*.py",
+                          "submitty_count token -l python While part4/*.py" ],
             "points" : 2,
             "validation" : [
                 {

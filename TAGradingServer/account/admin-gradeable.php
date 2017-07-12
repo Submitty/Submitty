@@ -387,8 +387,9 @@ HTML;
 
 		<br />
                 <b>Full path to the directory containing the autograding config.json file:</b><br>
-                See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">Submitty GitHub sample assignment configurations</a><br>
-		<kbd>/usr/local/submitty/sample_files/sample_assignment_config/upload_only/</kbd>  (for an assignment with no autograding)<br>
+                See samples here: <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty Tutorial example autograding configurations</a><br>
+                See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/more_autograding_examples">Additional example autograding configurations</a><br>
+		<kbd>/usr/local/submitty/more_autograding_examples/upload_only/config/</kbd>  (for an assignment with no autograding)<br>
 		<kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
 		<kbd>/var/local/submitty/courses/{$_GET['semester']}/{$_GET['course']}/config_upload/#</kbd> (for an web uploaded configuration)<br>
 
@@ -1645,6 +1646,7 @@ HTML;
         var has_space = gradeable_id.includes(" ");
         var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
         var unique_gradeable = false;
+        var bad_max_score = false;
         var check1 = document.getElementById('radio_electronic_file').checked;
         var check2 = document.getElementById('radio_checkpoints').checked;
         var check3 = document.getElementById('radio_numeric').checked;
@@ -1699,6 +1701,23 @@ HTML;
             alert("A type of gradeable must be selected");
             return false;
         }
+
+
+        var numOfNumeric = 0;
+        var wrapper = $('.numerics-table');
+        var i;
+        if(check3) {
+            for (i = 0; i < $('#numeric_num-items').val(); i++) {
+                numOfNumeric++;
+                if ($('#mult-field-' + numOfNumeric,wrapper).find('.max_score').attr('name','max_score_'+numOfNumeric).val() == 0) {
+                    alert("Max score cannot be 0 [Question "+ numOfNumeric + "]");
+                    return false;
+                }
+            }
+        }
+        
+    }
+
     }
     calculateTotalScore();
     calculatePercentageTotal();

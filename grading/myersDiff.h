@@ -14,8 +14,8 @@
    It was published in the journal "Algorithmica" in November 1986.
 
    Code similar to:
-   		http://simplygenius.net/Article/DiffTutorial1
- 		FIXME: if this was the source, should be formally credited
+      http://simplygenius.net/Article/DiffTutorial1
+    FIXME: if this was the source, should be formally credited
         (or are both just coming from the paper's pseudocode)
  */
 

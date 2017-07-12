@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+use app\libraries\Core;
 
 /**
  * Class Team
@@ -18,10 +19,11 @@ class Team extends AbstractModel {
 
     /**
      * Team constructor.
+     * @parma Core  $core
      * @param array $details
      */
-    public function __construct($details) {
-        parent::__construct();
+    public function __construct(Core $core, $details) {
+        parent::__construct($core);
 
         $this->id = $details[0]['team_id'];
         $this->member_user_ids = array();

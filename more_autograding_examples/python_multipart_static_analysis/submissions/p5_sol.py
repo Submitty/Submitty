@@ -7,4 +7,4 @@ while i < len(rainfall):
     if rainfall[i][1] > rainfall[max_i][1]:
         max_i = i
     i += 1
-print rainfall[max_i][0], rainfall[max_i][1]
+print(rainfall[max_i][0], rainfall[max_i][1])

@@ -1,0 +1,289 @@
+.grading_toolbar {
+    position:fixed;
+    top: 125px;
+    left: 0px;
+    height: 41px;
+    width: 290px;
+    z-index: 1099;
+    background-color: #edf6f6;
+}
+
+.grading_toolbar i:not(.icon-disabled):hover{
+    cursor: pointer;
+    box-shadow: 0px 0px 5px 5px yellow;
+    background-color: yellow;
+}
+
+.icon-auto-grading-results {
+    background: url('../img/glyphicons-40-notes.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-selected.icon-auto-grading-results {
+    box-shadow: 0px 0px 5px 5px #fd4472;
+    background-color: #fd4472;
+}
+
+.icon-grading-panel {
+    background: url('../img/glyphicons-151-edit.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-selected.icon-grading-panel {
+    box-shadow: 0px 0px 5px 5px #00e08e;
+    background-color: #00e08e;
+}
+
+.icon-files {
+    background: url('../img/glyphicons-145-folder-open.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-selected.icon-files {
+    box-shadow: 0px 0px 5px 5px #00b3fa;
+    background-color: #00b3fa;
+}
+
+.icon-status {
+    background: url('../img/glyphicons-4-user.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-selected.icon-status {
+    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.icon-refresh{
+    background: url('../img/refresh-page-option.png') no-repeat;
+    background-size: 100%;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+
+.icon-left {
+    background: url('../img/glyphicons-225-chevron-left.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+
+.icon-right {
+    background: url('../img/glyphicons-224-chevron-right.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+
+.icon-home {
+    background: url('../img/glyphicons-21-home.png') no-repeat -2px -1px;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+
+.progress_bar {
+    position:fixed;
+    top: 125px;
+    left: 290px;
+    height: 31px;
+    width: 250px;
+    z-index: 1099;
+    background-color: #edf6f6;
+    border: 5px solid #edf6f6;
+}
+
+progress {
+    border-radius: 2px;
+}
+
+progress::-webkit-progress-value {
+    background: #1E90FF;
+}
+
+.draggable {
+}
+
+.rubric_panel {
+    font-size: 90%;
+    cursor: move;
+    position: absolute;
+    background-color: #E9EFEF;
+    display: none;
+    overflow:auto;
+    opacity: 0.95;
+}
+
+#autograding_results.rubric_panel {
+    border:5px solid #c40233 ;
+}
+
+#grading_rubric.rubric_panel {
+    border:5px solid #00a368;
+}
+
+#submission_browser.rubric_panel {
+    border:5px solid #0088bf ;
+}
+
+#student_info.rubric_panel {
+    border:5px solid black;
+}
+
+.grading_label {
+    display: inline-block;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 16pt;
+}
+
+.inner-container {
+    margin-top: 0px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-left: 10px;
+}
+
+.file-viewer{
+    float: left;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.file-viewer a,
+.file-viewer a:link,
+.file-viewer a:visited,
+.file-viewer a:active {
+    color: #005c83;
+}
+
+.file-viewer a:hover {
+    color: #6db7ff;
+    text-decoration: none;
+}
+
+.div-viewer{
+    float: left;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.div-viewer a,
+.div-viewer a:link,
+.div-viewer a:visited,
+.div-viewer a:active {
+    color: #005c83;
+}
+
+.div-viewer a:hover {
+    color: #6db7ff;
+    text-decoration: none;
+}
+
+.icon-folder-closed {
+    background: url('../img/glyphicons-halflings.png') no-repeat -384px -120px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-folder-open {
+    background: url('../img/glyphicons-halflings.png') no-repeat -410px -120px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-plus {
+    background-image: url('../img/glyphicons-halflings.png');
+    background-position: 0px -96px;
+    background-repeat: no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-minus {
+    background-image: url('../img/glyphicons-halflings.png');
+    background-position: -24px -96px;
+    background-repeat: no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.rubric-title {
+    width: 100%;
+    margin-left: 0;
+    margin-bottom: 20px;
+    float: left;
+    text-align: left;
+}
+
+.rubric-table {
+    border: 1px solid #dddddd;
+    border-collapse: separate;
+    *border-collapse: collapse;
+    -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+            border-radius: 4px;
+}
+
+.rubric-table th, 
+.rubric-table td {
+    padding: 8px;
+    line-height: 20px;
+    text-align: left;
+    vertical-align: top;
+    border-top: 1px solid #dddddd;
+    border-left: 1px solid #dddddd;
+}
+
+.rubric-table th {
+  font-weight: bold;
+}
+
+.rubric-table thead th {
+  vertical-align: bottom;
+}
+
+.rubric-table caption + thead tr:first-child th,
+.rubric-table caption + thead tr:first-child td,
+.rubric-table colgroup + thead tr:first-child th,
+.rubric-table colgroup + thead tr:first-child td,
+.rubric-table thead:first-child tr:first-child th,
+.rubric-table thead:first-child tr:first-child td {
+  border-top: 0;
+}
+
+.rubric-table tbody > tr:nth-child(odd) > td,
+.rubric-table tbody > tr:nth-child(odd) > th {
+  background-color: #f9f9f9;
+}
+
+.btn-large {
+    width: 96%;
+    margin-left: 2%;
+    margin-right: 2%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 17px;
+    padding: 16px;
+}

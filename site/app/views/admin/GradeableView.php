@@ -17,8 +17,8 @@ class GradeableView extends AbstractView {
     <a href="http://submitty.org/instructor/Assignment-Configuration">
     http://submitty.org/instructor/Assignment-Configuration</a><br>
     and examples:<br>
-    <a href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">
-    https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config</a>
+    <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty Tutorial example autograding configurations</a><br>
+    <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/more_autograding_examples">Additional example autograding configurations</a><br>
     </p>
     
     <br><br>

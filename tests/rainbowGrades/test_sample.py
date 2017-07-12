@@ -11,11 +11,28 @@ import os
 import tempfile
 import shutil
 import subprocess
+from datetime import datetime
 
 # Get paths required for testing
 repository_path = "__INSTALL__FILLIN__SUBMITTY_REPOSITORY__"
 script_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", "test_suite", "rainbowGrades")
 runner_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "to_be_graded_batch")
+
+
+def get_current_semester():
+    """
+    Given today's date, generates a three character code that represents the semester to use for
+    courses such that the first half of the year is considered "Spring" and the last half is
+    considered "Fall". The "Spring" semester  gets an S as the first letter while "Fall" gets an
+    F. The next two characters are the last two digits in the current year.
+    :return:
+    """
+    today = datetime.today()
+    semester = "f" + str(today.year)[-2:]
+    if today.month < 7:
+        semester = "s" + str(today.year)[-2:]
+    return semester
+
 
 
 def error_and_cleanup(tmp_path, message, error=-1):
@@ -26,9 +43,9 @@ def error_and_cleanup(tmp_path, message, error=-1):
     :param error: Which error code to return (default -1)
     :return: None
     """
-    print(message)
-    if os.path.isdir(tmp_path):
-        shutil.rmtree(tmp_path)
+    print("ERROR: " + message)
+    # if os.path.isdir(tmp_path):
+    #     shutil.rmtree(tmp_path)
     sys.exit(error)
 
 
@@ -41,6 +58,8 @@ def remove_extra_raw_data_fields(raw_line):
     if 'grade_released_date' in raw_line:
         return False
     if 'last_update' in raw_line:
+        return False
+    if 'date:' in raw_line:
         return False
     return True
 
@@ -61,7 +80,7 @@ def sample_rainbow_grades_test():
 
     # Verify resources exist, set up initial temporary directories and configuration
     print("Creating temporary RainbowGrades test directories")
-    test_tmp = tempfile.mkdtemp("", "")
+    test_tmp = tempfile.mkdtemp("", "",script_path)
     print("Made new directory {}".format(test_tmp))
 
     if not os.path.isdir(test_tmp):
@@ -102,7 +121,7 @@ def sample_rainbow_grades_test():
     try:
         shutil.copy(os.path.join(script_path, "MakefileHelperTest"), os.path.join(rainbow_tmp, "MakefileHelper"))
         shutil.copy(os.path.join(script_path, "Makefile_sample"), os.path.join(summary_tmp, "Makefile"))
-        shutil.copy(os.path.join(script_path, "customization_sample.json"),
+        shutil.copy(os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", ".setup", "customization_sample.json"),
                     os.path.join(summary_tmp, "customization.json"))
         shutil.copy(os.path.join(repository_path, "grading", "json_syntax_checker.py"),
                     os.path.join(grading_tmp, "json_syntax_checker.py"))
@@ -120,7 +139,7 @@ def sample_rainbow_grades_test():
                     make_file.write("RAINBOW_GRADES_DIRECTORY=" + rainbow_tmp + "\n")
                 elif len(line) >= 18 and line[:18] == "REPORTS_DIRECTORY=":
                     make_file.write(os.path.join("REPORTS_DIRECTORY=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses",
-                                                 "s17", "sample", "reports") + "\n")
+                                                 get_current_semester(), "sample", "reports") + "\n")
                 else:
                     make_file.write(line)
     except Exception as e:
@@ -158,12 +177,15 @@ def sample_rainbow_grades_test():
 
     if len(known_files) != len(summary_files):
         file_diff = len(known_files) - len(summary_files)
-        if len(known_files) > len(summary_files):
+        if len(summary_files) == 0:
+            error_and_cleanup(test_tmp, "There were no files in the rsync'd raw_data. Did you forget to generate grade "
+                                        "summaries?")
+        elif len(known_files) > len(summary_files):
             error_and_cleanup(test_tmp,
-                              "There are {} more files in the rsync'd raw_data than expected.".format(file_diff))
+                              "There are {} fewer files in the rsync'd raw_data than expected.".format(file_diff))
         else:
             error_and_cleanup(test_tmp,
-                              "There are {} fewer files in the rsync'd raw_data than expected.".format(-1 * file_diff))
+                              "There are {} more files in the rsync'd raw_data than expected.".format(-1 * file_diff))
 
     # Verify the content (except for time-dependent fields) of Submitty raw_data files match with test version
     for f in known_files:
@@ -186,8 +208,6 @@ def sample_rainbow_grades_test():
         filter2 = filter(remove_extra_raw_data_fields, contents2)
         for x, y in zip(filter1, filter2):
             if x != y:
-                print("{} and {} differ".format(filename1, filename2))
-                exit(-1)
                 error_and_cleanup(test_tmp, "{} and {} differ".format(filename1, filename2))
 
     print("All raw files match")
@@ -211,7 +231,7 @@ def sample_rainbow_grades_test():
     make_output = make_output[-1].strip()  # Get the RUN COMMAND LINE
     make_output = make_output.split('/')
     make_output = make_output[-1]  # Get the name of the output.html file since it uses the date
-    if not os.path.isdir(os.path.join(summary_tmp, "all_students_summary_html", make_output)):
+    if not os.path.isfile(os.path.join(summary_tmp, "all_students_summary_html", make_output)):
         error_and_cleanup(test_tmp, "Failed to find output file in all_students_summary_html")
 
     output_generated_contents = ""
@@ -286,8 +306,8 @@ def sample_rainbow_grades_test():
     # TODO: Add make push, and create a test for the Submitty-side "View Grades"
 
     # Cleanup generated directories/files
-    print("Removing temporary directory")
-    shutil.rmtree(test_tmp)
+    # print("Removing temporary directory")
+    # shutil.rmtree(test_tmp)
 
 if __name__ == '__main__':
     sample_rainbow_grades_test()

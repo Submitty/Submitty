@@ -23,6 +23,10 @@
 #   unregistered_students: int for number of students to have that are not in either rotating or registration sections.
 #     The default for this is 50.
 #
+#   make_customization: if set to true the script will make a customization_X.json where X is the course code.
+#     The default is false.
+#
+#
 #   gradeables: a list of gradeables to be used for this course. Each gradeable is defined as:
 #
 #     g_id: what is the id for this gradeable. This is optional for electronic gradeables and will default to the
@@ -31,11 +35,12 @@
 #     g_title: [optional] what is the title for this gradeable. Defaults to a capitalized version of g_id with
 #         underscores converted to spaces.
 #
-#     gradeable_config [optional]: what config to use out of sample_files-sample_assignent_config for this gradeable.
-#         this should be omitted if this is not an electronic gradeable.
+#     gradeable_config [optional]: what config to use out of more_autograding_examples or tutorial examples
+#         for this gradeable.   this should be omitted if this is not an electronic gradeable.
 #
 #     sample_path [optional]: path for where to get submissions for a given gradeable. If no path is given, then
-#         just use /usr/local/submitty/GIT_CHECKOUT_Submitty/sample_files/sample_submissions/<gradeable_id>
+#         just use /usr/local/submitty/GIT_CHECKOUT_Submitty/more_autograding_examples/<gradeable_id>/submissions or
+#         just use /usr/local/submitty/GIT_CHECKOUT_Tutorial/examples/<gradeable_id>/submissions
 #
 #     g_type: integer between 0-2 inclusive, where 0 is for electronic gradeable, 1 is for Checkpoint and 2 is for
 #         Numeric-Text. This can be omitted if it's an electronic gradeable (as anything with gradeable_config defined
@@ -82,6 +87,9 @@
 #
 #     eg_precision: [optional] what is the precision to be used on the rubric page per item when grading.
 #         Defaults to 0.5.
+#
+#     eg_max_random_submissions: [optional] integer limiting how many random submissions should be generated.
+#         Defaults to no limit.
 #
 # To make how the order of the time fields work more explicit:
 # g_ta_view_start_date < eg_submission_open_date < eg_submission_due_date < g_grade_start_date < g_grade_released_date

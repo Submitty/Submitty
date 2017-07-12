@@ -81,7 +81,7 @@ def allCorrect(test):
     test.empty_json_diff("test05_0_diff.json")
     test.empty_json_diff("test06_0_diff.json")
 
-    test.diff("results_grade.txt","results_grade.txt_allCorrect","-b")
+    test.diff("grade.txt","grade.txt_allCorrect","-b")
     test.json_diff("results.json","results.json_allCorrect")
 
 
@@ -96,7 +96,7 @@ def columnSpacingOff(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_columnSpacingOff","-b")
+    test.diff("grade.txt","grade.txt_columnSpacingOff","-b")
     test.json_diff("results.json","results.json_columnSpacingOff")
 
 
@@ -111,7 +111,7 @@ def extraLinesAtEnd(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_extraLinesAtEnd","-b")
+    test.diff("grade.txt","grade.txt_extraLinesAtEnd","-b")
     test.json_diff("results.json","results.json_extraLinesAtEnd")
 
 
@@ -126,7 +126,7 @@ def extraSpacesAtEnd(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_extraSpacesAtEnd","-b")
+    test.diff("grade.txt","grade.txt_extraSpacesAtEnd","-b")
     test.json_diff("results.json","results.json_extraSpacesAtEnd")
 
 
@@ -141,7 +141,7 @@ def frontSpacingOff(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_frontSpacingOff","-b")
+    test.diff("grade.txt","grade.txt_frontSpacingOff","-b")
     test.json_diff("results.json","results.json_frontSpacingOff")
 
 
@@ -156,7 +156,7 @@ def lineOrderOff(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_lineOrderOff","-b")
+    test.diff("grade.txt","grade.txt_lineOrderOff","-b")
     test.json_diff("results.json","results.json_lineOrderOff")
 
 
@@ -171,7 +171,7 @@ def spacingOff(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_spacingOff","-b")
+    test.diff("grade.txt","grade.txt_spacingOff","-b")
     test.json_diff("results.json","results.json_spacingOff")
 
 
@@ -186,6 +186,6 @@ def spellingOff(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_spellingOff","-b")
+    test.diff("grade.txt","grade.txt_spellingOff","-b")
     test.json_diff("results.json","results.json_spellingOff")
 
