@@ -23,7 +23,9 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => 10,
-            'gcd_component_comment' => 'Comment about gradeable'
+            'gcd_component_comment' => 'Comment about gradeable',
+            'gcd_grader' => 'instructor',
+            'gcd_graded_version' => 1
         );
 
 
@@ -41,7 +43,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'comment' => 'Comment about gradeable',
             'has_grade' => true,
             'grade_time' => null,
-            'grader' => null,
+            'grader' => 'instructor',
+            'graded_version' => 1,
             'modified' => false
         );
         $actual = $component->toArray();
@@ -59,6 +62,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($expected['order'], $component->getOrder());
         $this->assertEquals($expected['score'], $component->getScore());
         $this->assertEquals($expected['comment'], $component->getComment());
+        $this->assertEquals($expected['grader'], $component->getGrader());
+        $this->assertEquals($expected['graded_version'], $component->getGradedVersion());
 
         $component->setScore(20);
         $this->assertEquals(20, $component->getScore());
@@ -75,6 +80,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => 1000,
+            'grader' => 'ta',
+            'graded_version' => 1,
             'gcd_component_comment' => 'Comment about gradeable'
         );
 
@@ -95,6 +102,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => -100,
+            'grader' => 'ta',
+            'graded_version' => 1,
             'gcd_component_comment' => 'Comment about gradeable'
         );
         $component = new GradeableComponent($this->core, $details);
@@ -113,6 +122,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => null,
+            'grader' => 'ta',
+            'graded_version' => 1,
             'gcd_component_comment' => null
         );
 
@@ -133,6 +144,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => -50,
+            'grader' => 'ta',
+            'graded_version' => 1,
             'gcd_component_comment' => 'Comment about gradeable'
         );
 
@@ -153,6 +166,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => -150,
+            'grader' => 'ta',
+            'graded_version' => 1,
             'gcd_component_comment' => 'Comment about gradeable'
         );
 
@@ -173,6 +188,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => 100,
+            'grader' => 'ta',
+            'graded_version' => 1,
             'gcd_component_comment' => 'Comment about gradeable'
         );
 
@@ -193,6 +210,8 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => 50,
+            'grader' => 'ta',
+            'graded_version' => 1,
             'gcd_component_comment' => null
         );
 
