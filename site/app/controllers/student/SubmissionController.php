@@ -186,13 +186,63 @@ class SubmissionController extends AbstractController {
         }
 
         // save this pdf somewhere
-        
+        // make this randomized later, after testing
+        $directory = "/jess_testing";
+        // do {
+        //     $file = md5(uniqid(rand(), true));
+        // } while (file_exists(FileUtils::joinPaths("/tmp", $file)));
 
-        // get number of pages for the submitted pdf
-        // make sure is a multiple of # of pages per exam
-        // if not, popup error message
-        // save this pdf somewhere
-        // split this pdf with pdftk for loop and save those pdfs somewhere
+        if (!FileUtils::createDir("/tmp".$directory)) {
+            return $this->uploadResult("Failed to make folder for this batch upload.", false);
+        }
+
+        // save the pdf somewhere
+        for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+            if (isset($uploaded_files[$i])) {
+                for ($j = 0; $j < $count[$i]; $j++) {
+                    if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
+                        $dst = FileUtils::joinPaths("/tmp".$directory, $uploaded_files[$i]["name"][$j]);
+                        if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
+                            return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
+                        }
+                    }
+                    else {
+                        return $this->uploadResult("The tmp file '{$uploaded_files[$i]['name'][$j]}' was not properly uploaded.", false);
+                    }
+                    // Is this really an error we should fail on?
+                    if (!@unlink($uploaded_files[$i]["tmp_name"][$j])) {
+                        return $this->uploadResult("Failed to delete the uploaded file {$uploaded_files[$i]["name"][$j]} from temporary storage.", false);
+                    }
+                }
+            }
+        }
+
+        // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
+        // as that would require some hacky path handling specific to PAM authentication
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?directory={$directory}&num={$num_pages}");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($ch);
+
+        if ($output === false) {
+            return $this->uploadResult(curl_error($ch),false);
+        }
+
+        $output = json_decode($output, true);
+        curl_close($ch);
+
+        if ($output === null) {
+            return $this->uploadResult("Error JSON response for pdf split: ".json_last_error_msg(),false);
+        }
+        else if (!isset($output['valid'])) {
+            return $this->uploadResult("Missing response in JSON for pdf split",false);
+        }
+        else if ($output['valid'] != true) {
+            return $this->uploadResult($output['message'],false);
+        }
+
+        return $this->uploadResult("Up to here is good!",false);
+
         // for each pdf also get the cover image and name appropriately
         // display pdfs in new div
 
