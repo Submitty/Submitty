@@ -171,6 +171,8 @@ int main(int argc, char *argv[]) {
       textbox["rows"]  = (*textboxes)[i].value("rows",0);
       assert (int(textbox["rows"]) >= 0);
       textbox["filename"] = (*textboxes)[i].value("filename","textbox_"+std::to_string(i)+".txt");
+      //list of images to display above the text box
+      textbox["image"] = (*textboxes)[i].value("images", nlohmann::json::array({}));
       j["textboxes"].push_back(textbox);
     }
   }

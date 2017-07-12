@@ -131,17 +131,34 @@ HTML;
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
 
-
             for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
-                $tester = $gradeable->getTextBoxDisplayImages($i);
 
-                //$gradeable->getTextboxes()[$i]['image']
-                foreach((array)$tester as $current_TextBox_Image)
+
+
+
+                if (isset($gradeable->getTextboxes()[$i]['image']) && $gradeable->getTextboxes()[$i]['image'] != "")
                 {
-                    $return .= <<<HTML
-                    OHAI!
-HTML;
+                    $tester = $gradeable->getTextboxes()[$i]['image'];
                 }
+                else
+                {
+                    $tester = array();
+                }
+
+                //
+                foreach((array)$tester as $currPath)
+                {
+                    $imgPath = $this->core->getConfig()->getCoursePath() . "/test_input/" . $gradeable->getName() . "/".$currPath;
+                    $content_type = FileUtils::getContentType($imgPath);
+                    if (substr($content_type, 0, 5) === "image") {
+                       // Read image path, convert to base64 encoding
+                       $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                       // Format the image SRC:  data:{mime};base64,{data};
+                       $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
+                       // insert the sample image data
+                       $return .= '<img src="'.$textBoximagesrc.'">';
+                    }
+                 }
                 $label = $gradeable->getTextboxes()[$i]['label'];
                 $rows = $gradeable->getTextboxes()[$i]['rows'];
                 if ($rows == 0) {
@@ -801,7 +818,6 @@ HTML;
                             </div>
 HTML;
 
-<<<<<<< HEAD
                                     $myExpectedimage = $diff_viewer->getExpectedImageFilename();
                                     if($myExpectedimage != "")
                                     {
@@ -828,9 +844,7 @@ HTML;
                                     </div>
 HTML;
                                     }
-                                    else if ($diff_viewer->hasDisplayExpected()) {
-=======
-                                    if ($diff_viewer->hasDisplayExpected()) {
+                                    else if ($diff_viewer->hasDisplaylabel<br><textExpected()) {
                                         $visible2 = "visible";
                                         $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\t")); 
                                         $less_than_30 = true;
@@ -846,7 +860,6 @@ HTML;
                                         }
                                         $title1 = "Expected ";
                                         $title1 .= $description;
->>>>>>> b29511d241287dde0aa778a9916b9be763e4b8d7
                                         $return .= <<<HTML
                             <div class='diff-element'>
                                 <h4>Expected {$description} <span onclick="openPopUp('{$title1}', {$count}, {$autocheck_cnt}, 1)" style="visibility: {$visible2}"> <i class="fa fa-window-restore" style="visibility: {$visible2}; cursor: pointer;"></i> </span></h4>

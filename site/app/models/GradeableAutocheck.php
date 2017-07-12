@@ -73,7 +73,6 @@ class GradeableAutocheck extends AbstractModel {
             $difference_file = $result_path . "/details/" . $details["difference_file"];
         }
 
-        var_dump($details);
         if(isset($details["image_difference"]) && file_exists($result_path . "/details/" . $details["image_difference"])) {
             $image_difference = $result_path . "/details/" . $details["image_difference"];
         }        

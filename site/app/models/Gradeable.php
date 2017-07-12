@@ -189,8 +189,6 @@ class Gradeable extends AbstractModel {
     /** @property @var int */
     protected $graded_version = null;
 
-    protected $textBoxDisplayImages = array();
-
     /** @property @var array */
     protected $versions = array();
 
