@@ -27,6 +27,7 @@ use app\libraries\Utils;
  * @method int getHighestVersion()
  * @method int getActiveVersion()
  * @method void setActiveVersion(int $version)
+ * @method void setGradedVersion(int $version)
  * @method int getMaxSubmissions()
  * @method float getMaxSize()
  * @method GradeableVersion[] getVersions()
@@ -851,7 +852,7 @@ class Gradeable extends AbstractModel {
     public function updateGradeable() {
         $this->core->getQueries()->updateGradeable2($this);
     }
-  
+
     public function getActiveDaysLate() {
         $extended_due_date = clone $this->due_date;
         $return =  DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);
@@ -859,6 +860,16 @@ class Gradeable extends AbstractModel {
             $return = 0;
         }
         return $return;
+    }
+    
+    public function validateVersions() {
+        $active_check = $this->active_version;
+        foreach($this->components as $component) {
+            if($component->getGradedVersion() !== $active_check) {
+                return false;
+            }
+        }
+        return true;
     }
   
     public function saveData() {

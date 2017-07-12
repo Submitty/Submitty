@@ -214,14 +214,9 @@ HTML;
                         $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
-                    // $different = false;
-                    // if($graded_version !== $active_version){
-                    //     $different = true;
-                    //     // probably want to write a different query instead of this
-                    //     $row->loadResultDetails();
-                    //     $autograding_score = $row->getVersions()[$graded_version]->getNonHiddenTotal() + $row->getVersions()[$graded_version]->getHiddenTotal();
-                    // }
-                    //TODO: need to add check for if any components have a version not matching the active version
+                    $different = false;
+                    // TODO: ADD RED FLAG IF GRADED VERSION IS NOT EQUAL TO ACTIVE VERSION
+
                 }
                 else{
                     $viewed_grade = "";

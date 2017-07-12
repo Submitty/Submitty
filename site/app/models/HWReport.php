@@ -66,51 +66,56 @@ class HWReport extends AbstractModel {
             
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             // everything done only when beenTAgraded, so getGradedVersion will always exist
-            $graded_version = $gradeable->getGradedVersion();
+            $active_version = $gradeable->getActiveVersion();
  
-            $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $graded_version, "results_grade.txt");
+            $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $active_version, "results_grade.txt");
             $auto_grading_awarded = 0;
             $auto_grading_max_score = 0;
-            if(!file_exists($submit_file)) {
-                $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
+            if($gradeable->validateVersions()) {
+                if(!file_exists($submit_file)) {
+                    $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
+                }
+                else {
+                    // used only for setting $auto_grading_awarded...not sure if this is worth it since it's in the file anyways, or write a new query
+                    $gradeable->loadResultDetails();
+                    $auto_grading_awarded = $gradeable->getVersions()[$graded_version]->getNonHiddenTotal() + $gradeable->getVersions()[$graded_version]->getHiddenTotal();
+                    $auto_grading_max_score = $gradeable->getTotalAutograderNonExtraCreditPoints();
+                    $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
+                    $gradefilecontents = file_get_contents($submit_file);
+                    $student_output_text .= "submission version #" . $graded_version .$nl;
+                    $student_output_text .= $nl.$gradefilecontents.$nl;
+                }
+                foreach($gradeable->getComponents() as $component) {
+                    $student_output_text .= $component->getTitle() . "[" . $component->getScore() . "/" . $component->getMaxValue() . "]".$nl;
+                    if($component->getStudentComment() != "") {
+                        $student_output_text .= "Rubric: " . $component->getStudentComment() . $nl;
+                    }
+                    if($component->getComment() != "") {
+                        $student_output_text .= "TA NOTE: " . $component->getComment() . $nl;
+                    }
+                    $student_output_text .= $nl;
+                    
+                    $student_grade += $component->getScore();
+                    if(!$component->getIsExtraCredit() && $component->getMaxValue() > 0) {
+                        $rubric_total += $component->getMaxValue();
+                        $ta_max_score += $component->getMaxValue();
+                    }
+                }
+                $student_output_text .= "TA GRADING TOTAL [ " . $student_grade . " / " . $ta_max_score . " ]". $nl;
+                $student_output_text .= "----------------------------------------------------------------------" . $nl;
+                $rubric_total += $auto_grading_max_score;
+                $student_grade += $auto_grading_awarded;
+                
+                $student_final_grade = max(0,$student_grade);
+                $student_output_last = strtoupper($gradeable->getName()) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
+                $student_output_last .= $nl;
+                $student_output_last .= "OVERALL NOTE FROM TA: " . ($gradeable->getOverallComment() != "" ? $gradeable->getOverallComment() . $nl : "No Note") . $nl;
+                $student_output_last .= "----------------------------------------------------------------------" . $nl;
             }
             else {
-                // used only for setting $auto_grading_awarded...not sure if this is worth it since it's in the file anyways, or write a new query
-                $gradeable->loadResultDetails();
-                $auto_grading_awarded = $gradeable->getVersions()[$graded_version]->getNonHiddenTotal() + $gradeable->getVersions()[$graded_version]->getHiddenTotal();
-                $auto_grading_max_score = $gradeable->getTotalAutograderNonExtraCreditPoints();
-                $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
-                $gradefilecontents = file_get_contents($submit_file);
-                $student_output_text .= "submission version #" . $graded_version .$nl;
-                $student_output_text .= $nl.$gradefilecontents.$nl;
+                $student_final_output = "[ THERE ARE GRADING VERSION CONFLICTS WITH THIS ASSIGNMENT. PLEASE CONTACT YOUR INSTRUCTOR OR TA TO RESOLVE THE ISSUE]";
             }
-            foreach($gradeable->getComponents() as $component) {
-                $student_output_text .= $component->getTitle() . "[" . $component->getScore() . "/" . $component->getMaxValue() . "]".$nl;
-                if($component->getStudentComment() != "") {
-                    $student_output_text .= "Rubric: " . $component->getStudentComment() . $nl;
-                }
-                if($component->getComment() != "") {
-                    $student_output_text .= "TA NOTE: " . $component->getComment() . $nl;
-                }
-                $student_output_text .= $nl;
-                
-                $student_grade += $component->getScore();
-                if(!$component->getIsExtraCredit() && $component->getMaxValue() > 0) {
-                    $rubric_total += $component->getMaxValue();
-                    $ta_max_score += $component->getMaxValue();
-                }
-            }
-            $student_output_text .= "TA GRADING TOTAL [ " . $student_grade . " / " . $ta_max_score . " ]". $nl;
-            $student_output_text .= "----------------------------------------------------------------------" . $nl;
-            $rubric_total += $auto_grading_max_score;
-            $student_grade += $auto_grading_awarded;
-            
-            $student_final_grade = max(0,$student_grade);
-            $student_output_last = strtoupper($gradeable->getName()) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
-            $student_output_last .= $nl;
-            $student_output_last .= "OVERALL NOTE FROM TA: " . ($gradeable->getOverallComment() != "" ? $gradeable->getOverallComment() . $nl : "No Note") . $nl;
-            $student_output_last .= "----------------------------------------------------------------------" . $nl;
-            
+
             $student_final_output = $student_output_text_main . $student_output_text. $student_output_last;
         }
         else {
