@@ -147,9 +147,9 @@ class ElectronicGraderController extends AbstractController {
         $submit_data['g_id'] = $gradeable_id;
         $submit_data['u_id'] = $who_id;
         $submit_data['gd_id'] = $regrade ? $gradeable->getGdId() : null;
-        $submit_data['grader_id'] = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getComponents()[1]->getGrader()->getId();
+        // $submit_data['grader_id'] = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getComponents()[1]->getGrader()->getId();
         $submit_data['comment'] = $_POST['comment-general'];
-        $submit_data['graded_version'] = $_POST['graded_version'];
+        // $submit_data['graded_version'] = $_POST['graded_version'];
         $submit_data['time'] = $now->format("Y-m-d H:i:s");
         
         $submit_data['components'] = array();
@@ -160,6 +160,8 @@ class ElectronicGraderController extends AbstractController {
             $submit_data['components'][$gc_id] = array();
             $submit_data['components'][$gc_id]['grade'] = floatval($_POST["grade-{$comp->getOrder()}"]);
             $submit_data['components'][$gc_id]['comment'] = isset($_POST["comment-{$comp->getOrder()}"]) ? $_POST["comment-{$comp->getOrder()}"] : '';
+            $submit_data['components'][$gc_id]['grader_id'] = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getComponents()[1]->getGrader()->getId();
+            $submit_data['components'][$gc_id]['graded_version'] = $_POST['graded_version'];
         }
 
         $this->core->getQueries()->submitTAGrade($submit_data);
