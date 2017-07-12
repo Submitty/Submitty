@@ -132,7 +132,6 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders);
     }
 
-    //TODO (issue #1128) refactor this function to set data in the gradeable model then call $gradeable->saveData()
     public function submitGrade() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             $_SESSION['messages']['error'][] = "Invalid CSRF Token";
@@ -146,6 +145,22 @@ class ElectronicGraderController extends AbstractController {
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
             $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
+        if ($this->core->getUser()->getGroup() === 3) {
+            if ($gradeable->isGradeByRegistration()) {
+                $sections = $this->core->getUser()->getGradingRegistrationSections();
+                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            }
+            else {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+                $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
+            $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
+            if (!in_array($who_id, $user_ids_to_grade)) {
+                $_SESSION['messages']['error'][] = "You do not have permission to grade {$who_id}";
+                $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+            }
         }
 
         $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
@@ -232,6 +247,11 @@ class ElectronicGraderController extends AbstractController {
         $gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
         $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
+        if (($who_id !== "") && ($this->core->getUser()->getGroup() === 3) && !in_array($who_id, $user_ids_to_grade)) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$who_id}";
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+        }
+
         $prev_id = "";
         $next_id = "";
         $break_next = false;
