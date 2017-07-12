@@ -869,6 +869,16 @@ class Gradeable extends AbstractModel {
         }
         return $return;
     }
+    
+    public function validateVersions() {
+        $active_check = $this->active_version;
+        foreach($this->components as $component) {
+            if($component->getGradedVersion() !== $active_check) {
+                return false;
+            }
+        }
+        return true;
+    }
   
     public function saveData() {
         $this->core->getCourseDB()->beginTransaction();
