@@ -112,6 +112,9 @@ class HWReport extends AbstractModel {
                 $student_output_last .= "OVERALL NOTE FROM TA: " . ($gradeable->getOverallComment() != "" ? $gradeable->getOverallComment() . $nl : "No Note") . $nl;
                 $student_output_last .= "----------------------------------------------------------------------" . $nl;
             }
+            else {
+                $student_final_output = "[ THERE ARE GRADING VERSION CONFLICTS WITH THIS ASSIGNMENT. PLEASE CONTACT YOUR INSTRUCTOR OR TA TO RESOLVE THE ISSUE]";
+            }
 
             $student_final_output = $student_output_text_main . $student_output_text. $student_output_last;
         }
