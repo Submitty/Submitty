@@ -183,9 +183,6 @@ class Gradeable extends AbstractModel {
     protected $current_version = -1;
     /** @property @var int $highest Highest version submitted for an assignment */
     protected $highest_version = 0;
-    // /** @property @var int */
-    // protected $graded_version = null;
-
 
     /** @property @var array */
     protected $versions = array();
@@ -855,12 +852,7 @@ class Gradeable extends AbstractModel {
     public function updateGradeable() {
         $this->core->getQueries()->updateGradeable2($this);
     }
-  
-    public function getGraderId() {
-        return $this->grader_id;
-    }
-    
-  
+
     public function getActiveDaysLate() {
         $extended_due_date = clone $this->due_date;
         $return =  DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);

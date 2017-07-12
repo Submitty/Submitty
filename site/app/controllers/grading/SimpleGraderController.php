@@ -127,7 +127,6 @@ class SimpleGraderController extends AbstractController  {
             }
         }
 
-        $gradeable->setGradedVersion(0);
         $gradeable->setOverallComment("");
         $gradeable->saveData();
 

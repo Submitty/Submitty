@@ -39,12 +39,12 @@ class HWReport extends AbstractModel {
         if($gradeable->beenTAgraded()) {
             $student_output_text_main .= strtoupper($gradeable->getName())." GRADE".$nl;
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
-            $firstname = $gradeable->getGrader()->getDisplayedFirstName();
-            $student_output_text_main .= "Graded by: {$gradeable->getGrader()->getDisplayedFirstName()} {$gradeable->getGrader()->getLastName()} <{$gradeable->getGrader()->getEmail()}>".$nl;
+            $firstname = $gradeable->getComponents()[1]->getGrader()->getDisplayedFirstName();
+            $student_output_text_main .= "Graded by: {$gradeable->getComponents()[1]->getGrader()->getDisplayedFirstName()} {$gradeable->getComponents()[1]->getGrader()->getLastName()} <{$gradeable->getComponents()[1]->getGrader()->getEmail()}>".$nl;
             
             // Calculate late days for this gradeable
             $late_days = $ldu->getGradeable($student_id, $g_id);
-            $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$gradeable->getGrader()->getEmail().$nl;
+            $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$gradeable->getComponents()[1]->getGrader()->getEmail().$nl;
             if($gradeable->getDaysLate() > 0) {
                 $student_output_text_main .= "This submission was submitted ".$gradeable->getDaysLate()." day(s) after the due date.".$nl;
             }
@@ -136,9 +136,9 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() === null) {
+            if($gradeable->getComponents()[1]->getGrader() === null) {
                 foreach($graders as $g) {
-                    if($g->getId() == $gradeable->getGraderId()) {
+                    if($g->getId() == $gradeable->getComponents()[1]->getGraderId()) {
                         $gradeable->setGrader($g);
                     }
                 }
@@ -152,9 +152,9 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() === null) {
+            if($gradeable->getComponents()[1]->getGrader() === null) {
                 foreach($graders as $grader) {
-                    if($grader->getId() == $gradeable->getGraderId()) {
+                    if($grader->getId() == $gradeable->getComponents()[1]->getGraderId()) {
                         $gradeable->setGrader($grader);
                     }
                 }
@@ -170,9 +170,9 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this-core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() === null) {
+            if($gradeable->getComponents()[1]->getGrader() === null) {
                 foreach($graders as $grader) {
-                    if($grader->getId() == $gradeable->getGraderId()) {
+                    if($grader->getId() == $gradeable->getComponents()[1]->getGraderId()) {
                         $gradeable->setGrader($grader);
                     }
                 }
@@ -186,9 +186,9 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() === null) {
+            if($gradeable->getComponents()[1]->getGrader() === null) {
                 foreach($graders as $grader) {
-                    if($grader->getId() == $gradeable->getGraderId()) {
+                    if($grader->getId() == $gradeable->getComponents()[1]->getGraderId()) {
                         $gradeable->setGrader($grader);
                     }
                 }
