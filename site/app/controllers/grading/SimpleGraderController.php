@@ -198,8 +198,6 @@ class SimpleGraderController extends AbstractController  {
 
                     $user = $this->core->getQueries()->getUserById($username);
                     $gradeable->setUser($user);
-                    $gradeable->setGrader($this->core->getUser());
-                    $gradeable->setGradedVersion(1);
                     $gradeable->setOverallComment("");
                     $gradeable->saveData();
                     $return_data[] = $temp_array;
