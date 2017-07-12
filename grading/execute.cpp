@@ -110,7 +110,10 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "xwininfo",                "/usr/bin/xwininfo"}, // get info about window
 
     // for Debugging
-    { "strace",                  "/usr/bin/strace" }
+    { "strace",                  "/usr/bin/strace" },
+    
+    //Matlab
+    { "matlab",                  "/usr/local/bin/matlab" }
 
   };
 
