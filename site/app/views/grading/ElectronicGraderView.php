@@ -836,9 +836,15 @@ HTML;
 HTML;
         if ($gradeable->beenTAgraded()) {
             // assumes that the person who graded the first question graded everything... also in electronicGraderController:150...have to rewrite to be per component
+            $graders = array();
+            foreach($gradeable->getComponents() as $component){
+                $graders[] = $component->getGrader()->getId();
+            }
+            array_unique($graders);
+            $graders = implode(",", $graders);
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: {$gradeable->getComponents()[1]->getGrader()->getId()}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
+            Graded By: {$graders}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
         </div>
 HTML;
         }
