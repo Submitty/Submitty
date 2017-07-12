@@ -289,8 +289,8 @@ def get_result_details(semester, course, g_id, who_id, version):
                 for testcase in result_json['testcases']:
                     result_details['testcases'].append({'points': testcase['points_awarded']})
 
-    if os.path.isfile(os.path.join(result_dir, "results_history.json")):
-        with open(os.path.join(result_dir, "results_history.json")) as result_file:
+    if os.path.isfile(os.path.join(result_dir, "history.json")):
+        with open(os.path.join(result_dir, "history.json")) as result_file:
             result_json = json.load(result_file)
             a = datetime.strptime(result_json[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
             result_details['submission_time'] = '{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}' \

@@ -55,7 +55,7 @@ def main():
         # we are attempting to count instances of
         #    /usr/local/submitty/bin/grade_students.sh
         # but it may also be matching:
-        #    /usr/local/submitty/bin/grade_students__results_history.py
+        #    /usr/local/submitty/bin/write_grade_history.py
         #
         # and it perhaps also overcounts submissions that use fork (??)
         #

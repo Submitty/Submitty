@@ -141,8 +141,8 @@ def main():
 
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",obj["gradeable"],obj["who"],str(obj["version"]))
 
-    # grab a copy of the current results_history.json file (if it exists)
-    global_results_history_file_location=os.path.join(results_path,"results_history.json")
+    # grab a copy of the current history.json file (if it exists)
+    global_history_file_location=os.path.join(results_path,"history.json")
     # FIXME - HISTORY FILE NEEDS WORK
 
     # --------------------------------------------------------------------

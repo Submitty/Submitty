@@ -309,8 +309,8 @@ chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 
 # fix the permissions specifically of the build_config_upload.py script
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py

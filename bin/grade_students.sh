@@ -387,13 +387,13 @@ function grade_this_item {
 
     results_path="$results_path_tmp/OLD"
 
-    # grab a copy of the current results_history.json file (if it exists)
-    global_results_history_file_location_tmp=${results_path_tmp}/results_history.json
-    global_results_history_file_location=${results_path}/results_history.json
-    if [ -e "$global_results_history_file_location" ]
+    # grab a copy of the current history.json file (if it exists)
+    global_history_file_location_tmp=${results_path_tmp}/history.json
+    global_history_file_location=${results_path}/history.json
+    if [ -e "$global_history_file_location" ]
     then
-        tmp_results_history_filename=`mktemp`
-        cp -f $global_results_history_file_location  $tmp_results_history_filename
+        tmp_history_filename=`mktemp`
+        cp -f $global_history_file_location  $tmp_history_filename
     fi
 
 
@@ -668,13 +668,13 @@ function grade_this_item {
 
 
     # move the copied results history (if it exists) back into results folder
-    if [ -e "$tmp_results_history_filename" ]
+    if [ -e "$tmp_history_filename" ]
     then
-        mv $tmp_results_history_filename $global_results_history_file_location
+        mv $tmp_history_filename $global_history_file_location
         # and fix permissions
         ta_group=`stat -c "%G"  ${results_path}`
-        chgrp ${ta_group} $global_results_history_file_location
-        chmod g+r $global_results_history_file_location
+        chgrp ${ta_group} $global_history_file_location
+        chmod g+r $global_history_file_location
     fi
 
     # --------------------------------------------------------------------
@@ -857,8 +857,8 @@ while true; do
         sec_deadline=`date -d "${global_gradeable_deadline}" +%s`
         sec_submission=`date -d "${global_submission_time}" +%s`
         seconds_late=$((sec_submission-sec_deadline))
-        ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py  \
-                               "$global_results_history_file_location" \
+        ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py  \
+                               "$global_history_file_location" \
                                "$global_gradeable_deadline" \
                                "$global_submission_time" \
                                "$seconds_late" \
@@ -870,7 +870,7 @@ while true; do
                                "$ELAPSED" \
                                "$global_grade_result"
 
-        cp "$global_results_history_file_location" "$global_results_history_file_location_tmp"  
+        cp "$global_history_file_location" "$global_history_file_location_tmp"  
         
         #---------------------------------------------------------------------
         # WRITE OUT VERSION DETAILS

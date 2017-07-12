@@ -2,10 +2,10 @@
 
 """
 Writes out submission datetime details (when it was submitted, how long it was in grading
-process, etc) to a results_history.json file which is a list of all grading attempts for a
+process, etc) to a history.json file which is a list of all grading attempts for a
 particular submission (including initial grading of it and all regrades).
 
-Details of using the script can be gotten through ./grade_students__results_history.py --help
+Details of using the script can be gotten through ./write_grade_history.py --help
 """
 
 import argparse
@@ -15,10 +15,10 @@ import collections
 
 
 parser = argparse.ArgumentParser(description="Writes out grading details to the "
-                                             "results_history.json file which is ordered by when "
+                                             "history.json file which is ordered by when "
                                              "the grade was done (with newest grading being last "
                                              "in the list)")
-parser.add_argument("json_file", type=str, help="location of the results_history.json file")
+parser.add_argument("json_file", type=str, help="location of the history.json file")
 parser.add_argument("assignment_deadline", type=str, help="deadline for the gradeable submission")
 parser.add_argument("submission_time", type=str, help="time that submission happened by student")
 parser.add_argument("seconds_late", type=int, help="how many seconds late was the submission? "
