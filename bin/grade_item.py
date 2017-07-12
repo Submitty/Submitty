@@ -10,6 +10,8 @@ import shutil
 import subprocess
 import stat
 import filecmp
+import datetime
+import time
 
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
@@ -28,6 +30,15 @@ def parse_args():
     parser.add_argument("which_untrusted")
     return parser.parse_args()
 
+
+def get_queue_time(args):
+    t = time.ctime(os.path.getctime(os.path.join(args.next_directory,args.next_to_grade)))
+    print ("QUEUE TIME ",t)
+    return datetime.datetime.strptime(time.ctime(), "%a %b %d %H:%M:%S %Y")
+
+def get_current_time():
+    t = time.ctime(os.path.getctime(os.path.join(args.next_directory,args.next_to_grade)))
+    return datetime.datetime.strptime(time.ctime(), "%a %b %d %H:%M:%S %Y")
 
 def get_submission_path(args):
     queue_file = os.path.join(args.next_directory,args.next_to_grade)
@@ -142,8 +153,10 @@ def main():
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",obj["gradeable"],obj["who"],str(obj["version"]))
 
     # grab a copy of the current history.json file (if it exists)
-    global_history_file_location=os.path.join(results_path,"history.json")
-    # FIXME - HISTORY FILE NEEDS WORK
+    history_file=os.path.join(results_path,"history.json")
+    history_file_tmp=tempfile.mkdtemp()
+    if os.path.isfile(history_file):
+        shutil.copy(history_file,history_file_tmp)
 
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
@@ -158,8 +171,8 @@ def main():
 
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
-        submission_time=submission_time_file.read()
-
+        submission_time=submission_time_file.read().rstrip()
+    
     
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
@@ -186,8 +199,10 @@ def main():
     #print ("UPLOAD TYPE ",gradeable_upload_type)
     #FIXME:  deal with svn/git/whatever
 
-    gradeable_deadline = gradeable_config_obj["date_due"]
-
+    gradeable_deadline_string = gradeable_config_obj["date_due"]
+    gradeable_deadline_datetime=datetime.datetime.strptime(str(gradeable_deadline_string),'%Y-%m-%d %H:%M:%S')
+    #gradeable_deadline_datetime.replace(tzinfo=datetime.timezone.utc)
+    
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
     pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
     
@@ -369,6 +384,67 @@ def main():
 
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(results_path,"details"),tmp_logs)
+
+    if os.path.isfile(history_file_tmp):
+        shutil.move(history_file_tmp,history_file)
+        # fix permissions
+        ta_group_id=os.stat(results_path).st_gid
+        #os.chown(history_file,HWCRON_UID,ta_group_id)
+        #os.chmod(history_file,0640)
+        
+    # -------------------------------------------------------------
+    # create/append to the results history
+
+    submission_datetime=datetime.datetime.strptime(str(submission_time),'%Y-%m-%d %H:%M:%S')
+
+    #    submission_datetime.replace(tzinfo=datetime.timezone.utc)
+    
+    print ("DEADLINE |",str(gradeable_deadline_string),"| |",str(submission_time),"|")
+
+    
+    gradeable_deadline_longstring = datetime.datetime.strftime(gradeable_deadline_datetime, "%a %b  %d %H:%M:%S %Z %Y")
+    submission_longstring = datetime.datetime.strftime(submission_datetime, "%a %b  %d %H:%M:%S %Z %Y")
+
+    print ("BEFgradeable_deadline_datetime   ", gradeable_deadline_datetime)
+    print ("BEFgradeable_deadline longstring ", gradeable_deadline_longstring)
+    print ("BEFsubmission longstring ", submission_longstring)
+        
+    gradeable_deadline_longstring = gradeable_deadline_longstring.replace("  20","  EST  20")
+    submission_longstring = submission_longstring.replace("  20","  EST  20")
+
+
+    
+    print ("AFTgradeable_deadline_datetime   ", gradeable_deadline_datetime)
+    print ("AFTgradeable_deadline longstring ", gradeable_deadline_longstring)
+    print ("AFTsubmission longstring ", submission_longstring)
+    print ("submission_datetime   ", submission_datetime)
+
+    
+    deadline_seconds = gradeable_deadline_datetime.toordinal()
+    submission_seconds = submission_datetime.toordinal()
+
+    seconds_late = submission_seconds-deadline_seconds
+    print ("LATE ",seconds_late)
+    # note: negative = not late
+
+
+    queue_time = get_queue_time(args)
+    queue_time_longstring = datetime.datetime.strftime(queue_time, "%a %b  %d %H:%M:%S %Z %Y")
+    queue_time_longstring = queue_time_longstring.replace("  20","  EST  20")
+    print ("qtlong",queue_time_longstring)
+    
+    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","write_grade_history.py"),
+                     history_file,
+                     gradeable_deadline_longstring,
+                     submission_longstring,
+                     str(seconds_late),
+                     queue_time_longstring,
+                     "False",# "$IS_BATCH_JOB" \
+                     "",#"`date -d @$STARTTIME`" \
+                     "0", #"$WAITTIME" \
+                     "",#"`date -d @$ENDTIME`" \
+                     "0",#"$ELAPSED" \
+                     "0"])#"$global_grade_result"
 
     # TEMPORARY ERROR CHECKING
     if os.path.isdir(os.path.join(results_path,"OLD")):

@@ -388,13 +388,13 @@ function grade_this_item {
     results_path="$results_path_tmp/OLD"
 
     # grab a copy of the current history.json file (if it exists)
-    global_history_file_location_tmp=${results_path_tmp}/history.json
-    global_history_file_location=${results_path}/history.json
-    if [ -e "$global_history_file_location" ]
-    then
-        tmp_history_filename=`mktemp`
-        cp -f $global_history_file_location  $tmp_history_filename
-    fi
+    #global_history_file_location_tmp=${results_path_tmp}/history.json
+    #global_history_file_location=${results_path}/history.json
+    #if [ -e "$global_history_file_location" ]
+    #then
+    #    tmp_history_filename=`mktemp`
+    #    cp -f $global_history_file_location  $tmp_history_filename
+    #fi
 
 
     # --------------------------------------------------------------------
@@ -668,19 +668,20 @@ function grade_this_item {
 
 
     # move the copied results history (if it exists) back into results folder
-    if [ -e "$tmp_history_filename" ]
-    then
-        mv $tmp_history_filename $global_history_file_location
-        # and fix permissions
-        ta_group=`stat -c "%G"  ${results_path}`
-        chgrp ${ta_group} $global_history_file_location
-        chmod g+r $global_history_file_location
-    fi
+    #if [ -e "$tmp_history_filename" ]
+    #then
+    #    mv $tmp_history_filename $global_history_file_location
+    #    # and fix permissions
+    #    ta_group=`stat -c "%G"  ${results_path}`
+    #    chgrp ${ta_group} $global_history_file_location
+    #    chmod g+r $global_history_file_location
+    #fi
 
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
 
     # step out of this directory
+
     popd > /dev/null
     # and remove the directory
     find . -exec ls -lta {} \; > $results_path/results_log_done.txt 2>&1
@@ -853,24 +854,24 @@ while true; do
 	ELAPSED=$(($ENDTIME - $STARTTIME))
 
 	# -------------------------------------------------------------
-        # create/append to the results history
-        sec_deadline=`date -d "${global_gradeable_deadline}" +%s`
-        sec_submission=`date -d "${global_submission_time}" +%s`
-        seconds_late=$((sec_submission-sec_deadline))
-        ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py  \
-                               "$global_history_file_location" \
-                               "$global_gradeable_deadline" \
-                               "$global_submission_time" \
-                               "$seconds_late" \
-                               "`date -d @$FILE_TIMESTAMP`" \
-                               "$IS_BATCH_JOB" \
-                               "`date -d @$STARTTIME`" \
-                               "$WAITTIME" \
-                               "`date -d @$ENDTIME`" \
-                               "$ELAPSED" \
-                               "$global_grade_result"
-
-        cp "$global_history_file_location" "$global_history_file_location_tmp"  
+#        # create/append to the results history
+#        sec_deadline=`date -d "${global_gradeable_deadline}" +%s`
+#        sec_submission=`date -d "${global_submission_time}" +%s`
+#        seconds_late=$((sec_submission-sec_deadline))
+#        ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py  \
+#                               "$global_history_file_location" \
+#                               "$global_gradeable_deadline" \
+#                               "$global_submission_time" \
+#                               "$seconds_late" \
+#                               "`date -d @$FILE_TIMESTAMP`" \
+#                               "$IS_BATCH_JOB" \
+#                               "`date -d @$STARTTIME`" \
+#                               "$WAITTIME" \
+#                               "`date -d @$ENDTIME`" \
+#                               "$ELAPSED" \
+#                               "$global_grade_result"
+#
+#        cp "$global_history_file_location" "$global_history_file_location_tmp"  
         
         #---------------------------------------------------------------------
         # WRITE OUT VERSION DETAILS

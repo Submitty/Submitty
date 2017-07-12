@@ -28,6 +28,8 @@ import re
 import shutil
 import subprocess
 import uuid
+import pytz
+
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
 
@@ -792,7 +794,12 @@ class Course(object):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
-                        current_time = (gradeable.submission_due_date - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+                        current_time_tmp = (gradeable.submission_due_date - timedelta(days=1))
+                        # add the timezone
+                        my_timezone=pytz.timezone('US/Eastern')
+                        current_time_tmp = my_timezone.localize(current_time_tmp)
+                        # format the time as a string with timezone
+                        current_time = current_time_tmp.strftime("%Y-%m-%d %H:%M:%S %Z")
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time)
                         conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
