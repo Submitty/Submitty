@@ -9,6 +9,7 @@ class AutogradingView extends AbstractView {
 
     public function showResults($gradeable, $show_hidden=false) {
         $return = "";
+        $popup_css_file = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
         $has_badges = false;
         if ($gradeable->getNormalPoints() > 0) {
             $has_badges = true;
@@ -210,13 +211,8 @@ HTML;
                     }
                     $title .= $description;
                     $return .= <<<HTML
-                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 0)" style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
+                <h4>{$title} <span onclick="openPopUp('{$popup_css_file}', '{$title}', {$count}, {$autocheck_cnt}, 0)" style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
                 <div id="container_{$count}_{$autocheck_cnt}_0">
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/ta-grading.css" />
 HTML;
                     foreach ($autocheck->getMessages() as $message) {
                         $type_class = "black-message";
@@ -268,13 +264,8 @@ HTML;
                         $title .= $description;
                         $return .= <<<HTML
             <div class='diff-element'>
-                <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 1)" style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
+                <h4>{$title} <span onclick="openPopUp('{$popup_css_file}', '{$title}', {$count}, {$autocheck_cnt}, 1)" style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
                 <div id="container_{$count}_{$autocheck_cnt}_1">
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css" />
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css" />
-                <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/ta-grading.css" />
 HTML;
                         for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
                             $return .= <<<HTML
