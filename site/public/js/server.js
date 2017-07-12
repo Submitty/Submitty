@@ -726,7 +726,7 @@ function setupNumericTextCells() {
 function openPopUp(str, count, testcase_num, side) {
     var element_id = "container_" + count + "_" + testcase_num + "_" + side;
     var elem_html = document.getElementById(element_id).innerHTML;
-    my_window = window.open("", "mywindow1", "status=1,width=750,height=500");
+    my_window = window.open("", "_blank", "status=1,width=750,height=500");
     my_window.document.write(str + elem_html);
     my_window.document.close(); 
     my_window.focus();
