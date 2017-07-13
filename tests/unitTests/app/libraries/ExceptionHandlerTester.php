@@ -37,7 +37,7 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
     public function testExceptionHandlerLog() {
         $tmp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $this->assertTrue(FileUtils::createDir($tmp_dir));
-        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($tmp_dir, 'error')));
+        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($tmp_dir, 'site_errors')));
         Logger::setLogPath($tmp_dir);
         date_default_timezone_set("America/New_York");
         $date = getdate(time());
@@ -45,7 +45,7 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
         ExceptionHandler::setDisplayExceptions(false);
         ExceptionHandler::setLogExceptions(true);
         ExceptionHandler::handleException(new BaseException("test", array("test"=>"b", "test2"=>array('a','c'))));
-        $file = FileUtils::joinPaths($tmp_dir, 'error', $filename);
+        $file = FileUtils::joinPaths($tmp_dir, 'site_errors', $filename);
         $this->assertFileExists($file);
         $actual = file_get_contents($file);
         $this->assertRegExp('/[0-9]{2}\:[0-9]{2}\:[0-9]{2}\ [0-9]{2}\/[0-9]{2}\/[0-9]{4} \- FATAL ERROR\napp.+/', $actual);
