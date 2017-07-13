@@ -40,6 +40,7 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= strtoupper($gradeable->getName())." GRADE".$nl;
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             $firstname = $gradeable->getComponents()[1]->getGrader()->getDisplayedFirstName();
+            // will need to change how we get grader...currently just assumes that the grader of the first component graded the whole thing
             $student_output_text_main .= "Graded by: {$gradeable->getComponents()[1]->getGrader()->getDisplayedFirstName()} {$gradeable->getComponents()[1]->getGrader()->getLastName()} <{$gradeable->getComponents()[1]->getGrader()->getEmail()}>".$nl;
             
             // Calculate late days for this gradeable

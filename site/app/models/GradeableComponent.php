@@ -31,6 +31,8 @@ use app\libraries\Core;
  * @method void setComment(string $comment)
  * @method User getGrader()
  * @method void setGrader(User $grader)
+ * @method int getGradedVersion()
+ * @method void setGradedVersion()
  * @method \DateTime getGradeTime()
  * @method void setGradeTime(\DateTime $date_time)
  * @method bool getHasGrade()
@@ -86,7 +88,6 @@ class GradeableComponent extends AbstractModel {
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = isset($details['gcd_grader']) ? $details['gcd_grader']: null;
-            // $this->graded_version = isset($details['gcd_graded_version']) ? $details['gcd_graded_version'] : -1;
             $this->graded_version = $details['gcd_graded_version'];
             if (isset($details['gcd_grade_time'])) {
                 $this->grade_time = new \DateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());

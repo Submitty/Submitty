@@ -27,7 +27,6 @@ use app\libraries\Utils;
  * @method int getHighestVersion()
  * @method int getActiveVersion()
  * @method void setActiveVersion(int $version)
- * @method void setGradedVersion(int $version)
  * @method int getMaxSubmissions()
  * @method float getMaxSize()
  * @method GradeableVersion[] getVersions()

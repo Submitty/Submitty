@@ -143,6 +143,7 @@ WHERE gc.g_id=?
         return $return;
     }
 
+// This has to be updated to also load components for each version
     public function getGradeableVersions($g_id, $user_id, $team_id, $due_date) {
         if ($user_id === null) {
             $this->course_db->query("
@@ -534,7 +535,6 @@ ORDER BY registration_section", $params);
     public function getTotalComponentCount($g_id) {
       $params=$g_id;
       return $this->course_db->query("SELECT count(*) FROM gradeable_component WHERE g_id=?", $params);
-      // return $this->course_db->rows();
     }
 
     public function getGradedComponentsCountByRegistrationSections($g_id, $sections) {
