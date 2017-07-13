@@ -194,7 +194,8 @@ CREATE TABLE gradeable (
 CREATE TABLE gradeable_component_mark (
     gc_id integer NOT NULL,
     gcm_id integer NOT NULL,
-    gcm_pts numeric NOT NULL,
+    gcm_order integer NOT NULL,
+    gcm_points numeric NOT NULL,
     gcm_note character varying NOT NULL
 );
 
@@ -204,6 +205,7 @@ CREATE TABLE gradeable_component_mark (
 
 CREATE TABLE gradeable_component_mark_data (
     gcm_id integer NOT NULL,
+    gc_id integer NOT NULL,
     gd_id integer NOT NULL
 );
 
@@ -475,7 +477,7 @@ ALTER TABLE ONLY gradeable_component_mark
 --
 
 ALTER TABLE ONLY gradeable_component_mark_data
-    ADD CONSTRAINT gradeable_component_mark_data_pkey PRIMARY KEY (gcm_id, gd_id);
+    ADD CONSTRAINT gradeable_component_mark_data_pkey PRIMARY KEY (gcm_id, gc_id, gd_id);
 
 --
 -- Name: gradeable_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -
@@ -675,6 +677,13 @@ ALTER TABLE ONLY gradeable_component
     ADD CONSTRAINT gradeable_component_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
 --
+-- Name: gradeable_component_mark_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_component_mark
+    ADD CONSTRAINT gradeable_component_mark_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES gradeable_component(gc_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+--
 -- Name: gradeable_component_mark_data_gcm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -687,13 +696,6 @@ ALTER TABLE ONLY gradeable_component_mark_data
 
 ALTER TABLE ONLY gradeable_component_mark_data
     ADD CONSTRAINT gradeable_component_mark_data_gd_id_fkey FOREIGN KEY (gd_id) REFERENCES gradeable_data(gd_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
---
--- Name: gradeable_component_mark_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY gradeable_component_mark
-    ADD CONSTRAINT gradeable_component_mark_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES gradeable_component(gc_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --
 -- Name: gradeable_data_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

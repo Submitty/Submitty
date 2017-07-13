@@ -186,6 +186,10 @@ class AdminGradeableView extends AbstractView {
         top: -96px;
         left: -313px;
     }
+
+    .ui_tpicker_unit_hide {
+        display: none;
+    }
     
     /* align the radio, buttons and checkboxes with labels */
     input[type="radio"],input[type="checkbox"] {
@@ -796,7 +800,7 @@ HTML;
 </div>
 
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-<link type="text/css" rel="stylesheet" href="css/jquery-ui-timepicker-addon.css" />
+<link type='text/css' rel='stylesheet' href="http://trentrichardson.com/examples/timepicker/jquery-ui-timepicker-addon.css" />
 <script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
@@ -847,6 +851,8 @@ function createCrossBrowserJSDate(val){
                 timeFormat: "HH:mm:ss",
                 showButtonPanel: true,
                 showTimezone: false,
+                showMillisec: false,
+                showMicrosec: false,
                 beforeShow: function( input ) {
                     setTimeout(function() {
                         var buttonPane = $( input )
