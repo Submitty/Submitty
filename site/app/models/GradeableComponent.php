@@ -32,7 +32,7 @@ use app\libraries\Core;
  * @method User getGrader()
  * @method void setGrader(User $grader)
  * @method int getGradedVersion()
- * @method void setGradedVersion()
+ * @method void setGradedVersion(int $graded_version)
  * @method \DateTime getGradeTime()
  * @method void setGradeTime(\DateTime $date_time)
  * @method bool getHasGrade()
@@ -63,7 +63,7 @@ class GradeableComponent extends AbstractModel {
     /** @property @var User */
     protected $grader = null;
 
-    /** @property @var int $graded_version  The version graded for the component */
+    /** @property @var int */
     protected $graded_version = -1;
 
     /** @property @var \DateTime */

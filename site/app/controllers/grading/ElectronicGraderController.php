@@ -172,10 +172,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
-        if (isset($_POST['overwrite'])) $gradeable->setGrader($this->core->getUser());
         $gradeable->setOverallComment($_POST['comment-general']);
-        $gradeable->setGradedVersion($gradeable->getActiveVersion());
-        
         // $regrade = $gradeable->beenTAgraded();
         
         // $submit_data = array();
@@ -200,8 +197,7 @@ class ElectronicGraderController extends AbstractController {
             if (isset($_POST['overwrite'])) $comps[$key]->setGrader($this->core->getUser());
             $comps[$key]->setScore(floatval($_POST["grade-{$comps[$key]->getOrder()}"]));
             $comps[$key]->setComment($_POST["comment-{$comps[$key]->getOrder()}"]);
-            if(isset($_POST['overwrite'])) $comps[$key]->setGrader($this->core->getUser()->getId());
-            $comps[$key]->setGradedVersion($_POST['graded_version']);
+            $comps[$key]->setGradedVersion($_POST["grader-{$comps[$key]->getOrder()}"]);
             $comps[$key]->setGradeTime($now);
         }
         $gradeable->setComponents($comps);
