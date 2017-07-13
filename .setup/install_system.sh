@@ -541,12 +541,14 @@ if [[ ${VAGRANT} == 1 ]]; then
     chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/logs/autograding
     chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/site
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/site/access
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/site/error
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/site ${SUBMITTY_DATA_DIR}/logs/site
-    chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site
-    chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/access
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/site_errors
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/access ${SUBMITTY_DATA_DIR}/logs/access
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
+    chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/access
+    chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
+    chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site_errors
+    chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
     # Call helper script that makes the courses and refreshes the database
     ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py
