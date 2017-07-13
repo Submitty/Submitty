@@ -126,15 +126,15 @@ class SimpleGraderController extends AbstractController  {
                     $component->setComment($_POST['scores'][$component->getId()]);
                 }
                 else {
-                    if($component->getMaxValue() < $_POST['scores'][$component->getId()]){
-                        $response = array('status' => 'fail', 'message' => "Save error: score is greater than the max score");
+                    if($component->getMaxValue() < $_POST['scores'][$component->getId()] || !is_numeric($_POST['scores'][$component->getId()])){
+                        $response = array('status' => 'fail', 'message' => "Save error: score must be a number less than the max score");
                         $this->core->getOutput()->renderJson($response);
                         return $response;
                     }
                     $component->setScore($_POST['scores'][$component->getId()]);
-                    $component->setGrader($this->core->getUser());
-                    $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                 }
+                $component->setGrader($this->core->getUser());
+                $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
             }
         }
 

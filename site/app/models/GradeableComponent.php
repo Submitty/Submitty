@@ -87,8 +87,8 @@ class GradeableComponent extends AbstractModel {
         $this->order = $details['gc_order'];
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
-            $this->grader = isset($details['gcd_grader']) ? $details['gcd_grader']: null;
-            $this->graded_version = $details['gcd_graded_version'];
+            $this->grader = $details['gcd_grader'];
+            $this->graded_version = isset($details['gcd_graded_version']) ? $details['gcd_graded_version']: -1;
             if (isset($details['gcd_grade_time'])) {
                 $this->grade_time = new \DateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());
             }

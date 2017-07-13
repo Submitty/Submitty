@@ -778,17 +778,13 @@ class Course(object):
             max_submissions = gradeable.max_random_submissions
             for user in self.users:
                 submitted = False
-                graded = 1
                 submission_path = os.path.join(gradeable_path, user.id)
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
-                    if gradeable.gradeable_config is None or \
+                    if not (gradeable.gradeable_config is None or \
                             (gradeable.submission_due_date < NOW and random.random() < 0.5) or \
-                            (random.random() < 0.3):
-                        graded = -1
-                    elif max_submissions is not None and submission_count >= max_submissions:
-                        graded = -1
-                    else:
+                            (random.random() < 0.3) or \
+                            (max_submissions is not None and submission_count >= max_submissions)):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
