@@ -865,10 +865,10 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
 
     public function insertGradeableData(Gradeable $gradeable) {
         $params = array($gradeable->getId(), $gradeable->getUser()->getId(),
-                        $gradeable->getOverallComment(), $gradeable->getGradedVersion());
+                        $gradeable->getGrader()->getId(), $gradeable->getOverallComment(), $gradeable->getGradedVersion());
         $this->course_db->query("INSERT INTO 
-gradeable_data (g_id, gd_user_id, gd_overall_comment, gd_graded_version)
-VALUES (?, ?, ?, ?)", $params);
+gradeable_data (g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_graded_version)
+VALUES (?, ?, ?, ?, ?)", $params);
         return $this->course_db->getLastInsertId("gradeable_data_gd_id_seq");
     }
 
@@ -1284,28 +1284,6 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
         else {
             $team = new Team($this->core, $this->course_db->rows());
             return $team;
-        }
-    }
-
-    public function submitTAGrade($details) {
-        if ($details['gd_id'] === null) {
-            $params = array($details['g_id'], $details['u_id'], $details['grader_id'], $details['comment'], $details['graded_version']);
-            $this->course_db->query("INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_graded_version, gd_user_viewed_date ) VALUES(?,?,?,?,?,NULL)", $params);
-            $details['gd_id'] = $this->course_db->getLastInsertId('gradeable_data_gd_id_seq');
-
-            foreach($details['components'] as $gc_id => $data) {
-                $params = array($details['gd_id'], $gc_id, $data['grade'], $data['comment'], $details['grader_id'], $details['time']);
-                $this->course_db->query("INSERT INTO gradeable_component_data (gd_id, gc_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grade_time) VALUES (?,?,?,?,?,?)", $params);
-            }
-        }
-        else {
-            $params = array($details['grader_id'], $details['graded_version'], $details['comment'], $details['gd_id']);
-            $this->course_db->query("UPDATE gradeable_data SET gd_grader_id=?, gd_graded_version=?, gd_overall_comment=?, gd_user_viewed_date=NULL WHERE gd_id=?", $params);
-
-            foreach($details['components'] as $gc_id => $data) {
-                $params = array($data['grade'], $data['comment'], $details['grader_id'], $details['time'], $details['gd_id'], $gc_id);
-                $this->course_db->query("UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_grade_time=? WHERE gd_id=? AND gc_id=?", $params);
-            }
         }
     }
 

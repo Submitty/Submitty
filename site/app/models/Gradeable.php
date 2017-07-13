@@ -369,6 +369,7 @@ class Gradeable extends AbstractModel {
             // NOTE: the TA grading total may be negative!
         }
 
+        $this->minimum_grading_group = $details['g_min_grading_group'];
         $this->grade_by_registration = $details['g_grade_by_registration'] === true;
         $this->grade_start_date = new \DateTime($details['g_grade_start_date'], $timezone);
         $this->grade_released_date = new \DateTime($details['g_grade_released_date'], $timezone);
@@ -859,10 +860,6 @@ class Gradeable extends AbstractModel {
 
     public function updateGradeable() {
         $this->core->getQueries()->updateGradeable2($this);
-    }
-  
-    public function getGraderId() {
-        return $this->grader_id;
     }
   
     public function getActiveDaysLate() {
