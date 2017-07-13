@@ -594,7 +594,7 @@ HTML;
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
                         <input type="number" id="grade-{$question->getOrder()}" class="grades" name="grade-{$question->getOrder()}" value="{$question->getScore()}" min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question->getOrder()}', '{$question->getMaxValue()}', {$precision}); calculatePercentageTotal();" style="width:50px; resize:none;" {$disabled}></textarea>
                         <strong> / {$question->getMaxValue()}</strong>
-                        <input type="hidden" id="grader-{$question->getOrder()}" name="grader-{$question->getOrder()}">
+                        <input type="hidden" id="version-{$question->getOrder()}" name="version-{$question->getOrder()}" value="{$gradeable->getActiveVersion()}">
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">

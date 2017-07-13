@@ -870,7 +870,7 @@ class Gradeable extends AbstractModel {
         }
         return true;
     }
-  
+
     public function saveData() {
         $this->core->getCourseDB()->beginTransaction();
         if ($this->gd_id === null) {

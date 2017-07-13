@@ -66,9 +66,10 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
             
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
-            // everything done only when beenTAgraded, so getGradedVersion will always exist
+
+            // uses active version...
             $active_version = $gradeable->getActiveVersion();
-            $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $graded_version, "grade.txt");
+            $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $active_version, "grade.txt");
             $auto_grading_awarded = 0;
             $auto_grading_max_score = 0;
             if($gradeable->validateVersions()) {
@@ -76,13 +77,11 @@ class HWReport extends AbstractModel {
                     $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
                 }
                 else {
-                    // used only for setting $auto_grading_awarded...not sure if this is worth it since it's in the file anyways, or write a new query
-                    $gradeable->loadResultDetails();
-                    $auto_grading_awarded = $gradeable->getVersions()[$graded_version]->getNonHiddenTotal() + $gradeable->getVersions()[$graded_version]->getHiddenTotal();
+                    $auto_grading_awarded = $gradeable->getGradedAutograderPoints();
                     $auto_grading_max_score = $gradeable->getTotalAutograderNonExtraCreditPoints();
                     $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
                     $gradefilecontents = file_get_contents($submit_file);
-                    $student_output_text .= "submission version #" . $graded_version .$nl;
+                    $student_output_text .= "submission version #" . $active_version .$nl;
                     $student_output_text .= $nl.$gradefilecontents.$nl;
                 }
                 foreach($gradeable->getComponents() as $component) {

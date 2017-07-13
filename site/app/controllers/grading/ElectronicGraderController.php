@@ -173,31 +173,13 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $gradeable->setOverallComment($_POST['comment-general']);
-        // $regrade = $gradeable->beenTAgraded();
-        
-        // $submit_data = array();
-        // $submit_data['g_id'] = $gradeable_id;
-        // $submit_data['u_id'] = $who_id;
-        // $submit_data['gd_id'] = $regrade ? $gradeable->getGdId() : null;
-        // $submit_data['comment'] = $_POST['comment-general'];
-        // $submit_data['time'] = $now->format("Y-m-d H:i:s");
-        
-        // $submit_data['components'] = array();
-        // $comps = $gradeable->getComponents();
-        // //update each gradeable component data
-        // foreach($comps as $comp){
-        //     $gc_id = $comp->getId();
-        //     $submit_data['components'][$gc_id] = array();
-        //     $submit_data['components'][$gc_id]['grade'] = floatval($_POST["grade-{$comp->getOrder()}"]);
-        //     $submit_data['components'][$gc_id]['comment'] = isset($_POST["comment-{$comp->getOrder()}"]) ? $_POST["comment-{$comp->getOrder()}"] : '';
-        //     $submit_data['components'][$gc_id]['grader_id'] = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $comp->getGrader()->getId();
-        //     $submit_data['components'][$gc_id]['graded_version'] = $_POST['graded_version'];
+
         $comps = $gradeable->getComponents();
         foreach($comps as $key => $data) {
             if (isset($_POST['overwrite'])) $comps[$key]->setGrader($this->core->getUser());
             $comps[$key]->setScore(floatval($_POST["grade-{$comps[$key]->getOrder()}"]));
             $comps[$key]->setComment($_POST["comment-{$comps[$key]->getOrder()}"]);
-            $comps[$key]->setGradedVersion($_POST["grader-{$comps[$key]->getOrder()}"]);
+            $comps[$key]->setGradedVersion($_POST["version-{$comps[$key]->getOrder()}"]);
             $comps[$key]->setGradeTime($now);
         }
         $gradeable->setComponents($comps);
