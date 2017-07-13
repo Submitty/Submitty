@@ -403,6 +403,13 @@ HTML;
                         $all_cover_files[$filename_shorten] = $details;
                     }
                 }
+                $url_pdf = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=submissions&file=words_881.pdf&path=/var/local/submitty/courses/f17/development/submissions/upload_only/instructor/3/words_881.pdf";
+                $url_text = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=submissions&file=foo.txt&path=/var/local/submitty/courses/f17/development/submissions/upload_only/instructor/1/foo.txt";
+                
+                $url = "/tmp/jess_testing/150_dpi_corrected.pdf";
+                $url = "/var/local/submitty/courses/f17/development/submissions/upload_only/instructor/3/words_881.pdf";
+                $url = "/tmp/jess_testing/150_dpi_corrected.pdf";
+                $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=jess_testing&file=150_dpi_corrected.pdf&path=/tmp/jess_testing/150_dpi_corrected.pdf";
                 $return .= <<<HTML
 <div class="content">
     <h2>Unassigned Exam PDF Uploads</h2>
@@ -410,19 +417,45 @@ HTML;
         <thead class="persist-thead">
             <tr>
                 <td width="10%"></td>
-                <td width="40%">PDF preview</td>
-                <td width="30%">User ID</td>
-                <td width="20%">Enter</td>
+                <td width="60%">
+                    PDF preview </br>
+                    <object data="http://www.pdf995.com/samples/pdf.pdf" type="application/pdf" width="100%" height="200">
+                        alt : <a href="http://www.pdf995.com/samples/pdf.pdf">test.pdf</a>
+                    </object>
+                    <object data="{$url_pdf}" type="application/pdf" width="100%" height="200">
+                        alt : <a href="{$url_pdf}">url_pdf.pdf</a>
+                    </object>
+                    <object data="{$url_text}" width="100%" height="200">
+                        alt : <a href="{$url_text}">url_text.txt</a>
+                    </object>
+                    <object data="{$url}" type="application/pdf" width="100%" height="200">
+                        alt : <a href="{$url}">something.pdf</a>
+                    </object>
+                </td>
+                <td width="20%">User ID</td>
+                <td width="10%">Enter</td>
             </tr>
         </thead>
 HTML;
                 $count = 1;
                 foreach ($all_cover_files as $filename => $details) {
+                    $show = "tru\n";
+                    $data = "";
+                    foreach ($details as $detailname => $detail) {
+                        $show .= $detailname;
+                        $show .= ": ";
+                        $show .= $detail;
+                        $show .= "\n";
+                    }
+                    $data = $details["path"];
                     $return .= <<<HTML
         <tbody>
             <tr>
                 <td>{$count}</td>
-                <td>{$filename}</td>
+                <td>
+                    <object data="{$data}" type="application/pdf" width="100%" height="200">
+                    </object>
+                </td>
                 <td>
                     <input type="text" value =""/>
                 </td>
