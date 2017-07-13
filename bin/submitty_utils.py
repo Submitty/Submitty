@@ -12,8 +12,7 @@ def get_timezone():
     return tzlocal.get_localzone()
 
 
-def write_date_with_full_timezone(d):
-    
+def write_submitty_date(d):
     print ("\nWD ",d)
     print ("tzinfo ",d.tzinfo)
     my_timezone = get_timezone()
@@ -24,7 +23,7 @@ def write_date_with_full_timezone(d):
     print ("answer ",answer)
     return answer
 
-def read_date_with_full_timezone(s):
+def read_submitty_date(d):
     words = s.split()
     if not len(words) == 3:
         SystemExit("ERROR:  unexpected date format ",s)

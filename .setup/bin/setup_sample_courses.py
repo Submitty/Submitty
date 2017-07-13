@@ -809,7 +809,7 @@ class Course(object):
                         # ('America/New_York'), rather it abbreviates it as 'EDT' or 'EST')
                         current_time = current_time_tmp.strftime("%Y-%m-%d %H:%M:%S ") + str(my_timezone)
 
-                        current_time = submitty_utils.write_date_with_full_timezone(current_time_tmp)
+                        current_time = submitty_utils.write_submitty_date(current_time_tmp)
 
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time)

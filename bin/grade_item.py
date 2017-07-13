@@ -198,7 +198,7 @@ def main():
     
     #print ("foo aware ", foo)
     
-    submission_datetime=submitty_utils.read_date_with_full_timezone(submission_string)
+    submission_datetime=submitty_utils.read_submitty_date(submission_string)
     print ("MY DATETIME ",submission_datetime)
 
     
@@ -434,17 +434,17 @@ def main():
     # -------------------------------------------------------------
     # create/append to the results history
 
-    gradeable_deadline_longstring = submitty_utils.write_date_with_full_timezone(gradeable_deadline_datetime)
-    submission_longstring = submitty_utils.write_date_with_full_timezone(submission_datetime)
+    gradeable_deadline_longstring = submitty_utils.write_submitty_date(gradeable_deadline_datetime)
+    submission_longstring = submitty_utils.write_submitty_date(submission_datetime)
     
     seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
     # note: negative = not late
 
     queue_time = get_queue_time(args)
-    queue_time_longstring = submitty_utils.write_date_with_full_timezone(queue_time)
+    queue_time_longstring = submitty_utils.write_submitty_date(queue_time)
 
-    grading_began_longstring = submitty_utils.write_date_with_full_timezone(grading_began)
-    grading_finished_longstring = submitty_utils.write_date_with_full_timezone(grading_finished)
+    grading_began_longstring = submitty_utils.write_submitty_date(grading_began)
+    grading_finished_longstring = submitty_utils.write_submitty_date(grading_finished)
 
     waittime=int((grading_began-queue_time).total_seconds())
     gradingtime=int((grading_finished-grading_began).total_seconds())
