@@ -418,8 +418,15 @@ function setupCheckboxCells() {
             elems.push(this);
         }
         var scores = {};
-        scores[$(this).data('id')] = $(this).data('score');
-
+        if ($(this).hasClass('cell-all')) {
+            parent.children(".cell-grade").each(function() {
+                scores[$(this).data('id')] = $(this).data('score');
+            });
+        }
+        else {
+            scores[$(this).data('id')] = $(this).data('score');
+        }
+        
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
             {
