@@ -397,6 +397,7 @@ function setupCheckboxCells() {
     $("td[class^=cell-]").click(function() {
         var parent = $(this).parent();
         var elems = [];
+        var scores = {};
         if ($(this).hasClass('cell-all')) {
             var lastScore = null;
             var setFull = false;
@@ -407,6 +408,7 @@ function setupCheckboxCells() {
                 else if (lastScore !== $(this).data("score")) {
                     setFull = true;
                 }
+                scores[$(this).data('id')] = $(this).data('score');
             });
             parent.children(".cell-grade").each(function() {
                 updateCheckpointCell(this, setFull);
@@ -416,14 +418,6 @@ function setupCheckboxCells() {
         else {
             updateCheckpointCell(this);
             elems.push(this);
-        }
-        var scores = {};
-        if ($(this).hasClass('cell-all')) {
-            parent.children(".cell-grade").each(function() {
-                scores[$(this).data('id')] = $(this).data('score');
-            });
-        }
-        else {
             scores[$(this).data('id')] = $(this).data('score');
         }
         
