@@ -98,21 +98,13 @@ def main():
     # Remove the MOT.D
     remove_file("/etc/motd")
 
-    # Scrub the hosts file
-    hosts = ["192.168.56.101    test-submit test-submit.cs.rpi.edu",
-             "192.168.56.102    test-cgi test-cgi.cs.rpi.edu",
-             "192.168.56.103    test-svn test-svn.cs.rpi.edu",
-             "192.168.56.104    test-hwgrading test-hwgrading.cs.rpi.edu"]
-    remove_lines("/etc/hosts", hosts)
-
     # Scrub out the network interfaces that were created for Vagrant
-    subprocess.call(["ifdown", "eth1", "eth1:1", "eth1:2", "eth1:3"])
-    remove_file("/etc/network/interfaces.d/eth1.cfg")
+    subprocess.call(["ifdown", "enp0s8", "enp0s8:1", "enp0s8:2"])
+    remove_file("/etc/network/interfaces.d/enp0s8.cfg")
 
     # Remove the data directories for submitty
     shutil.rmtree('/usr/local/submitty/.setup', True)
     shutil.rmtree('/var/local/submitty', True)
-    shutil.rmtree('/var/lib/svn', True)
 
     # If we have psql cmd available, then PostgreSQL is installed so we should scrub out any
     # submitty DBs

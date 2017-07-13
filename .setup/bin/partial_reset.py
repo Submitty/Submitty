@@ -93,13 +93,16 @@ def main():
     os.system("{}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
     if os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
         os.system("rm -rf {}/*_logs".format(SUBMITTY_DATA_DIR))
-        os.system('rm -r {}/.vagrant/autograding_logs'.format(SUBMITTY_REPOSITORY))
-        os.system('mkdir {}/.vagrant/autograding_logs'.format(SUBMITTY_REPOSITORY))
-        os.system('ln -s {}/.vagrant/autograding_logs {}/autograding_logs'
+        os.system('rm -rf {}/.vagrant/logs/*'.format(SUBMITTY_REPOSITORY))
+
+        os.system('mkdir {}/.vagrant/logs/autograding'.format(SUBMITTY_REPOSITORY))
+        os.system('ln -s {}/.vagrant/logs/autograding {}/logs/autograding'
                   .format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
-        os.system('rm -r {}/.vagrant/tagrading_logs'.format(SUBMITTY_REPOSITORY))
-        os.system('mkdir {}/.vagrant/tagrading_logs'.format(SUBMITTY_REPOSITORY))
-        os.system('ln -s {}/.vagrant/tagrading_logs {}/tagrading_logs'
+
+        os.system('mkdir {}/.vagrant/logs/site'.format(SUBMITTY_REPOSITORY))
+        os.system('mkdir {}/.vagrant/logs/site/access'.format(SUBMITTY_REPOSITORY))
+        os.system('mkdir {}/.vagrant/logs/site/error'.format(SUBMITTY_REPOSITORY))
+        os.system('ln -s {}/.vagrant/logs/site {}/logs/site'
                   .format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
 
     if cmd_exists('psql'):

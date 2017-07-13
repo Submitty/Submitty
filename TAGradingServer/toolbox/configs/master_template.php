@@ -9,7 +9,7 @@ define("__SUBMISSION_GRACE_PERIOD_SECONDS__", 5 * 60);
 define("__OUTPUT_MAX_LENGTH__", 100000);
 define("__DEBUG__", false);
 define("__LOG_EXCEPTIONS__", true);
-define("__LOG_PATH__", "__INSTALL__FILLIN__TAGRADING_LOG_PATH__");
+define("__LOG_PATH__", "__INSTALL__FILLIN__SITE_LOG_PATH__");
 
 /* -- static configs for hard coded values ---------------------------------- */
 //Used by xslx_to_csv conversion process
