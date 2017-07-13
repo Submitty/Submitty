@@ -840,7 +840,7 @@ HTML;
             foreach($gradeable->getComponents() as $component){
                 $graders[] = $component->getGrader()->getId();
             }
-            array_unique($graders);
+            $graders = array_unique($graders);
             $graders = implode(",", $graders);
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">

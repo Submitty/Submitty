@@ -160,7 +160,7 @@ class ElectronicGraderController extends AbstractController {
             $submit_data['components'][$gc_id] = array();
             $submit_data['components'][$gc_id]['grade'] = floatval($_POST["grade-{$comp->getOrder()}"]);
             $submit_data['components'][$gc_id]['comment'] = isset($_POST["comment-{$comp->getOrder()}"]) ? $_POST["comment-{$comp->getOrder()}"] : '';
-            $submit_data['components'][$gc_id]['grader_id'] = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getComponents()[1]->getGrader()->getId();
+            $submit_data['components'][$gc_id]['grader_id'] = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $comp->getGrader()->getId();
             $submit_data['components'][$gc_id]['graded_version'] = $_POST['graded_version'];
         }
 

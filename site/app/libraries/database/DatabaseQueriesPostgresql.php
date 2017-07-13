@@ -1303,7 +1303,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
             $details['gd_id'] = $this->course_db->getLastInsertId('gradeable_data_gd_id_seq');
 
             foreach($details['components'] as $gc_id => $data) {
-                $params = array($details['gd_id'], $gc_id, $data['grade'], $data['comment'], $details['grader_id'], $details['graded_version'], $details['time']);
+                $params = array($details['gd_id'], $gc_id, $data['grade'], $data['comment'], $data['grader_id'], $data['graded_version'], $details['time']);
                 $this->course_db->query("INSERT INTO gradeable_component_data (gd_id, gc_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (?,?,?,?,?,?,?)", $params);
             }
         }
@@ -1312,7 +1312,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
             $this->course_db->query("UPDATE gradeable_data SET gd_overall_comment=?, gd_user_viewed_date=NULL WHERE gd_id=?", $params);
 
             foreach($details['components'] as $gc_id => $data) {
-                $params = array($data['grade'], $data['comment'], $details['grader_id'], $details['graded_version'], $details['time'], $details['gd_id'], $gc_id);
+                $params = array($data['grade'], $data['comment'], $data['grader_id'], $data['graded_version'], $details['time'], $details['gd_id'], $gc_id);
                 $this->course_db->query("UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_graded_version=?, gcd_grade_time=? WHERE gd_id=? AND gc_id=?", $params);
             }
         }
