@@ -76,6 +76,10 @@ ORDER BY u.registration_section, u.user_id");
         return $return;
     }
 
+    public function insertGradeableComponentMark(GradeableComponentMark $mark) {
+
+    }
+
     public function insertUser(User $user, $semester, $course) {
         $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
                        $user->getLastName(), $user->getEmail());
@@ -893,6 +897,10 @@ VALUES (?, ?, ?, ?, ?, ?)", $params);
         $this->course_db->query("
 UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?",
             $params);
+    }
+
+    public function updateGradeableComponentMarkData($gcd_id, GradeableComponentMark $mark) {
+
     }
   
     public function createNewGradeable($details) {
