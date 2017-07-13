@@ -15,6 +15,9 @@ import pytz
 import time
 import dateutil
 import dateutil.parser
+import tzlocal
+
+import submitty_utils
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
@@ -31,29 +34,14 @@ def parse_args():
     parser.add_argument("which_untrusted")
     return parser.parse_args()
 
-
-def get_timezone():
-    # read ubuntu timezone
-    # FIXME? ALTERNATELY GET FROM INI FILE
-    tzname = time.tzname
-    if len(tzname) == 2 and tzname[1] not in [None, 'None', '']:
-        # daylight savings
-        if (tzname[1] == "EDT"):
-            # hack because EDT is not supported by pytz
-            return pytz.timezone('America/New_York')
-        return pytz.timezone(tzname[1])
-    else:
-        # not daylight savings
-        return pytz.timezone(tzname[0])
-
 def get_queue_time(args):
     t = time.ctime(os.path.getctime(os.path.join(args.next_directory,args.next_to_grade)))
     t = dateutil.parser.parse(t)
-    t = get_timezone().localize(t)
+    t = submitty_utils.get_timezone().localize(t)
     return t
 
 def get_current_time():
-    return datetime.datetime.now(get_timezone())
+    return datetime.datetime.now(submitty_utils.get_timezone())
 
 def get_submission_path(args):
     queue_file = os.path.join(args.next_directory,args.next_to_grade)
@@ -190,8 +178,30 @@ def main():
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
         submission_string=submission_time_file.read().rstrip()
-    submission_datetime=dateutil.parser.parse(submission_string)
 
+    #print ("MY STRING ",submission_string)
+
+    #words = submission_string.split()
+    #print ("words = ",words)
+    
+    #if not len(words) == 3:
+    #   SystemExit("ERROR SPLITTING WORDS")
+
+    #parse_me = str(words[0] + ' ' + words[1])
+    #print ("Parser me ", parse_me)
+    #foo = datetime.datetime.strptime(parse_me,'%Y-%m-%d %H:%M:%S')
+
+    #print ("foo unaware ", foo)
+    
+    #my_timezone = pytz.timezone(words[2])
+    #foo = my_timezone.localize(foo)
+    
+    #print ("foo aware ", foo)
+    
+    submission_datetime=submitty_utils.read_date_with_full_timezone(submission_string)
+    print ("MY DATETIME ",submission_datetime)
+
+    
     
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
@@ -424,17 +434,17 @@ def main():
     # -------------------------------------------------------------
     # create/append to the results history
 
-    gradeable_deadline_longstring = datetime.datetime.strftime(gradeable_deadline_datetime, "%a %b  %d %H:%M:%S %Z %Y")
-    submission_longstring = datetime.datetime.strftime(submission_datetime,"%a %b  %d %H:%M:%S %Z %Y")
+    gradeable_deadline_longstring = submitty_utils.write_date_with_full_timezone(gradeable_deadline_datetime)
+    submission_longstring = submitty_utils.write_date_with_full_timezone(submission_datetime)
     
     seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
     # note: negative = not late
 
     queue_time = get_queue_time(args)
-    queue_time_longstring = datetime.datetime.strftime(queue_time, "%a %b  %d %H:%M:%S %Z %Y")
+    queue_time_longstring = submitty_utils.write_date_with_full_timezone(queue_time)
 
-    grading_began_longstring = datetime.datetime.strftime(grading_began, "%a %b  %d %H:%M:%S %Z %Y")
-    grading_finished_longstring = datetime.datetime.strftime(grading_finished, "%a %b  %d %H:%M:%S %Z %Y")
+    grading_began_longstring = submitty_utils.write_date_with_full_timezone(grading_began)
+    grading_finished_longstring = submitty_utils.write_date_with_full_timezone(grading_finished)
 
     waittime=int((grading_began-queue_time).total_seconds())
     gradingtime=int((grading_finished-grading_began).total_seconds())
@@ -456,7 +466,6 @@ def main():
 
     #---------------------------------------------------------------------
     # WRITE OUT VERSION DETAILS
-
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","insert_database_version_data.py"),
                      obj["semester"],
                      obj["course"],
@@ -466,10 +475,10 @@ def main():
                      obj["who"],
                      "true" if obj["is_team"] else "false",
                      str(obj["version"])])
-        
+
     print ("finished grading ", args.next_to_grade, " in ", gradingtime, " seconds")
 
-    
+
     # TEMPORARY ERROR CHECKING
     if os.path.isdir(os.path.join(results_path,"OLD")):
         if not filecmp.cmp(os.path.join(results_path,"OLD","results.json"),

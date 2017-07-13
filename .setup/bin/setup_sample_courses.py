@@ -30,6 +30,11 @@ import subprocess
 import uuid
 import pytz
 import time
+import tzlocal
+import os.path
+
+sys.path.append(os.path.dirname(__file__) + '../../bin')
+import submitty_utils
 
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
@@ -406,21 +411,6 @@ def datetime_str(datetime_obj):
     if not isinstance(datetime_obj, datetime):
         return datetime_obj
     return datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
-
-
-def get_timezone():
-    # read ubuntu timezone
-    # FIXME? ALTERNATELY GET FROM INI FILE
-    tzname = time.tzname
-    if len(tzname) == 2 and tzname[1] not in [None, 'None', '']:
-        # daylight savings
-        if (tzname[1] == "EDT"):
-            # hack because EDT is not supported by pytz
-            return pytz.timezone('America/New_York')
-        return pytz.timezone(tzname[1])
-    else:
-        # not daylight savings
-        return pytz.timezone(tzname[0])
 
 
 def parse_args():
@@ -812,9 +802,15 @@ class Course(object):
                         submission_count += 1
                         current_time_tmp = (gradeable.submission_due_date - timedelta(days=1))
                         # add the timezone -- FIXME? ALTERNATELY GET FROM INI FILE
-                        current_time_tmp = my_timezone.localize(get_timezone())
+                        my_timezone = submitty_utils.get_timezone()
+                        current_time_tmp = my_timezone.localize(current_time_tmp)
                         # format the time as a string with timezone
-                        current_time = current_time_tmp.strftime("%Y-%m-%d %H:%M:%S %Z")
+                        # NOTE: strftime doesn't format the timezone with the full name
+                        # ('America/New_York'), rather it abbreviates it as 'EDT' or 'EST')
+                        current_time = current_time_tmp.strftime("%Y-%m-%d %H:%M:%S ") + str(my_timezone)
+
+                        current_time = submitty_utils.write_date_with_full_timezone(current_time_tmp)
+
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time)
                         conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,

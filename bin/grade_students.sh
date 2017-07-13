@@ -401,8 +401,6 @@ function grade_this_item {
     # chop of first & last characters
     global_submission_time=`date -d "${submission_time}"`
 
-    #echo "gst " $global_submission_time
-    
     # switch to tmp directory
     pushd $tmp > /dev/null
 
@@ -837,23 +835,6 @@ while true; do
 
 	# calculate how long this job was running
 	ELAPSED=$(($ENDTIME - $STARTTIME))
-
-        
-        #---------------------------------------------------------------------
-        # WRITE OUT VERSION DETAILS
-
-        #echo "GRADE STUDENT SH INSERT... "
-        #${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
-        #                       "${semester}" \
-        #                       "${course}" \
-        #                       "${gradeable}" \
-        #                       "${user}" \
-        #                       "${team}" \
-        #                       "${who}" \
-        #                       "${is_team}" \
-        #                       "${version}"
-        #
-	#echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
 
 	# -------------------------------------------------------------
 	# remove submission & the active grading tag from the todo list

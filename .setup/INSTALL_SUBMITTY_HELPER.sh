@@ -271,6 +271,7 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
@@ -308,7 +309,9 @@ chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 
