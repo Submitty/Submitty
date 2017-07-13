@@ -5,7 +5,7 @@ namespace unitTests\app\models;
 use app\libraries\Core;
 use app\models\User;
 use app\models\GradeableComponent;
-use unitTests\BaseUnitTest;
+use tests\unitTests\BaseUnitTest;
 
 class GradeableComponentTester extends BaseUnitTest {
     private $core;
@@ -15,7 +15,7 @@ class GradeableComponentTester extends BaseUnitTest {
     }
     
     protected function createMockUser($id) {
-        $return = $this->createMockModel('User');
+        $return = $this->createMockModel(User::class);
         $return->method("getId")->willReturn($id);
         return $return;
     }
