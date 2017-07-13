@@ -397,6 +397,10 @@ HTML;
         &emsp;3=Limited Access Grader (mentor)<br>
         &emsp;4=Student (no grading access)<br>
     </p>
+        <p>&emsp;</p>
+    <p>
+        Do not use a header row.<br>
+    </p>
     <br />
     <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'upload_grader_list'))}" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />

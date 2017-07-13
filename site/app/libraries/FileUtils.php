@@ -385,7 +385,7 @@ class FileUtils {
                 $content_type = 'text/x-python';
                 break;
             case 'csv':
-                $content_type = 'text/csv';
+                $content_type = 'text/csv'
                 break;
             case 'xlsx':
                 $content_type = 'spreadsheet/xlsx';

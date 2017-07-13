@@ -5,6 +5,7 @@ namespace app\controllers\admin;
 use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\Output;
+use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\User;
 
@@ -259,55 +260,133 @@ class UsersController extends AbstractController {
         $content_type = FileUtils::getContentType($_FILES['upload']['name']);
         $mime_type = FileUtils::getMimeType($_FILES['upload']['tmp_name']);
 
-        /*if ($fileType === 'spreadsheet/xlsx' && $mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            //XLSX detected.  Conversion needed.
+        if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             $csv_file = "/tmp/".Utils::generateRandomString();
             $xlsx_file = "/tmp/".Utils::generateRandomString();
             $old_umask = umask(0007);
             file_put_contents($csv_file, "");
             umask($old_umask);
 
-            if (move_uploaded_file($_FILES['graderlist']['tmp_name'], $xlsx_file)) {
-
-                //Call up CGI script to process conversion.
+            if (move_uploaded_file($_FILES['upload']['tmp_name'], $xlsx_file)) {
                 $xlsx_tmp = basename($xlsx_file);
                 $csv_tmp = basename($csv_file);
-                error_reporting(E_ALL);
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, __CGI_URL__."/xlsx_to_csv.cgi?xlsx_file={$xlsx_tmp}&csv_file={$csv_tmp}");
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."xlsx_to_csv.cgi?xlsx_file={$xlsx_tmp}&csv_file={$csv_tmp}");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 $output = curl_exec($ch);
+
                 if ($output === false) {
-                    terminate_on_error("Error parsing xlsx to csv.");
+                    $this->core->addErrorMessage("Error parsing xlsx to csv");
+                    $this->core->redirect($return_url);
                 }
 
                 $output = json_decode($output, true);
                 if ($output === null) {
-                    terminate_on_error("Error parsing JSON response: " . json_last_error_msg());
+                    $this->core->addErrorMessage("Error parsing JSON response: ".json_last_error_msg());
+                    $this->core->redirect($return_url);
                 } else if ($output['error'] === true) {
-                    terminate_on_error("Error parsing xlsx to csv: " . $output['error_message']);
+                    $this->core->addErrorMessage("Error parsing xlsx to csv: ".$output['error_message']);
+                    $this->core->redirect($return_url);
                 } else if ($output['success'] !== true) {
-                    terminate_on_error("Error on response on parsing xlsx: " . curl_error($ch));
+                    $this->core->addErrorMessage("Error on response on parsing xlsx: ".curl_error($ch));
+                    $this->core->redirect($return_url);
                 }
 
                 curl_close($ch);
             } else {
-
-                terminate_on_error("Error isolating uploaded XLSX.  Please contact tech support.");
+                $this->core->addErrorMessage("Error isolating uploaded XLSX. Contact your sysadmin.");
+                $this->core->redirect($return_url);
             }
 
-        } else if ($fileType === 'csv' && $mimeType === 'text/plain') {
-
-        //CSV detected.  No conversion needed.
-        $csv_file = $_FILES['graderlist']['tmp_name'];
-        $xlsx_file = null;
-    
+        } else if ($content_type === 'text/csv' && $mime_type === 'text/plain') {
+            $csv_file = $_FILES['upload']['tmp_name'];
+            $xlsx_file = null;
         } else {
             $this->core->addErrorMessage("Must upload xlsx or csv");
             $this->core->redirect($return_url);
-        }*/
+        }
 
-        $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}");
+        register_shutdown_function(
+            function() use ($csv_file, $xlsx_file) {
+                if (file_exists($xlsx_file)) {
+                    unlink($xlsx_file);
+                }
+                if (file_exists($csv_file)) {
+                    unlink($csv_file);
+                }
+            }
+        );
+
+        //Set environment config to allow '\r' EOL encoding.  (reverts back after script exits)
+        //Otherwise, only '\n' and '\r\n' are allowed.  ('\r' is normally expected to be a Unix item seperator)
+        //Older versions of Microsoft Excel on Macintosh write CSVs with '\r' EOL encoding.
+        ini_set("auto_detect_line_endings", true);
+
+        $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($contents === false) {
+            $this->core->addErrorMessage("File was not properly uploaded. Contact your sysadmin.");
+            $this->core->redirect($return_url);
+        }
+
+        if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+            unset($contents[0]); // xlsx2csv will add a row to the top of the spreadsheet
+        }
+
+        //Validation and error checking.
+        $error_message = "";
+        $row_num = 0;
+        $graders_to_add = array();
+        foreach($contents as $content) {
+            $row_num++;
+            $vals = explode(",", trim($content));
+            if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
+
+            //No check on user_id (computing login ID) -- different Univeristies have different formats.
+            
+            //First and Last name must be alpha characters, white-space, or certain punctuation.
+            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}" . PHP_EOL;
+            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[2]) ? "" : "Error in last name column, row #{$row_num}: {$vals[2]}" . PHP_EOL;
+
+            //Check email address for format "address@domain".
+            $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_num}: {$vals[3]}" . PHP_EOL;
+
+            //grader-level check is a digit between 1 - 4.
+            $error_message .= preg_match("~[1-4]{1}~", $vals[4]) ? "" : "Error in grader-level column, row #{$row_num}: {$vals[4]}" . PHP_EOL;
+
+            $graders_to_add[] = $vals;
+        }
+
+        //Display any accumulated errors.  Quit on errors, otherwise continue.
+        if (!empty($error_message)) {
+            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not be an error.");
+            $this->core->redirect($return_url);
+        }
+
+        //Existing graders are not updated.
+        $existing_graders = $this->core->getQueries()->getAllGraders();
+        foreach($existing_graders as $existing_grader) {
+            foreach($graders_to_add as $index => $new_grader) {
+                if ($new_grader[0] === $existing_grader->getId()) {
+                    unset($graders_to_add[$index]);
+                }
+            }
+        }
+
+        //Insert new graders to database
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();        
+        foreach($graders_to_add as $data) {
+            $new_grader = new User($this->core);
+            $new_grader->setId($data[0]);
+            $new_grader->setFirstName($data[1]);
+            $new_grader->setLastName($data[2]);
+            $new_grader->setEmail($data[3]);
+            $new_grader->setGroup($data[4]);
+            $this->core->getQueries()->insertUser($new_grader, $semester, $course);
+        }
+
+        $inserted = count($grader_to_add);
+        $this->core->addSuccessMessage("{$inserted} new graders added from {$_FILES['upload']['name']}");
         $this->core->redirect($return_url);
     }
 }
