@@ -5,7 +5,7 @@ namespace unitTests\app\models;
 use app\libraries\Core;
 use app\models\User;
 use app\models\GradeableComponent;
-use unitTests\BaseUnitTest;
+use tests\unitTests\BaseUnitTest;
 
 class GradeableComponentTester extends BaseUnitTest {
     private $core;
