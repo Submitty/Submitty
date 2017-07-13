@@ -11,8 +11,10 @@ import subprocess
 import stat
 import filecmp
 import datetime
+import pytz
 import time
-
+import dateutil
+import dateutil.parser
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
@@ -20,7 +22,6 @@ SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
 BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
-
 
 # ==================================================================================
 def parse_args():
@@ -33,12 +34,16 @@ def parse_args():
 
 def get_queue_time(args):
     t = time.ctime(os.path.getctime(os.path.join(args.next_directory,args.next_to_grade)))
-    print ("QUEUE TIME ",t)
-    return datetime.datetime.strptime(time.ctime(), "%a %b %d %H:%M:%S %Y")
+    dt = dateutil.parser.parse(t)
+    my_timezone=pytz.timezone(time.tzname[0]) # read ubuntu timezone
+    dt = my_timezone.localize(dt)
+    return dt
 
 def get_current_time():
-    t = time.ctime(os.path.getctime(os.path.join(args.next_directory,args.next_to_grade)))
-    return datetime.datetime.strptime(time.ctime(), "%a %b %d %H:%M:%S %Y")
+    t = datetime.datetime.now()
+    my_timezone=pytz.timezone(time.tzname[0]) # read ubuntu timezone
+    t = my_timezone.localize(t)
+    return t
 
 def get_submission_path(args):
     queue_file = os.path.join(args.next_directory,args.next_to_grade)
@@ -141,6 +146,8 @@ def main():
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
     print ("GRADE THIS", submission_path)
 
+    grading_began=get_current_time()
+
     # --------------------------------------------------------
     # various paths
     test_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_code",obj["gradeable"])
@@ -171,8 +178,9 @@ def main():
 
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
-        submission_time=submission_time_file.read().rstrip()
-    
+        submission_string=submission_time_file.read().rstrip()
+    submission_datetime=dateutil.parser.parse(submission_string)
+
     
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
@@ -199,9 +207,10 @@ def main():
     #print ("UPLOAD TYPE ",gradeable_upload_type)
     #FIXME:  deal with svn/git/whatever
 
-    gradeable_deadline_string = gradeable_config_obj["date_due"]
-    gradeable_deadline_datetime=datetime.datetime.strptime(str(gradeable_deadline_string),'%Y-%m-%d %H:%M:%S')
-    #gradeable_deadline_datetime.replace(tzinfo=datetime.timezone.utc)
+    # FIXME: TIMEZONE HACK
+    gradeable_deadline_string = gradeable_config_obj["date_due"] + " EDT"
+
+    gradeable_deadline_datetime=dateutil.parser.parse(gradeable_deadline_string)
     
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
     pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
@@ -230,7 +239,7 @@ def main():
                                            obj["gradeable"],
                                            obj["who"],
                                            str(obj["version"]),
-                                           submission_time],
+                                           submission_string],
                                           stdout=logfile)
 
     if compile_success == 0:
@@ -288,7 +297,7 @@ def main():
                                           obj["gradeable"],
                                           obj["who"],
                                           str(obj["version"]),
-                                          submission_time],
+                                          submission_string],
                                           stdout=logfile)
 
 
@@ -340,7 +349,7 @@ def main():
                                              obj["gradeable"],
                                              obj["who"],
                                              str(obj["version"]),
-                                             submission_time],
+                                             submission_string],
                                             stdout=logfile)
 
     if validator_success == 0:
@@ -392,46 +401,26 @@ def main():
         #os.chown(history_file,HWCRON_UID,ta_group_id)
         #os.chmod(history_file,0640)
         
+    grading_finished=get_current_time()
+
     # -------------------------------------------------------------
     # create/append to the results history
 
-    submission_datetime=datetime.datetime.strptime(str(submission_time),'%Y-%m-%d %H:%M:%S')
-
-    #    submission_datetime.replace(tzinfo=datetime.timezone.utc)
-    
-    print ("DEADLINE |",str(gradeable_deadline_string),"| |",str(submission_time),"|")
-
-    
     gradeable_deadline_longstring = datetime.datetime.strftime(gradeable_deadline_datetime, "%a %b  %d %H:%M:%S %Z %Y")
-    submission_longstring = datetime.datetime.strftime(submission_datetime, "%a %b  %d %H:%M:%S %Z %Y")
-
-    print ("BEFgradeable_deadline_datetime   ", gradeable_deadline_datetime)
-    print ("BEFgradeable_deadline longstring ", gradeable_deadline_longstring)
-    print ("BEFsubmission longstring ", submission_longstring)
-        
-    gradeable_deadline_longstring = gradeable_deadline_longstring.replace("  20","  EST  20")
-    submission_longstring = submission_longstring.replace("  20","  EST  20")
-
-
+    submission_longstring = datetime.datetime.strftime(submission_datetime,"%a %b  %d %H:%M:%S %Z %Y")
     
-    print ("AFTgradeable_deadline_datetime   ", gradeable_deadline_datetime)
-    print ("AFTgradeable_deadline longstring ", gradeable_deadline_longstring)
-    print ("AFTsubmission longstring ", submission_longstring)
-    print ("submission_datetime   ", submission_datetime)
-
-    
-    deadline_seconds = gradeable_deadline_datetime.toordinal()
-    submission_seconds = submission_datetime.toordinal()
-
-    seconds_late = submission_seconds-deadline_seconds
-    print ("LATE ",seconds_late)
+    seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
     # note: negative = not late
-
 
     queue_time = get_queue_time(args)
     queue_time_longstring = datetime.datetime.strftime(queue_time, "%a %b  %d %H:%M:%S %Z %Y")
-    queue_time_longstring = queue_time_longstring.replace("  20","  EST  20")
-    print ("qtlong",queue_time_longstring)
+
+    grading_began_longstring = datetime.datetime.strftime(grading_began, "%a %b  %d %H:%M:%S %Z %Y")
+    grading_finished_longstring = datetime.datetime.strftime(grading_finished, "%a %b  %d %H:%M:%S %Z %Y")
+
+    waittime=int((grading_began-queue_time).total_seconds())
+    gradingtime=int((grading_finished-grading_began).total_seconds())
+
     
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","write_grade_history.py"),
                      history_file,
@@ -440,10 +429,10 @@ def main():
                      str(seconds_late),
                      queue_time_longstring,
                      "False",# "$IS_BATCH_JOB" \
-                     "",#"`date -d @$STARTTIME`" \
-                     "0", #"$WAITTIME" \
-                     "",#"`date -d @$ENDTIME`" \
-                     "0",#"$ELAPSED" \
+                     grading_began_longstring,
+                     str(waittime),
+                     grading_finished_longstring,
+                     str(gradingtime),
                      "0"])#"$global_grade_result"
 
     # TEMPORARY ERROR CHECKING
@@ -470,3 +459,4 @@ def main():
 # ==================================================================================
 if __name__ == "__main__":
     main()
+

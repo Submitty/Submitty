@@ -650,7 +650,6 @@ function grade_this_item {
 
     cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.png $tmp/test*.html $tmp/results_log_*txt $tmp/results.json $tmp/grade.txt $tmp/test*.json "$results_path"
 
-
     # FIXME: a global variable
 
     if [ -e $results_path/grade.txt ] ;
@@ -659,8 +658,7 @@ function grade_this_item {
     else
 	global_grade_result="ERROR: $results_path/grade.txt does not exist"
     fi
-
-
+    
     if [[ $global_grade_result == "" ]] ;
     then
 	global_grade_result="WARNING: $results_path/grade.txt does not have a total score"
@@ -682,11 +680,16 @@ function grade_this_item {
 
     # step out of this directory
 
-    popd > /dev/null
+
     # and remove the directory
     find . -exec ls -lta {} \; > $results_path/results_log_done.txt 2>&1
+
+    popd > /dev/null
     $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp  > /dev/null  2>&1
     rm -rf $tmp
+
+    echo "DONE OLD GRADING"
+    
 }
 
 
@@ -843,6 +846,8 @@ while true; do
 	# call the helper function
         echo "========================================================================"
 	grade_this_item $NEXT_DIRECTORY $NEXT_ITEM
+
+        echo "IN BETWEEN"
 
         ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
         echo "========================================================================"

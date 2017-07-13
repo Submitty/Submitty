@@ -29,6 +29,7 @@ import shutil
 import subprocess
 import uuid
 import pytz
+import time
 
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
@@ -795,8 +796,9 @@ class Course(object):
                         submitted = True
                         submission_count += 1
                         current_time_tmp = (gradeable.submission_due_date - timedelta(days=1))
-                        # add the timezone
-                        my_timezone=pytz.timezone('US/Eastern')
+                        # add the timezone -- FIXME? GET FROM INI FILE / READ FROM SYSTEM?
+                        #my_timezone=pytz.timezone('America/New_York')
+                        my_timezone=pytz.timezone(time.tzname[0]) # read ubuntu timezone
                         current_time_tmp = my_timezone.localize(current_time_tmp)
                         # format the time as a string with timezone
                         current_time = current_time_tmp.strftime("%Y-%m-%d %H:%M:%S %Z")
