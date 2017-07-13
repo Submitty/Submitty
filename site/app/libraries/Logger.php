@@ -145,7 +145,7 @@ class Logger {
         $log_message .= str_repeat("=-", 30)."="."\n";
 
         // Appends to the file using a locking mechanism, and supressing any potential error from this
-        @file_put_contents(FileUtils::joinPaths(static::$log_path, 'error', "{$filename}.log"), $log_message, FILE_APPEND | LOCK_EX);
+        @file_put_contents(FileUtils::joinPaths(static::$log_path, 'site_errors', "{$filename}.log"), $log_message, FILE_APPEND | LOCK_EX);
     }
 
     /**

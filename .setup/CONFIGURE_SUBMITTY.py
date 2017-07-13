@@ -50,7 +50,7 @@ SUBMITTY_REPOSITORY = os.path.dirname(SETUP_SCRIPT_DIRECTORY)
 SUBMITTY_INSTALL_DIR = '/usr/local/submitty'
 SUBMITTY_DATA_DIR = '/var/local/submitty'
 
-TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'site')
+TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs')
 AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
 
 ##############################################################################

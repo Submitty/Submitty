@@ -136,9 +136,8 @@ mkdir -p ${SUBMITTY_DATA_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}/courses
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/site
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/site/access
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/site/error
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
 
 
 # set the permissions of these directories
