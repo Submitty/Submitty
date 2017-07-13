@@ -46,11 +46,9 @@ args = parser.parse_args()
 # LOAD THE PREVIOUS HISTORY
 json_file = args.json_file
 if os.path.isfile(json_file):
-    print ("OPENING PREV HISTORY")
     with open(json_file, 'r') as infile:
         obj = json.load(infile, object_pairs_hook=collections.OrderedDict)
 else:
-    print ("NO PREV HISTORY ",json_file)
     obj = []
 
 #####################################

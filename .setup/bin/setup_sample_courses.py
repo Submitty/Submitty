@@ -408,6 +408,21 @@ def datetime_str(datetime_obj):
     return datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
 
 
+def get_timezone():
+    # read ubuntu timezone
+    # FIXME? ALTERNATELY GET FROM INI FILE
+    tzname = time.tzname
+    if len(tzname) == 2 and tzname[1] not in [None, 'None', '']:
+        # daylight savings
+        if (tzname[1] == "EDT"):
+            # hack because EDT is not supported by pytz
+            return pytz.timezone('America/New_York')
+        return pytz.timezone(tzname[1])
+    else:
+        # not daylight savings
+        return pytz.timezone(tzname[0])
+
+
 def parse_args():
     """
     Parses out the arguments that might be passed to this script as it's run as a commandline
@@ -796,10 +811,8 @@ class Course(object):
                         submitted = True
                         submission_count += 1
                         current_time_tmp = (gradeable.submission_due_date - timedelta(days=1))
-                        # add the timezone -- FIXME? GET FROM INI FILE / READ FROM SYSTEM?
-                        #my_timezone=pytz.timezone('America/New_York')
-                        my_timezone=pytz.timezone(time.tzname[0]) # read ubuntu timezone
-                        current_time_tmp = my_timezone.localize(current_time_tmp)
+                        # add the timezone -- FIXME? ALTERNATELY GET FROM INI FILE
+                        current_time_tmp = my_timezone.localize(get_timezone())
                         # format the time as a string with timezone
                         current_time = current_time_tmp.strftime("%Y-%m-%d %H:%M:%S %Z")
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,

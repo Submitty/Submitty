@@ -34,6 +34,7 @@ def parse_args():
 
 def get_timezone():
     # read ubuntu timezone
+    # FIXME? ALTERNATELY GET FROM INI FILE
     tzname = time.tzname
     if len(tzname) == 2 and tzname[1] not in [None, 'None', '']:
         # daylight savings
