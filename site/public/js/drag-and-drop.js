@@ -324,7 +324,7 @@ function isValidSubmission(){
  *
  * @param 
  */
-function handleBatch(num_pages, gradeable_id) {
+function handleBatch(num_pages, gradeable_id, return_url) {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -379,6 +379,7 @@ function handleBatch(num_pages, gradeable_id) {
                 data = JSON.parse(data);
                 if (data['success']) {
                     console.log("success");
+                    window.location.href = return_url;
                 }
                 else {
                     alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);

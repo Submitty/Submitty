@@ -24,7 +24,7 @@ try:
     directory = os.path.basename(arguments['directory'].value)
     num = int(os.path.basename(arguments['num'].value))
 
-    CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+    current_path = os.path.dirname(os.path.realpath(__file__))
     original_path = "/tmp/" + directory
     copy_path = "/tmp/" + directory + "_copy"
 
@@ -48,7 +48,7 @@ try:
         if (total_pages % num != 0):
             valid = False
             message = "Total # of pages: {t} is not divisible by the # of page(s) per exam: {n}".format(t=total_pages,n=num)
-            valid = False
+            shutil.rmtree(copy_path)
             break
 
         # split the pdf
@@ -60,9 +60,17 @@ try:
             os.system("pdftk {in_pdf} cat {start}-{stop} output {out_pdf}".format(in_pdf=filename,start=j*num+1,stop=(j+1)*num,out_pdf=out_pdf))
             os.system("pdftk {in_pdf} cat {start} output {out_pdf}".format(in_pdf=filename,start=j*num+1,out_pdf=out_cover_pdf))
 
-    os.chdir(CURRENT_PATH) #make sure this is in right place
+    # get rid of unnecessary copies
+    for filename in os.listdir(original_path):
+        os.remove(filename)
+
+    os.chdir(current_path) #make sure this is in right place
     
 except:
     valid = False
+    # if copy exists, delete it... but relies on the fact that copy_path exists :(
+    if os.path.exists(copy_path):
+        shutil.rmtree(copy_path)
+        
 
 print(json.dumps({"valid": valid, "message": message}))

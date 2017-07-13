@@ -217,6 +217,9 @@ class SubmissionController extends AbstractController {
             }
         }
 
+        // use pdf_check.cgi to check that # of pages is valid and split
+        // for each pdf also get the cover image and name appropriately
+
         // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
         // as that would require some hacky path handling specific to PAM authentication
         $ch = curl_init();
@@ -232,19 +235,21 @@ class SubmissionController extends AbstractController {
         curl_close($ch);
 
         if ($output === null) {
+            FileUtils::recursiveRmdir("/tmp".$directory);
             return $this->uploadResult("Error JSON response for pdf split: ".json_last_error_msg(),false);
         }
         else if (!isset($output['valid'])) {
+            FileUtils::recursiveRmdir("/tmp".$directory);
             return $this->uploadResult("Missing response in JSON for pdf split",false);
         }
-        else if ($output['valid'] != true) {
+        else if ($output['valid'] !== true) {
+            FileUtils::recursiveRmdir("/tmp".$directory);
             return $this->uploadResult($output['message'],false);
         }
 
-        return $this->uploadResult("Up to here is good!",false);
-
-        // for each pdf also get the cover image and name appropriately
         // display pdfs in new div
+        // $all_files = FileUtils::getAllFiles("/tmp".$directory."_copy");
+        // echo count($all_files);
 
         $return = array('success' => true);
         $this->core->getOutput()->renderJson($return);
@@ -252,7 +257,7 @@ class SubmissionController extends AbstractController {
     }
 
 
-    /**\
+    /**
     * Function for verification that a given RCS ID is valid and has a corresponding user and gradeable.
     * This should be called via AJAX, saving the result to the json_buffer of the Output object. 
     * If failure, also returns message explaining what happened.
@@ -282,7 +287,7 @@ class SubmissionController extends AbstractController {
         $student_id = $_POST['student_id'];
         $student_user = $this->core->getQueries()->getUserById($student_id);
 
-        if ($student_user == null) {
+        if ($student_user === null) {
             $msg = "Invalid student id '{$_POST['student_id']}'";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);

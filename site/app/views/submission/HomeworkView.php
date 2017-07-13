@@ -88,8 +88,6 @@ HTML;
         </div>
     </form>
 HTML;
-        }   
-
             $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
@@ -122,6 +120,7 @@ HTML;
         });
     </script>
 HTML;
+        }
         $return .= <<<HTML
     <div class="sub">
 HTML;
@@ -339,22 +338,13 @@ HTML;
                 // batch upload
                 if ($("#radio_batch").is(":checked")) {
                     var num_pages = document.getElementById("submissionForm").num_pages.value;
-                    handleBatch(num_pages, "{$gradeable->getId()}");
-                    // error checking with file name
-                    // make sure that submission is a pdf
-                        // if(url_file.substring(url_file.length - 3) == "pdf") {
-                        //     iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=submissions&file=" + html_file + "&path=" + url_file + "' width='750px' height='600px' style='border: 0'></iframe>");
-                        // }
-                    // get number of pages for the submitted pdf
-                    // make sure is a multiple of # of pages per exam
-                    // if not, popup error message
-                    // save this pdf somewhere
-                    // split this pdf with pdftk for loop and save those pdfs somewhere
-                    // for each pdf also get the cover image and name appropriately
-                    // display pdfs in new div
+                    handleBatch(num_pages, "{$gradeable->getId()}",
+                                "{$this->core->buildUrl(array('component' => 'student',
+                                                               'gradeable_id' => $gradeable->getId()))}");
                 }
                 // no RCS entered, upload for whoever is logged in
-                else if (($("#radio_normal").is(":checked")) || user_id == ""){
+                else if (($("#radio_normal").is(":checked")) || 
+                        ($("#radio_student").is(":checked") && user_id == "")){
                     handleSubmission("{$this->core->buildUrl(array('component' => 'student',
                                                                'page' => 'submission',
                                                                'action' => 'upload',
@@ -380,7 +370,78 @@ HTML;
     </script>
 </div>
 HTML;
+        //////
+        if ($this->core->getUser()->accessAdmin()) {
+            $directory = "/jess_testing";
+            // $all_directories = FileUtils::getAllDirs("/tmp");
+            // echo count($all_directories);
+            // echo "\n";
+            // foreach ($all_directories as $d) {
+            //     echo $d;
+            //     echo "\n";
+            // }
 
+            $pre_all_files = FileUtils::getAllFiles("/tmp".$directory);
+            // echo count($pre_all_files);
+            // echo "\n";
+
+            $pre_all_files = FileUtils::getAllFiles("/tmp".$directory."_copy");
+            // echo count($pre_all_files);
+            // echo "\n";
+
+            if (count($pre_all_files) > 0) {
+
+                $all_files = array();
+                $all_cover_files = array();
+
+                foreach ($pre_all_files as $filename => $details) {
+                    // echo $file;
+                    // echo "\n";
+                    $all_files[$filename] = $details;
+                    if (strpos($filename, 'cover') !== false) {
+                        $filename_shorten = str_replace("_cover",'',$filename);
+                        $all_cover_files[$filename_shorten] = $details;
+                    }
+                }
+                $return .= <<<HTML
+<div class="content">
+    <h2>Unassigned Exam PDF Uploads</h2>
+    <table class="table table-striped table-bordered persist-area">
+        <thead class="persist-thead">
+            <tr>
+                <td width="10%"></td>
+                <td width="40%">PDF preview</td>
+                <td width="30%">User ID</td>
+                <td width="20%">Enter</td>
+            </tr>
+        </thead>
+HTML;
+                $count = 1;
+                foreach ($all_cover_files as $filename => $details) {
+                    $return .= <<<HTML
+        <tbody>
+            <tr>
+                <td>{$count}</td>
+                <td>{$filename}</td>
+                <td>
+                    <input type="text" value =""/>
+                </td>
+                <td>
+                    <a class="btn btn-primary" >
+                        Submit
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+HTML;
+                    $count++;
+                }
+                $return .= <<<HTML
+    </table>
+</div>
+HTML;
+            }
+        }
         if ($gradeable->getSubmissionCount() === 0) {
             $return .= <<<HTML
 <div class="content">

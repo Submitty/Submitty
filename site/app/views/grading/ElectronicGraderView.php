@@ -88,7 +88,7 @@ HTML;
         if($percentage !== -1 || $this->core->getUser()->accessFullGrading()){
             $return .= <<<HTML
             <a class="btn btn-primary" 
-                href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
+                href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}">
                 Grading Details
             </a>
 HTML;
