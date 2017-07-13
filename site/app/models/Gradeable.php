@@ -20,7 +20,6 @@ use app\libraries\Utils;
  *
  * @method string getId()
  * @method string getName()
- * @method string getTaInstructions()
  * @method int getType()
  * @method array getPartNames()
  * @method array getTextboxes()
