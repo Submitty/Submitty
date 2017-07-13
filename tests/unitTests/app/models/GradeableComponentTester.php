@@ -15,7 +15,7 @@ class GradeableComponentTester extends BaseUnitTest {
     }
     
     protected function createMockUser($id) {
-        $return = $this->createMockModel('User');
+        $return = $this->createMockModel(User::class);
         $return->method("getId")->willReturn($id);
         return $return;
     }
