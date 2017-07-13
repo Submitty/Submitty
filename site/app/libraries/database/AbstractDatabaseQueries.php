@@ -384,13 +384,6 @@ abstract class AbstractDatabaseQueries {
     abstract public function getTeamByUserId($g_id, $user_id);
 
     /**
-     * Update/Insert data from TA grading form to gradeable_data, gradeable_component_data
-     *
-     * @param array $details
-     */
-    abstract public function submitTAGrade($details);
-
-    /**
      * Return an array of users with late days
      */
     abstract public function getUsersWithLateDays();

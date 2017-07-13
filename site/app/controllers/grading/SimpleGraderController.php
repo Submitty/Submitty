@@ -39,6 +39,11 @@ class SimpleGraderController extends AbstractController  {
         }
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getName()}");
 
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         $students = array();
         if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
@@ -87,6 +92,12 @@ class SimpleGraderController extends AbstractController  {
         $g_id = $_REQUEST['g_id'];
         $user_id = $_REQUEST['user_id'];
         $gradeable = $this->core->getQueries()->getGradeable($g_id, $user_id);
+
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         $user = $this->core->getQueries()->getUserById($user_id);
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             $response = array('status' => 'fail', 'message' => 'Invalid CSRF token');
@@ -140,6 +151,12 @@ class SimpleGraderController extends AbstractController  {
 
         $users = $_POST['users'];
         $g_id = $_POST['g_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($g_id, $username);
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         $num_numeric = $_POST['num_numeric'];
         $num_text = $_POST['num_text'];
         $component_ids = $_POST['component_ids'];

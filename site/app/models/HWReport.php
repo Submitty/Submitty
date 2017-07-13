@@ -68,7 +68,7 @@ class HWReport extends AbstractModel {
             // everything done only when beenTAgraded, so getGradedVersion will always exist
             $graded_version = $gradeable->getGradedVersion();
  
-            $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $graded_version, "results_grade.txt");
+            $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $graded_version, "grade.txt");
             $auto_grading_awarded = 0;
             $auto_grading_max_score = 0;
             if(!file_exists($submit_file)) {
@@ -134,13 +134,6 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() === null) {
-                foreach($graders as $g) {
-                    if($g->getId() == $gradeable->getGraderId()) {
-                        $gradeable->setGrader($g);
-                    }
-                }
-            }
             $this->generateReport($gradeable, $ldu);
         }
     }
@@ -150,13 +143,6 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() === null) {
-                foreach($graders as $grader) {
-                    if($grader->getId() == $gradeable->getGraderId()) {
-                        $gradeable->setGrader($grader);
-                    }
-                }
-            }
             $this->generateReport($gradeable, $ldu);
         }
     }
@@ -168,13 +154,6 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this-core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() === null) {
-                foreach($graders as $grader) {
-                    if($grader->getId() == $gradeable->getGraderId()) {
-                        $gradeable->setGrader($grader);
-                    }
-                }
-            }
             $this->generateReport($gradeable, $ldu);
         }
     }
@@ -184,13 +163,6 @@ class HWReport extends AbstractModel {
         $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
-            if($gradeable->getGrader() === null) {
-                foreach($graders as $grader) {
-                    if($grader->getId() == $gradeable->getGraderId()) {
-                        $gradeable->setGrader($grader);
-                    }
-                }
-            }
             $this->generateReport($gradeable, $ldu);
         }
     }
