@@ -23,6 +23,7 @@ import argparse
 from datetime import datetime
 import json
 import os
+import sys
 
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
 

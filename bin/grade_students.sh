@@ -387,16 +387,6 @@ function grade_this_item {
 
     results_path="$results_path_tmp/OLD"
 
-    # grab a copy of the current history.json file (if it exists)
-    #global_history_file_location_tmp=${results_path_tmp}/history.json
-    #global_history_file_location=${results_path}/history.json
-    #if [ -e "$global_history_file_location" ]
-    #then
-    #    tmp_history_filename=`mktemp`
-    #    cp -f $global_history_file_location  $tmp_history_filename
-    #fi
-
-
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
     tmp=`mktemp -d /tmp/temp.XXXXXXXX`
@@ -411,6 +401,8 @@ function grade_this_item {
     # chop of first & last characters
     global_submission_time=`date -d "${submission_time}"`
 
+    #echo "gst " $global_submission_time
+    
     # switch to tmp directory
     pushd $tmp > /dev/null
 
@@ -664,17 +656,6 @@ function grade_this_item {
 	global_grade_result="WARNING: $results_path/grade.txt does not have a total score"
     fi
 
-
-    # move the copied results history (if it exists) back into results folder
-    #if [ -e "$tmp_history_filename" ]
-    #then
-    #    mv $tmp_history_filename $global_history_file_location
-    #    # and fix permissions
-    #    ta_group=`stat -c "%G"  ${results_path}`
-    #    chgrp ${ta_group} $global_history_file_location
-    #    chmod g+r $global_history_file_location
-    #fi
-
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
 
@@ -846,7 +827,6 @@ while true; do
 	# call the helper function
         echo "========================================================================"
 	grade_this_item $NEXT_DIRECTORY $NEXT_ITEM
-
         echo "IN BETWEEN"
 
         ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
@@ -858,40 +838,22 @@ while true; do
 	# calculate how long this job was running
 	ELAPSED=$(($ENDTIME - $STARTTIME))
 
-	# -------------------------------------------------------------
-#        # create/append to the results history
-#        sec_deadline=`date -d "${global_gradeable_deadline}" +%s`
-#        sec_submission=`date -d "${global_submission_time}" +%s`
-#        seconds_late=$((sec_submission-sec_deadline))
-#        ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py  \
-#                               "$global_history_file_location" \
-#                               "$global_gradeable_deadline" \
-#                               "$global_submission_time" \
-#                               "$seconds_late" \
-#                               "`date -d @$FILE_TIMESTAMP`" \
-#                               "$IS_BATCH_JOB" \
-#                               "`date -d @$STARTTIME`" \
-#                               "$WAITTIME" \
-#                               "`date -d @$ENDTIME`" \
-#                               "$ELAPSED" \
-#                               "$global_grade_result"
-#
-#        cp "$global_history_file_location" "$global_history_file_location_tmp"  
         
         #---------------------------------------------------------------------
         # WRITE OUT VERSION DETAILS
 
-        ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
-                               "${semester}" \
-                               "${course}" \
-                               "${gradeable}" \
-                               "${user}" \
-                               "${team}" \
-                               "${who}" \
-                               "${is_team}" \
-                               "${version}"
-        
-	echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
+        #echo "GRADE STUDENT SH INSERT... "
+        #${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
+        #                       "${semester}" \
+        #                       "${course}" \
+        #                       "${gradeable}" \
+        #                       "${user}" \
+        #                       "${team}" \
+        #                       "${who}" \
+        #                       "${is_team}" \
+        #                       "${version}"
+        #
+	#echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
 
 	# -------------------------------------------------------------
 	# remove submission & the active grading tag from the todo list

@@ -48,14 +48,12 @@ def get_timezone():
 
 def get_queue_time(args):
     t = time.ctime(os.path.getctime(os.path.join(args.next_directory,args.next_to_grade)))
-    dt = dateutil.parser.parse(t)
-    dt = get_timezone().localize(dt)
-    return dt
+    t = dateutil.parser.parse(t)
+    t = get_timezone().localize(t)
+    return t
 
 def get_current_time():
-    t = datetime.datetime.now(get_timezone())
-    print ("CURRENT TIME",t)
-    return t
+    return datetime.datetime.now(get_timezone())
 
 def get_submission_path(args):
     queue_file = os.path.join(args.next_directory,args.next_to_grade)
@@ -456,6 +454,22 @@ def main():
                      str(gradingtime),
                      grade_result])
 
+    #---------------------------------------------------------------------
+    # WRITE OUT VERSION DETAILS
+
+    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","insert_database_version_data.py"),
+                     obj["semester"],
+                     obj["course"],
+                     obj["gradeable"],
+                     obj["user"],
+                     obj["team"],
+                     obj["who"],
+                     "true" if obj["is_team"] else "false",
+                     str(obj["version"])])
+        
+    print ("finished grading ", args.next_to_grade, " in ", gradingtime, " seconds")
+
+    
     # TEMPORARY ERROR CHECKING
     if os.path.isdir(os.path.join(results_path,"OLD")):
         if not filecmp.cmp(os.path.join(results_path,"OLD","results.json"),
