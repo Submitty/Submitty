@@ -5,6 +5,7 @@ namespace app\controllers\admin;
 use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\Output;
+use app\libraries\FileUtils;
 use app\models\User;
 
 class UsersController extends AbstractController {
@@ -29,6 +30,9 @@ class UsersController extends AbstractController {
             case 'update_rotating_sections':
                 $this->updateRotatingSections();
                 break;
+            case 'upload_grader_list':
+                $this->uploadGraderList();
+                break;
             case 'students':
             default:
                 $this->core->getOutput()->addBreadcrumb("Students");
@@ -47,6 +51,7 @@ class UsersController extends AbstractController {
         $graders = $this->core->getQueries()->getAllGraders();
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders);
         $this->renderUserForm('update_grader');
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'graderListForm');
     }
 
     private function renderUserForm($action) {
@@ -235,6 +240,74 @@ class UsersController extends AbstractController {
         }
 
         $this->core->addSuccessMessage("Rotating sections setup");
+        $this->core->redirect($return_url);
+    }
+
+    public function uploadGraderList() {
+        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'graders'));
+
+        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $this->core->addErrorMessage("Invalid CSRF token");
+            $this->core->redirect($return_url);
+        }
+
+        if ($_FILES['upload']['name'] == "") {
+            $this->core->addErrorMessage("No input file specified");
+            $this->core->redirect($return_url);
+        }
+
+        $content_type = FileUtils::getContentType($_FILES['upload']['name']);
+        $mime_type = FileUtils::getMimeType($_FILES['upload']['tmp_name']);
+
+        /*if ($fileType === 'spreadsheet/xlsx' && $mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+            //XLSX detected.  Conversion needed.
+            $csv_file = "/tmp/".Utils::generateRandomString();
+            $xlsx_file = "/tmp/".Utils::generateRandomString();
+            $old_umask = umask(0007);
+            file_put_contents($csv_file, "");
+            umask($old_umask);
+
+            if (move_uploaded_file($_FILES['graderlist']['tmp_name'], $xlsx_file)) {
+
+                //Call up CGI script to process conversion.
+                $xlsx_tmp = basename($xlsx_file);
+                $csv_tmp = basename($csv_file);
+                error_reporting(E_ALL);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, __CGI_URL__."/xlsx_to_csv.cgi?xlsx_file={$xlsx_tmp}&csv_file={$csv_tmp}");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                $output = curl_exec($ch);
+                if ($output === false) {
+                    terminate_on_error("Error parsing xlsx to csv.");
+                }
+
+                $output = json_decode($output, true);
+                if ($output === null) {
+                    terminate_on_error("Error parsing JSON response: " . json_last_error_msg());
+                } else if ($output['error'] === true) {
+                    terminate_on_error("Error parsing xlsx to csv: " . $output['error_message']);
+                } else if ($output['success'] !== true) {
+                    terminate_on_error("Error on response on parsing xlsx: " . curl_error($ch));
+                }
+
+                curl_close($ch);
+            } else {
+
+                terminate_on_error("Error isolating uploaded XLSX.  Please contact tech support.");
+            }
+
+        } else if ($fileType === 'csv' && $mimeType === 'text/plain') {
+
+        //CSV detected.  No conversion needed.
+        $csv_file = $_FILES['graderlist']['tmp_name'];
+        $xlsx_file = null;
+    
+        } else {
+            $this->core->addErrorMessage("Must upload xlsx or csv");
+            $this->core->redirect($return_url);
+        }*/
+
+        $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}");
         $this->core->redirect($return_url);
     }
 }

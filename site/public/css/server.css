@@ -739,7 +739,7 @@ table .instructor .two-options{
     color-stop(100%, rgba(255, 0, 0, 0.4)));
 }
 
-#edit-user-form {
+.popup-form {
     z-index: 2000;
     position: fixed;
     top: 10%;
@@ -753,7 +753,7 @@ table .instructor .two-options{
     display: none;
 }
 
-#edit-user-form div {
+.popup-form div {
     width: 30%;
     display: inline-block;
     vertical-align: top;
@@ -761,7 +761,7 @@ table .instructor .two-options{
     padding-bottom: 10px;
 }
 
-#edit-user-form > div > input[type="text"] {
+.popup-form > div > input[type="text"] {
     width: 95%;
 }
 
