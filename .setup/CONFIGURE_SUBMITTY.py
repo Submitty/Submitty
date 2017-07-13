@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import argparse
+from collections import OrderedDict
 import grp
+import json
 import os
 import pwd
 import shutil
@@ -49,6 +51,7 @@ SUBMITTY_REPOSITORY = os.path.dirname(SETUP_SCRIPT_DIRECTORY)
 # FIXME: Check that directories exist and are readable/writeable?
 SUBMITTY_INSTALL_DIR = '/usr/local/submitty'
 SUBMITTY_DATA_DIR = '/var/local/submitty'
+SUBMITTY_TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT_Tutorial')
 
 TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs')
 AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
@@ -113,6 +116,21 @@ GRADE_STUDENTS_STARTS_PER_HOUR = 20
 
 ##############################################################################
 
+CONFIGURATION_FILE = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'INSTALL_SUBMITTY.sh')
+CONFIGURATION_JSON = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'submitty_conf.json')
+
+##############################################################################
+
+defaults = {'database_host': 'localhost',
+            'database_user': 'hsdbu',
+            'submission_url': '',
+            'authentication_method': 1}
+
+if os.path.isfile(CONFIGURATION_JSON):
+    with open(CONFIGURATION_JSON) as conf_file:
+        defaults = json.load(conf_file)
+    defaults['authentication_method'] = 1 if defaults['authentication_method'] == 'PamAuthentication' else 2
+
 print("\nWelcome to the Submitty Homework Submission Server Configuration\n")
 DEBUGGING_ENABLED = args.debug is True
 
@@ -120,22 +138,30 @@ if DEBUGGING_ENABLED:
     print('!! DEBUG MODE ENABLED !!')
     print()
 
-DATABASE_HOST = get_input('What is the database host?', 'localhost')
+print('Hit enter to use default in []')
 print()
 
-DATABASE_USER = get_input('What is the database user?', 'hsdbu')
+DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
 print()
 
-DATABASE_PASS = get_input('What is the database password for {}?'.format(DATABASE_USER))
+DATABASE_USER = get_input('What is the database user?', defaults['database_user'])
 print()
 
-SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)').rstrip('/')
+default = ''
+if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
+    default = '(Leave blank to use same password)'
+DATABASE_PASS = get_input('What is the database password for {}? {}'.format(DATABASE_USER, default))
+if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
+    DATABASE_PASS = defaults['database_password']
+print()
+
+SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
 print()
 
 print("What authentication method to use:\n1. PAM\n2. Database\n")
 while True:
     try:
-        auth = int(get_input('Enter number?'))
+        auth = int(get_input('Enter number?', defaults['authentication_method']))
     except ValueError:
         auth = 0
     if 0 < auth < 3:
@@ -178,7 +204,7 @@ with open(CONFIGURATION_FILE, 'w') as open_file:
 
     write('SUBMITTY_INSTALL_DIR=' + SUBMITTY_INSTALL_DIR)
     write('SUBMITTY_REPOSITORY=' + SUBMITTY_REPOSITORY)
-    write('SUBMITTY_TUTORIAL_DIR=' + os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT_Tutorial'))
+    write('SUBMITTY_TUTORIAL_DIR=' + SUBMITTY_TUTORIAL_DIR)
     write('SUBMITTY_DATA_DIR=' + SUBMITTY_DATA_DIR)
     write('HWPHP_USER=' + HWPHP_USER)
     write('HWCGI_USER=' + HWCGI_USER)
@@ -213,13 +239,58 @@ with open(CONFIGURATION_FILE, 'w') as open_file:
     write('GRADE_STUDENTS_IDLE_TOTAL_MINUTES=' + str(GRADE_STUDENTS_IDLE_TOTAL_MINUTES))
     write('GRADE_STUDENTS_STARTS_PER_HOUR=' + str(GRADE_STUDENTS_STARTS_PER_HOUR))
     write()
-    write('DEBUGGING_ENABLED=' + 'true' if DEBUGGING_ENABLED else 'false')
+    write('DEBUGGING_ENABLED=' + ('true' if DEBUGGING_ENABLED else 'false'))
     write()
     write('# Now actually run the installation script')
     write('source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER.sh  "$@"')
 
 os.chmod(CONFIGURATION_FILE, 700)
 
+CONFIGURATION_JSON = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'submitty_conf.json')
+with open(CONFIGURATION_JSON, 'w') as json_file:
+    obj = OrderedDict()
+    obj['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
+    obj['submitty_repository'] = SUBMITTY_REPOSITORY
+    obj['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
+    obj['submitty_data_dir'] = SUBMITTY_DATA_DIR
+    obj['hwphp_user'] = HWPHP_USER
+    obj['hwcgi_user'] = HWCGI_USER
+    obj['hwcron_user'] = HWCRON_USER
+    obj['hwcronphp_group'] = HWCRONPHP_GROUP
+    obj['course_builders_group'] = COURSE_BUILDERS_GROUP
+
+    obj['num_untrusted'] = NUM_UNTRUSTED
+    obj['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
+    obj['first_untrusted_gid'] = FIRST_UNTRUSTED_UID
+
+    obj['hwcron_uid'] = HWCRON_UID
+    obj['hwcron_gid'] = HWCRON_GID
+    obj['hwphp_uid'] = HWPHP_UID
+    obj['hwphp_gid'] = HWPHP_GID
+
+    obj['database_host'] = DATABASE_HOST
+    obj['database_user'] = DATABASE_USER
+    obj['database_password'] = DATABASE_PASS
+
+    obj['authentication_method'] = AUTHENTICATION_METHOD
+
+    obj['submission_url'] = SUBMISSION_URL
+    obj['tagrading_url'] = TAGRADING_URL
+    obj['cgi_url'] = CGI_URL
+
+    obj['autograding_log_path'] = AUTOGRADING_LOG_PATH
+    obj['site_log_path'] = TAGRADING_LOG_PATH
+
+    obj['max_instances_of_grade_students'] = MAX_INSTANCES_OF_GRADE_STUDENTS
+    obj['grade_students_idle_seconds'] = GRADE_STUDENTS_IDLE_SECONDS
+    obj['grade_students_idle_total_minutes'] = GRADE_STUDENTS_IDLE_TOTAL_MINUTES
+    obj['grade_students_starts_per_hour'] = GRADE_STUDENTS_STARTS_PER_HOUR
+    obj['debugging_enabled'] = DEBUGGING_ENABLED
+
+    json.dump(obj, json_file, indent=2)
+    json_file.write('\n')
+
+os.chmod(CONFIGURATION_JSON, 700)
 
 ##############################################################################
 
