@@ -46,9 +46,11 @@ args = parser.parse_args()
 # LOAD THE PREVIOUS HISTORY
 json_file = args.json_file
 if os.path.isfile(json_file):
+    print ("OPENING PREV HISTORY")
     with open(json_file, 'r') as infile:
         obj = json.load(infile, object_pairs_hook=collections.OrderedDict)
 else:
+    print ("NO PREV HISTORY ",json_file)
     obj = []
 
 #####################################
@@ -69,8 +71,9 @@ blob["wait_time"] = args.wait_time
 blob["grading_finished"] = args.grading_finished
 blob["grade_time"] = args.grade_time
 autograde_array = str.split(args.autograde_total)
-if autograde_array[0] == "Automatic":
+if len(autograde_array) > 0 and autograde_array[0] == "Automatic":
     blob["autograde_total"] = int(autograde_array[3])
+    blob["autograde_max_possible"] = int(autograde_array[5])
 
 
 #####################################

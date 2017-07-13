@@ -32,17 +32,28 @@ def parse_args():
     return parser.parse_args()
 
 
+def get_timezone():
+    # read ubuntu timezone
+    tzname = time.tzname
+    if len(tzname) == 2 and tzname[1] not in [None, 'None', '']:
+        # daylight savings
+        if (tzname[1] == "EDT"):
+            # hack because EDT is not supported by pytz
+            return pytz.timezone('America/New_York')
+        return pytz.timezone(tzname[1])
+    else:
+        # not daylight savings
+        return pytz.timezone(tzname[0])
+
 def get_queue_time(args):
     t = time.ctime(os.path.getctime(os.path.join(args.next_directory,args.next_to_grade)))
     dt = dateutil.parser.parse(t)
-    my_timezone=pytz.timezone(time.tzname[0]) # read ubuntu timezone
-    dt = my_timezone.localize(dt)
+    dt = get_timezone().localize(dt)
     return dt
 
 def get_current_time():
-    t = datetime.datetime.now()
-    my_timezone=pytz.timezone(time.tzname[0]) # read ubuntu timezone
-    t = my_timezone.localize(t)
+    t = datetime.datetime.now(get_timezone())
+    print ("CURRENT TIME",t)
     return t
 
 def get_submission_path(args):
@@ -95,7 +106,7 @@ def copy_contents_into(source,target):
             else:
                 shutil.copy(os.path.join(source,item),target)
 
-    
+
 # copy files that match one of the patterns from the source directory
 # to the target directory.  
 def pattern_copy(what,patterns,source,target,tmp_logs):
@@ -161,8 +172,9 @@ def main():
 
     # grab a copy of the current history.json file (if it exists)
     history_file=os.path.join(results_path,"history.json")
-    history_file_tmp=tempfile.mkdtemp()
+    history_file_tmp=""
     if os.path.isfile(history_file):
+        filehandle,history_file_tmp=tempfile.mkstemp()
         shutil.copy(history_file,history_file_tmp)
 
     # --------------------------------------------------------------------
@@ -360,6 +372,15 @@ def main():
 
     untrusted_grant_read_access(args,tmp_work)
 
+
+    # grab the result of autograding
+    grade_result = ""
+    with open(os.path.join(tmp_work,"grade.txt")) as f:
+        lines = f.readlines()
+        for line in lines:
+            if line.startswith("Automatic grading total:"):
+                grade_result = line
+
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
 
@@ -394,12 +415,10 @@ def main():
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(results_path,"details"),tmp_logs)
 
-    if os.path.isfile(history_file_tmp):
+    if not history_file_tmp == "":
         shutil.move(history_file_tmp,history_file)
         # fix permissions
         ta_group_id=os.stat(results_path).st_gid
-        #os.chown(history_file,HWCRON_UID,ta_group_id)
-        #os.chmod(history_file,0640)
         
     grading_finished=get_current_time()
 
@@ -421,6 +440,7 @@ def main():
     waittime=int((grading_began-queue_time).total_seconds())
     gradingtime=int((grading_finished-grading_began).total_seconds())
 
+    is_batch_job = "BATCH" if args.next_directory==BATCH_QUEUE else "INTERACTIVE"
     
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","write_grade_history.py"),
                      history_file,
@@ -428,12 +448,12 @@ def main():
                      submission_longstring,
                      str(seconds_late),
                      queue_time_longstring,
-                     "False",# "$IS_BATCH_JOB" \
+                     is_batch_job,
                      grading_began_longstring,
                      str(waittime),
                      grading_finished_longstring,
                      str(gradingtime),
-                     "0"])#"$global_grade_result"
+                     grade_result])
 
     # TEMPORARY ERROR CHECKING
     if os.path.isdir(os.path.join(results_path,"OLD")):
