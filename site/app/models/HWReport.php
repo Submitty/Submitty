@@ -64,10 +64,7 @@ class HWReport extends AbstractModel {
             }
             if(substr($late_days['status'], 0, 3) == 'Bad') {
                 $student_output_text_main .= "NOTE: THIS ASSIGNMENT WILL BE RECORDED AS ZERO".$nl;
-                $student_output_text_main .= "  Contact your TA or instructor if you believe this is an error".$nl;
-            }
-            if($gradeable->getGradedVersion() !== $gradeable->getActiveVersion()) {
-                $student_output_text_main .= "NOTE: The active version is not the version graded.".$nl;
+                $student_output_text_main .= "  Contact your TA or instructor if you believe this is an error".$nl.$nl;
             }
             if($late_days['late_days_charged'] > 0) {
                 $student_output_text_main .= "Number of late days used for this homework: " . $late_days['late_days_charged'] . $nl;
