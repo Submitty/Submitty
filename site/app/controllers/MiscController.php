@@ -82,6 +82,7 @@ class MiscController extends AbstractController {
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
             header('Content-Disposition: inline; filename="' .  basename($_REQUEST['path']) . '"');
+            readfile($_REQUEST['path']);
             $this->core->getOutput()->renderString($_REQUEST['path']);
         }
         else {
