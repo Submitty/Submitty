@@ -580,7 +580,7 @@ HTML;
                 <td style="padding: 20px;">{$admin_team_list}</td>
                 <td style="padding: 20px;">{$gradeable_open_range}</td>
 HTML;
-                if ($this->core->getUser()->accessGrading()) {
+                if ($this->core->getUser()->accessGrading() && ($this->core->getUser()->getGroup() <= $g_data->getMinimumGradingGroup())) {
                     $return .= <<<HTML
                 <td style="padding: 20px;">{$gradeable_grade_range}</td>
                 <td style="padding: 20px;">{$admin_button}</td>
