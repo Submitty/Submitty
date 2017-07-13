@@ -39,13 +39,23 @@ class HWReport extends AbstractModel {
         if($gradeable->beenTAgraded()) {
             $student_output_text_main .= strtoupper($gradeable->getName())." GRADE".$nl;
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
-            $firstname = $gradeable->getComponents()[1]->getGrader()->getDisplayedFirstName();
-            // will need to change how we get grader...currently just assumes that the grader of the first component graded the whole thing
-            $student_output_text_main .= "Graded by: {$gradeable->getComponents()[1]->getGrader()->getDisplayedFirstName()} {$gradeable->getComponents()[1]->getGrader()->getLastName()} <{$gradeable->getComponents()[1]->getGrader()->getEmail()}>".$nl;
-            
+            $graders = array();
+            foreach($gradeable->getComponents() as $component){
+                $graders[] = $component->getGrader();
+            }
+            $graders = array_unique($graders);
+            $name_and_emails = array();
+            foreach($graders as $grader){
+                $name_and_emails[] = "{$grader->getDisplayedFirstName()} {$grader->getLastName()} <{$grader->getEmail()}>".$nl;
+            }
+            $name_and_emails = implode(",", $name_and_emails);
+
+            $student_output_text_main .= "Graded by : " . $name_and_emails;
+
             // Calculate late days for this gradeable
             $late_days = $ldu->getGradeable($student_id, $g_id);
-            $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$gradeable->getComponents()[1]->getGrader()->getEmail().$nl;
+            // TODO: add functionality to choose who regrade requests will be sent to
+            $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$name_and_emails.$nl;
             if($gradeable->getDaysLate() > 0) {
                 $student_output_text_main .= "This submission was submitted ".$gradeable->getDaysLate()." day(s) after the due date.".$nl;
             }
