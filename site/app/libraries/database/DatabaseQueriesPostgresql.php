@@ -143,6 +143,7 @@ WHERE gc.g_id=?
         return $return;
     }
 
+// This has to be updated to also load components for each version
     public function getGradeableVersions($g_id, $user_id, $team_id, $due_date) {
         if ($user_id === null) {
             $this->course_db->query("
@@ -280,13 +281,13 @@ SELECT";
         if ($user_ids !== null) {
             $query .= ",
   gd.gd_id,
-  gd.gd_grader_id,
   gd.gd_overall_comment,
   gd.gd_user_viewed_date,
-  gd.gd_graded_version,
   gd.array_gcd_gc_id,
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
+  gd.array_gcd_grader_id,
+  gd.array_gcd_graded_version,
   gd.array_gcd_grade_time,
   gd.array_gcd_user_id,
   gd.array_gcd_user_firstname,
@@ -340,6 +341,8 @@ LEFT JOIN (
     in_gcd.array_gcd_gc_id,
     in_gcd.array_gcd_score,
     in_gcd.array_gcd_component_comment,
+    in_gcd.array_gcd_grader_id,
+    in_gcd.array_gcd_graded_version,
     in_gcd.array_gcd_grade_time,
     in_gcd.array_gcd_user_id,
     in_gcd.array_gcd_user_firstname,
@@ -352,8 +355,10 @@ LEFT JOIN (
     SELECT
       gd_id,
       array_agg(gc_id) AS array_gcd_gc_id,
-      array_agg(gcd_score) as array_gcd_score,
-      array_agg(gcd_component_comment) as array_gcd_component_comment,
+      array_agg(gcd_score) AS array_gcd_score,
+      array_agg(gcd_component_comment) AS array_gcd_component_comment,
+      array_agg(gcd_grader_id) AS array_gcd_grader_id,
+      array_agg(gcd_graded_version) AS array_gcd_graded_version,
       array_agg(gcd_grade_time) AS array_gcd_grade_time,
       array_agg(u.user_id) AS array_gcd_user_id,
       array_agg(u.user_firstname) AS array_gcd_user_firstname,
@@ -527,7 +532,12 @@ ORDER BY registration_section", $params);
         return $return;
     }
 
-    public function getGradedUserCountByRegistrationSections($g_id, $sections) {
+    public function getTotalComponentCount($g_id) {
+      $params=array($g_id);
+      return $this->course_db->query("SELECT count(*) FROM gradeable_component WHERE g_id=?", $params);
+    }
+
+    public function getGradedComponentsCountByRegistrationSections($g_id, $sections) {
         $return = array();
         $params = array($g_id);
         $where = "";
@@ -539,7 +549,7 @@ ORDER BY registration_section", $params);
 SELECT count(u.*) as cnt, u.registration_section
 FROM users AS u
 INNER JOIN (
-  SELECT * FROM gradeable_data WHERE g_id=? AND (gd_graded_version >= 0 OR gd_graded_version = -1)
+  SELECT gd.* FROM gradeable_data AS gd LEFT JOIN gradeable_component_data AS gcd ON gcd.gd_id = gd.gd_id WHERE g_id=? GROUP BY gd.gd_id
 ) AS gd ON u.user_id = gd.gd_user_id
 {$where}
 GROUP BY u.registration_section
@@ -630,7 +640,7 @@ ORDER BY rotating_section", $params);
         return $return;
     }
 
-    public function getGradedUserCountByRotatingSections($g_id, $sections) {
+    public function getGradedComponentsCountByRotatingSections($g_id, $sections) {
         $return = array();
         $params = array($g_id);
         $where = "";
@@ -642,7 +652,7 @@ ORDER BY rotating_section", $params);
 SELECT count(u.*) as cnt, u.rotating_section
 FROM users AS u
 INNER JOIN (
-  SELECT * FROM gradeable_data WHERE g_id=? AND (gd_graded_version >= 0 OR gd_graded_version = -1)
+    SELECT gd.* FROM gradeable_data AS gd LEFT JOIN gradeable_component_data AS gcd ON gcd.gd_id = gd.gd_id WHERE g_id=? GROUP BY gd.gd_id
 ) AS gd ON u.user_id = gd.gd_user_id
 {$where}
 GROUP BY u.rotating_section
@@ -865,33 +875,32 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
 
     public function insertGradeableData(Gradeable $gradeable) {
         $params = array($gradeable->getId(), $gradeable->getUser()->getId(),
-                        $gradeable->getGrader()->getId(), $gradeable->getOverallComment(), $gradeable->getGradedVersion());
+                        $gradeable->getOverallComment());
         $this->course_db->query("INSERT INTO 
-gradeable_data (g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_graded_version)
-VALUES (?, ?, ?, ?, ?)", $params);
+gradeable_data (g_id, gd_user_id, gd_overall_comment)
+VALUES (?, ?, ?)", $params);
         return $this->course_db->getLastInsertId("gradeable_data_gd_id_seq");
     }
 
     public function updateGradeableData(Gradeable $gradeable) {
-        $params = array($gradeable->getGrader()->getId(), $gradeable->getOverallComment(),
-                        $gradeable->getGradedVersion(), $gradeable->getGdId());
+        $params = array($gradeable->getOverallComment(), $gradeable->getGdId());
 
-        $this->course_db->query("UPDATE gradeable_data SET gd_grader_id=?, gd_overall_comment=?, gd_graded_version=? WHERE gd_id=?", $params);
+        $this->course_db->query("UPDATE gradeable_data SET gd_overall_comment=? WHERE gd_id=?", $params);
     }
 
     public function insertGradeableComponentData($gd_id, GradeableComponent $component) {
         $params = array($component->getId(), $gd_id, $component->getScore(),
-                        $component->getComment(), $component->getGrader()->getId(), $component->getGradeTime()->format("Y-m-d H:i:s"));
+                        $component->getComment(), $component->getGrader()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
         $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grade_time) 
-VALUES (?, ?, ?, ?, ?, ?)", $params);
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) 
+VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
     public function updateGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getScore(), $component->getComment(), $component->getGrader()->getId(),
+        $params = array($component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getGradedVersion(),
                         $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
         $this->course_db->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?",
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?",
             $params);
     }
   
