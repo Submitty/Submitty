@@ -378,7 +378,6 @@ function handleBatch(num_pages, gradeable_id, return_url) {
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    console.log("success");
                     window.location.href = return_url;
                 }
                 else {
@@ -461,16 +460,7 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
 function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id) {
     $("#submit").prop("disabled", true);
 
-    // depending on which is checked, update cookie
-    if ($('#radio_normal').is(':checked')) {
-        document.cookie="student_checked="+0;
-    };
-    if ($('#radio_student').is(':checked')) {
-        document.cookie="student_checked="+1;
-    };
-    if ($('#radio_batch').is(':checked')) {
-        document.cookie="student_checked="+2;
-    };
+    
 
     var message = "";
     // check versions used

@@ -10,7 +10,7 @@ class MiscController extends AbstractController {
     public function run() {
         switch($_REQUEST['page']) {
             case 'display_file':
-                $this->display_file();
+                $this->displayFile();
                 break;
             case 'download_file':
                 $this->downloadFile();
@@ -24,7 +24,7 @@ class MiscController extends AbstractController {
         }
     }
 
-    private function display_file() {
+    private function displayFile() {
         //Additional security
         if (!($this->core->getUser()->accessGrading())) {
             throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
@@ -44,7 +44,7 @@ class MiscController extends AbstractController {
                 throw new \InvalidArgumentException("File does not exist");
             }
         }
-        else if ($_REQUEST['dir'] === "submissions") {
+        else if ($_REQUEST['dir'] === "submissions" || $_REQUEST['dir'] === "uploads") {
             if (!file_exists($_REQUEST['path'])) {
                 throw new \InvalidArgumentException("File does not exist");
             }
@@ -60,10 +60,12 @@ class MiscController extends AbstractController {
         $folder_names[] = "submissions";
         $folder_names[] = "results";
         $folder_names[] = "checkout";
+        $folder_names[] = "uploads";
         $path_anchors = array();
         $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[0]);
         $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[1]);
         $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[2]);
+        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[3]);
         $arr_count = count($path_anchors);
         $access = false;
         for ($x = 0; $x < $arr_count; $x++) {

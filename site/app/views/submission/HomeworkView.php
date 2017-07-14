@@ -331,6 +331,16 @@ HTML;
         }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
+                // depending on which is checked, update cookie
+                if ($('#radio_normal').is(':checked')) {
+                    document.cookie="student_checked="+0;
+                };
+                if ($('#radio_student').is(':checked')) {
+                    document.cookie="student_checked="+1;
+                };
+                if ($('#radio_batch').is(':checked')) {
+                    document.cookie="student_checked="+2;
+                };
                 var user_id = "";
                 if (document.getElementById("submissionForm")) {
                     user_id = document.getElementById("submissionForm").student_id.value;
@@ -370,24 +380,11 @@ HTML;
     </script>
 </div>
 HTML;
-        //////
         if ($this->core->getUser()->accessAdmin()) {
-            $directory = "/jess_testing";
-            // $all_directories = FileUtils::getAllDirs("/tmp");
-            // echo count($all_directories);
-            // echo "\n";
-            // foreach ($all_directories as $d) {
-            //     echo $d;
-            //     echo "\n";
-            // }
+            $pdf_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", 
+                $gradeable->getId());
 
-            $pre_all_files = FileUtils::getAllFiles("/tmp".$directory);
-            // echo count($pre_all_files);
-            // echo "\n";
-
-            $pre_all_files = FileUtils::getAllFiles("/tmp".$directory."_copy");
-            // echo count($pre_all_files);
-            // echo "\n";
+            $pre_all_files = FileUtils::getAllFiles($pdf_path);
 
             if (count($pre_all_files) > 0) {
 
@@ -395,21 +392,12 @@ HTML;
                 $all_cover_files = array();
 
                 foreach ($pre_all_files as $filename => $details) {
-                    // echo $file;
-                    // echo "\n";
                     $all_files[$filename] = $details;
                     if (strpos($filename, 'cover') !== false) {
                         $filename_shorten = str_replace("_cover",'',$filename);
                         $all_cover_files[$filename_shorten] = $details;
                     }
                 }
-                $url_pdf = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=submissions&file=words_881.pdf&path=/var/local/submitty/courses/f17/development/submissions/upload_only/instructor/3/words_881.pdf";
-                $url_text = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=submissions&file=foo.txt&path=/var/local/submitty/courses/f17/development/submissions/upload_only/instructor/1/foo.txt";
-                
-                $url = "/tmp/jess_testing/150_dpi_corrected.pdf";
-                $url = "/var/local/submitty/courses/f17/development/submissions/upload_only/instructor/3/words_881.pdf";
-                $url = "/tmp/jess_testing/150_dpi_corrected.pdf";
-                $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=jess_testing&file=150_dpi_corrected.pdf&path=/tmp/jess_testing/150_dpi_corrected.pdf";
                 $return .= <<<HTML
 <div class="content">
     <h2>Unassigned Exam PDF Uploads</h2>
@@ -417,21 +405,7 @@ HTML;
         <thead class="persist-thead">
             <tr>
                 <td width="10%"></td>
-                <td width="60%">
-                    PDF preview </br>
-                    <object data="http://www.pdf995.com/samples/pdf.pdf" type="application/pdf" width="100%" height="200">
-                        alt : <a href="http://www.pdf995.com/samples/pdf.pdf">test.pdf</a>
-                    </object>
-                    <object data="{$url_pdf}" type="application/pdf" width="100%" height="200">
-                        alt : <a href="{$url_pdf}">url_pdf.pdf</a>
-                    </object>
-                    <object data="{$url_text}" width="100%" height="200">
-                        alt : <a href="{$url_text}">url_text.txt</a>
-                    </object>
-                    <object data="{$url}" type="application/pdf" width="100%" height="200">
-                        alt : <a href="{$url}">something.pdf</a>
-                    </object>
-                </td>
+                <td width="60%">PDF preview</td>
                 <td width="20%">User ID</td>
                 <td width="10%">Enter</td>
             </tr>
@@ -439,27 +413,32 @@ HTML;
 HTML;
                 $count = 1;
                 foreach ($all_cover_files as $filename => $details) {
-                    $show = "tru\n";
-                    $data = "";
-                    foreach ($details as $detailname => $detail) {
-                        $show .= $detailname;
-                        $show .= ": ";
-                        $show .= $detail;
-                        $show .= "\n";
-                    }
-                    $data = $details["path"];
+                    // $show = "tru\n";
+                    // $data = "";
+                    // foreach ($details as $detailname => $detail) {
+                    //     $show .= $detailname;
+                    //     $show .= ": ";
+                    //     $show .= $detail;
+                    //     $show .= "\n";
+                    // }
+                    // echo $show;
+                    $path = $details["path"];
+                    $name = $details["relative_name"];
+                    $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$name."&path=".$path;
+                    $url_pdf = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=submissions&file=words_881.pdf&path=/var/local/submitty/courses/f17/development/submissions/upload_only/instructor/3/words_881.pdf";
                     $return .= <<<HTML
         <tbody>
             <tr>
-                <td>{$count}</td>
+                <td style="vertical-align: middle">{$count}</td>
                 <td>
-                    <object data="{$data}" type="application/pdf" width="100%" height="200">
+                    <object data="{$url}" type="application/pdf" width="100%" height="300">
+                        alt : <a href="{$url}">pdf.pdf</a>
                     </object>
                 </td>
-                <td>
+                <td style="vertical-align: middle">
                     <input type="text" value =""/>
                 </td>
-                <td>
+                <td style="vertical-align: middle">
                     <a class="btn btn-primary" >
                         Submit
                     </a>

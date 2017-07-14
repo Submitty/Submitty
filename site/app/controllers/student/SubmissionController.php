@@ -185,15 +185,9 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.", false);
         }
 
-        // save this pdf somewhere
-        // make this randomized later, after testing
-        $directory = "/jess_testing";
-        // do {
-        //     $file = md5(uniqid(rand(), true));
-        // } while (file_exists(FileUtils::joinPaths("/tmp", $file)));
-
-        if (!FileUtils::createDir("/tmp".$directory)) {
-            return $this->uploadResult("Failed to make folder for this batch upload.", false);
+        $pdf_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "bulk_pdf", $gradeable->getId());
+        if (!FileUtils::createDir($pdf_path)) {
+            return $this->uploadResult("Failed to make gradeable path.", false);
         }
 
         // save the pdf somewhere
@@ -201,7 +195,7 @@ class SubmissionController extends AbstractController {
             if (isset($uploaded_files[$i])) {
                 for ($j = 0; $j < $count[$i]; $j++) {
                     if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
-                        $dst = FileUtils::joinPaths("/tmp".$directory, $uploaded_files[$i]["name"][$j]);
+                        $dst = FileUtils::joinPaths($pdf_path, $uploaded_files[$i]["name"][$j]);
                         if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
                             return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
                         }
@@ -222,8 +216,11 @@ class SubmissionController extends AbstractController {
 
         // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
         // as that would require some hacky path handling specific to PAM authentication
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?directory={$directory}&num={$num_pages}");
+        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
 
@@ -235,21 +232,17 @@ class SubmissionController extends AbstractController {
         curl_close($ch);
 
         if ($output === null) {
-            FileUtils::recursiveRmdir("/tmp".$directory);
+            FileUtils::recursiveRmdir($pdf_path);
             return $this->uploadResult("Error JSON response for pdf split: ".json_last_error_msg(),false);
         }
         else if (!isset($output['valid'])) {
-            FileUtils::recursiveRmdir("/tmp".$directory);
+            FileUtils::recursiveRmdir($pdf_path);
             return $this->uploadResult("Missing response in JSON for pdf split",false);
         }
         else if ($output['valid'] !== true) {
-            FileUtils::recursiveRmdir("/tmp".$directory);
+            FileUtils::recursiveRmdir($pdf_path);
             return $this->uploadResult($output['message'],false);
         }
-
-        // display pdfs in new div
-        // $all_files = FileUtils::getAllFiles("/tmp".$directory."_copy");
-        // echo count($all_files);
 
         $return = array('success' => true);
         $this->core->getOutput()->renderJson($return);
