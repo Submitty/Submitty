@@ -5,6 +5,7 @@ namespace app\libraries\database;
 use app\libraries\Utils;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
+use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
 use app\models\User;
 use app\models\SimpleLateUser;
@@ -76,8 +77,39 @@ ORDER BY u.registration_section, u.user_id");
         return $return;
     }
 
-    public function insertGradeableComponentMark(GradeableComponentMark $mark) {
+    public function getGradeableComponentsMarks($gc_id) {
+      $this->course_db->query("
+SELECT *
+FROM gradeable_component_mark
+WHERE gc_id=?
+ORDER BY gcm_order ASC
+", array($gc_id));
+      $return = array();
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row['gcm_id']] = new GradeableComponentMark($this->core, $row);
+        }
+        return $return;
+    }
 
+    public function insertGradeableComponentMark(GradeableComponentMark $mark) {
+        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNote(), $mark->getOrder());
+
+        $this->course_db->query("
+INSERT INTO gradeable_component_mark (gc_id, gcm_points, gcm_note, gcm_order)
+VALUES (?, ?, ?, ?)", $params);
+    }
+
+    public function updateGradeableComponentMark(GradeableComponentMark $mark) {
+        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNote(), $mark->getOrder(), $mark->getId());
+
+        $this->course_db->query("
+UPDATE gradeable_component_mark SET gc_id=?, gcm_points=?, gcm_note=?, gcm_order=?
+WHERE gcm_id=?", $params);
+    }
+
+    public function deleteGradeableComponentMark(GradeableComponentMark $mark) {
+        $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id=?",array($mark->getId()));
+        $this->course_db->query("DELETE FROM gradeable_component_mark WHERE gcm_id=?", array($mark->getId()));
     }
 
     public function insertUser(User $user, $semester, $course) {

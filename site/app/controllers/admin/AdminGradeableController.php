@@ -7,6 +7,8 @@ use \lib\Database;
 use \lib\Functions;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
+use app\models\GradeableComponent;
+use app\models\GradeableComponentMark;
 
 class AdminGradeableController extends AbstractController {
 	public function run() {
@@ -187,10 +189,73 @@ class AdminGradeableController extends AbstractController {
         }
 
         if ($edit_gradeable === 0) {
-            $this->core->getQueries()->createNewGradeable($details);
+            $this->core->getQueries()->createNewGradeable($details);          
+            if ($details['g_gradeable_type'] === 0) {
+                $components = $this->core->getQueries()->getGradeableComponents($details['g_id']);
+                $index = 1;
+                foreach ($components as $comp) {
+                    $num_deduct = 0;
+                    foreach($_POST as $k=>$v){
+                        if(strpos($k,'deduct_points_' . $index) !== false){
+                            $num_deduct++;
+                        }
+                    }
+
+                    for ($y = 0; $y < $num_deduct; $y++) {
+                        $mark = new GradeableComponentMark($this->core);
+                        $mark->setGcId($comp->getId());
+                        $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
+                        $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                        $mark->setOrder($y);
+                        $this->core->getQueries()->insertGradeableComponentMark($mark);
+                    }                    
+                    $index++;
+                }
+            }
+            
         }
         else if ($edit_gradeable === 1) {
             $this->core->getQueries()->updateGradeable($details);
+            if ($details['g_gradeable_type'] === 0) {
+                $components = $this->core->getQueries()->getGradeableComponents($details['g_id']);
+                $index = 1;
+                foreach ($components as $comp) {
+                    $num_deduct = 0; //current number of marks
+                    foreach($_POST as $k=>$v){
+                        if(strpos($k,'deduct_points_' . $index) !== false){
+                            $num_deduct++;
+                        }
+                    }
+
+                    $marks = $this->core->getQueries()->getGradeableComponentsMarks($comp->getId());
+                    $num_old_deduct = count($marks); //old number of marks
+                    //if old > new, delete old
+                    //if old < new, create more
+
+                    $y = 0;
+                    foreach($marks as $mark) {
+                        if($y < $num_deduct && $y < $num_old_deduct) {
+                            $mark->setGcId($comp->getId());
+                            $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
+                            $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                            $mark->setOrder($y);
+                            $this->core->getQueries()->updateGradeableComponentMark($mark);
+                        } else if($num_old_deduct > $num_deduct) {
+                            $this->core->getQueries()->deleteGradeableComponentMark($mark);
+                        }
+                        $y++; 
+                    }
+                    for($y = $num_old_deduct; $y < $num_deduct; $y++) {
+                        $mark = new GradeableComponentMark($this->core);
+                        $mark->setGcId($comp->getId());
+                        $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
+                        $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                        $mark->setOrder($y);
+                        $this->core->getQueries()->insertGradeableComponentMark($mark);
+                    }             
+                    $index++;
+                }
+            }
         }
 
         //set up roating sections

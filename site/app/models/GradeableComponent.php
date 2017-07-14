@@ -83,17 +83,20 @@ class GradeableComponent extends AbstractModel {
         $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
 
-        $mark_fields = array('gcm_id', 'gcm_point', 'gcm_order',
-                                'gcm_is_deduction', 'gcm_comment');
+        $mark_fields = array('gcm_id', 'gc_id', 'gcm_points',
+                                'gcm_note', 'gcm_order');
 
-        for ($i = 0; $i < count($details['array_gcm_id']); $i++) {
-            $mark_details = array();
-            foreach ($mark_fields as $key) {
-                $mark_details[$key] = $details["array_{$key}"][$i];
+        if (isset($details['array_gcm_id'])) {
+            for ($i = 0; $i < count($details['array_gcm_id']); $i++) {
+                $mark_details = array();
+                foreach ($mark_fields as $key) {
+                    $mark_details[$key] = $details["array_{$key}"][$i];
+                }
+
+                $this->marks[$mark_details['gcm_order']] = $this->core->loadModel(GradeableComponentMark::class, $mark_details);
             }
-
-             $this->marks[$mark_details['gcm_order']] = $this->core->loadModel(GradeableComponentMark::class, $mark_details);
         }
+        
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = isset($details['gcd_grader']) ? $details['gcd_grader'] : null;
