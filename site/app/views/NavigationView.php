@@ -369,7 +369,7 @@ HTML;
                         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
                         if ($g_data->useTAGrading()) {
                             $gradeable_core = $this->core->getQueries()->getGradeable($gradeable);
-                            $total = array();
+                            $total_users = array();
                             $graded = array();
                             $graders = array();
                             $sections = array();
@@ -378,8 +378,9 @@ HTML;
                                     $sections = $this->core->getUser()->getGradingRegistrationSections();
                                 }
                                 if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
-                                    $total = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
-                                    $graded = $this->core->getQueries()->getGradedUserCountByRegistrationSections($gradeable_core->getId(), $sections);
+                                    $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
+                                    $total_components = $this->core->getQueries()->getTotalComponentCount($gradeable_core->getId());
+                                    $graded = $this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable_core->getId(), $sections);
                                     $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
                                 }
                             }
@@ -388,41 +389,42 @@ HTML;
                                     $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable, $this->core->getUser()->getId());
                                 }
                                 if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
-                                    $total = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
-                                    $graded = $this->core->getQueries()->getGradedUserCountByRotatingSections($gradeable, $sections);
+                                    $total_users = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
+                                    $total_components = $this->core->getQueries()->getTotalComponentCount($gradeable_core->getId());
+                                    $graded = $this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable, $sections);
                                     $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable_core->getId(), $sections);
                                 }
                             }
 
                             $sections = array();
-                            if (count($total) > 0) {
-                                foreach ($total as $key => $value) {
+                            if (count($total_users) > 0) {
+                                foreach ($total_users as $key => $value) {
                                     $sections[$key] = array(
-                                        'total_students' => $value,
-                                        'graded_students' => 0,
+                                        'total_components' => $value * $total_components,
+                                        'graded_components' => 0,
                                         'graders' => array()
                                     );
                                     if (isset($graded[$key])) {
-                                        $sections[$key]['graded_students'] = intval($graded[$key]);
+                                        $sections[$key]['graded_components'] = intval($graded[$key]) * $total_components;
                                     }
                                     if (isset($graders[$key])) {
                                         $sections[$key]['graders'] = $graders[$key];
                                     }
                                 }
                             }
-                            $students_graded = 0;
-                            $students_total = 0;
+                            $components_graded = 0;
+                            $components_total = 0;
                             foreach ($sections as $key => $section) {
                                 if ($key === "NULL") {
                                     continue;
                                 }
-                                $students_graded += $section['graded_students'];
-                                $students_total += $section['total_students']; 
+                                $components_graded += $section['graded_components'];
+                                $components_total += $section['total_components']; 
                             }
                             $TA_percent = 0;
-                            if ($students_total == 0) { $TA_percent = 0; }
+                            if ($components_total == 0) { $TA_percent = 0; }
                             else {
-                                $TA_percent = $students_graded / $students_total;
+                                $TA_percent = $components_graded / $components_total;
                                 $TA_percent = $TA_percent * 100;
                             }
                             //if $TA_percent is 100, change the text to REGRADE
@@ -446,7 +448,7 @@ HTML;
 HTML;
                             }                           
                             //Give the TAs a progress bar too                        
-                            if (($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED") && $students_total != 0) {
+                            if (($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED") && $components_total != 0) {
                                 $gradeable_grade_range .= <<<HTML
                                 <style type="text/css"> 
                                     .meter3 { 
@@ -578,7 +580,7 @@ HTML;
                 <td style="padding: 20px;">{$admin_team_list}</td>
                 <td style="padding: 20px;">{$gradeable_open_range}</td>
 HTML;
-                if ($this->core->getUser()->accessGrading()) {
+                if ($this->core->getUser()->accessGrading() && ($this->core->getUser()->getGroup() <= $g_data->getMinimumGradingGroup())) {
                     $return .= <<<HTML
                 <td style="padding: 20px;">{$gradeable_grade_range}</td>
                 <td style="padding: 20px;">{$admin_button}</td>

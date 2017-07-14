@@ -778,17 +778,13 @@ class Course(object):
             max_submissions = gradeable.max_random_submissions
             for user in self.users:
                 submitted = False
-                graded = 1
                 submission_path = os.path.join(gradeable_path, user.id)
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
-                    if gradeable.gradeable_config is None or \
+                    if not (gradeable.gradeable_config is None or \
                             (gradeable.submission_due_date < NOW and random.random() < 0.5) or \
-                            (random.random() < 0.3):
-                        graded = -1
-                    elif max_submissions is not None and submission_count >= max_submissions:
-                        graded = -1
-                    else:
+                            (random.random() < 0.3) or \
+                            (max_submissions is not None and submission_count >= max_submissions)):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
@@ -826,8 +822,7 @@ class Course(object):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
-                                                             gd_overall_comment="lorem ipsum lodar",
-                                                             gd_graded_version=graded, gd_grader_id=self.instructor.id)
+                                                             gd_overall_comment="lorem ipsum lodar")
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:
@@ -841,7 +836,7 @@ class Course(object):
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S")
                                 conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                              gcd_score=score, gcd_component_comment="lorem ipsum",
-                                             gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time)
+                                             gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=1)
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
