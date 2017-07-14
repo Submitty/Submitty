@@ -68,10 +68,12 @@ blob["grading_began"] = args.grading_began
 blob["wait_time"] = args.wait_time
 blob["grading_finished"] = args.grading_finished
 blob["grade_time"] = args.grade_time
+blob["autograde_result"] = args.autograde_total
 autograde_array = str.split(args.autograde_total)
 if len(autograde_array) > 0 and autograde_array[0] == "Automatic":
     blob["autograde_total"] = int(autograde_array[3])
-    blob["autograde_max_possible"] = int(autograde_array[5])
+    if len(autograde_array) == 6:
+        blob["autograde_max_possible"] = int(autograde_array[5])
 
 
 #####################################
