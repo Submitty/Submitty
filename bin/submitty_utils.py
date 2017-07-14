@@ -6,22 +6,28 @@ import tzlocal
 import datetime
 
 
+# grab the system timezone (should only used when we don't have any info about the timezone)
 def get_timezone():
     return tzlocal.get_localzone()
 
 
+# grab the current time
+def get_current_time():
+    return datetime.datetime.now(get_timezone())
+
+
+# convert a datetime object (with or without the timezone) to a string with a timezone
 def write_submitty_date(d):
     my_timezone = d.tzinfo
     if my_timezone is None:
         print ("NO TIMEZONE ",d,"assuming local timezone")
         my_timezone = get_timezone()
-        d_with_timezone = my_timezone.localize(d)
-    else:
-        d_with_timezone = d;
-    answer = d.strftime("%Y-%m-%d %H:%M:%S ") + str(d_with_timezone.tzinfo)
+        d = my_timezone.localize(d)
+    answer = d.strftime("%Y-%m-%d %H:%M:%S ") + str(d.tzinfo)
     return answer
 
 
+# convert a string (with or without the timezone) to a date time object with a timezone
 def read_submitty_date(s):
     words = s.split()
     if len(words) < 2 or len(words) > 3:

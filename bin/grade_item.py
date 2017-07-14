@@ -40,8 +40,6 @@ def get_queue_time(args):
     t = submitty_utils.get_timezone().localize(t)
     return t
 
-def get_current_time():
-    return datetime.datetime.now(submitty_utils.get_timezone())
 
 def get_submission_path(args):
     queue_file = os.path.join(args.next_directory,args.next_to_grade)
@@ -144,7 +142,7 @@ def main():
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
     print ("GRADE THIS", submission_path)
 
-    grading_began=get_current_time()
+    grading_began=submitty_utils.get_current_time()
 
     # --------------------------------------------------------
     # various paths
@@ -178,29 +176,8 @@ def main():
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
         submission_string=submission_time_file.read().rstrip()
-
-    #print ("MY STRING ",submission_string)
-
-    #words = submission_string.split()
-    #print ("words = ",words)
-    
-    #if not len(words) == 3:
-    #   SystemExit("ERROR SPLITTING WORDS")
-
-    #parse_me = str(words[0] + ' ' + words[1])
-    #print ("Parser me ", parse_me)
-    #foo = datetime.datetime.strptime(parse_me,'%Y-%m-%d %H:%M:%S')
-
-    #print ("foo unaware ", foo)
-    
-    #my_timezone = pytz.timezone(words[2])
-    #foo = my_timezone.localize(foo)
-    
-    #print ("foo aware ", foo)
     
     submission_datetime=submitty_utils.read_submitty_date(submission_string)
-    print ("MY DATETIME ",submission_datetime)
-
     
     
     # --------------------------------------------------------------------
@@ -228,10 +205,7 @@ def main():
     #print ("UPLOAD TYPE ",gradeable_upload_type)
     #FIXME:  deal with svn/git/whatever
 
-    # FIXME: TIMEZONE HACK
-    gradeable_deadline_string = gradeable_config_obj["date_due"] + " EDT"
-
-    gradeable_deadline_datetime=dateutil.parser.parse(gradeable_deadline_string)
+    gradeable_deadline_string = gradeable_config_obj["date_due"]
     
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
     pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
@@ -428,12 +402,15 @@ def main():
         shutil.move(history_file_tmp,history_file)
         # fix permissions
         ta_group_id=os.stat(results_path).st_gid
+        os.chown(history_file,int(HWCRON_UID),ta_group_id)
+        add_permissions(history_file,stat.S_IRGRP)
         
-    grading_finished=get_current_time()
+    grading_finished=submitty_utils.get_current_time()
 
     # -------------------------------------------------------------
     # create/append to the results history
 
+    gradeable_deadline_datetime = submitty_utils.read_submitty_date(gradeable_deadline_string)
     gradeable_deadline_longstring = submitty_utils.write_submitty_date(gradeable_deadline_datetime)
     submission_longstring = submitty_utils.write_submitty_date(submission_datetime)
     

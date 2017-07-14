@@ -804,26 +804,17 @@ class Course(object):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
-                        current_time_tmp = (gradeable.submission_due_date - timedelta(days=1))
-                        # add the timezone -- FIXME? ALTERNATELY GET FROM INI FILE
-                        my_timezone = submitty_utils.get_timezone()
-                        current_time_tmp = my_timezone.localize(current_time_tmp)
-                        # format the time as a string with timezone
-                        # NOTE: strftime doesn't format the timezone with the full name
-                        # ('America/New_York'), rather it abbreviates it as 'EDT' or 'EST')
-                        current_time = current_time_tmp.strftime("%Y-%m-%d %H:%M:%S ") + str(my_timezone)
-
-                        current_time = submitty_utils.write_submitty_date(current_time_tmp)
+                        current_time_string = submitty_utils.write_submitty_date(submitty_utils.get_current_time())
 
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
-                                     g_version=1, submission_time=current_time)
+                                     g_version=1, submission_time=current_time_string)
                         conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
                                      active_version=1)
                         with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
-                            json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time}]},
+                            json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time_string}]},
                                       open_file)
                         with open(os.path.join(submission_path, "1", ".submit.timestamp"), "w") as open_file:
-                            open_file.write(current_time + "\n")
+                            open_file.write(current_time_string + "\n")
 
                         if isinstance(gradeable.submissions, dict):
                             for key in gradeable.submissions:

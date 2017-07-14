@@ -398,6 +398,7 @@ function grade_this_item {
     else
 	log_error "$NEXT_TO_GRADE" "$submission_path/.submit.timestamp   does not exist!"
     fi
+    #ignore the timezone..  this version of the code will go away very soon (will be replaced by grade_item.py which uses the timezone correctly)
     submission_time_no_timezone=${submission_time:0:19}
 
     # switch to tmp directory
@@ -658,16 +659,12 @@ function grade_this_item {
 
     # step out of this directory
 
-
     # and remove the directory
     find . -exec ls -lta {} \; > $results_path/results_log_done.txt 2>&1
 
     popd > /dev/null
     $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp  > /dev/null  2>&1
     rm -rf $tmp
-
-    echo "DONE OLD GRADING"
-    
 }
 
 
@@ -819,12 +816,10 @@ while true; do
 
 	# FIXME: using a global variable to pass back the grade
 	global_grade_result="ERROR: NO GRADE"
-	#global_submission_time=""
 	global_gradeable_deadline=""
 	# call the helper function
         echo "========================================================================"
 	grade_this_item $NEXT_DIRECTORY $NEXT_ITEM
-        echo "IN BETWEEN"
 
         ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
         echo "========================================================================"
