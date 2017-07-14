@@ -202,7 +202,6 @@ HTML;
             $last_section = false;
             $tbody_open = false;
             foreach ($rows as $row) {
-                $graded_version = $row->getGradedVersion();
                 $active_version = $row->getActiveVersion();
                 $highest_version = $row->getHighestVersion();
                 $autograding_score = $row->getGradedAutograderPoints();
@@ -294,12 +293,7 @@ HTML;
                     
                     if ($row->beenTAgraded()) {
                         $btn_class = "btn-default";
-                        // if($different) {
-                        //     $contents = "Graded " . $graded_version . "/" . $highest_version;
-                        // }
-                        // else{
-                            $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-                        // }
+                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
                     }
                     else {
                         $btn_class = "btn-primary";
