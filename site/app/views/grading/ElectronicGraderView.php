@@ -376,6 +376,41 @@ HTML;
 HTML;
         }
         else{
+//             $return .= <<<HTML
+//              <h4 class='label' style="float: left">Select Version:</h4>
+//                 <select name="submission_version" onChange="versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(),
+//                                                           'gradeable_version' => ""))}', this)">
+// HTML;
+//             $current_version_number = $gradeable->getActiveVersion();
+//             foreach ($gradeable->getVersions() as $version) {
+//                 $selected = "";
+//                 $select_text = array("Version #{$version->getVersion()}");
+//                 if ($gradeable->getNormalPoints() > 0) {
+//                     $select_text[] = "Score: ".$version->getNonHiddenTotal()." / " . $gradeable->getTotalNonHiddenNonExtraCreditPoints();
+//                 }
+
+//                 if ($version->getDaysLate() > 0) {
+//                     $select_text[] = "Days Late: ".$version->getDaysLate();
+//                 }
+
+//                 if ($version->isActive()) {
+//                     $select_text[] = "GRADE THIS VERSION";
+//                 }
+
+//                 if ($version->getVersion() == $current_version_number) {
+//                     $selected = "selected";
+//                 }
+
+//                 $select_text = implode("&nbsp;&nbsp;&nbsp;", $select_text);
+//                 $return .= <<<HTML
+//         <option value="{$version->getVersion()}" {$selected}>{$select_text}</option>
+
+// HTML;
+//             }
+//             $return .= <<< HTML
+//                 </select>
+
+// HTML;
             $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, true);
         }
         $return .= <<<HTML
