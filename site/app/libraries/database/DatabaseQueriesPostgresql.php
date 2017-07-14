@@ -533,7 +533,7 @@ ORDER BY registration_section", $params);
     }
 
     public function getTotalComponentCount($g_id) {
-      $params=$g_id;
+      $params=array($g_id);
       return $this->course_db->query("SELECT count(*) FROM gradeable_component WHERE g_id=?", $params);
     }
 

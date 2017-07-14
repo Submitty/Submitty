@@ -412,19 +412,19 @@ HTML;
                                     }
                                 }
                             }
-                            $students_graded = 0;
-                            $students_total = 0;
+                            $components_graded = 0;
+                            $components_total = 0;
                             foreach ($sections as $key => $section) {
                                 if ($key === "NULL") {
                                     continue;
                                 }
-                                $students_graded += $section['graded_students'];
-                                $students_total += $section['total_students']; 
+                                $components_graded += $section['graded_components'];
+                                $components_total += $section['total_components']; 
                             }
                             $TA_percent = 0;
-                            if ($students_total == 0) { $TA_percent = 0; }
+                            if ($components_total == 0) { $TA_percent = 0; }
                             else {
-                                $TA_percent = $students_graded / $students_total;
+                                $TA_percent = $components_graded / $components_total;
                                 $TA_percent = $TA_percent * 100;
                             }
                             //if $TA_percent is 100, change the text to REGRADE
