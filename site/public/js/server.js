@@ -397,6 +397,7 @@ function setupCheckboxCells() {
     $("td[class^=cell-]").click(function() {
         var parent = $(this).parent();
         var elems = [];
+        var scores = {};
         if ($(this).hasClass('cell-all')) {
             var lastScore = null;
             var setFull = false;
@@ -407,6 +408,7 @@ function setupCheckboxCells() {
                 else if (lastScore !== $(this).data("score")) {
                     setFull = true;
                 }
+                scores[$(this).data('id')] = $(this).data('score');
             });
             parent.children(".cell-grade").each(function() {
                 updateCheckpointCell(this, setFull);
@@ -416,10 +418,9 @@ function setupCheckboxCells() {
         else {
             updateCheckpointCell(this);
             elems.push(this);
+            scores[$(this).data('id')] = $(this).data('score');
         }
-        var scores = {};
-        scores[$(this).data('id')] = $(this).data('score');
-
+        
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
             {
@@ -723,14 +724,16 @@ function setupNumericTextCells() {
     });
 }
 
-function openPopUp(str, count, testcase_num, side) {
+function openPopUp(css, title, count, testcase_num, side) {
     var element_id = "container_" + count + "_" + testcase_num + "_" + side;
-    var elem_html = document.getElementById(element_id).innerHTML;
-    my_window = window.open("", "mywindow1", "status=1,width=750,height=500");
-    my_window.document.write(str + elem_html);
+    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
+    elem_html += title + document.getElementById(element_id).innerHTML;
+    my_window = window.open("", "_blank", "status=1,width=750,height=500");
+    my_window.document.write(elem_html);
     my_window.document.close(); 
     my_window.focus();
 }
+
 function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenseForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});

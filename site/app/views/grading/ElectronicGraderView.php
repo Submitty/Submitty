@@ -22,8 +22,8 @@ class ElectronicGraderView extends AbstractView {
             if ($key === "NULL") {
                 continue;
             }
-            $graded += $section['graded_students'];
-            $total += $section['total_students'];
+            $graded += $section['graded_components'];
+            $total += $section['total_components'];
         }
         if ($total === 0){
             $percentage = -1;
@@ -40,6 +40,7 @@ HTML;
         $return .= <<<HTML
     <div class="sub">
         No Grading To Be Done! :)
+    </div>
 HTML;
 
     }
@@ -54,9 +55,9 @@ HTML;
         <div style="margin-left: 20px">
 HTML;
         foreach ($sections as $key => $section) {
-            $percentage = round(($section['graded_students'] / $section['total_students']) * 100);
+            $percentage = round(($section['graded_components'] / $section['total_components']) * 100);
             $return .= <<<HTML
-            Section {$key}: {$percentage}% ({$section['graded_students']} / {$section['total_students']})<br />
+            Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})<br />
 HTML;
         }
         $return .= <<<HTML
@@ -65,45 +66,61 @@ HTML;
         Graders:
         <div style="margin-left: 20px">
 HTML;
-            foreach ($sections as $key => $section) {
-                if ($key === "NULL") {
-                    continue;
-                }
-                if (count($section['graders']) > 0) {
-                    $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
-                }
-                else {
-                    $graders = "Nobody";
-                }
-                $return .= <<<HTML
+        foreach ($sections as $key => $section) {
+            if ($key === "NULL") {
+                continue;
+            }
+            if (count($section['graders']) > 0) {
+                $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
+            }
+            else {
+                $graders = "Nobody";
+            }
+            $return .= <<<HTML
             Section {$key}: {$graders}<br />
 HTML;
-            }
         }
-        // {$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
         $return .= <<<HTML
         </div>
-        <div style="margin-top: 20px">
+    </div>
+HTML;
+    }
+    //{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
+    $return .= <<<HTML
+    <div style="margin-top: 20px">
 HTML;
         if($percentage !== -1 || $this->core->getUser()->accessFullGrading()){
             $return .= <<<HTML
-            <a class="btn btn-primary" 
-                href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
-                Grading Details
-            </a>
+        <a class="btn btn-primary" 
+            href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
+            Grading Details
+        </a>
 HTML;
             if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
                 $return .= <<<HTML
-            <a class="btn btn-primary"
-                href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'individual'=>'0'))}">
-                Grade Next Student
-            </a>
-        </div>
-    </div>
-</div>
+        <a class="btn btn-primary"
+            href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'individual'=>'0'))}">
+            Grade Next Student
+        </a>
+        <a class="btn btn-primary"
+            href="{$this->core->buildUrl(array('component'=>'misc', 'page'=>'download_all_assigned', 'dir'=>'submissions', 'gradeable_id'=>$gradeable->getId()))}">
+            Download Zip of All Assigned Students
+        </a>
+HTML;
+            }
+            if($this->core->getUser()->accessFullGrading()) {
+                $return .= <<<HTML
+        <a class="btn btn-primary" 
+            href="{$this->core->buildUrl(array('component'=>'misc', 'page'=>'download_all_assigned', 'dir'=>'submissions', 'gradeable_id'=>$gradeable->getId(), 'type'=>'All'))}">
+            Download Zip of All Students
+        </a>
 HTML;
             }
         }
+        $return .= <<<HTML
+    </div>
+</div>
+HTML;
         return $return;
     }
 
@@ -185,9 +202,9 @@ HTML;
             $last_section = false;
             $tbody_open = false;
             foreach ($rows as $row) {
-                $graded_version = $row->getGradedVersion();
                 $active_version = $row->getActiveVersion();
                 $highest_version = $row->getHighestVersion();
+                $autograding_score = $row->getGradedAutograderPoints();
                 if ($row->beenTAgraded()){
                     if ($row->getUserViewedDate() === null || $row->getUserViewedDate() === "") {
                         $viewed_grade = "&#10008;";
@@ -200,18 +217,13 @@ HTML;
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
                     $different = false;
-                    if($graded_version !== $active_version){
-                        $different = true;
-                        // probably want to write a different query instead of this
-                        $row->loadResultDetails();
-                        $autograding_score = $row->getVersions()[$graded_version]->getNonHiddenTotal() + $row->getVersions()[$graded_version]->getHiddenTotal();
-                    }
+                    // TODO: ADD RED FLAG IF GRADED VERSION IS NOT EQUAL TO ACTIVE VERSION
+
                 }
                 else{
                     $viewed_grade = "";
                     $grade_viewed = "";
                     $grade_viewed_color = "";
-                    $autograding_score = $row->getGradedAutograderPoints();
                 }
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
                 $graded = $autograding_score + $row->getGradedTAPoints();
@@ -281,12 +293,7 @@ HTML;
                     
                     if ($row->beenTAgraded()) {
                         $btn_class = "btn-default";
-                        if($different) {
-                            $contents = "Graded " . $graded_version . "/" . $highest_version;
-                        }
-                        else{
-                            $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-                        }
+                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
                     }
                     else {
                         $btn_class = "btn-primary";
@@ -369,223 +376,7 @@ HTML;
 HTML;
         }
         else{
-            $has_badges = false;
-            if ($gradeable->getNormalPoints() > 0) {
-                $has_badges = true;
-                if ($gradeable->getGradedNonHiddenPoints() >= $gradeable->getNormalPoints()) {
-                    $background = "green-background";
-                }
-                else if ($gradeable->getGradedNonHiddenPoints() > 0) {
-                    $background = "yellow-background";
-                }
-                else {
-                    $background = "red-background";
-                }
-                if ($gradeable->getTotalAutograderNonExtraCreditPoints() > $gradeable->getNormalPoints()) {
-                    $return .= <<<HTML
-        <div class="box">
-            <div class="box-title">
-                <span class="badge {$background}">{$gradeable->getGradedNonHiddenPoints()} / {$gradeable->getNormalPoints()}</span>
-                <h4>Total (No Hidden Points)</h4>
-            </div>
-        </div>
-HTML;
-                    if ($gradeable->getGradedAutograderPoints() >= $gradeable->getTotalAutograderNonExtraCreditPoints()) {
-                        $background = "green-background";
-                    }
-                    else if ($gradeable->getGradedAutograderPoints() > 0) {
-                        $background = "yellow-background";
-                    }
-                    else {
-                        $background = "red-background";
-                    }
-                    $return .= <<<HTML
-        <div class="box">
-            <div class="box-title">
-                <span class="badge {$background}">{$gradeable->getGradedAutograderPoints()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</span>
-                <h4>Total (With Hidden Points)</h4>
-            </div>
-        </div>
-HTML;
-                }
-                else {
-                    $return .= <<<HTML
-        <div class="box">
-            <div class="box-title">
-                <span class="badge {$background}">{$gradeable->getGradedNonHiddenPoints()} / {$gradeable->getNormalPoints()}</span>
-                <h4>Total</h4>
-            </div>
-        </div>
-HTML;
-                }
-            }
-            $count = 0;
-            $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
-            foreach ($gradeable->getTestcases() as $testcase) {
-                if (!$testcase->viewTestcase()) {
-                    continue;
-                }
-                $div_click = "";
-                if ($testcase->hasDetails() || (count($testcase->getAutochecks()) > 0)) {
-                    $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
-                }
-                $return .= <<<HTML
-        <div class="box">
-            <div class="box-title" {$div_click}>
-HTML;
-                if ($testcase->hasDetails() || (count($testcase->getAutochecks()) > 0)) {
-                    $return .= <<<HTML
-                <div style="float:right; color: #0000EE; text-decoration: underline">Details</div>
-HTML;
-                }
-                if ($testcase->hasPoints()) {
-                    $showed_badge = false;
-                    $background = "";
-                    if ($testcase->isExtraCredit()) {
-                        if ($testcase->getPointsAwarded() > 0) {
-                            $showed_badge = true;
-                            $background = "green-background";                                $return .= <<<HTML
-                <div class="badge {$background}"> &nbsp; +{$testcase->getPointsAwarded()} &nbsp; </div>
-HTML;
-                        }
-                    }
-                    else if ($testcase->getPoints() > 0) {
-                        if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
-                            $background = "green-background";
-                        }
-                        else if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
-                            $background = "red-background";
-                        }
-                        else {
-                            $background = "yellow-background";
-                        }
-                        $showed_badge = true;
-                        $return .= <<<HTML
-                <div class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</div>
-HTML;
-                    }
-                    else if ($testcase->getPoints() < 0) {
-                        if ($testcase->getPointsAwarded() < 0) {
-                            if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
-                                $background = "red-background";
-                            }
-                            else if ($testcase->getPointsAwarded() < 0) {
-                                $background = "yellow-background";
-                            }
-                        $showed_badge = true;
-                        $return .= <<<HTML
-                <div class="badge {$background}"> &nbsp; {$testcase->getPointsAwarded()} &nbsp; </div>
-HTML;
-                        }
-                    }
-                    if (!$showed_badge) {
-                        $return .= <<<HTML
-                <div class="no-badge"></div>
-HTML;
-                    }
-                }
-                else if ($has_badges) {
-                    $return .= <<<HTML
-                <div class="no-badge"></div>
-HTML;
-                }
-                if ($testcase->isHidden()) {
-                    $return .= <<<HTML
-                <div class="badge" style="margin-left:0px; margin-right:10px;">Hidden</div>
-HTML;
-                }
-                $name = htmlentities($testcase->getName());
-                $extra_credit = "";
-                if($testcase->isExtraCredit()) {
-                    $extra_credit = "<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
-                }
-                $command = htmlentities($testcase->getDetails());
-                    $return .= <<<HTML
-                <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}</h4>
-            </div>
-HTML;
-                if ($testcase->hasDetails() || (count($testcase->getAutochecks()) > 0)) {
-                    $return .= <<<HTML
-            <div id="testcase_{$count}" style="display: {$display_box};">
-HTML;
-                    $autocheck_cnt = 0;
-                    $autocheck_len = count($testcase->getAutochecks());
-                    foreach ($testcase->getAutochecks() as $autocheck) {
-                        $description = $autocheck->getDescription();
-                        $diff_viewer = $autocheck->getDiffViewer();
-                        $return .= <<<HTML
-                <div class="box-block">
-HTML;
-                        $title = "";
-                        $return .= <<<HTML
-                    <div class='diff-element'>
-HTML;
-                        if ($diff_viewer->hasDisplayExpected()) {
-                            $title = "Student ";
-                        }
-                        $title .= $description;
-                        $return .= <<<HTML
-                        <h4>{$title}</h4>
-HTML;
-                        foreach ($autocheck->getMessages() as $message) {
-                            $return .= <<<HTML
-                        <span class="red-message">{$message}</span><br />
-HTML;
-                        }
-                        $myimage = $diff_viewer->getActualImageFilename();
-                        if ($myimage != "") {
-                            // borrowed from file-display.php
-                            $content_type = FileUtils::getContentType($myimage);
-                            if (substr($content_type, 0, 5) === "image") {
-                                // Read image path, convert to base64 encoding
-                                $imageData = base64_encode(file_get_contents($myimage));
-                                // Format the image SRC:  data:{mime};base64,{data};
-                                $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
-                                // insert the sample image data
-                                $return .= '<img src="'.$myimagesrc.'">';
-                            }
-                        }
-                        else if ($diff_viewer->hasDisplayActual()) {
-                            $return .= <<<HTML
-                        {$diff_viewer->getDisplayActual()}
-HTML;
-                        }
-                        $return .= <<<HTML
-                    </div>
-HTML;
-                        if ($diff_viewer->hasDisplayExpected()) {
-                            $return .= <<<HTML
-                    <div class='diff-element'>
-                        <h4>Expected {$description}</h4>
-HTML;
-                            for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
-                                $return .= <<<HTML
-                        <br />
-HTML;
-                            }
-                            $return .= <<<HTML
-                        {$diff_viewer->getDisplayExpected()}
-                    </div>
-HTML;
-                        }
-                        $return .= <<<HTML
-                </div>
-HTML;
-                        if (++$autocheck_cnt < $autocheck_len) {
-                             $return .= <<<HTML
-                <div class="clear"></div>
-HTML;
-                        }
-                    }
-                    $return .= <<<HTML
-            </div>
-HTML;
-                }
-                $return .= <<<HTML
-        </div>
-HTML;
-                $count++;
-            }
+            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, true);
         }
         $return .= <<<HTML
     </div>
@@ -595,6 +386,7 @@ HTML;
     <span class="grading_label">Submissions and Results Browser</span>
     <button class="btn btn-default" onclick="openAll()">Expand All</button>
     <button class="btn btn-default" onclick="closeAll()">Close All</button>
+    <button class="btn btn-default" onclick="downloadZip('{$gradeable->getId()}','{$gradeable->getUser()->getId()}')">Download Zip File</button>
     <br />
     <div class="inner-container">
 HTML;
@@ -618,14 +410,17 @@ HTML;
                 if (!is_array($contents)) {
                     $dir = htmlentities($dir);
                     $contents = urlencode(htmlentities($contents));
+                    $content_url = urldecode($contents); 
                     $indent_offset = $indent * -15;
+                    $super_url = $content_url;
                     $return .= <<<HTML
                 <div>
                     <div class="file-viewer">
                         <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count})'>
                             <span class='icon-plus' style='vertical-align:text-bottom;'></span>
                         {$dir}</a> &nbsp;
-                        <a onclick='openFile("{$dir}", "{$contents}")'>(Popout)</a>
+                        <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                        <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
                     </div><br/>
                     <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px"></div>
                 </div>
@@ -636,12 +431,13 @@ HTML;
             foreach ($files as $dir => $contents) {
                 if (is_array($contents)) {
                     $dir = htmlentities($dir);
+                    $url = reset($contents);
                     $return .= <<<HTML
             <div>
                 <div class="div-viewer">
                     <a class='openAllDiv' onclick='openDiv({$count});'>
                         <span class='icon-folder-closed' style='vertical-align:text-top;'></span>
-                    {$dir}</a>
+                    {$dir}</a> 
                 </div><br/>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none'>
 HTML;
@@ -830,9 +626,16 @@ HTML;
         </div>
 HTML;
         if ($gradeable->beenTAgraded()) {
+            // assumes that the person who graded the first question graded everything... also in electronicGraderController:150...have to rewrite to be per component
+            $graders = array();
+            foreach($gradeable->getComponents() as $component){
+                $graders[] = $component->getGrader()->getId();
+            }
+            $graders = array_unique($graders);
+            $graders = implode(",", $graders);
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: {$gradeable->getGrader()->getId()}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
+            Graded By: {$graders}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
         </div>
 HTML;
         }
@@ -897,7 +700,19 @@ HTML;
         return false;
     }
 
+    function downloadZip(grade_id, user_id) {
+        window.location = buildUrl({'component': 'misc', 'page': 'download_zip', 'dir': 'submissions', 'gradeable_id': grade_id, 'user_id': user_id});
+        return false;
+    }
+
+    function downloadFile(html_file, url_file) {
+        url_file = decodeURIComponent(url_file);        
+        window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': html_file, 'path': url_file});
+        return false;
+    }
+
     function openFile(html_file, url_file) {
+        url_file = decodeURIComponent(url_file);
         window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=submissions&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
