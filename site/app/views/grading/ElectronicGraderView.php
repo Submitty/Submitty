@@ -562,7 +562,7 @@ HTML;
 HTML;
             }
             $return .= <<<HTML
-            <span onclick="openClose({$c})"> <i class="fa fa-window-maximize" style="visibility: visible; cursor: pointer;"></i> </span> {$note} 
+            <span onclick="openClose({$c})"> <i id="icon-{$c}" class="fa fa-window-maximize" style="visibility: visible; cursor: pointer;"></i> </span> {$note} 
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());
@@ -595,7 +595,7 @@ HTML;
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
-                            <textarea name="comment-{$question->getOrder()}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$question->getComment()}</textarea>
+                            <textarea id="rubric-textarea-{$c}" name="comment-{$question->getOrder()}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$question->getComment()}</textarea>
                         </div>
                     </td>
                 </tr>
@@ -733,10 +733,13 @@ HTML;
 
     function openClose(row_id) {
         var x = document.getElementById('extra-' + row_id);
+        $("#icon-" + row_id).toggleClass('fa-window-maximize fa-window-close-o');
         if (x.style.display === 'none') {
             x.style.display = '';
+            document.getElementById("rubric-textarea-" + row_id).disabled = true;
         } else {
             x.style.display = 'none';
+            document.getElementById("rubric-textarea-" + row_id).disabled = false;
         }
     }
 </script>
