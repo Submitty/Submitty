@@ -51,7 +51,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'comment' => 'Comment about gradeable',
             'has_grade' => true,
             'grade_time' => null,
-            'grader' => 'instructor',
+            'grader' => $this->createMockUser('instructor'),
             'graded_version' => 1,
             'modified' => false
         );
@@ -70,7 +70,7 @@ class GradeableComponentTester extends BaseUnitTest {
         $this->assertEquals($expected['order'], $component->getOrder());
         $this->assertEquals($expected['score'], $component->getScore());
         $this->assertEquals($expected['comment'], $component->getComment());
-        $this->assertEquals($expected['grader'], $component->getGrader()->getId());
+        $this->assertEquals($expected['grader']->getId(), $component->getGrader()->getId());
         $this->assertEquals($expected['graded_version'], $component->getGradedVersion());
 
         $component->setScore(20);
@@ -88,7 +88,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => 1000,
-            'grader' => $this->createMockUser('ta'),
+            'grader' => $this->createMockUser('ta')->getId(),
             'graded_version' => 1,
             'gcd_component_comment' => 'Comment about gradeable'
         );
@@ -110,7 +110,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => -100,
-            'grader' => $this->createMockUser('ta'),
+            'grader' => $this->createMockUser('ta')->getId(),
             'graded_version' => 1,
             'gcd_component_comment' => 'Comment about gradeable'
         );
@@ -130,7 +130,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => null,
-            'grader' => $this->createMockUser('ta'),
+            'grader' => $this->createMockUser('ta')->getId(),
             'graded_version' => 1,
             'gcd_component_comment' => null
         );
