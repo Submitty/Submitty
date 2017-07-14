@@ -369,7 +369,7 @@ HTML;
                         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
                         if ($g_data->useTAGrading()) {
                             $gradeable_core = $this->core->getQueries()->getGradeable($gradeable);
-                            $total = array();
+                            $total_users = array();
                             $graded = array();
                             $graders = array();
                             $sections = array();
@@ -448,7 +448,7 @@ HTML;
 HTML;
                             }                           
                             //Give the TAs a progress bar too                        
-                            if (($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED") && $students_total != 0) {
+                            if (($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED") && $components_total != 0) {
                                 $gradeable_grade_range .= <<<HTML
                                 <style type="text/css"> 
                                     .meter3 { 

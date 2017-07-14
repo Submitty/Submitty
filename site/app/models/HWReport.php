@@ -39,14 +39,9 @@ class HWReport extends AbstractModel {
         if($gradeable->beenTAgraded()) {
             $student_output_text_main .= strtoupper($gradeable->getName())." GRADE".$nl;
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
-            $graders = array();
-            foreach($gradeable->getComponents() as $component){
-                $graders[] = $component->getGrader();
-            }
-            $graders = array_unique($graders);
             $name_and_emails = array();
-            foreach($graders as $grader){
-                $name_and_emails[] = "{$grader->getDisplayedFirstName()} {$grader->getLastName()} <{$grader->getEmail()}>".$nl;
+            foreach($gradeable->getComponents() as $component){
+                $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>".$nl;
             }
             $name_and_emails = implode(",", $name_and_emails);
 
