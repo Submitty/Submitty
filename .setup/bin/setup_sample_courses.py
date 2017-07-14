@@ -32,9 +32,13 @@ import pytz
 import time
 import tzlocal
 import os.path
+import sys
 
-sys.path.append(os.path.dirname(__file__) + '../../bin')
+
+# share a couple functions related to timezone
+sys.path.append("/usr/local/submitty/bin")
 import submitty_utils
+
 
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile

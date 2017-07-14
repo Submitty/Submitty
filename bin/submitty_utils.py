@@ -2,8 +2,6 @@
 
 import pytz
 import time
-import dateutil
-import dateutil.parser
 import tzlocal
 import datetime
 
@@ -13,26 +11,30 @@ def get_timezone():
 
 
 def write_submitty_date(d):
-    print ("\nWD ",d)
-    print ("tzinfo ",d.tzinfo)
-    my_timezone = get_timezone()
-    #my_timezone = d.tzinfo
-    #print ("tz ",my_timezone)
-    #print ("tz ",my_timezone())
-    answer = d.strftime("%Y-%m-%d %H:%M:%S ") + str(my_timezone)#tz.tzname(my_timezone)
-    print ("answer ",answer)
+    my_timezone = d.tzinfo
+    if my_timezone is None:
+        print ("NO TIMEZONE ",d,"assuming local timezone")
+        my_timezone = get_timezone()
+        d_with_timezone = my_timezone.localize(d)
+    else:
+        d_with_timezone = d;
+    answer = d.strftime("%Y-%m-%d %H:%M:%S ") + str(d_with_timezone.tzinfo)
     return answer
 
-def read_submitty_date(d):
+
+def read_submitty_date(s):
     words = s.split()
-    if not len(words) == 3:
-        SystemExit("ERROR:  unexpected date format ",s)
+    if len(words) < 2 or len(words) > 3:
+        raise SystemExit("ERROR:  unexpected date format %s" % s)
     without_timezone = str(words[0] + ' ' + words[1])
-    without_timezone = datetime.datetime.strptime(without_timezone,'%Y-%m-%d %H:%M:%S')
-    my_timezone = pytz.timezone(words[2])
-    #with_timezone = my_timezone.localize(without_timezone)
-    tz = my_timezone.tzinfo
-    #print ("RD TZ",tz)
-    #with_timezone = without_timezone.replace(tzinfo=my_timezone.tzinfo)
-    with_timezone = without_timezone.replace(tzinfo=tz)
+    try:
+        without_timezone = datetime.datetime.strptime(without_timezone,'%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        raise SystemExit("ERROR:  invalid date format %s" % s)
+    if len(words) == 2:
+        print ("NO TIMEZONE ",s,"assuming local timezone")
+        my_timezone = get_timezone()
+    else:
+        my_timezone = pytz.timezone(words[2])
+    with_timezone = my_timezone.localize(without_timezone)
     return with_timezone

@@ -398,8 +398,7 @@ function grade_this_item {
     else
 	log_error "$NEXT_TO_GRADE" "$submission_path/.submit.timestamp   does not exist!"
     fi
-    # chop of first & last characters
-    global_submission_time=`date -d "${submission_time}"`
+    submission_time_no_timezone=${submission_time:0:19}
 
     # switch to tmp directory
     pushd $tmp > /dev/null
@@ -503,7 +502,7 @@ function grade_this_item {
 
 	# run the compile.out as the untrusted user
 	#echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$gradeable" "$who" "$version" "$submission_time" >& $tmp/results_log_compile.txt'
-	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$gradeable" "$who" "$version" "$submission_time" >& $tmp/results_log_compile.txt
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$gradeable" "$who" "$version" "$submission_time_no_timezone" >& $tmp/results_log_compile.txt
 
 	compile_error_code="$?"
 	if [[ "$compile_error_code" -ne 0 ]] ;
@@ -567,7 +566,7 @@ function grade_this_item {
 
 	# run the run.out as the untrusted user
 	#echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$gradeable" "$who" "$version" "$submission_time" >& results_log_runner.txt'
-	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$gradeable" "$who" "$version" "$submission_time" >& results_log_runner.txt
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$gradeable" "$who" "$version" "$submission_time_no_timezone" >& results_log_runner.txt
 	runner_error_code="$?"
 
 	# change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
@@ -610,11 +609,11 @@ function grade_this_item {
 
 	#FIXME: do we still need valgrind here?
         if [[ 0 -eq 0 ]] ; then
-            echo "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time"  >& results_log_validator.txt
-            "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time"  >& results_log_validator.txt
+            echo "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time_no_timezone"  >& results_log_validator.txt
+            "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time_no_timezone"  >& results_log_validator.txt
         else
-            echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/valgrind "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time"  >& results_log_validator.txt'
-            "$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" " "/usr/bin/valgrind" "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time"  >& results_log_validator.txt
+            echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/valgrind "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time_no_timezone"  >& results_log_validator.txt'
+            "$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" " "/usr/bin/valgrind" "$bin_path/$gradeable/validate.out" "$gradeable" "$who" "$version" "$submission_time_no_timezone"  >& results_log_validator.txt
         fi
 
 	validator_error_code="$?"
@@ -820,7 +819,7 @@ while true; do
 
 	# FIXME: using a global variable to pass back the grade
 	global_grade_result="ERROR: NO GRADE"
-	global_submission_time=""
+	#global_submission_time=""
 	global_gradeable_deadline=""
 	# call the helper function
         echo "========================================================================"
