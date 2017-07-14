@@ -20,45 +20,10 @@
  *
  * -------------------------------------------------------------------------- */
 
-//Course list to be processed.  Other courses in the CSV feed will be ignored.
-//Elements should be string data representing the course, both prefix and
-//number.  Do not seperate or deliminate prefix and number.
-//***THIS NEEDS TO BE SET as a serialized array.
-define('COURSE_LIST', serialize( array(
-'cs100',
-'cs150',
-'cs200',
-'cs250',
-'cs300',
-'cs350',
-'cs400'
-)));
+/* Definitions for error logging -------------------------------------------- */
+define('ERROR_E_MAIL',   'sysadmins@lists.myuniversity.edu');
+define('ERROR_LOG_FILE', '/var/local/submitty/bin/auto_feed_error.log');
 
-//Some Universities will hold mixed enrollment of graduate and undergraduate
-//students and/or corss registered courses in a single classroom.  Having
-//multiple Submitty courses for one whole classroom may be inconvenient, so this
-//list will map enrollment of a "base" course to all related courses.
-//
-//Enrollees in any mapped courses will appear in additional sections in the
-//"base" course.  ***THIS NEEDS TO BE SET as arrays of a serialized array.
-
-/* EXAMPLES --------------------------------------------------------------------
- *
- * CS-300 is mapped to graduate course CS-500 only.  Entry is as follows:
- *
- * 'cs300' => array('cs500')
- *
- * CS-400 is mapped to graduate course CS-600 and cross registered with courses
- * IT-400 and IT-600.  Entry is as follows:
- *
- * 'cs400' => array('cs600', 'it400', 'it600')
- *
- * -------------------------------------------------------------------------- */
-
-define('COURSE_MAPPINGS', serialize( array(
-'cs300' => array('cs500'),
-'cs400' => array('cs600', 'it400', 'it600')
-)));
 
 //Student registration status is important, as data dumps can contain students
 //who have dropped a course either before the semester starts or during the

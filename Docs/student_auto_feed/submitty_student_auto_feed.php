@@ -13,7 +13,7 @@
  *
  * THIS SOFTWARE IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
  * COMPATIBLE WITH YOUR UNIVERSITY'S INFORMATION SYSTEMS.  THIS IS ONLY A CODE
- * EXAMPLE FOR YOUR UNIVERSITY'S SYSYTEM'S PROGRAMMER TO PROVIDE AN
+ * EXAMPLE FOR YOUR UNIVERSITY'S SYSTEMS PROGRAMMER TO PROVIDE AN
  * IMPLEMENTATION.  IT MAY REQUIRE SOME ADDITIONAL MODIFICATION TO SAFELY WORK
  * WITH YOUR UNIVERSITY'S AND/OR DEPARTMENT'S INFORMATION SYSTEMS.
  *
@@ -30,10 +30,11 @@
  * -------------------------------------------------------------------------- */
 
 class submitty_student_auto_feed {
+    private static $semester;
 	private static $course_list;
-	private static $course_mappings;
 	private static $db;
 	private static $data = array();
+	private static $log_msg_queue;
 
 	public function __construct() {
 
@@ -42,23 +43,53 @@ class submitty_student_auto_feed {
 			die("This is a command line tool.");
 		}
 
-		//Ensure all course labels have a common alpha case (lower).
-		self::$course_list     = array_map('strtolower', unserialize(COURSE_LIST));
-		self::$course_mappings = array_change_key_case(unserialize(COURSE_MAPPINGS), CASE_LOWER);
-		foreach(self::$course_mappings as &$courses) {
-			$courses = array_map('strtolower', $courses);
-		} unset($courses);
+		//Make sure log msg queue is empty on start.
+		self::$log_msg_queue = "";
+
+		//Determine current semester
+		$month = intval(date("m", time()));
+		$year  = date("y", time());
+
+        //(s)pring is month <= 5, (f)all is month >= 8, su(m)mer are months 6 and 7.
+		//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
+		self::$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
+
+        //Get course list, mapped to all lowercase
+        self::$course_list = array_map('strtolower', get_participating_courses());
+
+        //Make connection to submitty_db
+   		$db_host     = DB_HOST;
+		$db_user     = DB_LOGIN;
+		$db_password = DB_PASSWORD;
+        self::$db = pg_connect("host={$db_host} dbname=submitty user={$db_user} password={$db_password}");
 
 		//Execute processes as soon as object is instantiated.
 		//(halts when FALSE is returned by a method)
 		switch(false) {
 		case $this->load_and_validate_csv():
-			fwrite(STDERR, "CSV feed file could not be loaded or failed validation." . PHP_EOL);
+			log_it("CSV feed file could not be loaded or failed validation.");
 			break;
-		case $this->process_csv():
+		case $this->upsert():
+		    log_it("Error during upsert of data.");
 			break;
 		}
- 	}
+
+		//END process.
+	}
+
+	public function __destruct() {
+
+        //Close DB connection, if it exists.
+        if (is_resource(self::$db) && get_resource_type(self::$db) === 'pgsql link') {
+            pg_close(self::$db);
+        }
+
+        //Output logs, if any.
+        if (!empty($log_msg_queue)) {
+            error_log(self::$log_msg_queue, 1, ERROR_E_MAIL);    //to email
+            error_log(self::$log_msg_queue, 3, ERROR_LOG_FILE);  //to file
+        }
+    }
 
 	private function load_and_validate_csv() {
 	//IN:  No parameters
@@ -68,7 +99,7 @@ class submitty_student_auto_feed {
 		$csv_file = CSV_FILE;
 		$loaded_data = file($csv_file, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
 		if ($loaded_data === false) {
-			fwrite(STDERR, "Failed to load {$csv_file}." . PHP_EOL);
+			log_it("Failed to load {$csv_file}.");
 			return false;
 		}
 
@@ -88,13 +119,12 @@ class submitty_student_auto_feed {
 
 			//BEGIN VALIDATION
 			$course = strtolower($row[COLUMN_COURSE_PREFIX]) . $row[COLUMN_COURSE_NUMBER];
-			$mapping = $this->course_is_mapped($course);
 			$num_fields = count($row);
 
 			//Row validation filters.  If any prove false, row is discarded.
 			switch(false) {
 			//Check to see if course is participating in Submitty
-			case (in_array($course, self::$course_list) || boolval($mapping)):
+			case (in_array($course, self::$course_list)):
 				break;
 			//Check that row shows student is registered.
 			case (in_array($row[COLUMN_REGISTRATION], unserialize(STUDENT_REGISTERED_CODES))):
@@ -102,7 +132,7 @@ class submitty_student_auto_feed {
 			//Validate expected number of fields
 			case ($num_fields === $validate_num_fields):
 			//Log that row is invalid per number of columns
-				fwrite(STDERR, "Row {$index} has {$num_fields} columns.  {$validate_num_fields} expected.  Row discarded." . PHP_EOL);
+				log_it("Row {$index} has {$num_fields} columns.  {$validate_num_fields} expected.  Row discarded.");
 				break;
 			//Check row columns
 			default:
@@ -110,33 +140,23 @@ class submitty_student_auto_feed {
 				switch(false) {
 				//First name must be alpha characters, white-space, or certain punctuation.
 				case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_FNAME])):
-					fwrite(STDERR, "Row {$index} failed validation for student first name ({$row[COLUMN_FNAME]}).  Row discarded." . PHP_EOL);
+					log_it("Row {$index} failed validation for student first name ({$row[COLUMN_FNAME]}).  Row discarded.");
 					break;
 				//Last name must be alpha characters white-space, or certain punctuation.
 				case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_LNAME])):
-					fwrite(STDERR, "Row {$index} failed validation for student last name ({$row[COLUMN_LNAME]}).  Row discarded." . PHP_EOL);
+					log_it("Row {$index} failed validation for student last name ({$row[COLUMN_LNAME]}).  Row discarded.");
 					break;
 				//Student section must be greater than zero.  intval($str) returns zero when $str is not integer.
 				case (intval($row[COLUMN_SECTION]) > 0):
-					fwrite(STDERR, "Row {$index} failed validation for student section ({$row[COLUMN_SECTION]}).  Row discarded." . PHP_EOL);
+					log_it("Row {$index} failed validation for student section ({$row[COLUMN_SECTION]}).  Row discarded.");
 					break;
 				//Loose email address check for format of "address@domain" or "address@[ipv4]"
-				case (preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $row[COLUMN_EMAIL])):
-					fwrite(STDERR, "Row {$index} failed validation for student email ({$row[COLUMN_EMAIL]}).  Row discarded." . PHP_EOL);
+				case (preg_match("~^.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $row[COLUMN_EMAIL])):
+					log_it("Row {$index} failed validation for student email ({$row[COLUMN_EMAIL]}).  Row discarded.");
 
 				default:
-					//Validation passed.
-
-					//Adjust data for any mapped course.  Such students will be
-					//assigned to a new section in the base course.  Row data
-					//will be grouped into the base course's data.
-					if (boolval($mapping)) {
-						$row[COLUMN_SECTION] = $mapping['offset'];
-						$course = $mapping['base_course'];
-					}
-
-					//Include row in data set.  Group data by course.
-					self::$data[$course][] = $row;
+					//Validation passed. Include row in data set.
+					self::$data[] = $row;
 				}
 			}
 		} unset($row);
@@ -146,123 +166,27 @@ class submitty_student_auto_feed {
 		return (count(self::$data) > 0);
 	}
 
-	private function process_csv() {
-	//IN:  No parameters
-	//OUT: No return
-	//PURPOSE: Process csv fields to be upserted to DB tables.
-	//NOTE:    $month 1 - 5 is (s)pring semester.
-	//         $month 8 - 12 is (f)all semester.
-	//         Other $month values are maybe s(u)mmer courses...?
-
-		//copied for string expansion with "{$var}"
-		$db_host     = DB_HOST;
-		$db_user     = DB_LOGIN;
-		$db_password = DB_PASSWORD;
-		$month       = intval(date("m", time()));
-		$year        = date("y", time());
-		//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
-		$semester    = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
-
-		foreach(self::$course_list as $course) {
-			$course_name = strtolower($course);
-			$db_name = "submitty_{$semester}_{$course_name}";
-			self::$db = pg_connect("host={$db_host} dbname={$db_name} user={$db_user} password={$db_password}");
-			if (self::$db === false) {
-				fwrite(STDERR, "ERROR: Failed to connect to DB {$db_host} or {$db_name}.  Skipping {$course}." . PHP_EOL);
-				continue;  //skip upserting and move on to next course.
-			}
-
-			switch(false) {
-			//update sections_registration DB constraint.
-			case ($this->update_sections_fk($course)):
-				fwrite(STDERR, "Could not update sections_id foreign key." . PHP_EOL);
-				break;
-			//Upsert data.
-			case ($this->upsert($course)):
-				fwrite(STDERR, "Error during upsert." . PHP_EOL);
-				break;
-			}
-
-			pg_close(self::$db);
-		}
-
-		//successfully completed.
-		return true;
-	}
-
-	private function update_sections_fk($course) {
-	//IN:  Course ID as whole string (prefix and number)
-	//OUT: FALSE when DB is not accessible (process aborts).
-	//     TRUE when process is complete.
-	//PURPOSE:  DB column users/registration_section has a foreign constraint
-	//          that must be satisfied before upserting student data.
-
-		//EXPECTED: self::$db has an active/open Postgres connection.
+	private function get_participating_course_list() {
+    	//EXPECTED: self::$db has an active/open Postgres connection.
 		if (!is_resource(self::$db) || get_resource_type(self::$db) !== 'pgsql link') {
-			fwrite(STDERR, "Error: not connected to DB while updating sections_registration foreign key constraint for {$course}" . PHP_EOL);
+			log_it("Error: not connected to DB when retrieving active course list.");
 			return false;
 		}
 
-		//Determine highest registered section number from course data.  Needed
-		//when expanding mapped courses and updating users/regsitration_section
-		//in DB.
-		$csv_max_section = 1;
-		foreach(self::$data[$course] as $row) {
-			$tmp = intval($row[COLUMN_SECTION]);
-			if ($tmp > $csv_max_section) {
-				$csv_max_section = $tmp;
-			}
-		}
+		$sql = <<<SQL
+SELECT course
+FROM courses
+WHERE semester = $1
+SQL;
 
-		//Determine max value permitted by DB foreign constraint.
-		$query = pg_query(self::$db, "SELECT MAX(sections_registration_id) FROM sections_registration");
-		$db_max_section = pg_fetch_result($query, 'max');
+        $result = pg_query_params(self::$db, $sql, array(self::$db));
 
-		//Determine that foreign constraint should be updated.
-		if (is_null($db_max_section)) {
-			//There are no registered sections.  Start adding sections at 01.
-			$new_sections_start = 1;
-		} else {
-			$db_max_section = intval($db_max_section);
-			if ($csv_max_section - $db_max_section > 0) {
-				//There are registered sections, but more are needed to process
-				//student data.
-				$new_sections_start = ($db_max_section + 1);
-			} else {
-				//All required sections already exist, so no updates needed.
-				//PHP_INT_MAX is a trigger to prevent update loop.
-				$new_sections_start = PHP_INT_MAX;
-			}
-		}
+        if ($result === false) {
+            log_it("Error: DB query failed to retrieve course list.");
+            return false;
+        }
 
-		//Update foreign constraint in DB.
-		//$new_sections_start = PHP_INT_MAX prevents this from running.
-		for($i = $new_sections_start; $i <= $csv_max_section; $i++) {
-			pg_query_params(self::$db, "INSERT INTO sections_registration VALUES ($1)", array($i));
-		}
-
-		return true;
-	}
-
-	private function course_is_mapped($tmp_course) {
-	//IN:  Course as full string (e.g. "cs100").
-	//OUT: Array of the base course that is mapped and the mapping index.
-	//PURPOSE:  Course mappings are two dimensional arrays, which cannot be
-	//          parsed with array_search.  Offset is incremented as it will be
-	//          used to set section for student enrollment.
-	//TO DO:  Student section reassignment for mapped courses are specific at
-	//        setting the section to 2+ as this assumes the base course has only
-	//        one section.  This may be a false assumption at some Universities.
-
-		foreach(self::$course_mappings as $base_course=>$mappings) {
-			$offset = array_search($tmp_course, $mappings);
-			if ($offset !== false) {
-				return array( 'base_course' => strtolower($base_course),
-				              'offset'      => strval($offset + 2) );
-			}
-		}
-
-		return false;
+        return pg_fetch_all($result);
 	}
 
 	private function upsert($course) {
@@ -273,8 +197,8 @@ class submitty_student_auto_feed {
 
 		//EXPECTED: self::$db has an active/open Postgres connection.
 		if (!is_resource(self::$db) || get_resource_type(self::$db) !== 'pgsql link') {
-			fwrite(STDERR, "Error: not connected to DB when attempting data upsert for {$course}" . PHP_EOL);
-			return;
+			log_it("Error: not connected to DB when attempting data upsert for {$course}");
+			return false;
 		}
 
 /* -----------------------------------------------------------------------------
@@ -288,22 +212,32 @@ class submitty_student_auto_feed {
 		              'commit' => 'COMMIT' );
 
 		//TEMPORARY table to hold all new values that will be "upserted"
-		$sql['temp_table'] = <<<SQL
-CREATE TEMPORARY TABLE temp
-	(student_id           VARCHAR,
-	 first_name           VARCHAR,
-	 last_name            VARCHAR,
-	 preferred_first_name VARCHAR,
-	 email                VARCHAR,
-	 s_group              INTEGER,
-	 r_section            INTEGER,
-	 is_manual            BOOLEAN)
-ON COMMIT DROP
+		$sql['temp_tables'] = <<<SQL
+CREATE TEMPORARY TABLE upsert_users (
+    u_user_id                  VARCHAR,
+	u_user_firstname           VARCHAR,
+	u_user_preferred_firstname VARCHAR,
+	u_last_name                VARCHAR,
+	u_email                    VARCHAR,
+) ON COMMIT DROP
+
+CREATE TEMPORARY TABLE upsert_courses_users (
+    u_semester             VARCHAR,
+    u_course               VARCHAR
+    u_user_id              VARCHAR
+    u_user_group           INTEGER
+    u_registration_section VARCHAR
+) ON COMMIT DROP
 SQL;
+
+/* TO DO
+- correct all SQL to do batch upsert from two temp tables (matching to submitty DB)
+- need some DB adjustments
+*/
 
 		//INSERT new data into temporary table -- prepares all data to be
 		//upserted in a single DB transaction.
-		foreach(self::$data[$course] as $i => $row) {
+		foreach(self::$data as $i => $row) {
 			$sql['data'][$i] = <<<SQL
 INSERT INTO temp VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 SQL;
@@ -372,18 +306,17 @@ AND users.manual_registration=$2
 SQL;
 
 		pg_query(self::$db, $sql['begin']);
-		pg_query(self::$db, $sql['temp_table']);
+		pg_query(self::$db, $sql['temp_tables']);
 
 		//fills temp table with batch upsert data.
-		foreach(self::$data[$course] as $i => $row) {
+		foreach(self::$data as $i => $row) {
 			pg_query_params(self::$db, $sql['data'][$i], array( $row[COLUMN_CSID],
 			                                                    $row[COLUMN_FNAME],
 			                                                    $row[COLUMN_LNAME],
 			                                                    $row[COLUMN_PNAME],
 			                                                    $row[COLUMN_EMAIL],
-			                                                    4,
 			                                                    $row[COLUMN_SECTION],
-			                                                    'FALSE' ));
+
 		}
 
 		pg_query(self::$db, $sql['lock']);
@@ -395,6 +328,15 @@ SQL;
 		//indicate success.
 		return true;
 	}
+
+	private function log_it($msg) {
+    //IN:  Message to write to log file
+    //OUT: No return, although log ms queue is updated.
+    //PURPOSE: log msg queue holds messages intended for email and text logs.
+
+        self::$log_msg_queue .= date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
+}
+
 }
 /* EOF ====================================================================== */
 ?>
