@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\exceptions\ConfigException;
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\libraries\IniParser;
 use app\libraries\Utils;
 
@@ -191,6 +192,12 @@ class Config extends AbstractModel {
                 throw new ConfigException("Invalid path for setting {$path}: {$this->$path}");
             }
             $this->$path = rtrim($this->$path, "/");
+        }
+
+        foreach(array('site_errors', 'access') as $path) {
+            if (!is_dir(FileUtils::joinPaths($this->submitty_log_path, $path))) {
+                throw new ConfigException("Missing log folder: {$path}");
+            }
         }
 
         if (!is_dir(implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester)))) {
