@@ -483,7 +483,7 @@ HTML;
 
         //Late day calculation
         $ldu = new LateDaysCalculation($this->core);
-        $return .= $ldu->generateTableForUserDate($user->getId(), $gradeable->getDueDate());
+        $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
         $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
         $status = $late_days_data['status'];
 

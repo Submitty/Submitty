@@ -177,6 +177,62 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         return $return;
     }
 
+
+//must fix for teams
+    public function getGradeableVersions2($g_id, $user_id, $team_id, $due_date) {
+        if ($user_id === null) {
+            $this->course_db->query("
+SELECT egd.*, egv.active_version = egd.g_version as active_version
+FROM electronic_gradeable_data AS egd
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_version
+) AS egv ON egv.active_version = egd.g_version AND egv.team_id = egd.team_id AND egv.g_id = egd.g_id
+WHERE egd.g_id=? AND egd.team_id=?
+ORDER BY egd.g_version", array($g_id, $team_id));
+        }
+        else {
+            $this->course_db->query("
+SELECT
+  egd.*,
+  egv.active_version = egd.g_version as active_version,
+  gc.*
+FROM electronic_gradeable_data AS egd
+LEFT JOIN(
+  SELECT
+    g_id,
+    array_agg(gc_id) as array_gc_id,
+    array_agg(gc_title) AS array_gc_title,
+    array_agg(gc_ta_comment) AS array_gc_ta_comment,
+    array_agg(gc_student_comment) AS array_gc_student_comment,
+    array_agg(gc_max_value) AS array_gc_max_value,
+    array_agg(gc_is_text) AS array_gc_is_text,
+    array_agg(gc_is_extra_credit) AS array_gc_is_extra_credit,
+    array_agg(gc_order) AS array_gc_order
+  FROM gradeable_component
+  WHERE g_id='grading_homework'
+  GROUP BY g_id
+) AS gc
+ON gc.g_id = egd.g_id
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_version
+) AS egv ON egv.active_version = egd.g_version AND egv.user_id = egd.user_id AND egv.g_id = egd.g_id
+WHERE egd.user_id=? AND egd.g_id=?
+ORDER BY egd.g_version", array($user_id, $g_id));
+        }
+        
+        $return = array();
+        foreach ($this->course_db->rows() as $row) {
+            $row['submission_time'] = new \DateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
+            $return[$row['g_version']] = new GradeableVersion($this->core, $row, $due_date);
+        }
+
+        return $return;
+    }
+
+
+
     public function getAllGradeables($user_id = null) {
         return $this->getGradeables(null, $user_id);
     }
