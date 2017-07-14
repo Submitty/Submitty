@@ -84,9 +84,10 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
   std::cout << "FULL POINTS " << full_points << std::endl;
 
   bool test_case_success = (result.getMessages().size() == 0);
-  bool show_message  = ShowHelper(tcg.value("show_message", "never"),test_case_success);
-  bool show_actual   = ShowHelper(tcg.value("show_actual",  "never"),test_case_success);
-  bool show_expected = ShowHelper(tcg.value("show_expected","never"),test_case_success);
+  bool show_message    = ShowHelper(tcg.value("show_message", "never"),test_case_success);
+  bool show_actual     = ShowHelper(tcg.value("show_actual",  "never"),test_case_success);
+  bool show_image_diff = ShowHelper(tcg.value("show_difference_image",  "never"),test_case_success);
+  bool show_expected   = ShowHelper(tcg.value("show_expected","never"),test_case_success);
   /*  if (full_points > 0 && fabs(full_points-score) < 0.0001) {
     test_case_success = true;
     }*/
@@ -159,6 +160,10 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
             expected_path << expected_out_dir << expected;
             if (show_expected) {
              autocheck_j["expected_file"] = expected_path.str();
+            }
+            if (show_image_diff)
+            {
+              autocheck_j["image_difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_difference.png";
             }
             if (show_actual) {
              autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";

@@ -6,6 +6,7 @@ use app\models\Gradeable;
 use app\models\User;
 use app\models\LateDaysCalculation;
 use app\views\AbstractView;
+use app\libraries\FileUtils;
 
 class ElectronicGraderView extends AbstractView {
     /**
@@ -543,8 +544,13 @@ HTML;
                         <h4>{$title}</h4>
 HTML;
                         foreach ($autocheck->getMessages() as $message) {
+                            $type_class = "black-message";
+                            if ($message['type'] == "information") $type_class = "black-message";
+                            else if ($message['type'] == "success") $type_class = "green-message";
+                            else if ($message['type'] == "failure") $type_class = "red-message";
+                            else if ($message['type'] == "warning") $type_class = "yellow-message";
                             $return .= <<<HTML
-                        <span class="red-message">{$message}</span><br />
+                    <span class="{$type_class}">{$message['message']}</span><br />
 HTML;
                         }
                         $myimage = $diff_viewer->getActualImageFilename();
@@ -568,7 +574,33 @@ HTML;
                         $return .= <<<HTML
                     </div>
 HTML;
-                        if ($diff_viewer->hasDisplayExpected()) {
+                        
+                        $myExpectedimage = $diff_viewer->getExpectedImageFilename();
+                        if($myExpectedimage != "")
+                        {
+                            $return .= <<<HTML
+                            <div class='diff-element'>
+                            <h4>Expected {$description}</h4>
+HTML;
+                        for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
+                            $return .= <<<HTML
+                        <br />
+HTML;
+                            }
+                            // borrowed from file-display.php
+                            $content_type = FileUtils::getContentType($myExpectedimage);
+                            if (substr($content_type, 0, 5) === "image") {
+                               // Read image path, convert to base64 encoding
+                               $expectedImageData = base64_encode(file_get_contents($myExpectedimage));
+                               // Format the image SRC:  data:{mime};base64,{data};
+                               $myExpectedimagesrc = 'data: '.mime_content_type($myExpectedimage).';charset=utf-8;base64,'.$expectedImageData;
+                               // insert the sample image data
+                               $return .= '<img src="'.$myExpectedimagesrc.'">';
+                            }
+                        $return .= <<<HTML
+                        </div>
+HTML;
+                        }else if ($diff_viewer->hasDisplayExpected()) {
                             $return .= <<<HTML
                     <div class='diff-element'>
                         <h4>Expected {$description}</h4>
@@ -583,9 +615,39 @@ HTML;
                     </div>
 HTML;
                         }
-                        $return .= <<<HTML
-                </div>
+
+                        $myDifferenceImage = $diff_viewer->getDifferenceFilename();
+                        if($myDifferenceImage != "")
+                        {
+                            $return .= <<<HTML
+                        <div class='diff-element'>
+                        <h4>Difference {$description}</h4>
 HTML;
+                        for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
+                            $return .= <<<HTML
+                        <br />
+HTML;
+                            }
+                            // borrowed from file-display.php
+                            $content_type = FileUtils::getContentType($myDifferenceImage);
+                            if (substr($content_type, 0, 5) === "image") {
+                               // Read image path, convert to base64 encoding
+                               $differenceImageData = base64_encode(file_get_contents($myDifferenceImage));
+                               // Format the image SRC:  data:{mime};base64,{data};
+                               $differenceImagesrc = 'data: '.mime_content_type($myDifferenceImage).';charset=utf-8;base64,'.$differenceImageData;
+                               // insert the sample image data
+                               $return .= '<img src="'.$differenceImagesrc.'">';
+                            }
+                        $return .= <<<HTML
+                        </div>
+HTML;
+                        }
+
+
+                        $return .= <<<HTML
+                            </div>
+HTML;
+
                         if (++$autocheck_cnt < $autocheck_len) {
                              $return .= <<<HTML
                 <div class="clear"></div>

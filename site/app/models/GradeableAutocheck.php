@@ -41,8 +41,7 @@ class GradeableAutocheck extends AbstractModel {
      */
     public function __construct(Core $core, $details, $course_path, $result_path, $idx) {
         parent::__construct($core);
-        $this->index = $idx;
-        
+
         if (isset($details['description'])) {
             $this->description = Utils::prepareHtmlString($details['description']);
         }
@@ -54,7 +53,7 @@ class GradeableAutocheck extends AbstractModel {
             }
         }
         
-        $actual_file = $expected_file = $difference_file = "";
+        $actual_file = $expected_file = $difference_file = $image_difference ="";
 
         if(isset($details["actual_file"]) && file_exists($result_path . "/details/" . $details["actual_file"])) {
             $actual_file = $result_path . "/details/" . $details["actual_file"];
@@ -73,9 +72,12 @@ class GradeableAutocheck extends AbstractModel {
             $difference_file = $result_path . "/details/" . $details["difference_file"];
         }
 
-        if(isset($details["image_difference"]) && file_exists($result_path . "/details/" . $details["image_difference"])) {
-            $image_difference = $result_path . "/details/" . $details["image_difference"];
-        }        
+        if(isset($details["image_difference_file"]) &&
+            file_exists($result_path . "/details/" . $details["image_difference_file"])) {
+            $this->index = $idx;
+            $image_difference = $result_path . "/details/" . $details["image_difference_file"];
+        }
+
         $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $image_difference, $this->index);
     }
 }

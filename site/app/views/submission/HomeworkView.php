@@ -133,21 +133,15 @@ HTML;
 
             for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
 
-
-
-
-                if (isset($gradeable->getTextboxes()[$i]['image']) && $gradeable->getTextboxes()[$i]['image'] != "")
-                {
+                if (isset($gradeable->getTextboxes()[$i]['image']) && $gradeable->getTextboxes()[$i]['image'] != ""){
                     $tester = $gradeable->getTextboxes()[$i]['image'];
                 }
-                else
-                {
+                else{
                     $tester = array();
                 }
 
                 //
-                foreach((array)$tester as $currPath)
-                {
+                foreach((array)$tester as $currPath){
                     $imgPath = $this->core->getConfig()->getCoursePath() . "/test_input/" . $gradeable->getName() . "/".$currPath;
                     $content_type = FileUtils::getContentType($imgPath);
                     if (substr($content_type, 0, 5) === "image") {
@@ -158,7 +152,8 @@ HTML;
                        // insert the sample image data
                        $return .= '<img src="'.$textBoximagesrc.'">';
                     }
-                 }
+                }
+
                 $label = $gradeable->getTextboxes()[$i]['label'];
                 $rows = $gradeable->getTextboxes()[$i]['rows'];
                 if ($rows == 0) {
@@ -756,7 +751,7 @@ HTML;
                                     $return .= <<<HTML
                             <div class='diff-element'>
 HTML;
-                                    if ($diff_viewer->hasDisplayExpected()) {
+                                    if ($diff_viewer->hasDisplayActual() || $diff_viewer->getActualImageFilename() != "" ) {
                                         $title = "Student ";
                                     }
                                     if ($diff_viewer->hasDisplayActual()) {
@@ -776,6 +771,7 @@ HTML;
                                         $visible1 = "hidden";
                                     }
                                     $title .= $description;
+                                    
                                     $return .= <<<HTML
                                 <h4>{$title} <span onclick="openPopUp('{$title}', {$count}, {$autocheck_cnt}, 0)" style="visibility: {$visible1}"> <i class="fa fa-window-restore" style="visibility: {$visible1}; cursor: pointer;"></i> </span> </h4>
                                 <div id="container_{$count}_{$autocheck_cnt}_0">
@@ -844,7 +840,7 @@ HTML;
                                     </div>
 HTML;
                                     }
-                                    else if ($diff_viewer->hasDisplaylabel<br><textExpected()) {
+                                    else if ($diff_viewer->hasDisplayExpected()) {
                                         $visible2 = "visible";
                                         $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\t")); 
                                         $less_than_30 = true;
