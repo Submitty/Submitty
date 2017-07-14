@@ -2,4 +2,5 @@ sudo: true
 user_firstname: Quinn
 user_group: 1
 user_id: instructor
+user_id: instructor
 user_lastname: Instructor
