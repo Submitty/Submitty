@@ -42,7 +42,7 @@ try:
     # move to copy folder
     os.chdir(split_path)
 
-    for filename in os.listdir(split_path):
+    for filename in os.listdir(bulk_path):
 
         total_pages = subprocess.check_output("pdftk " + filename + " dump_data | awk '/NumberOfPages/{print $2}'", shell=True)
         total_pages = int(total_pages.decode('utf-8').rstrip())

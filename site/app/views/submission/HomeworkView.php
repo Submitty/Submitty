@@ -69,8 +69,8 @@ HTML;
                 Normal Submission
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
-            <input type='radio' id="radio_batch" name="submission_type">
-                Batch Upload
+            <input type='radio' id="radio_bulk" name="submission_type">
+                Bulk Upload
         </div>
         <div id="student_id_input" style="display: none">
             <div class="sub">
@@ -95,13 +95,13 @@ HTML;
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
-                $("#radio_batch").prop("checked", cookieValue==2);
+                $("#radio_bulk").prop("checked", cookieValue==2);
                 document.cookie="student_checked="+0;
             }
             if ($("#radio_student").is(":checked")) {
                 $('#student_id_input').show();
             }
-            if ($("#radio_batch").is(":checked")) {
+            if ($("#radio_bulk").is(":checked")) {
                 $('#pdf_submit_button').show();
             }
             $('#radio_normal').click(function() {
@@ -113,7 +113,7 @@ HTML;
                 $('#pdf_submit_button').hide();
                 $('#student_id_input').show();
             });
-            $('#radio_batch').click(function()  {
+            $('#radio_bulk').click(function()  {
                 $('#student_id_input').hide();
                 $('#pdf_submit_button').show();
             });
@@ -338,17 +338,17 @@ HTML;
                 if ($('#radio_student').is(':checked')) {
                     document.cookie="student_checked="+1;
                 };
-                if ($('#radio_batch').is(':checked')) {
+                if ($('#radio_bulk').is(':checked')) {
                     document.cookie="student_checked="+2;
                 };
                 var user_id = "";
                 if (document.getElementById("submissionForm")) {
                     user_id = document.getElementById("submissionForm").student_id.value;
                 }
-                // batch upload
-                if ($("#radio_batch").is(":checked")) {
+                // bulk upload
+                if ($("#radio_bulk").is(":checked")) {
                     var num_pages = document.getElementById("submissionForm").num_pages.value;
-                    handleBatch(num_pages, "{$gradeable->getId()}",
+                    handleBulk(num_pages, "{$gradeable->getId()}",
                                 "{$this->core->buildUrl(array('component' => 'student',
                                                                'gradeable_id' => $gradeable->getId()))}");
                 }

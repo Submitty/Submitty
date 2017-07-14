@@ -324,7 +324,7 @@ function isValidSubmission(){
  *
  * @param 
  */
-function handleBatch(num_pages, gradeable_id, return_url) {
+function handleBulk(num_pages, gradeable_id, return_url) {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -365,7 +365,7 @@ function handleBatch(num_pages, gradeable_id, return_url) {
         }
     }
 
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'batch'});
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'bulk'});
 
     $.ajax({
         url: url,

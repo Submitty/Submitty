@@ -43,8 +43,8 @@ class SubmissionController extends AbstractController {
             case 'pop_up':
                 return $this->popUp();
                 break;
-            case 'batch':
-                return $this->batchUpload();
+            case 'bulk':
+                return $this->bulkUpload();
                 break;
             case 'verify':
                 return $this->validGradeable();
@@ -108,7 +108,7 @@ class SubmissionController extends AbstractController {
     /**
     *
     */
-    private function batchUpload() {
+    private function bulkUpload() {
         if (!isset($_POST['num_pages'])) {
             $msg = "Did not pass in number of pages.";
             $return = array('success' => false, 'message' => $msg);
@@ -131,26 +131,20 @@ class SubmissionController extends AbstractController {
         // error checking with file name
         // make sure that submission is a pdf
 
-        $uploaded_files = array();
-        for ($i = 1; $i <= $gradeable->getNumParts(); $i++){
-            if (isset($_FILES["files{$i}"])) {
-                $uploaded_files[$i] = $_FILES["files{$i}"];
-            }
+        if (isset($_FILES["files1"])) {
+            $uploaded_file = $_FILES["files1"];
         }
             
         $errors = array();
-        $count = array();
-        for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-            if (isset($uploaded_files[$i])) {
-                $count[$i] = count($uploaded_files[$i]["name"]);
-                for ($j = 0; $j < $count[$i]; $j++) {
-                    if (!isset($uploaded_files[$i]["tmp_name"][$j]) || $uploaded_files[$i]["tmp_name"][$j] === "") {
-                        $error_message = $uploaded_files[$i]["name"][$j]." failed to upload. ";
-                        if (isset($uploaded_files[$i]["error"][$j])) {
-                            $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[$i]["error"][$j]). ".";
-                        }
-                        $errors[] = $error_message;
+        if (isset($uploaded_file)) {
+            $count = count($uploaded_file["name"]);
+            for ($j = 0; $j < $count; $j++) {
+                if (!isset($uploaded_file["tmp_name"][$j]) || $uploaded_file["tmp_name"][$j] === "") {
+                    $error_message = $uploaded_file["name"][$j]." failed to upload. ";
+                    if (isset($uploaded_file["error"][$j])) {
+                        $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_file["error"][$j]). ".";
                     }
+                    $errors[] = $error_message;
                 }
             }
         }
@@ -167,17 +161,15 @@ class SubmissionController extends AbstractController {
         // We save that information for later so we know which files need unpacking or not and can save
         // a check to getMimeType()
         $file_size = 0;
-        for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-            if (isset($uploaded_files[$i])) {
-                for ($j = 0; $j < $count[$i]; $j++) {
-                    if(FileUtils::isValidFileName($uploaded_files[$i]["name"][$j]) === false) {
-                        return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[$i]["name"][$j].".", false);
-                    }
-                    if(substr($uploaded_files[$i]["name"][$j],-3) != "pdf") {
-                        return $this->uploadResult($uploaded_files[$i]["name"][$j]." is not a PDF!", false);
-                    }
-                    $file_size += $uploaded_files[$i]["size"][$j];
+        if (isset($uploaded_file)) {
+            for ($j = 0; $j < $count; $j++) {
+                if(FileUtils::isValidFileName($uploaded_file["name"][$j]) === false) {
+                    return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_file["name"][$j].".", false);
                 }
+                if(substr($uploaded_file["name"][$j],-3) != "pdf") {
+                    return $this->uploadResult($uploaded_file["name"][$j]." is not a PDF!", false);
+                }
+                $file_size += $uploaded_file["size"][$j];
             }
         }
             
@@ -191,22 +183,20 @@ class SubmissionController extends AbstractController {
         }
 
         // save the pdf somewhere
-        for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-            if (isset($uploaded_files[$i])) {
-                for ($j = 0; $j < $count[$i]; $j++) {
-                    if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
-                        $dst = FileUtils::joinPaths($pdf_path, $uploaded_files[$i]["name"][$j]);
-                        if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
-                            return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
-                        }
+        if (isset($uploaded_file)) {
+            for ($j = 0; $j < $count; $j++) {
+                if ($this->core->isTesting() || is_uploaded_file($uploaded_file["tmp_name"][$j])) {
+                    $dst = FileUtils::joinPaths($pdf_path, $uploaded_file["name"][$j]);
+                    if (!@copy($uploaded_file["tmp_name"][$j], $dst)) {
+                        return $this->uploadResult("Failed to copy uploaded file {$uploaded_file["name"][$j]} to current submission.", false);
                     }
-                    else {
-                        return $this->uploadResult("The tmp file '{$uploaded_files[$i]['name'][$j]}' was not properly uploaded.", false);
-                    }
-                    // Is this really an error we should fail on?
-                    if (!@unlink($uploaded_files[$i]["tmp_name"][$j])) {
-                        return $this->uploadResult("Failed to delete the uploaded file {$uploaded_files[$i]["name"][$j]} from temporary storage.", false);
-                    }
+                }
+                else {
+                    return $this->uploadResult("The tmp file '{$uploaded_file['name'][$j]}' was not properly uploaded.", false);
+                }
+                // Is this really an error we should fail on?
+                if (!@unlink($uploaded_file["tmp_name"][$j])) {
+                    return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file["name"][$j]} from temporary storage.", false);
                 }
             }
         }
