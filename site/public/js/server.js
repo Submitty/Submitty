@@ -84,7 +84,7 @@ function editUserForm(user_id) {
 }
 
 function newUserForm() {
-    $('.popup-form').css('display', 'none'); 
+    $('.popup-form').css('display', 'none');
     var form = $("#edit-user-form");
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
@@ -101,7 +101,7 @@ function newUserForm() {
 }
 
 function newGraderListForm() {
-    $('.popup-form').css('display', 'none'); 
+    $('.popup-form').css('display', 'none');
     var form = $("#grader-list-form");
     form.css("display", "block");
     form.css("width", "500px");
@@ -110,9 +110,12 @@ function newGraderListForm() {
 }
 
 function newClassListForm() {
-    $('.popup-form').css('display', 'none'); 
+    $('.popup-form').css('display', 'none');
     var form = $("#class-list-form");
     form.css("display", "block");
+    form.css("width", "500px");
+    form.css("margin-left", "-250px");
+    $('[name="upload"]', form).val(null);
 }
 
 /**

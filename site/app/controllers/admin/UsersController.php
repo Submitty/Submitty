@@ -34,6 +34,9 @@ class UsersController extends AbstractController {
             case 'upload_grader_list':
                 $this->uploadGraderList();
                 break;
+            case 'upload_class_list':
+                $this->uploadClassList();
+                break;
             case 'students':
             default:
                 $this->core->getOutput()->addBreadcrumb("Students");
@@ -244,21 +247,9 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    public function uploadGraderList() {
-        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'graders'));
-
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token");
-            $this->core->redirect($return_url);
-        }
-
-        if ($_FILES['upload']['name'] == "") {
-            $this->core->addErrorMessage("No input file specified");
-            $this->core->redirect($return_url);
-        }
-
-        $content_type = FileUtils::getContentType($_FILES['upload']['name']);
-        $mime_type = FileUtils::getMimeType($_FILES['upload']['tmp_name']);
+    private function getCsvOrXlsxData($filename, $tmp_name, $return_url) {
+        $content_type = FileUtils::getContentType($filename);
+        $mime_type = FileUtils::getMimeType($tmp_name);
 
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             $csv_file = "/tmp/".Utils::generateRandomString();
@@ -267,7 +258,7 @@ class UsersController extends AbstractController {
             file_put_contents($csv_file, "");
             umask($old_umask);
 
-            if (move_uploaded_file($_FILES['upload']['tmp_name'], $xlsx_file)) {
+            if (move_uploaded_file($tmp_name, $xlsx_file)) {
                 $xlsx_tmp = basename($xlsx_file);
                 $csv_tmp = basename($csv_file);
                 $ch = curl_init();
@@ -299,7 +290,7 @@ class UsersController extends AbstractController {
             }
 
         } else if ($content_type === 'text/csv' && $mime_type === 'text/plain') {
-            $csv_file = $_FILES['upload']['tmp_name'];
+            $csv_file = $tmp_name;
             $xlsx_file = null;
         } else {
             $this->core->addErrorMessage("Must upload xlsx or csv");
@@ -317,9 +308,7 @@ class UsersController extends AbstractController {
             }
         );
 
-        //Set environment config to allow '\r' EOL encoding.  (reverts back after script exits)
-        //Otherwise, only '\n' and '\r\n' are allowed.  ('\r' is normally expected to be a Unix item seperator)
-        //Older versions of Microsoft Excel on Macintosh write CSVs with '\r' EOL encoding.
+        //Set environment config to allow '\r' EOL encoding. (Used by older versions of Microsoft Excel on Macintosh)
         ini_set("auto_detect_line_endings", true);
 
         $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -329,8 +318,26 @@ class UsersController extends AbstractController {
         }
 
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            unset($contents[0]); // xlsx2csv will add a row to the top of the spreadsheet
+            unset($contents[0]); //xlsx2csv will add a row to the top of the spreadsheet
         }
+
+        return $contents;
+    }
+
+    public function uploadGraderList() {
+        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'graders'));
+
+        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $this->core->addErrorMessage("Invalid CSRF token");
+            $this->core->redirect($return_url);
+        }
+
+        if ($_FILES['upload']['name'] == "") {
+            $this->core->addErrorMessage("No input file specified");
+            $this->core->redirect($return_url);
+        }
+
+        $contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
         //Validation and error checking.
         $error_message = "";
@@ -342,7 +349,7 @@ class UsersController extends AbstractController {
             if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
 
             //No check on user_id (computing login ID) -- different Univeristies have different formats.
-            
+
             //First and Last name must be alpha characters, white-space, or certain punctuation.
             $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}" . PHP_EOL;
             $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[2]) ? "" : "Error in last name column, row #{$row_num}: {$vals[2]}" . PHP_EOL;
@@ -374,7 +381,7 @@ class UsersController extends AbstractController {
 
         //Insert new graders to database
         $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();        
+        $course = $this->core->getConfig()->getCourse();
         foreach($graders_to_add as $data) {
             $new_grader = new User($this->core);
             $new_grader->setId($data[0]);
@@ -387,6 +394,25 @@ class UsersController extends AbstractController {
 
         $inserted = count($grader_to_add);
         $this->core->addSuccessMessage("{$inserted} new graders added from {$_FILES['upload']['name']}");
+        $this->core->redirect($return_url);
+    }
+
+    public function uploadClassList() {
+        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
+
+        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $this->core->addErrorMessage("Invalid CSRF token");
+            $this->core->redirect($return_url);
+        }
+
+        if ($_FILES['upload']['name'] == "") {
+            $this->core->addErrorMessage("No input file specified");
+            $this->core->redirect($return_url);
+        }
+
+        $contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
+
+        $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}");
         $this->core->redirect($return_url);
     }
 }

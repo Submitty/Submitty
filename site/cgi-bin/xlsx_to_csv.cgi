@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- This script will convert a given xlsx (excel) file to csv format using 
+ This script will convert a given xlsx (excel) file to csv format using
  the xlsx2csv python package. The parameters to this script are a name
  for a XLSX file to convert and a name for the resulting CSV file. Deletion of
  these files should then be handled (if necessary) in the calling script, not
