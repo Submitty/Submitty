@@ -463,19 +463,6 @@ def main():
 
     grade_items_loop.log_message(is_batch_job,submission_path,"grade:",gradingtime,grade_result)
 
-
-    # TEMPORARY ERROR CHECKING
-    if os.path.isdir(os.path.join(results_path,"OLD")):
-        if not filecmp.cmp(os.path.join(results_path,"OLD","results.json"),
-                           os.path.join(results_path,"results.json")):
-            print ("********************************************************** OOPS!  results.json does not match")
-            touch (os.path.join(results_path,"MISMATCH_RESULTS_JSON"))
-        if not filecmp.cmp(os.path.join(results_path,"OLD","grade.txt"),
-                           os.path.join(results_path,"grade.txt")):
-            print ("********************************************************** OOPS!  grade.txt does not match")
-            touch (os.path.join(results_path,"MISMATCH_GRADE_TXT"))
-
-
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("finished")
             

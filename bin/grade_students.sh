@@ -61,9 +61,6 @@ GRADE_STUDENTS_IDLE_TOTAL_MINUTES=__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_M
 # The todo lists of the most recent (ungraded) submissions have a dummy
 # file in one of these directories:
 
-# SUBMITTY_DATA_DIR/to_be_graded/which_semester__course_apple__hw1__smithj__1
-# SUBMITTY_DATA_DIR/to_be_graded/which_semester__course_banana__hw2__doej__5
-
 TO_BE_GRADED_INTERACTIVE=$SUBMITTY_DATA_DIR/to_be_graded_interactive
 TO_BE_GRADED_BATCH=$SUBMITTY_DATA_DIR/to_be_graded_batch
 
@@ -314,17 +311,9 @@ while true; do
 	# -------------------------------------------------------------
 	# GRADE THIS ITEM!
 
-
-	# FIXME: using a global variable to pass back the grade
-	global_grade_result="ERROR: NO GRADE"
-	global_gradeable_deadline=""
-	# call the helper function
         echo "========================================================================"
-
-
         ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
         echo "========================================================================"
-
 
 	# -------------------------------------------------------------
 	# remove submission & the active grading tag from the todo list
