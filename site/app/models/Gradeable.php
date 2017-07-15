@@ -26,8 +26,6 @@ use app\libraries\Utils;
  * @method int getHighestVersion()
  * @method int getActiveVersion()
  * @method void setActiveVersion(int $version)
- * @method int getGradedVersion()
- * @method void setGradedVersion(int $version)
  * @method int getMaxSubmissions()
  * @method float getMaxSize()
  * @method GradeableVersion[] getVersions()
@@ -59,8 +57,6 @@ use app\libraries\Utils;
  * @method User getUser()
  * @method void setUser(User $user)
  * @method GradeableComponent[] getComponents()
- * @method User getGrader()
- * @method void setGrader(User $user)
  * @method string getOverallComment()
  * @method void setOverallComment(string $comment)
  * @method int getMinimumGradingGroup()
@@ -185,9 +181,6 @@ class Gradeable extends AbstractModel {
     protected $current_version = -1;
     /** @property @var int $highest Highest version submitted for an assignment */
     protected $highest_version = 0;
-    /** @property @var int */
-    protected $graded_version = null;
-
 
     /** @property @var array */
     protected $versions = array();
@@ -210,8 +203,6 @@ class Gradeable extends AbstractModel {
     protected $in_batch_queue = false;
     protected $grading_batch_queue = false;
 
-    /** @property @var User */
-    protected $grader = null;
     /** @property @var string */
     protected $overall_comment = "";
 
@@ -258,9 +249,7 @@ class Gradeable extends AbstractModel {
         $this->user = ($user === null) ? $this->core->getUser() : $user;
         if (isset($details['gd_id'])) {
             $this->gd_id = $details['gd_id'];
-            $this->grader = $this->core->getQueries()->getUserById($details['gd_grader_id']);
             $this->overall_comment = $details['gd_overall_comment'];
-            $this->graded_version = $details['gd_graded_version'];
         }
 
         $timezone = $this->core->getConfig()->getTimezone();
@@ -301,7 +290,7 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment',
+                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
                             'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
@@ -330,6 +319,7 @@ class Gradeable extends AbstractModel {
                         if ($details['array_gcd_gc_id'][$j] === $component_details['gc_id']) {
                             $component_details['gcd_score'] = $details['array_gcd_score'][$j];
                             $component_details['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
+                            $component_details['gcd_graded_version'] = $details['array_gcd_graded_version'][$j];                            
                             $component_details['gcd_grade_time'] = $details['array_gcd_grade_time'][$j];
 
                             if (isset($details['array_gcd_user_id'][$j])) {
@@ -860,7 +850,7 @@ class Gradeable extends AbstractModel {
     public function updateGradeable() {
         $this->core->getQueries()->updateGradeable2($this);
     }
-  
+
     public function getActiveDaysLate() {
         $extended_due_date = clone $this->due_date;
         $return =  DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);
@@ -869,7 +859,17 @@ class Gradeable extends AbstractModel {
         }
         return $return;
     }
-  
+    
+    public function validateVersions() {
+        $active_check = $this->active_version;
+        foreach($this->components as $component) {
+            if($component->getGradedVersion() !== $active_check) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public function saveData() {
         $this->core->getCourseDB()->beginTransaction();
         if ($this->gd_id === null) {

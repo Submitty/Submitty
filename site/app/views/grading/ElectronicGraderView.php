@@ -22,8 +22,8 @@ class ElectronicGraderView extends AbstractView {
             if ($key === "NULL") {
                 continue;
             }
-            $graded += $section['graded_students'];
-            $total += $section['total_students'];
+            $graded += $section['graded_components'];
+            $total += $section['total_components'];
         }
         if ($total === 0){
             $percentage = -1;
@@ -55,9 +55,9 @@ HTML;
         <div style="margin-left: 20px">
 HTML;
         foreach ($sections as $key => $section) {
-            $percentage = round(($section['graded_students'] / $section['total_students']) * 100);
+            $percentage = round(($section['graded_components'] / $section['total_components']) * 100);
             $return .= <<<HTML
-            Section {$key}: {$percentage}% ({$section['graded_students']} / {$section['total_students']})<br />
+            Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})<br />
 HTML;
         }
         $return .= <<<HTML
@@ -202,7 +202,6 @@ HTML;
             $last_section = false;
             $tbody_open = false;
             foreach ($rows as $row) {
-                $graded_version = $row->getGradedVersion();
                 $active_version = $row->getActiveVersion();
                 $highest_version = $row->getHighestVersion();
                 $autograding_score = $row->getGradedAutograderPoints();
@@ -218,12 +217,8 @@ HTML;
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
                     $different = false;
-                    if($graded_version !== $active_version){
-                        $different = true;
-                        // probably want to write a different query instead of this
-                        $row->loadResultDetails();
-                        $autograding_score = $row->getVersions()[$graded_version]->getNonHiddenTotal() + $row->getVersions()[$graded_version]->getHiddenTotal();
-                    }
+                    // TODO: ADD RED FLAG IF GRADED VERSION IS NOT EQUAL TO ACTIVE VERSION
+
                 }
                 else{
                     $viewed_grade = "";
@@ -298,12 +293,7 @@ HTML;
                     
                     if ($row->beenTAgraded()) {
                         $btn_class = "btn-default";
-                        if($different) {
-                            $contents = "Graded " . $graded_version . "/" . $highest_version;
-                        }
-                        else{
-                            $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-                        }
+                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
                     }
                     else {
                         $btn_class = "btn-primary";
@@ -488,6 +478,7 @@ HTML;
             <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
             <input type="hidden" name="u_id" value="{$user->getId()}" />
             <input type="hidden" name="individual" value="{$individual}" />
+            <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
 HTML;
 
         //Late day calculation
@@ -624,9 +615,16 @@ HTML;
         </div>
 HTML;
         if ($gradeable->beenTAgraded()) {
+            // assumes that the person who graded the first question graded everything... also in electronicGraderController:150...have to rewrite to be per component
+            $graders = array();
+            foreach($gradeable->getComponents() as $component){
+                $graders[] = $component->getGrader()->getId();
+            }
+            $graders = array_unique($graders);
+            $graders = implode(",", $graders);
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: {$gradeable->getGrader()->getId()}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
+            Graded By: {$graders}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
         </div>
 HTML;
         }
