@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-import datetime
+from datetime import datetime
 import os
 import portalocker
 import submitty_utils
@@ -12,8 +12,8 @@ SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
 
 def log_message(is_batch,jobname,timelabel,elapsed_time,message):
-    now=datetime.datetime.now()
-    datefile=datetime.datetime.strftime(now,"%Y%m%d")+".txt"
+    now=submitty_utils.get_current_time()
+    datefile=datetime.strftime(now,"%Y%m%d")+".txt"
     autograding_log_file=os.path.join(AUTOGRADING_LOG_PATH,datefile)
     easy_to_read_date=submitty_utils.write_submitty_date(now)
     my_pid = os.getpid()
@@ -23,7 +23,7 @@ def log_message(is_batch,jobname,timelabel,elapsed_time,message):
     time_unit = "" if elapsed_time=="" else "sec"
     with open(autograding_log_file,'a') as myfile:
         portalocker.lock(myfile,portalocker.LOCK_EX)
-        print ("%s | %6s | %5s | %-70s | %-6s %5s %3s | %s"
+        print ("%s | %6s | %5s | %-75s | %-6s %5s %3s | %s"
                % (easy_to_read_date,parent_pid,batch_string,
                   abbrev_jobname,timelabel,elapsed_time,time_unit,message),
                file=myfile)

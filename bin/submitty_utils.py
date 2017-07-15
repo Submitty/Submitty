@@ -3,7 +3,7 @@
 import pytz
 import time
 import tzlocal
-import datetime
+from datetime import datetime
 
 
 # grab the system timezone (should only used when we don't have any info about the timezone)
@@ -13,11 +13,11 @@ def get_timezone():
 
 # grab the current time
 def get_current_time():
-    return datetime.datetime.now(get_timezone())
+    return datetime.now(get_timezone())
 
 
 # convert a datetime object (with or without the timezone) to a string with a timezone
-def write_submitty_date(d):
+def write_submitty_date(d=get_current_time()):
     my_timezone = d.tzinfo
     if my_timezone is None:
         print ("NO TIMEZONE ",d,"assuming local timezone")
@@ -34,7 +34,7 @@ def read_submitty_date(s):
         raise SystemExit("ERROR:  unexpected date format %s" % s)
     without_timezone = str(words[0] + ' ' + words[1])
     try:
-        without_timezone = datetime.datetime.strptime(without_timezone,'%Y-%m-%d %H:%M:%S')
+        without_timezone = datetime.strptime(without_timezone,'%Y-%m-%d %H:%M:%S')
     except ValueError:
         raise SystemExit("ERROR:  invalid date format %s" % s)
     if len(words) == 2:

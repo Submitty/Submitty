@@ -801,7 +801,7 @@ class Course(object):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
-                        current_time_string = submitty_utils.write_submitty_date(submitty_utils.get_current_time())
+                        current_time_string = submitty_utils.write_submitty_date()
 
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time_string)
