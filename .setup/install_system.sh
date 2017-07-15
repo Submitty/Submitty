@@ -271,6 +271,7 @@ pip3 install psutil
 pip3 install pytz
 pip3 install python-dateutil
 pip3 install tzlocal
+pip3 install portalocker
 
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages

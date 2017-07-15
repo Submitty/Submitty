@@ -18,6 +18,7 @@ import dateutil.parser
 import tzlocal
 
 import submitty_utils
+import grade_items_loop   # FIXME:  will maybe be the other way around!
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
@@ -142,7 +143,14 @@ def main():
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
     print ("GRADE THIS", submission_path)
 
+    is_batch_job = args.next_directory==BATCH_QUEUE
+    is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
+
+    queue_time = get_queue_time(args)
+    queue_time_longstring = submitty_utils.write_submitty_date(queue_time)
     grading_began=submitty_utils.get_current_time()
+    waittime=int((grading_began-queue_time).total_seconds())
+    grade_items_loop.log_message(is_batch_job,submission_path,"wait:",waittime,"")
 
     # --------------------------------------------------------
     # various paths
@@ -361,6 +369,7 @@ def main():
     with open(os.path.join(tmp_work,"grade.txt")) as f:
         lines = f.readlines()
         for line in lines:
+            line=line.rstrip('\n')
             if line.startswith("Automatic grading total:"):
                 grade_result = line
 
@@ -417,24 +426,21 @@ def main():
     seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
     # note: negative = not late
 
-    queue_time = get_queue_time(args)
-    queue_time_longstring = submitty_utils.write_submitty_date(queue_time)
-
     grading_began_longstring = submitty_utils.write_submitty_date(grading_began)
     grading_finished_longstring = submitty_utils.write_submitty_date(grading_finished)
 
-    waittime=int((grading_began-queue_time).total_seconds())
+
     gradingtime=int((grading_finished-grading_began).total_seconds())
 
-    is_batch_job = "BATCH" if args.next_directory==BATCH_QUEUE else "INTERACTIVE"
-    
+
+
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","write_grade_history.py"),
                      history_file,
                      gradeable_deadline_longstring,
                      submission_longstring,
                      str(seconds_late),
                      queue_time_longstring,
-                     is_batch_job,
+                     is_batch_job_string,
                      grading_began_longstring,
                      str(waittime),
                      grading_finished_longstring,
@@ -454,6 +460,8 @@ def main():
                      str(obj["version"])])
 
     print ("finished grading ", args.next_to_grade, " in ", gradingtime, " seconds")
+
+    grade_items_loop.log_message(is_batch_job,submission_path,"grade:",gradingtime,grade_result)
 
 
     # TEMPORARY ERROR CHECKING

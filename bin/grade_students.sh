@@ -140,7 +140,7 @@ function log_message {
 	time_unit=""
     fi
 
-    printf "%-28s | %-6s | %5s | %-50s | %-6s %5s %3s | %s\n" \
+    printf "%-36s | %-6s | %5s | %-70s | %-6s %5s %3s | %s\n" \
 	"$EASY_TO_READ_DATE" \
 	"$BASHPID" \
 	"$is_batch" \
@@ -315,27 +315,6 @@ while true; do
 	# GRADE THIS ITEM!
 
 
-	# mark the start time
-	STARTTIME=$(date +%s)
-
-	# when was this job put in the queue?
-	FILE_TIMESTAMP=`stat -c %Y $NEXT_TO_GRADE 2>&1`
-
-	# calculate how long this job was waiting in the queue
-	integer_reg_expression='^[0-9]+$'
-	if ! [[ $FILE_TIMESTAMP =~ $integer_reg_expression ]] ; then
-	    # FIXME NOTE: if the file does not exist (shouldn't
-	    # happen, but we are seeing it, needs debugging)
-	    log_error "$NEXT_ITEM" "$FILE_TIMESTAMP"
-	    FILE_TIMESTAMP=STARTTIME+1
-	fi
-	WAITTIME=$(($STARTTIME - ${FILE_TIMESTAMP:-0}))
-
-
-	# log the start
-	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "wait:"  "$WAITTIME"  ""
-
-
 	# FIXME: using a global variable to pass back the grade
 	global_grade_result="ERROR: NO GRADE"
 	global_gradeable_deadline=""
@@ -346,11 +325,6 @@ while true; do
         ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py ${NEXT_DIRECTORY} ${NEXT_TO_GRADE} ${ARGUMENT_UNTRUSTED_USER}
         echo "========================================================================"
 
-	# mark the end time
-	ENDTIME=$(date +%s)
-
-	# calculate how long this job was running
-	ELAPSED=$(($ENDTIME - $STARTTIME))
 
 	# -------------------------------------------------------------
 	# remove submission & the active grading tag from the todo list
@@ -358,9 +332,6 @@ while true; do
 	rm -f $NEXT_DIRECTORY/$NEXT_ITEM          || log_error "$NEXT_ITEM" "Could not delete item from todo list"
 	rm -f $NEXT_DIRECTORY/GRADING_$NEXT_ITEM  || log_error "$NEXT_ITEM" "Could not delete item (w/ 'GRADING_' tag) from todo list"
 	flock -u $TODO_LOCK_FILE
-
-	# log the end
-	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "grade:"  "$ELAPSED" "$global_grade_result"
 
 	# break out of the loop (need to check for new interactive items)
 	graded_something=true
