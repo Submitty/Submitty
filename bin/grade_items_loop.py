@@ -3,8 +3,9 @@
 import sys
 from datetime import datetime
 import os
-import portalocker
 import submitty_utils
+import fcntl
+
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 AUTOGRADING_LOG_PATH="__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__"
@@ -22,12 +23,12 @@ def log_message(is_batch,jobname,timelabel,elapsed_time,message):
     abbrev_jobname = jobname[len(SUBMITTY_DATA_DIR+"/courses/"):]
     time_unit = "" if elapsed_time=="" else "sec"
     with open(autograding_log_file,'a') as myfile:
-        portalocker.lock(myfile,portalocker.LOCK_EX)
+        fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
         print ("%s | %6s | %5s | %-75s | %-6s %5s %3s | %s"
                % (easy_to_read_date,parent_pid,batch_string,
                   abbrev_jobname,timelabel,elapsed_time,time_unit,message),
                file=myfile)
-        portalocker.unlock(myfile)
+        fcntl.flock(myfile,fcntl.LOCK_UN)
 
     
 def log_error(jobname,message):
