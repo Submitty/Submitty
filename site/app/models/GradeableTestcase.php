@@ -19,6 +19,8 @@ use app\libraries\Utils;
  * @method string getName()
  * @method string getDetails()
  * @method float getPoints()
+ * @method bool isExtraCredit()
+ * @method bool isHidden()
  * @method float getPointsAwarded()
  * @method string getLogFile()
  * @method GradeableAutocheck[] getAutochecks()
@@ -37,7 +39,9 @@ class GradeableTestcase extends AbstractModel {
     protected $view_testcase = true;
     /** @property @var float */
     protected $points = 0;
+    /** @property @var bool */
     protected $extra_credit = false;
+    /** @property @var bool */
     protected $hidden = false;
     /** @property @var float */
     protected $points_awarded = 0;
@@ -143,16 +147,8 @@ class GradeableTestcase extends AbstractModel {
         return $this->points != 0;
     }
     
-    public function isHidden() {
-        return $this->hidden;
-    }
-    
-    public function isExtraCredit() {
-        return $this->extra_credit;
-    }
-    
     public function hasDetails() {
-      return (!$this->isHidden() && count($this->autochecks) > 0);
+      return (count($this->autochecks) > 0);
     }
 
     public function viewTestcaseMessage() {

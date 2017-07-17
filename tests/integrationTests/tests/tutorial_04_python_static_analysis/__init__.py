@@ -25,9 +25,7 @@ def initialize(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
         os.path.join(test.testcase_path, "assignment_config")])
-    subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "output.txt"),
-        os.path.join(test.testcase_path, "data")])
+
 
 
 def cleanup(test):
@@ -35,8 +33,10 @@ def cleanup(test):
             glob.glob(os.path.join(test.testcase_path, "data", "*")))
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data", "test*")))
-
-
+    subprocess.call(["cp",
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "output.txt"),
+        os.path.join(test.testcase_path, "data")])
+    
 @testcase
 def correct(test):
     cleanup(test)

@@ -25,7 +25,7 @@ if [[ $1 == vagrant ]]; then
   VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
 else
-  #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.sh script
+  #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
   VAGRANT=0
 fi
 
@@ -494,13 +494,14 @@ fi
 #################
 
 if [ ${VAGRANT} == 1 ]; then
-	echo -e "/var/run/postgresql
+    echo -e "/var/run/postgresql
 hsdbu
 hsdbu
 http://192.168.56.101
-y" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
+1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+
 else
-	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
+	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
 fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
@@ -527,17 +528,21 @@ if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much
     echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
 
-    rm -r ${SUBMITTY_DATA_DIR}/*_logs
-    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/logs/*_logs
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding_logs
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
-    chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/autograding_logs
-    chmod 770 ${SUBMITTY_DATA_DIR}/autograding_logs
+    rm -rf ${SUBMITTY_DATA_DIR}/logs/*
+    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/logs/*
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
+    chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/logs/autograding
+    chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/logs/tagrading_logs
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
-    chown hwphp:course_builders ${SUBMITTY_DATA_DIR}/tagrading_logs
-    chmod 770 ${SUBMITTY_DATA_DIR}/tagrading_logs
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/access
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/site_errors
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/access ${SUBMITTY_DATA_DIR}/logs/access
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
+    chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/access
+    chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
+    chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site_errors
+    chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
     # Call helper script that makes the courses and refreshes the database
     ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py

@@ -5,7 +5,10 @@
                 {
                     "description": "part1/README.txt",
                     "messages": [
-                        "ERROR: required files not found:  part1/README.txt"
+                        {
+                            "message": "ERROR: required files not found:  part1/README.txt",
+                            "type": "failure"
+                        }
                     ]
                 }
             ],
@@ -121,6 +124,6 @@
             "points_awarded": 0,
             "test_name": "Test 11 Submission Limit",
             "view_testcase": false
-       }
+        }
     ]
 }

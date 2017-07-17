@@ -22,6 +22,9 @@ class GradeableVersion extends AbstractModel {
     protected $team_id;
     /** @property @var int */
     protected $version;
+    /** @property @var \app\models\GradeableComponent[] */
+    protected $components = array();
+    protected $been_graded = false;
     /** @property @var float */
     protected $non_hidden_non_extra_credit = 0;
     /** @property @var float */
@@ -37,6 +40,8 @@ class GradeableVersion extends AbstractModel {
     protected $active = false;
     /** @property @var int */
     protected $days_late = 0;
+    /** @property @var int */
+    protected $days_early = 0;
 
     /**
      * GradeableVersion constructor.
@@ -52,16 +57,23 @@ class GradeableVersion extends AbstractModel {
         $this->user_id = $details['user_id'];
         $this->team_id = $details['team_id'];
         $this->version = $details['g_version'];
+        // need to put in constructor for components and been_graded after query for getGradeableVersions is updated
         $this->non_hidden_non_extra_credit = $details['autograding_non_hidden_non_extra_credit'];
         $this->non_hidden_extra_credit = $details['autograding_non_hidden_extra_credit'];
         $this->hidden_non_extra_credit = $details['autograding_hidden_non_extra_credit'];
         $this->hidden_extra_credit = $details['autograding_hidden_extra_credit'];
         $this->submission_time = $details['submission_time'];
         // We add a 5 minute buffer for submissions before they're considered "late"
-        $this->days_late = DateUtils::calculateDayDiff($due_date->add(new \DateInterval("PT5M")), $this->submission_time);
+        $extended_due_date = clone $due_date;
+        $this->days_late = DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);
+        $this->days_early = DateUtils::calculateDayDiff($this->submission_time, $extended_due_date);
         if ($this->days_late < 0) {
             $this->days_late = 0;
         }
+        else if ($this->days_early < 0) {
+            $this->days_early = 0;
+        }
+        
         $this->active = isset($details['active_version']) && $details['active_version'] === true;
     }
 
