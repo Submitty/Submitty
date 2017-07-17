@@ -76,16 +76,16 @@ ORDER BY u.registration_section, u.user_id");
         return $return;
     }
 
-    public function insertUser(User $user, $semester, $course) {
-        if ($this->getSubmittyUser($user->getId()) === null) {
-            $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
-                           $user->getLastName(), $user->getEmail());
+    public function insertSubmittyUser(User $user) {
+        $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
+                       $user->getLastName(), $user->getEmail());
 
-            $this->submitty_db->query("
+        $this->submitty_db->query("
 INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email) 
 VALUES (?, ?, ?, ?, ?, ?)", $array);
-        }
+    }
 
+    public function insertCourseUser(User $user, $semester, $course) {
         $params = array($semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
                         Utils::convertBooleanToString($user->isManualRegistration()));
         $this->submitty_db->query("

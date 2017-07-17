@@ -141,7 +141,10 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
-            $this->core->getQueries()->insertUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
+                $this->core->getQueries()->insertSubmittyUser($user);
+            }
+            $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
             $this->core->addSuccessMessage("User '{$user->getId()}' created");
         }
         $this->core->redirect($return_url);
@@ -260,8 +263,8 @@ class UsersController extends AbstractController {
         $mime_type = FileUtils::getMimeType($tmp_name);
 
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            $csv_file = "/tmp/".Utils::generateRandomString();
-            $xlsx_file = "/tmp/".Utils::generateRandomString();
+            $csv_file = sys_get_temp_dir() . '/' . Utils::generateRandomString();
+            $xlsx_file = sys_get_temp_dir() . '/' . Utils::generateRandomString();
             $old_umask = umask(0007);
             file_put_contents($csv_file, "");
             umask($old_umask);
@@ -353,20 +356,20 @@ class UsersController extends AbstractController {
         $graders_data = array();
         foreach($contents as $content) {
             $row_num++;
-            $vals = explode(",", trim($content));
+            $vals = str_getcsv(trim($content));
             if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
 
             //No check on user_id (computing login ID) -- different Univeristies have different formats.
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}" . PHP_EOL;
-            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[2]) ? "" : "Error in last name column, row #{$row_num}: {$vals[2]}" . PHP_EOL;
+            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}," . PHP_EOL;
+            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[2]) ? "" : "Error in last name column, row #{$row_num}: {$vals[2]}," . PHP_EOL;
 
             //Check email address for format "address@domain".
-            $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_num}: {$vals[3]}" . PHP_EOL;
+            $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_num}: {$vals[3]}," . PHP_EOL;
 
             //grader-level check is a digit between 1 - 4.
-            $error_message .= preg_match("~[1-4]{1}~", $vals[4]) ? "" : "Error in grader-level column, row #{$row_num}: {$vals[4]}" . PHP_EOL;
+            $error_message .= preg_match("~[1-4]{1}~", $vals[4]) ? "" : "Error in grader-level column, row #{$row_num}: {$vals[4]}," . PHP_EOL;
 
             $graders_data[] = $vals;
         }
@@ -408,7 +411,10 @@ class UsersController extends AbstractController {
             $grader->setLastName($grader_data[2]);
             $grader->setEmail($grader_data[3]);
             $grader->setGroup($grader_data[4]);
-            $this->core->getQueries()->insertUser($grader, $semester, $course);
+            if ($this->core->getQueries()->getSubmittyUser($grader_data[0]) === null) {
+                $this->core->getQueries()->insertSubmittyUser($grader);
+            }
+            $this->core->getQueries()->insertCourseUser($grader, $semester, $course);
         }
         foreach($graders_to_update as $grader_data) {
             $grader = $this->core->getQueries()->getUserById($grader_data[0]);
@@ -438,25 +444,26 @@ class UsersController extends AbstractController {
         $contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
         //Validation and error checking.
+        $num_reg_sections = count($this->core->getQueries()->getRegistrationSections());
         $error_message = "";
         $row_num = 0;
         $students_data = array();
         foreach($contents as $content) {
             $row_num++;
-            $vals = explode(",", trim($content));
+            $vals = str_getcsv(trim($content));
             if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
 
             //No check on user_id (computing login ID) -- different Univeristies have different formats.
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}" . PHP_EOL;
-            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[2]) ? "" : "Error in last name column, row #{$row_num}: {$vals[2]}" . PHP_EOL;
+            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}," . PHP_EOL;
+            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[2]) ? "" : "Error in last name column, row #{$row_num}: {$vals[2]}," . PHP_EOL;
 
             //Check email address for format "address@domain".
-            $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_num}: {$vals[3]}" . PHP_EOL;
+            $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_num}: {$vals[3]}," . PHP_EOL;
 
             //Student section must be greater than zero (intval($str) returns zero when $str is not integer)
-            $error_message .= ($vals[4] > 0) ? "" : "Error in student section column, row #{$row_num}: {$vals[4]}" . PHP_EOL;
+            $error_message .= (($vals[4] > 0) && ($vals[4] <= $num_reg_sections)) ? "" : "Error in student section column, row #{$row_num}: {$vals[4]}," . PHP_EOL;
 
             $students_data[] = $vals;
         }
@@ -499,7 +506,10 @@ class UsersController extends AbstractController {
             $student->setEmail($student_data[3]);
             $student->setRegistrationSection($student_data[4]);
             $student->setGroup(4);
-            $this->core->getQueries()->insertUser($student, $semester, $course);
+            if ($this->core->getQueries()->getSubmittyUser($student_data[0]) === null) {
+                $this->core->getQueries()->insertSubmittyUser($student);
+            }
+            $this->core->getQueries()->insertCourseUser($student, $semester, $course);
         }
         foreach($students_to_update as $student_data) {
             $student = $this->core->getQueries()->getUserById($student_data[0]);
