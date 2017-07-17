@@ -242,6 +242,7 @@ with open(CONFIGURATION_FILE, 'w') as open_file:
     write()
 
     for key, value in obj.items():
+        key = str(key).upper()
         if isinstance(value, str):
             write('{}="{}"'.format(key, value.replace('"', '\"')))
         elif isinstance(value, bool):
