@@ -653,12 +653,6 @@ class Course(object):
                           course_group))
 
         os.environ['PGPASSWORD'] = DB_PASS
-        database = "submitty_" + self.semester + "_" + self.code
-        os.system('psql -d postgres -h {} -U hsdbu -c "CREATE DATABASE {}"'.format(DB_HOST,
-                                                                                   database))
-        os.system("psql -d {} -h {} -U {} -f {}/site/data/course_tables.sql"
-                  .format(database, DB_HOST, DB_USER, SUBMITTY_REPOSITORY))
-
         print("Database created, now populating ", end="")
         submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
         submitty_conn = submitty_engine.connect()
