@@ -43,7 +43,7 @@ class ElectronicGraderController extends AbstractController {
          * we need number of students per section
          */
         $total = array();
-        $graded = array();
+        $graded_components = array();
         $graders = array();
         $sections = array();
         if ($gradeable->isGradeByRegistration()) {
@@ -51,8 +51,9 @@ class ElectronicGraderController extends AbstractController {
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
             }
             if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
-                $total = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
-                $graded = $this->core->getQueries()->getGradedUserCountByRegistrationSections($gradeable->getId(), $sections);
+                $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
+                $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable->getId(), $sections);
                 $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
             }
         }
@@ -61,22 +62,23 @@ class ElectronicGraderController extends AbstractController {
                 $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
             }
             if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
-                $total = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
-                $graded = $this->core->getQueries()->getGradedUserCountByRotatingSections($gradeable_id, $sections);
+                $total_users = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
+                $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable_id, $sections);
                 $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
             }
         }
 
         $sections = array();
-        if (count($total) > 0) {
-            foreach ($total as $key => $value) {
+        if (count($total_users) > 0) {
+            foreach ($total_users as $key => $value) {
                 $sections[$key] = array(
-                    'total_students' => $value,
-                    'graded_students' => 0,
+                    'total_components' => $value * $num_components,                        
+                    'graded_components' => 0,
                     'graders' => array()
                 );
-                if (isset($graded[$key])) {
-                    $sections[$key]['graded_students'] = intval($graded[$key]);
+                if (isset($graded_components[$key])) {
+                    $sections[$key]['graded_components'] = intval($graded_components[$key]);
                 }
                 if (isset($graders[$key])) {
                     $sections[$key]['graders'] = $graders[$key];
@@ -170,15 +172,14 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
-        if (isset($_POST['overwrite'])) $gradeable->setGrader($this->core->getUser());
         $gradeable->setOverallComment($_POST['comment-general']);
-        $gradeable->setGradedVersion($gradeable->getActiveVersion());
-        
+
         $comps = $gradeable->getComponents();
         foreach($comps as $key => $data) {
             if (isset($_POST['overwrite'])) $comps[$key]->setGrader($this->core->getUser());
             $comps[$key]->setScore(floatval($_POST["grade-{$comps[$key]->getOrder()}"]));
             $comps[$key]->setComment($_POST["comment-{$comps[$key]->getOrder()}"]);
+            $comps[$key]->setGradedVersion($_POST["graded_version"]);
             $comps[$key]->setGradeTime($now);
         }
         $gradeable->setComponents($comps);
@@ -220,7 +221,7 @@ class ElectronicGraderController extends AbstractController {
             }
             $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
             $total = array_sum($this->core->getQueries()->getTotalUserCountByRegistrationSections($sections));
-            $graded = array_sum($this->core->getQueries()->getGradedUserCountByRegistrationSections($gradeable_id, $sections));
+            $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable_id, $sections));
         }
         else {
             $section_key = "rotating_section";
@@ -233,7 +234,7 @@ class ElectronicGraderController extends AbstractController {
             }
             $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
             $total = array_sum($this->core->getQueries()->getTotalUserCountByRotatingSections($sections));
-            $graded = array_sum($this->core->getQueries()->getGradedUserCountByRotatingSections($gradeable_id, $sections));
+            $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable_id, $sections));
         }
 
         if($total == 0) {
