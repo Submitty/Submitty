@@ -243,12 +243,7 @@ class Gradeable extends AbstractModel {
 
     protected $user_viewed_date = null;
 
-<<<<<<< HEAD
     public function __construct(Core $core, $details=array(), User $user = null) {
-=======
-    public function __construct(Core $core, $details, User $user = null) {
-        echo("gradeable constructor...");
->>>>>>> 59af9b563e3234c3c10fcd3509265dee3a749322
         parent::__construct($core);
         if(!isset($details['g_id'])) {
             return;

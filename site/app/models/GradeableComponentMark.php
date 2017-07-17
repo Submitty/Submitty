@@ -25,7 +25,6 @@ class GradeableComponentMark extends AbstractModel {
     protected $has_mark = false;
 
     public function __construct(Core $core, $details=array()) {
-        echo("gradeable component mark constructor...");
         parent::__construct($core);
         if (!isset($details['gcm_id'])) {
             return;
@@ -38,6 +37,7 @@ class GradeableComponentMark extends AbstractModel {
         if (isset($details['gcm_has_mark']) && $details['gcm_has_mark'] !== null) {
             $has_mark = true;
         }
+    }
 
     public function saveData($gd_id, $gc_id) {
         if ($this->modified) {

@@ -76,7 +76,6 @@ class GradeableComponent extends AbstractModel {
     protected $marks = array();
 
     public function __construct(Core $core, $details=array()) {
-        echo("gradeable component constructor...");
         parent::__construct($core);
         if (!isset($details['gc_id'])) {
             return;

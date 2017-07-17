@@ -124,7 +124,8 @@ class AdminGradeableView extends AbstractView {
                 $num_old_questions = count($old_questions);                
                 $component_ids = array();
                 for ($i = 0; $i < $num_old_questions; $i++) {
-                    $component_ids[] = ((json_decode($data[1]))[$i]->gc_id);
+                    $json = json_decode($data[1]);
+                    $component_ids[] = $json[$i]->gc_id;
                 }
             }
             if ($data[0]['g_gradeable_type'] === 2) {

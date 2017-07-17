@@ -230,7 +230,6 @@ ORDER BY egd.g_version", array($g_id, $user_id));
      *  section_key:
      */
     public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
-      echo("getGradeables...");
         $return = array();
         $g_ids_query = "";
         $users_query = "";
@@ -987,7 +986,7 @@ VALUES (?, ?, ?)", $params);
     public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
         $params = array($gc_id, $gd_id, $mark->getId());
         $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?")
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?");
     }
 
     public function createNewGradeable2(Gradeable $gradeable) {
