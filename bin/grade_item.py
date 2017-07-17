@@ -18,7 +18,7 @@ import dateutil.parser
 import tzlocal
 
 import submitty_utils
-import grade_items_scheduler   # FIXME:  will maybe be the other way around!
+import grade_items_logging
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
@@ -35,15 +35,15 @@ def parse_args():
     parser.add_argument("which_untrusted")
     return parser.parse_args()
 
-def get_queue_time(args):
-    t = time.ctime(os.path.getctime(os.path.join(args.next_directory,args.next_to_grade)))
+def get_queue_time(next_directory,next_to_grade):
+    t = time.ctime(os.path.getctime(os.path.join(next_directory,next_to_grade)))
     t = dateutil.parser.parse(t)
     t = submitty_utils.get_timezone().localize(t)
     return t
 
 
-def get_submission_path(args):
-    queue_file = os.path.join(args.next_directory,args.next_to_grade)
+def get_submission_path(next_directory,next_to_grade):
+    queue_file = os.path.join(next_directory,next_to_grade)
     if not os.path.isfile(queue_file):
         raise SystemExit("ERROR: the file does not exist",queue_file)
     with open(queue_file, 'r') as infile:
@@ -111,13 +111,13 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
             
 
 # give permissions to all created files to the hwcron user
-def untrusted_grant_read_access(args,my_dir):
+def untrusted_grant_read_access(which_untrusted,my_dir):
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                     args.which_untrusted,
+                     which_untrusted,
                      "/usr/bin/find",
                      my_dir,
                      "-user",
-                     args.which_untrusted,
+                     which_untrusted,
                      "-exec",
                      "/bin/chmod",
                      "o+r",
@@ -127,7 +127,7 @@ def untrusted_grant_read_access(args,my_dir):
 
 # ==================================================================================
 # ==================================================================================
-def main():
+def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
@@ -135,22 +135,21 @@ def main():
 
     # --------------------------------------------------------
     # figure out what we're supposed to grade & error checking
-    args = parse_args()
-    obj = get_submission_path(args)
+    obj = get_submission_path(next_directory,next_to_grade)
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
                                    "submissions",obj["gradeable"],obj["who"],str(obj["version"]))
     if not os.path.isdir(submission_path):
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
     print ("GRADE THIS", submission_path)
 
-    is_batch_job = args.next_directory==BATCH_QUEUE
+    is_batch_job = next_directory==BATCH_QUEUE
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
 
-    queue_time = get_queue_time(args)
+    queue_time = get_queue_time(next_directory,next_to_grade)
     queue_time_longstring = submitty_utils.write_submitty_date(queue_time)
     grading_began=submitty_utils.get_current_time()
     waittime=int((grading_began-queue_time).total_seconds())
-    grade_items_scheduler.log_message(is_batch_job,submission_path,"wait:",waittime,"")
+    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"wait:",waittime,"")
 
     # --------------------------------------------------------
     # various paths
@@ -237,7 +236,7 @@ def main():
 
     with open(os.path.join(tmp_logs,"compilation_log.txt"), 'w') as logfile:
         compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                           args.which_untrusted,
+                                           which_untrusted,
                                            os.path.join(tmp_compilation,"my_compile.out"),
                                            obj["gradeable"],
                                            obj["who"],
@@ -250,7 +249,7 @@ def main():
     else:
         print ("NEW COMPILATION FAILURE")
 
-    untrusted_grant_read_access(args,tmp_compilation)
+    untrusted_grant_read_access(which_untrusted,tmp_compilation)
         
     # remove the compilation program
     os.remove(os.path.join(tmp_compilation,"my_compile.out"))
@@ -295,7 +294,7 @@ def main():
     # run the run.out as the untrusted user
     with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
         runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                          args.which_untrusted,
+                                          which_untrusted,
                                           os.path.join(tmp_work,"my_runner.out"),
                                           obj["gradeable"],
                                           obj["who"],
@@ -311,7 +310,7 @@ def main():
     else:
         print ("NEW RUNNER FAILURE")
 
-    untrusted_grant_read_access(args,tmp_work)
+    untrusted_grant_read_access(which_untrusted,tmp_work)
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
@@ -347,7 +346,7 @@ def main():
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
         validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                             args.which_untrusted,
+                                             which_untrusted,
                                              os.path.join(tmp_work,"my_validator.out"),
                                              obj["gradeable"],
                                              obj["who"],
@@ -361,7 +360,7 @@ def main():
         print ("NEW VALIDATOR FAILURE")
 
 
-    untrusted_grant_read_access(args,tmp_work)
+    untrusted_grant_read_access(which_untrusted,tmp_work)
 
 
     # grab the result of autograding
@@ -459,9 +458,9 @@ def main():
                      "true" if obj["is_team"] else "false",
                      str(obj["version"])])
 
-    print ("finished grading ", args.next_to_grade, " in ", gradingtime, " seconds")
+    print ("finished grading ", next_to_grade, " in ", gradingtime, " seconds")
 
-    grade_items_scheduler.log_message(is_batch_job,submission_path,"grade:",gradingtime,grade_result)
+    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",gradingtime,grade_result)
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("finished")
@@ -473,6 +472,8 @@ def main():
 
     
 # ==================================================================================
+# ==================================================================================
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    just_grade_item(args.next_directory,args.next_to_grade,args.which_untrusted)
 
