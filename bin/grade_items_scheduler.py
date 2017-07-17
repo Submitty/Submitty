@@ -38,4 +38,4 @@ def log_error(jobname,message):
 
 def log_exit(jobname,message):
     log_error(jobname,message)
-    log_error(jobname,"EXIT grade_items_loop.py")
+    log_error(jobname,"EXIT grade_items_scheduler.py")

@@ -18,7 +18,7 @@ import dateutil.parser
 import tzlocal
 
 import submitty_utils
-import grade_items_loop   # FIXME:  will maybe be the other way around!
+import grade_items_scheduler   # FIXME:  will maybe be the other way around!
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
@@ -150,7 +150,7 @@ def main():
     queue_time_longstring = submitty_utils.write_submitty_date(queue_time)
     grading_began=submitty_utils.get_current_time()
     waittime=int((grading_began-queue_time).total_seconds())
-    grade_items_loop.log_message(is_batch_job,submission_path,"wait:",waittime,"")
+    grade_items_scheduler.log_message(is_batch_job,submission_path,"wait:",waittime,"")
 
     # --------------------------------------------------------
     # various paths
@@ -461,7 +461,7 @@ def main():
 
     print ("finished grading ", args.next_to_grade, " in ", gradingtime, " seconds")
 
-    grade_items_loop.log_message(is_batch_job,submission_path,"grade:",gradingtime,grade_result)
+    grade_items_scheduler.log_message(is_batch_job,submission_path,"grade:",gradingtime,grade_result)
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("finished")
