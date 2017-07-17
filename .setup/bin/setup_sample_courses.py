@@ -653,6 +653,8 @@ class Course(object):
                           course_group))
 
         os.environ['PGPASSWORD'] = DB_PASS
+        database = "submitty_" + self.semester + "_" + self.code
+
         print("Database created, now populating ", end="")
         submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
         submitty_conn = submitty_engine.connect()
