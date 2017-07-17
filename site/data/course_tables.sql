@@ -193,11 +193,11 @@ CREATE TABLE gradeable (
 --
 
 CREATE TABLE gradeable_component_mark (
-    gc_id integer NOT NULL,
     gcm_id integer NOT NULL,
-    gcm_order integer NOT NULL,
+    gc_id integer NOT NULL,
     gcm_points numeric NOT NULL,
-    gcm_note character varying NOT NULL
+    gcm_note character varying NOT NULL,
+    gcm_order integer NOT NULL
 );
 
 --
@@ -205,9 +205,9 @@ CREATE TABLE gradeable_component_mark (
 --
 
 CREATE TABLE gradeable_component_mark_data (
-    gcm_id integer NOT NULL,
     gc_id integer NOT NULL,
-    gd_id integer NOT NULL
+    gd_id integer NOT NULL,
+    gcm_id integer NOT NULL
 );
 
 --

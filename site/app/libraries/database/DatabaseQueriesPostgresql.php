@@ -230,6 +230,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
      *  section_key:
      */
     public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
+      echo("getGradeables...");
         $return = array();
         $g_ids_query = "";
         $users_query = "";
@@ -313,12 +314,18 @@ SELECT";
   gc.array_gc_max_value,
   gc.array_gc_is_text,
   gc.array_gc_is_extra_credit,
-  gc.array_gc_order";
+  gc.array_gc_order,
+  gc.array_array_gcm_id,
+  gc.array_array_gc_id,
+  gc.array_array_gcm_points,
+  gc.array_array_gcm_note,
+  gc.array_array_gcm_order";
         if ($user_ids !== null) {
             $query .= ",
   gd.gd_id,
   gd.gd_overall_comment,
   gd.gd_user_viewed_date,
+  gd.array_array_gcm_id,
   gd.array_gcd_gc_id,
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
@@ -365,8 +372,27 @@ LEFT JOIN (
     array_agg(gc_max_value) AS array_gc_max_value,
     array_agg(gc_is_text) AS array_gc_is_text,
     array_agg(gc_is_extra_credit) AS array_gc_is_extra_credit,
-    array_agg(gc_order) AS array_gc_order
-  FROM gradeable_component
+    array_agg(gc_order) AS array_gc_order,
+    array_agg(array_gcm_id) AS array_array_gcm_id,
+    array_agg(array_gc_id) AS array_array_gc_id,
+    array_agg(array_gcm_points) AS array_array_gcm_points,
+    array_agg(array_gcm_note) AS array_array_gcm_note,
+    array_agg(array_gcm_order) AS array_array_gcm_order
+  FROM
+  (SELECT gc.*, gcm.array_gcm_id, gcm.array_gc_id, gcm.array_gcm_points, array_gcm_note, array_gcm_order
+  FROM gradeable_component AS gc
+  LEFT JOIN(
+    SELECT
+      gc_id,
+      array_to_string(array_agg(gcm_id), ',') as array_gcm_id,
+      array_to_string(array_agg(gc_id), ',') as array_gc_id,
+      array_to_string(array_agg(gcm_points), ',') as array_gcm_points,
+      array_to_string(array_agg(gcm_note), ',') as array_gcm_note,
+      array_to_string(array_agg(gcm_order), ',') as array_gcm_order
+    FROM gradeable_component_mark
+    GROUP BY gc_id
+  ) AS gcm
+  ON gc.gc_id=gcm.gc_id) as gradeable_component
   GROUP BY g_id
 ) AS gc ON gc.g_id=g.g_id";
         if ($user_ids !== null) {
@@ -380,6 +406,7 @@ LEFT JOIN (
     in_gcd.array_gcd_grader_id,
     in_gcd.array_gcd_graded_version,
     in_gcd.array_gcd_grade_time,
+    in_gcd.array_array_gcm_id,
     in_gcd.array_gcd_user_id,
     in_gcd.array_gcd_user_firstname,
     in_gcd.array_gcd_user_preferred_firstname,
@@ -389,22 +416,32 @@ LEFT JOIN (
   FROM gradeable_data as in_gd
   LEFT JOIN (
     SELECT
-      gd_id,
+      gcd.gd_id,
       array_agg(gc_id) AS array_gcd_gc_id,
       array_agg(gcd_score) AS array_gcd_score,
       array_agg(gcd_component_comment) AS array_gcd_component_comment,
       array_agg(gcd_grader_id) AS array_gcd_grader_id,
       array_agg(gcd_graded_version) AS array_gcd_graded_version,
       array_agg(gcd_grade_time) AS array_gcd_grade_time,
+      array_agg(array_gcm_id) AS array_array_gcm_id,
       array_agg(u.user_id) AS array_gcd_user_id,
       array_agg(u.user_firstname) AS array_gcd_user_firstname,
       array_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
       array_agg(u.user_lastname) AS array_gcd_user_lastname,
       array_agg(u.user_email) AS array_gcd_user_email,
       array_agg(u.user_group) AS array_gcd_user_group
-    FROM gradeable_component_data AS gcd
+    FROM(
+        SELECT gcd.*, gcmd.array_gcm_id
+        FROM gradeable_component_data AS gcd 
+        LEFT JOIN (
+          SELECT gc_id, gd_id, array_to_string(array_agg(gcm_id), ',') as array_gcm_id
+          FROM gradeable_component_mark_data AS gcmd
+          GROUP BY gc_id, gd_id
+        ) as gcmd
+    ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id 
+    ) AS gcd
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id 
-    GROUP BY gd_id
+    GROUP BY gcd.gd_id
   ) AS in_gcd ON in_gd.gd_id = in_gcd.gd_id
 ) AS gd ON gd.gd_user_id = u.user_id AND g.g_id = gd.g_id
 LEFT JOIN (
@@ -940,8 +977,17 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
             $params);
     }
 
-    public function updateGradeableComponentMarkData($gcd_id, GradeableComponentMark $mark) {
+    public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $mark->getId());
+        $this->course_db->query("
+INSERT INTO gradeable_component_mark_data (gc_id, gd_id, gcm_id)
+VALUES (?, ?, ?)", $params);
+    }
 
+    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $mark->getId());
+        $this->course_db->query("
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?")
     }
   
     public function createNewGradeable($details) {

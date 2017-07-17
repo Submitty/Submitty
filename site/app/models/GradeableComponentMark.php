@@ -13,13 +13,19 @@ class GradeableComponentMark extends AbstractModel {
     protected $id = null;
     /** @property @var int Unique identifier for the component associated with this mark */
     protected $gc_id = null;
-    /** @property @var float Given points that someone has given this mark */
-    protected $points = 0;
+    /** @property @var float Maximum value that the component can have */
+    protected $max_value = 0;
     /** @property @var int Order for marks to be shown in */
     protected $order = 1;
-    /** @property @var string Comment for the mark */
+    /** @property @var float Points for this mark */
+    protected $points = 0;
+    /** @property @var string Comment for this mark */
     protected $note = "";
+    /** @property @var bool This person earned this mark*/
+    protected $has_mark = false;
+
     public function __construct(Core $core, $details=array()) {
+        echo("gradeable component mark constructor...");
         parent::__construct($core);
         if (!isset($details['gcm_id'])) {
             return;
@@ -29,14 +35,16 @@ class GradeableComponentMark extends AbstractModel {
         $this->points = $details['gcm_points'];
         $this->order = $details['gcm_order'];
         $this->note = $details['gcm_note'];
-    }
+        if (isset($details['gcm_has_mark']) && $details['gcm_has_mark'] !== null) {
+            $has_mark = true;
+        }
 
     public function saveData($gd_id, $gc_id) {
         if ($this->modified) {
-        	if ($this->id === null) {
-                
+        	if ($this->has_mark) {
+                $this->core->getQueries()->insertGradeableCompnentMarkData($gd_id, $gc_id, $this);
         	} else {
-        		$this->core->getQueries()->updateGradeableComponentMarkData($gcd_id, $this);
+        		$this->core->getQueries()->deleteGradeableComponentMarkData($gd_id, $gc_id, $this);
         	}
         }
     }
