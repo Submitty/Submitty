@@ -376,41 +376,9 @@ HTML;
 HTML;
         }
         else{
-//             $return .= <<<HTML
-//              <h4 class='label' style="float: left">Select Version:</h4>
-//                 <select name="submission_version" onChange="versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(),
-//                                                           'gradeable_version' => ""))}', this)">
-// HTML;
-//             $current_version_number = $gradeable->getActiveVersion();
-//             foreach ($gradeable->getVersions() as $version) {
-//                 $selected = "";
-//                 $select_text = array("Version #{$version->getVersion()}");
-//                 if ($gradeable->getNormalPoints() > 0) {
-//                     $select_text[] = "Score: ".$version->getNonHiddenTotal()." / " . $gradeable->getTotalNonHiddenNonExtraCreditPoints();
-//                 }
-
-//                 if ($version->getDaysLate() > 0) {
-//                     $select_text[] = "Days Late: ".$version->getDaysLate();
-//                 }
-
-//                 if ($version->isActive()) {
-//                     $select_text[] = "GRADE THIS VERSION";
-//                 }
-
-//                 if ($version->getVersion() == $current_version_number) {
-//                     $selected = "selected";
-//                 }
-
-//                 $select_text = implode("&nbsp;&nbsp;&nbsp;", $select_text);
-//                 $return .= <<<HTML
-//         <option value="{$version->getVersion()}" {$selected}>{$select_text}</option>
-
-// HTML;
-//             }
-//             $return .= <<< HTML
-//                 </select>
-
-// HTML;
+            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$gradeable->getUser()->getId(), 'individual'=>$individual,
+                                                          'gradeable_version' => ""))}', this)";
+            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange);
             $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, true);
         }
         $return .= <<<HTML
@@ -544,6 +512,15 @@ HTML;
 
 <div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
     <span class="grading_label">Grading Rubric</span>
+HTML;
+        $disabled = '';
+        if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
+            $disabled='disabled';
+            $return .= <<<HTML
+    <div class="red-message" style="text-align: center">Select the submission version to be graded</div>
+HTML;
+        }
+        $return .= <<<HTML
     <div style="margin:3px;">
         <table class="rubric-table" id="rubric-table">
             <tbody>
@@ -561,7 +538,6 @@ HTML;
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
             }
     
-            $disabled = '';
             if(substr($question->getTitle(), 0, 12) === "AUTO-GRADING") {
                 $disabled = 'disabled';
             }
@@ -646,7 +622,7 @@ HTML;
             </tbody>
         </table><br/>
         <div style="width:100%;"><b>General Comment:</b>
-        <textarea name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0">{$gradeable->getOverallComment()}</textarea>
+        <textarea name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
         </div>
 HTML;
         if ($gradeable->beenTAgraded()) {
@@ -659,7 +635,7 @@ HTML;
             $graders = implode(",", $graders);
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: {$graders}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
+            Graded By: {$graders}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' {$disabled}/><br />
         </div>
 HTML;
         }
@@ -675,12 +651,12 @@ HTML;
         if (!($now < $gradeable->getGradeStartDate()) && ($total_points > 0)) {
             if($gradeable->beenTAgraded()) {
                 $return .= <<<HTML
-            <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);"/>
+            <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);" {$disabled}/>
 HTML;
             }
             else {
                 $return .= <<<HTML
-            <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>
+            <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade" {$disabled}/>
 HTML;
             }
         }

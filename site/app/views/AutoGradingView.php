@@ -9,32 +9,34 @@ class AutogradingView extends AbstractView {
 
     public function showResults($gradeable, $show_hidden=false) {
         $return = "";
+        $current_version = $gradeable->getCurrentVersion();
         $popup_css_file = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
         $has_badges = false;
-        if ($gradeable->getNormalPoints() > 0) {
+        if ($current_version->getNonHiddenTotal() > 0) {
             $has_badges = true;
-            if ($gradeable->getGradedNonHiddenPoints() >= $gradeable->getNormalPoints()) {
+            if ($current_version->getNonHiddenTotal() >= $gradeable->getNormalPoints()) {
                 $background = "green-background";
             }
-            else if ($gradeable->getGradedNonHiddenPoints() > 0) {
+            else if ($current_version->getNonHiddenTotal() > 0) {
                 $background = "yellow-background";
             }
             else {
                 $background = "red-background";
             }
-            if (($gradeable->getTotalAutograderNonExtraCreditPoints() > $gradeable->getNormalPoints()) && $show_hidden) {
+            if (($current_version->getNonHiddenNonExtraCredit() + $current_version->getHiddenNonExtraCredit() > $gradeable->getNormalPoints()) && $show_hidden) {
                 $return .= <<<HTML
 <div class="box">
     <div class="box-title">
-        <span class="badge {$background}">{$gradeable->getGradedNonHiddenPoints()} / {$gradeable->getNormalPoints()}</span>
+        <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
         <h4>Total (No Hidden Points)</h4>
     </div>
 </div>
 HTML;
-                if ($gradeable->getGradedAutograderPoints() >= $gradeable->getTotalAutograderNonExtraCreditPoints()) {
+                $all_autograder_points = $current_version->getNonHiddenTotal() + $current_version->getHiddenTotal();
+                if ($all_autograder_points >= $gradeable->getTotalAutograderNonExtraCreditPoints()) {
                     $background = "green-background";
                 }
-                else if ($gradeable->getGradedAutograderPoints() > 0) {
+                else if ($all_autograder_points > 0) {
                     $background = "yellow-background";
                 }
                 else {
@@ -43,7 +45,7 @@ HTML;
                 $return .= <<<HTML
 <div class="box" style="background-color:#D3D3D3;">
     <div class="box-title">
-        <span class="badge {$background}">{$gradeable->getGradedAutograderPoints()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</span>
+        <span class="badge {$background}">{$all_autograder_points} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</span>
         <h4>Total (With Hidden Points)</h4>
     </div>
 </div>
@@ -53,7 +55,7 @@ HTML;
                 $return .= <<<HTML
 <div class="box">
     <div class="box-title">
-        <span class="badge {$background}">{$gradeable->getGradedNonHiddenPoints()} / {$gradeable->getNormalPoints()}</span>
+        <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
         <h4>Total</h4>
     </div>
 </div>
@@ -298,4 +300,52 @@ HTML;
         }
         return $return;
     }
+
+
+    public function showVersionChoice($gradeable, $onChange) {
+        $return = <<<HTML
+    <h3 class='label' style="float: left">Select Submission Version:</h3>
+    <select style="margin: 0 10px;" name="submission_version"
+    onChange="{$onChange}">
+
+HTML;
+        if ($gradeable->getActiveVersion() == 0) {
+            $selected = ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) ? "selected" : "";
+            $return .= <<<HTML
+        <option value="0" {$selected}>Do Not Grade Assignment</option>
+HTML;
+
+        }
+        foreach ($gradeable->getVersions() as $version) {
+            $selected = "";
+            $select_text = array("Version #{$version->getVersion()}");
+            if ($gradeable->getNormalPoints() > 0) {
+                $select_text[] = "Score: ".$version->getNonHiddenTotal()." / " . $gradeable->getTotalNonHiddenNonExtraCreditPoints();
+            }
+
+            if ($version->getDaysLate() > 0) {
+                $select_text[] = "Days Late: ".$version->getDaysLate();
+            }
+
+            if ($version->isActive()) {
+                $select_text[] = "GRADE THIS VERSION";
+            }
+
+            if ($version->getVersion() == $gradeable->getCurrentVersionNumber()) {
+                $selected = "selected";
+            }
+
+            $select_text = implode("&nbsp;&nbsp;&nbsp;", $select_text);
+            $return .= <<<HTML
+        <option value="{$version->getVersion()}" {$selected}>{$select_text}</option>
+
+HTML;
+        }
+
+        $return .= <<<HTML
+    </select>
+HTML;
+        return $return;
+    }
+
 }

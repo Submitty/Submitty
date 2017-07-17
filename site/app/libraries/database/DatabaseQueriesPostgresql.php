@@ -210,7 +210,6 @@ LEFT JOIN(
     array_agg(gc_is_extra_credit) AS array_gc_is_extra_credit,
     array_agg(gc_order) AS array_gc_order
   FROM gradeable_component
-  WHERE g_id='grading_homework'
   GROUP BY g_id
 ) AS gc
 ON gc.g_id = egd.g_id
