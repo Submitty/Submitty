@@ -244,7 +244,8 @@ with open(CONFIGURATION_FILE, 'w') as open_file:
     for key, value in obj.items():
         key = str(key).upper()
         if isinstance(value, str):
-            write('{}="{}"'.format(key, value.replace('"', '\"')))
+            # To escape a single quote in bash, use '\'' because bash is awful
+            write("{}='{}'".format(key, value.replace("'", "'\''")))
         elif isinstance(value, bool):
             write('{}={}'.format(key, 'true' if value is True else 'false'))
         else:

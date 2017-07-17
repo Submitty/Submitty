@@ -25,7 +25,7 @@ COURSE_BUILDERS_GROUP=__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__
 
 DATABASE_HOST=__INSTALL__FILLIN__DATABASE_HOST__
 DATABASE_USER=__INSTALL__FILLIN__DATABASE_USER__
-DATABASE_PASS="__INSTALL__FILLIN__DATABASE_PASSWORD__"
+DATABASE_PASS='__INSTALL__FILLIN__DATABASE_PASSWORD__'
 
 ########################################################################################################################
 ########################################################################################################################
@@ -225,8 +225,8 @@ chmod 660 ${course_dir}/config/config.ini
 replace_fillin_variables ${course_dir}/config/config.ini
 
 echo -e "Creating database ${DATABASE_NAME}\n"
-PGPASSWORD="${DATABASE_PASS}" psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d postgres -c "CREATE DATABASE ${DATABASE_NAME}"
-PGPASSWORD="${DATABASE_PASS}" psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d ${DATABASE_NAME} -f ${SUBMITTY_INSTALL_DIR}/site/data/course_tables.sql
+PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d postgres -c "CREATE DATABASE ${DATABASE_NAME}"
+PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d ${DATABASE_NAME} -f ${SUBMITTY_INSTALL_DIR}/site/data/course_tables.sql
 echo -e "\nSUCESS!\n\n"
 
 ########################################################################################################################
