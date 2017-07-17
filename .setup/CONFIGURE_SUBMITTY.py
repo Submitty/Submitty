@@ -191,6 +191,45 @@ os.chmod(SETUP_DIR, 700)
 ##############################################################################
 # WRITE THE VARIABLES TO A FILE
 
+obj = OrderedDict()
+obj['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
+obj['submitty_repository'] = SUBMITTY_REPOSITORY
+obj['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
+obj['submitty_data_dir'] = SUBMITTY_DATA_DIR
+obj['hwphp_user'] = HWPHP_USER
+obj['hwcgi_user'] = HWCGI_USER
+obj['hwcron_user'] = HWCRON_USER
+obj['hwcronphp_group'] = HWCRONPHP_GROUP
+obj['course_builders_group'] = COURSE_BUILDERS_GROUP
+
+obj['num_untrusted'] = NUM_UNTRUSTED
+obj['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
+obj['first_untrusted_gid'] = FIRST_UNTRUSTED_UID
+
+obj['hwcron_uid'] = HWCRON_UID
+obj['hwcron_gid'] = HWCRON_GID
+obj['hwphp_uid'] = HWPHP_UID
+obj['hwphp_gid'] = HWPHP_GID
+
+obj['database_host'] = DATABASE_HOST
+obj['database_user'] = DATABASE_USER
+obj['database_password'] = DATABASE_PASS
+
+obj['authentication_method'] = AUTHENTICATION_METHOD
+
+obj['submission_url'] = SUBMISSION_URL
+obj['tagrading_url'] = TAGRADING_URL
+obj['cgi_url'] = CGI_URL
+
+obj['autograding_log_path'] = AUTOGRADING_LOG_PATH
+obj['site_log_path'] = TAGRADING_LOG_PATH
+
+obj['max_instances_of_grade_students'] = MAX_INSTANCES_OF_GRADE_STUDENTS
+obj['grade_students_idle_seconds'] = GRADE_STUDENTS_IDLE_SECONDS
+obj['grade_students_idle_total_minutes'] = GRADE_STUDENTS_IDLE_TOTAL_MINUTES
+obj['grade_students_starts_per_hour'] = GRADE_STUDENTS_STARTS_PER_HOUR
+obj['debugging_enabled'] = DEBUGGING_ENABLED
+
 CONFIGURATION_FILE = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'INSTALL_SUBMITTY.sh')
 with open(CONFIGURATION_FILE, 'w') as open_file:
     def write(x=''):
@@ -202,44 +241,14 @@ with open(CONFIGURATION_FILE, 'w') as open_file:
     write('# Manual editing is allowed (but will be clobbered if CONFIGURE_SUBMITTY.py is re-run)')
     write()
 
-    write('SUBMITTY_INSTALL_DIR=' + SUBMITTY_INSTALL_DIR)
-    write('SUBMITTY_REPOSITORY=' + SUBMITTY_REPOSITORY)
-    write('SUBMITTY_TUTORIAL_DIR=' + SUBMITTY_TUTORIAL_DIR)
-    write('SUBMITTY_DATA_DIR=' + SUBMITTY_DATA_DIR)
-    write('HWPHP_USER=' + HWPHP_USER)
-    write('HWCGI_USER=' + HWCGI_USER)
-    write('HWCRON_USER=' + HWCRON_USER)
-    write('HWCRONPHP_GROUP=' + HWCRONPHP_GROUP)
-    write('COURSE_BUILDERS_GROUP=' + COURSE_BUILDERS_GROUP)
-
-    write('NUM_UNTRUSTED=' + str(NUM_UNTRUSTED))
-    write('FIRST_UNTRUSTED_UID=' + str(FIRST_UNTRUSTED_UID))
-    write('FIRST_UNTRUSTED_GID=' + str(FIRST_UNTRUSTED_UID))
-
-    write('HWCRON_UID=' + str(HWCRON_UID))
-    write('HWCRON_GID=' + str(HWCRON_GID))
-    write('HWPHP_UID=' + str(HWPHP_UID))
-    write('HWPHP_GID=' + str(HWPHP_GID))
-
-    write('DATABASE_HOST=' + DATABASE_HOST)
-    write('DATABASE_USER=' + DATABASE_USER)
-    write('DATABASE_PASSWORD=' + DATABASE_PASS)
-
-    write('AUTHENTICATION_METHOD=' + AUTHENTICATION_METHOD)
-
-    write('SUBMISSION_URL=' + SUBMISSION_URL)
-    write('TAGRADING_URL=' + TAGRADING_URL)
-    write('CGI_URL=' + CGI_URL)
-
-    write('AUTOGRADING_LOG_PATH=' + AUTOGRADING_LOG_PATH)
-    write('SITE_LOG_PATH=' + TAGRADING_LOG_PATH)
-
-    write('MAX_INSTANCES_OF_GRADE_STUDENTS=' + str(MAX_INSTANCES_OF_GRADE_STUDENTS))
-    write('GRADE_STUDENTS_IDLE_SECONDS=' + str(GRADE_STUDENTS_IDLE_SECONDS))
-    write('GRADE_STUDENTS_IDLE_TOTAL_MINUTES=' + str(GRADE_STUDENTS_IDLE_TOTAL_MINUTES))
-    write('GRADE_STUDENTS_STARTS_PER_HOUR=' + str(GRADE_STUDENTS_STARTS_PER_HOUR))
-    write()
-    write('DEBUGGING_ENABLED=' + ('true' if DEBUGGING_ENABLED else 'false'))
+    for key, value in obj.items():
+        key = str(key).upper()
+        if isinstance(value, str):
+            write('{}="{}"'.format(key, value.replace('"', '\"')))
+        elif isinstance(value, bool):
+            write('{}={}'.format(key, 'true' if value is True else 'false'))
+        else:
+            write('{}={}'.format(key, value))
     write()
     write('# Now actually run the installation script')
     write('source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER.sh  "$@"')
@@ -248,45 +257,6 @@ os.chmod(CONFIGURATION_FILE, 700)
 
 CONFIGURATION_JSON = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'submitty_conf.json')
 with open(CONFIGURATION_JSON, 'w') as json_file:
-    obj = OrderedDict()
-    obj['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
-    obj['submitty_repository'] = SUBMITTY_REPOSITORY
-    obj['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
-    obj['submitty_data_dir'] = SUBMITTY_DATA_DIR
-    obj['hwphp_user'] = HWPHP_USER
-    obj['hwcgi_user'] = HWCGI_USER
-    obj['hwcron_user'] = HWCRON_USER
-    obj['hwcronphp_group'] = HWCRONPHP_GROUP
-    obj['course_builders_group'] = COURSE_BUILDERS_GROUP
-
-    obj['num_untrusted'] = NUM_UNTRUSTED
-    obj['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
-    obj['first_untrusted_gid'] = FIRST_UNTRUSTED_UID
-
-    obj['hwcron_uid'] = HWCRON_UID
-    obj['hwcron_gid'] = HWCRON_GID
-    obj['hwphp_uid'] = HWPHP_UID
-    obj['hwphp_gid'] = HWPHP_GID
-
-    obj['database_host'] = DATABASE_HOST
-    obj['database_user'] = DATABASE_USER
-    obj['database_password'] = DATABASE_PASS
-
-    obj['authentication_method'] = AUTHENTICATION_METHOD
-
-    obj['submission_url'] = SUBMISSION_URL
-    obj['tagrading_url'] = TAGRADING_URL
-    obj['cgi_url'] = CGI_URL
-
-    obj['autograding_log_path'] = AUTOGRADING_LOG_PATH
-    obj['site_log_path'] = TAGRADING_LOG_PATH
-
-    obj['max_instances_of_grade_students'] = MAX_INSTANCES_OF_GRADE_STUDENTS
-    obj['grade_students_idle_seconds'] = GRADE_STUDENTS_IDLE_SECONDS
-    obj['grade_students_idle_total_minutes'] = GRADE_STUDENTS_IDLE_TOTAL_MINUTES
-    obj['grade_students_starts_per_hour'] = GRADE_STUDENTS_STARTS_PER_HOUR
-    obj['debugging_enabled'] = DEBUGGING_ENABLED
-
     json.dump(obj, json_file, indent=2)
     json_file.write('\n')
 
