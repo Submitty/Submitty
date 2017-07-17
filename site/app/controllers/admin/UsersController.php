@@ -103,9 +103,16 @@ class UsersController extends AbstractController {
         }
 
         $user->setFirstName($_POST['user_firstname']);
-        $user->setPreferredFirstName($_POST['user_preferred_firstname']);
+        if (isset($_POST['user_preferred_firstname'])) {
+            $user->setPreferredFirstName($_POST['user_preferred_firstname']);
+        }
+
         $user->setLastName($_POST['user_lastname']);
         $user->setEmail($_POST['user_email']);
+        if (isset($_POST['user_password'])) {
+            $user->setPassword($_POST['user_password']);
+        }
+
         if ($_POST['registered_section'] === "null") {
             $user->setRegistrationSection(null);
         }

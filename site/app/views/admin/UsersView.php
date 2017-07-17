@@ -273,7 +273,11 @@ HTML;
         }
         $return .= <<<HTML
     </div>
-    <div style="float: right; width: auto">
+    <div style="width: 60%">
+        Password:<br />
+        <input type="text" name="password" placeholder="New Password" />    
+    </div>
+    <div style="float: right; width: auto; margin-top: 10px">
         <a onclick="$('#edit-user-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
         <input class="btn btn-primary" type="submit" value="Submit" />
     </div>
