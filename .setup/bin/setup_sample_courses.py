@@ -660,9 +660,6 @@ class Course(object):
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData(bind=submitty_engine)
 
-        courses_table = Table('courses', submitty_metadata, autoload=True)
-        submitty_conn.execute(courses_table.insert(), semester=self.semester, course=self.code)
-
         engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                                  database))
         conn = engine.connect()
