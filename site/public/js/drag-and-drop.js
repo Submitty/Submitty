@@ -329,7 +329,6 @@ function handleBulk(num_pages, gradeable_id, return_url) {
 
     var formData = new FormData();
 
-    var message = "";
     if(num_pages == "") {
         alert("You didn't enter the # of page(s)!");
         $("#submit").prop("disabled", false);
@@ -404,6 +403,8 @@ function handleBulk(num_pages, gradeable_id, return_url) {
  * @param submitStudentGradeable, a callback function
  */
 function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGradeable) {
+    console.log("AAAAAhhhhhhhhhhhhhhhh");
+
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -457,10 +458,11 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
  * @param num_textboxes
  * @param user_id
  */
-function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id) {
+function handleSubmission(g_id, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id) {
     $("#submit").prop("disabled", true);
 
-    
+    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload','gradeable_id': g_id});
+    return_url = buildUrl({'component': 'student','gradeable_id': g_id});
 
     var message = "";
     // check versions used

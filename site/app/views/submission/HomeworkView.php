@@ -83,7 +83,7 @@ HTML;
         </div>
         <div class = "sub" id="pdf_submit_button" style="display: none">
             <div class="sub">
-                # of page(s) for each exam: <input type="number" id= "num_pages" name= "num_pages" placeholder="required"/>
+                # of page(s) per PDF: <input type="number" id= "num_pages" name= "num_pages" placeholder="required"/>
             </div>
         </div>
     </form>
@@ -300,54 +300,41 @@ HTML;
 
         $svn_string = ($gradeable->useSvnCheckout()) ? "true" : "false";
 
-        $return.= <<<HTML
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $("#pdf_submit").click(function(e){ // Submit button
-                console.log("AAAAAAAAA");
-            });
-        });
-    </script>
-
-HTML;
-
         $return .= <<<HTML
     <script type="text/javascript">
         function submitStudentGradeable(student_id, highest_version) {
-            handleSubmission("{$this->core->buildUrl(array('component' => 'student',
-                                                            'page' => 'submission',
-                                                            'action' => 'upload',
-                                                            'gradeable_id' => $gradeable->getId()))}",
-                                 "{$this->core->buildUrl(array('component' => 'student',
-                                                               'gradeable_id' => $gradeable->getId()))}",
-                                 {$days_late},
-                                 {$gradeable->getAllowedLateDays()},
-                                 highest_version,
-                                 {$gradeable->getMaxSubmissions()},
-                                 "{$this->core->getCsrfToken()}",
-                                 {$svn_string},
-                                 {$gradeable->getNumTextBoxes()},
-                                 student_id);           
+            if ($('#radio_student').is(':checked')) {
+                handleSubmission("{$gradeable->getId()}",
+                                     {$days_late},
+                                     {$gradeable->getAllowedLateDays()},
+                                     highest_version,
+                                     {$gradeable->getMaxSubmissions()},
+                                     "{$this->core->getCsrfToken()}",
+                                     {$svn_string},
+                                     {$gradeable->getNumTextBoxes()},
+                                     student_id);  
+            };
+            if ($('#radio_bulk').is(':checked')) { 
+                console.log("bbbbbbrrrrrrrrro");
+            };       
         }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
+                var user_id = "";
                 // depending on which is checked, update cookie
                 if ($('#radio_normal').is(':checked')) {
                     document.cookie="student_checked="+0;
                 };
                 if ($('#radio_student').is(':checked')) {
                     document.cookie="student_checked="+1;
+                    user_id = $("#student_id").val();
                 };
                 if ($('#radio_bulk').is(':checked')) {
                     document.cookie="student_checked="+2;
                 };
-                var user_id = "";
-                if (document.getElementById("submissionForm")) {
-                    user_id = document.getElementById("submissionForm").student_id.value;
-                }
                 // bulk upload
                 if ($("#radio_bulk").is(":checked")) {
-                    var num_pages = document.getElementById("submissionForm").num_pages.value;
+                    var num_pages = $("#num_pages").val();
                     handleBulk(num_pages, "{$gradeable->getId()}",
                                 "{$this->core->buildUrl(array('component' => 'student',
                                                                'gradeable_id' => $gradeable->getId()))}");
@@ -355,12 +342,7 @@ HTML;
                 // no RCS entered, upload for whoever is logged in
                 else if (($("#radio_normal").is(":checked")) || 
                         ($("#radio_student").is(":checked") && user_id == "")){
-                    handleSubmission("{$this->core->buildUrl(array('component' => 'student',
-                                                               'page' => 'submission',
-                                                               'action' => 'upload',
-                                                               'gradeable_id' => $gradeable->getId()))}",
-                                 "{$this->core->buildUrl(array('component' => 'student',
-                                                               'gradeable_id' => $gradeable->getId()))}",
+                    handleSubmission("{$gradeable->getId()}",
                                  {$days_late},
                                  {$gradeable->getAllowedLateDays()},
                                  {$gradeable->getHighestVersion()},
@@ -384,72 +366,79 @@ HTML;
             $pdf_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", 
                 $gradeable->getId());
 
-            $pre_all_files = FileUtils::getAllFiles($pdf_path);
+            $all_directories = FileUtils::getAllFiles($pdf_path);
 
-            if (count($pre_all_files) > 0) {
+            if (count($all_directories) > 0) {
 
-                $all_files = array();
-                $all_cover_files = array();
-
-                foreach ($pre_all_files as $filename => $details) {
-                    $all_files[$filename] = $details;
-                    if (strpos($filename, 'cover') !== false) {
-                        $filename_shorten = str_replace("_cover",'',$filename);
-                        $all_cover_files[$filename_shorten] = $details;
-                    }
-                }
                 $return .= <<<HTML
 <div class="content">
     <h2>Unassigned Exam PDF Uploads</h2>
+    <form id="bulkForm" method="post">
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
-                <td width="10%"></td>
+                <td width="3%"></td>
+                <td width="14%">Timestamp</td>
                 <td width="60%">PDF preview</td>
-                <td width="20%">User ID</td>
-                <td width="10%">Enter</td>
+                <td width="15%">User ID</td>
+                <td width="8%">Enter</td>
             </tr>
         </thead>
+        <tbody>
 HTML;
                 $count = 1;
-                foreach ($all_cover_files as $filename => $details) {
-                    // $show = "tru\n";
-                    // $data = "";
-                    // foreach ($details as $detailname => $detail) {
-                    //     $show .= $detailname;
-                    //     $show .= ": ";
-                    //     $show .= $detail;
-                    //     $show .= "\n";
-                    // }
-                    // echo $show;
-                    $path = $details["path"];
-                    $name = $details["relative_name"];
-                    $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$name."&path=".$path;
-                    $url_pdf = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=submissions&file=words_881.pdf&path=/var/local/submitty/courses/f17/development/submissions/upload_only/instructor/3/words_881.pdf";
-                    $return .= <<<HTML
-        <tbody>
+                $count_array = array();
+                foreach ($all_directories as $timestamp => $content) {
+                    $files = $content["files"];
+
+                    foreach ($files as $filename => $content2) {
+                        $name = $content2["name"];
+                        $path = $content2["path"];
+                        $relative_name = $content2["relative_name"];
+                        if (strpos($filename, 'cover') == false)
+                            // $count_array[$count] = $path;
+                            continue;
+                        $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$name."&path=".$path;
+                        $return .= <<<HTML
             <tr>
                 <td style="vertical-align: middle">{$count}</td>
+                <td style = "vertical-align: middle">{$timestamp}</td> 
                 <td>
                     <object data="{$url}" type="application/pdf" width="100%" height="300">
                         alt : <a href="{$url}">pdf.pdf</a>
                     </object>
                 </td>
                 <td style="vertical-align: middle">
-                    <input type="text" value =""/>
+                    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                    <input type="text" id="bulk_student_id_{$count}" value =""/>
                 </td>
                 <td style="vertical-align: middle">
-                    <a class="btn btn-primary" >
-                        Submit
-                    </a>
+                    <button type="button" id="bulk_submit_{$count}" class="btn btn-success">Submit</button>
                 </td>
             </tr>
-        </tbody>
 HTML;
                     $count++;
+                    }
                 }
                 $return .= <<<HTML
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#bulkForm button").click(function(e){
+            var btn = $(document.activeElement);
+            var id = btn.attr("id");
+            count = id.substring(id.length-1, id.length);
+            user_id = $("#bulk_student_id_"+count).val()
+            //console.log(user_id);
+            // once submitted, make that button hidden?
+            validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, submitStudentGradeable);
+        });
+    });
+</script>
+HTML;
+                $return .= <<<HTML
+        </tbody>
     </table>
+    </form>
 </div>
 HTML;
             }

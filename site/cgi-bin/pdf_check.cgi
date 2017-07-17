@@ -25,11 +25,12 @@ try:
     sem = os.path.basename(arguments['sem'].value)
     course = os.path.basename(arguments['course'].value)
     g_id = os.path.basename(arguments['g_id'].value)
+    ver = os.path.basename(arguments['ver'].value)
 
     current_path = os.path.dirname(os.path.realpath(__file__))
 
-    bulk_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/bulk_pdf",g_id)
-    split_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/split_pdf",g_id)
+    bulk_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/bulk_pdf",g_id,ver)
+    split_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/split_pdf",g_id,ver)
 
     # copy folder
     if not os.path.exists(split_path):

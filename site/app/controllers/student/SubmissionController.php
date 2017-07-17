@@ -182,11 +182,17 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to make gradeable path.", false);
         }
 
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d_H:i:s");
+        $version_path = FileUtils::joinPaths($pdf_path, $current_time);
+        if (!FileUtils::createDir($version_path)) {
+            return $this->uploadResult("Failed to make gradeable path.", false);
+        }
+
         // save the pdf somewhere
         if (isset($uploaded_file)) {
             for ($j = 0; $j < $count; $j++) {
                 if ($this->core->isTesting() || is_uploaded_file($uploaded_file["tmp_name"][$j])) {
-                    $dst = FileUtils::joinPaths($pdf_path, $uploaded_file["name"][$j]);
+                    $dst = FileUtils::joinPaths($version_path, $uploaded_file["name"][$j]);
                     if (!@copy($uploaded_file["tmp_name"][$j], $dst)) {
                         return $this->uploadResult("Failed to copy uploaded file {$uploaded_file["name"][$j]} to current submission.", false);
                     }
@@ -210,7 +216,7 @@ class SubmissionController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}");
+        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
 
