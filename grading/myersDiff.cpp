@@ -276,7 +276,7 @@ TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::jso
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
       student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_INFORMATION,"ERROR: Student file too large for grader")});
   }
 
   bool extraStudentOutputOk = j.value("extra_student_output",false);

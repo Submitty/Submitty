@@ -235,7 +235,8 @@ HTML;
                             // Format the image SRC:  data:{mime};base64,{data};
                             $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
                             // insert the sample image data
-                            $return .= '<img src="'.$myimagesrc.'">';
+                            
+                            $return .= '<img src="'.$myimagesrc.'" img style="border:2px solid black">';
                         }
                     }
                     else if ($diff_viewer->hasDisplayActual()) {
@@ -267,7 +268,7 @@ HTML;
                            // Format the image SRC:  data:{mime};base64,{data};
                            $myExpectedimagesrc = 'data: '.mime_content_type($myExpectedimage).';charset=utf-8;base64,'.$expectedImageData;
                            // insert the sample image data
-                           $return .= '<img src="'.$myExpectedimagesrc.'">';
+                           $return .= '<img src="'.$myExpectedimagesrc.'" img style="border:2px solid black">';
                         }
                     $return .= <<<HTML
             </div>
@@ -325,7 +326,7 @@ HTML;
                            // Format the image SRC:  data:{mime};base64,{data};
                            $differenceImagesrc = 'data: '.mime_content_type($myDifferenceImage).';charset=utf-8;base64,'.$differenceImageData;
                            // insert the sample image data
-                           $return .= '<img src="'.$differenceImagesrc.'">';
+                           $return .= '<img src="'.$differenceImagesrc.'" img style="border:2px solid black">';
                         }
                     $return .= <<<HTML
             </div>
