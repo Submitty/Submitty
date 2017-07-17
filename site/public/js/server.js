@@ -115,6 +115,7 @@ function newClassListForm() {
     form.css("display", "block");
     form.css("width", "500px");
     form.css("margin-left", "-250px");
+    $('[name="move_missing"]', form).prop('checked', false);
     $('[name="upload"]', form).val(null);
 }
 

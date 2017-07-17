@@ -15,7 +15,7 @@ class UsersView extends AbstractView {
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-        <a onclick="classListForm()" class="btn btn-primary">Upload Classlist</a>
+        <a onclick="newClassListForm()" class="btn btn-primary">Upload Classlist</a>
         <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
     </div>
     <h2>View Students</h2>
@@ -397,7 +397,7 @@ HTML;
         &emsp;3=Limited Access Grader (mentor)<br>
         &emsp;4=Student (no grading access)<br>
     </p>
-        <p>&emsp;</p>
+    <p>&emsp;</p>
     <p>
         Do not use a header row.<br>
     </p>
@@ -409,6 +409,37 @@ HTML;
         </div>
         <div style="float: right; width: auto">
             <a onclick="$('#grader-list-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+            <input class="btn btn-primary" type="submit" value="Submit" />
+        </div>
+    </form>
+</div>
+HTML;
+        return $return;
+    }
+
+    public function classListForm() {
+        $return = <<<HTML
+<div class="popup-form" id="class-list-form">
+    <h2>Upload Classlist</h2>
+    <p>&emsp;</p>
+    <p>
+        Format your class list as an .xlsx or .csv file with 5 columns:<br>
+        &emsp;username, LastName, FirstName, email, RegistrationSection<br>
+    </p>
+    <p>&emsp;</p>
+    <p>
+        Do not use a header row.<br>
+    </p>
+    <br />
+    <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'upload_class_list'))}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        Move students missing from the classlist to NULL section?<input type="checkbox" name="move_missing" /><br>
+        <br />
+        <div>
+            <input type="file" name="upload" accept=".xlsx, .csv">
+        </div>
+        <div style="float: right; width: auto">
+            <a onclick="$('#class-list-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
             <input class="btn btn-primary" type="submit" value="Submit" />
         </div>
     </form>

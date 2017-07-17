@@ -49,6 +49,7 @@ class UsersController extends AbstractController {
         $students = $this->core->getQueries()->getAllUsers();
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
         $this->renderUserForm('update_student');
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm');
     }
 
     public function listGraders() {
@@ -342,7 +343,7 @@ class UsersController extends AbstractController {
         //Validation and error checking.
         $error_message = "";
         $row_num = 0;
-        $graders_to_add = array();
+        $graders_data = array();
         foreach($contents as $content) {
             $row_num++;
             $vals = explode(",", trim($content));
@@ -360,40 +361,57 @@ class UsersController extends AbstractController {
             //grader-level check is a digit between 1 - 4.
             $error_message .= preg_match("~[1-4]{1}~", $vals[4]) ? "" : "Error in grader-level column, row #{$row_num}: {$vals[4]}" . PHP_EOL;
 
-            $graders_to_add[] = $vals;
+            $graders_data[] = $vals;
         }
 
         //Display any accumulated errors.  Quit on errors, otherwise continue.
         if (!empty($error_message)) {
-            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not be an error.");
+            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
             $this->core->redirect($return_url);
         }
 
         //Existing graders are not updated.
-        $existing_graders = $this->core->getQueries()->getAllGraders();
-        foreach($existing_graders as $existing_grader) {
-            foreach($graders_to_add as $index => $new_grader) {
-                if ($new_grader[0] === $existing_grader->getId()) {
-                    unset($graders_to_add[$index]);
+        $existing_users = $this->core->getQueries()->getAllUsers();
+        $graders_to_add = array();
+        $graders_to_update = array();
+        foreach($graders_data as $grader_data) {
+            $exists = false;
+            foreach($existing_users as $i => $existing_user) {
+                if ($grader_data[0] === $existing_user->getId()) {
+                    if ($grader_data[4] !== $existing_user->getGroup()) {
+                        $graders_to_update[] = $grader_data;
+                    }
+                    unset($existing_users[$i]);
+                    $exists = true;
+                    break;
                 }
+            }
+            if (!$exists) {
+                $graders_to_add[] = $grader_data;
             }
         }
 
         //Insert new graders to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        foreach($graders_to_add as $data) {
-            $new_grader = new User($this->core);
-            $new_grader->setId($data[0]);
-            $new_grader->setFirstName($data[1]);
-            $new_grader->setLastName($data[2]);
-            $new_grader->setEmail($data[3]);
-            $new_grader->setGroup($data[4]);
-            $this->core->getQueries()->insertUser($new_grader, $semester, $course);
+        foreach($graders_to_add as $grader_data) {
+            $grader = new User($this->core);
+            $grader->setId($grader_data[0]);
+            $grader->setFirstName($grader_data[1]);
+            $grader->setLastName($grader_data[2]);
+            $grader->setEmail($grader_data[3]);
+            $grader->setGroup($grader_data[4]);
+            $this->core->getQueries()->insertUser($grader, $semester, $course);
+        }
+        foreach($graders_to_update as $grader_data) {
+            $grader = $this->core->getQueries()->getUserById($grader_data[0]);
+            $grader->setGroup($grader_data[4]);
+            $this->core->getQueries()->updateUser($grader, $semester, $course);
         }
 
-        $inserted = count($grader_to_add);
-        $this->core->addSuccessMessage("{$inserted} new graders added from {$_FILES['upload']['name']}");
+        $added = count($graders_to_add);
+        $updated = count($graders_to_update);
+        $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
         $this->core->redirect($return_url);
     }
 
@@ -412,7 +430,90 @@ class UsersController extends AbstractController {
 
         $contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
-        $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}");
+        //Validation and error checking.
+        $error_message = "";
+        $row_num = 0;
+        $students_data = array();
+        foreach($contents as $content) {
+            $row_num++;
+            $vals = explode(",", trim($content));
+            if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
+
+            //No check on user_id (computing login ID) -- different Univeristies have different formats.
+
+            //First and Last name must be alpha characters, white-space, or certain punctuation.
+            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}" . PHP_EOL;
+            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[2]) ? "" : "Error in last name column, row #{$row_num}: {$vals[2]}" . PHP_EOL;
+
+            //Check email address for format "address@domain".
+            $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_num}: {$vals[3]}" . PHP_EOL;
+
+            //Student section must be greater than zero (intval($str) returns zero when $str is not integer)
+            $error_message .= ($vals[4] > 0) ? "" : "Error in student section column, row #{$row_num}: {$vals[4]}" . PHP_EOL;
+
+            $students_data[] = $vals;
+        }
+
+        //Display any accumulated errors.  Quit on errors, otherwise continue.
+        if (!empty($error_message)) {
+            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
+            $this->core->redirect($return_url);
+        }
+
+        //Existing students are not updated.
+        $existing_users = $this->core->getQueries()->getAllUsers();
+        $students_to_add = array();
+        $students_to_update = array();
+        foreach($students_data as $student_data) {
+            $exists = false;
+            foreach($existing_users as $i => $existing_user) {
+                if ($student_data[0] === $existing_user->getId()) {
+                    if ($student_data[4] !== $existing_user->getRegistrationSection()) {
+                        $students_to_update[] = $student_data;
+                    }
+                    unset($existing_users[$i]);
+                    $exists = true;
+                    break;
+                }
+            }
+            if (!$exists) {
+                $students_to_add[] = $student_data;
+            }
+        }
+
+        //Insert new students to database
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        foreach($students_to_add as $student_data) {
+            $student = new User($this->core);
+            $student->setId($student_data[0]);
+            $student->setFirstName($student_data[1]);
+            $student->setLastName($student_data[2]);
+            $student->setEmail($student_data[3]);
+            $student->setRegistrationSection($student_data[4]);
+            $student->setGroup(4);
+            $this->core->getQueries()->insertUser($student, $semester, $course);
+        }
+        foreach($students_to_update as $student_data) {
+            $student = $this->core->getQueries()->getUserById($student_data[0]);
+            $student->setRegistrationSection($student_data[4]);
+            $this->core->getQueries()->updateUser($student, $semester, $course);
+        }
+
+        $added = count($students_to_add);
+        $updated = count($students_to_update);
+
+        if (isset($_POST['move_missing'])) {
+            foreach($existing_users as $user) {
+                if ($user->getRegistrationSection() != null) {
+                    $user->setRegistrationSection(null);
+                    $this->core->getQueries()->updateUser($user, $semester, $course);
+                    $updated++;
+                }
+            }
+        }
+
+        $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
         $this->core->redirect($return_url);
     }
 }
