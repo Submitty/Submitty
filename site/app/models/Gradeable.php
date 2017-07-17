@@ -243,7 +243,12 @@ class Gradeable extends AbstractModel {
 
     protected $user_viewed_date = null;
 
+<<<<<<< HEAD
     public function __construct(Core $core, $details=array(), User $user = null) {
+=======
+    public function __construct(Core $core, $details, User $user = null) {
+        echo("gradeable constructor...");
+>>>>>>> 59af9b563e3234c3c10fcd3509265dee3a749322
         parent::__construct($core);
         if(!isset($details['g_id'])) {
             return;
@@ -294,12 +299,12 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
+                            'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
                             'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order');
+                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
