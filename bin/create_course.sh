@@ -25,7 +25,7 @@ COURSE_BUILDERS_GROUP=__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__
 
 DATABASE_HOST=__INSTALL__FILLIN__DATABASE_HOST__
 DATABASE_USER=__INSTALL__FILLIN__DATABASE_USER__
-DATABASE_PASS=__INSTALL__FILLIN__DATABASE_PASSWORD__
+DATABASE_PASS="__INSTALL__FILLIN__DATABASE_PASSWORD__"
 
 ########################################################################################################################
 ########################################################################################################################
