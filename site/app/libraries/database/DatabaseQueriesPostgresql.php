@@ -943,7 +943,54 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
     public function updateGradeableComponentMarkData($gcd_id, GradeableComponentMark $mark) {
 
     }
-  
+
+    public function createNewGradeable2(Gradeable $gradeable) {
+        $params = array($gradeable->getId(), $gradeable->getName(), $gradeable->getInstructionsUrl(), $gradeable->getTaInstructions(), var_export($gradeable->getTeamAssignment(),true), $gradeable->getType(), var_export($gradeable->getGradeByRegistration(), true), $gradeable->getTaViewDate(), $gradeable->getGradeStartDate(), $gradeable->getGradeReleasedDate(), $gradeable->getMinimumGradingGroup(), $gradeable->getBucket());
+        $this->course_db->query("
+INSERT INTO gradeable(g_id, g_title, g_instructions_url,g_overall_ta_instructions, g_team_assignment, g_gradeable_type, g_grade_by_registration, g_ta_view_start_date, g_grade_start_date,  g_grade_released_date,  g_min_grading_group, g_syllabus_bucket) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+        if ($gradeable->getType() === 0) {
+            $params = array($gradeable->getId(), $gradeable->getOpenDate(), $gradeable->getDueDate(), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision());
+            $this->course_db->query("
+INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository, 
+eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision) 
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+        }
+    }
+
+    public function updateGradeable2(Gradeable $gradeable) {
+        $params = array($gradeable->getName(), $gradeable->getInstructionsUrl(), $gradeable->getTaInstructions(), var_export($gradeable->getTeamAssignment(),true), $gradeable->getType(), var_export($gradeable->getGradeByRegistration(), true), $gradeable->getTaViewDate(), $gradeable->getGradeStartDate(), $gradeable->getGradeReleasedDate(), $gradeable->getMinimumGradingGroup(), $gradeable->getBucket(), $gradeable->getId());
+        $this->course_db->query("
+UPDATE gradeable SET g_title=?, g_instructions_url=?, g_overall_ta_instructions=?, g_team_assignment=?, 
+g_gradeable_type=?, g_grade_by_registration=?, g_ta_view_start_date=?, g_grade_start_date=?, 
+g_grade_released_date=?, g_min_grading_group=?, g_syllabus_bucket=? WHERE g_id=?", $params);
+        if ($gradeable->getType() === 0) {
+          $params = array($gradeable->getOpenDate(), $gradeable->getDueDate(), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), $gradeable->getId());
+          $this->course_db->query("
+UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?, 
+eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params);
+        }
+    }
+
+    public function createNewGradeableComponent(GradeableComponent $component, Gradeable $gradeable) {
+        $params = array($gradeable->getId(), $component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getMaxValue(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder());
+        $this->course_db->query("
+INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value, 
+gc_is_text, gc_is_extra_credit, gc_order) 
+VALUES(?, ?, ?, ?, ?, ?, ?, ?)", $params);
+    }   
+
+    public function updateGradeableComponent(GradeableComponent $component) {
+        $params = array($component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getMaxValue(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), $component->getId());
+        $this->course_db->query("
+UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?, gc_max_value=?, gc_is_text=?, gc_is_extra_credit=?, gc_order=? WHERE gc_id=?", $params);
+    }
+
+    public function deleteGradeableComponent(GradeableComponent $component) {
+        $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id=?",array($component->getId()));
+        $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id=?", array($component->getId()));
+    }
+
     public function createNewGradeable($details) {
         $this->course_db->beginTransaction();
 
@@ -1185,35 +1232,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
         }
         $this->course_db->commit();
     }
-
-    //the better way to update a gradeable, this way should eventually replace the old way
-    public function updateGradeable2(Gradeable $gradeable) {
-        $this->course_db->beginTransaction();
-        $tempTeam = ($gradeable->isTeamAssignment() == 1) ? '1' : '0';
-        $tempRegistration = ($gradeable->getGradeByRegistration() == 1) ? '1' : '0';
-        //updates the data common for all gradeables.
-        $params = array($gradeable->getName(), $gradeable->getTaInstructions(), $tempTeam, $gradeable->getType(),
-                        $tempRegistration, $gradeable->getGradeStartDate()->format('Y/m/d H:i:s'), $gradeable->getGradeReleasedDate()->format('Y/m/d H:i:s'),
-                        $gradeable->getBucket(), $gradeable->getMinimumGradingGroup(), $gradeable->getInstructionsURL(),
-                        $gradeable->getTAViewDate()->format('Y/m/d H:i:s'), $gradeable->getId());
-        $this->course_db->query("
-UPDATE gradeable SET g_title=?, g_overall_ta_instructions=?, g_team_assignment=?, g_gradeable_type=?, 
-g_grade_by_registration=?, g_grade_start_date=?, g_grade_released_date=?, g_syllabus_bucket=?, 
-g_min_grading_group=?, g_instructions_url=?, g_ta_view_start_date=? WHERE g_id=?", $params);
-
-        if($gradeable->getType() === 0) {
-            $tempRepository = ($gradeable->getIsRepository() == 1 ) ? '1' : '0';
-            $tempTAgrading = ($gradeable->useTAGrading() == 1) ? '1' : '0';
-            $params = array($gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'),
-                    $tempRepository, $gradeable->getSubdirectory(), $tempTAgrading,  
-                    $gradeable->getAllowedLateDays(), $gradeable->getPointPrecision(), $gradeable->getId());
-            $this->course_db->query("
-UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?, 
-eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params); 
-        }
-
-        $this->course_db->commit();
-      }
 
     public function updateUserViewedDate(Gradeable $gradeable) {
         if ($gradeable->getGdId() !== null) {

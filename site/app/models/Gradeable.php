@@ -100,6 +100,7 @@ class Gradeable extends AbstractModel {
     /** @property @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
 
+    /** @property @var bool */
     protected $ta_grades_released = false;
 
     /** @property @var bool Should the gradeable be graded by registration section (or by rotating section) */
@@ -242,8 +243,11 @@ class Gradeable extends AbstractModel {
 
     protected $user_viewed_date = null;
 
-    public function __construct(Core $core, $details, User $user = null) {
+    public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
+        if(!isset($details['g_id'])) {
+            return;
+        }
         $this->id = $details['g_id'];
 
         $this->user = ($user === null) ? $this->core->getUser() : $user;

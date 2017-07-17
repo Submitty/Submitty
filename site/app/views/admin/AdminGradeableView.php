@@ -97,7 +97,8 @@ class AdminGradeableView extends AbstractView {
                 $num_old_questions = count($old_questions);                
                 $component_ids = array();
                 for ($i = 0; $i < $num_old_questions; $i++) {
-                    $component_ids[] = ((json_decode($data[1]))[$i]->gc_id);
+                    $json = json_decode($data[1]);
+                    $component_ids[] = $json[$i]->gc_id;
                 }
             }
             if ($data[0]['g_gradeable_type'] === 2) { //if the gradeable edited is num/text gradeable
@@ -429,7 +430,7 @@ HTML;
                               display: block; height: auto;">{$question['student_grading_note']}</textarea>
                     <div id="deduction_questions_{$num}">
 HTML;
-    if ($type_of_action === "edit" || $type_of_action === "add_template") {
+    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0) {
         $type_deduct = 0;
         $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
         foreach ($marks as $mark) {
