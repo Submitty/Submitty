@@ -168,6 +168,7 @@ HTML;
 	foreach($contents as $content) {
 		$row_being_processed++;
 		$vals = explode(",", trim($content));
+		$vals[4] = intval($vals[4]); //change float read from xlsx to int
 
 		//Data checks
 		//No check on user_id (computing login ID) -- different Univeristies have different formats.
