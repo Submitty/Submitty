@@ -1,74 +1,55 @@
-#!/usr/bin/env php
+#!/usr/bin/env python3
 
-<?php
-/**
- * This script will convert a given xlsx (excel) file to csv format such
- * that PHP can then natively parse the file using the fgetcsv builtin function.
- * We utilize the xlsx2csv python package which we assume is available on the
- * command line to do this conversion. The parameters to this script are a name
- * for a XLSX file to convert and a name for the resulting CSV file. Deletion of
- * these files should then be handled (if necessary) in the calling script, not
- * in this file. Files handled by this script generally contain data that is
- * regulate by FERPA (20 U.S.C. § 1232g) and thus should be treated in a manner
- * such that unintended access is generally not possible. As such, the URL should
- * not be indicated to the user (ie. through obvious redirection to this script)
- * or by directly encoding it into a javascript ajax call. It should just be called
- * via an internal call of the server, thus not making the url accessible.
- */
+"""
+ This script will convert a given xlsx (excel) file to csv format using
+ the xlsx2csv python package. The parameters to this script are a name
+ for a XLSX file to convert and a name for the resulting CSV file. Deletion of
+ these files should then be handled (if necessary) in the calling script, not
+ in this file. Files handled by this script generally contain data that is
+ regulate by FERPA (20 U.S.C. § 1232g) and thus should be treated in a manner
+ such that unintended access is generally not possible. As such, the URL should
+ not be indicated to the user (ie. through obvious redirection to this script)
+ or by directly encoding it into a javascript ajax call. It should just be called
+ via an internal call of the server, thus not making the url accessible.
+"""
 
-/**
- * @param $string
- */
-function return_error($string) {
-    $json = json_encode(array('success' => false, 'error' => true, 'error_message' => $string), JSON_UNESCAPED_SLASHES);
-    die($json);
-}
+import cgi
+import json
+import os
+import xlsx2csv
 
-/**
- *
- */
-function return_success() {
-    die("{'success': true, 'error': false}");
-}
+def print_error(message):
+    print(json.dumps({"success": False, "error": True, "error_message": message}))
 
-parse_str($_SERVER['QUERY_STRING'], $_REQUEST);
+def main():
+    print("Content-type: text/html")
+    print()
 
-//Check if popen() is allowed
-if (function_exists('popen')) {
-    //Check if xlsx2csv file exists
-    $proc_handle = popen("command -v xlsx2csv", "r");
-    $tmp = fread($proc_handle, 1);
-    pclose($proc_handle);
-    if (empty($tmp)) {
-        return_error("xlsx2csv not available.");
-    }
-}
-else {
-    return_error("popen not available");
-}
+    args = cgi.FieldStorage()
+    xlsx_file = "/tmp/" + os.path.basename(args['xlsx_file'].value)
+    csv_file = "/tmp/" + os.path.basename(args['csv_file'].value)
 
-$xlsx_file = "/tmp/".basename($_REQUEST['xlsx_file']);
-$csv_file = "/tmp/".basename($_REQUEST['csv_file']);
+    if (not os.path.isfile(xlsx_file)):
+        print_error("XLSX spreadsheet not found")
+        return
+    elif (not os.path.isfile(csv_file)):
+        print_error("CSV file not found")
+        return
+    elif (not os.access(csv_file, os.W_OK)):
+        print_error("Cannot write to CSV file")
+        return
 
-if (!file_exists($xlsx_file)) {
-    return_error("XLSX spreadsheet not found");
-}
-else if (!file_exists($csv_file)) {
-    return_error("CSV file not found");
-}
-else if (!is_writeable($csv_file)) {
-    return_error("Cannot write to CSV file");
-}
+    # XLSX to CSV conversion
+    xlsx2csv.Xlsx2csv(xlsx_file, outputencoding='utf-8', skip_empty_lines=True).convert(csv_file)
 
-//XLSX to CSV conversion
-$proc_handle = popen("xlsx2csv -d , -i -s 0 {$xlsx_file} > {$csv_file} 2>&1", "r");
+    # Validate result after conversion
+    with open(csv_file, "r") as read_file:
+        tmp = read_file.read()
+        if (not tmp):
+            print_error("Failed converting xlsx to csv.")
+            return
 
-//Validate result after process.
-//Check for traceback from xlsx2csv process (no message when process successful).
-$tmp = fread($proc_handle, 1);
-pclose($proc_handle);
-if (!empty($tmp)) {
-    return_error("Failed converting xlsx to csv.");
-}
+    print(json.dumps({"success": True, "error": False}))
 
-return_success();
+if __name__ == "__main__":
+    main()

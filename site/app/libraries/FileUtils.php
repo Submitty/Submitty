@@ -384,6 +384,12 @@ class FileUtils {
             case 'py':
                 $content_type = 'text/x-python';
                 break;
+            case 'csv':
+                $content_type = 'text/csv';
+                break;
+            case 'xlsx':
+                $content_type = 'spreadsheet/xlsx';
+                break;
             default:
                 $content_type = 'text/x-sh';
                 break;

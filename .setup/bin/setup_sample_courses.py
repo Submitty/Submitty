@@ -620,10 +620,11 @@ class Course(object):
         self.gradeables = []
         self.make_customization = False
         ids = []
-        for gradeable in course['gradeables']:
-            self.gradeables.append(Gradeable(gradeable))
-            assert self.gradeables[-1].id not in ids
-            ids.append(self.gradeables[-1].id)
+        if 'gradeables' in course:
+            for gradeable in course['gradeables']:
+                self.gradeables.append(Gradeable(gradeable))
+                assert self.gradeables[-1].id not in ids
+                ids.append(self.gradeables[-1].id)
         self.users = []
         self.registration_sections = 10
         self.rotating_sections = 5
