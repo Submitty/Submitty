@@ -133,26 +133,17 @@ HTML;
 
                 $image_width = $image_height = 0;
 
-                if (isset($gradeable->getTextboxes()[$i]['image']) && $gradeable->getTextboxes()[$i]['image'] != ""){
-                    $tester = $gradeable->getTextboxes()[$i]['image'];
-
-                    if(isset($gradeable->getTextboxes()[$i]['image_height'])
-                          && (int)$gradeable->getTextboxes()[$i]['image_height'] > 0){
-                        $image_height = $gradeable->getTextboxes()[$i]['image_height'];
-                    }
-
-                    if(isset($gradeable->getTextboxes()[$i]['image_width'])
-                          && (int)$gradeable->getTextboxes()[$i]['image_width'] > 0){
-                        $image_width = $gradeable->getTextboxes()[$i]['image_width'];
-                    }
+                if (isset($gradeable->getTextboxes()[$i]['images']) && $gradeable->getTextboxes()[$i]['images'] != ""){
+                    $tester = $gradeable->getTextboxes()[$i]['images'];
                 }
                 else{
                     $tester = array();
                 }
 
                 //
-                foreach((array)$tester as $currPath){
-                    $imgPath = $this->core->getConfig()->getCoursePath() . "/test_input/" . $gradeable->getName() . "/".$currPath;
+                foreach((array)$tester as $currImage){
+                    $currImageName = $currImage["image_name"];
+                    $imgPath = $this->core->getConfig()->getCoursePath() . "/test_input/" . $gradeable->getName() . "/".$currImageName;
                     $content_type = FileUtils::getContentType($imgPath);
                     if (substr($content_type, 0, 5) === "image") {
                        // Read image path, convert to base64 encoding
@@ -160,6 +151,15 @@ HTML;
                        // Format the image SRC:  data:{mime};base64,{data};
                        $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
                        // insert the sample image data
+
+                        if(isset($currImage['image_height']) && (int)$currImage['image_height'] > 0){
+                            $image_height = $currImage['image_height'];
+                        }
+
+                        if(isset($currImage['image_width']) && (int)$currImage['image_width'] > 0){
+                            $image_width = $currImage['image_width'];
+                        }
+
                        $image_display = '<img src="'.$textBoximagesrc.'"';
 
                        if($image_width > 0){
