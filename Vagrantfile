@@ -8,16 +8,23 @@ ${GIT_PATH}/.setup/vagrant.sh vagrant 2>&1 | tee ${GIT_PATH}/.vagrant/logs/vagra
 SCRIPT
 
 Vagrant.configure(2) do |config|
-    # Ubuntu 14.04 (Trusty Tahr) - 64bit
+  # Specify the various machines that we might develop on. After defining a name, we
+  # can specify if the vm is our "primary" one (if we don't specify a VM, it'll use
+  # that one) as well as making sure all non-primary ones have "autostart: false" set
+  # so that when we do "vagrant up", it doesn't spin up those machines.
+
+  # Our primary development target, this is what RPI runs Submitty on
   config.vm.define 'ubuntu', primary: true do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-16.04'
+    ubuntu.vm.network 'forwarded_port', guest: 80, host: 8080
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 15432
   end
 
   config.vm.define 'debian', autostart: false do |debian|
     debian.vm.box = 'debian/jessie64'
+    debian.vm.network 'forwarded_port', guest: 80, host: 8888
+    debian.vm.network 'forwarded_port', guest: 5432, host: 25432
   end
-
-  config.vm.network 'private_network', ip: '192.168.56.101', auto_config: false
 
   config.vm.provider 'virtualbox' do |vb|
     #vb.gui = true
@@ -35,7 +42,5 @@ Vagrant.configure(2) do |config|
 
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
 
-  #config.vm.provision 'shell', inline: $script
-
-  config.vm.network 'forwarded_port', guest: 5432, host: 15432
+  config.vm.provision 'shell', inline: $script
 end

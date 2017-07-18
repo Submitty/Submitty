@@ -155,7 +155,7 @@ if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'datab
     DATABASE_PASS = defaults['database_password']
 print()
 
-SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
+SUBMISSION_URL = get_input('What is the url for submission? (ex: http://localhost or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
 print()
 
 print("What authentication method to use:\n1. PAM\n2. Database\n")

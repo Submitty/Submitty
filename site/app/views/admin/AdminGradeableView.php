@@ -37,7 +37,7 @@ class AdminGradeableView extends AbstractView {
         $TA_grade_open_date = date('m/d/Y 23:59:59', strtotime( '+10 days' ));
         $TA_grade_release_date = date('m/d/Y 23:59:59', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-		$BASE_URL = "http://192.168.56.101/hwgrading";
+		$BASE_URL = "http:/localhost/hwgrading";
 		$action = "upload_new_gradeable"; //decides how the page's data is displayed
 		$string = "Add"; //Add or Edit
 		$button_string = "Add";
