@@ -133,6 +133,8 @@ class AdminGradeableController extends AbstractController {
             $is_ta_grading = (isset($_POST['ta_grading']) && $_POST['ta_grading']=='true') ? true : false;
             $gradeable->setTaGrading($is_ta_grading);
             $gradeable->setConfigPath($_POST['config_path']);
+            $is_peer_grading = (isset($_POST['peer_grading']) && $_POST['peer_grading']=='yes') ? true : false;
+            $gradeable->setPeerGrading($is_peer_grading);
         }
 
         if ($edit_gradeable === 0) {

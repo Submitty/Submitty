@@ -983,11 +983,11 @@ DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?
 INSERT INTO gradeable(g_id, g_title, g_instructions_url,g_overall_ta_instructions, g_team_assignment, g_gradeable_type, g_grade_by_registration, g_ta_view_start_date, g_grade_start_date,  g_grade_released_date,  g_min_grading_group, g_syllabus_bucket) 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            $params = array($gradeable->getId(), $gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision());
+            $params = array($gradeable->getId(), $gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), var_export($gradeable->getPeerGrading(), true));
             $this->course_db->query("
 INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository, 
-eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision) 
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision, eg_peer_grading) 
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
     }
 
@@ -1079,7 +1079,7 @@ WHERE gcm_id=?", $params);
 
             $is_repository = $electronic_gradeable['eg_is_repository'];
             $late_days = $electronic_gradeable['eg_late_days'];
-            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_max_value, gc_is_extra_credit FROM gradeable_component 
+            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_max_value, gc_is_extra_credit, gc_is_peer FROM gradeable_component 
                         WHERE g_id=? GROUP BY gc_id ORDER BY gc_order ASC",array($gradeable_id));
             $tmp_questions = $this->course_db->rows();
             $old_questions = array();
@@ -1090,7 +1090,8 @@ WHERE gcm_id=?", $params);
                                                     'question_grading_note' => $question['gc_ta_comment'],
                                                     'student_grading_note'  => $question['gc_student_comment'],
                                                     'question_total'        => $question['gc_max_value'],
-                                                    'question_extra_credit' => $question['gc_is_extra_credit']));
+                                                    'question_extra_credit' => $question['gc_is_extra_credit'],
+                                                    'peer_component'        => $question['gc_is_peer']));
                 }
             }
         } else {

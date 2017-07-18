@@ -85,6 +85,9 @@ class Gradeable extends AbstractModel {
     /** @property @var bool Is this a team assignment */
     protected $team_assignment = false;
     
+    /** @property @var bool Does this assignment use peer grading*/
+    protected $peer_grading = false;
+    
     /** @property @var string Iris Bucket to place gradeable */
     protected $bucket = null;
     
@@ -262,6 +265,7 @@ class Gradeable extends AbstractModel {
         $this->ta_instructions = $details['g_overall_ta_instructions'];
         $this->instructions_url = $details['g_instructions_url'];
         $this->team_assignment = isset($details['g_team_assignment']) ? $details['g_team_assignment'] === true : false;
+        $this->peer_grading = isset($details['g_peer_grading']) ? $details['g_peer_grading'] === true: false;
         $this->type = $details['g_gradeable_type'];
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);
@@ -893,5 +897,9 @@ class Gradeable extends AbstractModel {
       
     public function getSyllabusBucket() {
         return $this->bucket;
+    }
+    
+    public function isPeer() {
+        return $this->peer_grading;
     }
 }

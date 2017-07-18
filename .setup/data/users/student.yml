@@ -3,4 +3,5 @@ user_email: student@example.com
 user_firstname: Joe
 user_group: 4
 user_id: student
+anon_id: student
 user_lastname: Student

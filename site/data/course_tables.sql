@@ -122,6 +122,7 @@ CREATE TABLE electronic_gradeable (
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
+    eg_peer_grading boolean NOT NULL,
     eg_submission_open_date timestamp(6) without time zone NOT NULL,
     eg_submission_due_date timestamp(6) without time zone NOT NULL,
     eg_late_days integer DEFAULT (-1) NOT NULL,
@@ -223,6 +224,7 @@ CREATE TABLE gradeable_component (
     gc_max_value numeric NOT NULL,
     gc_is_text boolean NOT NULL,
     gc_is_extra_credit boolean NOT NULL,
+    gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL
 );
 
@@ -389,6 +391,7 @@ CREATE TABLE sessions (
 
 CREATE TABLE users (
     user_id character varying NOT NULL,
+    anon_id character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
