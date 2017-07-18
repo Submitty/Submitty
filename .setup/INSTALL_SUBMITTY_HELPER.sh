@@ -528,9 +528,11 @@ chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 ################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.conf   /etc/init/submitty_grading_scheduler.conf
-chown -R root:root /etc/init/submitty_grading_scheduler.conf
-chmod 400 /etc/init/submitty_grading_scheduler.conf
+#rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.conf   /etc/init/submitty_grading_scheduler.conf
+#chown -R root:root /etc/init/submitty_grading_scheduler.conf
+#chmod 400 /etc/init/submitty_grading_scheduler.conf
+
+#systemctl restart submitty_grading_scheduler
 
 ################################################################################################################
 ################################################################################################################
