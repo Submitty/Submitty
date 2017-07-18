@@ -1,5 +1,6 @@
 user_firstname: Jack
 user_id: ta2
+anon_id: ta2
 user_lastname: TA
 courses:
   sample:
