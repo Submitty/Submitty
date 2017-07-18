@@ -8,7 +8,8 @@ import grade_items_logging
 import grade_item
 import fcntl
 import glob
-from multiprocessing import current_process, Pool, Queue
+#from multiprocessing import current_process, Pool, Queue, Manager
+import multiprocessing
 import time
 import random
 from queue import Empty
@@ -54,7 +55,7 @@ def initialize(untrusted_queue):
     :param untrusted_queue: multiprocessing.queues.Queue that contains all untrusted users left to
                             assign
     """
-    current_process().untrusted = untrusted_queue.get()
+    multiprocessing.current_process().untrusted = untrusted_queue.get()
 
 
 def runner(queue_file):
@@ -75,7 +76,7 @@ def runner(queue_file):
     # noinspection PyUnresolvedReferences
 
     open(os.path.join(grading_file), "w").close()
-    untrusted = current_process().untrusted
+    untrusted = multiprocessing.current_process().untrusted
     grade_item.just_grade_item(my_dir, queue_file, untrusted)
 
     os.remove(queue_file)
@@ -133,6 +134,30 @@ def populate_queue(queue, folder):
         if not filename.startswith("."):
             queue.put(os.path.join(folder, filename))
 
+# ==================================================================================
+# ==================================================================================
+def pick_a_job(interactive_queue,batch_queue):
+    while True:
+        pid = os.getpid()
+        job = None
+        # We have to block around trying to get elements from both queues (with preference
+        # on interactive), so we cannot block within the get() method for one queue.
+        # this runs the process async (non-blocking) so we rely on the callbacks/prints
+        # for knowing when this particular function finishes and the process becomes
+        # available again
+        try:
+            if interactive_queue.empty() is False:
+                job = interactive_queue.get()
+            elif batch_queue.empty() is False:
+                job = batch_queue.get()
+            else:
+                # FIXME: would be better to wait on queue edit event
+                time.sleep(1)
+        # protect on the cases where empty() was not reliable and returned incorrectly
+        except Empty:
+            pass
+        if not job == None:
+            runner(job)
 
 # ==================================================================================
 # ==================================================================================
@@ -144,63 +169,43 @@ def main():
 
     grade_items_logging.log_message(False,"","","","","grade_scheduler.py launched")
 
-    # Set up our queues that we're going to monitor for new jobs to run on
-    interactive_queue = Queue()
-    batch_queue = Queue()
-    populate_queue(interactive_queue, INTERACTIVE_QUEUE)
-    populate_queue(batch_queue, BATCH_QUEUE)
-
-    untrusted_users = Queue()
+    untrusted_users = multiprocessing.Queue()
     for i in range(MAX_INSTANCES_OF_GRADE_STUDENTS_int):
         untrusted_users.put("untrusted" + str(i).zfill(2))
 
-    interactive_handler = NewFileHandler(interactive_queue)
-    batch_handler = NewFileHandler(batch_queue)
+    with multiprocessing.Pool(processes=MAX_INSTANCES_OF_GRADE_STUDENTS_int, initializer=initialize,
+                              initargs=(untrusted_users,)) as pool:
+        m = multiprocessing.Manager()
+        # Set up our queues that we're going to monitor for new jobs to run on
+        interactive_queue = m.Queue()
+        batch_queue = m.Queue()
+        populate_queue(interactive_queue, INTERACTIVE_QUEUE)
+        populate_queue(batch_queue, BATCH_QUEUE)
 
-    # Setup watchdog observer that will watch the folders and run the handler on any
-    # FileSystemEvents. This runs in a thread automatically.
-    observer = Observer()
-    observer.schedule(event_handler=interactive_handler, path=INTERACTIVE_QUEUE,
-                      recursive=False)
-    observer.schedule(event_handler=batch_handler, path=BATCH_QUEUE, recursive=False)
-    observer.start()
+        interactive_handler = NewFileHandler(interactive_queue)
+        batch_handler = NewFileHandler(batch_queue)
 
-    print ("max instances",MAX_INSTANCES_OF_GRADE_STUDENTS_string,
-           MAX_INSTANCES_OF_GRADE_STUDENTS_int)
+        # Setup watchdog observer that will watch the folders and run the handler on any
+        # FileSystemEvents. This runs in a thread automatically.
+        observer = Observer()
+        observer.schedule(event_handler=interactive_handler, path=INTERACTIVE_QUEUE,
+                          recursive=False)
+        observer.schedule(event_handler=batch_handler, path=BATCH_QUEUE, recursive=False)
+        observer.start()
 
+        for i in range(0,MAX_INSTANCES_OF_GRADE_STUDENTS_int):
+            pool.apply_async(func=pick_a_job, args=(interactive_queue,batch_queue),
+                             callback=job_callback,
+                             error_callback=job_error_callback)
 
-    print("watching directory...")
-    with Pool(processes=MAX_INSTANCES_OF_GRADE_STUDENTS_int, initializer=initialize, initargs=(untrusted_users,)) as pool:
-        print("pool created...")
-        try:
-            while True:
-                job = None
-                # We have to block around trying to get elements from both queues (with preference
-                # on interactive), so we cannot block within the get() method for one queue.
-                while job is None:
-                    pid = os.getpid()
-                    print (pid,"in loop   iq=",interactive_queue.qsize(),"  bq=",batch_queue.qsize())
-                    try:
-                        if interactive_queue.empty() is False:
-                            job = interactive_queue.get()
-                        elif batch_queue.empty() is False:
-                            job = batch_queue.get()
-                        else:
-                            time.sleep(1)
-                    # protect on the cases where empty() was not reliable and returned incorrectly
-                    except Empty:
-                        pass
-                # this runs the process async (non-blocking) so we rely on the callbacks/prints
-                # for knowing when this particular function finishes and the process becomes
-                # available again
-                pool.apply_async(func=runner, args=(job, ), callback=job_callback,
-                                 error_callback=job_error_callback)
-        except KeyboardInterrupt:
-            observer.stop()
-            pool.close()
-        finally:
-            observer.join()
-            pool.join()
+        time.sleep(10)
+        #except KeyboardInterrupt:
+        pool.close()
+        #finally:
+        pool.join()
+
+        observer.stop()
+        observer.join()
 
     grade_items_logging.log_message(False,"","","","","grade_scheduler.py terminated")
 
