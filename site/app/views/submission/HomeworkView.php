@@ -347,6 +347,7 @@ HTML;
         else {
             $return .= <<<HTML
 <div class="content">
+    <h3 class='label' style="float: left">Select Submission Version:</h3>
 HTML;
             $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
