@@ -64,10 +64,15 @@ abstract class AbstractDatabaseQueries {
 
     /**
      * @param User $user
+     */
+    abstract public function insertSubmittyUser(User $user);
+
+    /**
+     * @param User $user
      * @param string $semester
      * @param string $course
      */
-    abstract public function insertUser(User $user, $semester, $course);
+    abstract public function insertCourseUser(User $user, $semester, $course);
 
     /**
      * @param User $user
