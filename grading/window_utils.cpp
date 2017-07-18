@@ -36,10 +36,7 @@ float stringToFloat(std::string const &str, int precision) {
 std::vector<float> extractFloatsFromString(std::string input){
     std::vector<float> floats;
     //Anything (lazy) followed by either a number of the form #.##### or .#####
-    std::string myReg = 
-          ".*?(-?[0-9]+(\\.[0-9]+)?|-?0*\\.[0-9]+)(.*)";
-          // ".*?(-?[0-9]*[1-9][0-9]*(\\.[0-9]+)?|-?0*\\.[0-9]*[1-9][0-9]*)(.*)";
-
+    std::string myReg = ".*?(-?[0-9]+(\\.[0-9]+)?|-?0*\\.[0-9]+)(.*)";
     std::regex regex(myReg);
     std::smatch match;
     int i = 0;
@@ -48,7 +45,6 @@ std::vector<float> extractFloatsFromString(std::string input){
       //if we have matched, match 1 (group 1) is a float
       floats.push_back(stringToFloat(match[1].str(), 10));        
       input = match[3]; 
-      std::cout << floats[i] << std::endl;
       i++;
     }
     return floats;
@@ -62,7 +58,6 @@ std::vector<int> extractIntsFromString(std::string input){
     if (input == "")
     {
       std::vector<int> empty;
-      std::cout << "Returning vec of size " << empty.size() << std::endl;
       return empty;
     }
 
@@ -86,11 +81,9 @@ std::vector<int> extractIntsFromString(std::string input){
 
 std::vector<int> getPidsAssociatedWithPid(int pid)
 {
-  std::cout << "AHHHHHHHHHHHHHHHHHHHHH" << std::endl;
   std::string pidQuery = "pgrep -P ";
   pidQuery +=  std::to_string(pid);
   std::string children = output_of_system_command(pidQuery.c_str());
-  std::cout <<"CHILDREN:\n " << children << std::endl;
   std::vector<int> ints = extractIntsFromString(children);
 
   std::cout << "The pids associated with " << pid << " are: (there are " << ints.size() << ") " << std::endl;
@@ -292,6 +285,7 @@ void initializeWindow(std::string& window_name, int pid, std::set<std::string>& 
     return; 
   }
 
+  //Code left on purpose; could be useful in future development
   // //if none exist, do not set the window_name variable                                                                                
   // if(windows.size() == 0){ 
   //   std::cout << "Initialization failed..." << std::endl;

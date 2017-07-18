@@ -52,7 +52,6 @@ HTML;
      * @return string
      */
     public function showGradeable($gradeable, $days_late) {
-        // var_dump($gradeable);
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
