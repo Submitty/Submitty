@@ -551,7 +551,16 @@ class SubmissionController extends AbstractController {
     }
     
     private function updateSubmissionVersion() {
-        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        if (isset($_REQUEST['ta'])){
+            $ta = $_REQUEST['ta'];
+            $who = $_REQUEST['who'];
+            $individual = $_REQUEST['individual'];
+            $mylist = new GradeableList($this->core, $this->core->getQueries()->getUserById($who));
+            $gradeable_list = $mylist->getSubmittableElectronicGradeables();
+        }
+        else{
+            $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        }
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
             $msg = "Invalid gradeable id.";
             $_SESSION['messages']['error'][] = $msg;
@@ -585,7 +594,7 @@ class SubmissionController extends AbstractController {
         }
 
         $original_user_id = $this->core->getUser()->getId();
-        $user_id = $this->core->getUser()->getId();
+        $user_id = $gradeable->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
             if ($team !== null) {
@@ -633,9 +642,17 @@ class SubmissionController extends AbstractController {
             $msg = "Updated version of gradeable to version #{$new_version}.";
             $_SESSION['messages']['success'][] = $msg;
         }
-        $this->core->redirect($this->core->buildUrl(array('component' => 'student',
+        if($ta) {
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic',
+                                                    'action' => 'grade', 'gradeable_id' => $gradeable->getId(),
+                                                    'who_id'=>$who, 'individual'=>$individual,
+                                                          'gradeable_version' => $new_version)));
+        }
+        else {
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
                                                           'gradeable_version' => $new_version)));
+        }
 
         return array('error' => false, 'version' => $new_version, 'message' => $msg);
     }

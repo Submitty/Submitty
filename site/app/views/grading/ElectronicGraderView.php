@@ -367,19 +367,45 @@ HTML;
 HTML;
         if ($gradeable->getActiveVersion() === 0){
             $return .= <<<HTML
-        <h4>No Submission</h4>
+        <h3>No Submission</h3>
 HTML;
         }
-        else if (count($gradeable->getTestcases()) === 0) {
+        if (count($gradeable->getTestcases()) === 0) {
             $return .= <<<HTML
-        <h4>No Autograding For This Assignment</h4>
+        <h3>No Autograding For This Assignment</h3>
 HTML;
         }
         else{
-            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$gradeable->getUser()->getId(), 'individual'=>$individual,
+            $who = $gradeable->getUser()->getId();
+            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'individual'=>$individual,
                                                           'gradeable_version' => ""))}', this)";
-            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange);
-            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, true);
+            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $who, $individual);
+            // If viewing the active version, show cancel button, otherwise so button to switch active
+            if ($gradeable->getCurrentVersionNumber() > 0) {
+                if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
+                    $version = 0;
+                    $button = '<input type="submit" class="btn btn-default btn-xs" style="float: right" value="Cancel Student Submission">';
+                }
+                else {
+                    $version = $gradeable->getCurrentVersionNumber();
+                    $button = '<input type="submit" class="btn btn-default btn-xs" value="Grade This Version">';
+                }
+                $return .= <<<HTML
+    <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
+            action="{$this->core->buildUrl(array('component' => 'student',
+                                                 'action' => 'update',
+                                                 'gradeable_id' => $gradeable->getId(),
+                                                 'new_version' => $version, 'ta' => true, 'who' => $who, 'individual' => $individual))}">
+        <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        {$button}
+    </form>
+
+
+HTML;
+            }
+            if ($gradeable->getCurrentVersionNumber() !== 0){
+                $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, true);
+            }
         }
         $return .= <<<HTML
     </div>
@@ -514,10 +540,10 @@ HTML;
     <span class="grading_label">Grading Rubric</span>
 HTML;
         $disabled = '';
-        if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
+        if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion() || $gradeable->getCurrentVersionNumber() == 0){
             $disabled='disabled';
             $return .= <<<HTML
-    <div class="red-message" style="text-align: center">Select the submission version to be graded</div>
+    <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
         }
         $return .= <<<HTML
