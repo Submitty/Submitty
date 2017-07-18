@@ -253,7 +253,6 @@ apt-get -qqy autoremove
 # so that hwphp is the only one who could use PAM for example
 pip2 install -U pip
 pip2 install python-pam
-pip2 install xlsx2csv
 pip2 install psycopg2
 pip2 install PyYAML
 pip2 install sqlalchemy
@@ -272,6 +271,7 @@ pip3 install pytz
 pip3 install python-dateutil
 pip3 install tzlocal
 pip3 install watchdog
+pip3 install xlsx2csv
 
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
