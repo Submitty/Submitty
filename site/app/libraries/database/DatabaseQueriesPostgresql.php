@@ -3,6 +3,7 @@
 namespace app\libraries\database;
 
 use app\libraries\Utils;
+use \app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
@@ -89,27 +90,6 @@ ORDER BY gcm_order ASC
             $return[$row['gcm_id']] = new GradeableComponentMark($this->core, $row);
         }
         return $return;
-    }
-
-    public function insertGradeableComponentMark(GradeableComponentMark $mark) {
-        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNote(), $mark->getOrder());
-
-        $this->course_db->query("
-INSERT INTO gradeable_component_mark (gc_id, gcm_points, gcm_note, gcm_order)
-VALUES (?, ?, ?, ?)", $params);
-    }
-
-    public function updateGradeableComponentMark(GradeableComponentMark $mark) {
-        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNote(), $mark->getOrder(), $mark->getId());
-
-        $this->course_db->query("
-UPDATE gradeable_component_mark SET gc_id=?, gcm_points=?, gcm_note=?, gcm_order=?
-WHERE gcm_id=?", $params);
-    }
-
-    public function deleteGradeableComponentMark(GradeableComponentMark $mark) {
-        $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id=?",array($mark->getId()));
-        $this->course_db->query("DELETE FROM gradeable_component_mark WHERE gcm_id=?", array($mark->getId()));
     }
 
     public function insertUser(User $user, $semester, $course) {
@@ -989,13 +969,13 @@ VALUES (?, ?, ?)", $params);
 DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?");
     }
 
-    public function createNewGradeable2(Gradeable $gradeable) {
-        $params = array($gradeable->getId(), $gradeable->getName(), $gradeable->getInstructionsUrl(), $gradeable->getTaInstructions(), var_export($gradeable->getTeamAssignment(),true), $gradeable->getType(), var_export($gradeable->getGradeByRegistration(), true), $gradeable->getTaViewDate(), $gradeable->getGradeStartDate(), $gradeable->getGradeReleasedDate(), $gradeable->getMinimumGradingGroup(), $gradeable->getBucket());
+    public function createNewGradeable(Gradeable $gradeable) {
+        $params = array($gradeable->getId(), $gradeable->getName(), $gradeable->getInstructionsUrl(), $gradeable->getTaInstructions(), var_export($gradeable->getTeamAssignment(),true), $gradeable->getType(), var_export($gradeable->getGradeByRegistration(), true), $gradeable->getTaViewDate()->format('Y/m/d H:i:s'), $gradeable->getGradeStartDate()->format('Y/m/d H:i:s'), $gradeable->getGradeReleasedDate()->format('Y/m/d H:i:s'), $gradeable->getMinimumGradingGroup(), $gradeable->getBucket());
         $this->course_db->query("
 INSERT INTO gradeable(g_id, g_title, g_instructions_url,g_overall_ta_instructions, g_team_assignment, g_gradeable_type, g_grade_by_registration, g_ta_view_start_date, g_grade_start_date,  g_grade_released_date,  g_min_grading_group, g_syllabus_bucket) 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
-        if ($gradeable->getType() === 0) {
-            $params = array($gradeable->getId(), $gradeable->getOpenDate(), $gradeable->getDueDate(), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision());
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            $params = array($gradeable->getId(), $gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision());
             $this->course_db->query("
 INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository, 
 eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision) 
@@ -1003,14 +983,14 @@ VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
     }
 
-    public function updateGradeable2(Gradeable $gradeable) {
-        $params = array($gradeable->getName(), $gradeable->getInstructionsUrl(), $gradeable->getTaInstructions(), var_export($gradeable->getTeamAssignment(),true), $gradeable->getType(), var_export($gradeable->getGradeByRegistration(), true), $gradeable->getTaViewDate(), $gradeable->getGradeStartDate(), $gradeable->getGradeReleasedDate(), $gradeable->getMinimumGradingGroup(), $gradeable->getBucket(), $gradeable->getId());
+    public function updateGradeable(Gradeable $gradeable) {
+        $params = array($gradeable->getName(), $gradeable->getInstructionsUrl(), $gradeable->getTaInstructions(), var_export($gradeable->getTeamAssignment(),true), $gradeable->getType(), var_export($gradeable->getGradeByRegistration(), true), $gradeable->getTaViewDate()->format('Y/m/d H:i:s'), $gradeable->getGradeStartDate()->format('Y/m/d H:i:s'), $gradeable->getGradeReleasedDate()->format('Y/m/d H:i:s'), $gradeable->getMinimumGradingGroup(), $gradeable->getBucket(), $gradeable->getId());
         $this->course_db->query("
 UPDATE gradeable SET g_title=?, g_instructions_url=?, g_overall_ta_instructions=?, g_team_assignment=?, 
 g_gradeable_type=?, g_grade_by_registration=?, g_ta_view_start_date=?, g_grade_start_date=?, 
 g_grade_released_date=?, g_min_grading_group=?, g_syllabus_bucket=? WHERE g_id=?", $params);
         if ($gradeable->getType() === 0) {
-          $params = array($gradeable->getOpenDate(), $gradeable->getDueDate(), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), $gradeable->getId());
+          $params = array($gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), $gradeable->getId());
           $this->course_db->query("
 UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?, 
 eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params);
@@ -1036,59 +1016,25 @@ UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?
         $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id=?", array($component->getId()));
     }
 
-    public function createNewGradeable($details) {
-        $this->course_db->beginTransaction();
+    public function createGradeableComponentMark(GradeableComponentMark $mark) {
+        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNote(), $mark->getOrder());
 
-        //inserts the data common among all gradeable types
-        $params = array($details['g_id'], $details['g_title'], $details['g_instructions_url'], $details['g_overall_ta_instructions'],
-            $details['g_use_teams'], $details['g_gradeable_type'], $details['g_grade_by_registration'], $details['g_ta_view_start_date'],
-            $details['g_grade_start_date'], $details['g_grade_released_date'], $details['g_min_grading_group'], $details['syllabus_bucket']);
         $this->course_db->query("
-INSERT INTO gradeable(g_id, g_title, g_instructions_url,g_overall_ta_instructions, g_team_assignment, g_gradeable_type, g_grade_by_registration,
- g_ta_view_start_date, g_grade_start_date,  g_grade_released_date,  g_min_grading_group, g_syllabus_bucket) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+INSERT INTO gradeable_component_mark (gc_id, gcm_points, gcm_note, gcm_order)
+VALUES (?, ?, ?, ?)", $params);
+    }
 
-        //inserts the data if the gradeable is an electronic gradeable.
-        if($details['g_gradeable_type'] === 0) {
-            $params = array($details['g_id'], $details['eg_submission_open_date'], $details['eg_submission_due_date'],
-                    $details['eg_is_repository'], $details['eg_subdirectory'], $details['use_ta_grading'], $details['eg_config_path'], 
-                    $details['eg_late_days'], $details['eg_precision']);
-            $this->course_db->query("
-INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository, 
-eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision) 
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
-            for ($x = 0; $x < $details['num_questions']; $x++) {
-                        $params = array($details['g_id'], $details['array_eg_gc_title'][$x], $details['array_gc_ta_comment'][$x], 
-                            $details['array_gc_student_comment'][$x], $details['array_gc_max_value'][$x], 
-                            $details['array_gc_is_text'][$x], $details['array_eg_gc_is_extra_credit'][$x], $details['array_gc_order'][$x]);
-            $this->course_db->query("
-INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value, 
-gc_is_text, gc_is_extra_credit, gc_order) 
-VALUES(?, ?, ?, ?, ?, ?, ?, ?)",$params);
-            }
+    public function updateGradeableComponentMark(GradeableComponentMark $mark) {
+        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNote(), $mark->getOrder(), $mark->getId());
 
-        //inserts the data if the gradeable is a checkpoint gradeable.
-        } else if ($details['g_gradeable_type'] === 1) {
-            for ($x = 0; $x < $details['num_checkpoints']; $x++) {
-            $params = array($details['g_id'], $details['array_cp_gc_title'][$x], '','',1,"false",$details['array_cp_gc_is_extra_credit'][$x],$x);
-                $this->course_db->query("
-INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment,
-gc_max_value,gc_is_text,gc_is_extra_credit,gc_order) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
-            }
+        $this->course_db->query("
+UPDATE gradeable_component_mark SET gc_id=?, gcm_points=?, gcm_note=?, gcm_order=?
+WHERE gcm_id=?", $params);
+    }
 
-        //inserts the data if the gradeable is a numeric/text gradeable.
-        } else if ($details['g_gradeable_type'] === 2) {
-            for($x=1; $x<=$details['num_numeric']+$details['num_text']; $x++) {
-                $params = array($details['g_id'], $details['array_nt_gc_title'][$x], '','', $details['array_gc_max_value'][$x],
-                    $details['array_gc_is_text'][$x], $details['array_nt_gc_is_extra_credit'][$x], $x);
-                $this->course_db->query("
-INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value,
-gc_is_text, gc_is_extra_credit, gc_order) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
-            }
-        }
-        $this->course_db->commit();
+    public function deleteGradeableComponentMark(GradeableComponentMark $mark) {
+        $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id=?",array($mark->getId()));
+        $this->course_db->query("DELETE FROM gradeable_component_mark WHERE gcm_id=?", array($mark->getId()));
     }
 
     public function getGradeableData($gradeable_id) {
@@ -1157,125 +1103,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
         }
 
         return $data;
-    }
-    public function updateGradeable($details) {
-        $this->course_db->beginTransaction();
-
-        //updates the data common for all gradeables.
-        $params = array($details['g_title'], $details['g_overall_ta_instructions'], $details['g_use_teams'], $details['g_gradeable_type'],
-                        $details['g_grade_by_registration'], $details['g_grade_start_date'], $details['g_grade_released_date'],
-                        $details['syllabus_bucket'], $details['g_min_grading_group'], $details['g_instructions_url'],
-                        $details['g_ta_view_start_date'] , $details['g_id']);
-        $this->course_db->query("
-UPDATE gradeable SET g_title=?, g_overall_ta_instructions=?, g_team_assignment=?, g_gradeable_type=?, 
-g_grade_by_registration=?, g_grade_start_date=?, g_grade_released_date=?, g_syllabus_bucket=?, 
-g_min_grading_group=?, g_instructions_url=?, g_ta_view_start_date=? WHERE g_id=?", $params);
-
-        //inserts the data if the gradeable is an electronic gradeable.
-        if($details['g_gradeable_type'] === 0) {
-            $params = array($details['eg_submission_open_date'], $details['eg_submission_due_date'],
-                    $details['eg_is_repository'], $details['eg_subdirectory'], $details['use_ta_grading'], $details['eg_config_path'], 
-                    $details['eg_late_days'], $details['eg_precision'], $details['g_id']);
-            $this->course_db->query("
-UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?, 
-eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params); 
-
-            $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($details['g_id']));
-            $num_old_questions = intval($this->course_db->row()['cnt']);
-            for ($x = 0; $x < $details['num_questions']; $x++) {
-                if($x<$num_old_questions) {
-                    $params = array($details['array_eg_gc_title'][$x], $details['array_gc_ta_comment'][$x], $details['array_gc_student_comment'][$x], $details['array_gc_max_value'][$x], $details['array_gc_is_text'][$x], $details['array_eg_gc_is_extra_credit'][$x],        $details['g_id'], $details['array_gc_order'][$x]);
-                    $this->course_db->query("
-UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?,gc_student_comment=?, gc_max_value=?, 
-gc_is_text=?, gc_is_extra_credit=? WHERE g_id=? AND gc_order=?", $params);
-                } else {
-                    $params = array($details['g_id'], $details['array_eg_gc_title'][$x], $details['array_gc_ta_comment'][$x], 
-                    $details['array_gc_student_comment'][$x], $details['array_gc_max_value'][$x], 
-                    $details['array_gc_is_text'][$x], $details['array_eg_gc_is_extra_credit'][$x], $details['array_gc_order'][$x]);
-                    $this->course_db->query("
-INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value, 
-gc_is_text, gc_is_extra_credit, gc_order) 
-VALUES(?, ?, ?, ?, ?, ?, ?, ?)",$params);
-                }
-            }
-            for($i=$details['num_questions']; $i<$num_old_questions; ++$i){
-                //DELETE all grades associated with these gcs
-                $params = array($details['g_id'],$i);
-                $this->course_db->query("SELECT gc_id FROM gradeable_component WHERE g_id=? AND gc_order=?",$params);
-                $row = $this->course_db->row();
-                if (!isset($row['gc_id'])) {
-                    continue;
-                }
-
-                $gc_id = $row['gc_id'];
-                $this->course_db->query("DELETE FROM gradeable_component_data AS gcd WHERE gc_id=?",array($gc_id));
-                $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id=?", array($gc_id));
-            }
-        } else if ($details['g_gradeable_type'] === 1) {
-            $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($details['g_id']));
-            $num_old_checkpoints = intval($this->course_db->row()['cnt']);
-            for ($x = 0; $x < $details['num_checkpoints']; $x++) {
-                if ($x < $num_old_checkpoints) {
-                    $params = array($details['array_cp_gc_title'][$x], '', '', 1, "false", $details['array_cp_gc_is_extra_credit'][$x], $details['g_id'], $x);
-                    $this->course_db->query("
-UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?,
-gc_max_value=?, gc_is_text=?, gc_is_extra_credit=? WHERE g_id=? AND gc_order=?", $params);
-                } else {
-                    $params = array($details['g_id'], $details['array_cp_gc_title'][$x], '','',1,"false",$details['array_cp_gc_is_extra_credit'][$x],$x);
-                $this->course_db->query("
-INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment,
-gc_max_value,gc_is_text,gc_is_extra_credit,gc_order) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
-                }            
-            }
-
-            for($i=$details['num_checkpoints']; $i<$num_old_checkpoints; ++$i){
-                //DELETE all grades associated with these gcs
-                $params = array($details['g_id'],$i);
-                $this->course_db->query("SELECT gc_id FROM gradeable_component WHERE g_id=? AND gc_order=?",$params);
-                $row = $this->course_db->row();
-                if (!isset($row['gc_id'])) {
-                    continue;
-                }
-
-                $gc_id = $row['gc_id'];
-                $this->course_db->query("DELETE FROM gradeable_component_data AS gcd WHERE gc_id=?",array($gc_id));
-                $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id=?", array($gc_id));
-            }
-        } else if ($details['g_gradeable_type'] === 2) {
-            $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($details['g_id']));
-            $num_old_numerics = intval($this->course_db->row()['cnt']);
-            for($x=1; $x<=$details['num_numeric']+$details['num_text']; $x++) {
-                if ($x<=$num_old_numerics) {
-                    $params = array($details['array_nt_gc_title'][$x], '','',$details['array_gc_max_value'][$x], $details['array_gc_is_text'][$x], $details['array_nt_gc_is_extra_credit'][$x], $details['g_id'],$x);
-                    $this->course_db->query("
-UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?, 
-gc_max_value=?, gc_is_text=?, gc_is_extra_credit=? WHERE g_id=? AND gc_order=?", $params);
-                } else {
-                    $params = array($details['g_id'], $details['array_nt_gc_title'][$x], '','', $details['array_gc_max_value'][$x],
-                    $details['array_gc_is_text'][$x], $details['array_nt_gc_is_extra_credit'][$x], $x);
-                $this->course_db->query("
-INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value,
-gc_is_text, gc_is_extra_credit, gc_order) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)",$params);
-                }
-            }
-
-            for($i=$details['num_numeric']+$details['num_text']+1; $i<=$num_old_numerics; ++$i){
-                //DELETE all grades associated with these gcs
-                $params = array($details['g_id'],$i);
-                $this->course_db->query("SELECT gc_id FROM gradeable_component WHERE g_id=? AND gc_order=?",$params);
-                $row = $this->course_db->row();
-                if (!isset($row['gc_id'])) {
-                    continue;
-                }
-
-                $gc_id = $row['gc_id'];
-                $this->course_db->query("DELETE FROM gradeable_component_data AS gcd WHERE gc_id=?",array($gc_id));
-                $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id=?", array($gc_id));
-            }
-        }
-        $this->course_db->commit();
     }
 
     public function updateUserViewedDate(Gradeable $gradeable) {

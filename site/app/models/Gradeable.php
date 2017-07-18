@@ -313,7 +313,9 @@ class Gradeable extends AbstractModel {
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {
                 $component_details = array();
                 foreach ($component_fields as $key) {
-                    $component_details[$key] = $details["array_{$key}"][$i];
+                    if (isset($details["array_{$key}"][$i])) {
+                        $component_details[$key] = $details["array_{$key}"][$i];
+                    }             
                 }
 
 
@@ -852,7 +854,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function updateGradeable() {
-        $this->core->getQueries()->updateGradeable2($this);
+        $this->core->getQueries()->updateGradeable($this);
     }
 
     public function getActiveDaysLate() {
