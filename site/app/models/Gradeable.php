@@ -892,7 +892,7 @@ class Gradeable extends AbstractModel {
         return $this->bucket;
     }
     
-    public function isPeer() }
+    public function isPeer() {
         return $this->peer_grading;
     }
 }
