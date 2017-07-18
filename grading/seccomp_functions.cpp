@@ -125,7 +125,6 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert(my_category);
   }
 
-  std::cout << "My program is " << my_program << std::endl;
   // --------------------------------------------------------------
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/bin/cp") {

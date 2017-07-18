@@ -34,6 +34,7 @@ class DiffViewer {
 
     private $has_difference = false;
     private $difference_file_image = "";
+
     /**
      * @var bool
      */

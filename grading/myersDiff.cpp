@@ -255,7 +255,8 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int aut
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Your image does not match the instructor's.")});
   }
    else{
-         return new TestResults(1.0, {std::make_pair(MESSAGE_SUCCESS, "SUCCESS: Your image was close enough to your instructor's!")});
+    // MESSAGE_NONE, MESSAGE_FAILURE, MESSAGE_WARNING, MESSAGE_SUCCESS, MESSAGE_INFORMATION
+         return new TestResults(1.0, {std::make_pair(MESSAGE_INFORMATION, "SUCCESS: Your image was close enough to your instructor's!")});
   }
 
 
@@ -276,7 +277,7 @@ TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::jso
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
       student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_INFORMATION,"ERROR: Student file too large for grader")});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
   }
 
   bool extraStudentOutputOk = j.value("extra_student_output",false);

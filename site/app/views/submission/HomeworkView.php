@@ -132,8 +132,20 @@ HTML;
 
             for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
 
+                $image_width = $image_height = 0;
+
                 if (isset($gradeable->getTextboxes()[$i]['image']) && $gradeable->getTextboxes()[$i]['image'] != ""){
                     $tester = $gradeable->getTextboxes()[$i]['image'];
+
+                    if(isset($gradeable->getTextboxes()[$i]['image_height'])
+                          && (int)$gradeable->getTextboxes()[$i]['image_height'] > 0){
+                        $image_height = $gradeable->getTextboxes()[$i]['image_height'];
+                    }
+
+                    if(isset($gradeable->getTextboxes()[$i]['image_width'])
+                          && (int)$gradeable->getTextboxes()[$i]['image_width'] > 0){
+                        $image_width = $gradeable->getTextboxes()[$i]['image_width'];
+                    }
                 }
                 else{
                     $tester = array();
@@ -149,7 +161,16 @@ HTML;
                        // Format the image SRC:  data:{mime};base64,{data};
                        $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
                        // insert the sample image data
-                       $return .= '<img src="'.$textBoximagesrc.'">';
+                       $image_display = '<img src="'.$textBoximagesrc.'"';
+
+                       if($image_width > 0){
+                        $image_display .= ' width="'.$image_width.'"';
+                       }
+                       if($image_height > 0){
+                        $image_display .= ' height="'.$image_height.'"';
+                       }
+                       $image_display .= ">";
+                       $return .= $image_display;
                     }
                 }
 
