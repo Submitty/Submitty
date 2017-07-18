@@ -400,10 +400,11 @@ function handleBulk(num_pages, gradeable_id, return_url) {
  * @param csrf_token
  * @param gradeable_id
  * @param student_id
+ * @param is_pdf
+ * @param url
  * @param submitStudentGradeable, a callback function
  */
-function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGradeable) {
-    console.log("AAAAAhhhhhhhhhhhhhhhh");
+function validateStudentId(csrf_token, gradeable_id, student_id, is_pdf, path, count, submitStudentGradeable) {
 
     $("#submit").prop("disabled", true);
 
@@ -425,7 +426,7 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    submitStudentGradeable(student_id, data['highest_version']);
+                    submitStudentGradeable(student_id, data['highest_version'], is_pdf, path, count);
                     return data;
                 }
                 else {
@@ -441,6 +442,49 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
         error: function() {
             $("#submit").prop("disabled", false);
             alert("Something went wrong. Please try again.");
+        }
+    });
+}
+
+function moveSubmission(g_id, csrf_token, user_id, path, count) {
+    //$("#submit").prop("disabled", true);
+
+    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'move', 'gradeable_id': g_id});
+
+    // no version checking bc this is exam only
+
+    var formData = new FormData();
+
+    formData.append('csrf_token', csrf_token);
+    formData.append('user_id', user_id);
+    formData.append('path', path);
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            // $("#submit").prop("disabled", false);
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    $("#bulk_submit_" + count).prop("disabled", true);
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function() {
+            $("#submit").prop("disabled", false);
+            alert("ERROR! Please contact administrator that you could not upload files.");
         }
     });
 }
@@ -461,7 +505,7 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
 function handleSubmission(g_id, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id) {
     $("#submit").prop("disabled", true);
 
-    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload','gradeable_id': g_id});
+    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': g_id});
     return_url = buildUrl({'component': 'student','gradeable_id': g_id});
 
     var message = "";

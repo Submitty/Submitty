@@ -46,6 +46,9 @@ class SubmissionController extends AbstractController {
             case 'bulk':
                 return $this->bulkUpload();
                 break;
+            case 'move':
+                return $this->ajaxMoveSubmission();
+                break;
             case 'verify':
                 return $this->validGradeable();
                 break;
@@ -240,9 +243,186 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($output['message'],false);
         }
 
+        $gradeable->loadResultDetails();
+
         $return = array('success' => true);
         $this->core->getOutput()->renderJson($return);
         return $return;
+    }
+
+    /**
+     * Function for uploading a submission to the server. This should be called via AJAX, saving the result
+     * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     *
+     * @return boolean
+     */
+    private function ajaxMoveSubmission() {
+        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            return $this->uploadResult("Invalid CSRF token.", false);
+        }
+    
+        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        
+        // This checks for an assignment id, and that it's a valid assignment id in that
+        // it corresponds to one that we can access (whether through admin or it being released)
+        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
+            return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
+        }
+
+        if (!isset($_POST['user_id'])) {
+            return $this->uploadResult("Invalid user id.", false);
+        }
+
+        if (!isset($_POST['path'])) {
+            return $this->uploadResult("Invalid path.", false);
+        }
+
+        $original_user_id = $this->core->getUser()->getId();
+        $user_id = $_POST['user_id'];
+        $path = $_POST['path'];
+        if ($user_id == $original_user_id) {
+            $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+        }
+        else {
+            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $user_id);
+        }
+        $gradeable->loadResultDetails();
+        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
+            $gradeable->getId());
+        
+        // copy files from the path to the student's submissions folder
+
+        /*
+         * Perform checks on the following folders (and whether or not they exist):
+         * 1) the assignment folder in the submissions directory
+         * 2) the student's folder in the assignment folder
+         * 3) the version folder in the student folder
+         * 4) the part folders in the version folder in the version folder
+         */
+        if (!FileUtils::createDir($gradeable_path)) {
+            return $this->uploadResult("Failed to make folder for this assignment.", false);
+        }
+        
+        $who_id = $user_id;
+        $team_id = "";
+        if ($gradeable->isTeamAssignment()) {
+            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            if ($team !== null) {
+                $team_id = $team->getId();
+                $who_id = $team_id;
+                $user_id = "";
+            }
+        }
+        
+        $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
+        $this->upload_details['user_path'] = $user_path;
+        if (!FileUtils::createDir($user_path)) {
+                return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
+        }
+    
+        $new_version = $gradeable->getHighestVersion() + 1;
+        $version_path = FileUtils::joinPaths($user_path, $new_version);
+        
+        if (!FileUtils::createDir($version_path)) {
+            return $this->uploadResult("Failed to make folder for the current version.", false);
+        }
+    
+        $this->upload_details['version_path'] = $version_path;
+        $this->upload_details['version'] = $new_version;
+        
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s");
+        $max_size = $gradeable->getMaxSize();
+
+        $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
+            $gradeable->getId(), $path);
+        $type = FileUtils::getMimeType($uploaded_file);
+
+        if (isset($uploaded_file)) {
+            if (!@copy($uploaded_file, FileUtils::joinPaths($version_path,basename($uploaded_file)))) {
+                return $this->uploadResult("Failed to copy uploaded file {$uploaded_file} to current submission.", false);
+            }
+                // Is this really an error we should fail on?
+            // if (!@unlink($uploaded_file)) {
+            //     return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+            // }
+        }
+
+        // DELETE FILES SOMEHOW!!! LATER THO 
+    
+        $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
+        if (!file_exists($settings_file)) {
+            $json = array("active_version" => $new_version,
+                          "history" => array(array("version" => $new_version,
+                                                   "time" => $current_time,
+                                                   "who" => $original_user_id,
+                                                   "type" => "upload")));
+        }
+        else {
+            $json = FileUtils::readJsonFile($settings_file);
+            if ($json === false) {
+                return $this->uploadResult("Failed to open settings file.", false);
+            }
+            $json["active_version"] = $new_version;
+            $json["history"][] = array("version"=> $new_version, "time" => $current_time, "who" => $original_user_id, "type" => "upload");
+        }
+    
+        // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            return $this->uploadResult("Failed to write to settings file.", false);
+        }
+        
+        $this->upload_details['assignment_settings'] = true;
+
+        if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time."\n")) {
+            return $this->uploadResult("Failed to save timestamp file for this submission.", false);
+        }
+
+        $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+            $gradeable->getId(), $who_id, $new_version);
+        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
+            implode("__", $queue_file));
+
+        // create json file...
+        if ($gradeable->isTeamAssignment()) {
+            $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+                                "course" => $this->core->getConfig()->getCourse(),
+                                "gradeable" =>  $gradeable->getId(),
+                                "user" => $user_id,
+                                "team" => $team_id,
+                                "who" => $who_id,
+                                "is_team" => True,
+                                "version" => $new_version);
+        }
+        else {
+            $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+                                "course" => $this->core->getConfig()->getCourse(),
+                                "gradeable" =>  $gradeable->getId(),
+                                "user" => $user_id,
+                                "team" => $team_id,
+                                "who" => $who_id,
+                                "is_team" => False,
+                                "version" => $new_version);
+        }
+        
+
+        if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+            return $this->uploadResult("Failed to create file for grading queue.", false);
+        }
+
+        if($gradeable->isTeamAssignment()) {
+            $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
+        }
+        else {
+            $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
+        }
+
+        if ($user_id == $original_user_id)
+            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
+        else
+            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}";
+            
+
+        return $this->uploadResult("Successfully uploaded files");
     }
 
 

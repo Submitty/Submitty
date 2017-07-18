@@ -4,6 +4,8 @@ namespace app\views\submission;
 
 use app\models\Gradeable;
 use app\views\AbstractView;
+// delete later
+use app\libraries\FileUtils;
 
 class HomeworkView extends AbstractView {
 
@@ -300,21 +302,22 @@ HTML;
 
         $return .= <<<HTML
     <script type="text/javascript">
-        function submitStudentGradeable(student_id, highest_version) {
-            if ($('#radio_student').is(':checked')) {
+        function submitStudentGradeable(student_id, highest_version, is_pdf, path, count) {
+            if (!is_pdf) {
                 handleSubmission("{$gradeable->getId()}",
-                                     {$days_late},
-                                     {$gradeable->getAllowedLateDays()},
-                                     highest_version,
-                                     {$gradeable->getMaxSubmissions()},
-                                     "{$this->core->getCsrfToken()}",
-                                     {$svn_string},
-                                     {$gradeable->getNumTextBoxes()},
-                                     student_id);  
-            };
-            if ($('#radio_bulk').is(':checked')) { 
-                console.log("bbbbbbrrrrrrrrro");
-            };       
+                                         {$days_late},
+                                         {$gradeable->getAllowedLateDays()},
+                                         highest_version,
+                                         {$gradeable->getMaxSubmissions()},
+                                         "{$this->core->getCsrfToken()}",
+                                         {$svn_string},
+                                         {$gradeable->getNumTextBoxes()},
+                                         student_id);
+            }
+            else {
+                moveSubmission("{$gradeable->getId()}","{$this->core->getCsrfToken()}",student_id,path,count);
+            }
+
         }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
@@ -352,7 +355,7 @@ HTML;
                 }
                 // student upload
                 else if (($("#radio_student").is(":checked"))) {
-                    validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, submitStudentGradeable);
+                    validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, false, "", "", submitStudentGradeable);
                 }
                 e.stopPropagation();
             });
@@ -361,10 +364,8 @@ HTML;
 </div>
 HTML;
         if ($this->core->getUser()->accessAdmin()) {
-            $pdf_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", 
-                $gradeable->getId());
 
-            $all_directories = FileUtils::getAllFiles($pdf_path);
+            $all_directories = $gradeable->getUploadsFiles();
 
             if (count($all_directories) > 0) {
 
@@ -389,13 +390,13 @@ HTML;
                 foreach ($all_directories as $timestamp => $content) {
                     $files = $content["files"];
 
-                    foreach ($files as $filename => $content2) {
-                        $name = $content2["name"];
-                        $path = $content2["path"];
-                        $relative_name = $content2["relative_name"];
-                        if (strpos($filename, 'cover') == false)
-                            // $count_array[$count] = $path;
+                    foreach ($files as $filename => $details) {
+                        $name = $details["name"];
+                        $path = $details["path"];
+                        if (strpos($filename, 'cover') == false) {
+                            $count_array[$count] = $timestamp."/".$name;
                             continue;
+                        }
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$name."&path=".$path;
                         $return .= <<<HTML
             <tr>
@@ -405,6 +406,7 @@ HTML;
                     <object data="{$url}" type="application/pdf" width="100%" height="300">
                         alt : <a href="{$url}">pdf.pdf</a>
                     </object>
+
                 </td>
                 <td style="vertical-align: middle">
                     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
@@ -417,18 +419,31 @@ HTML;
 HTML;
                     $count++;
                     }
+                $count_array_json = json_encode($count_array);
                 }
+//                 foreach ($count_array as $c => $p) {
+//                     $return.= <<<HTML
+//             <tr>
+//                 <td>{$p}</td>
+//             </tr>
+// HTML;
+//                 }
                 $return .= <<<HTML
 <script type="text/javascript">
     $(document).ready(function() {
         $("#bulkForm button").click(function(e){
             var btn = $(document.activeElement);
             var id = btn.attr("id");
-            count = id.substring(id.length-1, id.length);
-            user_id = $("#bulk_student_id_"+count).val()
-            //console.log(user_id);
+            var count = id.substring(12, id.length);
+            var user_id = $("#bulk_student_id_"+count).val();
+            var js_count_array = $count_array_json;
+            // console.log(count);
+            // console.log(user_id);
+            // console.log(js_count_array[count]);
+            var path = js_count_array[count];
             // once submitted, make that button hidden?
-            validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, submitStudentGradeable);
+
+            validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, submitStudentGradeable);
         });
     });
 </script>

@@ -193,8 +193,8 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_
 #               drwxr-s---       $HWCRON_USER       ta_www_group    results/
 #               drwxr-s---       $HWCRON_USER       ta_www_group    checkout/
 #               drwxr-s---       $HWCRON_USER       ta_www_group    uploads/
-#               drwxr-s---       $HWPHP_USER       ta_www_group    uploads/bulk_pdf/
-#               drwxr-s---       $HWCGI_USER       ta_www_group    uploads/split_pdf/
+#               drwxr-s---       $HWPHP_USER        ta_www_group    uploads/bulk_pdf/
+#               drwxr-s---       $HWCGI_USER        ta_www_group    uploads/split_pdf/
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/submissions
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/config_upload
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/results
