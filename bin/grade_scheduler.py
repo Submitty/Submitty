@@ -8,7 +8,6 @@ import grade_items_logging
 import grade_item
 import fcntl
 import glob
-#from multiprocessing import current_process, Pool, Queue, Manager
 import multiprocessing
 import time
 import random
@@ -35,15 +34,22 @@ class NewFileHandler(FileSystemEventHandler):
     Simple handler for watchdog that watches for new files
     """
 
-    def __init__(self, queue):
+    def __init__(self, queue,new_job_event,overall_lock):
         super(FileSystemEventHandler, self).__init__()
         self.queue = queue
+        self.new_job_event = new_job_event
+        self.overall_lock = overall_lock
 
     def on_created(self, event):
         if isinstance(event, FileCreatedEvent):
             if os.path.basename(event.src_path).startswith("GRADING_") is False:
+                # When a new queue file is created, add that job to
+                # the queue and set the event that wakes up any
+                # processes waiting on this event.
+                self.overall_lock.acquire()
                 self.queue.put(event.src_path)
-
+                self.new_job_event.set()
+                self.overall_lock.release()
 
 # ==================================================================================
 def initialize(untrusted_queue):
@@ -73,95 +79,72 @@ def runner(queue_file):
     directory = os.path.dirname(os.path.realpath(queue_file))
     name = os.path.basename(os.path.realpath(queue_file))
     grading_file = os.path.join(directory, "GRADING_" + name)
-    # noinspection PyUnresolvedReferences
 
     open(os.path.join(grading_file), "w").close()
     untrusted = multiprocessing.current_process().untrusted
     grade_item.just_grade_item(my_dir, queue_file, untrusted)
 
+    # note: not necessary to acquire lock for these statements, but
+    # make sure you remove the queue file, then the grading file
     os.remove(queue_file)
     os.remove(grading_file)
-
-
-def job_error_callback(exception):
-    """
-    Callback for if our callable was to raise an exception. We would want to implement this
-    function so that it would clean up anything left behind when a queued task failed to run as
-    well as log the exception we got, while also removing the errored queue file from the pool.
-    Because this is not designed to run as a cron task, we would probably have to implement
-    sending an email here as well.
-
-    :param exception:
-    """
-
-    grade_items_logging.log_message(False,"","","","","job error callback")
-
-    pass
-
-
-
-def job_callback(result):
-    """
-    Callback for our job when it successfully runs. We would handle killing off any
-    runaway aspects of the grading job (such as forked child processes). We would also
-    move cleaning up the queue files here as well (just have to return the filename from runner).
-
-    :param result:
-    """
-
-    grade_items_logging.log_message(False,"","","","","job callback")
-
-    pass
 
 
 def populate_queue(queue, folder):
     """
     Populate a queue with all files in folder. We first scan the folder to check for any
-    "GRADING_*" and clean them up, and then add the remaining files (except for any that
-    start with '.') to our queue.
+    "GRADING_*" and clean them up, and then add the remaining files to the queue, sorted
+    by creation time.
 
     :param queue: multiprocessing.queues.Queue
     :param folder: string representing the path to the folder to add files from
     """
+
     for file_path in glob.glob(os.path.join(folder, "GRADING_*")):
-        # We would add a real cleanup routine here for Submitty
-        print("Cleanup " + file_path)
+        grade_items_logging.log_message(False,"","","","","Remove old queue file: " + file_path)
         os.remove(file_path)
 
-    # TODO: We should use os.scandir() here and get the timestamp of the file so that we can
-    # generate a sorted list (by timestamp) and then put the files into the queue in that order
-    for filename in os.listdir(folder):
-        if not filename.startswith("."):
-            queue.put(os.path.join(folder, filename))
+    # Grab all the files currently in the folder, sorted by creation
+    # time, and put them in the queue to be graded
+    files = glob.glob(os.path.join(folder, "*"))
+    files.sort(key=os.path.getctime)
+    for f in files:
+        queue.put(os.path.join(folder, f))
+
 
 # ==================================================================================
 # ==================================================================================
-def pick_a_job(interactive_queue,batch_queue):
+def worker_process(interactive_queue,batch_queue,new_job_event,overall_lock):
+    """
+    Each worker process spins in a loop, acquiring the overall lock to
+    check the queues, prioritizing interactive jobs over batch jobs.
+    If no jobs are available, the worker waits on an event editing one
+    of the queues.
+    """
+
     while True:
-        pid = os.getpid()
-        job = None
-        # We have to block around trying to get elements from both queues (with preference
-        # on interactive), so we cannot block within the get() method for one queue.
-        # this runs the process async (non-blocking) so we rely on the callbacks/prints
-        # for knowing when this particular function finishes and the process becomes
-        # available again
-        try:
-            if interactive_queue.empty() is False:
-                job = interactive_queue.get()
-            elif batch_queue.empty() is False:
-                job = batch_queue.get()
-            else:
-                # FIXME: would be better to wait on queue edit event
-                time.sleep(1)
-        # protect on the cases where empty() was not reliable and returned incorrectly
-        except Empty:
-            pass
-        if not job == None:
+        overall_lock.acquire()
+        if not interactive_queue.empty():
+            job = interactive_queue.get()
+            overall_lock.release()
             runner(job)
+            continue
+        elif not batch_queue.empty():
+            job = batch_queue.get()
+            overall_lock.release()
+            runner(job)
+            continue
+        else:
+            new_job_event.clear()
+            overall_lock.release()
+            pid = os.getpid()
+            print ("pid ",pid,": no job for now, going to wait 10 seconds")
+            new_job_event.wait(10)
+
 
 # ==================================================================================
 # ==================================================================================
-def main():
+def launch_workers(num_workers):
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
@@ -169,34 +152,41 @@ def main():
 
     grade_items_logging.log_message(False,"","","","","grade_scheduler.py launched")
 
+    # prepare a list of untrusted users to be used by the workers
     untrusted_users = multiprocessing.Queue()
-    for i in range(MAX_INSTANCES_OF_GRADE_STUDENTS_int):
+    for i in range(num_workers):
         untrusted_users.put("untrusted" + str(i).zfill(2))
 
-    with multiprocessing.Pool(processes=MAX_INSTANCES_OF_GRADE_STUDENTS_int, initializer=initialize,
+    with multiprocessing.Pool(processes=num_workers, initializer=initialize,
                               initargs=(untrusted_users,)) as pool:
+
+        # Manager allows "shared memory" with the worker process
         m = multiprocessing.Manager()
+
         # Set up our queues that we're going to monitor for new jobs to run on
         interactive_queue = m.Queue()
         batch_queue = m.Queue()
         populate_queue(interactive_queue, INTERACTIVE_QUEUE)
         populate_queue(batch_queue, BATCH_QUEUE)
 
-        interactive_handler = NewFileHandler(interactive_queue)
-        batch_handler = NewFileHandler(batch_queue)
+        # the workers will wait on event if the queues are exhausted
+        new_job_event = m.Event()
+
+        # this lock will be used to edit the queue or new job event
+        overall_lock = m.Lock()
 
         # Setup watchdog observer that will watch the folders and run the handler on any
         # FileSystemEvents. This runs in a thread automatically.
+        interactive_handler = NewFileHandler(interactive_queue,new_job_event,overall_lock)
+        batch_handler = NewFileHandler(batch_queue,new_job_event,overall_lock)
         observer = Observer()
-        observer.schedule(event_handler=interactive_handler, path=INTERACTIVE_QUEUE,
-                          recursive=False)
+        observer.schedule(event_handler=interactive_handler, path=INTERACTIVE_QUEUE, recursive=False)
         observer.schedule(event_handler=batch_handler, path=BATCH_QUEUE, recursive=False)
         observer.start()
 
-        for i in range(0,MAX_INSTANCES_OF_GRADE_STUDENTS_int):
-            pool.apply_async(func=pick_a_job, args=(interactive_queue,batch_queue),
-                             callback=job_callback,
-                             error_callback=job_error_callback)
+        # launch the worker threads
+        for i in range(0,num_workers):
+            pool.apply_async(func=worker_process, args=(interactive_queue,batch_queue,new_job_event,overall_lock))
 
         time.sleep(10)
         #except KeyboardInterrupt:
@@ -212,4 +202,5 @@ def main():
 
 # ==================================================================================
 if __name__ == "__main__":
-    main()
+    num_workers = MAX_INSTANCES_OF_GRADE_STUDENTS_int
+    launch_workers(num_workers)
