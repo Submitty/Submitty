@@ -25,7 +25,7 @@ def log_message(is_batch,which_untrusted,jobname,timelabel,elapsed_time,message)
     with open(autograding_log_file,'a') as myfile:
         fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
         print ("%s | %6s | %5s | %11s | %-75s | %-6s %5s %3s | %s"
-               % (easy_to_read_date,parent_pid,batch_string,which_untrusted,
+               % (easy_to_read_date,my_pid,batch_string,which_untrusted,
                   abbrev_jobname,timelabel,elapsed_time,time_unit,message),
                file=myfile)
         fcntl.flock(myfile,fcntl.LOCK_UN)

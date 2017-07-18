@@ -7,23 +7,20 @@ import submitty_utils
 import grade_items_logging
 import grade_item
 import fcntl
-
-
-
-import os
 import glob
 from multiprocessing import current_process, Pool, Queue
 import time
 import random
-
 from queue import Empty
-
 from watchdog.observers import Observer
 from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
 
-
+# ==================================================================================
 # these variables will be replaced by INSTALL_SUBMITTY.sh
+MAX_INSTANCES_OF_GRADE_STUDENTS_string = "__INSTALL__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__"
+MAX_INSTANCES_OF_GRADE_STUDENTS_int    = int(MAX_INSTANCES_OF_GRADE_STUDENTS_string)
+
 AUTOGRADING_LOG_PATH="__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
@@ -31,9 +28,7 @@ INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
 BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 
 
-GRADERS = 1
-
-
+# ==================================================================================
 class NewFileHandler(FileSystemEventHandler):
     """
     Simple handler for watchdog that watches for new files
@@ -49,6 +44,7 @@ class NewFileHandler(FileSystemEventHandler):
                 self.queue.put(event.src_path)
 
 
+# ==================================================================================
 def initialize(untrusted_queue):
     """
     Initializer function for all our processes. We get one untrusted user off our queue which
@@ -72,23 +68,19 @@ def runner(queue_file):
     """
 
     my_dir,my_file=os.path.split(queue_file)
+    pid = os.getpid()
+    directory = os.path.dirname(os.path.realpath(queue_file))
+    name = os.path.basename(os.path.realpath(queue_file))
+    grading_file = os.path.join(directory, "GRADING_" + name)
+    # noinspection PyUnresolvedReferences
 
+    open(os.path.join(grading_file), "w").close()
     untrusted = current_process().untrusted
     grade_item.just_grade_item(my_dir, queue_file, untrusted)
 
-    pid = os.getpid()
-    directory = os.path.dirname(os.path.realpath(queue_file))
-    queue = "interactive" if directory.endswith("to_be_graded_interactive") else "batch"
-    name = os.path.basename(os.path.realpath(queue_file))
-    grading_file = os.path.join(directory, "GRADING_" + name)
-    sleep = random.randint(1, 10)
-    # noinspection PyUnresolvedReferences
-
-    #print("Running job (pid: {}) on {} ({}) for {} seconds by {}.".format(pid, name, queue,
-    #                                                                      sleep, untrusted))
-    open(os.path.join(grading_file), "w").close()
     os.remove(queue_file)
     os.remove(grading_file)
+
 
 def job_error_callback(exception):
     """
@@ -100,6 +92,9 @@ def job_error_callback(exception):
 
     :param exception:
     """
+
+    grade_items_logging.log_message(False,"","","","","job error callback")
+
     pass
 
 
@@ -112,6 +107,9 @@ def job_callback(result):
 
     :param result:
     """
+
+    grade_items_logging.log_message(False,"","","","","job callback")
+
     pass
 
 
@@ -136,8 +134,6 @@ def populate_queue(queue, folder):
             queue.put(os.path.join(folder, filename))
 
 
-
-
 # ==================================================================================
 # ==================================================================================
 def main():
@@ -155,7 +151,7 @@ def main():
     populate_queue(batch_queue, BATCH_QUEUE)
 
     untrusted_users = Queue()
-    for i in range(GRADERS):
+    for i in range(MAX_INSTANCES_OF_GRADE_STUDENTS_int):
         untrusted_users.put("untrusted" + str(i).zfill(2))
 
     interactive_handler = NewFileHandler(interactive_queue)
@@ -169,8 +165,12 @@ def main():
     observer.schedule(event_handler=batch_handler, path=BATCH_QUEUE, recursive=False)
     observer.start()
 
+    print ("max instances",MAX_INSTANCES_OF_GRADE_STUDENTS_string,
+           MAX_INSTANCES_OF_GRADE_STUDENTS_int)
+
+
     print("watching directory...")
-    with Pool(processes=GRADERS, initializer=initialize, initargs=(untrusted_users,)) as pool:
+    with Pool(processes=MAX_INSTANCES_OF_GRADE_STUDENTS_int, initializer=initialize, initargs=(untrusted_users,)) as pool:
         print("pool created...")
         try:
             while True:
@@ -178,6 +178,8 @@ def main():
                 # We have to block around trying to get elements from both queues (with preference
                 # on interactive), so we cannot block within the get() method for one queue.
                 while job is None:
+                    pid = os.getpid()
+                    print (pid,"in loop   iq=",interactive_queue.qsize(),"  bq=",batch_queue.qsize())
                     try:
                         if interactive_queue.empty() is False:
                             job = interactive_queue.get()

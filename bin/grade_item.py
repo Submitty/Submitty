@@ -129,6 +129,8 @@ def untrusted_grant_read_access(which_untrusted,my_dir):
 # ==================================================================================
 def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
+    my_pid = os.getpid()
+
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
@@ -140,7 +142,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                    "submissions",obj["gradeable"],obj["who"],str(obj["version"]))
     if not os.path.isdir(submission_path):
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
-    print ("GRADE THIS", submission_path)
+    print ("pid",my_pid,"GRADE THIS", submission_path)
 
     is_batch_job = next_directory==BATCH_QUEUE
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
@@ -245,9 +247,11 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                           stdout=logfile)
 
     if compile_success == 0:
-        print ("NEW COMPILATION OK")
+        print ("pid",my_pid,"COMPILATION OK")
     else:
-        print ("NEW COMPILATION FAILURE")
+        print ("pid",my_pid,"COMPILATION FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
+
 
     untrusted_grant_read_access(which_untrusted,tmp_compilation)
         
@@ -306,9 +310,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
 
     if runner_success == 0:
-        print ("NEW RUNNER OK")
+        print ("pid",my_pid,"RUNNER OK")
     else:
-        print ("NEW RUNNER FAILURE")
+        print ("pid",my_pid,"RUNNER FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","RUNNER FAILURE")
 
     untrusted_grant_read_access(which_untrusted,tmp_work)
 
@@ -355,10 +360,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                             stdout=logfile)
 
     if validator_success == 0:
-        print ("NEW VALIDATOR OK")
+        print ("pid",my_pid,"VALIDATOR OK")
     else:
-        print ("NEW VALIDATOR FAILURE")
-
+        print ("pid",my_pid,"VALIDATOR FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","VALIDATION FAILURE")
 
     untrusted_grant_read_access(which_untrusted,tmp_work)
 
@@ -458,7 +463,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                      "true" if obj["is_team"] else "false",
                      str(obj["version"])])
 
-    print ("finished grading ", next_to_grade, " in ", gradingtime, " seconds")
+    print ("pid",my_pid,"finished grading ", next_to_grade, " in ", gradingtime, " seconds")
 
     grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",gradingtime,grade_result)
 
