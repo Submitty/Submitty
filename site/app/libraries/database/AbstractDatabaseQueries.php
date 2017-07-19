@@ -270,7 +270,7 @@ abstract class AbstractDatabaseQueries {
      *
      * @param array $details
      */
-    abstract public function createNewGradeable($details);
+    abstract public function createNewGradeable(Gradeable $gradeable);
 
     /**
      * Gets an array that contains all revelant data in a gradeable.
@@ -286,7 +286,7 @@ abstract class AbstractDatabaseQueries {
      *
      * @param array $details
      */
-    abstract public function updateGradeable($details);
+    abstract public function updateGradeable(Gradeable $gradeable);
 
     /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
