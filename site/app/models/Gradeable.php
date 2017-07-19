@@ -103,6 +103,7 @@ class Gradeable extends AbstractModel {
     /** @property @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
 
+    /** @property @var bool */
     protected $ta_grades_released = false;
 
     /** @property @var bool Should the gradeable be graded by registration section (or by rotating section) */
@@ -245,8 +246,11 @@ class Gradeable extends AbstractModel {
 
     protected $user_viewed_date = null;
 
-    public function __construct(Core $core, $details, User $user = null) {
+    public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
+        if(!isset($details['g_id'])) {
+            return;
+        }
         $this->id = $details['g_id'];
 
         $this->user = ($user === null) ? $this->core->getUser() : $user;
@@ -271,6 +275,7 @@ class Gradeable extends AbstractModel {
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
+            $this->config_path = $details['eg_config_path'];
             if (isset($details['active_version']) && $details['active_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
@@ -294,12 +299,12 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
+                            'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
                             'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order');
+                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
@@ -313,7 +318,9 @@ class Gradeable extends AbstractModel {
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {
                 $component_details = array();
                 foreach ($component_fields as $key) {
-                    $component_details[$key] = $details["array_{$key}"][$i];
+                    if (isset($details["array_{$key}"][$i])) {
+                        $component_details[$key] = $details["array_{$key}"][$i];
+                    }             
                 }
 
 
@@ -852,7 +859,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function updateGradeable() {
-        $this->core->getQueries()->updateGradeable2($this);
+        $this->core->getQueries()->updateGradeable($this);
     }
 
     public function getActiveDaysLate() {
