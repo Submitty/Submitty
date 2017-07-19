@@ -4,6 +4,7 @@ namespace app\views;
 
 use app\models\Gradeable;
 use app\views\AbstractView;
+use app\libraries\FileUtils;
 
 class AutogradingView extends AbstractView {
 
@@ -189,7 +190,7 @@ HTML;
                     $return .= <<<HTML
             <div class='diff-element'>
 HTML;
-                    if ($diff_viewer->hasDisplayExpected()) {
+                    if ($diff_viewer->hasDisplayExpected() || $diff_viewer->getActualImageFilename() != "") {
                         $title = "Student ";
                     }
                     if ($diff_viewer->hasDisplayActual()) {
@@ -216,7 +217,7 @@ HTML;
 HTML;
                     foreach ($autocheck->getMessages() as $message) {
                         $type_class = "black-message";
-                        if ($message['type'] == "information") $type_class = "black-message";
+                        if ($message['type'] == "information") $type_class = "blue-message";
                         else if ($message['type'] == "success") $type_class = "green-message";
                         else if ($message['type'] == "failure") $type_class = "red-message";
                         else if ($message['type'] == "warning") $type_class = "yellow-message";
@@ -234,7 +235,8 @@ HTML;
                             // Format the image SRC:  data:{mime};base64,{data};
                             $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
                             // insert the sample image data
-                            $return .= '<img src="'.$myimagesrc.'">';
+                            
+                            $return .= '<img src="'.$myimagesrc.'" img style="border:2px solid black">';
                         }
                     }
                     else if ($diff_viewer->hasDisplayActual()) {
@@ -246,23 +248,49 @@ HTML;
                 </div>
             </div>
 HTML;
-                    if ($diff_viewer->hasDisplayExpected()) {
-                        $visible = "visible";
-                        $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\t")); 
-                        $less_than_30 = true;
-                        $arr_count = count($tmp_array_string);
-                        for ($x = 0; $x < $arr_count; $x++) {
-                            if(strlen($tmp_array_string[$x]) > 30) {
-                                $less_than_30 = false;
-                                $x = $arr_count;
-                            }
-                        }
-                        if (substr_count($diff_viewer->getDisplayExpected(), 'line_number') < 10 && $less_than_30) {
-                            $visible = "hidden";
-                        }
-                        $title = "Expected ";
-                        $title .= $description;
+                    $myExpectedimage = $diff_viewer->getExpectedImageFilename();
+                    if($myExpectedimage != "")
+                    {
                         $return .= <<<HTML
+            <div class='diff-element'>
+                <h4>Expected {$description}</h4>
+HTML;
+                        for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
+                            $return .= <<<HTML
+                    <br />
+HTML;
+                        }
+                        // borrowed from file-display.php
+                        $content_type = FileUtils::getContentType($myExpectedimage);
+                        if (substr($content_type, 0, 5) === "image") {
+                           // Read image path, convert to base64 encoding
+                           $expectedImageData = base64_encode(file_get_contents($myExpectedimage));
+                           // Format the image SRC:  data:{mime};base64,{data};
+                           $myExpectedimagesrc = 'data: '.mime_content_type($myExpectedimage).';charset=utf-8;base64,'.$expectedImageData;
+                           // insert the sample image data
+                           $return .= '<img src="'.$myExpectedimagesrc.'" img style="border:2px solid black">';
+                        }
+                    $return .= <<<HTML
+            </div>
+HTML;
+                    }
+                    elseif ($diff_viewer->hasDisplayExpected()) {
+                    $visible = "visible";
+                    $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\t")); 
+                    $less_than_30 = true;
+                    $arr_count = count($tmp_array_string);
+                    for ($x = 0; $x < $arr_count; $x++) {
+                        if(strlen($tmp_array_string[$x]) > 30) {
+                            $less_than_30 = false;
+                            $x = $arr_count;
+                        }
+                    }
+                    if (substr_count($diff_viewer->getDisplayExpected(), 'line_number') < 10 && $less_than_30) {
+                        $visible = "hidden";
+                    }
+                    $title = "Expected ";
+                    $title .= $description;
+                    $return .= <<<HTML
             <div class='diff-element'>
                 <h4>{$title} <span onclick="openPopUp('{$popup_css_file}', '{$title}', {$count}, {$autocheck_cnt}, 1)" style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
                 <div id="container_{$count}_{$autocheck_cnt}_1">
@@ -278,6 +306,33 @@ HTML;
             </div>
 HTML;
                     }
+                    $myDifferenceImage = $diff_viewer->getDifferenceFilename();
+                    if($myDifferenceImage != "")
+                    {
+                        $return .= <<<HTML
+            <div class='diff-element'>
+                    <h4>Difference {$description}</h4>
+HTML;
+                    for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
+                        $return .= <<<HTML
+                <br />
+HTML;
+                        }
+                        // borrowed from file-display.php
+                        $content_type = FileUtils::getContentType($myDifferenceImage);
+                        if (substr($content_type, 0, 5) === "image") {
+                           // Read image path, convert to base64 encoding
+                           $differenceImageData = base64_encode(file_get_contents($myDifferenceImage));
+                           // Format the image SRC:  data:{mime};base64,{data};
+                           $differenceImagesrc = 'data: '.mime_content_type($myDifferenceImage).';charset=utf-8;base64,'.$differenceImageData;
+                           // insert the sample image data
+                           $return .= '<img src="'.$differenceImagesrc.'" img style="border:2px solid black">';
+                        }
+                    $return .= <<<HTML
+            </div>
+HTML;
+                    }
+
                     $return .= <<<HTML
         </div>
 HTML;
