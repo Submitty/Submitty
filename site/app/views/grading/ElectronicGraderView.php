@@ -381,12 +381,12 @@ HTML;
 HTML;
         if ($gradeable->getActiveVersion() === 0){
             $return .= <<<HTML
-        <h3>No Submission</h3>
+        <h4>No Submission</h4>
 HTML;
         }
         else if (count($gradeable->getTestcases()) === 0) {
             $return .= <<<HTML
-        <h3>No Autograding For This Assignment</h3>
+        <h4>No Autograding For This Assignment</h4>
 HTML;
         }
         else{
@@ -592,7 +592,7 @@ HTML;
             $message = htmlentities($question->getTitle());
             $message = "<b>{$message}</b>";
             if ($question->getGradedVersion() != -1) {
-                $message .= "  " . "Before submitting regrade, please ensure that comments from version " . $question->getGradedVersion() . " still apply.";
+                $message .= "  " . "Before submitting regrade, please edit or ensure that comments from version " . $question->getGradedVersion() . " still apply.";
             }
             $note = htmlentities($question->getTaComment());
             if ($note != "") {
