@@ -81,10 +81,11 @@ def main():
                 SUBMITTY_DATA_DIR, directory))
     use_courses = args.course
 
-    # We have to kill crontab and all running grade students processes as otherwise we end up with the process
+    # We have to kill crontab and all running grading scheduler processes as otherwise we end up with the process
     # grabbing the homework files that we are inserting before we're ready to (and permission errors exist) which
     # ends up with just having a ton of build failures. Better to wait on grading any homeworks until we've done
     # all steps of setting up a course.
+    print ("pausing the autograding scheduling daemon")
     os.system("crontab -u hwcron -l > /tmp/hwcron_cron_backup.txt")
     os.system("crontab -u hwcron -r")
     os.system("systemctl stop submitty_grading_scheduler")
@@ -201,8 +202,11 @@ def main():
         if courses[course].make_customization:
             courses[course].make_course_json()
 
+    # restart the autograding daemon
+    print ("restarting the autograding scheduling daemon")
     os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
     os.system("rm /tmp/hwcron_cron_backup.txt")
+    os.system("systemctl restart submitty_grading_scheduler")
 
 def generate_random_user_id(length):
     id_base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
