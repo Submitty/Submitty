@@ -4,6 +4,7 @@ namespace app\views\submission;
 
 use app\models\Gradeable;
 use app\views\AbstractView;
+use app\libraries\FileUtils;
 
 class HomeworkView extends AbstractView {
 
@@ -128,8 +129,50 @@ HTML;
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
 
-
             for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
+
+                $image_width = $image_height = 0;
+
+                if (isset($gradeable->getTextboxes()[$i]['images']) && $gradeable->getTextboxes()[$i]['images'] != ""){
+                    $tester = $gradeable->getTextboxes()[$i]['images'];
+                }
+                else{
+                    $tester = array();
+                }
+
+                //
+                foreach((array)$tester as $currImage){
+                    $currImageName = $currImage["image_name"];
+                    $imgPath = $this->core->getConfig()->getCoursePath() . "/test_input/" . $gradeable->getName() . "/".$currImageName;
+                    $content_type = FileUtils::getContentType($imgPath);
+                    if (substr($content_type, 0, 5) === "image") {
+                       // Read image path, convert to base64 encoding
+                       $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                       // Format the image SRC:  data:{mime};base64,{data};
+                       $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
+                       // insert the sample image data
+
+                        if(isset($currImage['image_height']) && (int)$currImage['image_height'] > 0){
+                            $image_height = $currImage['image_height'];
+                        }
+
+                        if(isset($currImage['image_width']) && (int)$currImage['image_width'] > 0){
+                            $image_width = $currImage['image_width'];
+                        }
+
+                       $image_display = '<img src="'.$textBoximagesrc.'"';
+
+                       if($image_width > 0){
+                        $image_display .= ' width="'.$image_width.'"';
+                       }
+                       if($image_height > 0){
+                        $image_display .= ' height="'.$image_height.'"';
+                       }
+                       $image_display .= ">";
+                       $return .= $image_display;
+                    }
+                }
+
                 $label = $gradeable->getTextboxes()[$i]['label'];
                 $rows = $gradeable->getTextboxes()[$i]['rows'];
                 if ($rows == 0) {
@@ -552,7 +595,6 @@ HTML;
                     }
 
                 }
-
                 if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
                     if ($gradeable->beingGradedInteractiveQueue() ||
                         (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
