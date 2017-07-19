@@ -68,8 +68,14 @@ HTML;
                 Normal Submission
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
+HTML;
+            if ($gradeable->getNumParts() == 1) {
+                $return .= <<<HTML
             <input type='radio' id="radio_bulk" name="submission_type">
                 Bulk Upload
+HTML;
+            }
+            $return .= <<<HTML
         </div>
         <div id="user_id_input" style="display: none">
             <div class="sub">
