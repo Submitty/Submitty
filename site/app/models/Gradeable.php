@@ -431,6 +431,7 @@ class Gradeable extends AbstractModel {
 
         for ($i = 0; $i < $num_textboxes; $i++) {
           $this->textboxes[$i] = $details['textboxes'][$i];
+          // if(isset($detailes['']))
         }
 
         if (isset($details['testcases'])) {
