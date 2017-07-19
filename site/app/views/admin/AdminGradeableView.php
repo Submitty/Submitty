@@ -402,11 +402,11 @@ HTML;
                 if((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; $display_peer_checkboxes='style="display:none"'; }
         $html_output .= <<<HTML
  /> No <br />
+                <div class="peer_input" style="display:none;">How many people should each person grade? <input style='width: 50px' type='text' name="point_precision" value="3" class='float_val' /></div>
                 Point precision (for TA grading): 
                 <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
                 <br /> 
                 
-
                 <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
                         <tr>
@@ -505,7 +505,7 @@ HTML;
                 Deduction/Addition:&nbsp;&nbsp;<input type="radio" id="deduct_radio_ded_id_{$num}" name="deduct_radio_{$num}" value="deduction" onclick="onDeduction(this);" {$ded_checked}> <i class="fa fa-minus-square" aria-hidden="true"> </i>
                 <input type="radio" id="deduct_radio_add_id_{$num}" name="deduct_radio_{$num}" value="addition" onclick="onAddition(this);" {$add_checked}> <i class="fa fa-plus-square" aria-hidden="true"> </i>
                 <br />
-                <div id="peer_checkbox_{$num}" class="peer_checkbox" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
+                <div id="peer_checkbox_{$num}" class="peer_input" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
 HTML;
         if ($num > 1){
         $html_output .= <<<HTML
@@ -1122,11 +1122,11 @@ function createCrossBrowserJSDate(val){
         });
 
         $('input:radio[name="peer_grading"]').change(function() {
-            $('.peer_checkbox').hide();
+            $('.peer_input').hide();
             $('#peer_averaging_scheme').hide();
             if ($(this).is(':checked')) {
                 if($(this).val() == 'yes') {
-                    $('.peer_checkbox').show();
+                    $('.peer_input').show();
                     $('#peer_averaging_scheme').show();
                 }
             }
@@ -1718,7 +1718,7 @@ $('#gradeable-form').on('submit', function(e){
                 Deduction/Addition:&nbsp;&nbsp;<input type="radio" id="deduct_radio_ded_id_'+newQ+'" name="deduct_radio_'+newQ+'" value="deduction" onclick="onDeduction(this);" checked> <i class="fa fa-minus-square" aria-hidden="true"> </i> \
                 <input type="radio" id="deduct_radio_add_id_'+newQ+'" name="deduct_radio_'+newQ+'" value="addition" onclick="onAddition(this);"> <i class="fa fa-plus-square" aria-hidden="true"> </i> \
                 <br /> \
-                <div id="peer_checkbox_'+newQ+'" class="peer_checkbox" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
+                <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <i class="fa fa-times" aria-hidden="true"></i></a> \
                 <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \
@@ -1931,6 +1931,27 @@ $('#gradeable-form').on('submit', function(e){
         var checkRegister = document.getElementById('registration-section').checked;
         var checkRotate = document.getElementById('rotating-section').checked;
         var all_gradeable_ids = $js_gradeables_array;
+        if($('#peer_yes_radio').is(':checked')) {
+            var found_peer_component = false;
+            var found_reg_component = false;
+            $("input[name^='peer_component']").each(function() {
+                console.log(this);
+                if (this.checked) {
+                    found_peer_component = true;
+                }
+                else {
+                    found_reg_component = true;
+                }
+            });
+            if (!found_peer_component) {
+                alert("At least one component must be for peer_grading");
+                return false;
+            }
+            if (!found_reg_component) {
+                alert("At least one component must be for ta grading");
+                return false;
+            }
+        }
         if (!($edit)) {
             var x;
             for (x = 0; x < all_gradeable_ids.length; x++) {

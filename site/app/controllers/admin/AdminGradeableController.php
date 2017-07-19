@@ -197,7 +197,7 @@ class AdminGradeableController extends AbstractController {
                 $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
                 $gradeable_component->setIsExtraCredit($extra_credit);
                 $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='yes') ? true : false;
-                $old_component->setPeerGrading($peer_grading_component);
+                $gradeable_component->setPeerGrading($peer_grading_component);
                 $gradeable_component->setOrder($x);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }  
