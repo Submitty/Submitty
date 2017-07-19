@@ -221,8 +221,12 @@ HTML;
         <tbody id="section-{$section}" data-numnumeric="{$num_numeric}" data-numtext="{$num_text}" data-compids = "{$component_ids}">
 HTML;
             }
+            $style = "";
+            if ($gradeable_row->getUser()->accessGrading()) {
+                $style = "style='background: #7bd0f7;'";
+            }
             $return .= <<<HTML
-            <tr data-gradeable="{$gradeable->getId()}" data-user="{$gradeable_row->getUser()->getId()}" data-row="{$row}"> 
+            <tr data-gradeable="{$gradeable->getId()}" data-user="{$gradeable_row->getUser()->getId()}" data-row="{$row}" {$style}> 
                 <td class="">{$count}</td>
                 <td class="">{$gradeable_row->getUser()->getRegistrationSection()}</td>
                 <td class="cell-all" style="text-align: left">{$gradeable_row->getUser()->getId()}</td>
