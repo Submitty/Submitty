@@ -37,7 +37,7 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
      * @dataProvider diffDir
      */
     public function testDiffViewer($diffDir) {
-        $diff = new DiffViewer("{$diffDir}/input_actual.txt", "{$diffDir}/input_expected.txt", "", "{$diffDir}/input_differences.json");
+        $diff = new DiffViewer("{$diffDir}/input_actual.txt", "{$diffDir}/input_expected.txt", "{$diffDir}/input_differences.json", "");
         $this->assertStringEqualsFile($diffDir."/output_actual.txt", $diff->getDisplayActual());
         $this->assertStringEqualsFile($diffDir."/output_expected.txt", $diff->getDisplayExpected());
         $this->assertTrue($diff->existsDifference());
@@ -64,7 +64,7 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
     public function testDifferencesException() {
         $diff = new DiffViewer(__TEST_DATA__."/diffs/diff_test_01/input_actual.txt",
                                __TEST_DATA__."/diffs/diff_test_01/input_expected.txt",
-                               "",
-                               "file_that_doesnt_exist");
+                               "file_that_doesnt_exist",
+                               "");
     }
 }
