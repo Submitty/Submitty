@@ -1,8 +1,16 @@
 {
+    "autograding" : {
+        "submission_to_runner" : [ "*.txt", "*.png" ]
+    },
     "textboxes" : [
         { 
-            "label": "Your favorite color:",
-            "filename" : "color.txt"
+            "label": "The above animal:",
+            "images": [
+                {
+                    "image_name" : "image1.png"
+                }
+            ],
+            "filename" : "animal.txt"
         },
         {    
             "label": "200-300 word description",
@@ -10,9 +18,24 @@
             "filename" : "description.txt"
         },
         {    
-            "label": "Write a haiku",
-            "rows" : 3,
-            "filename" : "haiku.txt"
+            "label": "Write a haiku about one of the above images:",
+            "images": [
+                {
+                    "image_name" : "image2.png",
+                    "image_height" : 200,
+                    "image_width" : 200
+                },
+                {
+                    "image_name" : "image3.png",
+                    "image_height" : 200,
+                    "image_width" : 200
+                },
+                {
+                    "image_name" : "image4.png",
+                    "image_height" : 200,
+                    "image_width" : 200
+                }
+            ]
         },
         { 
             "label": "Number of hours spent on this assignment:",
@@ -23,7 +46,7 @@
         {
             "type" : "FileCheck",
             "title" : "Review Favorite Color",
-            "actual_file" : "color.txt",
+            "actual_file" : "animal.txt",
             "points" : 0
         },
         {

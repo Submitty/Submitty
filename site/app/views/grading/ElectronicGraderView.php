@@ -6,6 +6,7 @@ use app\models\Gradeable;
 use app\models\User;
 use app\models\LateDaysCalculation;
 use app\views\AbstractView;
+use app\libraries\FileUtils;
 
 class ElectronicGraderView extends AbstractView {
     /**
@@ -217,8 +218,6 @@ HTML;
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
                     $different = false;
-                    // TODO: ADD RED FLAG IF GRADED VERSION IS NOT EQUAL TO ACTIVE VERSION
-
                 }
                 else{
                     $viewed_grade = "";
@@ -261,8 +260,12 @@ HTML;
         <tbody id="section-{$section}">
 HTML;
                 }
+                $style = "";
+                if ($row->getUser()->accessGrading()) {
+                    $style = "style='background: #7bd0f7;'";
+                }
                 $return .= <<<HTML
-            <tr id="user-row-{$row->getUser()->getId()}">
+            <tr id="user-row-{$row->getUser()->getId()}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
                 <td>{$row->getUser()->getId()}</td>
