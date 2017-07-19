@@ -23,6 +23,8 @@ import argparse
 from datetime import datetime
 import json
 import os
+import sys
+import submitty_utils
 
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
 
@@ -289,10 +291,11 @@ def get_result_details(semester, course, g_id, who_id, version):
                 for testcase in result_json['testcases']:
                     result_details['testcases'].append({'points': testcase['points_awarded']})
 
-    if os.path.isfile(os.path.join(result_dir, "results_history.json")):
-        with open(os.path.join(result_dir, "results_history.json")) as result_file:
+    if os.path.isfile(os.path.join(result_dir, "history.json")):
+        with open(os.path.join(result_dir, "history.json")) as result_file:
             result_json = json.load(result_file)
-            a = datetime.strptime(result_json[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
+            #a = datetime.strptime(result_json[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
+            a = submitty_utils.read_submitty_date(result_json[-1]['submission_time'])
             result_details['submission_time'] = '{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}' \
                 .format(a.year, a.month, a.day, a.hour, a.minute, a.second)
     return result_details

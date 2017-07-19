@@ -36,7 +36,7 @@ def main():
                 if proc.username() not in untrusted_users:
                     untrusted_users.append(proc.username())
             elif proc.username() == 'hwcron':
-                if '/usr/local/submitty/bin/grade_students.sh' in proc.cmdline():
+                if '/usr/local/submitty/bin/submitty_grading_scheduler.sh' in proc.cmdline():
                     print ("grade_students instance: ", proc.cmdline())
                     commands.append(proc.cmdline())
         except psutil.NoSuchProcess:

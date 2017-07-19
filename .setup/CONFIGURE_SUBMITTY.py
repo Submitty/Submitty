@@ -99,20 +99,7 @@ for i in range(1, NUM_UNTRUSTED):
 
 # adjust this number depending on the # of processors
 # available on your hardware
-MAX_INSTANCES_OF_GRADE_STUDENTS = 15
-
-# if queue is empty, wait this long before checking the queue again
-GRADE_STUDENTS_IDLE_SECONDS = 5
-
-# each grade_students.sh process should idle for this long total
-# before terminating the process
-GRADE_STUDENTS_IDLE_TOTAL_MINUTES = 16
-
-# how often should the cron job launch a new grade_students.sh script?
-# 4 starts per hour  = every 15 minutes
-# 12 starts per hour = every 5 minutes
-# 15 starts per hour = every 4 minutes
-GRADE_STUDENTS_STARTS_PER_HOUR = 20
+NUM_GRADING_SCHEDULER_WORKERS = 5
 
 ##############################################################################
 
@@ -224,10 +211,8 @@ obj['cgi_url'] = CGI_URL
 obj['autograding_log_path'] = AUTOGRADING_LOG_PATH
 obj['site_log_path'] = TAGRADING_LOG_PATH
 
-obj['max_instances_of_grade_students'] = MAX_INSTANCES_OF_GRADE_STUDENTS
-obj['grade_students_idle_seconds'] = GRADE_STUDENTS_IDLE_SECONDS
-obj['grade_students_idle_total_minutes'] = GRADE_STUDENTS_IDLE_TOTAL_MINUTES
-obj['grade_students_starts_per_hour'] = GRADE_STUDENTS_STARTS_PER_HOUR
+obj['num_grading_scheduler_workers'] = NUM_GRADING_SCHEDULER_WORKERS
+
 obj['debugging_enabled'] = DEBUGGING_ENABLED
 
 CONFIGURATION_FILE = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'INSTALL_SUBMITTY.sh')

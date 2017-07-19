@@ -676,15 +676,15 @@ class Gradeable extends AbstractModel {
         if ($this->current_version > 0) {
             $this->result_details = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "results.json"));
             if ($this->result_details !== false) {
-                $results_history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "results_history.json"));
-                if ($results_history !== false) {
-                    $last_results_timestamp = $results_history[count($results_history) - 1];
+                $history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "history.json"));
+                if ($history !== false) {
+                    $last_results_timestamp = $history[count($history) - 1];
                 } else {
                     $last_results_timestamp = array('submission_time' => "UNKNOWN", "grade_time" => "UNKOWN",
                         "wait_time" => "UNKNOWN");
                 }
                 $this->result_details = array_merge($this->result_details, $last_results_timestamp);
-                $this->result_details['num_autogrades'] = count($results_history);
+                $this->result_details['num_autogrades'] = count($history);
                 for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
                     $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current_version));
                 }
