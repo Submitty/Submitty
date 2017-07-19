@@ -14,6 +14,7 @@ import argparse
 import os
 import subprocess
 import time
+import psutil
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
@@ -36,7 +37,6 @@ if not os.access(INTERACTIVE_QUEUE, os.R_OK):
 if not os.access(BATCH_QUEUE, os.R_OK):
     raise SystemExit("ERROR: batch queue {} is not readeable".format(BATCH_QUEUE))
 
-
 # ======================================================================
 
 def parse_args():
@@ -49,28 +49,26 @@ def main():
     args = parse_args()
     while True:
 
-        #
-        # FIXME: This command is buggy, sometimes overcounting grading processes
-        #
-        # we are attempting to count instances of
-        #    /usr/local/submitty/bin/grade_students.sh
-        # but it may also be matching:
-        #    /usr/local/submitty/bin/write_grade_history.py
-        #
-        # and it perhaps also overcounts submissions that use fork (??)
-        #
-
-        proc = subprocess.Popen(["pgrep", "grade_students"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, _ = proc.communicate()
-        out = out.decode("utf-8")
-        procs = out.split('\n')
-        # extra newline creates an empty process (also needed when no matching grade processes)
-        procs = [s for s in procs if len(s) > 0]
-
         # count the processes
-        num_procs = len(procs)
-        if num_procs == 0:
-            print ("WARNING: No matching grade_students.sh processes!")
+        pid_list = psutil.pids()
+        num_procs=0
+        for pid in pid_list:
+            try:
+                proc = psutil.Process(pid)
+                if 'hwcron' == proc.username():
+                    if (proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"bin","submitty_grading_scheduler.py")):
+                        num_procs+=1
+            except psutil.NoSuchProcess:
+                pass
+
+        # remove 2 from the count...  each worker is forked from the
+        # initial process, and there's a helper process for the
+        # observer too
+        num_procs-=2
+
+        if num_procs <= 0:
+            print ("WARNING: No matching submitty_grading_scheduler.py processes!")
+            num_procs = 0
 
         done = True
         batch_queue = os.listdir(BATCH_QUEUE)
