@@ -4,6 +4,7 @@ namespace app\views\submission;
 
 use app\models\Gradeable;
 use app\views\AbstractView;
+use app\libraries\FileUtils;
 
 class HomeworkView extends AbstractView {
 
@@ -141,8 +142,50 @@ HTML;
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
 
-
             for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
+
+                $image_width = $image_height = 0;
+
+                if (isset($gradeable->getTextboxes()[$i]['images']) && $gradeable->getTextboxes()[$i]['images'] != ""){
+                    $tester = $gradeable->getTextboxes()[$i]['images'];
+                }
+                else{
+                    $tester = array();
+                }
+
+                //
+                foreach((array)$tester as $currImage){
+                    $currImageName = $currImage["image_name"];
+                    $imgPath = $this->core->getConfig()->getCoursePath() . "/test_input/" . $gradeable->getName() . "/".$currImageName;
+                    $content_type = FileUtils::getContentType($imgPath);
+                    if (substr($content_type, 0, 5) === "image") {
+                       // Read image path, convert to base64 encoding
+                       $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                       // Format the image SRC:  data:{mime};base64,{data};
+                       $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
+                       // insert the sample image data
+
+                        if(isset($currImage['image_height']) && (int)$currImage['image_height'] > 0){
+                            $image_height = $currImage['image_height'];
+                        }
+
+                        if(isset($currImage['image_width']) && (int)$currImage['image_width'] > 0){
+                            $image_width = $currImage['image_width'];
+                        }
+
+                       $image_display = '<img src="'.$textBoximagesrc.'"';
+
+                       if($image_width > 0){
+                        $image_display .= ' width="'.$image_width.'"';
+                       }
+                       if($image_height > 0){
+                        $image_display .= ' height="'.$image_height.'"';
+                       }
+                       $image_display .= ">";
+                       $return .= $image_display;
+                    }
+                }
+
                 $label = $gradeable->getTextboxes()[$i]['label'];
                 $rows = $gradeable->getTextboxes()[$i]['rows'];
                 if ($rows == 0) {
@@ -469,50 +512,13 @@ HTML;
         else {
             $return .= <<<HTML
 <div class="content">
-
     <h3 class='label' style="float: left">Select Submission Version:</h3>
-    <select style="margin: 0 10px;" name="submission_version"
-    onChange="versionChange('{$this->core->buildUrl(array('component' => 'student',
+HTML;
+            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
-                                                          'gradeable_version' => ""))}', this)">
+                                                          'gradeable_version' => ""))}', this)";
+            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange);
 
-HTML;
-            if ($gradeable->getActiveVersion() == 0) {
-                $selected = ($current_version_number == $gradeable->getActiveVersion()) ? "selected" : "";
-                $return .= <<<HTML
-        <option value="0" {$selected}>Do Not Grade Assignment</option>
-HTML;
-
-            }
-            foreach ($gradeable->getVersions() as $version) {
-                $selected = "";
-                $select_text = array("Version #{$version->getVersion()}");
-                if ($gradeable->getNormalPoints() > 0) {
-                    $select_text[] = "Score: ".$version->getNonHiddenTotal()." / " . $gradeable->getTotalNonHiddenNonExtraCreditPoints();
-                }
-
-                if ($version->getDaysLate() > 0) {
-                    $select_text[] = "Days Late: ".$version->getDaysLate();
-                }
-
-                if ($version->isActive()) {
-                    $select_text[] = "GRADE THIS VERSION";
-                }
-
-                if ($version->getVersion() == $current_version_number) {
-                    $selected = "selected";
-                }
-
-                $select_text = implode("&nbsp;&nbsp;&nbsp;", $select_text);
-                $return .= <<<HTML
-        <option value="{$version->getVersion()}" {$selected}>{$select_text}</option>
-
-HTML;
-            }
-
-            $return .= <<<HTML
-    </select>
-HTML;
             // If viewing the active version, show cancel button, otherwise so button to switch active
             if ($current_version_number > 0) {
                 if ($current_version->getVersion() == $gradeable->getActiveVersion()) {
@@ -674,7 +680,6 @@ HTML;
                     }
 
                 }
-
                 if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
                     if ($gradeable->beingGradedInteractiveQueue() ||
                         (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {

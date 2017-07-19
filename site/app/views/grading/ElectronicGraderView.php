@@ -6,6 +6,7 @@ use app\models\Gradeable;
 use app\models\User;
 use app\models\LateDaysCalculation;
 use app\views\AbstractView;
+use app\libraries\FileUtils;
 
 class ElectronicGraderView extends AbstractView {
     /**
@@ -217,8 +218,6 @@ HTML;
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
                     $different = false;
-                    // TODO: ADD RED FLAG IF GRADED VERSION IS NOT EQUAL TO ACTIVE VERSION
-
                 }
                 else{
                     $viewed_grade = "";
@@ -261,8 +260,12 @@ HTML;
         <tbody id="section-{$section}">
 HTML;
                 }
+                $style = "";
+                if ($row->getUser()->accessGrading()) {
+                    $style = "style='background: #7bd0f7;'";
+                }
                 $return .= <<<HTML
-            <tr id="user-row-{$row->getUser()->getId()}">
+            <tr id="user-row-{$row->getUser()->getId()}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
                 <td>{$row->getUser()->getId()}</td>
@@ -293,7 +296,12 @@ HTML;
                     
                     if ($row->beenTAgraded()) {
                         $btn_class = "btn-default";
-                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                        if($row->validateVersions()) {
+                            $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                        }
+                        else{
+                            $contents = "Version Conflict";
+                        }
                     }
                     else {
                         $btn_class = "btn-primary";
@@ -304,8 +312,17 @@ HTML;
                         {$contents}
                     </a>
                 </td>
+HTML;
+                    if($row->validateVersions()) {
+                        $return .= <<<HTML
                 <td><div class="{$box_background}">{$graded}&nbsp;/&nbsp;{$total_possible}</div></td>
 HTML;
+                    }
+                    else{
+                        $return .= <<<HTML
+                <td></td>
+HTML;
+                    }
                     if($active_version == $highest_version) {
                         $return .= <<<HTML
                 <td>{$active_version}</td>
@@ -466,12 +483,43 @@ HTML;
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
     <span class="grading_label">Student Information</span>
     <div class="inner-container">
+        <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
         <div class="rubric-title">
-            <b>{$user->getFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
-            Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
-            Submitted: {$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
-        </div>
 HTML;
+        $who = $gradeable->getUser()->getId();
+        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'individual'=>$individual,
+                                                      'gradeable_version' => ""))}', this)";
+        $formatting = "font-size: 13px;float:right;";
+        $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
+        $return .= <<<HTML
+        <b>{$user->getFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
+        Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
+        Submitted:&nbsp{$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
+HTML;
+            
+        // If viewing the active version, show cancel button, otherwise so button to switch active
+        if ($gradeable->getCurrentVersionNumber() > 0) {
+            if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
+                $version = 0;
+                $button = '<input type="submit" class="btn btn-default btn-xs" style="float: right;" value="Cancel Student Submission">';
+            }
+            else {
+                $version = $gradeable->getCurrentVersionNumber();
+                $button = '<input type="submit" class="btn btn-default btn-xs" style="float: right;" value="Grade This Version">';
+            }
+            $return .= <<<HTML
+        <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
+                action="{$this->core->buildUrl(array('component' => 'student',
+                                                     'action' => 'update',
+                                                     'gradeable_id' => $gradeable->getId(),
+                                                     'new_version' => $version, 'ta' => true, 'who' => $who, 'individual' => $individual))}">
+            <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
+            {$button}
+        </form>
+        </div>
+
+HTML;
+        }
         $return .= <<<HTML
         <form id="rubric_form" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'submit'))}" method="post">
             <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
@@ -483,7 +531,7 @@ HTML;
 
         //Late day calculation
         $ldu = new LateDaysCalculation($this->core);
-        $return .= $ldu->generateTableForUserDate($user->getId(), $gradeable->getDueDate());
+        $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
         $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
         $status = $late_days_data['status'];
 
@@ -504,11 +552,21 @@ HTML;
         }
         $return .= <<<HTML
         <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
+        </div>
     </div>
 </div>
 
 <div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
     <span class="grading_label">Grading Rubric</span>
+HTML;
+        $disabled = '';
+        if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion() || $gradeable->getCurrentVersionNumber() == 0){
+            $disabled='disabled';
+            $return .= <<<HTML
+    <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
+HTML;
+        }
+        $return .= <<<HTML
     <div style="margin:3px;">
         <table class="rubric-table" id="rubric-table">
             <tbody>
@@ -526,7 +584,6 @@ HTML;
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
             }
     
-            $disabled = '';
             if(substr($question->getTitle(), 0, 12) === "AUTO-GRADING") {
                 $disabled = 'disabled';
             }
@@ -536,6 +593,10 @@ HTML;
 HTML;
             $penalty = !(intval($question->getMaxValue()) > 0);
             $message = htmlentities($question->getTitle());
+            $message = "<b>{$message}</b>";
+            if ($question->getGradedVersion() != -1 && $gradeable->getActiveVersion() != $question->getGradedVersion()) {
+                $message .= "  " . "Before submitting regrade, please edit or ensure that comments from version " . $question->getGradedVersion() . " still apply.";
+            }
             $note = htmlentities($question->getTaComment());
             if ($note != "") {
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
@@ -546,19 +607,19 @@ HTML;
             if($question->getIsExtraCredit()) {
                 $return .= <<<HTML
                     <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-                        <i class="icon-plus"></i> <b>{$message}</b> {$note}
+                        <i class="icon-plus"></i> $message {$note}
 HTML;
             }
             else if($penalty) {
                 $return .= <<<HTML
                     <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-                        <i class="icon-minus"></i> <b>{$message}</b> {$note}
+                        <i class="icon-minus"></i> $message {$note}
 HTML;
             }
             else {
                 $return .= <<<HTML
                     <td style="font-size: 12px;" colspan="4">
-                        <b>{$message}</b> {$note}
+                        $message {$note}
 HTML;
             }
 
@@ -611,7 +672,7 @@ HTML;
             </tbody>
         </table><br/>
         <div style="width:100%;"><b>General Comment:</b>
-        <textarea name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0">{$gradeable->getOverallComment()}</textarea>
+        <textarea name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
         </div>
 HTML;
         if ($gradeable->beenTAgraded()) {
@@ -624,7 +685,7 @@ HTML;
             $graders = implode(",", $graders);
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: {$graders}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
+            Graded By: {$graders}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' {$disabled}/><br />
         </div>
 HTML;
         }
@@ -640,12 +701,12 @@ HTML;
         if (!($now < $gradeable->getGradeStartDate()) && ($total_points > 0)) {
             if($gradeable->beenTAgraded()) {
                 $return .= <<<HTML
-            <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);"/>
+            <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);" {$disabled}/>
 HTML;
             }
             else {
                 $return .= <<<HTML
-            <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>
+            <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade" {$disabled}/>
 HTML;
             }
         }

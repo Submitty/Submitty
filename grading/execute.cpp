@@ -893,6 +893,7 @@ int execute(const std::string &cmd,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config) {
 
+  std::set<std::string> active_windows;
   bool window_mode = false; //Tells us if the process is expected to spawn a window. (additional support later) 
   
   if(actions.size() > 0){ //right now, we assume if there are actions, there will be a window.  
@@ -903,6 +904,7 @@ int execute(const std::string &cmd,
       setenv("DISPLAY", ":0", 1);
     }
     window_mode = true;
+    active_windows = snapshotOfActiveWindows();
   }
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
@@ -956,7 +958,7 @@ int execute(const std::string &cmd,
 
       do {
           if(window_mode && windowName == ""){ //if we are expecting a window, but know nothing about it
-            initializeWindow(windowName, childPID); //attempt to get information about the window
+            initializeWindow(windowName, childPID, active_windows); //attempt to get information about the window
             if(windowName != ""){ //if we found information about the window
               centerMouse(windowName); //center our mouse on its screen
             }

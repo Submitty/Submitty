@@ -192,6 +192,13 @@ def main():
     os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
     os.system("rm /tmp/hwcron_cron_backup.txt")
 
+def generate_random_user_id(length):
+    id_base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    anon_id = ""
+    for i in range(length):
+        anon_id += random.choice(id_base)
+    return anon_id
+
 
 def generate_random_users(total, real_users):
     """
@@ -210,6 +217,7 @@ def generate_random_users(total, real_users):
 
     users = []
     user_ids = []
+    anon_ids = []
     with open(os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w") as random_users_file:
         for i in range(total):
             if random.random() < 0.5:
@@ -219,13 +227,16 @@ def generate_random_users(total, real_users):
             last_name = random.choice(last_names)
             user_id = last_name.replace("'", "")[:5] + first_name[0]
             user_id = user_id.lower()
+            anon_id = generate_random_user_id(15)
             while user_id in user_ids or user_id in real_users:
                 if user_id[-1].isdigit():
                     user_id = user_id[:-1] + str(int(user_id[-1]) + 1)
                 else:
                     user_id = user_id + "1"
-
+            if anon_id in anon_ids:
+                anon_id = generate_random_user_id(15)
             new_user = User({"user_id": user_id,
+                             "anon_id": anon_id,
                              "user_firstname": first_name,
                              "user_lastname": last_name,
                              "user_group": 4,
@@ -233,6 +244,7 @@ def generate_random_users(total, real_users):
             new_user.create()
             user_ids.append(user_id)
             users.append(new_user)
+            anon_ids.append(anon_id)
             random_users_file.write(user_id + "\n")
     return users
 
@@ -480,6 +492,7 @@ class User(object):
 
     Attributes:
         id
+        anon_id
         password
         firstname
         lastname
@@ -493,6 +506,7 @@ class User(object):
     """
     def __init__(self, user):
         self.id = user['user_id']
+        self.anon_id = user['anon_id']
         self.password = self.id
         self.firstname = user['user_firstname']
         self.lastname = user['user_lastname']
@@ -654,18 +668,11 @@ class Course(object):
 
         os.environ['PGPASSWORD'] = DB_PASS
         database = "submitty_" + self.semester + "_" + self.code
-        os.system('psql -d postgres -h {} -U hsdbu -c "CREATE DATABASE {}"'.format(DB_HOST,
-                                                                                   database))
-        os.system("psql -d {} -h {} -U {} -f {}/site/data/course_tables.sql"
-                  .format(database, DB_HOST, DB_USER, SUBMITTY_REPOSITORY))
 
         print("Database created, now populating ", end="")
         submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData(bind=submitty_engine)
-
-        courses_table = Table('courses', submitty_metadata, autoload=True)
-        submitty_conn.execute(courses_table.insert(), semester=self.semester, course=self.code)
 
         engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                                  database))
@@ -712,10 +719,11 @@ class Course(object):
                                   registration_section=reg_section,
                                   manual_registration=user.get_detail(self.code, "manual"))
             update = users_table.update(values={
-                users_table.c.rotating_section: bindparam('rotating_section')
+                users_table.c.rotating_section: bindparam('rotating_section'),
+                users_table.c.anon_id: bindparam('anon_id')
             }).where(users_table.c.user_id == bindparam('b_user_id'))
 
-            conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
+            conn.execute(update, rotating_section=rot_section, anon_id=user.anon_id, b_user_id=user.id)
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(user.get_detail(self.code,"grading_registration_section"))
@@ -1035,6 +1043,7 @@ class Gradeable(object):
         self.instructions_url = ""
         self.overall_ta_instructions = ""
         self.team_assignment = False
+        self.peer_grading = False
         self.grade_by_registration = True
         self.is_repository = False
         self.subdirectory = ""
@@ -1164,7 +1173,9 @@ class Gradeable(object):
         conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
-                     g_team_assignment=self.team_assignment, g_gradeable_type=self.type,
+                     g_team_assignment=self.team_assignment, 
+                     g_peer_grading=self.peer_grading, 
+                     g_gradeable_type=self.type,
                      g_grade_by_registration=self.grade_by_registration,
                      g_ta_view_start_date=self.ta_view_date,
                      g_grade_start_date=self.grade_start_date,
@@ -1281,6 +1292,7 @@ class Component(object):
 
         self.is_text = False
         self.is_extra_credit = False
+        self.is_peer = False
         self.order = order
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
@@ -1302,7 +1314,7 @@ class Component(object):
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
                                     gc_max_value=self.max_value, gc_is_text=self.is_text,
-                                    gc_is_extra_credit=self.is_extra_credit, gc_order=self.order)
+                                    gc_is_extra_credit=self.is_extra_credit, gc_is_peer=self.is_peer, gc_order=self.order)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 
