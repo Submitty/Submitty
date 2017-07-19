@@ -273,6 +273,7 @@ chmod 751 ${SUBMITTY_INSTALL_DIR}/bin
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 #replace necessary variables in the copied scripts
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/adduser.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
