@@ -43,6 +43,7 @@ try:
 
     current_path = os.path.dirname(os.path.realpath(__file__))
 
+    uploads_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads")
     bulk_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/bulk_pdf",g_id,ver)
     split_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/split_pdf",g_id,ver)
 
@@ -51,7 +52,7 @@ try:
         os.makedirs(split_path)
 
     # adding permissions for the PHP
-    add_permissions_recursive(split_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
+    add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
 
     # copy over files to new directory
     for filename in os.listdir(bulk_path):

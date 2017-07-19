@@ -321,10 +321,152 @@ function isValidSubmission(){
 }
 
 /**
- *
- * @param 
+ * @param csrf_token
+ * @param gradeable_id
+ * @param user_id
+ * @param is_pdf
+ * @param path
+ * @param count
+ * @param makeSubmission, a callback function
  */
-function handleBulk(num_pages, gradeable_id, return_url) {
+function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, makeSubmission) {
+
+    var formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+    formData.append('user_id', user_id);
+
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
+
+    $.ajax({
+        url: url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count);
+                    return data;
+                }
+                else {
+                    alert("ERROR! \n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function() {
+            $("#submit").prop("disabled", false);
+            alert("Something went wrong. Please try again.");
+        }
+    });
+}
+
+/**
+* @param csrf_token
+* @param gradeable_id
+* @param user_id
+* @param path
+* @param count
+*/
+function moveSubmission(csrf_token, gradeable_id, user_id, path, count) {
+
+    url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'move', 'gradeable_id': gradeable_id});
+
+    var formData = new FormData();
+
+    formData.append('csrf_token', csrf_token);
+    formData.append('user_id', user_id);
+    formData.append('path', path);
+
+    $.ajax({
+        url: url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    $("#bulk_submit_" + count).prop("disabled", true);
+                    $("#bulk_delete_" + count).prop("disabled", true);
+                    $("#bulk_user_id_" + count).prop("disabled", true);
+                    alert("submitted");
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function() {
+            alert("ERROR! Please contact administrator that you could not upload files.");
+        }
+    });
+}
+
+/**
+* @param csrf_token
+* @param gradeable_id
+* @param path
+* @param count
+*/
+function deleteSubmission(csrf_token, gradeable_id, path, count) {
+
+    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'delete', 'gradeable_id': gradeable_id});
+
+    var formData = new FormData();
+
+    formData.append('csrf_token', csrf_token);
+    formData.append('path', path);
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    $("#bulk_submit_" + count).prop("disabled", true);
+                    $("#bulk_delete_" + count).prop("disabled", true);
+                    $("#bulk_user_id_" + count).val("");
+                    $("#bulk_user_id_" + count).prop("disabled", true);
+                    alert("deleted");
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were deleting.");
+                console.log(data);
+            }
+        },
+        error: function() {
+            alert("ERROR! Please contact administrator that you could not delete files.");
+        }
+    });
+}
+
+/**
+ * @param gradeable_id
+ * @param num_pages
+ */
+function handleBulk(gradeable_id, num_pages) {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -341,7 +483,6 @@ function handleBulk(num_pages, gradeable_id, return_url) {
     }
 
     formData.append('num_pages', num_pages);
-    formData.append('gradeable_id', gradeable_id);
 
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {
@@ -364,7 +505,8 @@ function handleBulk(num_pages, gradeable_id, return_url) {
         }
     }
 
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'bulk'});
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'bulk', 'gradeable_id': gradeable_id});
+    var return_url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id});
 
     $.ajax({
         url: url,
@@ -397,145 +539,6 @@ function handleBulk(num_pages, gradeable_id, return_url) {
 }
 
 /**
- * @param csrf_token
- * @param gradeable_id
- * @param student_id
- * @param is_pdf
- * @param url
- * @param submitStudentGradeable, a callback function
- */
-function validateStudentId(csrf_token, gradeable_id, student_id, is_pdf, path, count, submitStudentGradeable) {
-
-    $("#submit").prop("disabled", true);
-
-    var formData = new FormData();
-    formData.append('csrf_token', csrf_token);
-    formData.append('gradeable_id', gradeable_id);
-    formData.append('student_id', student_id);
-
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify'});
-
-    $.ajax({
-        url: url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            $("#submit").prop("disabled", false);
-            try {
-                data = JSON.parse(data);
-                if (data['success']) {
-                    submitStudentGradeable(student_id, data['highest_version'], is_pdf, path, count);
-                    return data;
-                }
-                else {
-                    alert("ERROR! \n\n" + data['message']);
-                }
-            }
-            catch (e) {
-                console.log(e);
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
-            }
-        },
-        error: function() {
-            $("#submit").prop("disabled", false);
-            alert("Something went wrong. Please try again.");
-        }
-    });
-}
-
-function moveSubmission(g_id, csrf_token, user_id, path, count) {
-
-    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'move', 'gradeable_id': g_id});
-
-    // no version checking bc this is exam only
-
-    var formData = new FormData();
-
-    formData.append('csrf_token', csrf_token);
-    formData.append('user_id', user_id);
-    formData.append('path', path);
-
-    $.ajax({
-        url: submit_url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            try {
-                data = JSON.parse(data);
-                if (data['success']) {
-                    alert("submitted");
-                    $("#bulk_submit_" + count).prop("disabled", true);
-                    $("#bulk_delete_" + count).prop("disabled", true);
-                    $("#bulk_student_id_" + count).prop("disabled", true);
-                }
-                else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
-                }
-            }
-            catch (e) {
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
-                console.log(data);
-            }
-        },
-        error: function() {
-            alert("ERROR! Please contact administrator that you could not upload files.");
-        }
-    });
-}
-
-function deleteSubmission(g_id, csrf_token, path, count) {
-
-    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'delete', 'gradeable_id': g_id});
-
-    // no version checking bc this is exam only
-
-    var formData = new FormData();
-
-    formData.append('csrf_token', csrf_token);
-    formData.append('path', path);
-
-    $.ajax({
-        url: submit_url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            try {
-                data = JSON.parse(data);
-                if (data['success']) {
-                    alert("deleted");
-                    $("#bulk_submit_" + count).prop("disabled", true);
-                    $("#bulk_delete_" + count).prop("disabled", true);
-                    $("#bulk_student_id_" + count).val("");
-                    $("#bulk_student_id_" + count).prop("disabled", true);
-                }
-                else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
-                }
-            }
-            catch (e) {
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
-                console.log(data);
-            }
-        },
-        error: function() {
-            alert("ERROR! Please contact administrator that you could not upload files.");
-        }
-    });
-}
-
-/**
- *
- * @param submit_url
- * @param return_url
  * @param days_late
  * @param late_days_allowed
  * @param versions_used
@@ -545,11 +548,11 @@ function deleteSubmission(g_id, csrf_token, path, count) {
  * @param num_textboxes
  * @param user_id
  */
-function handleSubmission(g_id, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id) {
+function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, gradeable_id, user_id) {
     $("#submit").prop("disabled", true);
 
-    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': g_id});
-    return_url = buildUrl({'component': 'student','gradeable_id': g_id});
+    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id});
+    return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
 
     var message = "";
     // check versions used
