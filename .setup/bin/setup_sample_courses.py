@@ -775,7 +775,7 @@ class Course(object):
             form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
-        os.system("chown hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
+        os.system("chown -f hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
         if not os.path.isfile(os.path.join(course_path, "ASSIGNMENTS.txt")):
             os.system("touch {}".format(os.path.join(course_path, "ASSIGNMENTS.txt")))
             os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
