@@ -49,6 +49,9 @@ class SubmissionController extends AbstractController {
             case 'move':
                 return $this->ajaxMoveSubmission();
                 break;
+            case 'delete':
+                return $this->ajaxDeleteSubmission();
+                break;
             case 'verify':
                 return $this->validGradeable();
                 break;
@@ -335,19 +338,24 @@ class SubmissionController extends AbstractController {
 
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $path);
-        $type = FileUtils::getMimeType($uploaded_file);
 
         if (isset($uploaded_file)) {
             if (!@copy($uploaded_file, FileUtils::joinPaths($version_path,basename($uploaded_file)))) {
                 return $this->uploadResult("Failed to copy uploaded file {$uploaded_file} to current submission.", false);
             }
-                // Is this really an error we should fail on?
-            // if (!@unlink($uploaded_file)) {
-            //     return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+
+            if (!@unlink($uploaded_file)) {
+                return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+            }
+
+            if (!@unlink(str_replace(".pdf", "_cover.pdf", $uploaded_file))) {
+                return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+            }
+
+            // if (!@move_uploaded_file($uploaded_file, FileUtils::joinPaths($version_path,basename($uploaded_file)))) {
+            //     return $this->uploadResult("Failed to move uploaded file {$uploaded_file} to current submission.", false);
             // }
         }
-
-        // DELETE FILES SOMEHOW!!! LATER THO 
     
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
         if (!file_exists($settings_file)) {
@@ -420,9 +428,51 @@ class SubmissionController extends AbstractController {
             $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         else
             $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}";
-            
 
         return $this->uploadResult("Successfully uploaded files");
+    }
+
+    /**
+     * Function for uploading a submission to the server. This should be called via AJAX, saving the result
+     * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
+     *
+     * @return boolean
+     */
+    private function ajaxDeleteSubmission() {
+        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            return $this->uploadResult("Invalid CSRF token.", false);
+        }
+    
+        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        
+        // This checks for an assignment id, and that it's a valid assignment id in that
+        // it corresponds to one that we can access (whether through admin or it being released)
+        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
+            return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
+        }
+
+        if (!isset($_POST['path'])) {
+            return $this->uploadResult("Invalid path.", false);
+        }
+
+        $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+        $gradeable->loadResultDetails();
+        $path = $_POST['path'];
+
+        $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
+            $gradeable->getId(), $path);
+
+        if (!@unlink($uploaded_file)) {
+            return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+        }
+
+        if (!@unlink(str_replace(".pdf", "_cover.pdf", $uploaded_file))) {
+            return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+        }
+        
+        $_SESSION['messages']['success'][] = "Successfully deleted this PDF.";
+
+        return $this->uploadResult("Successfully deleted files");
     }
 
 

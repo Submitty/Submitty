@@ -303,7 +303,7 @@ HTML;
         $return .= <<<HTML
     <script type="text/javascript">
         function submitStudentGradeable(student_id, highest_version, is_pdf, path, count) {
-            if (!is_pdf) {
+            if (!is_pdf && $('#radio_student').is(':checked')) {
                 handleSubmission("{$gradeable->getId()}",
                                          {$days_late},
                                          {$gradeable->getAllowedLateDays()},
@@ -340,6 +340,7 @@ HTML;
                                 "{$this->core->buildUrl(array('component' => 'student',
                                                                'gradeable_id' => $gradeable->getId()))}");
                 }
+                // if student, need to 
                 // no RCS entered, upload for whoever is logged in
                 else if (($("#radio_normal").is(":checked")) || 
                         ($("#radio_student").is(":checked") && user_id == "")){
@@ -371,16 +372,17 @@ HTML;
 
                 $return .= <<<HTML
 <div class="content">
-    <h2>Unassigned Exam PDF Uploads</h2>
+    <h2>Unassigned PDF Uploads</h2>
     <form id="bulkForm" method="post">
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
-                <td width="3%"></td>
-                <td width="14%">Timestamp</td>
-                <td width="60%">PDF preview</td>
+                <td width="5%"></td>
+                <td width="10%">Timestamp</td>
+                <td width="50%">PDF preview</td>
                 <td width="15%">User ID</td>
-                <td width="8%">Enter</td>
+                <td width="10%">Submit</td>
+                <td width="10%">Delete</td>
             </tr>
         </thead>
         <tbody>
@@ -391,6 +393,7 @@ HTML;
                     $files = $content["files"];
 
                     foreach ($files as $filename => $details) {
+                        $clean_timestamp = str_replace("_", " ", $timestamp);
                         $name = $details["name"];
                         $path = $details["path"];
                         if (strpos($filename, 'cover') == false) {
@@ -401,12 +404,11 @@ HTML;
                         $return .= <<<HTML
             <tr>
                 <td style="vertical-align: middle">{$count}</td>
-                <td style = "vertical-align: middle">{$timestamp}</td> 
+                <td style = "vertical-align: middle">{$clean_timestamp}</td> 
                 <td>
                     <object data="{$url}" type="application/pdf" width="100%" height="300">
                         alt : <a href="{$url}">pdf.pdf</a>
                     </object>
-
                 </td>
                 <td style="vertical-align: middle">
                     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
@@ -415,19 +417,15 @@ HTML;
                 <td style="vertical-align: middle">
                     <button type="button" id="bulk_submit_{$count}" class="btn btn-success">Submit</button>
                 </td>
+                <td style="vertical-align: middle">
+                    <button type="button" id="bulk_delete_{$count}" class="btn btn-danger">Delete</button>
+                </td>
             </tr>
 HTML;
                     $count++;
                     }
                 $count_array_json = json_encode($count_array);
                 }
-//                 foreach ($count_array as $c => $p) {
-//                     $return.= <<<HTML
-//             <tr>
-//                 <td>{$p}</td>
-//             </tr>
-// HTML;
-//                 }
                 $return .= <<<HTML
 <script type="text/javascript">
     $(document).ready(function() {
@@ -437,13 +435,17 @@ HTML;
             var count = id.substring(12, id.length);
             var user_id = $("#bulk_student_id_"+count).val();
             var js_count_array = $count_array_json;
-            // console.log(count);
-            // console.log(user_id);
-            // console.log(js_count_array[count]);
             var path = js_count_array[count];
-            // once submitted, make that button hidden?
-
-            validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, submitStudentGradeable);
+            if (id.includes("delete")) {
+                message = "Are you sure you want to delete this submission?";
+                if (!confirm(message)) {
+                    return;
+                }
+                deleteSubmission("{$gradeable->getId()}","{$this->core->getCsrfToken()}", path, count);
+            }
+            else {
+                validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, submitStudentGradeable);
+            }
         });
     });
 </script>

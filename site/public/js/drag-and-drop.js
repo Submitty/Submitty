@@ -447,7 +447,6 @@ function validateStudentId(csrf_token, gradeable_id, student_id, is_pdf, path, c
 }
 
 function moveSubmission(g_id, csrf_token, user_id, path, count) {
-    //$("#submit").prop("disabled", true);
 
     submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'move', 'gradeable_id': g_id});
 
@@ -466,11 +465,13 @@ function moveSubmission(g_id, csrf_token, user_id, path, count) {
         contentType: false,
         type: 'POST',
         success: function(data) {
-            // $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
+                    alert("submitted");
                     $("#bulk_submit_" + count).prop("disabled", true);
+                    $("#bulk_delete_" + count).prop("disabled", true);
+                    $("#bulk_student_id_" + count).prop("disabled", true);
                 }
                 else {
                     alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
@@ -483,7 +484,49 @@ function moveSubmission(g_id, csrf_token, user_id, path, count) {
             }
         },
         error: function() {
-            $("#submit").prop("disabled", false);
+            alert("ERROR! Please contact administrator that you could not upload files.");
+        }
+    });
+}
+
+function deleteSubmission(g_id, csrf_token, path, count) {
+
+    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'delete', 'gradeable_id': g_id});
+
+    // no version checking bc this is exam only
+
+    var formData = new FormData();
+
+    formData.append('csrf_token', csrf_token);
+    formData.append('path', path);
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    alert("deleted");
+                    $("#bulk_submit_" + count).prop("disabled", true);
+                    $("#bulk_delete_" + count).prop("disabled", true);
+                    $("#bulk_student_id_" + count).val("");
+                    $("#bulk_student_id_" + count).prop("disabled", true);
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function() {
             alert("ERROR! Please contact administrator that you could not upload files.");
         }
     });

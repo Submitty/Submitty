@@ -12,6 +12,20 @@ import json
 import os
 import subprocess
 import shutil
+import stat
+
+# from grade_item.py
+def add_permissions(item,perms):
+    if os.getuid() == os.stat(item).st_uid:
+        os.chmod(item,os.stat(item).st_mode | perms)
+
+def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
+    for root, dirs, files in os.walk(top_dir):
+        add_permissions(root,root_perms)
+        for d in dirs:
+            add_permissions(os.path.join(root, d),dir_perms)
+        for f in files:
+            add_permissions(os.path.join(root, f),file_perms)
 
 print("Content-type: text/html")
 print()
@@ -35,6 +49,9 @@ try:
     # copy folder
     if not os.path.exists(split_path):
         os.makedirs(split_path)
+
+    # adding permissions for the PHP
+    add_permissions_recursive(split_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
 
     # copy over files to new directory
     for filename in os.listdir(bulk_path):
