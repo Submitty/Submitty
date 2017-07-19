@@ -72,6 +72,9 @@ class GradeableComponent extends AbstractModel {
     /** @property @var bool */
     protected $has_grade = false;
 
+    /** @property @var bool Does this component use peer grading*/
+    protected $peer_grading = false;
+
     /** @property @var \app\models\GradeableComponentMark[] */
     protected $marks = array();
 

@@ -177,6 +177,8 @@ class AdminGradeableController extends AbstractController {
                         $old_component->setIsText(false);
                         $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
                         $old_component->setIsExtraCredit($extra_credit);
+                        $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='yes') ? true : false;
+                        $old_component->setPeerGrading($peer_grading_component);
                         $old_component->setOrder($x);
                         $this->core->getQueries()->updateGradeableComponent($old_component);
                     } else if ($num_old_components > $num_questions) {
@@ -194,6 +196,8 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setIsText(false);
                 $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
                 $gradeable_component->setIsExtraCredit($extra_credit);
+                $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='yes') ? true : false;
+                $old_component->setPeerGrading($peer_grading_component);
                 $gradeable_component->setOrder($x);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }  
