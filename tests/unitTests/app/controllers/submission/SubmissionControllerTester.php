@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\models\Gradeable;
 use app\models\GradeableList;
 use tests\unitTests\BaseUnitTest;
+use app\models\User;
 
 class SubmissionControllerTester extends BaseUnitTest {
 
