@@ -280,6 +280,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeable->loadResultDetails();
         $individual = $_REQUEST['individual'];
 
+
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual);
     }

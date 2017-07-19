@@ -150,8 +150,8 @@ class GradeableComponent extends AbstractModel {
                     }
                 }
 
+                
                 $this->marks[$mark_details['gcm_order']] = $this->core->loadModel(GradeableComponentMark::class, $mark_details);
-
             }
 
             ksort($this->marks);

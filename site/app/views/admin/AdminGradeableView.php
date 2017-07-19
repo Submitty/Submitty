@@ -84,8 +84,6 @@ class AdminGradeableView extends AbstractView {
             $g_instructions_url = $data[0]['g_instructions_url'];
             $team_yes_checked = $data[0]['g_team_assignment'];
             $team_no_checked = !$team_yes_checked;
-            $peer_yes_checked = $data[0]['g_peer_grading'];
-            $peer_no_checked = !$peer_yes_checked;
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
@@ -97,6 +95,8 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $peer_yes_checked = $data[3]['eg_peer_grading'];
+                $peer_no_checked = !$peer_yes_checked;
                 $old_questions = $data[5];
                 $num_old_questions = count($old_questions);                
                 $component_ids = array();
@@ -116,8 +116,6 @@ class AdminGradeableView extends AbstractView {
             $g_instructions_url = $data[0]['g_instructions_url'];
             $team_yes_checked = $data[0]['g_team_assignment'];
             $team_no_checked = !$team_yes_checked;
-            $peer_yes_checked = $data[0]['g_peer_grading'];
-            $peer_no_checked = !$peer_yes_checked;
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
@@ -126,6 +124,8 @@ class AdminGradeableView extends AbstractView {
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $peer_yes_checked = $data[3]['eg_peer_grading'];
+                $peer_no_checked = !$peer_yes_checked;
                 $old_questions = $data[5];
                 $num_old_questions = count($old_questions);                
                 $component_ids = array();
@@ -1097,14 +1097,6 @@ function createCrossBrowserJSDate(val){
                 }
             });
         }
-        
-        if ($('input[name=peer_grading]').is(':checked')){
-            $('input[name=peer_grading]').each(function(){
-                if(!($(this).is(':checked')) && ({$edit})){
-                    $(this).attr("disabled",true);
-                }
-            });
-        }
           
         $('input:radio[name="ta_grading"]').change(function(){
             $('#rubric_questions').hide();
@@ -1514,6 +1506,8 @@ $('#gradeable-form').on('submit', function(e){
         row.find('textarea[name=student_comment_' + oldNum + ']').attr('name', 'student_comment_' + newNum).attr('id', 'student_' + newNum);
         row.find('input[name=points_' + oldNum + ']').attr('name', 'points_' + newNum);
         row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
+        row.find('div[id=peer_checkbox_' + oldNum +']').attr('id', 'peer_checkbox_' + newNum);
+        row.find('input[name=peer_component_'+ oldNum + ']').attr('name', 'peer_component_' + newNum);
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
         row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
@@ -1536,6 +1530,7 @@ $('#gradeable-form').on('submit', function(e){
         if (question == 1) {
             child = 1;
         }
+        var new_question = parseInt(question) + 1;
 
         if(!newRow.length) {
             return false;
@@ -1568,8 +1563,12 @@ $('#gradeable-form').on('submit', function(e){
         currentRow.children()[child].children[2].checked = newRow.children()[1].children[2].checked;
         newRow.children()[1].children[2].checked = temp;
 
+        //Move peer grading box
+        temp = currentRow.find('input[name=peer_component_' + question +']')[0].checked;
+        currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + new_question +']')[0].checked;
+        newRow.find('input[name=peer_component_' + new_question +']')[0].checked = temp;
+
         //Move the radio button
-        var new_question = parseInt(question) + 1;
         var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
         var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
         document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + new_question).checked;
@@ -1648,6 +1647,11 @@ $('#gradeable-form').on('submit', function(e){
         temp = currentRow.children()[1].children[2].checked;
         currentRow.children()[1].children[2].checked = newRow.children()[child].children[2].checked;
         newRow.children()[child].children[2].checked = temp;
+
+        //Move peer grading box
+        temp = currentRow.find('input[name=peer_component_' + question +']')[0].checked;
+        currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked;
+        newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked = temp;
 
         //Move the radio button
         var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;

@@ -516,6 +516,7 @@ HTML;
 
         $c = 1;
         $precision = floatval($gradeable->getPointPrecision());
+        $num_questions = count($gradeable->getComponents());
 
         foreach ($gradeable->getComponents() as $question) {
             // hide auto-grading if it has no value
@@ -562,7 +563,7 @@ HTML;
 HTML;
             }
             $return .= <<<HTML
-            <span onclick="openClose({$c})"> <i id="icon-{$c}" class="fa fa-window-maximize" style="visibility: visible; cursor: pointer;"></i> </span> {$note} 
+            <span onclick="openClose({$c},{$num_questions});"> <i id="icon-{$c}" class="fa fa-window-maximize" style="visibility: visible; cursor: pointer;"></i> </span> {$note} 
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());
@@ -588,25 +589,71 @@ HTML;
             }
             
             $return .= <<<HTML
-                <tr style="background-color: #f9f9f9;">
+                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
-                        <input type="number" id="grade-{$question->getOrder()}" class="grades" name="grade-{$question->getOrder()}" value="{$question->getScore()}" min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question->getOrder()}', '{$question->getMaxValue()}', {$precision}); calculatePercentageTotal();" style="width:50px; resize:none;" {$disabled}></textarea>
+                        <input readonly type="text" id="grade-{$question->getOrder()}" name="grade-{$question->getOrder()}" value="{$question->getScore()}" onchange="validateInput('grade-{$question->getOrder()}', '{$question->getMaxValue()}', {$precision}); calculatePercentageTotal();" style="width:50px; resize:none;" {$disabled}></textarea>
                         <strong> / {$question->getMaxValue()}</strong>
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
-                            <textarea id="rubric-textarea-{$c}" name="comment-{$question->getOrder()}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$question->getComment()}</textarea>
+                            <textarea readonly id="rubric-textarea-{$c}" name="comment-{$question->getOrder()}" rows="4" style="width:98%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$question->getComment()}</textarea>
                         </div>
                     </td>
                 </tr>
-                <tr id="extra-{$c}" style="{$background}; display: none" colspan="4">
-                    <td colspan="1" style="{$background}; text-align: center;">
-                        <span onclick=""> <i class="fa fa-plus-square" style="visibility: visible; cursor: pointer;"></i> </span>
+                <tbody id="extra-{$c}" style="{$background}; display: none" colspan="4">
+HTML;
+
+            $min = -1000;
+            $max = 0;
+            foreach ($question->getMarks() as $mark) {
+                if($mark->getPoints() < 0) {
+                    $min = -1000;
+                    $max = 0;
+                    break;
+                }
+                else if ($mark->getPoints() > 0) {
+                    $min = 0;  
+                    $max = 1000;
+                    break;
+                }
+            }
+            $d = 0;
+            foreach ($question->getMarks() as $mark) {
+                $return .= <<<HTML
+                <tr>
+                    <td colspan="1" style="{$background}; text-align: center;"> <input type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                        <span onclick=""> <i class="fa fa-square-o" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}">
-                        <textarea onkeyup="autoResizeComment(event);" rows="1" style="width:98%; resize:none; float:left;"></textarea>
+                        <textarea onkeyup="autoResizeComment(event);" rows="1" style="width:98%; resize:none; float:left;">{$mark->getNote()}</textarea>
                     </td>
                 </tr>
+HTML;
+            $d++;
+            }
+
+                $return .= <<<HTML
+                <tr>
+                    <td colspan="4" style"{$background};">
+                        <span onclick="return false;"><i class="fa fa-level-up" aria-hidden="true"></i>
+                        Add New </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="1" style="{$background}; text-align: center;"> <input type="number" step="{$precision}" value="0" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                        <span onclick=""> <i class="fa fa-square-o" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                    </td>
+                    <td colspan="3" style="{$background}">
+                        <textarea onkeyup="autoResizeComment(event);" rows="1" placeholder="Custom message for student..." style="width:98%; resize:none; float:left;"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="{$background};">
+                        <span onclick="return false;" style="float: right;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i>
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
 HTML;
             $c++;
         }
@@ -731,15 +778,46 @@ HTML;
         $("#score_total").html(total+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});
     }
 
-    function openClose(row_id) {
-        var x = document.getElementById('extra-' + row_id);
-        $("#icon-" + row_id).toggleClass('fa-window-maximize fa-window-close-o');
-        if (x.style.display === 'none') {
-            x.style.display = '';
-            document.getElementById("rubric-textarea-" + row_id).disabled = true;
-        } else {
-            x.style.display = 'none';
-            document.getElementById("rubric-textarea-" + row_id).disabled = false;
+    function openClose(row_id, num_questions) {
+        var row_num = parseInt(row_id);
+        var total_num = parseInt(num_questions);
+        for (var x = 1; x <= num_questions; x++) {
+            var current = document.getElementById('extra-' + x);
+            var current_summary = document.getElementById('summary-' + x);
+            var icon = document.getElementById('icon-' + x);
+            if (x === row_num) {
+                if (current.style.display === 'none') {
+                    current.style.display = '';
+                    current_summary.style.display = 'none';
+                    if (icon.classList.contains('fa-window-maximize'))
+                    {
+                        icon.classList.remove('fa-window-maximize');
+                    }
+                    if(!(icon.classList.contains('fa-window-close-o'))) {
+                        icon.classList.add('fa-window-close-o');
+                    }
+                } else {
+                    current.style.display = 'none';
+                    current_summary.style.display = '';
+                    if (icon.classList.contains('fa-window-close-o'))
+                    {
+                        icon.classList.remove('fa-window-close-o');
+                    }
+                    if(!(icon.classList.contains('fa-window-maximize'))) {
+                        icon.classList.add('fa-window-maximize');
+                    }
+                }
+            } else {
+                current.style.display = 'none';
+                current_summary.style.display = '';
+                if (icon.classList.contains('fa-window-close-o'))
+                {
+                    icon.classList.remove('fa-window-close-o');
+                }
+                if(!(icon.classList.contains('fa-window-maximize'))) {
+                    icon.classList.add('fa-window-maximize');
+                }
+            }
         }
     }
 </script>
