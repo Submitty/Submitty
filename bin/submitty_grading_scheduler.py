@@ -18,8 +18,8 @@ from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
 # ==================================================================================
 # these variables will be replaced by INSTALL_SUBMITTY.sh
-MAX_INSTANCES_OF_GRADE_STUDENTS_string = "__INSTALL__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__"
-MAX_INSTANCES_OF_GRADE_STUDENTS_int    = int(MAX_INSTANCES_OF_GRADE_STUDENTS_string)
+NUM_GRADING_SCHEDULER_WORKERS_string = "__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__"
+NUM_GRADING_SCHEDULER_WORKERS_int    = int(NUM_GRADING_SCHEDULER_WORKERS_string)
 
 AUTOGRADING_LOG_PATH="__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
@@ -66,10 +66,7 @@ def initialize(untrusted_queue):
 
 def runner(queue_file):
     """
-    Primary method which we run on any new jobs (queue files) that we pass to an empty
-    process in our pool. The process gets the path of the queue_file as a paramater, which
-    we can use to get the queue (batch or interactive) that we're in as well as then operate on
-    it. This function would contain all of the logic in grade_students.sh from line 784 downward.
+    Grades a single item in one of the queues.
 
     :param queue_file: file path pointing to the file we want to operate one.
     """
@@ -202,5 +199,5 @@ def launch_workers(num_workers):
 
 # ==================================================================================
 if __name__ == "__main__":
-    num_workers = MAX_INSTANCES_OF_GRADE_STUDENTS_int
+    num_workers = NUM_GRADING_SCHEDULER_WORKERS_int
     launch_workers(num_workers)

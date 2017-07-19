@@ -87,7 +87,7 @@ def main():
     # all steps of setting up a course.
     os.system("crontab -u hwcron -l > /tmp/hwcron_cron_backup.txt")
     os.system("crontab -u hwcron -r")
-    os.system("killall grade_students.sh")
+    os.system("systemctl stop submitty_grading_scheduler")
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
