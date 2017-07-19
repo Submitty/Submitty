@@ -591,7 +591,7 @@ HTML;
             $penalty = !(intval($question->getMaxValue()) > 0);
             $message = htmlentities($question->getTitle());
             $message = "<b>{$message}</b>";
-            if ($question->getGradedVersion() != -1) {
+            if ($question->getGradedVersion() != -1 && $gradeable->getActiveVersion() != $question->getGradedVersion()) {
                 $message .= "  " . "Before submitting regrade, please edit or ensure that comments from version " . $question->getGradedVersion() . " still apply.";
             }
             $note = htmlentities($question->getTaComment());
