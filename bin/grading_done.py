@@ -56,7 +56,8 @@ def main():
             try:
                 proc = psutil.Process(pid)
                 if 'hwcron' == proc.username():
-                    if (proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"bin","submitty_grading_scheduler.py")):
+                    if (len(proc.cmdline()) >= 2 and
+                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"bin","submitty_grading_scheduler.py")):
                         num_procs+=1
             except psutil.NoSuchProcess:
                 pass
