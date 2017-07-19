@@ -64,7 +64,7 @@ def initialize(untrusted_queue):
     multiprocessing.current_process().untrusted = untrusted_queue.get()
 
 
-def runner(queue_file):
+def grade_queue_file(queue_file,which_untrusted):
     """
     Grades a single item in one of the queues.
 
@@ -78,8 +78,8 @@ def runner(queue_file):
     grading_file = os.path.join(directory, "GRADING_" + name)
 
     open(os.path.join(grading_file), "w").close()
-    untrusted = multiprocessing.current_process().untrusted
-    grade_item.just_grade_item(my_dir, queue_file, untrusted)
+    #untrusted = multiprocessing.current_process().untrusted
+    grade_item.just_grade_item(my_dir, queue_file, which_untrusted)
 
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
@@ -111,7 +111,7 @@ def populate_queue(queue, folder):
 
 # ==================================================================================
 # ==================================================================================
-def worker_process(interactive_queue,batch_queue,new_job_event,overall_lock):
+def worker_process(interactive_queue,batch_queue,new_job_event,overall_lock,which_untrusted):
     """
     Each worker process spins in a loop, acquiring the overall lock to
     check the queues, prioritizing interactive jobs over batch jobs.
@@ -124,12 +124,12 @@ def worker_process(interactive_queue,batch_queue,new_job_event,overall_lock):
         if not interactive_queue.empty():
             job = interactive_queue.get()
             overall_lock.release()
-            runner(job)
+            grade_queue_file(job,which_untrusted)
             continue
         elif not batch_queue.empty():
             job = batch_queue.get()
             overall_lock.release()
-            runner(job)
+            grade_queue_file(job,which_untrusted)
             continue
         else:
             new_job_event.clear()
@@ -154,45 +154,41 @@ def launch_workers(num_workers):
     for i in range(num_workers):
         untrusted_users.put("untrusted" + str(i).zfill(2))
 
-    with multiprocessing.Pool(processes=num_workers, initializer=initialize,
-                              initargs=(untrusted_users,)) as pool:
+    # Set up our queues that we're going to monitor for new jobs to run on
+    interactive_queue = multiprocessing.Queue()
+    batch_queue = multiprocessing.Queue()
+    populate_queue(interactive_queue, INTERACTIVE_QUEUE)
+    populate_queue(batch_queue, BATCH_QUEUE)
 
-        # Manager allows "shared memory" with the worker process
-        m = multiprocessing.Manager()
+    # the workers will wait on event if the queues are exhausted
+    new_job_event = multiprocessing.Event()
 
-        # Set up our queues that we're going to monitor for new jobs to run on
-        interactive_queue = m.Queue()
-        batch_queue = m.Queue()
-        populate_queue(interactive_queue, INTERACTIVE_QUEUE)
-        populate_queue(batch_queue, BATCH_QUEUE)
+    # this lock will be used to edit the queue or new job event
+    overall_lock = multiprocessing.Lock()
 
-        # the workers will wait on event if the queues are exhausted
-        new_job_event = m.Event()
+    # Setup watchdog observer that will watch the folders and run the handler on any
+    # FileSystemEvents. This runs in a thread automatically.
+    interactive_handler = NewFileHandler(interactive_queue,new_job_event,overall_lock)
+    batch_handler = NewFileHandler(batch_queue,new_job_event,overall_lock)
+    observer = Observer()
+    observer.schedule(event_handler=interactive_handler, path=INTERACTIVE_QUEUE, recursive=False)
+    observer.schedule(event_handler=batch_handler, path=BATCH_QUEUE, recursive=False)
+    observer.start()
 
-        # this lock will be used to edit the queue or new job event
-        overall_lock = m.Lock()
+    # launch the worker threads
+    processes = list()
+    for i in range(0,num_workers):
+        u = "untrusted" + str(i).zfill(2)
+        p = multiprocessing.Process(target=worker_process,args=(interactive_queue,batch_queue,new_job_event,overall_lock,u))
+        p.start()
+        processes.append(p)
 
-        # Setup watchdog observer that will watch the folders and run the handler on any
-        # FileSystemEvents. This runs in a thread automatically.
-        interactive_handler = NewFileHandler(interactive_queue,new_job_event,overall_lock)
-        batch_handler = NewFileHandler(batch_queue,new_job_event,overall_lock)
-        observer = Observer()
-        observer.schedule(event_handler=interactive_handler, path=INTERACTIVE_QUEUE, recursive=False)
-        observer.schedule(event_handler=batch_handler, path=BATCH_QUEUE, recursive=False)
-        observer.start()
+    # wait until the processes finish (doesn't happen under normal operation)
+    for i in range(0,num_workers):
+        processes[i].join()
 
-        # launch the worker threads
-        for i in range(0,num_workers):
-            pool.apply_async(func=worker_process, args=(interactive_queue,batch_queue,new_job_event,overall_lock))
-
-        time.sleep(10)
-        #except KeyboardInterrupt:
-        pool.close()
-        #finally:
-        pool.join()
-
-        observer.stop()
-        observer.join()
+    observer.stop()
+    observer.join()
 
     grade_items_logging.log_message(False,"","","","","grade_scheduler.py terminated")
 
