@@ -526,6 +526,12 @@ table tr.table-header {
     color: #008800;
 }
 
+.blue-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #0a6496;
+}
+
 .red-message {
     font-style: italic;
     font-weight: bold;
