@@ -192,8 +192,8 @@ class Gradeable extends AbstractModel {
     protected $results_files = array();
     protected $meta_files = array();
     protected $previous_files = array();
-    /** @property @var Array of
-    ///// add actual description pls */
+    /** @property @var Array of all split pdfsuploads. Each key is a filename and then each element is an array
+    * that contains filename, file path, and the file size. */
     protected $uploads_files = array();
 
     protected $result_details;
@@ -573,8 +573,8 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Loads submission details about an electronic submission from the submissions/ and
-     * results/ directories and their respective json files.
+     * Loads submission details about an electronic submission from the submissions/,
+     * results/, and uploads/ directories and their respective json files.
      */
     public function loadResultDetails() {
         if ($this->type !== GradeableType::ELECTRONIC_FILE) {

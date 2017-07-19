@@ -397,7 +397,12 @@ function moveSubmission(csrf_token, gradeable_id, user_id, path, count) {
                     $("#bulk_submit_" + count).prop("disabled", true);
                     $("#bulk_delete_" + count).prop("disabled", true);
                     $("#bulk_user_id_" + count).prop("disabled", true);
-                    alert("submitted");
+                    var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
+                    $('#messages').append(message);
+                    setTimeout(function() {
+                        $('#submit_' + count).fadeOut();
+                    }, 5000);
+                    return;
                 }
                 else {
                     alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
@@ -444,7 +449,12 @@ function deleteSubmission(csrf_token, gradeable_id, path, count) {
                     $("#bulk_delete_" + count).prop("disabled", true);
                     $("#bulk_user_id_" + count).val("");
                     $("#bulk_user_id_" + count).prop("disabled", true);
-                    alert("deleted");
+                    var message ='<div id="delete_' + count + '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'delete_' + count + '\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
+                    $('#messages').append(message);
+                    setTimeout(function() {
+                        $('#delete_' + count).fadeOut();
+                    }, 5000);
+                    return;
                 }
                 else {
                     alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);

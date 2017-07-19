@@ -377,12 +377,12 @@ HTML;
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
-                <td width="5%"></td>
+                <td width="4%"></td>
                 <td width="10%">Timestamp</td>
-                <td width="50%">PDF preview</td>
+                <td width="55%">PDF preview</td>
                 <td width="15%">User ID</td>
-                <td width="10%">Submit</td>
-                <td width="10%">Delete</td>
+                <td width="8%">Submit</td>
+                <td width="8%">Delete</td>
             </tr>
         </thead>
         <tbody>
@@ -403,22 +403,22 @@ HTML;
                         }
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
                         $return .= <<<HTML
-            <tr>
-                <td style="vertical-align: middle">{$count}</td>
-                <td style = "vertical-align: middle">{$clean_timestamp}</td> 
+            <tr class="tr tr-vertically-centered">
+                <td>{$count}</td>
+                <td>{$clean_timestamp}</td> 
                 <td>
                     <object data="{$url}" type="application/pdf" width="100%" height="300">
                         alt : <a href="{$url}">pdf.pdf</a>
                     </object>
                 </td>
-                <td style="vertical-align: middle">
+                <td>
                     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
                     <input type="text" id="bulk_user_id_{$count}" value =""/>
                 </td>
-                <td style="vertical-align: middle">
+                <td>
                     <button type="button" id="bulk_submit_{$count}" class="btn btn-success">Submit</button>
                 </td>
-                <td style="vertical-align: middle">
+                <td>
                     <button type="button" id="bulk_delete_{$count}" class="btn btn-danger">Delete</button>
                 </td>
             </tr>

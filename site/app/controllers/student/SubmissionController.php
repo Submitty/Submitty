@@ -501,12 +501,7 @@ class SubmissionController extends AbstractController {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
-        if ($user_id == $original_user_id)
-            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
-        else
-            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}";
-
-        return $this->uploadResult("Successfully uploaded files");
+        return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}");
     }
 
     /**
@@ -557,10 +552,8 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }
         }
-        
-        $_SESSION['messages']['success'][] = "Successfully deleted this PDF.";
 
-        return $this->uploadResult("Successfully deleted files");
+        return $this->uploadResult("Successfully deleted this PDF.");
     }
 
     /**
