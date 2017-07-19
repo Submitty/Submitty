@@ -559,6 +559,7 @@ class SubmissionController extends AbstractController {
             $gradeable_list = $mylist->getSubmittableElectronicGradeables();
         }
         else{
+            $ta = false;
             $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         }
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
