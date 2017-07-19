@@ -590,6 +590,10 @@ HTML;
 HTML;
             $penalty = !(intval($question->getMaxValue()) > 0);
             $message = htmlentities($question->getTitle());
+            $message = "<b>{$message}</b>";
+            if ($question->getGradedVersion() != -1) {
+                $message .= "  " . "Before submitting regrade, please ensure that comments from version " . $question->getGradedVersion() . " still apply.";
+            }
             $note = htmlentities($question->getTaComment());
             if ($note != "") {
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
@@ -600,19 +604,19 @@ HTML;
             if($question->getIsExtraCredit()) {
                 $return .= <<<HTML
                     <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-                        <i class="icon-plus"></i> <b>{$message}</b> {$note}
+                        <i class="icon-plus"></i> $message {$note}
 HTML;
             }
             else if($penalty) {
                 $return .= <<<HTML
                     <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-                        <i class="icon-minus"></i> <b>{$message}</b> {$note}
+                        <i class="icon-minus"></i> $message {$note}
 HTML;
             }
             else {
                 $return .= <<<HTML
                     <td style="font-size: 12px;" colspan="4">
-                        <b>{$message}</b> {$note}
+                        $message {$note}
 HTML;
             }
 
