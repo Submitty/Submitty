@@ -3,6 +3,12 @@
     "max_submission_size" : 1000000,
     "assignment_message" : "Please upload a single .pdf file containing 500-1000 words.",
 
+    "autograding" : {
+        "submission_to_compilation" : [ "*.pdf" ],
+        "submission_to_runner" : [ "*.pdf" ],
+        "submission_to_validation" : [ "*.pdf" ]
+    },
+    
     "testcases" : [ 
 
         {
@@ -14,7 +20,7 @@
 
         {
             "title" : "Required 500-1000 Words",
-            "command" : [ "pdftotext test01_*pdf plaintext.txt",
+            "command" : [ "pdftotext *.pdf plaintext.txt",
                           "wc -w < plaintext.txt" ],
             "points" : 1,
             "validation" : [

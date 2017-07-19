@@ -34,20 +34,27 @@ class ElectronicGraderController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $this->core->getOutput()->addBreadcrumb("Status {$gradeable->getName()}");
 
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         /*
          * we need number of students per section
          */
         $total = array();
-        $graded = array();
+        $graded_components = array();
         $graders = array();
         $sections = array();
+        $total_users = 0;
         if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getUser()->accessFullGrading()){
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
             }
             if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
-                $total = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
-                $graded = $this->core->getQueries()->getGradedUserCountByRegistrationSections($gradeable->getId(), $sections);
+                $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
+                $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable->getId(), $sections);
                 $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
             }
         }
@@ -56,22 +63,23 @@ class ElectronicGraderController extends AbstractController {
                 $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
             }
             if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
-                $total = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
-                $graded = $this->core->getQueries()->getGradedUserCountByRotatingSections($gradeable_id, $sections);
+                $total_users = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
+                $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable_id, $sections);
                 $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
             }
         }
 
         $sections = array();
-        if (count($total) > 0) {
-            foreach ($total as $key => $value) {
+        if (count($total_users) > 0) {
+            foreach ($total_users as $key => $value) {
                 $sections[$key] = array(
-                    'total_students' => $value,
-                    'graded_students' => 0,
+                    'total_components' => $value * $num_components,                        
+                    'graded_components' => 0,
                     'graders' => array()
                 );
-                if (isset($graded[$key])) {
-                    $sections[$key]['graded_students'] = intval($graded[$key]);
+                if (isset($graded_components[$key])) {
+                    $sections[$key]['graded_components'] = intval($graded_components[$key]);
                 }
                 if (isset($graders[$key])) {
                     $sections[$key]['graders'] = $graders[$key];
@@ -89,6 +97,12 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $this->core->getOutput()->addBreadcrumb("Details {$gradeable->getName()}");
+
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
@@ -118,10 +132,9 @@ class ElectronicGraderController extends AbstractController {
         $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
 
         $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'summaryPage', $gradeable, $rows, $graders);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders);
     }
 
-    //TODO (issue #1128) refactor this function to set data in the gradeable model then call $gradeable->saveData()
     public function submitGrade() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             $_SESSION['messages']['error'][] = "Invalid CSRF Token";
@@ -132,68 +145,97 @@ class ElectronicGraderController extends AbstractController {
         $who_id = $_POST['u_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
 
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
+        if ($this->core->getUser()->getGroup() === 3) {
+            if ($gradeable->isGradeByRegistration()) {
+                $sections = $this->core->getUser()->getGradingRegistrationSections();
+                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            }
+            else {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+                $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
+            $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
+            if (!in_array($who_id, $user_ids_to_grade)) {
+                $_SESSION['messages']['error'][] = "You do not have permission to grade {$who_id}";
+                $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+            }
+        }
+
         $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
         $homeworkDate = $gradeable->getGradeStartDate();
         if ($now < $homeworkDate) {
             $_SESSION['messages']['error'][] = "Grading is not open yet for {$gradeable->getName()}";
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
-        
-        $regrade = $gradeable->beenTAgraded();
-        
-        $submit_data = array();
-        $submit_data['g_id'] = $gradeable_id;
-        $submit_data['u_id'] = $who_id;
-        $submit_data['gd_id'] = $regrade ? $gradeable->getGdId() : null;
-        $submit_data['grader_id'] = isset($_POST['overwrite']) ? $this->core->getUser()->getId() : $gradeable->getGrader()->getId();
-        $submit_data['comment'] = $_POST['comment-general'];
-        $submit_data['graded_version'] = $_POST['graded_version'];
-        $submit_data['time'] = $now->format("Y-m-d H:i:s");
-        
-        $submit_data['components'] = array();
-        $comps = $gradeable->getComponents();
-        //update each gradeable component data
-        foreach($comps as $comp){
-            $gc_id = $comp->getId();
-            $submit_data['components'][$gc_id] = array();
-            $submit_data['components'][$gc_id]['grade'] = floatval($_POST["grade-{$comp->getOrder()}"]);
-            $submit_data['components'][$gc_id]['comment'] = isset($_POST["comment-{$comp->getOrder()}"]) ? $_POST["comment-{$comp->getOrder()}"] : '';
-        }
 
-        $this->core->getQueries()->submitTAGrade($submit_data);
+        $gradeable->setOverallComment($_POST['comment-general']);
+
+        $comps = $gradeable->getComponents();
+        foreach($comps as $key => $data) {
+            if (isset($_POST['overwrite'])) $comps[$key]->setGrader($this->core->getUser());
+            $comps[$key]->setScore(floatval($_POST["grade-{$comps[$key]->getOrder()}"]));
+            $comps[$key]->setComment($_POST["comment-{$comps[$key]->getOrder()}"]);
+            $comps[$key]->setGradedVersion($_POST["graded_version"]);
+            $comps[$key]->setGradeTime($now);
+        }
+        $gradeable->setComponents($comps);
+
+        $gradeable->saveData();
 
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($who_id, $gradeable_id);
-        $individual = intval($_POST['individual']);
 
         $_SESSION['messages']['success'][] = "Successfully uploaded grade for {$who_id}";
-
+        $individual = intval($_POST['individual']);
         if ($individual == 1) {
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id)));
         }
         else {
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable_id, 'individual'=>'0')));
-        }
-        
+        }   
     }
 
     public function showGrading() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
 
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         $graded = 0;
         $total = 0;
         if ($gradeable->isGradeByRegistration()) {
+            $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
+            if ($this->core->getUser()->accessAdmin() && $sections == null) {
+                $sections = $this->core->getQueries()->getRegistrationSections();
+                for ($i = 0; $i < count($sections); $i++) {
+                    $sections[$i] = $sections[$i]['sections_registration_id'];
+                }
+            }
             $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
             $total = array_sum($this->core->getQueries()->getTotalUserCountByRegistrationSections($sections));
-            $graded = array_sum($this->core->getQueries()->getGradedUserCountByRegistrationSections($gradeable_id, $sections));
+            $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable_id, $sections));
         }
         else {
+            $section_key = "rotating_section";
             $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+            if ($this->core->getUser()->accessAdmin() && $sections == null) {
+                $sections = $this->core->getQueries()->getRotatingSections();
+                for ($i = 0; $i < count($sections); $i++) {
+                    $sections[$i] = $sections[$i]['sections_rotating_id'];
+                }
+            }
             $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
             $total = array_sum($this->core->getQueries()->getTotalUserCountByRotatingSections($sections));
-            $graded = array_sum($this->core->getQueries()->getGradedUserCountByRotatingSections($gradeable_id, $sections));
+            $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable_id, $sections));
         }
 
         if($total == 0) {
@@ -203,43 +245,35 @@ class ElectronicGraderController extends AbstractController {
             $progress = round(($graded / $total) * 100, 1);
         }
 
-        $user_ids_to_grade = array();
-        foreach ($users_to_grade as $u) {
-            $user_ids_to_grade[] = $u->getId();
-        }
+        $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
+        $gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
-        if (isset($_REQUEST['who_id'])) {
-            $who_id = $_REQUEST['who_id'];
-        }
-        else {
-            $gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade);
-            $who_id = "";
-            foreach ($gradeables_to_grade as $g) {
-                if (!$g->beenTAgraded()) {
-                    $who_id = $g->getUser()->getId();
-                    break; 
-                }
-            }
-            if ($who_id === "") {
-                $_SESSION['messages']['success'][] = "Finished grading for {$gradeable->getName()}";
-                $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
-            }
+        $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
+        if (($who_id !== "") && ($this->core->getUser()->getGroup() === 3) && !in_array($who_id, $user_ids_to_grade)) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$who_id}";
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
         $prev_id = "";
         $next_id = "";
         $break_next = false;
-        foreach ($user_ids_to_grade as $u_id) {
+        foreach ($gradeables_to_grade as $g) {
+            $id = $g->getUser()->getId();
             if ($break_next) {
-                $next_id = $u_id;
+                $next_id = $id;
                 break;
             }
-            if ($u_id === $who_id) {
+            if (($who_id === "" && !$g->beenTAgraded()) || $who_id === $id) {
+                $who_id = $id;
                 $break_next = true;
             }
             else {
-                $prev_id = $u_id;
+                $prev_id = $id;
             }
+        }
+        if ($who_id === "") {
+            $_SESSION['messages']['success'][] = "Finished grading for {$gradeable->getName()}";
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);

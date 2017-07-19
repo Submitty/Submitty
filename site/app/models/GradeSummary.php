@@ -68,12 +68,18 @@ class GradeSummary extends AbstractModel {
         
         $autograding_score = $gradeable->getGradedAutoGraderPoints();
         $ta_grading_score = $gradeable->getGradedTAPoints();
-        
+
         $this_g['id'] = $gradeable->getId();
         $this_g['name'] = $gradeable->getName();
         $this_g['grade_released_date'] = $gradeable->getGradeReleasedDate();
         
-        $this_g['score'] = max(0,floatval($autograding_score)+floatval($ta_grading_score));
+        if($gradeable->validateVersions() || !$gradeable->useTAGrading()){
+            $this_g['score'] = max(0,floatval($autograding_score)+floatval($ta_grading_score));
+        }
+        else{
+            $this_g['score'] = 0;
+            $this_g['note'] = 'SCORE IS SET TO 0 BECAUSE THERE ARE VERSION CONFLICTS.';
+        }
         
         switch ($gradeable->getType()) {
             case GradeableType::ELECTRONIC_FILE:

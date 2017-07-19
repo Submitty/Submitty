@@ -89,17 +89,18 @@ CREATE FUNCTION csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader
         -- Remove any existing record for this student for this gradeable
         DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
 
-        INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_graded_version) VALUES (gradeable_id, line[1],grader_id, '', 1);
+        INSERT INTO gradeable_data(g_id, gd_user_id, gd_overall_comment) VALUES (gradeable_id, line[1], '', 1);
 
         SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
 
         FOR j IN 1..size
         LOOP
           IF istext[j] THEN
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_component_comment) VALUES (gcids[j], gdid,0, line[j+1]);
+          --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
           ELSE
             score := CAST(line[j+1] AS NUMERIC);
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_component_comment) VALUES (gcids[j], gdid, score, '');
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
           END IF;
         END LOOP;
 
@@ -172,6 +173,7 @@ CREATE TABLE gradeable (
     g_instructions_url character varying(255) NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_team_assignment boolean NOT NULL,
+    g_peer_grading boolean NOT NULL,
     g_gradeable_type integer NOT NULL,
     g_grade_by_registration boolean NOT NULL,
     g_ta_view_start_date timestamp(6) without time zone NOT NULL,
@@ -199,6 +201,7 @@ CREATE TABLE gradeable_component (
     gc_max_value numeric NOT NULL,
     gc_is_text boolean NOT NULL,
     gc_is_extra_credit boolean NOT NULL,
+    gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL
 );
 
@@ -213,6 +216,7 @@ CREATE TABLE gradeable_component_data (
     gcd_score numeric NOT NULL,
     gcd_component_comment character varying NOT NULL,
     gcd_grader_id character varying(255) NOT NULL,
+    gcd_graded_version integer,
     gcd_grade_time timestamp(6) without time zone NOT NULL,
     CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id))
 );
@@ -245,9 +249,7 @@ CREATE TABLE gradeable_data (
     gd_id integer NOT NULL,
     g_id character varying(255) NOT NULL,
     gd_user_id character varying(255) NOT NULL,
-    gd_grader_id character varying(255),
     gd_overall_comment character varying NOT NULL,
-    gd_graded_version integer NOT NULL,
     gd_user_viewed_date timestamp(6) without time zone DEFAULT NULL
 );
 
@@ -350,7 +352,7 @@ CREATE TABLE sessions (
 
 CREATE TABLE users (
     user_id character varying NOT NULL,
-    user_password character varying,
+    anon_id character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
@@ -359,6 +361,7 @@ CREATE TABLE users (
     registration_section integer,
     rotating_section integer,
     manual_registration boolean DEFAULT false,
+    last_updated TIMESTAMP WITHOUT time zone,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 0) AND (user_group <= 4)))
 );
 
@@ -626,14 +629,6 @@ ALTER TABLE ONLY gradeable_component
 
 ALTER TABLE ONLY gradeable_data
     ADD CONSTRAINT gradeable_data_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
-
-
---
--- Name: gradeable_data_gd_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY gradeable_data
-    ADD CONSTRAINT gradeable_data_gd_grader_id_fkey FOREIGN KEY (gd_grader_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --

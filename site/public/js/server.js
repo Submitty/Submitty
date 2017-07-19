@@ -84,6 +84,7 @@ function editUserForm(user_id) {
 }
 
 function newUserForm() {
+    $('.popup-form').css('display', 'none');
     var form = $("#edit-user-form");
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
@@ -97,6 +98,25 @@ function newUserForm() {
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
+}
+
+function newGraderListForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#grader-list-form");
+    form.css("display", "block");
+    form.css("width", "500px");
+    form.css("margin-left", "-250px");
+    $('[name="upload"]', form).val(null);
+}
+
+function newClassListForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#class-list-form");
+    form.css("display", "block");
+    form.css("width", "500px");
+    form.css("margin-left", "-250px");
+    $('[name="move_missing"]', form).prop('checked', false);
+    $('[name="upload"]', form).val(null);
 }
 
 /**
@@ -372,7 +392,6 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
         try{
             response = JSON.parse(response);
             if (response['status'] === 'success') {
-                console.log("Success");
                 callbackSuccess(response);
             }
             else {
@@ -398,6 +417,7 @@ function setupCheckboxCells() {
     $("td[class^=cell-]").click(function() {
         var parent = $(this).parent();
         var elems = [];
+        var scores = {};
         if ($(this).hasClass('cell-all')) {
             var lastScore = null;
             var setFull = false;
@@ -408,6 +428,7 @@ function setupCheckboxCells() {
                 else if (lastScore !== $(this).data("score")) {
                     setFull = true;
                 }
+                scores[$(this).data('id')] = $(this).data('score');
             });
             parent.children(".cell-grade").each(function() {
                 updateCheckpointCell(this, setFull);
@@ -417,10 +438,9 @@ function setupCheckboxCells() {
         else {
             updateCheckpointCell(this);
             elems.push(this);
+            scores[$(this).data('id')] = $(this).data('score');
         }
-        var scores = {};
-        scores[$(this).data('id')] = $(this).data('score');
-
+        
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
             {
@@ -722,6 +742,16 @@ function setupNumericTextCells() {
             f.replaceWith(f = f.clone(true));
         }
     });
+}
+
+function openPopUp(css, title, count, testcase_num, side) {
+    var element_id = "container_" + count + "_" + testcase_num + "_" + side;
+    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
+    elem_html += title + document.getElementById(element_id).innerHTML;
+    my_window = window.open("", "_blank", "status=1,width=750,height=500");
+    my_window.document.write(elem_html);
+    my_window.document.close(); 
+    my_window.focus();
 }
 
 function updateHomeworkExtensions(data) {

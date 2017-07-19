@@ -7,6 +7,8 @@ use app\libraries\Core;
 use app\libraries\Output;
 use app\models\HWReport;
 use app\models\GradeSummary;
+use app\models\LateDaysCalculation;
+
 /*
 use app\report\HWReportView;
 use app\report\CSVReportView;
@@ -43,6 +45,7 @@ class ReportController extends AbstractController {
         $gradeables = $this->core->getQueries()->getGradeables(null, $student_ids);
         $results = array();
         $results['header_model'] = array('First' => 'First Name', 'Last'=> 'Last Name', 'reg_section' => 'Registration Section');
+        $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
             $student_id = $gradeable->getUser()->getId();
             if(!isset($results[$student_id])) {
@@ -52,7 +55,17 @@ class ReportController extends AbstractController {
             if(!isset($results['header_model'][$g_id])) {
                 $results['header_model'][$g_id] = $g_id.": ".($gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints());
             }
-            $results[$student_id][$g_id] = $gradeable->getGradedTAPoints() + $gradeable->getGradedAutograderPoints();
+
+            $autograding_score = $gradeable->getGradedAutograderPoints();
+            $ta_grading_score = $gradeable->getGradedTAPoints();
+            
+            $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
+            if(substr($late_days['status'], 0, 3) == 'Bad' || !$gradeable->validateVersions()) {
+                $results[$student_id][$g_id] = 0;
+            }
+            else{
+                $results[$student_id][$g_id] = $autograding_score + $ta_grading_score;
+            }
         }
         
         $nl = "\n";

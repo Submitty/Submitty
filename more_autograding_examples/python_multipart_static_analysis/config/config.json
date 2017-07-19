@@ -9,7 +9,9 @@
         "RLIMIT_AS" : "RLIM_INFINITY",
         "RLIMIT_SIGPENDING" : 100
     },
-
+    "autograding" : {
+        "submission_to_validation" : [ "part2/*.txt" ]
+    },
     "testcases" : [
         {
             "title" : "Convert Temperature",

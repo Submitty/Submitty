@@ -2,8 +2,6 @@
 
 namespace app\views\submission;
 
-use app\libraries\FileUtils;
-use app\libraries\Utils;
 use app\models\Gradeable;
 use app\views\AbstractView;
 
@@ -209,7 +207,7 @@ HTML;
             if($current_version_number === $gradeable->getHighestVersion()
                 && $current_version_number > 0) {
                 $return .= <<<HTML
-    <button type="button" id= "getprev" class="btn btn-primary">Get Most Recent Files</button>
+    <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
             }
 
@@ -440,6 +438,13 @@ HTML;
         </p>
     </div>
 HTML;
+                    if ($gradeable->hasConditionalMessage()) {
+                        $return .= <<<HTML
+    <div class="sub" id="conditional_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
+    </div>
+HTML;
+                    }
                 }
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
@@ -576,217 +581,12 @@ HTML;
 HTML;
                 }
                 else {
-                    $has_badges = false;
-                    if ($gradeable->getNormalPoints() > 0) {
-                        $has_badges = true;
-                        if ($current_version->getNonHiddenTotal() >= $gradeable->getNormalPoints()) {
-                            $background = "green-background";
-                        }
-                        else if ($current_version->getNonHiddenTotal() > 0) {
-                            $background = "yellow-background";
-                        }
-                        else {
-                            $background = "red-background";
-                        }
-                        $return .= <<<HTML
-        <div class="box">
-            <div class="box-title">
-                <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
-                <h4>Total</h4>
-            </div>
-        </div>
-HTML;
-                    }
-
-                    $count = 0;
-                    $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
-                    foreach ($gradeable->getTestcases() as $testcase) {
-                        if (!$testcase->viewTestcase()) {
-                          continue;
-                        }
-                        $div_click = "";
-                        if ($testcase->hasDetails()) {
-                            $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
-                        }
-                        $return .= <<<HTML
-        <div class="box">
-            <div class="box-title" {$div_click}>
-HTML;
-                        if ($testcase->hasDetails()) {
-                            $return .= <<<HTML
-                <div style="float:right; color: #0000EE; text-decoration: underline">Details</div>
-HTML;
-                        }
-                        if ($testcase->hasPoints()) {
-                            if ($testcase->isHidden()) {
-                                $return .= <<<HTML
-                <div class="badge">Hidden</div>
-HTML;
-                            }
-                            else {
-                                $showed_badge = false;
-                                $background = "";
-                                if ($testcase->isExtraCredit()) {
-                                    if ($testcase->getPointsAwarded() > 0) {
-                                        $showed_badge = true;
-                                        $background = "green-background";
-                                        $return .= <<<HTML
-                <div class="badge {$background}"> &nbsp; +{$testcase->getPointsAwarded()} &nbsp; </div>
-HTML;
-                                    }
-                                }
-                                else if ($testcase->getPoints() > 0) {
-                                    if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
-                                        $background = "green-background";
-                                    }
-                                    else if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
-                                        $background = "red-background";
-                                    }
-                                    else {
-                                        $background = "yellow-background";
-                                    }
-                                    $showed_badge = true;
-                                    $return .= <<<HTML
-                <div class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</div>
-HTML;
-                                }
-                                else if ($testcase->getPoints() < 0) {
-                                    if ($testcase->getPointsAwarded() < 0) {
-                                        if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
-                                            $background = "red-background";
-                                        }
-                                        else if ($testcase->getPointsAwarded() < 0) {
-                                            $background = "yellow-background";
-                                        }
-                                        $showed_badge = true;
-                                        $return .= <<<HTML
-                <div class="badge {$background}"> &nbsp; {$testcase->getPointsAwarded()} &nbsp; </div>
-HTML;
-                                    }
-                                }
-                                if (!$showed_badge) {
-                                    $return .= <<<HTML
-                <div class="no-badge"></div>
-HTML;
-                                }
-                            }
-                        }
-                        else if ($has_badges) {
-                            $return .= <<<HTML
-                <div class="no-badge"></div>
-HTML;
-                        }
-                        $name = htmlentities($testcase->getName());
-                        $extra_credit = "";
-                        if($testcase->isExtraCredit()) {
-                          $extra_credit = "&nbsp;&nbsp;<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
-                        }
-                        $command = htmlentities($testcase->getDetails());
-                        $testcase_message = "";
-                        if (!$testcase->isHidden() && $testcase->viewTestcaseMessage()) {
-                            $testcase_message = <<<HTML
-                        <span class='italics'><font color="#c00000">{$testcase->getTestcaseMessage()}</font></span>
-HTML;
-                        }
-                        $return .= <<<HTML
-                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>{$extra_credit}&nbsp;&nbsp;{$testcase_message}</h4>
-            </div>
-HTML;
-                        if ($testcase->hasDetails()) {
-                            $return .= <<<HTML
-            <div id="testcase_{$count}" style="display: {$display_box};">
-HTML;
-                            if (!$testcase->isHidden()) {
-                                $autocheck_cnt = 0;
-                                $autocheck_len = count($testcase->getAutochecks());
-                                foreach ($testcase->getAutochecks() as $autocheck) {
-                                    $description = $autocheck->getDescription();
-                                    $diff_viewer = $autocheck->getDiffViewer();
-
-                                    $return .= <<<HTML
-                <div class="box-block">
-HTML;
-
-                                    $title = "";
-                                    $return .= <<<HTML
-                            <div class='diff-element'>
-HTML;
-                                    if ($diff_viewer->hasDisplayExpected()) {
-                                        $title = "Student ";
-                                    }
-                                    $title .= $description;
-                                    $return .= <<<HTML
-                                <h4>{$title}</h4>
-HTML;
-                                    foreach ($autocheck->getMessages() as $message) {
-                                        $return .= <<<HTML
-                                <span class="red-message">{$message}</span><br />
-HTML;
-                                    }
-
-                                    $myimage = $diff_viewer->getActualImageFilename();
-                                    if ($myimage != "") {
-                                        // borrowed from file-display.php
-                                        $content_type = FileUtils::getContentType($myimage);
-                                        if (substr($content_type, 0, 5) === "image") {
-                                           // Read image path, convert to base64 encoding
-                                           $imageData = base64_encode(file_get_contents($myimage));
-                                           // Format the image SRC:  data:{mime};base64,{data};
-                                           $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
-                                           // insert the sample image data
-                                           $return .= '<img src="'.$myimagesrc.'">';
-                                        }
-                                    }
-                                    else if ($diff_viewer->hasDisplayActual()) {
-                                        $return .= <<<HTML
-                                {$diff_viewer->getDisplayActual()}
-HTML;
-                                    }
-                                    $return .= <<<HTML
-                            </div>
-HTML;
-
-                                    if ($diff_viewer->hasDisplayExpected()) {
-                                        $return .= <<<HTML
-                            <div class='diff-element'>
-                                <h4>Expected {$description}</h4>
-HTML;
-                                        for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
-                                            $return .= <<<HTML
-                                <br />
-HTML;
-                                        }
-                                        $return .= <<<HTML
-                                {$diff_viewer->getDisplayExpected()}
-                            </div>
-HTML;
-                                    }
-
-                                    $return .= <<<HTML
-                </div>
-HTML;
-                                    if (++$autocheck_cnt < $autocheck_len) {
-                                        $return .= <<<HTML
-                <div class="clear"></div>
-HTML;
-                                    }
-                                }
-                            }
-                            $return .= <<<HTML
-            </div>
-HTML;
-                        }
-                        $return .= <<<HTML
-        </div>
-HTML;
-                        $count++;
-                    }
+                    $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable);
                 }
                 $return .= <<<HTML
     </div>
 HTML;
             }
-
             $return .= <<<HTML
 </div>
 HTML;
@@ -811,6 +611,13 @@ HTML;
 HTML;
         }
 
+        return $return;
+    }
+
+    public function showPopUp($gradeable) {
+        $return = <<<HTML
+            <p>Banana</p>
+HTML;
         return $return;
     }
 }

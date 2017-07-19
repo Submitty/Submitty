@@ -528,7 +528,20 @@ table tr.table-header {
 
 .red-message {
     font-style: italic;
+    font-weight: bold;
     color: #af0000;
+}
+
+.yellow-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #eac73d;
+}
+
+.black-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #000000;
 }
 
 .sub-text {
@@ -702,9 +715,9 @@ table .instructor .two-options{
 
 .btn-nav {
     width:100%;
-    padding: 0px; 
-    padding-top: 10px; 
-    padding-bottom: 10px;
+    padding: 0px !important; 
+    padding-top: 10px !important; 
+    padding-bottom: 10px !important;
 }
 
 .rainbow {
@@ -726,7 +739,7 @@ table .instructor .two-options{
     color-stop(100%, rgba(255, 0, 0, 0.4)));
 }
 
-#edit-user-form {
+.popup-form {
     z-index: 2000;
     position: fixed;
     top: 10%;
@@ -740,7 +753,7 @@ table .instructor .two-options{
     display: none;
 }
 
-#edit-user-form div {
+.popup-form div {
     width: 30%;
     display: inline-block;
     vertical-align: top;
@@ -748,7 +761,7 @@ table .instructor .two-options{
     padding-bottom: 10px;
 }
 
-#edit-user-form > div > input[type="text"] {
+.popup-form > div > input[type="text"] {
     width: 95%;
 }
 

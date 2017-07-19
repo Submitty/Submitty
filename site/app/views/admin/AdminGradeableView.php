@@ -34,6 +34,8 @@ class AdminGradeableView extends AbstractView {
         $electronic_gradeable['eg_precision'] = 0.5;
         $team_yes_checked;
         $team_no_checked;
+        $peer_yes_checked = false;
+        $peer_no_checked = true;
         $TA_grade_open_date = date('m/d/Y 23:59:59', strtotime( '+10 days' ));
         $TA_grade_release_date = date('m/d/Y 23:59:59', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
@@ -82,6 +84,8 @@ class AdminGradeableView extends AbstractView {
             $g_instructions_url = $data[0]['g_instructions_url'];
             $team_yes_checked = $data[0]['g_team_assignment'];
             $team_no_checked = !$team_yes_checked;
+            $peer_yes_checked = $data[0]['g_peer_grading'];
+            $peer_no_checked = !$peer_yes_checked;
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
@@ -106,10 +110,13 @@ class AdminGradeableView extends AbstractView {
             $g_instructions_url = $data[0]['g_instructions_url'];
             $team_yes_checked = $data[0]['g_team_assignment'];
             $team_no_checked = !$team_yes_checked;
+            $peer_yes_checked = $data[0]['g_peer_grading'];
+            $peer_no_checked = !$peer_yes_checked;
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
+            $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
@@ -278,12 +285,12 @@ HTML;
             <fieldset>
             <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes"
 HTML;
-        if (($type_of_action === "edit" || $type_of_action === "add_template") && $team_yes_checked) { $html_output .= "checked"; }
+        if (($type_of_action === "edit" || $type_of_action === "add_template") && $team_yes_checked) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
             > Yes
             <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="no"
 HTML;
-        if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= "checked"; }
+        if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
             > No
                 <div class="team_assignment team_yes" id="team_date">
@@ -302,19 +309,19 @@ HTML;
             <fieldset>
                 <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
 HTML;
-    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type']===0) { $html_output .= "checked"; }
+    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type']===0) { $html_output .= ' checked="checked"'; }
     $html_output .= <<<HTML
             > 
             Electronic File
             <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints"
 HTML;
-            if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type']===1) { $html_output .= "checked"; }
+            if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type']===1) { $html_output .= ' checked="checked"'; }
     $html_output .= <<<HTML
             >
             Checkpoints
             <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric"
 HTML;
-            if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type']===2) { $html_output .= "checked"; }
+            if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type']===2) { $html_output .= ' checked="checked"'; }
     $html_output .= <<<HTML
             >
             Numeric/Text
@@ -350,7 +357,7 @@ HTML;
 		<br />
                 <b>Full path to the directory containing the autograding config.json file:</b><br>
                 See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">Submitty GitHub sample assignment configurations</a><br>
-		<kbd>/usr/local/submitty/sample_files/sample_assignment_config/no_autograding/</kbd>  (for an upload only homework)<br>
+		<kbd>/usr/local/submitty/more_autograding_examples/no_autograding/config</kbd>  (for an upload only homework)<br>
 		<kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
 		<kbd>/var/local/submitty/courses/{$_GET['semester']}/{$_GET['course']}/config_upload/#</kbd> (for an web uploaded configuration)<br>
 
@@ -360,16 +367,28 @@ HTML;
                 Will this assignment also be graded by the TAs?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
-                if ($use_ta_grading===true) { $html_output .= "checked"; }
+                if ($use_ta_grading===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> Yes
                 <input type="radio" id="no_ta_grade" name="ta_grading" value="false"
 HTML;
-                if ($use_ta_grading===false) { $html_output .= "checked"; }
+                if ($use_ta_grading===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
-                /> No
+                /> No 
+                
                 <div id="rubric_questions" class="bool_val rubric_questions">
-
+                Will this assignment have peer grading?: 
+                <input type="radio" id="peer_yes_radio" name="peer_grading" value="yes" class="peer_yes"
+HTML;
+        $display_peer_checkboxes = "";
+                if(($type_of_action === "edit" || $type_of_action === "add_template") && $peer_yes_checked) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+ /> Yes
+                <input type="radio" id="peer_no_radio" name="peer_grading" value="no" class="peer_no"
+HTML;
+                if((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; $display_peer_checkboxes='style="display:none"'; }
+        $html_output .= <<<HTML
+ /> No <br />
                 Point precision (for TA grading): 
                 <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
                 <br /> 
@@ -390,7 +409,8 @@ HTML;
                                      'question_grading_note' => "",
                                      'student_grading_note'  => "",
                                      'question_total'        => 0,
-                                     'question_extra_credit' => 0);
+                                     'question_extra_credit' => 0,
+                                     'peer_component'        => 0);
     }
 
     //this is a hack
@@ -420,10 +440,12 @@ HTML;
         <input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_grade}" min="-1000" max="1000" step="0.5" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">
 HTML;
         $checked = ($question['question_extra_credit']) ? "checked" : "";
+        $peer_checked = ($question['peer_component']) ? ' checked="checked"' : "";
         $html_output .= <<<HTML
                 <br />
                 Extra Credit:&nbsp;&nbsp;<input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
                 <br />
+                <div id="peer_checkbox_{$num}" class="peer_checkbox" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
 HTML;
         if ($num > 1){
         $html_output .= <<<HTML
@@ -583,13 +605,14 @@ HTML;
     $html_output .= <<<HTML
             </select>
             <br />
+            <div id="ta_instructions_id">
             What overall instructions should be provided to the TA?:<br /><textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;">
 HTML;
     $tmp = htmlspecialchars($g_overall_ta_instructions);
     $html_output .= <<<HTML
 {$tmp}
 </textarea>
-            
+            </div>
             <br />
             <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
             <br />
@@ -643,14 +666,14 @@ HTML;
         <tr>
 HTML;
 //display the appropriate graders for each user group 
-function display_graders($graders, $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, &$html_output){
+function display_graders($graders, $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, &$html_output, $type_of_action){
     foreach($graders as $grader){
        $html_output .= <<<HTML
         <tr>
             <td>{$grader['user_id']}</td>
             <td><input style="width: 227px" type="text" name="grader_{$grader['user_id']}" class="grader" disabled value="
 HTML;
-        if($have_old && !$g_grade_by_registration) {
+        if(($have_old && !$g_grade_by_registration) || $type_of_action === "add_template") {
             $html_output .= (isset($graders_to_sections[$grader['user_id']])) ? $graders_to_sections[$grader['user_id']] : '';
         }
         else{
@@ -697,7 +720,7 @@ HTML;
         <table>
                 <th>Instructor Graders</th>
 HTML;
-    display_graders($initial_data[4][0], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);
+    display_graders($initial_data[4][0], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output, $type_of_action);
     
   $html_output .= <<<HTML
         </table>
@@ -708,7 +731,7 @@ HTML;
                 <th>Full Access Graders</th>
 HTML;
     
-  display_graders($initial_data[4][1], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);
+  display_graders($initial_data[4][1], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output, $type_of_action);
     
   $html_output .= <<<HTML
             </table>
@@ -722,7 +745,7 @@ HTML;
                 <th>Limited Access Graders</th>
 HTML;
 
-  display_graders($initial_data[4][2], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output);    
+  display_graders($initial_data[4][2], $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections, $html_output, $type_of_action);    
   
     $html_output .= <<<HTML
         </table>
@@ -1011,6 +1034,14 @@ function createCrossBrowserJSDate(val){
                 }
             });
         }
+        
+        if ($('input[name=peer_grading]').is(':checked')){
+            $('input[name=peer_grading]').each(function(){
+                if(!($(this).is(':checked')) && ({$edit})){
+                    $(this).attr("disabled",true);
+                }
+            });
+        }
           
         $('input:radio[name="ta_grading"]').change(function(){
             $('#rubric_questions').hide();
@@ -1019,6 +1050,7 @@ function createCrossBrowserJSDate(val){
                 if($(this).val() == 'true'){ 
                     $('#rubric_questions').show();
                     $('#grading_questions').show();
+                    $('#ta_instructions_id').hide();
                     $('#grades_released_compare_date').html('TA Grading Open Date');
                 } else {
                     $('#grades_released_compare_date').html('Due Date');
@@ -1026,6 +1058,18 @@ function createCrossBrowserJSDate(val){
             }
         });
 
+        $('input:radio[name="peer_grading"]').change(function() {
+            $('.peer_checkbox').hide();
+            $('#peer_averaging_scheme').hide();
+            if ($(this).is(':checked')) {
+                if($(this).val() == 'yes') {
+                    $('.peer_checkbox').show();
+                    $('#peer_averaging_scheme').show();
+                }
+            }
+        });
+        
+        
         $('[name="gradeable_template"]').change(
         function(){
             var arrayUrlParts = [];
@@ -1048,6 +1092,7 @@ function createCrossBrowserJSDate(val){
             $('input[name=config_path]').val('{$electronic_gradeable['eg_config_path']}');
             $('input[name=eg_late_days]').val('{$electronic_gradeable['eg_late_days']}');
             $('input[name=point_precision]').val('{$electronic_gradeable['eg_precision']}');
+            $('#ta_instructions_id').hide();
             
             if($('#repository_radio').is(':checked')){
                 $('#repository').show();
@@ -1109,12 +1154,14 @@ function createCrossBrowserJSDate(val){
                 }
             }
             else if ($(this).val() == 'Checkpoints'){ 
+                $('#ta_instructions_id').show();
                 $('#checkpoints').show();
                 $('#grading_questions').show();
                 $('#ta_grading_compare_date').html('TA Beta Testing Date');
                 $('#grades_released_compare_date').html('TA Grading Open Date');
             }
             else if ($(this).val() == 'Numeric'){ 
+                $('#ta_instructions_id').show();
                 $('#numeric').show();
                 $('#grading_questions').show();
                 $('#ta_grading_compare_date').html('TA Beta Testing Date');
@@ -1478,6 +1525,10 @@ $('#gradeable-form').on('submit', function(e){
         var num = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
         var newQ = num+1;
         var sBox = selectBox(newQ);
+        var display = "";
+        if($('input[id=peer_no_radio]').is(':checked')) {
+            display = 'style="display:none"';
+        }
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
             <td style="overflow: hidden;"> \
                 <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" placeholder="Rubric Item Title"></textarea> \
@@ -1490,6 +1541,7 @@ $('#gradeable-form').on('submit', function(e){
                 <br /> \
                 Extra Credit:&nbsp;&nbsp;<input onclick="calculatePercentageTotal();" name="eg_extra_'+newQ+'" type="checkbox" class="eg_extra extra" value="on"/> \
                 <br /> \
+                <div id="peer_checkbox_'+newQ+'" class="peer_checkbox" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <i class="fa fa-times" aria-hidden="true"></i></a> \
                 <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \

@@ -10,6 +10,8 @@ use app\libraries\DatabaseUtils;
  *
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
+ * @method void setAnonId(string $anon_id)
+ * @method string getAnonId() 
  * @method string getPassword()
  * @method string getFirstName() Get the first name of the loaded user
  * @method string getPreferredFirstName() Get the preferred name of the loaded user
@@ -26,6 +28,7 @@ use app\libraries\DatabaseUtils;
  * @method void setManualRegistration(bool $flag)
  * @method bool isManualRegistration()
  * @method array getGradingRegistrationSections()
+ * @method bool isLoaded()
  */
 class User extends AbstractModel {
     
@@ -34,6 +37,8 @@ class User extends AbstractModel {
     
     /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
+    /** @property @var string The anonymous id of this user which should be unique for each course they are in*/
+    protected $anon_id;
     /**
      * @property
      * @var string The password for the student used for database authentication. This should be hashed and salted.
@@ -75,7 +80,7 @@ class User extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details) {
+    public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;
@@ -86,6 +91,9 @@ class User extends AbstractModel {
         if (isset($details['user_password'])) {
             $this->setPassword($details['user_password']);
         }
+        if (isset($details['anon_id'])) {
+            $this->anon_id = $details['anon_id'];
+        }
         $this->setFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {
             $this->setPreferredFirstName($details['user_preferred_firstname']);
@@ -93,7 +101,7 @@ class User extends AbstractModel {
 
         $this->last_name = $details['user_lastname'];
         $this->email = $details['user_email'];
-        $this->group = intval($details['user_group']);
+        $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
             $this->group = 4;
         }
@@ -104,14 +112,6 @@ class User extends AbstractModel {
         if (isset($details['grading_registration_sections'])) {
             $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
         }
-    }
-    
-    /**
-     * Gets whether the user was actually loaded from the DB with the given user id
-     * @return bool
-     */
-    public function isLoaded() {
-        return $this->loaded;
     }
     
     /**
