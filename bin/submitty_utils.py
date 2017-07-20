@@ -36,7 +36,10 @@ def read_submitty_date(s):
     try:
         without_timezone = datetime.strptime(without_timezone,'%Y-%m-%d %H:%M:%S')
     except ValueError:
-        raise SystemExit("ERROR:  invalid date format %s" % s)
+        try:
+            without_timezone = datetime.strptime(without_timezone, '%Y/%m/%d %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            raise SystemExit("ERROR:  invalid date format %s" % s)
     if len(words) == 2:
         print ("NO TIMEZONE ",s,"assuming local timezone")
         my_timezone = get_timezone()
