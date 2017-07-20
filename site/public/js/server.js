@@ -162,6 +162,11 @@ function checkVersionChange(days_late, late_days_allowed){
     return true;
 }
 
+function checkTaVersionChange(){
+    var message = "You are overriding the student's chosen submission. Are you sure you want to continue?";
+    return confirm(message);
+}
+
 function checkVersionsUsed(gradeable, versions_used, versions_allowed) {
     versions_used = parseInt(versions_used);
     versions_allowed = parseInt(versions_allowed);

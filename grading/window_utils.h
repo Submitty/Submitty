@@ -1,7 +1,8 @@
 #include <string>
 #include <vector>
+#include <set>
 
-double stringToFloat(std::string const &str, int precision);
+float stringToFloat(std::string const &str, int precision);
 
 std::vector<float> extractFloatsFromString(std::string input);
 /**
@@ -9,6 +10,8 @@ std::vector<float> extractFloatsFromString(std::string input);
 *from a string. The values are returned in a vector.
 */
 std::vector<int> extractIntsFromString(std::string input);
+
+std::vector<int> getPidsAssociatedWithPid(int pid);
 
 /**
 * Given a pid, this function finds any windows directly belonging to it. 
@@ -26,13 +29,15 @@ std::vector<std::string> getWindowNameAssociatedWithPid(int pid);
 */
 std::vector<int> getWindowData(std::string data_string, std::string window_name);
 
+std::set<std::string> snapshotOfActiveWindows();
+
 /**
 * Using the child pid, this function queries to see which window names are associated with it and uses the
 * first of these to set the window_name variable (which is passed by reference). At present
 * if any names are returned we just use the first one (we don't currently support multi-window programs.)
 * if none are returned, we simply fail to set the window_name variable. 
 */
-void initializeWindow(std::string& window_name, int pid);
+void initializeWindow(std::string& window_name, int pid, std::set<std::string>& active_windows);
 
 /**
 *This function modifies pos to be <= min and >= max. It is used to set pos to be within the window border.
@@ -82,8 +87,8 @@ void click(std::string window_name, int button);
 /**
 * This function moves the mouse to moved_mouse_x, moved_mouse_y, clamping between x_start x_end and y_start y_end.
 */
-void mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, int x_start, int x_end, int y_start, int y_end);
-
+void mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, 
+                 int x_start, int x_end, int y_start, int y_end, bool no_clamp);
 /**
 * This function sets the height, width, x_start, y_start (upper left coords), x_end, and y_end (lower right) 
 * variables of the student's window. These values are used in operations such as mouse movement. 

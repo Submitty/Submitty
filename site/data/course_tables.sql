@@ -173,6 +173,7 @@ CREATE TABLE gradeable (
     g_instructions_url character varying(255) NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_team_assignment boolean NOT NULL,
+    g_peer_grading boolean NOT NULL,
     g_gradeable_type integer NOT NULL,
     g_grade_by_registration boolean NOT NULL,
     g_ta_view_start_date timestamp(6) without time zone NOT NULL,
@@ -200,6 +201,7 @@ CREATE TABLE gradeable_component (
     gc_max_value numeric NOT NULL,
     gc_is_text boolean NOT NULL,
     gc_is_extra_credit boolean NOT NULL,
+    gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL
 );
 
@@ -351,6 +353,7 @@ CREATE TABLE sessions (
 
 CREATE TABLE users (
     user_id character varying NOT NULL,
+    anon_id character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,

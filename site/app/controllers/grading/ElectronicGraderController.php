@@ -46,6 +46,7 @@ class ElectronicGraderController extends AbstractController {
         $graded_components = array();
         $graders = array();
         $sections = array();
+        $total_users = 0;
         if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getUser()->accessFullGrading()){
                 $sections = $this->core->getUser()->getGradingRegistrationSections();

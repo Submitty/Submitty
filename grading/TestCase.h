@@ -113,7 +113,7 @@ private:
 
   // -------------------------------
   // PRIVATE HELPER FUNCTIONS
-  TestResults* dispatch(const nlohmann::json& grader) const;
+  TestResults* dispatch(const nlohmann::json& grader, int autocheck_number) const;
   TestResults* custom_dispatch(const nlohmann::json& grader) const;
 
   // -------------------------------

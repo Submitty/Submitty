@@ -98,6 +98,7 @@ class AdminGradeableController extends AbstractController {
         $details['g_instructions_url'] = $_POST['instructions_url'];
         $details['g_overall_ta_instructions'] = $_POST['ta_instructions'];
         $details['g_use_teams'] = (isset($_POST['team_assignment']) && $_POST['team_assignment']=='yes')? "true" : "false";
+        $details['g_peer_grading'] = (isset($_POST['peer_grading']) && $_POST['ta_grading'] == "true" && $_POST['peer_grading'] == 'yes') ? "true": "false";
         $details['g_gradeable_type'] = $_POST['gradeable_type'];
         if ($details['g_gradeable_type'] === "Electronic File") {
             $details['g_gradeable_type'] = GradeableType::ELECTRONIC_FILE;
@@ -128,7 +129,9 @@ class AdminGradeableController extends AbstractController {
         $details['array_gc_is_text'] = array();
         $details['array_gc_is_extra_credit'] = array();
         $details['array_gc_order'] = array();
+        $details['array_gc_peer'] = array();
         $details['syllabus_bucket'] = $_POST['gradeable_buckets'];
+        
 
         $num_questions = 0;
         foreach($_POST as $k=>$v){
@@ -147,6 +150,7 @@ class AdminGradeableController extends AbstractController {
                 $details['array_gc_is_text'][$x] = "false";
                 $details['array_eg_gc_is_extra_credit'][$x] = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? "true" : "false";
                 $details['array_gc_order'][$x] = $x;
+                $details['array_gc_peer'][$x] = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on')? "true" : "false";
             }
         }
         // create a gradeable component for each checkpoint
