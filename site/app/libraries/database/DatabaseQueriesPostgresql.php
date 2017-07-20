@@ -1370,18 +1370,5 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
             VALUES(?,?,?)", array($user_id, $g_id, $days));
         }
     }
-
-    // public function getExtensions($user_id, $g_id){
-    //     $this->course_db->query("
-    //       SELECT *
-    //       FROM late_day_exceptions
-    //       WHERE user_id=?
-    //         AND g_id=?;", array($user_id, $g_id));
-          // $details = $this->course_db->$rows();
-          // $details['user_firstname'] = "don't";
-          // $details['user_lastname'] = "care";
-
-    //       // return new SimpleLateUser($this->core, $row);
-    // }
 }
 
