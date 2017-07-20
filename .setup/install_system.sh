@@ -243,6 +243,9 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
+# Install pdftk for exam pdf uploads 
+apt-get install -qqy pdftk
+
 # Used by Network Programming class
 apt-get install -qqy libssl-dev
 

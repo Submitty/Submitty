@@ -68,21 +68,31 @@ HTML;
                 Normal Submission
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
+HTML;
+            if ($gradeable->getNumParts() == 1) {
+                $return .= <<<HTML
+            <input type='radio' id="radio_bulk" name="submission_type">
+                Bulk Upload
+HTML;
+            }
+            $return .= <<<HTML
         </div>
-        <div id="student_id_input" style="display: none">
+        <div id="user_id_input" style="display: none">
             <div class="sub">
                 Input the user_id of the student you wish to submit for. This <i>permanently</i> affects the student's submissions, so please use with caution.
             </div>
             <div class="sub">
                 <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                user_id: <input type="text" float="right" id= "student_id" name="student_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
+                user_id: <input type="text" id= "user_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
             </div class="sub">
         </div>
-
+        <div class = "sub" id="pdf_submit_button" style="display: none">
+            <div class="sub">
+                # of page(s) per PDF: <input type="number" id= "num_pages" placeholder="required"/>
+            </div>
+        </div>
     </form>
 HTML;
-        }   
-
             $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
@@ -90,24 +100,33 @@ HTML;
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
+                $("#radio_bulk").prop("checked", cookieValue==2);
                 document.cookie="student_checked="+0;
             }
             if ($("#radio_student").is(":checked")) {
-                $('#student_id_input').show();
+                $('#user_id_input').show();
+            }
+            if ($("#radio_bulk").is(":checked")) {
+                $('#pdf_submit_button').show();
             }
             $('#radio_normal').click(function() {
-                $('#student_id_input').hide();
-                $('#student_id').val('');
+                $('#user_id_input').hide();
+                $('#pdf_submit_button').hide();
+                $('#user_id').val('');
             });
             $('#radio_student').click(function() {
-                $('#student_id_input').show();
+                $('#pdf_submit_button').hide();
+                $('#user_id_input').show();
+            });
+            $('#radio_bulk').click(function()  {
+                $('#user_id_input').hide();
+                $('#pdf_submit_button').show();
+                $('#user_id').val('');
             });
         });
     </script>
 HTML;
-
-
-
+        }
         $return .= <<<HTML
     <div class="sub">
 HTML;
@@ -331,47 +350,62 @@ HTML;
 
         $return .= <<<HTML
     <script type="text/javascript">
-        function submitStudentGradeable(student_id, highest_version) {
-            handleSubmission("{$this->core->buildUrl(array('component' => 'student',
-                                                            'page' => 'submission',
-                                                            'action' => 'upload',
-                                                            'gradeable_id' => $gradeable->getId()))}",
-                                 "{$this->core->buildUrl(array('component' => 'student',
-                                                               'gradeable_id' => $gradeable->getId()))}",
-                                 {$days_late},
-                                 {$gradeable->getAllowedLateDays()},
-                                 highest_version,
-                                 {$gradeable->getMaxSubmissions()},
-                                 "{$this->core->getCsrfToken()}",
-                                 {$svn_string},
-                                 {$gradeable->getNumTextBoxes()},
-                                 student_id);           
+        function makeSubmission(user_id, highest_version, is_pdf, path, count) {
+            // submit the selected pdf
+            if (is_pdf) {
+                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count);
+            }
+            // otherwise, this is a regular submission of the uploaded files
+            else if (user_id == "") {
+                handleSubmission({$days_late},
+                                {$gradeable->getAllowedLateDays()},
+                                {$gradeable->getHighestVersion()},
+                                {$gradeable->getMaxSubmissions()},
+                                "{$this->core->getCsrfToken()}",
+                                {$svn_string},
+                                {$gradeable->getNumTextBoxes()},
+                                "{$gradeable->getId()}",
+                                "{$gradeable->getUser()->getId()}");
+            }
+            else {
+                handleSubmission({$days_late},
+                                {$gradeable->getAllowedLateDays()},
+                                highest_version,
+                                {$gradeable->getMaxSubmissions()},
+                                "{$this->core->getCsrfToken()}",
+                                {$svn_string},
+                                {$gradeable->getNumTextBoxes()},
+                                "{$gradeable->getId()}",
+                                user_id);
+            }
         }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
                 var user_id = "";
-                if (document.getElementById("submissionForm")) {
-                    user_id = document.getElementById("submissionForm").student_id.value;
+                var num_pages = 0;
+                // depending on which is checked, update cookie
+                if ($('#radio_normal').is(':checked')) {
+                    document.cookie="student_checked="+0;
+                };
+                if ($('#radio_student').is(':checked')) {
+                    document.cookie="student_checked="+1;
+                    user_id = $("#user_id").val();
+                };
+                if ($('#radio_bulk').is(':checked')) {
+                    document.cookie="student_checked="+2;
+                    num_pages = $("#num_pages").val();
+                };
+                // bulk upload
+                if ($("#radio_bulk").is(":checked")) {
+                    handleBulk("{$gradeable->getId()}", num_pages);
                 }
-                // no RCS entered, upload for whoever is logged in
-                if (user_id == ""){
-                    handleSubmission("{$this->core->buildUrl(array('component' => 'student',
-                                                               'page' => 'submission',
-                                                               'action' => 'upload',
-                                                               'gradeable_id' => $gradeable->getId()))}",
-                                 "{$this->core->buildUrl(array('component' => 'student',
-                                                               'gradeable_id' => $gradeable->getId()))}",
-                                 {$days_late},
-                                 {$gradeable->getAllowedLateDays()},
-                                 {$gradeable->getHighestVersion()},
-                                 {$gradeable->getMaxSubmissions()},
-                                 "{$this->core->getCsrfToken()}",
-                                 {$svn_string},
-                                 {$gradeable->getNumTextBoxes()},
-                                 "{$gradeable->getUser()->getId()}");
+                // no user id entered, upload for whoever is logged in
+                else if (user_id == ""){
+                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "")
                 }
+                // user id entered, need to validate first
                 else {
-                    validateStudentId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, submitStudentGradeable);
+                    validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, false, "", "", makeSubmission);
                 }
                 e.stopPropagation();
             });
@@ -379,7 +413,101 @@ HTML;
     </script>
 </div>
 HTML;
+        if ($this->core->getUser()->accessAdmin()) {
 
+            $all_directories = $gradeable->getUploadsFiles();
+
+            if (count($all_directories) > 0) {
+
+                $return .= <<<HTML
+<div class="content">
+    <h2>Unassigned PDF Uploads</h2>
+    <form id="bulkForm" method="post">
+    <table class="table table-striped table-bordered persist-area">
+        <thead class="persist-thead">
+            <tr>
+                <td width="4%"></td>
+                <td width="10%">Timestamp</td>
+                <td width="55%">PDF preview</td>
+                <td width="15%">User ID</td>
+                <td width="8%">Submit</td>
+                <td width="8%">Delete</td>
+            </tr>
+        </thead>
+        <tbody>
+HTML;
+                $count = 1;
+                $count_array = array();
+                foreach ($all_directories as $timestamp => $content) {
+                    $files = $content["files"];
+
+                    foreach ($files as $filename => $details) {
+                        $clean_timestamp = str_replace("_", " ", $timestamp);
+                        $path = $details["path"];
+                        if (strpos($filename, 'cover') == false) {
+                            // add each file that is not a cover to count_array 
+                            // each entry is in format timestamp/filename
+                            $count_array[$count] = $timestamp."/".$filename;
+                            continue;
+                        }
+                        $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
+                        $return .= <<<HTML
+            <tr class="tr tr-vertically-centered">
+                <td>{$count}</td>
+                <td>{$clean_timestamp}</td> 
+                <td>
+                    <object data="{$url}" type="application/pdf" width="100%" height="300">
+                        alt : <a href="{$url}">pdf.pdf</a>
+                    </object>
+                </td>
+                <td>
+                    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                    <input type="text" id="bulk_user_id_{$count}" value =""/>
+                </td>
+                <td>
+                    <button type="button" id="bulk_submit_{$count}" class="btn btn-success">Submit</button>
+                </td>
+                <td>
+                    <button type="button" id="bulk_delete_{$count}" class="btn btn-danger">Delete</button>
+                </td>
+            </tr>
+HTML;
+                    $count++;
+                    }
+                $count_array_json = json_encode($count_array);
+                }
+                $return .= <<<HTML
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#bulkForm button").click(function(e){
+            var btn = $(document.activeElement);
+            var id = btn.attr("id");
+            var count = id.substring(12,id.length);
+            var user_id = $("#bulk_user_id_"+count).val();
+            var js_count_array = $count_array_json;
+            var path = js_count_array[count];
+            if (id.includes("delete")) {
+                message = "Are you sure you want to delete this submission?";
+                if (!confirm(message)) {
+                    return;
+                }
+                deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
+            }
+            else {
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+            }
+        });
+    });
+</script>
+HTML;
+                $return .= <<<HTML
+        </tbody>
+    </table>
+    </form>
+</div>
+HTML;
+            }
+        }
         if ($gradeable->getSubmissionCount() === 0) {
             $return .= <<<HTML
 <div class="content">
