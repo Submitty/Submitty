@@ -501,8 +501,24 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.service   /
 chown -R hwcron:hwcron /etc/systemd/system/submitty_grading_scheduler.service
 chmod 444 /etc/systemd/system/submitty_grading_scheduler.service
 
-systemctl restart submitty_grading_scheduler
-echo -e "\n(Re)Started Submitty Grading Scheduler Daemon\n"
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_before=$?
+
+# if the daemon is currently running, restart it now
+systemctl try-restart submitty_grading_scheduler
+
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_after=$?
+
+if [[ $is_active_before -ne 0 ]]; then
+    echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   systemctl start submitty_grading_scheduler\n"
+else
+    if [[ $is_active_after -ne 0 ]]; then
+        echo -e "\nERROR!  Failed to restart Submitty Grading Scheduler Daemon\n"
+    fi
+    echo -e "Restarted Submitty Grading Scheduler Daemon\n"
+fi
 
 
 ################################################################################################################

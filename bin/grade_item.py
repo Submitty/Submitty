@@ -19,6 +19,8 @@ import tzlocal
 
 import submitty_utils
 import grade_items_logging
+import write_grade_history
+import insert_database_version_data
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
@@ -437,31 +439,29 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     gradingtime=int((grading_finished-grading_began).total_seconds())
 
 
-
-    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","write_grade_history.py"),
-                     history_file,
-                     gradeable_deadline_longstring,
-                     submission_longstring,
-                     str(seconds_late),
-                     queue_time_longstring,
-                     is_batch_job_string,
-                     grading_began_longstring,
-                     str(waittime),
-                     grading_finished_longstring,
-                     str(gradingtime),
-                     grade_result])
+    write_grade_history.just_write_grade_history(history_file,
+                                                 gradeable_deadline_longstring,
+                                                 submission_longstring,
+                                                 seconds_late,
+                                                 queue_time_longstring,
+                                                 is_batch_job_string,
+                                                 grading_began_longstring,
+                                                 waittime,
+                                                 grading_finished_longstring,
+                                                 gradingtime,
+                                                 grade_result)
 
     #---------------------------------------------------------------------
     # WRITE OUT VERSION DETAILS
-    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","insert_database_version_data.py"),
-                     obj["semester"],
-                     obj["course"],
-                     obj["gradeable"],
-                     obj["user"],
-                     obj["team"],
-                     obj["who"],
-                     "true" if obj["is_team"] else "false",
-                     str(obj["version"])])
+    insert_database_version_data.insert_to_database(
+        obj["semester"],
+        obj["course"],
+        obj["gradeable"],
+        obj["user"],
+        obj["team"],
+        obj["who"],
+        "true" if obj["is_team"] else "false",
+        str(obj["version"]))
 
     print ("pid",my_pid,"finished grading ", next_to_grade, " in ", gradingtime, " seconds")
 
