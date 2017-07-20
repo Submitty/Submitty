@@ -64,19 +64,21 @@ try:
     # move to copy folder
     os.chdir(split_path)
 
+    # check that all pages are divisible
     for filename in os.listdir(bulk_path):
 
         total_pages = subprocess.check_output("pdftk " + filename + " dump_data | awk '/NumberOfPages/{print $2}'", shell=True)
         total_pages = int(total_pages.decode('utf-8').rstrip())
-
-        #make sure # of pages is divisible
+        
         if (total_pages % num != 0):
             valid = False
-            message = "Total # of pages: {t} is not divisible by the # of page(s) per exam: {n}".format(t=total_pages,n=num)
+            message = "For file '{f}' the total # of pages: {t} is not divisible by the # of page(s) per exam: {n}".format(f=filename,t=total_pages,n=num)
             shutil.rmtree(split_path)
             break
 
-        # split the pdf
+    # split pdfs
+    for filename in os.listdir(bulk_path):
+
         div = total_pages // num
         for j in range(0,div):
             out_pdf = filename[:-4] + "_" + str(j) + ".pdf"

@@ -531,7 +531,7 @@ function handleBulk(gradeable_id, num_pages) {
                     window.location.href = return_url;
                 }
                 else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    alert("ERROR! \n\n" + data['message']);
                 }
             }
             catch (e) {
