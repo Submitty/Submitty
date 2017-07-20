@@ -1280,7 +1280,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
 
     public function getTeamById($team_id) {
         $this->course_db->query("
-          SELECT team_id, user_id, state FROM gradeable_teams NATURAL JOIN teams WHERE team_id=?", array($team_id));
+          SELECT team_id, user_id, state FROM gradeable_teams NATURAL JOIN teams WHERE team_id=? ORDER BY user_id", array($team_id));
 
         if (count($this->course_db->rows()) === 0) {
             return null;
@@ -1298,7 +1298,8 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
           WHERE g_id=? AND team_id IN (
             SELECT team_id
             FROM teams
-            WHERE user_id=? AND state=1)",
+            WHERE user_id=? AND state=1)
+          ORDER BY user_id",
           array($g_id, $user_id));
 
         if (count($this->course_db->rows()) === 0) {
@@ -1319,7 +1320,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
             FROM teams
           ) AS t ON gt.team_id=t.team_id
           WHERE g_id=?
-          ORDER BY team_id",
+          ORDER BY user_id",
           array($g_id));
 
         $team_rows = array();
