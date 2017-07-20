@@ -243,6 +243,9 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
+# Install pdftk for exam pdf uploads 
+apt-get install -qqy pdftk
+
 # Used by Network Programming class
 apt-get install -qqy libssl-dev
 
@@ -256,6 +259,9 @@ pip2 install python-pam
 pip2 install psycopg2
 pip2 install PyYAML
 pip2 install sqlalchemy
+pip2 install pytz
+pip2 install python-dateutil
+pip2 install tzlocal
 
 pip3 install -U pip
 pip3 install python-pam
@@ -264,6 +270,10 @@ pip3 install psycopg2
 pip3 install sqlalchemy
 pip3 install pylint
 pip3 install psutil
+pip3 install pytz
+pip3 install python-dateutil
+pip3 install tzlocal
+pip3 install watchdog
 pip3 install xlsx2csv
 
 chmod -R 555 /usr/local/lib/python*/*
@@ -505,7 +515,12 @@ else
 fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
-#source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
+
+# (re)start the submitty grading scheduler daemon
+systemctl restart submitty_grading_scheduler
+# also, set it to automatically start on boot
+sudo systemctl enable submitty_grading_scheduler
+
 
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
 mkdir -p ${SUBMITTY_DATA_DIR}/bin
