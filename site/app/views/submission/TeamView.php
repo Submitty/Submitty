@@ -16,30 +16,22 @@ class TeamView extends AbstractView {
         $site_url = $this->core->getConfig()->getSiteUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        
         $user_id = $this->core->getUser()->getId();
-        $has_team = false;
-        foreach ($teams as $t) {
-            if ($t->hasMember($user_id)) {
-                $has_team = true;
-                $team = $t;
-                break;
-            }
-        }
-
+        
+        $team = $gradeable->getTeam();
         $return = <<<HTML
 <div class="content">
     <h2>Manage Team For: {$gradeable->getName()}</h2> <br />
 HTML;
 
     //Top content box, has team
-    if ($has_team) {
+    if ($team !== null) {
 
-        //Team members status
-        if($team->getSize() === 1) {
-            $return .= <<<HTML
-    <span>You are the only member of the team.</span> <br />
+        //List team members
+        $return .= <<<HTML
+    <h3>Your Team:</h3> <br />
 HTML;
+        foreach ($team->getMembers())
         }
         else {
             $teammates = implode(", ", array_diff($t->getMembers(), array($user_id)));

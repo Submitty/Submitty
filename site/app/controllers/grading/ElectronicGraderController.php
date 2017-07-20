@@ -130,6 +130,19 @@ class ElectronicGraderController extends AbstractController {
 
         $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
 
+        if ($gradeable->isTeamAssignment()) {
+            $team_ids = array();
+            $tmp_student_ids = array();
+            foreach ($student_ids as $student_id) {
+                $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $student_id);
+                if (($team !== null) && !in_array($team->getId(), $team_ids)) {
+                    $team_ids[] = $team->getId();
+                    $tmp_student_ids[] = $team->getMembers()[0];
+                }
+            }
+            $student_ids = $tmp_student_ids;
+        }
+
         $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders);
     }

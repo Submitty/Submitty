@@ -350,35 +350,42 @@ abstract class AbstractDatabaseQueries {
      * @param string $g_id
      * @param string $user_id
      */
-    abstract public function newTeam($g_id, $user_id);
+    abstract public function createTeam($g_id, $user_id);
+
+    /**
+     * Remove a user from their current team
+     * @param string $team_id
+     * @param string $user_id
+     */
+    abstract public function leaveTeam($team_id, $user_id);
 
     /**
      * Add user $user_id to team $team_id as an invited user
      * @param string $team_id
      * @param string $user_id
      */
-    abstract public function newTeamInvite($team_id, $user_id);
+    abstract public function sendTeamInvitation($team_id, $user_id);
 
     /**
      * Add user $user_id to team $team_id as a team member
      * @param string $team_id
      * @param string $user_id
      */
-    abstract public function newTeamMember($team_id, $user_id);
+    abstract public function acceptTeamInvitation($team_id, $user_id);
 
     /**
-     * Remove a user from their current team, decline all invitiations for that user
+     * Decline all pending team invitiations for a user
      * @param string $g_id
      * @param string $user_id
      */
-    abstract public function removeTeamUser($g_id, $user_id);
+    abstract public function declineTeamInvitations($g_id, $user_id);
 
     /**
-     * Return an array of Team objects for all teams on given gradeable
-     * @param string $g_id
-     * @return \app\models\Team[]
+     * Return Team object for team whith given Team ID
+     * @param string $team_id
+     * @return \app\models\Team
      */
-    abstract public function getTeamsByGradeableId($g_id);
+    abstract public function getTeamById($team_id);
 
     /**
      * Return Team object for team which the given user belongs to on the given gradeable
@@ -386,7 +393,14 @@ abstract class AbstractDatabaseQueries {
      * @param string $user_id
      * @return \app\models\Team
      */
-    abstract public function getTeamByUserId($g_id, $user_id);
+    abstract public function getTeamByGradeableAndUser($g_id, $user_id);
+
+    /**
+     * Return an array of Team objects for all teams on given gradeable
+     * @param string $g_id
+     * @return \app\models\Team[]
+     */
+    abstract public function getTeamsByGradeableId($g_id);
 
     /**
      * Return an array of users with late days

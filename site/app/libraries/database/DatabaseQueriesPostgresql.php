@@ -372,7 +372,12 @@ LEFT JOIN (
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id 
     GROUP BY gd_id
   ) AS in_gcd ON in_gd.gd_id = in_gcd.gd_id
-) AS gd ON gd.gd_user_id = u.user_id AND g.g_id = gd.g_id
+) AS gd ON g.g_id = gd.g_id AND (gd.gd_user_id = u.user_id OR u.user_id IN (
+    SELECT
+      t.user_id
+    FROM gradeable_teams AS gt, teams AS t
+    WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = gd.gd_team_id AND t.state = 1)
+)
 LEFT JOIN (
   SELECT
     egd.*,
@@ -882,11 +887,20 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
     }
 
     public function insertGradeableData(Gradeable $gradeable) {
-        $params = array($gradeable->getId(), $gradeable->getUser()->getId(),
-                        $gradeable->getOverallComment());
-        $this->course_db->query("INSERT INTO 
+        if ($gradeable->isTeamAssignment()) {
+            $params = array($gradeable->getId(), $gradeable->getTeam()->getId(),
+                            $gradeable->getOverallComment());
+            $this->course_db->query("INSERT INTO 
+gradeable_data (g_id, gd_team_id, gd_overall_comment)
+VALUES (?, ?, ?)", $params);
+        }
+        else {
+            $params = array($gradeable->getId(), $gradeable->getUser()->getId(),
+                            $gradeable->getOverallComment());
+            $this->course_db->query("INSERT INTO 
 gradeable_data (g_id, gd_user_id, gd_overall_comment)
 VALUES (?, ?, ?)", $params);
+        }
         return $this->course_db->getLastInsertId("gradeable_data_gd_id_seq");
     }
 
@@ -1235,28 +1249,64 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
         return $this->course_db->rows();
     }
       
-    public function newTeam($g_id, $user_id) {
-        $this->course_db->query("SELECT * FROM gradeable_teams ORDER BY team_id");
-        $team_id_prefix = count($this->course_db->rows());
+    public function createTeam($g_id, $user_id) {
+        $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable_teams");
+        $team_id_prefix = strval($this->course_db->row()['cnt']);
+        if (strlen($team_id_prefix) < 5) $team_id_prefix = str_repeat("0", 5-strlen($team_id_prefix)) . $team_id_prefix;
         $team_id = "{$team_id_prefix}_{$user_id}";
+        
         $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id) VALUES(?,?)", array($team_id, $g_id));
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
     }
 
-    public function newTeamInvite($team_id, $user_id) {
+    public function leaveTeam($team_id, $user_id) {
+        $this->course_db->query("DELETE FROM teams AS t
+          WHERE team_id=? AND user_id=? AND state=1", array($team_id, $user_id));
+    }
+
+    public function sendTeamInvitation($team_id, $user_id) {
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,0)", array($team_id, $user_id,));
     }
 
-    public function newTeamMember($team_id, $user_id) {
+    public function acceptTeamInvitation($team_id, $user_id) {
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id,));
     }
 
-    public function removeTeamUser($g_id, $user_id) {
+    public function declineTeamInvitations($g_id, $user_id) {
+        $this->course_db->query("DELETE FROM teams AS t USING gradeable_teams AS gt
+          WHERE gt.g_id=? AND gt.team_id = t.team_id AND t.user_id=? AND t.state=0", array($g_id, $user_id));
+    }
+
+    public function getTeamById($team_id) {
         $this->course_db->query("
-          DELETE FROM teams AS t
-          USING gradeable_teams AS gt
-          WHERE gt.g_id=? AND gt.team_id = t.team_id AND t.user_id=?",
+          SELECT team_id, user_id, state FROM gradeable_teams NATURAL JOIN teams WHERE team_id=?", array($team_id));
+
+        if (count($this->course_db->rows()) === 0) {
+            return null;
+        }
+        else {
+            $team = new Team($this->core, $this->course_db->rows());
+            return $team;
+        }
+    }
+
+    public function getTeamByGradeableAndUser($g_id, $user_id) {
+        $this->course_db->query("
+          SELECT team_id, user_id, state
+          FROM gradeable_teams NATURAL JOIN teams
+          WHERE g_id=? AND team_id IN (
+            SELECT team_id
+            FROM teams
+            WHERE user_id=? AND state=1)",
           array($g_id, $user_id));
+
+        if (count($this->course_db->rows()) === 0) {
+            return null;
+        }
+        else {
+            $team = new Team($this->core, $this->course_db->rows());
+            return $team;
+        }
     }
 
     public function getTeamsByGradeableId($g_id) {
@@ -1283,25 +1333,6 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
             $teams[] = new Team($this->core, $team_row);
         }
         return $teams;
-    }
-
-    public function getTeamByUserId($g_id, $user_id) {
-        $this->course_db->query("
-          SELECT team_id, user_id, state
-          FROM gradeable_teams NATURAL JOIN teams
-          WHERE g_id=? AND team_id IN (
-            SELECT team_id
-            FROM teams
-            WHERE user_id=?)",
-          array($g_id, $user_id));
-
-        if (count($this->course_db->rows()) === 0) {
-            return null;
-        }
-        else {
-            $team = new Team($this->core, $this->course_db->rows());
-            return $team;
-        }
     }
 
     public function getUsersWithLateDays() {

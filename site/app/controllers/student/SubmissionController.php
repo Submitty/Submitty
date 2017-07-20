@@ -153,7 +153,7 @@ class SubmissionController extends AbstractController {
         }
         $student_gradeable->loadResultDetails();
         if ($student_gradeable->isTeamAssignment()) {
-            $student_team = $this->core->getQueries()->getTeamByUserId($gradeable_id, $student_id);
+            $student_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $student_id);
             if ($student_team === null) {
                 $msg = "Student '{$_POST['student_id']}' is not part of a team.";
                 $return = array('success' => false, 'message' => $msg);
@@ -217,7 +217,7 @@ class SubmissionController extends AbstractController {
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
             if ($team !== null) {
                 $team_id = $team->getId();
                 $who_id = $team_id;
@@ -587,7 +587,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $this->core->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
             if ($team !== null) {
                 $user_id = $team->getId();
             }
@@ -654,7 +654,7 @@ class SubmissionController extends AbstractController {
 
         $user_id = $this->core->getUser()->getId();
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($g_id, $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($g_id, $user_id);
             if ($team !== null) {
                 $user_id = $team->getId();
             }

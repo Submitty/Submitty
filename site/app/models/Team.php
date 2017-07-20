@@ -16,6 +16,8 @@ class Team extends AbstractModel {
     protected $member_user_ids;
     /** @propety @var array containing user ids of those invited to the team */
     protected $invited_user_ids;
+    /** @property @var string containing comma-seperated list of team members */
+    protected $member_list;
 
     /**
      * Team constructor.
@@ -36,6 +38,7 @@ class Team extends AbstractModel {
                 $this->invited_user_ids[] = $user['user_id'];
             }
         }
+        $this->member_list = count($this->member_user_ids) === 0 ? "[empty team]" : implode(", ", $this->member_user_ids);
     }
 
     /**
@@ -52,6 +55,14 @@ class Team extends AbstractModel {
     */
     public function getInvitations() {
         return $this->invited_user_ids;
+    }
+
+    /**
+     * Get string list of team members
+     * @return string
+    */
+    public function getMemberList() {
+        return $this->member_list;
     }
 
     /**
