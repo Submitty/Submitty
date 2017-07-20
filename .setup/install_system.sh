@@ -512,7 +512,12 @@ else
 fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
-#source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
+
+# (re)start the submitty grading scheduler daemon
+systemctl restart submitty_grading_scheduler
+# also, set it to automatically start on boot
+sudo systemctl enable submitty_grading_scheduler
+
 
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
 mkdir -p ${SUBMITTY_DATA_DIR}/bin
