@@ -348,7 +348,6 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                 data = JSON.parse(data);
                 if (data['success']) {
                     makeSubmission(user_id, data['highest_version'], is_pdf, path, count);
-                    return data;
                 }
                 else {
                     alert("ERROR! \n\n" + data['message']);
@@ -374,9 +373,9 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
 * @param path
 * @param count
 */
-function moveSubmission(csrf_token, gradeable_id, user_id, path, count) {
+function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
 
-    url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'move', 'gradeable_id': gradeable_id});
+    url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id});
 
     var formData = new FormData();
 
@@ -426,9 +425,9 @@ function moveSubmission(csrf_token, gradeable_id, user_id, path, count) {
 * @param path
 * @param count
 */
-function deleteSubmission(csrf_token, gradeable_id, path, count) {
+function deleteSplitItem(csrf_token, gradeable_id, path, count) {
 
-    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'delete', 'gradeable_id': gradeable_id});
+    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'delete_split', 'gradeable_id': gradeable_id});
 
     var formData = new FormData();
 

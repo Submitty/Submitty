@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
 """
-Given a filename, try to open that file, which should contain a JSON object
-containing a username and password, then test that against PAM printing out
-a JSON object that is authenticated and is true or false
+Given a semester, course, gradeable id, version, and number of pages per pdf,
+it checks whether the total number of pages in each bulk pdf file is divisible
+by the page per pdf, and splits accordingly. The split pdf items are placed
+in the split pdf directory. 
+If any of the uploaded bulk pdfs are not divisible by the number of pages
+per pdf, all created split pdfs for this version are deleted and an error message
+is returned.
 """
 import cgi
 # If things are not working, then this should be enabled for better troubleshooting
@@ -42,7 +46,6 @@ try:
     ver = os.path.basename(arguments['ver'].value)
 
     current_path = os.path.dirname(os.path.realpath(__file__))
-
     uploads_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads")
     bulk_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/bulk_pdf",g_id,ver)
     split_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/split_pdf",g_id,ver)
@@ -51,7 +54,7 @@ try:
     if not os.path.exists(split_path):
         os.makedirs(split_path)
 
-    # adding permissions for the PHP
+    # adding write permissions for the PHP
     add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
 
     # copy over files to new directory
@@ -78,8 +81,8 @@ try:
         for j in range(0,div):
             out_pdf = filename[:-4] + "_" + str(j) + ".pdf"
             out_cover_pdf = filename[:-4] + "_" + str(j) + "_cover.pdf"
-            os.system("pdftk {in_pdf} cat {start}-{stop} output {out_pdf}".format(in_pdf=filename,start=j*num+1,stop=(j+1)*num,out_pdf=out_pdf))
-            os.system("pdftk {in_pdf} cat {start} output {out_pdf}".format(in_pdf=filename,start=j*num+1,out_pdf=out_cover_pdf))
+            subprocess.call("pdftk {in_pdf} cat {start}-{stop} output {out_pdf}".format(in_pdf=filename,start=j*num+1,stop=(j+1)*num,out_pdf=out_pdf),shell=True)
+            subprocess.call("pdftk {in_pdf} cat {start} output {out_pdf}".format(in_pdf=filename,start=j*num+1,out_pdf=out_cover_pdf),shell=True)
 
     # get rid of unnecessary copies
     for filename in os.listdir(bulk_path):

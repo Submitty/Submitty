@@ -353,7 +353,7 @@ HTML;
         function makeSubmission(user_id, highest_version, is_pdf, path, count) {
             // submit the selected pdf
             if (is_pdf) {
-                moveSubmission("{$this->core->getCsrfToken()}","{$gradeable->getId()}",user_id,path,count);
+                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count);
             }
             // otherwise, this is a regular submission of the uploaded files
             else if (user_id == "") {
@@ -482,7 +482,7 @@ HTML;
         $("#bulkForm button").click(function(e){
             var btn = $(document.activeElement);
             var id = btn.attr("id");
-            var count = id.substring(12, id.length);
+            var count = id.substring(12,id.length);
             var user_id = $("#bulk_user_id_"+count).val();
             var js_count_array = $count_array_json;
             var path = js_count_array[count];
@@ -491,7 +491,7 @@ HTML;
                 if (!confirm(message)) {
                     return;
                 }
-                deleteSubmission("{$this->core->getCsrfToken()}", "{$gradeable->getId()}",path, count);
+                deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
             }
             else {
                 validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);

@@ -44,16 +44,16 @@ class SubmissionController extends AbstractController {
                 return $this->popUp();
                 break;
             case 'bulk':
-                return $this->bulkUpload();
+                return $this->ajaxBulkUpload();
                 break;
-            case 'move':
-                return $this->ajaxMoveSubmission();
+            case 'upload_split':
+                return $this->ajaxUploadSplitItem();
                 break;
-            case 'delete':
-                return $this->ajaxDeleteSubmission();
+            case 'delete_split':
+                return $this->ajaxDeleteSplitItem();
                 break;
             case 'verify':
-                return $this->validGradeable();
+                return $this->ajaxValidGradeable();
                 break;
             case 'display':
             default:
@@ -117,7 +117,7 @@ class SubmissionController extends AbstractController {
     * If failure, also returns message explaining what happened.
     * If success, also returns highest version of the student gradeable.
     */
-    private function validGradeable() {
+    private function ajaxValidGradeable() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
             $return = array('success' => false, 'message' => $msg);
@@ -180,10 +180,10 @@ class SubmissionController extends AbstractController {
 
     /**
     * Function that uploads a bulk PDF to the uploads/bulk_pdf folder. Splits it into PDFs of the page
-    * size entered.
+    * size entered and places in the uploads/split_pdf folder.
     * Its error checking has overlap with ajaxUploadSubmission.
     */
-    private function bulkUpload() {
+    private function ajaxBulkUpload() {
         if (!isset($_POST['num_pages'])) {
             $msg = "Did not pass in number of pages.";
             $return = array('success' => false, 'message' => $msg);
@@ -306,15 +306,15 @@ class SubmissionController extends AbstractController {
         curl_close($ch);
 
         if ($output === null) {
-            FileUtils::recursiveRmdir($pdf_path);
+            FileUtils::recursiveRmdir($version_path);
             return $this->uploadResult("Error JSON response for pdf split: ".json_last_error_msg(),false);
         }
         else if (!isset($output['valid'])) {
-            FileUtils::recursiveRmdir($pdf_path);
+            FileUtils::recursiveRmdir($version_path);
             return $this->uploadResult("Missing response in JSON for pdf split",false);
         }
         else if ($output['valid'] !== true) {
-            FileUtils::recursiveRmdir($pdf_path);
+            FileUtils::recursiveRmdir($version_path);
             return $this->uploadResult($output['message'],false);
         }
 
@@ -326,14 +326,14 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * Function for uploading a submission that already exists to the server. 
+     * Function for uploading a split item that already exists to the server. 
      * The file already exists in uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
      * Has overlap with ajaxUploadSubmission
      *
      * @return boolean
      */
-    private function ajaxMoveSubmission() {
+    private function ajaxUploadSplitItem() {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
@@ -505,12 +505,12 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * Function for deleting a PDF from the uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX, 
+     * Function for deleting a split item from the uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX, 
      * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
      *
      * @return boolean
      */
-    private function ajaxDeleteSubmission() {
+    private function ajaxDeleteSplitItem() {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
