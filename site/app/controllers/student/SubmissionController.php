@@ -231,7 +231,11 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
     
-        $new_version = $gradeable->getHighestVersion() + 1;
+        $new_version = count(FileUtils::getAllDirs($user_path)) + 1;
+        $new_version_2 = $gradeable->getHighestVersion() + 1;
+        if($new_version !== $new_version_2){
+            $_SESSION['messages']['notice'][] = "Submission count is not in sync with the database.";
+        }
         $version_path = FileUtils::joinPaths($user_path, $new_version);
         
         if (!FileUtils::createDir($version_path)) {
