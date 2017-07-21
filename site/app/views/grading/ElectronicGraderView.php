@@ -723,6 +723,19 @@ HTML;
             $c++;
         }
 
+        $return .= <<<HTML
+            <tr>
+                <td colspan="4">
+                    <b>General Comment</b> <span onclick=""> <i id="icon-general-comment" class="fa fa-window-maximize" style="visibility: visible;"></i>
+                </td>
+            </tr>
+            <tr onclick="openClose(-1, {$num_questions});">
+                <td colspan="4">
+                    <textarea name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
+                </td>
+            </tr>
+HTML;
+
         $total_points = $gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints();
         $return .= <<<HTML
                 <tr>
@@ -733,9 +746,6 @@ HTML;
                 </tr>
             </tbody>
         </table><br/>
-        <div style="width:100%;"><b>General Comment:</b>
-        <textarea name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
-        </div>
 HTML;
         if ($gradeable->beenTAgraded()) {
             // assumes that the person who graded the first question graded everything... also in electronicGraderController:150...have to rewrite to be per component
