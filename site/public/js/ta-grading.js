@@ -200,14 +200,14 @@ function handleKeyPress(key) {
 function openAll() {
     // click on all with the class openAllDiv that hasn't been expanded yet
     $(".openAllDiv").each(function() {
-        if ($(this).parent().find('span').hasClass('icon-folder-closed')) {
+        if ($(this).parent().find('span').hasClass('fa-folder')) {
             $(this).click();
         }
     });
 
     // click on all with the class openAllFile that hasn't been expanded yet
     $(".openAllFile").each(function() {
-        if($(this).find('span').hasClass('icon-plus')) {
+        if($(this).find('span').hasClass('fa-plus-circle')) {
             $(this.click());
         }
     });
@@ -217,14 +217,14 @@ function openAll() {
 function closeAll() {
     // click on all with the class openAllFile that is expanded
     $(".openAllFile").each(function() {
-        if($(this).find('span').hasClass('icon-minus')) {
+        if($(this).find('span').hasClass('fa-minus-circle')) {
             $(this.click());
         }
     });
 
     // click on all with the class openAllDiv that is expanded
     $(".openAllDiv").each(function() {
-        if ($(this).parent().find('span').hasClass('icon-folder-open')) {
+        if ($(this).parent().find('span').hasClass('fa-folder-open')) {
             $(this).click();
         }
     });
@@ -235,12 +235,12 @@ function openDiv(num) {
     if (elem.hasClass('open')) {
         elem.hide();
         elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-folder-open').addClass('icon-folder-closed');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
     }
     else {
         elem.show();
         elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-folder-closed').addClass('icon-folder-open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
     }
     return false;
 }

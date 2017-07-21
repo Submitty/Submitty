@@ -434,7 +434,7 @@ HTML;
                 <div>
                     <div class="file-viewer">
                         <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count})'>
-                            <span class='icon-plus' style='vertical-align:text-bottom;'></span>
+                            <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
                         {$dir}</a> &nbsp;
                         <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
                         <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
@@ -453,7 +453,7 @@ HTML;
             <div>
                 <div class="div-viewer">
                     <a class='openAllDiv' onclick='openDiv({$count});'>
-                        <span class='icon-folder-closed' style='vertical-align:text-top;'></span>
+                        <span class="fa fa-folder" style='vertical-align:text-top;'></span>
                     {$dir}</a> 
                 </div><br/>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none'>
@@ -607,13 +607,13 @@ HTML;
             if($question->getIsExtraCredit()) {
                 $return .= <<<HTML
                     <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-                        <i class="icon-plus"></i> $message {$note}
+                        <i class="fa fa-plus-circle" aria-hidden="true"></i> $message {$note}
 HTML;
             }
             else if($penalty) {
                 $return .= <<<HTML
                     <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-                        <i class="icon-minus"></i> $message {$note}
+                        <i class="fa fa-minus-circle" aria-hidden="true"></i> $message {$note}
 HTML;
             }
             else {
@@ -678,14 +678,14 @@ HTML;
         if ($gradeable->beenTAgraded()) {
             // assumes that the person who graded the first question graded everything... also in electronicGraderController:150...have to rewrite to be per component
             $graders = array();
-            foreach($gradeable->getComponents() as $component){
-                $graders[] = $component->getGrader()->getId();
-            }
+            //foreach($gradeable->getComponents() as $component){
+            //    $graders[] = $component->getGrader()->getId();
+            //}
             $graders = array_unique($graders);
             $graders = implode(",", $graders);
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: {$graders}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' {$disabled}/><br />
+            Graded By: No one<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' {$disabled}/><br />
         </div>
 HTML;
         }
@@ -740,12 +740,12 @@ HTML;
         if (!iframe.hasClass('shown')) {
             iframe.show();
             iframe.addClass('shown');
-            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-plus').addClass('icon-minus');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-plus-circle').addClass('fa-minus-circle');
         }
         else {
             iframe.hide();
             iframe.removeClass('shown');
-            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-minus').addClass('icon-plus');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-minus-circle').addClass('fa-plus-circle');
         }
         return false;
     }
