@@ -51,16 +51,23 @@ HTML;
      *
      * @return string
      */
-    public function showGradeable($gradeable, $days_late) {
+    public function showGradeable($gradeable, $days_late, $students) {
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
 HTML;
         if ($this->core->getUser()->accessAdmin()) {
+            $student_ids = array();
+            foreach ($students as $student) {
+                $student_ids[] = $student->getId();
+            }
+            $student_ids = json_encode($student_ids);
             $return .= <<<HTML
     <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
         <div >
@@ -84,7 +91,7 @@ HTML;
             <div class="sub">
                 <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
                 user_id: <input type="text" id= "user_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
-            </div class="sub">
+            </div>
         </div>
         <div class = "sub" id="pdf_submit_button" style="display: none">
             <div class="sub">
@@ -97,6 +104,7 @@ HTML;
     <script type="text/javascript">
         $(document).ready(function() {
             var cookie = document.cookie;
+            var student_ids = $student_ids;
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
@@ -122,6 +130,9 @@ HTML;
                 $('#user_id_input').hide();
                 $('#pdf_submit_button').show();
                 $('#user_id').val('');
+            });
+            $( "#user_id" ).autocomplete({
+                source: student_ids
             });
         });
     </script>
@@ -426,10 +437,11 @@ HTML;
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
-                <td width="4%"></td>
-                <td width="10%">Timestamp</td>
+                <td width="3%"></td>
+                <td width="8%">Timestamp</td>
                 <td width="55%">PDF preview</td>
                 <td width="15%">User ID</td>
+                <td width="3%"></td>
                 <td width="8%">Submit</td>
                 <td width="8%">Delete</td>
             </tr>
@@ -447,7 +459,9 @@ HTML;
                         if (strpos($filename, 'cover') == false) {
                             // add each file that is not a cover to count_array 
                             // each entry is in format timestamp/filename
+                            // save each filename so that the popout is the full pdf
                             $count_array[$count] = $timestamp."/".$filename;
+                            $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
                             continue;
                         }
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
@@ -459,6 +473,9 @@ HTML;
                     <object data="{$url}" type="application/pdf" width="100%" height="300">
                         alt : <a href="{$url}">pdf.pdf</a>
                     </object>
+                </td>
+                <td>
+                    <a onclick="openFile('{$url_full}')"><i class="fa fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
                 </td>
                 <td>
                     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
@@ -478,7 +495,14 @@ HTML;
                 }
                 $return .= <<<HTML
 <script type="text/javascript">
+    function openFile(url_full) {
+        window.open(url_full,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    }
     $(document).ready(function() {
+        var student_ids = $student_ids;
+        $("#bulkForm input").autocomplete({
+            source: student_ids
+        });
         $("#bulkForm button").click(function(e){
             var btn = $(document.activeElement);
             var id = btn.attr("id");
