@@ -221,7 +221,7 @@ HTML;
      * @param $user_id String. The user id of the user whose table you want.
      * @return string. The string representation of the HTML table.
      */
-    public function generateTableForUserDate($user_id, $endDate){
+    public function generateTableForUserDate($current_hw, $user_id, $endDate){
         //table header row.
         $table = <<<HTML
                 <h3>Overall Late Day Usage</h3><br/>
@@ -249,16 +249,20 @@ HTML;
             //For each submission build a table row.
             foreach ($student as $submission) {
                 if ($submission['eg_submission_due_date'] <= $endDate) {
+                    $class = "";
+                    if($submission['g_title'] == $current_hw){
+                        $class = "class='yellow-background'";
+                    }
                     $table .= <<<HTML
                 <tr>
-                    <th style="padding:5px; border:thin solid black">{$submission['g_title']}</th>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['allowed_per_term']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['allowed_per_assignment']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['late_days_used']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['extensions']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['status']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['late_days_charged']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['remaining_days']}</td>
+                    <th $class style="padding:5px; border:thin solid black">{$submission['g_title']}</th>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$submission['allowed_per_term']}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$submission['allowed_per_assignment']}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$submission['late_days_used']}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$submission['extensions']}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$submission['status']}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$submission['late_days_charged']}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$submission['remaining_days']}</td>
                 </tr>
 HTML;
                 }

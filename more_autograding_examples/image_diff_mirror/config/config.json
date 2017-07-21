@@ -1,0 +1,110 @@
+{
+    "autograding" : {
+        "submission_to_runner" : [ "*.txt", "*.png" ],
+	"work_to_details" : ["*.png"]
+    },
+    "max_submission_size" : 2000000,
+    "testcases" : [    
+        // *************** COMPILATION *****************
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            //Note the multistep compilation which first 
+            //calls cmake and then make. 
+            "command" : ["g++ *.cpp"],
+            "executable_name" : "a.out",
+            "points" : 4
+        },    
+        {
+            "title" : "Mirror",
+            "command" : "./a.out",
+            "points" : 1,
+            "validation" :
+            [
+                {
+                    "actual_file": "student1.png",
+                    "description": "student_image_one",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                }
+            ]
+        },
+        {
+            "title" : "Student 1 Professor 1",
+            "command" : "./a.out",
+            "points" : 1,
+            "validation" :
+            [
+                {
+                   "actual_file": "student1.png",
+                   "expected_file" : "professor1.png",
+                   "acceptable_threshold": ".2",
+                   "description": "imageDiff",
+                   "method": "ImageDiff",
+                   "show_difference_image" : "always",
+                   "show_actual": "always",
+                   "show_expected":"always",
+                   "show_message": "always"
+                }
+            ]
+        },
+        {
+            "title" : "Student 2 Professor 2",
+            "command" : "./a.out",
+            "points" : 1,
+            "validation" :
+            [
+                {
+                   "actual_file": "student2.png",
+                   "expected_file" : "professor2.png",
+                   "acceptable_threshold": ".2",
+                   "description": "imageDiff",
+                   "method": "ImageDiff",
+                   "show_difference_image" : "always",
+                   "show_actual": "always",
+                   "show_expected":"always",
+                   "show_message": "always"
+                }
+            ]
+        },
+        {
+            "title" : "Student 1 Professor 2",
+            "command" : "./a.out",
+            "points" : 1,
+            "validation" :
+            [
+                {
+                   "actual_file": "student1.png",
+                   "expected_file" : "professor2.png",
+                   "acceptable_threshold": ".2",
+                   "description": "imageDiff",
+                   "method": "ImageDiff",
+                   "show_difference_image" : "always",
+                   "show_actual": "always",
+                   "show_expected":"always",
+                   "show_message": "always"
+                }
+            ]
+        },
+        {
+            "title" : "Student 2 Professor 1",
+            "command" : "./a.out",
+            "points" : 1,
+            "validation" :
+            [
+                {
+                   "actual_file": "student2.png",
+                   "expected_file" : "professor1.png",
+                   "acceptable_threshold": ".2",
+                   "description": "imageDiff",
+                   "method": "ImageDiff",
+                   "show_difference_image" : "always",
+                   "show_actual": "always",
+                   "show_expected":"always",
+                   "show_message": "always"
+                }
+            ]
+        }
+    ]
+}

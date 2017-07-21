@@ -206,6 +206,10 @@ table tr.table-header {
     text-align: center;
 }
 
+.tr-vertically-centered > td {
+    vertical-align: middle;
+}
+
 /**********************************************************/
 
 #container {
@@ -524,6 +528,12 @@ table tr.table-header {
     font-style: italic;
     font-weight: bold;
     color: #008800;
+}
+
+.blue-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #0a6496;
 }
 
 .red-message {
