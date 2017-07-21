@@ -312,7 +312,9 @@ class ElectronicGraderController extends AbstractController {
                     $mark->setPoints($_POST['marks'][$index]['points']);
                     $mark->setNote($_POST['marks'][$index]['note']);
                     $mark->setOrder($_POST['marks'][$index]['order']);
-                    $this->core->getQueries()->updateGradeableComponentMark($mark);
+                    $mark->setHasMark($_POST['marks'][$index]['selected']);
+                    $mark->save();
+                    $mark->saveData($gradeable->getGdId(), $component->getId());
                     $index++;
                 }
                 $response = array('status' => $_POST['marks'][0]);

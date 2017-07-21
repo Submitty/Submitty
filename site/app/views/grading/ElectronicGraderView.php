@@ -691,10 +691,11 @@ HTML;
 
             $d = 0;
             foreach ($question->getMarks() as $mark) {
+                $icon_mark = ($mark->getHasMark() === true) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
                 <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
                     <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
-                        <span onclick="selectMark(this);"> <i class="fa fa-square-o" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                        <span onclick="selectMark(this);"> <i class="fa {$icon_mark}" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}">
                         <textarea name="mark_text_{$c}_{$d}" onkeyup="autoResizeComment(event);" rows="1" style="width:95%; resize:none; float:left;">{$mark->getNote()}</textarea>
