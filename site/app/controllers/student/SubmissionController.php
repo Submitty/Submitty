@@ -625,10 +625,13 @@ class SubmissionController extends AbstractController {
         $new_version_2 = $gradeable->getHighestVersion() + 1;
         if($new_version !== $new_version_2){
             $_SESSION['messages']['notice'][] = "Warning: some versions may not be in sync with the database.";
+            if($svn_checkout) {
+                $new_version = $new_version_2;
+            }
         }
         $version_path = FileUtils::joinPaths($user_path, $new_version);
         
-        if (!FileUtils::createDir($version_path)) {
+        if (!FileUtils::createDir($version_path) || ($this->core->isTesting() && !FileUtils::createDir(FileUtils::joinPaths($user_path, $new_version_2)))) {
             return $this->uploadResult("Failed to make folder for the current version.", false);
         }
     
@@ -641,7 +644,7 @@ class SubmissionController extends AbstractController {
         if ($gradeable->getNumParts() > 1) {
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 $part_path[$i] = FileUtils::joinPaths($version_path, "part".$i);
-                if (!FileUtils::createDir($part_path[$i])) {
+                if (!FileUtils::createDir($part_path[$i]) || (!FileUtils::createDir(FileUtils::joinPaths($user_path, $new_version_2)))) {
                     return $this->uploadResult("Failed to make the folder for part {$i}.", false);
                 }
             }
@@ -814,7 +817,7 @@ class SubmissionController extends AbstractController {
                         else {
                             if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
                                 $dst = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
-                                if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
+                                if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst) || ($this->core->isTesting() && $new_version !== $new_version_2)) {
                                     return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
                                 }
                             }
