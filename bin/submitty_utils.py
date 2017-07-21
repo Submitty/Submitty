@@ -36,9 +36,13 @@ def read_submitty_date(s):
     try:
         without_timezone = datetime.strptime(without_timezone,'%Y-%m-%d %H:%M:%S')
     except ValueError:
-        raise SystemExit("ERROR:  invalid date format %s" % s)
+        try:
+            without_timezone = datetime.strptime(without_timezone, '%m/%d/%Y %H:%M:%S')
+            print ("WARNING: INCONSISTENT DATE FORMAT ",s)
+        except ValueError:
+            raise SystemExit("ERROR:  invalid date format %s" % s)
     if len(words) == 2:
-        print ("NO TIMEZONE ",s,"assuming local timezone")
+        print ("WARNING: NO TIMEZONE ",s,"assuming local timezone")
         my_timezone = get_timezone()
     else:
         my_timezone = pytz.timezone(words[2])
