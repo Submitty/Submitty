@@ -195,6 +195,9 @@ class Gradeable extends AbstractModel {
     protected $results_files = array();
     protected $meta_files = array();
     protected $previous_files = array();
+    /** @property @var Array of all split pdfsuploads. Each key is a filename and then each element is an array
+    * that contains filename, file path, and the file size. */
+    protected $uploads_files = array();
 
     protected $result_details;
 
@@ -575,8 +578,8 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Loads submission details about an electronic submission from the submissions/ and
-     * results/ directories and their respective json files.
+     * Loads submission details about an electronic submission from the submissions/,
+     * results/, and uploads/ directories and their respective json files.
      */
     public function loadResultDetails() {
         if ($this->type !== GradeableType::ELECTRONIC_FILE) {
@@ -605,6 +608,7 @@ class Gradeable extends AbstractModel {
         $submission_path = $course_path."/submissions/".$this->id."/".$user_id;
         $svn_path = $course_path."/checkout/".$this->id."/".$user_id;
         $results_path = $course_path."/results/".$this->id."/".$user_id;
+        $uploads_path = $course_path."/uploads/split_pdf/".$this->id;
 
         //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
 
@@ -647,6 +651,12 @@ class Gradeable extends AbstractModel {
         $results_files = FileUtils::getAllFiles($results_current_path, array(), true);
         foreach ($results_files as $file => $details) {
             $this->results_files[$file] = $details;
+        }
+
+        $uploads_current_path = $uploads_path;
+        $uploads_files = FileUtils::getAllFiles($uploads_current_path);
+        foreach ($uploads_files as $timestamp => $content) {
+            $this->uploads_files[$timestamp] = $content;
         }
 
         if ($this->getNumParts() > 1) {

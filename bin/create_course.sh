@@ -20,6 +20,7 @@ SUBMISSION_URL=__INSTALL__FILLIN__SUBMISSION_URL__
 
 HWPHP_USER=__INSTALL__FILLIN__HWPHP_USER__
 HWCRON_USER=__INSTALL__FILLIN__HWCRON_USER__
+HWCGI_USER=__INSTALL__FILLIN__HWCGI_USER__
 
 COURSE_BUILDERS_GROUP=__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__
 
@@ -195,10 +196,16 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_
 #               drwxr-s---       $HWPHP_USER        ta_www_group    config_upload/
 #               drwxr-s---       $HWCRON_USER       ta_www_group    results/
 #               drwxr-s---       $HWCRON_USER       ta_www_group    checkout/
+#               drwxr-s---       $HWCRON_USER       ta_www_group    uploads/
+#               drwxr-s---       $HWPHP_USER        ta_www_group    uploads/bulk_pdf/
+#               drwxr-s---       $HWCGI_USER        ta_www_group    uploads/split_pdf/
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/submissions
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/config_upload
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/results
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/checkout
+create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/uploads
+create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
+create_and_set  u=rwx,g=rxs,o=   $HWCGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
 
 
 # NOTE:    instructor uploads TA HW grade reports & overall grade scores here

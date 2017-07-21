@@ -206,6 +206,10 @@ table tr.table-header {
     text-align: center;
 }
 
+.tr-vertically-centered > td {
+    vertical-align: middle;
+}
+
 /**********************************************************/
 
 #container {
