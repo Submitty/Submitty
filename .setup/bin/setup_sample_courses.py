@@ -28,6 +28,18 @@ import re
 import shutil
 import subprocess
 import uuid
+import pytz
+import time
+import tzlocal
+import os.path
+import sys
+
+
+# share a couple functions related to timezone
+sys.path.append("/usr/local/submitty/bin")
+import submitty_utils
+
+
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
 
@@ -69,13 +81,14 @@ def main():
                 SUBMITTY_DATA_DIR, directory))
     use_courses = args.course
 
-    # We have to kill crontab and all running grade students processes as otherwise we end up with the process
+    # We have to kill crontab and all running grading scheduler processes as otherwise we end up with the process
     # grabbing the homework files that we are inserting before we're ready to (and permission errors exist) which
     # ends up with just having a ton of build failures. Better to wait on grading any homeworks until we've done
     # all steps of setting up a course.
+    print ("pausing the autograding scheduling daemon")
     os.system("crontab -u hwcron -l > /tmp/hwcron_cron_backup.txt")
     os.system("crontab -u hwcron -r")
-    os.system("killall grade_students.sh")
+    os.system("systemctl stop submitty_grading_scheduler")
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
@@ -189,8 +202,11 @@ def main():
         if courses[course].make_customization:
             courses[course].make_course_json()
 
+    # restart the autograding daemon
+    print ("restarting the autograding scheduling daemon")
     os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
     os.system("rm /tmp/hwcron_cron_backup.txt")
+    os.system("systemctl restart submitty_grading_scheduler")
 
 def generate_random_user_id(length):
     id_base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -668,18 +684,11 @@ class Course(object):
 
         os.environ['PGPASSWORD'] = DB_PASS
         database = "submitty_" + self.semester + "_" + self.code
-        os.system('psql -d postgres -h {} -U hsdbu -c "CREATE DATABASE {}"'.format(DB_HOST,
-                                                                                   database))
-        os.system("psql -d {} -h {} -U {} -f {}/site/data/course_tables.sql"
-                  .format(database, DB_HOST, DB_USER, SUBMITTY_REPOSITORY))
 
         print("Database created, now populating ", end="")
         submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData(bind=submitty_engine)
-
-        courses_table = Table('courses', submitty_metadata, autoload=True)
-        submitty_conn.execute(courses_table.insert(), semester=self.semester, course=self.code)
 
         engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                                  database))
@@ -763,7 +772,7 @@ class Course(object):
             form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
-        os.system("chown hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
+        os.system("chown -f hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
         if not os.path.isfile(os.path.join(course_path, "ASSIGNMENTS.txt")):
             os.system("touch {}".format(os.path.join(course_path, "ASSIGNMENTS.txt")))
             os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
@@ -804,16 +813,17 @@ class Course(object):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
-                        current_time = (gradeable.submission_due_date - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+                        current_time_string = submitty_utils.write_submitty_date()
+
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
-                                     g_version=1, submission_time=current_time)
+                                     g_version=1, submission_time=current_time_string)
                         conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
                                      active_version=1)
                         with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
-                            json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time}]},
+                            json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time_string}]},
                                       open_file)
                         with open(os.path.join(submission_path, "1", ".submit.timestamp"), "w") as open_file:
-                            open_file.write(current_time + "\n")
+                            open_file.write(current_time_string + "\n")
 
                         if isinstance(gradeable.submissions, dict):
                             for key in gradeable.submissions:

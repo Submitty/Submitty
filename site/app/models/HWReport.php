@@ -69,12 +69,12 @@ class HWReport extends AbstractModel {
             
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
 
-            // uses active version...
-            $active_version = $gradeable->getActiveVersion();
-            $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $active_version, "grade.txt");
-            $auto_grading_awarded = 0;
-            $auto_grading_max_score = 0;
             if($gradeable->validateVersions()) {
+                // uses active version...
+                $active_version = $gradeable->getActiveVersion();
+                $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $active_version, "grade.txt");
+                $auto_grading_awarded = 0;
+                $auto_grading_max_score = 0;
                 if(!file_exists($submit_file)) {
                     $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
                 }
@@ -114,6 +114,7 @@ class HWReport extends AbstractModel {
                 $student_output_last .= "----------------------------------------------------------------------" . $nl;
             }
             else {
+                $student_output_text_main .= "NOTE: THIS ASSIGNMENT WILL BE RECORDED AS ZERO".$nl;
                 $student_output_last = "[ THERE ARE GRADING VERSION CONFLICTS WITH THIS ASSIGNMENT. PLEASE CONTACT YOUR INSTRUCTOR OR TA TO RESOLVE THE ISSUE]".$nl;
             }
 
