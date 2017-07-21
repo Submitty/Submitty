@@ -460,7 +460,7 @@ HTML;
                     foreach ($files as $filename => $details) {
                         $clean_timestamp = str_replace("_", " ", $timestamp);
                         $path = $details["path"];
-                        if (strpos($filename, 'cover') == false) {
+                        if (strpos($filename, "cover") == false) {
                             // add each file that is not a cover to count_array 
                             // each entry is in format timestamp/filename
                             // save each filename so that the popout is the full pdf
@@ -470,6 +470,9 @@ HTML;
                             continue;
                         }
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
+                        $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
+                        $path_full = str_replace("_cover.pdf", ".pdf", $path);
+                        $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full;
                         $return .= <<<HTML
             <tr class="tr tr-vertically-centered">
                 <td>{$count}</td>
