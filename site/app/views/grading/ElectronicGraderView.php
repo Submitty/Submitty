@@ -519,6 +519,24 @@ HTML;
         $num_questions = count($gradeable->getComponents());
 
         foreach ($gradeable->getComponents() as $question) {
+            $type = 0; //0 is common deductable, 1 is common additive
+            $min = -1000;
+            $max = 0;
+            foreach ($question->getMarks() as $mark) {
+                if($mark->getPoints() < 0) {
+                    $min = -1000;
+                    $max = 0;
+                    $type = 0;
+                    break;
+                }
+                else if ($mark->getPoints() > 0) {
+                    $min = 0;  
+                    $max = 1000;
+                    $type = 1;
+                    break;
+                }
+            }
+            $word = ($type === 1) ? "Addition" : "Deduction";
             // hide auto-grading if it has no value
             if ($question->getMaxValue() == 0) {
                 continue;
@@ -563,7 +581,7 @@ HTML;
 HTML;
             }
             $return .= <<<HTML
-            <span onclick="openClose({$c},{$num_questions});"> <i id="icon-{$c}" class="fa fa-window-maximize" style="visibility: visible; cursor: pointer;"></i> </span> {$note} 
+            <span onclick=""> <i id="icon-{$c}" class="fa fa-window-maximize" style="visibility: visible;"></i> </span> {$note} 
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());
@@ -596,36 +614,29 @@ HTML;
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
-                            <textarea readonly id="rubric-textarea-{$c}" name="comment-{$question->getOrder()}" rows="4" style="width:98%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$question->getComment()}</textarea>
+                            <textarea readonly id="rubric-textarea-{$c}" name="comment-{$question->getOrder()}" rows="4" style="width:95%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$question->getComment()}</textarea>
                         </div>
                     </td>
                 </tr>
                 <tbody id="extra-{$c}" style="{$background}; display: none" colspan="4">
+                <tr id="mark_header_id={$c}" name="mark_header_{$c}">
+                    <td colspan="4", style="{$background}">
+                            Common Grade {$word}
+                        <span onclick="saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()});" style="float: right; cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i>
+                        </span>
+                    </td>
+                </tr>
 HTML;
 
-            $min = -1000;
-            $max = 0;
-            foreach ($question->getMarks() as $mark) {
-                if($mark->getPoints() < 0) {
-                    $min = -1000;
-                    $max = 0;
-                    break;
-                }
-                else if ($mark->getPoints() > 0) {
-                    $min = 0;  
-                    $max = 1000;
-                    break;
-                }
-            }
             $d = 0;
             foreach ($question->getMarks() as $mark) {
                 $return .= <<<HTML
-                <tr>
-                    <td colspan="1" style="{$background}; text-align: center;"> <input type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
-                        <span onclick=""> <i class="fa fa-square-o" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
+                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                        <span onclick="selectMark(this);"> <i class="fa fa-square-o" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}">
-                        <textarea onkeyup="autoResizeComment(event);" rows="1" style="width:98%; resize:none; float:left;">{$mark->getNote()}</textarea>
+                        <textarea name="mark_text_{$c}_{$d}" onkeyup="autoResizeComment(event);" rows="1" style="width:95%; resize:none; float:left;">{$mark->getNote()}</textarea>
                     </td>
                 </tr>
 HTML;
@@ -634,23 +645,16 @@ HTML;
 
                 $return .= <<<HTML
                 <tr>
-                    <td colspan="4" style"{$background};">
-                        <span onclick="return false;"><i class="fa fa-level-up" aria-hidden="true"></i>
-                        Add New </span>
+                    <td colspan="4" style="{$background};">
+                        <span style="cursor: pointer;" onclick="addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+                        Add New {$word}</span>
                     </td>
                 </tr>
-                <tr>
-                    <td colspan="1" style="{$background}; text-align: center;"> <input type="number" step="{$precision}" value="0" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
-                        <span onclick=""> <i class="fa fa-square-o" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
+                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_custom_{$c}" type="number" step="{$precision}" value="0" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
                     </td>
                     <td colspan="3" style="{$background}">
-                        <textarea onkeyup="autoResizeComment(event);" rows="1" placeholder="Custom message for student..." style="width:98%; resize:none; float:left;"></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="{$background};">
-                        <span onclick="return false;" style="float: right;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i>
-                        </span>
+                        <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event);" rows="1" placeholder="Custom message for student..." style="width:95%; resize:none; float:left;">{$question->getComment()}</textarea>
                     </td>
                 </tr>
                 </tbody>
@@ -675,14 +679,14 @@ HTML;
         if ($gradeable->beenTAgraded()) {
             // assumes that the person who graded the first question graded everything... also in electronicGraderController:150...have to rewrite to be per component
             $graders = array();
-            foreach($gradeable->getComponents() as $component){
-                $graders[] = $component->getGrader()->getId();
-            }
+            //foreach($gradeable->getComponents() as $component){
+            //    $graders[] = $component->getGrader()->getId();
+            //}
             $graders = array_unique($graders);
             $graders = implode(",", $graders);
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: {$graders}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
+            Graded By: A Duck <br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
         </div>
 HTML;
         }
@@ -778,6 +782,60 @@ HTML;
         $("#score_total").html(total+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});
     }
 
+    function addMark(me, num, background, min, max, precision) {
+        var last_num = -10;
+        var current_row = $(me.parentElement.parentElement);
+        var current = $('[name=mark_'+num+']').last().attr('id');
+        if (current == null) {
+            last_num = -1;
+        } 
+        else {
+            last_num = parseInt($('[name=mark_'+num+']').last().attr('id').split('-')[2]);
+        }
+
+        var new_num = last_num + 1;
+        current_row.before(' \
+<tr id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'"> \
+    <td colspan="1" style="'+background+'; text-align: center;"> <input name="mark_points_'+num+'_'+new_num+'" type="number" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none;"> \
+                        <span onclick="selectMark(this);"> <i class="fa fa-square-o" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
+    </td> \
+    <td colspan="3" style="'+background+'"> \
+        <textarea name="mark_text_'+num+'_'+new_num+'" onkeyup="autoResizeComment(event);" rows="1" style="width:95%; resize:none; float:left;"></textarea> \
+        <span id="mark_remove_id-'+num+'-'+new_num+'" onclick="deleteMark(this,'+num+','+new_num+');"> <i class="fa fa-times" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
+    </td> \
+</tr> \
+        '); 
+    }
+
+    function deleteMark(me, num, last_num) {
+        var current_row = $(me.parentElement.parentElement);
+        current_row.remove();
+        var last_row = $('[name=mark_'+num+']').last().attr('id');
+        var totalD = -1;
+        if (last_row == null) {
+            totalD = -1;
+        } 
+        else {
+            totalD = parseInt($('[name=mark_'+num+']').last().attr('id').split('-')[2]);
+        }
+        var current_num = parseInt(last_num);
+        for (var i = current_num + 1; i <= totalD; i++) {
+            var new_num = i-1;
+            var current_mark = $('#mark_id-'+num+'-'+i);
+            current_mark.find('input[name=mark_points_'+num+'_'+i+']').attr('name', 'mark_points_'+num+'_'+new_num);
+            current_mark.find('textarea[name=mark_text_'+num+'_'+i+']').attr('name', 'mark_text_'+num+'_'+new_num);
+            current_mark.find('span[id=mark_remove_id-'+num+'-'+i+']').attr('onclick', 'deleteMark(this,'+num+','+new_num+');');
+            current_mark.find('i[name=mark_icon_'+num+'_'+i+']').attr('name', 'mark_icon_'+num+'_'+new_num);
+            current_mark.find('span[id=mark_remove_id-'+num+'-'+i+']').attr('id', 'mark_remove_id-'+num+'-'+new_num);
+            current_mark.attr('id', 'mark_id-'+num+'-'+new_num);
+        }
+    }
+
+    function selectMark(me) {
+        var icon = $(me).find("i");
+        icon.toggleClass("fa-square-o fa-square");
+    }
+
     function openClose(row_id, num_questions) {
         var row_num = parseInt(row_id);
         var total_num = parseInt(num_questions);
@@ -818,6 +876,53 @@ HTML;
                     icon.classList.add('fa-window-maximize');
                 }
             }
+        }
+    }
+
+    //num === -2 means save last opened component
+    //num === -1 means save all components
+    function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
+        if (num === -2) {
+
+        } else if (num === -1) {
+
+        } else {
+            var arr_length = $('tr[name=mark_'+num+']').length;
+            var mark_data = new Array(arr_length);
+            for (var i = 0; i < arr_length; i++) {
+                var current_row = $('#mark_id-'+num+'-'+i);
+                var is_selected = false;
+                if (current_row.find('i[name=mark_icon_'+num+'_'+i+']')[0].classList.contains('fa-square')) {
+                    is_selected = true;
+                }
+                var mark = {
+                    points: current_row.find('input[name=mark_points_'+num+'_'+i+']').val(),
+                    note: current_row.find('textarea[name=mark_text_'+num+'_'+i+']').val(),
+                    order: i,
+                    selected: is_selected
+                };
+                mark_data[i] = mark;
+            }
+            current_row = $('#mark_custom_id-'+num);
+            var custom_points = current_row.find('input[name=mark_points_custom_'+num+']').val();
+            var custom_message = current_row.find('textarea[name=mark_text_custom_'+num+']').val();
+            //alert (JSON.stringify(mark_data));
+            $.ajax({
+                type: "POST",
+                url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
+                data: {
+                    'gradeable_id' : gradeable_id,
+                    'user_id' : user_id,
+                    'gradeable_component_id' : gc_id,
+                    'active_version' : active_version,
+                    'custom_points' : custom_points,
+                    'custom_message' : custom_message,
+                    marks : mark_data
+                }
+            })
+            .done(function (response) {
+                alert (response);
+            });
         }
     }
 </script>

@@ -42,7 +42,7 @@ class GradeableComponentMark extends AbstractModel {
     public function saveData($gd_id, $gc_id) {
         if ($this->modified) {
         	if ($this->has_mark) {
-                $this->core->getQueries()->insertGradeableCompnentMarkData($gd_id, $gc_id, $this);
+                $this->core->getQueries()->insertGradeableComponentMarkData($gd_id, $gc_id, $this);
         	} else {
         		$this->core->getQueries()->deleteGradeableComponentMarkData($gd_id, $gc_id, $this);
         	}

@@ -894,6 +894,17 @@ class Gradeable extends AbstractModel {
         }
         $this->core->getCourseDB()->commit();
     }
+
+    public function saveData2() {
+        $this->core->getCourseDB()->beginTransaction();
+        if ($this->gd_id === null) {
+            $this->gd_id = $this->core->getQueries()->insertGradeableData($this);
+        }
+        elseif ($this->modified) {
+            $this->core->getQueries()->updateGradeableData($this);
+        }
+        $this->core->getCourseDB()->commit();
+    }
       
     public function getSyllabusBucket() {
         return $this->bucket;

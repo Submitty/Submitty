@@ -1739,6 +1739,7 @@ $('#gradeable-form').on('submit', function(e){
         var current_row = $('#deduct_id-'+question_id+'-'+current_id);
         current_row.remove();
         var last_deduct = $('[name=deduct_'+question_id+']').last().attr('id');
+        var totalD = -1;
         if (last_deduct == null) {
             totalD = -1;
         } 

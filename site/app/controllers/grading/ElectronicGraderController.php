@@ -19,6 +19,9 @@ class ElectronicGraderController extends AbstractController {
             case 'submit':
                 $this->submitGrade();
                 break;
+            case 'save_one_component':
+                $this->saveSingleComponent();
+                break;
             default:
                 $this->showStatus();
                 break;
@@ -283,5 +286,42 @@ class ElectronicGraderController extends AbstractController {
 
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual);
+    }
+
+    public function saveSingleComponent() {
+        $gradeable_id = $_POST['gradeable_id'];
+        $user_id = $_POST['user_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->getId() != $_POST['gradeable_component_id']) {
+                continue;
+            }
+            else {
+                if($gradeable->getGdId() == null) {
+                    $gradeable->saveData2();
+                }
+                $component->setGrader($this->core->getUser());
+                $component->setGradedVersion($_POST['active_version']);
+                $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                $component->setComment($_POST['custom_message']);
+                $component->saveData($gradeable->getGdId());
+                $marks = $component->getMarks();
+                $index = 0;
+                $marks_count = count($marks);
+                foreach ($marks as $mark) {
+                    $mark->setPoints($_POST['marks'][$index]['points']);
+                    $mark->setNote($_POST['marks'][$index]['note']);
+                    $mark->setOrder($_POST['marks'][$index]['order']);
+                    $this->core->getQueries()->updateGradeableComponentMark($mark);
+                    $index++;
+                }
+                $response = array('status' => $_POST['marks'][0]);
+                $this->core->getOutput()->renderJson($response);
+                return $response;
+            }
+        }
+        $response = array('status' => $_POST['gradeable_id']);
+        $this->core->getOutput()->renderJson($response);
+        return $response;
     }
 }
