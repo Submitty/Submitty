@@ -644,7 +644,7 @@ class SubmissionController extends AbstractController {
         if ($gradeable->getNumParts() > 1) {
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 $part_path[$i] = FileUtils::joinPaths($version_path, "part".$i);
-                if (!FileUtils::createDir($part_path[$i]) || (!FileUtils::createDir(FileUtils::joinPaths($user_path, $new_version_2)))) {
+                if (!FileUtils::createDir($part_path[$i]) || ($this->core->isTesting() &&!FileUtils::createDir(FileUtils::joinPaths($user_path, $new_version_2)))) {
                     return $this->uploadResult("Failed to make the folder for part {$i}.", false);
                 }
             }
@@ -789,7 +789,7 @@ class SubmissionController extends AbstractController {
                 if (isset($previous_files[$i])){
                     for ($j=0; $j < count($previous_files[$i]); $j++){
                         $src = FileUtils::joinPaths($previous_part_path[$i], $previous_files[$i][$j]);
-                        $dst = FileUtils::joinPaths($part_path[$i], $previous_files[$i][$j]);
+                        $dst = FileUtils::joinPaths(FileUtils::joinPaths($user_path, $new_version_2), $previous_files[$i][$j]);
                         if (!@copy($src, $dst)) {
                             return $this->uploadResult("Failed to copy previously submitted file {$previous_files[$i][$j]} to current submission.", false);
                         }
@@ -817,7 +817,8 @@ class SubmissionController extends AbstractController {
                         else {
                             if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
                                 $dst = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
-                                if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst) || ($this->core->isTesting() && $new_version !== $new_version_2)) {
+                                $dstTesting = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
+                                if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst) || ($this->core->isTesting() && !@copy($uploaded_files[$i]["tmp_name"][$j], $dstTesting))) {
                                     return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
                                 }
                             }
