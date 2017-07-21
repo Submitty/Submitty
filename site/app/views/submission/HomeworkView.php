@@ -389,6 +389,10 @@ HTML;
                                 "{$gradeable->getId()}",
                                 user_id);
             }
+            var next_count = count+1;
+            var next_input = "#bulk_user_id_" + next_count;
+            $(next_input).focus();
+            $(next_input).select();
         }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
@@ -440,8 +444,8 @@ HTML;
                 <td width="3%"></td>
                 <td width="8%">Timestamp</td>
                 <td width="55%">PDF preview</td>
-                <td width="15%">User ID</td>
                 <td width="3%"></td>
+                <td width="15%">User ID</td>
                 <td width="8%">Submit</td>
                 <td width="8%">Delete</td>
             </tr>
@@ -462,6 +466,7 @@ HTML;
                             // save each filename so that the popout is the full pdf
                             $count_array[$count] = $timestamp."/".$filename;
                             $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
+                            $filename_full = $filename;
                             continue;
                         }
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
@@ -470,6 +475,7 @@ HTML;
                 <td>{$count}</td>
                 <td>{$clean_timestamp}</td> 
                 <td>
+                    {$filename_full}</br>
                     <object data="{$url}" type="application/pdf" width="100%" height="300">
                         alt : <a href="{$url}">pdf.pdf</a>
                     </object>
@@ -506,8 +512,10 @@ HTML;
         $("#bulkForm button").click(function(e){
             var btn = $(document.activeElement);
             var id = btn.attr("id");
-            var count = id.substring(12,id.length);
+            var count = btn.parent().parent().index()+1;
             var user_id = $("#bulk_user_id_"+count).val();
+            var next_count = count+1;
+            var next_input = "#bulk_user_id_" + next_count;
             var js_count_array = $count_array_json;
             var path = js_count_array[count];
             if (id.includes("delete")) {
@@ -516,9 +524,43 @@ HTML;
                     return;
                 }
                 deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
+                $(next_input).focus();
+                $(next_input).select();
             }
             else {
                 validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        $("#bulkForm input").keydown(function(e) {
+            if(e.keyCode === 13) { // enter was pressed
+                var text = $(document.activeElement);
+                var id = text.attr("id");
+                var count = text.parent().parent().index()+1;
+                var user_id = $(document.activeElement).val();
+                var js_count_array = $count_array_json;
+                var path = js_count_array[count];
+                var next_count = count+1;
+                next_input = "#bulk_user_id_" + next_count;
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+        $("#bulkForm button").keydown(function(e) {
+            if(e.keyCode === 9) { // tab was pressed
+                var text = $(document.activeElement);
+                var id = text.attr("id");
+                var count = text.parent().parent().index()+1;
+                var next_count = count+1;
+                next_input = "#bulk_user_id_" + next_count;
+                if (id.includes("delete")) {
+                    $(next_input).focus();
+                    $(next_input).select();
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
             }
         });
     });
