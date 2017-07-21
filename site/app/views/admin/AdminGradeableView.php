@@ -402,7 +402,7 @@ HTML;
                 if((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; $display_peer_checkboxes='style="display:none"'; }
         $html_output .= <<<HTML
  /> No <br />
-                <div class="peer_input" style="display:none;">How many people should each person grade? <input style='width: 50px' type='text' name="point_precision" value="3" class='float_val' /></div>
+                <div class="peer_input" style="display:none;">How many people should each person grade? <input style='width: 50px' type='text' name="peer_point_precision" value="3" class='int_val' /></div>
                 Point precision (for TA grading): 
                 <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
                 <br /> 
@@ -419,11 +419,11 @@ HTML;
 
     if (count($old_questions) == 0) {
         $old_questions[0] = array('question_message'      => "",
-                                     'question_grading_note' => "",
-                                     'student_grading_note'  => "",
-                                     'question_total'        => 0,
-                                     'question_extra_credit' => 0,
-                                     'peer_component'        => 0);
+                                  'question_grading_note' => "",
+                                  'student_grading_note'  => "",
+                                  'question_total'        => 0,
+                                  'question_extra_credit' => 0,
+                                  'peer_component'        => 0);
     }
 
 

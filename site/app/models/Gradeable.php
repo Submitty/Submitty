@@ -88,6 +88,9 @@ class Gradeable extends AbstractModel {
     /** @property @var bool Does this assignment use peer grading*/
     protected $peer_grading = false;
     
+    /** @property @var int How many people should each person grade*/
+    protected $peer_grade_set = 0;
+    
     /** @property @var string Iris Bucket to place gradeable */
     protected $bucket = null;
     

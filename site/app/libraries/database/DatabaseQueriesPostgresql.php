@@ -284,6 +284,7 @@ SELECT";
   eg.eg_is_repository,
   eg.eg_subdirectory,
   eg.eg_use_ta_grading,
+  eg.eg_peer_grading,
   eg.eg_submission_open_date,
   eg.eg_submission_due_date,
   eg.eg_late_days,
@@ -295,6 +296,7 @@ SELECT";
   gc.array_gc_max_value,
   gc.array_gc_is_text,
   gc.array_gc_is_extra_credit,
+  gc.array_gc_is_peer,
   gc.array_gc_order,
   gc.array_array_gcm_id,
   gc.array_array_gc_id,
@@ -346,6 +348,7 @@ LEFT JOIN (
 LEFT JOIN (
   SELECT
     g_id,
+    array_agg(gc_is_peer) as array_gc_is_peer,
     array_agg(gc_id) as array_gc_id,
     array_agg(gc_title) AS array_gc_title,
     array_agg(gc_ta_comment) AS array_gc_ta_comment,
