@@ -390,7 +390,7 @@ HTML;
         $html_output .= <<<HTML
  /> No <br />
                 Point precision (for TA grading): 
-                <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
+                <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="0.5" class="float_val" />
                 <br /> 
                 
 
@@ -1395,8 +1395,24 @@ $('#gradeable-form').on('submit', function(e){
     }
 
     function selectBox(question){
+        var step = $('#point_precision_id').val();
         // should be the increment value
-        return '<input type="number" id="grade-'+question+'" class="points" name="points_' + question +'" value="0" min="-1000" max="1000" step="0.5" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">';
+        return '<input type="number" id="grade-'+question+'" class="points" name="points_' + question +'" value="0" min="-1000" max="1000" step="'+step+'" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">';
+    }
+
+    function fixPointPrecision(me) {
+        var step = $(me).val();
+        var index = 1;
+        var exists = true;
+        if(exists){
+            if($("#grade-"+index).length){
+                $("#grade-"+index).attr('step', step);
+            }
+            else{
+                exists = false;
+            }
+            index++;
+        }
     }
 
     function calculatePercentageTotal() {
