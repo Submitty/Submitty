@@ -215,6 +215,12 @@ HTML;
                 if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
                     continue;
                 }
+                // if selected to not be visible to students, skip
+                if ($title !== "GRADED" && !$g_data->canStudentSubmit() && !$this->core->getUser()->accessGrading()) {
+                    continue;
+                }
+
+
                 if ($g_data->getActiveVersion() < 1){
                     if ($title == "GRADED" || $title == "ITEMS BEING GRADED"){
                         $title = "CLOSED";
