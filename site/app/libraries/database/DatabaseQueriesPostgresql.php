@@ -269,6 +269,9 @@ SELECT";
   eg.eg_subdirectory,
   eg.eg_use_ta_grading,
   eg.eg_can_student_submit,
+  eg.eg_can_student_view,
+  eg.eg_can_student_download_active,
+  eg.eg_can_student_download_all,
   eg.eg_submission_open_date,
   eg.eg_submission_due_date,
   eg.eg_late_days,
@@ -928,13 +931,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         //inserts the data if the gradeable is an electronic gradeable.
         if($details['g_gradeable_type'] === 0) {
             $params = array($details['g_id'], $details['eg_submission_open_date'], $details['eg_submission_due_date'],
-                    $details['eg_is_repository'], $details['eg_subdirectory'], $details['use_ta_grading'], $details['can_student_submit'], 
-                    $details['eg_config_path'], 
+                    $details['eg_is_repository'], $details['eg_subdirectory'], $details['use_ta_grading'], $details['can_student_submit'], $details['can_student_view'],
+                    $details['can_student_download_active'], $details['can_student_download_all'], $details['eg_config_path'], 
                     $details['eg_late_days'], $details['eg_precision']);
             $this->course_db->query("
 INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository, 
 eg_subdirectory, eg_use_ta_grading, eg_can_student_submit, eg_config_path, eg_late_days, eg_precision) 
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
             for ($x = 0; $x < $details['num_questions']; $x++) {
                         $params = array($details['g_id'], $details['array_eg_gc_title'][$x], $details['array_gc_ta_comment'][$x], 
                             $details['array_gc_student_comment'][$x], $details['array_gc_max_value'][$x], 
@@ -993,6 +996,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",$params);
             $electronic_gradeable = $this->course_db->row();
             $use_ta_grading = $electronic_gradeable['eg_use_ta_grading'];
             $can_student_submit = $electronic_gradeable['eg_can_student_submit'];
+            $can_student_view = $electronic_gradeable['eg_can_student_view'];
+            $can_student_download_active = $electronic_gradeable['eg_can_student_download_all'];
+            $can_student_download_all = $electronic_gradeable['eg_can_student_download_all'];
 
             $initial_ta_grading_compare_date = "Due Date (+ max allowed late days)";
 
@@ -1054,11 +1060,13 @@ g_min_grading_group=?, g_instructions_url=?, g_ta_view_start_date=? WHERE g_id=?
         //inserts the data if the gradeable is an electronic gradeable.
         if($details['g_gradeable_type'] === 0) {
             $params = array($details['eg_submission_open_date'], $details['eg_submission_due_date'],
-                    $details['eg_is_repository'], $details['eg_subdirectory'], $details['use_ta_grading'], $details['can_student_submit'], $details['eg_config_path'], 
+                    $details['eg_is_repository'], $details['eg_subdirectory'], $details['use_ta_grading'], $details['can_student_submit'], $details['can_student_view'], 
+                    $details['can_student_download_active'], $details['can_student_download_all'], $details['eg_config_path'], 
                     $details['eg_late_days'], $details['eg_precision'], $details['g_id']);
             $this->course_db->query("
 UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?, 
-eg_subdirectory=?, eg_use_ta_grading=?, eg_can_student_submit=?, eg_config_path=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params); 
+eg_subdirectory=?, eg_use_ta_grading=?, eg_can_student_submit=?, eg_can_student_view=?, eg_can_student_download_active=?, eg_can_student_download_all=?, 
+eg_config_path=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params); 
 
             $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($details['g_id']));
             $num_old_questions = intval($this->course_db->row()['cnt']);
@@ -1181,7 +1189,8 @@ g_min_grading_group=?, g_instructions_url=?, g_ta_view_start_date=? WHERE g_id=?
                     $gradeable->getAllowedLateDays(), $gradeable->getPointPrecision(), $gradeable->getId());
             $this->course_db->query("
 UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?, 
-eg_subdirectory=?, eg_use_ta_grading=?, eg_can_student_submit=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params); 
+eg_subdirectory=?, eg_use_ta_grading=?, eg_can_student_submit=?, eg_can_student_view=?, eg_can_student_download_active=?, eg_can_student_download_all=?, 
+eg_late_days=?, eg_precision=? WHERE g_id=?", $params); 
         }
 
         $this->course_db->commit();

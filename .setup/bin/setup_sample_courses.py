@@ -1066,6 +1066,9 @@ class Gradeable(object):
         self.subdirectory = ""
         self.use_ta_grading = True
         self.can_student_submit = True
+        self.can_student_view = True
+        self.can_student_download_active = False
+        self.can_student_download_all = False
         self.late_days = 2
         self.precision = 0.5
         self.syllabus_bucket = "none (for practice only)"
@@ -1145,6 +1148,12 @@ class Gradeable(object):
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
             if 'eg_can_student_submit' in gradeable:
                 self.can_student_submit = gradeable['eg_can_student_submit'] is True
+            if 'eg_can_student_view' in gradeable:
+                self.can_student_view = gradeable['eg_can_student_view'] is True
+            if 'eg_can_student_download_active' in gradeable:
+                self.can_student_download_active = gradeable['eg_can_student_download_active'] is True
+            if 'eg_can_student_download_all' in gradeable:
+                self.can_student_download_all = gradeable['eg_can_student_download_all'] is True
             if 'eg_late_days' in gradeable:
                 self.late_days = max(0, int(gradeable['eg_late_days']))
             if 'eg_precision' in gradeable:
@@ -1214,7 +1223,8 @@ class Gradeable(object):
                          eg_submission_due_date=self.submission_due_date,
                          eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
                          eg_use_ta_grading=self.use_ta_grading, eg_can_student_submit=self.can_student_submit,
-                         eg_config_path=self.config_path,
+                         eg_can_student_view=self.can_student_view, eg_can_student_download_active=self.can_student_download_active,
+                         eg_can_student_download_all=self.can_student_download_all, eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision)
 
         for component in self.components:

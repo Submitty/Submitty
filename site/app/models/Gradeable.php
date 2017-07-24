@@ -143,8 +143,14 @@ class Gradeable extends AbstractModel {
     /** @property @var bool Is there any TA grading to be done for this gradeable (ie. any rubric questions) */
     protected $ta_grading = false;
 
-    /** @property @var bool Will students be able to view/make submissions before grades are released? Will be no for exams */
+    /** @property @var bool Will students be able to view submissions before grades are released? Will be no for exams */
     protected $student_submit = true;
+    /** @property @var bool Will students be able to view submissions before grades are released? Will be no for exams */
+    protected $student_view = true;
+    /** @property @var */
+    protected $student_download_active = false;
+    /** @property @var */
+    protected $student_download_all = false;
 
     /* Config variables for submission details for this gradeable */
     /** @property @var float Max size (in bytes) allowed for the submission */
@@ -278,6 +284,9 @@ class Gradeable extends AbstractModel {
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
             $this->student_submit = $details['eg_can_student_submit'] === true;
+            $this->student_view = $details['eg_can_student_view'] === true;
+            $this->student_download_active = $details['eg_can_student_download_active'] === true;
+            $this->student_download_all = $details['eg_can_student_download_all'] === true;
             if (isset($details['active_version']) && $details['active_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
@@ -832,6 +841,18 @@ class Gradeable extends AbstractModel {
 
     public function canStudentSubmit() {
         return $this->student_submit;
+    }
+
+    public function canStudentView() {
+        return $this->student_view;
+    }
+
+    public function canStudentDownloadActive() {
+        return $this->student_download_active;
+    }
+
+    public function canStudentDownloadAll() {
+        return $this->student_download_all;
     }
 
     public function taGradesReleased() {

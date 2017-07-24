@@ -51,6 +51,9 @@ class AdminGradeableView extends AbstractView {
 		$is_repository = false;
 		$use_ta_grading=false;
         $can_student_submit=true;
+        $can_student_view=true;
+        $can_student_download_active=false;
+        $can_student_download_all=false;
         $old_questions = array();
         $g_min_grading_group = 0;
         $g_overall_ta_instructions = "";
@@ -99,6 +102,9 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $can_student_submit = $data[3]['eg_can_student_submit'];
+                $can_student_view = $data[3]['eg_can_student_view'];
+                $can_student_download_active = $data[3]['eg_can_student_download_active'];
+                $can_student_download_all = $data[3]['eg_can_student_download_all'];
                 $old_questions = $data[5];
             }
             if ($data[0]['g_gradeable_type'] === 2) { //if the gradeable edited is num/text gradeable
@@ -123,6 +129,9 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $can_student_submit = $data[3]['eg_can_student_submit'];
+                $can_student_view = $data[3]['eg_can_student_view'];
+                $can_student_download_active = $data[3]['eg_can_student_download_active'];
+                $can_student_download_all = $data[3]['eg_can_student_download_all'];
                 $old_questions = $data[5];
             }
             if ($data[0]['g_gradeable_type'] === 2) {
@@ -366,7 +375,7 @@ HTML;
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
 
-                Will students be able to make/view submissions before grades are released? (Select 'No' if this is an exam.)
+                Will students be able to make submissions? (Select 'No' if this is an exam.)
                 <input type="radio" id="yes_student_submit" name="student_submit" value="true" class="bool_val rubric_questions"
 HTML;
                 if ($can_student_submit===true) { $html_output .= ' checked="checked"'; }
@@ -377,8 +386,50 @@ HTML;
                 if ($can_student_submit===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> No 
+                <br /> <br />  
+
+                Will students be able to view submissions? (Select 'No' if this is an exam.)
+                <input type="radio" id="yes_student_view" name="student_view" value="true" class="bool_val rubric_questions"
+HTML;
+                if ($can_student_view===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                /> Yes
+                <input type="radio" id="no_student_view" name="student_view" value="false"
+HTML;
+                if ($can_student_view===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                /> No 
                 <br /> <br />
 
+                Will students be able to download files? (Select 'Yes' if this is an exam.)
+                <input type="radio" id="yes_student_download" name="student_download" value="true" class="bool_val rubric_questions"
+HTML;
+                if ($can_student_download_active || $can_student_download_all) { $html_output .= ' checked="checked"'; }
+                $html_output .= <<<HTML
+                /> Yes
+                <input type="radio" id="no_student_download" name="student_download" value="false"
+HTML;
+                if ($can_student_download_active===false && $can_student_download_all===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                /> No 
+
+                <fieldset id="download_questions">
+
+                    <input type="radio" id="student_download_active" name="student_download_active" class="bool_val rubric_questions"
+HTML;
+                    if ($can_student_download_active===true) { $html_output .= ' value="true" checked="checked"'; }
+                    else { $html_output .= ' value="false"'; }
+        $html_output .= <<<HTML
+                    /> Active version only
+                    <input type="radio" id="student_download_all" name="student_download_all" 
+HTML;
+                    if ($can_student_download_all===true) { $html_output .= ' value="true" checked="checked"'; }
+                    else { $html_output .= ' value="true"'; }
+        $html_output .= <<<HTML
+                    /> All files
+
+                </fieldset>
+                <br /> <br />
 
                 Will this assignment also be graded by the TAs?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
@@ -1033,6 +1084,10 @@ function createCrossBrowserJSDate(val){
             $('#grading_questions').hide();
         }
 
+        if ($('input:radio[name="student_download"]:checked').attr('value') === 'false') {
+            $('#download_questions').hide();
+        }
+
         $('.gradeable_type_options').hide();
         
         if ($('input[name=gradeable_type]').is(':checked')){
@@ -1084,6 +1139,45 @@ function createCrossBrowserJSDate(val){
                 }
             }
         });
+
+        $('input:radio[name="student_download"]').change(function() {
+            $('#download_questions').hide();
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'true') {
+                    $('#download_questions').show();
+                    $('#student_download_active').prop('checked', true);
+                    $('#student_download_active').val(true);
+                }
+                else {
+                    $('#student_download_active').prop('checked', false);
+                    $('#student_download_active').val(false);
+                    $('#student_download_all').prop('checked', false); 
+                    $('#student_download_all').val(false);
+                }
+            }
+        });
+
+        $('#student_download_active').change(function() {
+            if ($(this).is(':checked')) {
+                $('#student_download_active').val(true);
+                $('#student_download_all').prop('checked', false); 
+            }
+            else {
+                $('#student_download_active').val(false);
+            }
+        });
+
+        $('#student_download_all').change(function() {
+            if ($(this).is(':checked')) {
+                $('#student_download_all').val(true);
+                $('#student_download_active').prop('checked', false); 
+            }
+            else {
+                $('#student_download_all').val(false);
+            }
+        });
+
+
         
         
         $('[name="gradeable_template"]').change(
