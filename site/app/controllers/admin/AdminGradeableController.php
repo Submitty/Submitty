@@ -135,7 +135,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setConfigPath($_POST['config_path']);
             $is_peer_grading = (isset($_POST['peer_grading']) && $_POST['peer_grading']=='yes') ? true : false;
             $gradeable->setPeerGrading($is_peer_grading);
-            
+            if ($is_peer_grading) { $gradeable->setPeerGradeSet($_POST['peer_grade_set']); }
         }
 
         if ($edit_gradeable === 0) {
@@ -167,6 +167,89 @@ class AdminGradeableController extends AbstractController {
         }
 
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
+            $make_peer_assignments = false;
+            if ($edit_gradeable === 1 && $gradeable->getPeerGrading()) {
+                $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber();
+                $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
+                if ($make_peer_assignments) {
+                    $this->core->getQueries()->clearPeerGradingAssignments($_POST['gradeable_id']);
+                }
+            }
+            if (($edit_gradeable === 0 || $make_peer_assignments) && $gradeable->getPeerGrading()) {
+                $users = $this->core->getQueries()->getAllUsers();
+                $user_ids = array();
+                $grading = array();
+                $incomplete_grading = array();
+                $graded_by = array();
+                $incomplete_graded_by = array();
+                $peer_grade_set = $gradeable->getPeerGradeSet();
+                foreach($users as $key => $user) {
+                    // Need to remove non-student users, or users in the NULL section
+                    if ($user->getRegistrationSection() == null) {
+                        unset($users[$key]);
+                    }
+                    else {
+                        $grading[$user->getId()] = array();
+                        $graded_by[$user->getId()] = array();
+                        $user_ids[] = $user->getId();
+                        $incomplete_grading[] = $user->getId();
+                        $incomplete_graded_by[] = $user->getId();
+                    }
+                }
+                $user_number = count($user_ids);
+                for($i = 0; $i<$user_number; $i++) {
+                    /* This is a mess...
+                    * we continually try to fill the grading and graded_by arrays (while loop) with random selections from the opposite incomplete arrays
+                    * (incomplete_grading to fill graded_by and incomplete_graded_by to fill grading)
+                    * 
+                    * If one of the randomly selected items is invalid (already in array, or is the same as the person who's array we are trying to fill)
+                    * we just try again on the next iteration of the while loop
+                    * we do this for both grading and graded_by, which should create a valid, random permutation, that we put in the database
+                    */
+                    while(count($graded_by[$user_ids[$i]]) != $peer_grade_set) {
+                        $select_num = $peer_grade_set - count($graded_by[$user_ids[$i]]);
+                        $random_keys = array_rand($incomplete_grading, $select_num);
+                        // if select_num is 1, array_rand just returns a number, and subsequent code expects an array
+                        if(!is_array($random_keys)) {
+                            $random_keys = array($random_keys);
+                        }
+                        for($j = 0; $j < $select_num ;$j++) {
+                            if(!(($incomplete_grading[$random_keys[$j]] === $user_ids[$i]) || (in_array($incomplete_grading[$random_keys[$j]], $graded_by[$user_ids[$i]])))) {
+                                $graded_by[$user_ids[$i]][] = $incomplete_grading[$random_keys[$j]];
+                                $grading[$incomplete_grading[$random_keys[$j]]][] = $user_ids[$i];
+                                if(count($grading[$incomplete_grading[$random_keys[$j]]]) == $peer_grade_set) {
+                                    unset($incomplete_grading[$random_keys[$j]]);
+                                }
+                            }
+                        }
+                    }
+                    unset($incomplete_graded_by[$i]);
+
+                    while(count($grading[$user_ids[$i]]) != $peer_grade_set) {
+                        $select_num = $peer_grade_set - count($grading[$user_ids[$i]]);
+                        $random_keys = array_rand($incomplete_graded_by, $select_num);
+                        if(!is_array($random_keys)) {
+                            $random_keys = array($random_keys);
+                        }
+                        for($j = 0; $j < $select_num; $j++) {
+                            if(!(($incomplete_graded_by[$random_keys[$j]] === $user_ids[$i]) || (in_array($incomplete_graded_by[$random_keys[$j]], $grading[$user_ids[$i]])))) {
+                                $grading[$user_ids[$i]][] = $incomplete_graded_by[$random_keys[$j]];
+                                $graded_by[$incomplete_graded_by[$random_keys[$j]]][] = $user_ids[$i];
+                                if (count($graded_by[$incomplete_graded_by[$random_keys[$j]]]) === $peer_grade_set) {
+                                    unset($incomplete_graded_by[$random_keys[$j]]);
+                                }
+                            }
+                        }
+                    }
+                    unset($incomplete_grading[$i]);
+                }
+                // I know I could do this on the fly in the above loop set, but I think its clearer to do it separately
+                foreach($grading as $grader=> $assignment) {
+                    foreach($assignment as $student) {
+                        $this->core->getQueries()->insertPeerGradingAssignment($grader, $student, $gradeable->getId());
+                    }
+                }
+            }
             if ($edit_gradeable === 1) {
                 $x = 0;
                 foreach ($old_components as $old_component) {

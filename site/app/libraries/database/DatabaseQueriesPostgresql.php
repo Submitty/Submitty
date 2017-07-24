@@ -1303,5 +1303,18 @@ WHERE gcm_id=?", $params);
             VALUES(?,?,?)", array($user_id, $g_id, $days));
         }
     }
+    
+    public function getPeerGradingAssignNumber($gradeable_id) {
+        $this->course_db->query("SELECT eg_peer_grade_set FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
+        return $this->course_db->row()['eg_peer_grade_set'];
+    }
+    
+    public function clearPeerGradingAssignments($gradeable_id) {
+        $this->course_db->query("DELETE FROM peer_assign WHERE g_id=?", array($gradeable_id));
+    }
+    
+    public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
+        $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
+    }
 }
 

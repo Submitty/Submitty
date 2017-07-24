@@ -32,6 +32,10 @@ use app\libraries\Utils;
  * @method float getNormalPoints() Returns the total number of points for testcases that are not hidden nor are extra credit
  * @method bool setTeamAssignment()
  * @method bool getTeamAssignment()
+ * @method int getPeerGradeSet()
+ * @method void setPeerGradeSet(int $assign)
+ * @method bool getPeerGrading()
+ * @method void setPeerGrading()
  * @method setTaViewDate(\DateTime $datetime)
  * @method \DateTime getOpenDate(\DateTime $datetime)
  * @method setOpenDate(\DateTime $datetime)
@@ -271,7 +275,7 @@ class Gradeable extends AbstractModel {
         $this->ta_instructions = $details['g_overall_ta_instructions'];
         $this->instructions_url = $details['g_instructions_url'];
         $this->team_assignment = isset($details['g_team_assignment']) ? $details['g_team_assignment'] === true : false;
-        $this->peer_grading = isset($details['g_peer_grading']) ? $details['g_peer_grading'] === true: false;
+        
         $this->type = $details['g_gradeable_type'];
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);
@@ -281,6 +285,7 @@ class Gradeable extends AbstractModel {
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
+            $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
             $this->config_path = $details['eg_config_path'];
             if (isset($details['active_version']) && $details['active_version'] !== null) {
                 $this->been_autograded = true;
@@ -911,9 +916,5 @@ class Gradeable extends AbstractModel {
       
     public function getSyllabusBucket() {
         return $this->bucket;
-    }
-    
-    public function isPeer() {
-        return $this->peer_grading;
     }
 }
