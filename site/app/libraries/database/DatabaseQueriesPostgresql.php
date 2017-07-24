@@ -934,7 +934,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
             $this->course_db->query("
 INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository, 
 eg_subdirectory, eg_use_ta_grading, eg_can_student_submit, eg_config_path, eg_late_days, eg_precision) 
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
             for ($x = 0; $x < $details['num_questions']; $x++) {
                         $params = array($details['g_id'], $details['array_eg_gc_title'][$x], $details['array_gc_ta_comment'][$x], 
                             $details['array_gc_student_comment'][$x], $details['array_gc_max_value'][$x], 
