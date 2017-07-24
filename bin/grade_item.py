@@ -125,7 +125,19 @@ def untrusted_grant_read_access(which_untrusted,my_dir):
                      "o+r",
                      "{}",
                      ";"])
-
+# give permissions to all created files to the hwcron user
+def untrusted_grant_write_access(which_untrusted,my_dir):
+    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                     which_untrusted,
+                     "/usr/bin/find",
+                     my_dir,
+                     "-user",
+                     which_untrusted,
+                     "-exec",
+                     "/bin/chmod",
+                     "o+rwx",
+                     "{}",
+                     ";"])
 
 # ==================================================================================
 # ==================================================================================
@@ -368,7 +380,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","VALIDATION FAILURE")
 
     untrusted_grant_read_access(which_untrusted,tmp_work)
-
+    untrusted_grant_write_access(which_untrusted, tmp_work) #FIXME
 
     # grab the result of autograding
     grade_result = ""
