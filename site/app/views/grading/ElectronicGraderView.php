@@ -596,10 +596,7 @@ HTML;
             }
             $word = ($type === 1) ? "Addition" : "Deduction";
             // hide auto-grading if it has no value
-            if ($question->getMaxValue() == 0) {
-                continue;
-            }
-            else if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
+            if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
             }
     
@@ -610,7 +607,7 @@ HTML;
             $return .= <<<HTML
                 <tr>
 HTML;
-            $penalty = !(intval($question->getMaxValue()) > 0);
+            $penalty = !(intval($question->getMaxValue()) >= 0);
             $message = htmlentities($question->getTitle());
             $message = "<b>{$message}</b>";
             if ($question->getGradedVersion() != -1 && $gradeable->getActiveVersion() != $question->getGradedVersion()) {
@@ -690,15 +687,24 @@ HTML;
 HTML;
 
             $d = 0;
+            $first = true;
+            $noChange = "";
             foreach ($question->getMarks() as $mark) {
+                if ($first === true) {
+                    $first = false;
+                    $noChange = "readonly";
+                }
+                else {
+                    $noChange = "";
+                }
                 $icon_mark = ($mark->getHasMark() === true) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
                 <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
-                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
                         <span onclick="selectMark(this);"> <i class="fa {$icon_mark}" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}">
-                        <textarea name="mark_text_{$c}_{$d}" onkeyup="autoResizeComment(event);" rows="1" style="width:95%; resize:none; float:left;">{$mark->getNote()}</textarea>
+                        <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width:95%; resize:none; float:left;" {$noChange}>{$mark->getNote()}</textarea>
                     </td>
                 </tr>
 HTML;

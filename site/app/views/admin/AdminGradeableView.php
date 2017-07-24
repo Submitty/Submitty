@@ -458,7 +458,15 @@ HTML;
                 $type_deduct = 1;
             }
         }
+        $first = true;
         foreach ($marks as $mark) {
+            if($first === true) {
+                $first = false;
+                $hidden = "display: none;";
+            }
+            else {
+                $hidden = "";
+            }
             if ($type_deduct === 1) {
                 $min = 0;
                 $max = 1000;
@@ -468,7 +476,7 @@ HTML;
                 $max = 0;
             }
             $html_output .= <<<HTML
-                <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px;">
+                <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
                 <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                 <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
                 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -1789,7 +1797,7 @@ $('#gradeable-form').on('submit', function(e){
         var question_id = me.parentElement.id.split('-')[1];
         var current_id = me.parentElement.id.split('-')[2];
         current_id = parseInt(current_id);
-        if (current_id == 0) {
+        if (current_id == 0 || current_id == 1) {
             return false;
         }
         var current_row = $('#deduct_id-'+question_id+'-'+current_id);
