@@ -73,9 +73,9 @@ if [ ${VAGRANT} == 1 ]; then
 ##    hsdbu, postgres, root, vagrant                      ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
-##    http://192.168.56.102 (submission)                  ##
-##    http://192.168.56.102/cgi-bin (cgi-bin scripts)     ##
-##    http://192.168.56.102/hwgrading (tagrading)         ##
+##    http://192.168.56.101 (submission)                  ##
+##    http://192.168.56.101/cgi-bin (cgi-bin scripts)     ##
+##    http://192.168.56.101/hwgrading (tagrading)         ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##
