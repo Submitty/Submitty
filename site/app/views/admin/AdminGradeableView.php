@@ -50,6 +50,7 @@ class AdminGradeableView extends AbstractView {
 		$g_gradeable_type = 0;
 		$is_repository = false;
 		$use_ta_grading=false;
+        $can_student_submit=true;
         $old_questions = array();
         $g_min_grading_group = 0;
         $g_overall_ta_instructions = "";
@@ -97,6 +98,7 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $can_student_submit = $data[3]['eg_can_student_submit'];
                 $old_questions = $data[5];
             }
             if ($data[0]['g_gradeable_type'] === 2) { //if the gradeable edited is num/text gradeable
@@ -120,6 +122,7 @@ class AdminGradeableView extends AbstractView {
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $can_student_submit = $data[3]['eg_can_student_submit'];
                 $old_questions = $data[5];
             }
             if ($data[0]['g_gradeable_type'] === 2) {
@@ -343,7 +346,6 @@ HTML;
                 How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
                                                                          type="text"/>
                 <br /> <br />
-                
 
                 Are students uploading files or commiting code to an SVN repository?<br />
                 <fieldset>
@@ -363,6 +365,20 @@ HTML;
 
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
+
+                Will students be able to make/view submissions before grades are released? (Select 'No' if this is an exam.)
+                <input type="radio" id="yes_student_submit" name="student_submit" value="true" class="bool_val rubric_questions"
+HTML;
+                if ($can_student_submit===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                /> Yes
+                <input type="radio" id="no_student_submit" name="student_submit" value="false"
+HTML;
+                if ($can_student_submit===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                /> No 
+                <br /> <br />
+
 
                 Will this assignment also be graded by the TAs?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"

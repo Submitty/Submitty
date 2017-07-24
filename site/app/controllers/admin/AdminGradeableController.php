@@ -119,6 +119,7 @@ class AdminGradeableController extends AbstractController {
         //$details['eg_subdirectory'] = $_POST['subdirectory'];
         $details['eg_subdirectory'] = " ";
         $details['use_ta_grading'] = $_POST['ta_grading'];
+        $details['can_student_submit'] = $_POST['student_submit'];
         $details['eg_config_path'] = $_POST['config_path'];
         $details['eg_precision'] = $_POST['point_precision'];
         $details['array_gc_id'] = array();

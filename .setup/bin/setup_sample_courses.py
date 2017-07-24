@@ -1065,6 +1065,7 @@ class Gradeable(object):
         self.is_repository = False
         self.subdirectory = ""
         self.use_ta_grading = True
+        self.can_student_submit = True
         self.late_days = 2
         self.precision = 0.5
         self.syllabus_bucket = "none (for practice only)"
@@ -1142,6 +1143,8 @@ class Gradeable(object):
                 self.subdirectory = gradeable['eg_subdirectory']
             if 'eg_use_ta_grading' in gradeable:
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
+            if 'eg_can_student_submit' in gradeable:
+                self.can_student_submit = gradeable['eg_can_student_submit'] is True
             if 'eg_late_days' in gradeable:
                 self.late_days = max(0, int(gradeable['eg_late_days']))
             if 'eg_precision' in gradeable:
@@ -1210,7 +1213,8 @@ class Gradeable(object):
                          eg_submission_open_date=self.submission_open_date,
                          eg_submission_due_date=self.submission_due_date,
                          eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
-                         eg_use_ta_grading=self.use_ta_grading, eg_config_path=self.config_path,
+                         eg_use_ta_grading=self.use_ta_grading, eg_can_student_submit=self.can_student_submit,
+                         eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision)
 
         for component in self.components:

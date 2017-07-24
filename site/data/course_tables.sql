@@ -122,6 +122,7 @@ CREATE TABLE electronic_gradeable (
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
+    eg_can_student_submit boolean NOT NULL,
     eg_submission_open_date timestamp(6) without time zone NOT NULL,
     eg_submission_due_date timestamp(6) without time zone NOT NULL,
     eg_late_days integer DEFAULT (-1) NOT NULL,
