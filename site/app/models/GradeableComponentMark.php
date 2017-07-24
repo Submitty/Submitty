@@ -62,6 +62,6 @@ class GradeableComponentMark extends AbstractModel {
 
     public function setHasMark($new_has_mark) {
         $this->has_mark_modifed = ($new_has_mark === $this->has_mark) ? false : true;
-        $this->has_mark = $new_has_mark;
+        $this->has_mark = filter_var($new_has_mark, FILTER_VALIDATE_BOOLEAN);
     }
 }
