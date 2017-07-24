@@ -8,6 +8,9 @@ use app\controllers\grading\TeamListController;
 
 
 class GradingController extends AbstractController{
+    if (!$this->core->getUser()->accessGrading()) {
+        $this->core->getOutput()->showError("This account is not authorized to view grading section");
+    }
     public function run() {
         $controller = null;
         switch ($_REQUEST['page']) {
