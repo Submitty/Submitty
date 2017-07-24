@@ -307,36 +307,33 @@ class ElectronicGraderController extends AbstractController {
                 $component->setGradedVersion($_POST['active_version']);
                 $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                 $component->setComment($_POST['custom_message']);
+                $component->setScore($_POST['custom_points']);
                 $component->saveData($gradeable->getGdId());
-                $marks = $component->getMarks();
+
                 $index = 0;
                 $marks_count = count($marks);
-                foreach ($marks as $mark) {
+                // save existing marks
+                foreach ($component->getMarks() as $mark) {
                     $mark->setPoints($_POST['marks'][$index]['points']);
                     $mark->setNote($_POST['marks'][$index]['note']);
                     $mark->setOrder($_POST['marks'][$index]['order']);
-                    $mark->setHasMark($_POST['marks'][$index]['selected']);
                     $mark->save();
+                    $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                     $mark->saveData($gradeable->getGdId(), $component->getId());
                     $index++;
                 }
+                // create new marks
                 for ($i = $index; $i < $_POST['num_mark']; $i++) {
                     $mark = new GradeableComponentMark($this->core);
                     $mark->setGcId($component->getId());
                     $mark->setPoints($_POST['marks'][$i]['points']);
                     $mark->setNote($_POST['marks'][$i]['note']);
                     $mark->setOrder($_POST['marks'][$i]['order']);
-                    $mark->setHasMark($_POST['marks'][$i]['selected']);
                     $mark->save();
+                    $mark->setHasMark($_POST['marks'][$i]['selected']);
                     $mark->saveData($gradeable->getGdId(), $component->getId());
                 }
-                $response = array('status' => $_POST['marks'][0]);
-                $this->core->getOutput()->renderJson($response);
-                return $response;
             }
         }
-        $response = array('status' => $_POST['gradeable_id']);
-        $this->core->getOutput()->renderJson($response);
-        return $response;
     }
 }

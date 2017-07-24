@@ -306,6 +306,7 @@ SELECT";
   gd.gd_id,
   gd.gd_overall_comment,
   gd.gd_user_viewed_date,
+  gd.array_array_gcm_mark,
   gd.array_gcd_gc_id,
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
@@ -386,6 +387,7 @@ LEFT JOIN (
     in_gcd.array_gcd_grader_id,
     in_gcd.array_gcd_graded_version,
     in_gcd.array_gcd_grade_time,
+    in_gcd.array_array_gcm_mark,
     in_gcd.array_gcd_user_id,
     in_gcd.array_gcd_user_firstname,
     in_gcd.array_gcd_user_preferred_firstname,
@@ -402,6 +404,7 @@ LEFT JOIN (
       array_agg(gcd_grader_id) AS array_gcd_grader_id,
       array_agg(gcd_graded_version) AS array_gcd_graded_version,
       array_agg(gcd_grade_time) AS array_gcd_grade_time,
+      array_agg(array_gcm_mark) AS array_array_gcm_mark,
       array_agg(u.user_id) AS array_gcd_user_id,
       array_agg(u.user_firstname) AS array_gcd_user_firstname,
       array_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
@@ -409,14 +412,15 @@ LEFT JOIN (
       array_agg(u.user_email) AS array_gcd_user_email,
       array_agg(u.user_group) AS array_gcd_user_group
     FROM(
-        SELECT gcd.*
+        SELECT gcd.* , gcmd.array_gcm_mark
         FROM gradeable_component_data AS gcd 
         LEFT JOIN (
-          SELECT gc_id, gd_id
+          SELECT gc_id, gd_id, array_to_string(array_agg(gcm_id), ',') as array_gcm_mark
           FROM gradeable_component_mark_data AS gcmd
-          GROUP BY gc_id, gd_id
+          GROUP BY gc_id, gd_id, gd_id
         ) as gcmd
-    ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id 
+    ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id
+    WHERE array_gcm_mark IS NOT NULL
     ) AS gcd
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id 
     GROUP BY gcd.gd_id

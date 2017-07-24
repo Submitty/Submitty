@@ -72,6 +72,9 @@ class GradeableComponent extends AbstractModel {
     /** @property @var bool */
     protected $has_grade = false;
 
+    /** @property @var bool */
+    protected $has_marks = false;
+
     /** @property @var bool Does this component use peer grading*/
     protected $peer_grading = false;
 
@@ -127,11 +130,15 @@ class GradeableComponent extends AbstractModel {
         }
 
         if (isset($details['array_gcm_id'])) {
-
+            $this->has_marks = true;
             $mark_fields = array('gcm_id', 'gc_id', 'gcm_points',
                                     'gcm_note', 'gcm_order');
             foreach ($mark_fields as $key) {
                 $details["array_{$key}"] = explode(',', $details["array_{$key}"]);
+            }
+
+            if (isset($details['array_gcm_mark'])) {
+                $details['array_gcm_mark'] = explode(',', $details['array_gcm_mark']);
             }
 
             for ($i = 0; $i < count($details['array_gcm_id']); $i++) {
@@ -139,11 +146,9 @@ class GradeableComponent extends AbstractModel {
                 foreach ($mark_fields as $key) {
                     $mark_details[$key] = $details["array_{$key}"][$i];
                 }
-
-                // see if this actually works...
-                if (isset($details['array_gcmd_gcm_id'])) {
-                    for ($j = 0; $j < count($details['array_gcmd_gcm_id']); $j++) {
-                        if ($details['array_gcmd_gcm_id'][$j] === $mark_details['gcm_id']) {
+                if (isset($details['array_gcm_mark'])) {
+                    for ($j = 0; $j < count($details['array_gcm_mark']); $j++) {
+                        if ($details['array_gcm_mark'][$j] === $mark_details['gcm_id']) {
                             $mark_details['gcm_has_mark'] = true;
                             break;
                         }
@@ -168,16 +173,12 @@ class GradeableComponent extends AbstractModel {
 
     public function saveData($gd_id) {
         if ($this->modified) {
-            if ($this->has_grade) {
+            if ($this->has_grade || $this->has_marks) {
                 $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
             }
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
             }
-        }
-
-        foreach ($this->marks as $mark) {
-            $mark->saveData($gd_id, $this->id);
         }
     }
 }

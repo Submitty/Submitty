@@ -1012,11 +1012,14 @@ HTML;
                     'custom_points' : custom_points,
                     'custom_message' : custom_message,
                     marks : mark_data
+                },
+                success: function(data) {
+                    console.log("success");
+                },
+                error: function() {
+                    console.log("Something went wront with saving marks...");
                 }
             })
-            .done(function (response) {
-                alert (response);
-            });
         }
     }
 </script>
