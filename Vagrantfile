@@ -3,8 +3,9 @@
 
 $script = <<SCRIPT
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT_Submitty
-mkdir -p ${GIT_PATH}/.vagrant/logs
-${GIT_PATH}/.setup/vagrant.sh vagrant 2>&1 | tee ${GIT_PATH}/.vagrant/logs/vagrant.log
+DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g")
+mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/logs
+${GIT_PATH}/.setup/vagrant.sh 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/logs/vagrant.log
 SCRIPT
 
 Vagrant.configure(2) do |config|
@@ -18,12 +19,14 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.box = 'bento/ubuntu-16.04'
     ubuntu.vm.network 'forwarded_port', guest: 80, host: 8080
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 15432
+    ubuntu.vm.network 'private_network', ip: '192.168.56.101', auto_config: false
   end
 
   config.vm.define 'debian', autostart: false do |debian|
     debian.vm.box = 'debian/jessie64'
     debian.vm.network 'forwarded_port', guest: 80, host: 8888
     debian.vm.network 'forwarded_port', guest: 5432, host: 25432
+    debian.vm.network 'private_network', ip: '192.168.56.102', auto_config: false
   end
 
   config.vm.provider 'virtualbox' do |vb|

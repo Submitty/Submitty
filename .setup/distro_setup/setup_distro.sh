@@ -18,4 +18,4 @@ if [ ! -d ${CURRENT_DIR}/${LOWER_DISTRO} ]; then
 fi
 
 echo "Setting up distro: ${DISTRO}"
-${CURRENT_DIR}/${DISTRO}/setup_distro.sh
+source ${CURRENT_DIR}/${LOWER_DISTRO}/setup_distro.sh

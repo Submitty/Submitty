@@ -26,20 +26,21 @@ COURSE_BUILDERS_GROUP=course_builders
 #################################################################
 # PROVISION SETUP
 #################
+
 if [[ $1 == vagrant ]]; then
   echo "Non-interactive vagrant script..."
-  VAGRANT=1
+  export VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
 else
   #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
-  VAGRANT=0
+  export VAGRANT=0
 fi
 
 #################################################################
 # DISTRO SETUP
 #################
 
-${CURRENT_DIR}/distro_setup/setup_distro.sh
+source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
 if [ ${VAGRANT} == 1 ]; then
     # We only might build analysis tools from source while using vagrant
@@ -134,10 +135,13 @@ chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
 sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
 
-pushd /tmp > /dev/null
+
 #################################################################
 # JAR SETUP
 #################
+
+pushd /tmp > /dev/null
+
 echo "Getting JUnit..."
 JUNIT_VER=4.12
 HAMCREST_VER=1.3
@@ -151,9 +155,14 @@ mv remotecontent?filepath=junit%2Fjunit%2F${JUNIT_VER}%2Fjunit-${JUNIT_VER}.jar 
 wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F${HAMCREST_VER}%2Fhamcrest-core-${HAMCREST_VER}.jar hamcrest-core-${HAMCREST_VER}.jar
 
+popd > /dev/null
+
 # EMMA is a tool for computing code coverage of Java programs
 
 echo "Getting emma..."
+
+pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
+
 EMMA_VER=2.0.5312
 wget https://github.com/Submitty/emma/releases/download/${EMMA_VER}/emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
@@ -164,18 +173,22 @@ rm index.html* > /dev/null 2>&1
 
 chmod o+r . *.jar
 
+popd > /dev/null
+
 #################################################################
 # DRMEMORY SETUP
 #################
 
 # Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
 
+pushd /tmp > /dev/null
+
 echo "Getting DrMemory..."
 DRMEM_TAG=release_1.10.1
 DRMEM_VER=1.10.1-3
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C /tmp/DrMemory
-mv /tmp/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
+tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
+mv /tmp/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
 chmod 755 ${SUBMITTY_INSTALL_DIR}/drmemory
@@ -308,15 +321,21 @@ fi
 # SUBMITTY SETUP
 #################
 
+
 if [ ${VAGRANT} == 1 ]; then
+    # This should be set by setup_distro.sh for whatever distro we have, but
+    # in case it is not, default to our primary URL
+    if [ -z "${SUBMISSION_URL}" ]; then
+        SUBMISSION_URL='http://192.168.56.101'
+    fi
     echo -e "/var/run/postgresql
 hsdbu
 hsdbu
-http://localhost
+${SUBMISSION_URL}
 1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 else
-	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
+	${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
 fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
@@ -343,17 +362,19 @@ if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much
     echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
 
+    DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g")
+
     rm -rf ${SUBMITTY_DATA_DIR}/logs/*
-    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/logs/*
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
+    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/*
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/autograding
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
     chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/logs/autograding
     chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/access
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/site_errors
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/access ${SUBMITTY_DATA_DIR}/logs/access
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/access
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/site_errors
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/access ${SUBMITTY_DATA_DIR}/logs/access
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
     chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/access
     chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
     chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site_errors
