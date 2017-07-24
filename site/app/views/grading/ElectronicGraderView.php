@@ -596,10 +596,7 @@ HTML;
             }
             $word = ($type === 1) ? "Addition" : "Deduction";
             // hide auto-grading if it has no value
-            if ($question->getMaxValue() == 0) {
-                continue;
-            }
-            else if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
+            if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
             }
     
@@ -610,7 +607,7 @@ HTML;
             $return .= <<<HTML
                 <tr>
 HTML;
-            $penalty = !(intval($question->getMaxValue()) > 0);
+            $penalty = !(intval($question->getMaxValue()) >= 0);
             $message = htmlentities($question->getTitle());
             $message = "<b>{$message}</b>";
             if ($question->getGradedVersion() != -1 && $gradeable->getActiveVersion() != $question->getGradedVersion()) {
@@ -642,7 +639,7 @@ HTML;
 HTML;
             }
             $return .= <<<HTML
-            <span onclick=""> <i id="icon-{$c}" class="fa fa-window-maximize" style="visibility: visible;"></i> </span> {$note} 
+            <span onclick=""> <i id="icon-{$c}" data-question_id="{$question->getId()}" class="fa fa-window-maximize" style="visibility: visible;"></i> </span> {$note} 
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());
@@ -668,7 +665,7 @@ HTML;
             }
             
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="openClose({$c}, {$num_questions});">
+                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
                         <input readonly type="text" id="grade-{$question->getOrder()}" name="grade-{$question->getOrder()}" value="{$question->getScore()}" onchange="validateInput('grade-{$question->getOrder()}', '{$question->getMaxValue()}', {$precision}); calculatePercentageTotal();" style="width:50px; resize:none;" {$disabled}></textarea>
                         <strong> / {$question->getMaxValue()}</strong>
@@ -683,22 +680,31 @@ HTML;
                 <tr id="mark_header_id={$c}" name="mark_header_{$c}">
                     <td colspan="4", style="{$background}">
                             Common Grade {$word}
-                        <span onclick="saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()});" style="float: right; cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i>
+                        <span onclick="saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose({$c}, {$num_questions});" style="float: right; cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i>
                         </span>
                     </td>
                 </tr>
 HTML;
 
             $d = 0;
+            $first = true;
+            $noChange = "";
             foreach ($question->getMarks() as $mark) {
+                if ($first === true) {
+                    $first = false;
+                    $noChange = "readonly";
+                }
+                else {
+                    $noChange = "";
+                }
                 $icon_mark = ($mark->getHasMark() === true) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
                 <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
-                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
                         <span onclick="selectMark(this);"> <i class="fa {$icon_mark}" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}">
-                        <textarea name="mark_text_{$c}_{$d}" onkeyup="autoResizeComment(event);" rows="1" style="width:95%; resize:none; float:left;">{$mark->getNote()}</textarea>
+                        <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width:95%; resize:none; float:left;" {$noChange}>{$mark->getNote()}</textarea>
                     </td>
                 </tr>
 HTML;
@@ -730,7 +736,7 @@ HTML;
                     <b>General Comment</b> <span onclick=""> <i id="icon-general-comment" class="fa fa-window-maximize" style="visibility: visible;"></i>
                 </td>
             </tr>
-            <tr onclick="openClose(-1, {$num_questions});">
+            <tr onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-1, {$num_questions});">
                 <td colspan="4">
                     <textarea name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
                 </td>
@@ -946,10 +952,29 @@ HTML;
     }
 
     //num === -2 means save last opened component
-    //num === -1 means save all components
+    //num === -1 means save all components, TO DO?
     function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
         if (num === -2) {
-
+            var index = 1;
+            var found = false;
+            var doesExist = ($('#icon-' + index).length) ? true : false;
+            while(doesExist) {
+                if($('#icon-' + index).length) {
+                    if ($('#icon-' + index)[0].classList.contains('fa-window-close-o')) {
+                        found = true;
+                        doesExist = false;
+                        index--;
+                    }
+                }
+                else{
+                    doesExist = false;
+                }
+                index++;
+            }
+            if (found === true) {
+                var gradeable_component_id = parseInt($('#icon-' + index)[0].dataset.question_id);
+                saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id);
+            }
         } else if (num === -1) {
 
         } else {
@@ -957,6 +982,7 @@ HTML;
             var mark_data = new Array(arr_length);
             for (var i = 0; i < arr_length; i++) {
                 var current_row = $('#mark_id-'+num+'-'+i);
+                var delete_mark = $('#mark_remove_id-'+num+'-'+i);
                 var is_selected = false;
                 if (current_row.find('i[name=mark_icon_'+num+'_'+i+']')[0].classList.contains('fa-square')) {
                     is_selected = true;
@@ -968,6 +994,7 @@ HTML;
                     selected: is_selected
                 };
                 mark_data[i] = mark;
+                delete_mark.remove();
             }
             current_row = $('#mark_custom_id-'+num);
             var custom_points = current_row.find('input[name=mark_points_custom_'+num+']').val();

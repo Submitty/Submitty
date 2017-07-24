@@ -323,10 +323,10 @@ class ElectronicGraderController extends AbstractController {
                 for ($i = $index; $i < $_POST['num_mark']; $i++) {
                     $mark = new GradeableComponentMark($this->core);
                     $mark->setGcId($component->getId());
-                    $mark->setPoints($_POST['marks'][$index]['points']);
-                    $mark->setNote($_POST['marks'][$index]['note']);
-                    $mark->setOrder($_POST['marks'][$index]['order']);
-                    $mark->setHasMark($_POST['marks'][$index]['selected']);
+                    $mark->setPoints($_POST['marks'][$i]['points']);
+                    $mark->setNote($_POST['marks'][$i]['note']);
+                    $mark->setOrder($_POST['marks'][$i]['order']);
+                    $mark->setHasMark($_POST['marks'][$i]['selected']);
                     $mark->save();
                     $mark->saveData($gradeable->getGdId(), $component->getId());
                 }

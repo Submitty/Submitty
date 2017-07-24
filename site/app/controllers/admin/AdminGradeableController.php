@@ -168,103 +168,128 @@ class AdminGradeableController extends AbstractController {
         //most of the logic in here follows the same pattern.
         //first delete or update the old components, then insert new components if there are any
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
-            if ($edit_gradeable === 1) {
-                $x = 0;
-                foreach ($old_components as $old_component) {
-                    if ($x < $num_questions && $x < $num_old_components) {
-                        $old_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
-                        $old_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
-                        $old_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
-                        $old_component->setMaxValue($_POST['points_' . strval($x + 1)]);
-                        $old_component->setIsText(false);
-                        $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
-                        $old_component->setIsExtraCredit($extra_credit);
-                        $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
-                        $old_component->setPeerGrading($peer_grading_component);
-                        $old_component->setOrder($x);
-                        $this->core->getQueries()->updateGradeableComponent($old_component);
-                    } else if ($num_old_components > $num_questions) {
-                        $this->core->getQueries()->deleteGradeableComponent($old_component);
-                    }
-                    $x++;
-                }
-            } 
-            for ($x = $start_index; $x < $num_questions; $x++) {
-                $gradeable_component = new GradeableComponent($this->core);
-                $gradeable_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
-                $gradeable_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
-                $gradeable_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
-                $gradeable_component->setMaxValue($_POST['points_' . strval($x + 1)]);
-                $gradeable_component->setIsText(false);
-                $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
-                $gradeable_component->setIsExtraCredit($extra_credit);
-                $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
-                $gradeable_component->setPeerGrading($peer_grading_component);
-                $gradeable_component->setOrder($x);
-                $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
-            }  
-
-            if ($edit_gradeable === 0) {        
-                $components = $this->core->getQueries()->getGradeableComponents($_POST['gradeable_id']);
-                $index = 1;
-                foreach ($components as $comp) {
-                    $num_marks = 0;
-                    foreach($_POST as $k=>$v){
-                        if(strpos($k,'deduct_points_' . $index) !== false){
-                            $num_marks++;
+            if ($is_ta_grading === true) {            
+                if ($edit_gradeable === 1) {
+                    $x = 0;
+                    foreach ($old_components as $old_component) {
+                        if ($x < $num_questions && $x < $num_old_components) {
+                            $old_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
+                            $old_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
+                            $old_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
+                            $old_component->setMaxValue($_POST['points_' . strval($x + 1)]);
+                            $old_component->setIsText(false);
+                            $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
+                            $old_component->setIsExtraCredit($extra_credit);
+                            $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
+                            $old_component->setPeerGrading($peer_grading_component);
+                            $old_component->setOrder($x);
+                            $this->core->getQueries()->updateGradeableComponent($old_component);
+                        } else if ($num_old_components > $num_questions) {
+                            $this->core->getQueries()->deleteGradeableComponent($old_component);
                         }
+                        $x++;
                     }
+                } 
+                for ($x = $start_index; $x < $num_questions; $x++) {
+                    $gradeable_component = new GradeableComponent($this->core);
+                    $gradeable_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
+                    $gradeable_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
+                    $gradeable_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
+                    $gradeable_component->setMaxValue($_POST['points_' . strval($x + 1)]);
+                    $gradeable_component->setIsText(false);
+                    $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
+                    $gradeable_component->setIsExtraCredit($extra_credit);
+                    $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
+                    $gradeable_component->setPeerGrading($peer_grading_component);
+                    $gradeable_component->setOrder($x);
+                    $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
+                }  
 
-                    for ($y = 0; $y < $num_marks; $y++) {
+                if ($edit_gradeable === 0) {        
+                    $components = $this->core->getQueries()->getGradeableComponents($_POST['gradeable_id']);
+                    $index = 1;
+                    foreach ($components as $comp) {
+                        $num_marks = 0;
+                        foreach($_POST as $k=>$v){
+                            if(strpos($k,'deduct_points_' . $index) !== false){
+                                $num_marks++;
+                            }
+                        }
+
+                        $type = 0; // 0 is deductable, 1 is addiction
+                        for ($y = 0; $y < $num_marks; $y++) {
+                            $temp_number =  floatval($_POST['deduct_points_' . $index . '_' . $y]);
+                            if ($temp_number == 0) {
+                                continue;
+                            }
+                            else {
+                                $type = ($temp_number < 0) ? 0 : 1;
+                                break;
+                            }
+                        }
+                        //special mark for all correct/all incorrect
                         $mark = new GradeableComponentMark($this->core);
                         $mark->setGcId($comp->getId());
-                        $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                        $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
-                        $mark->setOrder($y);
-                        $this->core->getQueries()->createGradeableComponentMark($mark);
-                    }                    
-                    $index++;
-                }            
-            }
-            else if ($edit_gradeable === 1) {
-                $components = $this->core->getQueries()->getGradeableComponents($_POST['gradeable_id']);
-                $index = 1;
-                foreach ($components as $comp) {
-                    $num_marks = 0; //current number of marks
-                    foreach($_POST as $k=>$v){
-                        if(strpos($k,'deduct_points_' . $index) !== false){
-                            $num_marks++;
+                        $mark->setPoints(0);
+                        if ($type === 1) {
+                            $mark->setNote("Incorrect");
+                        } else {
+                            $mark->setNote("Correct");
                         }
-                    }
+                        $mark->setOrder(0);
+                        $this->core->getQueries()->createGradeableComponentMark($mark);
 
-                    $marks = $this->core->getQueries()->getGradeableComponentsMarks($comp->getId());
-                    $num_old_mark = count($marks); //old number of marks
-                    //if old > new, delete old
-                    //if old < new, create more
+                        for ($y = 0; $y < $num_marks; $y++) {
+                            $mark = new GradeableComponentMark($this->core);
+                            $mark->setGcId($comp->getId());
+                            $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
+                            $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                            $mark->setOrder($y+1);
+                            $this->core->getQueries()->createGradeableComponentMark($mark);
+                        }                    
+                        $index++;
+                    }            
+                }
+                else if ($edit_gradeable === 1) {
+                    $components = $this->core->getQueries()->getGradeableComponents($_POST['gradeable_id']);
+                    $index = 1;
+                    foreach ($components as $comp) {
+                        $num_marks = 0; //current number of marks
+                        foreach($_POST as $k=>$v){
+                            if(strpos($k,'deduct_points_' . $index) !== false){
+                                $num_marks++;
+                            }
+                        }
 
-                    $y = 0;
-                    foreach($marks as $mark) {
-                        if($y < $num_marks && $y < $num_old_mark) {
+                        $marks = $this->core->getQueries()->getGradeableComponentsMarks($comp->getId());
+                        $num_old_mark = count($marks); //old number of marks
+                        //if old > new, delete old
+                        //if old < new, create more
+
+                        $y = 0;
+                        foreach($marks as $mark) {
+                            if($y < $num_marks && $y < $num_old_mark) {
+                                $mark->setGcId($comp->getId());
+                                $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
+                                $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                                $mark->setOrder($y);
+                                $this->core->getQueries()->updateGradeableComponentMark($mark);
+                            } else if($num_old_mark > $num_marks) {
+                                $this->core->getQueries()->deleteGradeableComponentMark($mark);
+                            }
+                            $y++; 
+                        }
+                        for($y = $num_old_mark; $y < $num_marks; $y++) {
+                            $mark = new GradeableComponentMark($this->core);
                             $mark->setGcId($comp->getId());
                             $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
                             $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
                             $mark->setOrder($y);
-                            $this->core->getQueries()->updateGradeableComponentMark($mark);
-                        } else if($num_old_mark > $num_marks) {
-                            $this->core->getQueries()->deleteGradeableComponentMark($mark);
-                        }
-                        $y++; 
-                    }
-                    for($y = $num_old_mark; $y < $num_marks; $y++) {
-                        $mark = new GradeableComponentMark($this->core);
-                        $mark->setGcId($comp->getId());
-                        $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                        $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
-                        $mark->setOrder($y);
-                        $this->core->getQueries()->createGradeableComponentMark($mark);
-                    }             
-                    $index++;
-                }               
+                            $this->core->getQueries()->createGradeableComponentMark($mark);
+                        }             
+                        $index++;
+                    }               
+                }
             }                
         } else if($gradeable->getType() === GradeableType::CHECKPOINTS) { 
             if ($edit_gradeable === 1) {
