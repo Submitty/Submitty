@@ -229,6 +229,8 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int aut
 
   float acceptable_threshold = stringToFloat(acceptable_threshold_str,6); //window_utils function.
 
+
+  actual_file = tc.getPrefix() + "_" + actual_file;
   std::cout << "About to compare " << actual_file << " and " << expected_file << std::endl;
 
 
