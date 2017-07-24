@@ -26,7 +26,13 @@
                 {
                     "actual_file": "part2/p2_bug3.txt",
                     "description": "Program Output",
-                    "difference_file": "test02_0_diff.json"
+                    "difference_file": "test02_0_diff.json",
+                    "messages": [
+                        {
+                            "message": "Incorrect Answer",
+                            "type": "failure"
+                        }
+                    ]
                 }
             ],
             "points_awarded": 0,

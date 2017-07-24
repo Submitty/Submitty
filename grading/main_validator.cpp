@@ -61,10 +61,11 @@ bool ShowHelper(const std::string& when, bool success) {
 }
 
 
-double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::json &autocheck_js, 
+double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::json &autocheck_js,
                       const std::string &hw_id, std::string &testcase_message) {
 
-  //std::cerr << "autocheck #" << which_grader+1 << " / " << my_testcase.numFileGraders() << std::endl;
+  std::cout << "-------------------------------------------------------------" << std::endl;
+  std::cout << "autocheck #" << which_grader+1 << " / " << my_testcase.numFileGraders() << std::endl;
 
   TestResultsFixedSize result = my_testcase.do_the_grading(which_grader);
 
@@ -83,17 +84,13 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
   int full_points = my_testcase.getPoints();
   std::cout << "FULL POINTS " << full_points << std::endl;
 
-  bool test_case_success = (result.getMessages().size() == 0);
-  bool show_message  = ShowHelper(tcg.value("show_message", "never"),test_case_success);
-  bool show_actual   = ShowHelper(tcg.value("show_actual",  "never"),test_case_success);
-  bool show_expected = ShowHelper(tcg.value("show_expected","never"),test_case_success);
-  /*  if (full_points > 0 && fabs(full_points-score) < 0.0001) {
-    test_case_success = true;
-    }*/
-
+  //bool test_case_success = (result.getMessages().size() == 0);
+  bool test_case_success = !(deduction > 0.0 && grade < 1.0);
+  bool show_message    = ShowHelper(tcg.value("show_message", "never"),test_case_success);
+  bool show_actual     = ShowHelper(tcg.value("show_actual",  "never"),test_case_success);
+  bool show_image_diff = ShowHelper(tcg.value("show_difference_image",  "never"),test_case_success);
+  bool show_expected   = ShowHelper(tcg.value("show_expected","never"),test_case_success);
   std::string BROKEN_CONFIG_ERROR_MESSAGE;
-
-  //std::cout << "sm=" << show_message << "  sa=" << show_actual << "  se=" << show_expected << std::endl;
 
   if (show_actual == false && show_expected == true) {
     //std::cout << "ERROR show_actual == false & show_expected == true" << std::endl;
@@ -160,14 +157,16 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
             if (show_expected) {
              autocheck_j["expected_file"] = expected_path.str();
             }
+            if (show_image_diff)
+            {
+              autocheck_j["image_difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_difference.png";
+            }
             if (show_actual) {
              autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
             }
           }
         }
       }
-      //std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
-      //std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
 
       if (studentFileExists && !studentFileEmpty) {
         actual_file_to_print = true;
@@ -182,7 +181,6 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
     }
 
     std::string fm = tcg.value("failure_message","");
-
     if (!test_case_success) {
       bool failure_message_already_added = false;
       if (FN==0) {
@@ -215,19 +213,19 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
     }
 
     if ((show_message && num_messages > 0)
-        || show_actual 
+        || show_actual
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
-
-      if (my_testcase.isFileCheck() && num_messages > 0 && messages[0].second.find("README") != std::string::npos)
+      if (my_testcase.isFileCheck() && num_messages > 0 && messages.size() > 0 && messages[0].second.find("README") != std::string::npos) {
         testcase_message = "README missing.";
-      else if (my_testcase.isCompilation() && num_messages > 0) {
-        if (result.hasCompilationError())
+      } else if (my_testcase.isCompilation() && num_messages > 0) {
+        if (result.hasCompilationError()) {
           testcase_message = "Compilation Error(s).";
-        else if (result.hasCompilationWarning() && testcase_message.find("ERROR") == std::string::npos)
+        } else if (result.hasCompilationWarning() && testcase_message.find("ERROR") == std::string::npos) {
           testcase_message = "Compilation Warning(s).";
-        else
+        } else {
           testcase_message = "Compilation Error(s).";
+        }
       }
     }
   }
@@ -289,7 +287,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       } else {
         std::cout << "EXCESSIVE SUBMISSIONS PENALTY = " << testcase_pts << std::endl;
       }
-    } 
+    }
     else {
       double my_score = 1.0;
       std::cout << "NUM FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
@@ -329,7 +327,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         nonhidden_automated_points_possible += my_testcase.getPoints();
       }
     }
-    all_testcases.push_back(tc_j); 
+    all_testcases.push_back(tc_j);
     gradefile << "Testcase"
               << std::setw(3) << std::right << i+1 << ": "
               << std::setw(50) << std::left << my_testcase.getTitle() << " ";
@@ -362,8 +360,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",automated_points_possible);
   assert (AUTO_POINTS == automated_points_possible);
   int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
-  
-  // Generate results.json 
+
+  // Generate results.json
   nlohmann::json sj;
   sj["testcases"] = all_testcases;
   std::ofstream json_file("results.json");

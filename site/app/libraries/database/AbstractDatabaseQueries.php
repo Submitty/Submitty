@@ -64,10 +64,15 @@ abstract class AbstractDatabaseQueries {
 
     /**
      * @param User $user
+     */
+    abstract public function insertSubmittyUser(User $user);
+
+    /**
+     * @param User $user
      * @param string $semester
      * @param string $course
      */
-    abstract public function insertUser(User $user, $semester, $course);
+    abstract public function insertCourseUser(User $user, $semester, $course);
 
     /**
      * @param User $user
@@ -216,9 +221,10 @@ abstract class AbstractDatabaseQueries {
     /**
      * This inserts an row in the electronic_gradeable_data table for a given gradeable/user/version combination.
      * The values for the row are set to defaults (0 for numerics and NOW() for the timestamp) with the actual values
-     * to be later filled in by the grade_students.sh routine. We do it this way as we can properly deal with the
+     * to be later filled in by the submitty_grading_scheduler.py and insert_database_version_data.py scripts.
+     * We do it this way as we can properly deal with the
      * electronic_gradeable_version table here as the "active_version" is a concept strictly within the PHP application
-     * code and grade_students.sh has no concept of it. This will either update or insert the row in
+     * code and the grading scripts have no concept of it. This will either update or insert the row in
      * electronic_gradeable_version for the given gradeable and student.
      *
      * @param $g_id

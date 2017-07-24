@@ -10,6 +10,8 @@ use app\libraries\DatabaseUtils;
  *
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
+ * @method void setAnonId(string $anon_id)
+ * @method string getAnonId() 
  * @method string getPassword()
  * @method string getFirstName() Get the first name of the loaded user
  * @method string getPreferredFirstName() Get the preferred name of the loaded user
@@ -35,6 +37,8 @@ class User extends AbstractModel {
     
     /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
+    /** @property @var string The anonymous id of this user which should be unique for each course they are in*/
+    protected $anon_id;
     /**
      * @property
      * @var string The password for the student used for database authentication. This should be hashed and salted.
@@ -86,6 +90,9 @@ class User extends AbstractModel {
         $this->setId($details['user_id']);
         if (isset($details['user_password'])) {
             $this->setPassword($details['user_password']);
+        }
+        if (isset($details['anon_id'])) {
+            $this->anon_id = $details['anon_id'];
         }
         $this->setFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {

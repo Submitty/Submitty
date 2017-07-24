@@ -20,8 +20,13 @@ SUBMISSION_URL=__INSTALL__FILLIN__SUBMISSION_URL__
 
 HWPHP_USER=__INSTALL__FILLIN__HWPHP_USER__
 HWCRON_USER=__INSTALL__FILLIN__HWCRON_USER__
+HWCGI_USER=__INSTALL__FILLIN__HWCGI_USER__
 
 COURSE_BUILDERS_GROUP=__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__
+
+DATABASE_HOST=__INSTALL__FILLIN__DATABASE_HOST__
+DATABASE_USER=__INSTALL__FILLIN__DATABASE_USER__
+DATABASE_PASS='__INSTALL__FILLIN__DATABASE_PASSWORD__'
 
 ########################################################################################################################
 ########################################################################################################################
@@ -191,10 +196,16 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_
 #               drwxr-s---       $HWPHP_USER        ta_www_group    config_upload/
 #               drwxr-s---       $HWCRON_USER       ta_www_group    results/
 #               drwxr-s---       $HWCRON_USER       ta_www_group    checkout/
+#               drwxr-s---       $HWCRON_USER       ta_www_group    uploads/
+#               drwxr-s---       $HWPHP_USER        ta_www_group    uploads/bulk_pdf/
+#               drwxr-s---       $HWCGI_USER        ta_www_group    uploads/split_pdf/
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/submissions
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/config_upload
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/results
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/checkout
+create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/uploads
+create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
+create_and_set  u=rwx,g=rxs,o=   $HWCGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
 
 
 # NOTE:    instructor uploads TA HW grade reports & overall grade scores here
@@ -215,13 +226,16 @@ replace_fillin_variables $course_dir/BUILD_${course}.sh
 
 
 # copy the config file for TA grading & replace the variables
-cp $SUBMITTY_INSTALL_DIR/site/config/course_template.ini ${course_dir}/config/config.ini
+cp ${SUBMITTY_INSTALL_DIR}/site/config/course_template.ini ${course_dir}/config/config.ini
 chown ${HWPHP_USER}:${ta_www_group} ${course_dir}/config/config.ini
 chmod 660 ${course_dir}/config/config.ini
 replace_fillin_variables ${course_dir}/config/config.ini
 
-echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"
-
+echo -e "Creating database ${DATABASE_NAME}\n"
+PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d postgres -c "CREATE DATABASE ${DATABASE_NAME}"
+PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d ${DATABASE_NAME} -f ${SUBMITTY_INSTALL_DIR}/site/data/course_tables.sql
+PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -c "INSERT INTO courses (semester, course) VALUES ('${semester}', '${course}');"
+echo -e "\nSUCCESS!\n\n"
 
 ########################################################################################################################
 ########################################################################################################################

@@ -10,7 +10,17 @@ import shutil
 import subprocess
 import stat
 import filecmp
+import datetime
+import pytz
+import time
+import dateutil
+import dateutil.parser
+import tzlocal
 
+import submitty_utils
+import grade_items_logging
+import write_grade_history
+import insert_database_version_data
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
@@ -18,7 +28,6 @@ SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
 BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
-
 
 # ==================================================================================
 def parse_args():
@@ -28,9 +37,15 @@ def parse_args():
     parser.add_argument("which_untrusted")
     return parser.parse_args()
 
+def get_queue_time(next_directory,next_to_grade):
+    t = time.ctime(os.path.getctime(os.path.join(next_directory,next_to_grade)))
+    t = dateutil.parser.parse(t)
+    t = submitty_utils.get_timezone().localize(t)
+    return t
 
-def get_submission_path(args):
-    queue_file = os.path.join(args.next_directory,args.next_to_grade)
+
+def get_submission_path(next_directory,next_to_grade):
+    queue_file = os.path.join(next_directory,next_to_grade)
     if not os.path.isfile(queue_file):
         raise SystemExit("ERROR: the file does not exist",queue_file)
     with open(queue_file, 'r') as infile:
@@ -79,7 +94,7 @@ def copy_contents_into(source,target):
             else:
                 shutil.copy(os.path.join(source,item),target)
 
-    
+
 # copy files that match one of the patterns from the source directory
 # to the target directory.  
 def pattern_copy(what,patterns,source,target,tmp_logs):
@@ -98,23 +113,37 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
             
 
 # give permissions to all created files to the hwcron user
-def untrusted_grant_read_access(args,my_dir):
+def untrusted_grant_read_access(which_untrusted,my_dir):
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                     args.which_untrusted,
+                     which_untrusted,
                      "/usr/bin/find",
                      my_dir,
                      "-user",
-                     args.which_untrusted,
+                     which_untrusted,
                      "-exec",
                      "/bin/chmod",
                      "o+r",
                      "{}",
                      ";"])
-
+# give permissions to all created files to the hwcron user
+def untrusted_grant_write_access(which_untrusted,my_dir):
+    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                     which_untrusted,
+                     "/usr/bin/find",
+                     my_dir,
+                     "-user",
+                     which_untrusted,
+                     "-exec",
+                     "/bin/chmod",
+                     "o+rwx",
+                     "{}",
+                     ";"])
 
 # ==================================================================================
 # ==================================================================================
-def main():
+def just_grade_item(next_directory,next_to_grade,which_untrusted):
+
+    my_pid = os.getpid()
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
@@ -122,13 +151,21 @@ def main():
 
     # --------------------------------------------------------
     # figure out what we're supposed to grade & error checking
-    args = parse_args()
-    obj = get_submission_path(args)
+    obj = get_submission_path(next_directory,next_to_grade)
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
                                    "submissions",obj["gradeable"],obj["who"],str(obj["version"]))
     if not os.path.isdir(submission_path):
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
-    print ("GRADE THIS", submission_path)
+    print ("pid",my_pid,"GRADE THIS", submission_path)
+
+    is_batch_job = next_directory==BATCH_QUEUE
+    is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
+
+    queue_time = get_queue_time(next_directory,next_to_grade)
+    queue_time_longstring = submitty_utils.write_submitty_date(queue_time)
+    grading_began=submitty_utils.get_current_time()
+    waittime=int((grading_began-queue_time).total_seconds())
+    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"wait:",waittime,"")
 
     # --------------------------------------------------------
     # various paths
@@ -141,9 +178,12 @@ def main():
 
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",obj["gradeable"],obj["who"],str(obj["version"]))
 
-    # grab a copy of the current results_history.json file (if it exists)
-    global_results_history_file_location=os.path.join(results_path,"results_history.json")
-    # FIXME - HISTORY FILE NEEDS WORK
+    # grab a copy of the current history.json file (if it exists)
+    history_file=os.path.join(results_path,"history.json")
+    history_file_tmp=""
+    if os.path.isfile(history_file):
+        filehandle,history_file_tmp=tempfile.mkstemp()
+        shutil.copy(history_file,history_file_tmp)
 
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
@@ -158,8 +198,10 @@ def main():
 
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
-        submission_time=submission_time_file.read()
-
+        submission_string=submission_time_file.read().rstrip()
+    
+    submission_datetime=submitty_utils.read_submitty_date(submission_string)
+    
     
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
@@ -186,8 +228,8 @@ def main():
     #print ("UPLOAD TYPE ",gradeable_upload_type)
     #FIXME:  deal with svn/git/whatever
 
-    gradeable_deadline = gradeable_config_obj["date_due"]
-
+    gradeable_deadline_string = gradeable_config_obj["date_due"]
+    
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
     pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
     
@@ -210,20 +252,22 @@ def main():
 
     with open(os.path.join(tmp_logs,"compilation_log.txt"), 'w') as logfile:
         compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                           args.which_untrusted,
+                                           which_untrusted,
                                            os.path.join(tmp_compilation,"my_compile.out"),
                                            obj["gradeable"],
                                            obj["who"],
                                            str(obj["version"]),
-                                           submission_time],
+                                           submission_string],
                                           stdout=logfile)
 
     if compile_success == 0:
-        print ("NEW COMPILATION OK")
+        print ("pid",my_pid,"COMPILATION OK")
     else:
-        print ("NEW COMPILATION FAILURE")
+        print ("pid",my_pid,"COMPILATION FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
 
-    untrusted_grant_read_access(args,tmp_compilation)
+
+    untrusted_grant_read_access(which_untrusted,tmp_compilation)
         
     # remove the compilation program
     os.remove(os.path.join(tmp_compilation,"my_compile.out"))
@@ -268,23 +312,24 @@ def main():
     # run the run.out as the untrusted user
     with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
         runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                          args.which_untrusted,
+                                          which_untrusted,
                                           os.path.join(tmp_work,"my_runner.out"),
                                           obj["gradeable"],
                                           obj["who"],
                                           str(obj["version"]),
-                                          submission_time],
+                                          submission_string],
                                           stdout=logfile)
 
 
 
 
     if runner_success == 0:
-        print ("NEW RUNNER OK")
+        print ("pid",my_pid,"RUNNER OK")
     else:
-        print ("NEW RUNNER FAILURE")
+        print ("pid",my_pid,"RUNNER FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","RUNNER FAILURE")
 
-    untrusted_grant_read_access(args,tmp_work)
+    untrusted_grant_read_access(which_untrusted,tmp_work)
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
@@ -320,21 +365,31 @@ def main():
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
         validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                             args.which_untrusted,
+                                             which_untrusted,
                                              os.path.join(tmp_work,"my_validator.out"),
                                              obj["gradeable"],
                                              obj["who"],
                                              str(obj["version"]),
-                                             submission_time],
+                                             submission_string],
                                             stdout=logfile)
 
     if validator_success == 0:
-        print ("NEW VALIDATOR OK")
+        print ("pid",my_pid,"VALIDATOR OK")
     else:
-        print ("NEW VALIDATOR FAILURE")
+        print ("pid",my_pid,"VALIDATOR FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","VALIDATION FAILURE")
 
+    untrusted_grant_read_access(which_untrusted,tmp_work)
+    untrusted_grant_write_access(which_untrusted, tmp_work) #FIXME
 
-    untrusted_grant_read_access(args,tmp_work)
+    # grab the result of autograding
+    grade_result = ""
+    with open(os.path.join(tmp_work,"grade.txt")) as f:
+        lines = f.readlines()
+        for line in lines:
+            line=line.rstrip('\n')
+            if line.startswith("Automatic grading total:"):
+                grade_result = line
 
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
@@ -370,17 +425,59 @@ def main():
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(results_path,"details"),tmp_logs)
 
-    # TEMPORARY ERROR CHECKING
-    if os.path.isdir(os.path.join(results_path,"OLD")):
-        if not filecmp.cmp(os.path.join(results_path,"OLD","results.json"),
-                           os.path.join(results_path,"results.json")):
-            print ("********************************************************** OOPS!  results.json does not match")
-            touch (os.path.join(results_path,"MISMATCH_RESULTS_JSON"))
-        if not filecmp.cmp(os.path.join(results_path,"OLD","grade.txt"),
-                           os.path.join(results_path,"grade.txt")):
-            print ("********************************************************** OOPS!  grade.txt does not match")
-            touch (os.path.join(results_path,"MISMATCH_GRADE_TXT"))
+    if not history_file_tmp == "":
+        shutil.move(history_file_tmp,history_file)
+        # fix permissions
+        ta_group_id=os.stat(results_path).st_gid
+        os.chown(history_file,int(HWCRON_UID),ta_group_id)
+        add_permissions(history_file,stat.S_IRGRP)
+        
+    grading_finished=submitty_utils.get_current_time()
 
+    # -------------------------------------------------------------
+    # create/append to the results history
+
+    gradeable_deadline_datetime = submitty_utils.read_submitty_date(gradeable_deadline_string)
+    gradeable_deadline_longstring = submitty_utils.write_submitty_date(gradeable_deadline_datetime)
+    submission_longstring = submitty_utils.write_submitty_date(submission_datetime)
+    
+    seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
+    # note: negative = not late
+
+    grading_began_longstring = submitty_utils.write_submitty_date(grading_began)
+    grading_finished_longstring = submitty_utils.write_submitty_date(grading_finished)
+
+
+    gradingtime=int((grading_finished-grading_began).total_seconds())
+
+
+    write_grade_history.just_write_grade_history(history_file,
+                                                 gradeable_deadline_longstring,
+                                                 submission_longstring,
+                                                 seconds_late,
+                                                 queue_time_longstring,
+                                                 is_batch_job_string,
+                                                 grading_began_longstring,
+                                                 waittime,
+                                                 grading_finished_longstring,
+                                                 gradingtime,
+                                                 grade_result)
+
+    #---------------------------------------------------------------------
+    # WRITE OUT VERSION DETAILS
+    insert_database_version_data.insert_to_database(
+        obj["semester"],
+        obj["course"],
+        obj["gradeable"],
+        obj["user"],
+        obj["team"],
+        obj["who"],
+        "true" if obj["is_team"] else "false",
+        str(obj["version"]))
+
+    print ("pid",my_pid,"finished grading ", next_to_grade, " in ", gradingtime, " seconds")
+
+    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",gradingtime,grade_result)
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("finished")
@@ -392,5 +489,8 @@ def main():
 
     
 # ==================================================================================
+# ==================================================================================
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    just_grade_item(args.next_directory,args.next_to_grade,args.which_untrusted)
+
