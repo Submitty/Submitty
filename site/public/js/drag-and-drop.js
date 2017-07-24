@@ -19,6 +19,9 @@ var changed = false;        // if files from previous submission changed
 
 var empty_textboxes = true;
 
+var student_ids = [];           // all student ids
+var student_without_ids = [];   // student ids for those w/o submissions
+
 // initializing file_array and prevous_files
 function createArray(num_parts){
     if(file_array.length == 0){
@@ -401,6 +404,10 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
                     setTimeout(function() {
                         $('#submit_' + count).fadeOut();
                     }, 5000);
+                    var index = student_without_ids.indexOf(user_id);
+                    if (index > -1) {
+                        student_without_ids.splice(index, 1);
+                    }
                     return;
                 }
                 else {
@@ -408,6 +415,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
                 }
             }
             catch (e) {
+                console.log(e);
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);

@@ -58,6 +58,14 @@ abstract class AbstractDatabaseQueries {
     abstract public function getAllUsers($section_key="registration_section");
 
     /**
+     * Fetches all students from the users table who do not have submissions, ordering by course section than user_id.
+     *
+     * @param string $section_key
+     * @return User[]
+     */
+    abstract public function getAllUsersWithoutSubmissions($section_key="registration_section", $g_id=null);
+
+    /**
      * @return User[]
      */
     abstract public function getAllGraders();

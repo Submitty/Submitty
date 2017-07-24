@@ -51,7 +51,7 @@ HTML;
      *
      * @return string
      */
-    public function showGradeable($gradeable, $days_late, $students) {
+    public function showGradeable($gradeable, $days_late) {
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
@@ -63,11 +63,19 @@ HTML;
     <h2>New submission for: {$gradeable->getName()}</h2>
 HTML;
         if ($this->core->getUser()->accessAdmin()) {
+            $students = $this->core->getQueries()->getAllUsers();
+            $students_without = $this->core->getQueries()->getAllUsersWithoutSubmissions("registration_section",$gradeable->getId());
             $student_ids = array();
+            $student_without_ids = array();
+
             foreach ($students as $student) {
                 $student_ids[] = $student->getId();
             }
+            foreach ($students_without as $student) {
+                $student_without_ids[] = $student->getId();
+            }
             $student_ids = json_encode($student_ids);
+            $student_without_ids = json_encode($student_without_ids);
             $return .= <<<HTML
     <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
         <div >
@@ -102,9 +110,13 @@ HTML;
 HTML;
             $return .= <<<HTML
     <script type="text/javascript">
+        
         $(document).ready(function() {
             var cookie = document.cookie;
-            var student_ids = $student_ids;
+            student_ids = $student_ids;
+            student_without_ids = $student_without_ids;
+            console.log(student_ids);
+            console.log(student_without_ids);
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
@@ -361,10 +373,33 @@ HTML;
 
         $return .= <<<HTML
     <script type="text/javascript">
+        function moveNextInput(count) {
+            var next_count = count+1;
+            var next_input = "#bulk_user_id_" + next_count;
+            if ($(next_input).length) {
+                $(next_input).focus();
+                $(next_input).select(); 
+
+                var inputOffset = $(next_input).offset().top;
+                var inputHeight = $(next_input).height();
+                var windowHeight = $(window).height();
+                var offset;
+
+                if (inputHeight < windowHeight) {
+                    offset = inputOffset - ((windowHeight / 2) - (inputHeight / 2));
+                }
+                else {
+                    offset = inputOffset;
+                }
+                var speed = 500;
+                $('html, body').animate({scrollTop:offset}, speed); 
+            }
+        }
         function makeSubmission(user_id, highest_version, is_pdf, path, count) {
             // submit the selected pdf
             if (is_pdf) {
                 submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count);
+                moveNextInput(count);
             }
             // otherwise, this is a regular submission of the uploaded files
             else if (user_id == "") {
@@ -389,10 +424,6 @@ HTML;
                                 "{$gradeable->getId()}",
                                 user_id);
             }
-            var next_count = count+1;
-            var next_input = "#bulk_user_id_" + next_count;
-            $(next_input).focus();
-            $(next_input).select();
         }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
@@ -508,17 +539,14 @@ HTML;
         window.open(url_full,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
     }
     $(document).ready(function() {
-        var student_ids = $student_ids;
         $("#bulkForm input").autocomplete({
-            source: student_ids
+            source: student_without_ids
         });
         $("#bulkForm button").click(function(e){
             var btn = $(document.activeElement);
             var id = btn.attr("id");
             var count = btn.parent().parent().index()+1;
             var user_id = $("#bulk_user_id_"+count).val();
-            var next_count = count+1;
-            var next_input = "#bulk_user_id_" + next_count;
             var js_count_array = $count_array_json;
             var path = js_count_array[count];
             if (id.includes("delete")) {
@@ -527,8 +555,7 @@ HTML;
                     return;
                 }
                 deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
-                $(next_input).focus();
-                $(next_input).select();
+                moveNextInput(count);
             }
             else {
                 validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
@@ -544,8 +571,6 @@ HTML;
                 var user_id = $(document.activeElement).val();
                 var js_count_array = $count_array_json;
                 var path = js_count_array[count];
-                var next_count = count+1;
-                next_input = "#bulk_user_id_" + next_count;
                 validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
                 e.preventDefault();
                 e.stopPropagation();
@@ -556,11 +581,9 @@ HTML;
                 var text = $(document.activeElement);
                 var id = text.attr("id");
                 var count = text.parent().parent().index()+1;
-                var next_count = count+1;
-                next_input = "#bulk_user_id_" + next_count;
+                // default behavior is okay for input/submit, but delete should go to next input
                 if (id.includes("delete")) {
-                    $(next_input).focus();
-                    $(next_input).select();
+                    moveNextInput(count);
                     e.preventDefault();
                     e.stopPropagation();
                 }
