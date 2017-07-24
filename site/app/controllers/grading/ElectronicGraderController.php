@@ -5,7 +5,10 @@ namespace app\controllers\grading;
 use app\controllers\AbstractController;
 use app\models\User;
 use app\models\HWReport;
-
+use \app\libraries\GradeableType;
+use app\models\Gradeable;
+use app\models\GradeableComponent;
+use app\models\GradeableComponentMark;
 
 class ElectronicGraderController extends AbstractController {
     public function run() {
@@ -316,6 +319,16 @@ class ElectronicGraderController extends AbstractController {
                     $mark->save();
                     $mark->saveData($gradeable->getGdId(), $component->getId());
                     $index++;
+                }
+                for ($i = $index; $i < $_POST['num_mark']; $i++) {
+                    $mark = new GradeableComponentMark($this->core);
+                    $mark->setGcId($component->getId());
+                    $mark->setPoints($_POST['marks'][$index]['points']);
+                    $mark->setNote($_POST['marks'][$index]['note']);
+                    $mark->setOrder($_POST['marks'][$index]['order']);
+                    $mark->setHasMark($_POST['marks'][$index]['selected']);
+                    $mark->save();
+                    $mark->saveData($gradeable->getGdId(), $component->getId());
                 }
                 $response = array('status' => $_POST['marks'][0]);
                 $this->core->getOutput()->renderJson($response);

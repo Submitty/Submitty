@@ -750,15 +750,9 @@ HTML;
 HTML;
         if ($gradeable->beenTAgraded()) {
             // assumes that the person who graded the first question graded everything... also in electronicGraderController:150...have to rewrite to be per component
-            $graders = array();
-            //foreach($gradeable->getComponents() as $component){
-            //    $graders[] = $component->getGrader()->getId();
-            //}
-            $graders = array_unique($graders);
-            $graders = implode(",", $graders);
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: A Duck <br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
+            <br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
         </div>
 HTML;
         }
@@ -986,6 +980,7 @@ HTML;
                     'gradeable_id' : gradeable_id,
                     'user_id' : user_id,
                     'gradeable_component_id' : gc_id,
+                    'num_mark' : arr_length,
                     'active_version' : active_version,
                     'custom_points' : custom_points,
                     'custom_message' : custom_message,
