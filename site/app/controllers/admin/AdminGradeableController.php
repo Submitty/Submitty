@@ -169,7 +169,7 @@ class AdminGradeableController extends AbstractController {
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
             $make_peer_assignments = false;
             if ($edit_gradeable === 1 && $gradeable->getPeerGrading()) {
-                $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber();
+                $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
                 $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
                 if ($make_peer_assignments) {
                     $this->core->getQueries()->clearPeerGradingAssignments($_POST['gradeable_id']);
@@ -206,6 +206,19 @@ class AdminGradeableController extends AbstractController {
                     * we just try again on the next iteration of the while loop
                     * we do this for both grading and graded_by, which should create a valid, random permutation, that we put in the database
                     */
+                    
+                    // check to see if we're stuck, and if so, start over.
+                    $in_incomplete = (in_array($user_ids[$i], $incomplete_grading)) ? 1 : 0;
+                    $bad_check =  count($incomplete_grading) - ($peer_grade_set - count($graded_by[$user_ids[$i]])) - $in_incomplete;
+                    if ($bad_check < 0 && count($graded_by[$user_ids[$i]]) != $peer_grade_set) {
+                        // if we are, we clear all the arrays and try again, setting $i = -1 to start over
+                        $grading = array_fill_keys($user_ids, array());
+                        $graded_by = array_fill_keys($user_ids, array());
+                        $incomplete_grading = array_map(function() { return $this; }, $user_ids);
+                        $incomplete_graded_by = array_map(function() { return $this; }, $user_ids);
+                        $i = -1;
+                        continue;
+                    }
                     while(count($graded_by[$user_ids[$i]]) != $peer_grade_set) {
                         $select_num = $peer_grade_set - count($graded_by[$user_ids[$i]]);
                         $random_keys = array_rand($incomplete_grading, $select_num);
@@ -224,7 +237,18 @@ class AdminGradeableController extends AbstractController {
                         }
                     }
                     unset($incomplete_graded_by[$i]);
-
+                    
+                    // no need to do an in_array check for $incomplete_graded_by because we just unset it from the array
+                    $bad_check = count($incomplete_graded_by) - ($peer_grade_set - count($graded_by[$user_ids[$i]]));
+                    if ($bad_check < 0 && count($grading[$user_ids[$i]]) != $peer_grade_set) {
+                        // if we are, we clear all the arrays and try again, setting $i = -1 to start over
+                        $grading = array_fill_keys($user_ids, array());
+                        $graded_by = array_fill_keys($user_ids, array());
+                        $incomplete_grading = array_map(function() { return $this; }, $user_ids);
+                        $incomplete_graded_by = array_map(function() { return $this; }, $user_ids);
+                        $i = -1;
+                        continue;
+                    }
                     while(count($grading[$user_ids[$i]]) != $peer_grade_set) {
                         $select_num = $peer_grade_set - count($grading[$user_ids[$i]]);
                         $random_keys = array_rand($incomplete_graded_by, $select_num);
@@ -261,8 +285,8 @@ class AdminGradeableController extends AbstractController {
                         $old_component->setIsText(false);
                         $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
                         $old_component->setIsExtraCredit($extra_credit);
-                        $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='yes') ? true : false;
-                        $old_component->setPeerGrading($peer_grading_component);
+                        $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
+                        $old_component->setIsPeer($peer_grading_component);
                         $old_component->setOrder($x);
                         $this->core->getQueries()->updateGradeableComponent($old_component);
                     } else if ($num_old_components > $num_questions) {
@@ -280,13 +304,13 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setIsText(false);
                 $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
                 $gradeable_component->setIsExtraCredit($extra_credit);
-                $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='yes') ? true : false;
-                $gradeable_component->setPeerGrading($peer_grading_component);
+                $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
+                $gradeable_component->setIsPeer($peer_grading_component);
                 $gradeable_component->setOrder($x);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }  
 
-            if ($edit_gradeable === 0) {        
+            if ($edit_gradeable === 0) {
                 $components = $this->core->getQueries()->getGradeableComponents($_POST['gradeable_id']);
                 $index = 1;
                 foreach ($components as $comp) {
@@ -358,6 +382,7 @@ class AdminGradeableController extends AbstractController {
                         $old_component->setStudentComment("");
                         $old_component->setMaxValue(1);
                         $old_component->setIsText(false);
+                        $old_component->setIsPeer(false);
                         $extra_credit = (isset($_POST['checkpoint_extra_'.strval($x+1)])) ? true : false;
                         $old_component->setIsExtraCredit($extra_credit);
                         $old_component->setOrder($x);
@@ -375,6 +400,7 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setStudentComment("");
                 $gradeable_component->setMaxValue(1);
                 $gradeable_component->setIsText(false);
+                $gradeable_component->setIsPeer(false);
                 $extra_credit = (isset($_POST['checkpoint_extra_'.strval($x+1)])) ? true : false;
                 $gradeable_component->setIsExtraCredit($extra_credit);
                 $gradeable_component->setOrder($x);
@@ -406,6 +432,7 @@ class AdminGradeableController extends AbstractController {
                         $old_numeric->setStudentComment("");
                         $old_numeric->setMaxValue($_POST['max_score_'. strval($x + 1)]);
                         $old_numeric->setIsText(false);
+                        $old_numeric->setIsPeer(false);
                         $extra_credit = (isset($_POST['numeric_extra_'.strval($x+1)])) ? true : false;
                         $old_numeric->setIsExtraCredit($extra_credit);
                         $old_numeric->setOrder($x);
@@ -425,6 +452,7 @@ class AdminGradeableController extends AbstractController {
                     $gradeable_component->setStudentComment("");
                     $gradeable_component->setMaxValue($_POST['max_score_'. strval($x + 1)]);
                     $gradeable_component->setIsText(false);
+                    $gradeable_component->setIsPeer(false);
                     $extra_credit = (isset($_POST['numeric_extra_'.strval($x+1)])) ? true : false;
                     $gradeable_component->setIsExtraCredit($extra_credit);
                     $gradeable_component->setOrder($x);
@@ -441,6 +469,7 @@ class AdminGradeableController extends AbstractController {
                         $old_text->setMaxValue(0);
                         $old_text->setIsText(true);
                         $old_text->setIsExtraCredit(false);
+                        $old_text->setIsPeer(false);
                         $old_text->setOrder($z + $x);
                         $this->core->getQueries()->updateGradeableComponent($old_text);
                         $start_index_text++; 
@@ -460,6 +489,7 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setMaxValue(0);
                 $gradeable_component->setIsText(true);
                 $gradeable_component->setIsExtraCredit(false);
+                $gradeable_component->setIsPeer(false);
                 $gradeable_component->setOrder($y + $z);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }

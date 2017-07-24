@@ -35,7 +35,7 @@ use app\libraries\Utils;
  * @method int getPeerGradeSet()
  * @method void setPeerGradeSet(int $assign)
  * @method bool getPeerGrading()
- * @method void setPeerGrading()
+ * @method void setPeerGrading(bool $peer)
  * @method setTaViewDate(\DateTime $datetime)
  * @method \DateTime getOpenDate(\DateTime $datetime)
  * @method setOpenDate(\DateTime $datetime)

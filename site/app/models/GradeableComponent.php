@@ -24,6 +24,8 @@ use app\libraries\Core;
  * @method float getMaxValue()
  * @method bool getIsText();
  * @method bool getIsExtraCredit()
+ * @method bool getIsPeer()
+ * @method void setIsPeer(bool $peer_grading)
  * @method int getOrder()
  * @method float getScore()
  * @method setScore(float $score)
@@ -73,7 +75,7 @@ class GradeableComponent extends AbstractModel {
     protected $has_grade = false;
 
     /** @property @var bool Does this component use peer grading*/
-    protected $peer_grading = false;
+    protected $is_peer = false;
 
     /** @property @var \app\models\GradeableComponentMark[] */
     protected $marks = array();
@@ -91,6 +93,7 @@ class GradeableComponent extends AbstractModel {
         $this->is_text = $details['gc_is_text'];
         $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
+        $this->is_peer = isset($details['gc_is_peer']) ? $details['gc_is_peer']: false;
         
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
