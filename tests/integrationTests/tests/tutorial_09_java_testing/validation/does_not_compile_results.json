@@ -3,16 +3,6 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test01_STDERR.txt",
-                    "description": "Compilation Errors and/or Warnings",
-                    "messages": [
-                        {
-                            "message": "ERROR: This file should be empty!",
-                            "type": "failure"
-                        }
-                    ]
-                },
-                {
                     "description": "Create Executable",
                     "messages": [
                         {
@@ -33,11 +23,10 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_STDERR.txt",
-                    "description": "Compilation Errors and/or Warnings",
+                    "description": "Create Executable",
                     "messages": [
                         {
-                            "message": "ERROR: This file should be empty!",
+                            "message": "ERROR: required files not found:  Factorial.class",
                             "type": "failure"
                         }
                     ]
@@ -47,7 +36,7 @@
                     "description": "Execution Logfile"
                 }
             ],
-            "points_awarded": 2,
+            "points_awarded": 1,
             "test_name": "Test 2 Java - Instructor JUnit Test Compilation",
             "testcase_message": "Compilation Error(s)."
         },
