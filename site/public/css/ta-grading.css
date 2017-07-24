@@ -21,7 +21,7 @@
     width: 22px;
     margin: 5px;
 }
-.icon-selected.icon-auto-grading-results {
+.icon-selected.fa-list-alt {
     box-shadow: 0px 0px 5px 5px #fd4472;
     background-color: #fd4472;
 }
@@ -33,7 +33,7 @@
     width: 22px;
     margin: 5px;
 }
-.icon-selected.icon-grading-panel {
+.icon-selected.fa-pencil-square-o {
     box-shadow: 0px 0px 5px 5px #00e08e;
     background-color: #00e08e;
 }
@@ -45,7 +45,7 @@
     width: 22px;
     margin: 5px;
 }
-.icon-selected.icon-files {
+.icon-selected.fa-folder-open {
     box-shadow: 0px 0px 5px 5px #00b3fa;
     background-color: #00b3fa;
 }
@@ -57,7 +57,7 @@
     width: 22px;
     margin: 5px;
 }
-.icon-selected.icon-status {
+.icon-selected.fa-user {
     box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.4);
     background-color: rgba(0, 0, 0, 0.4);
 }
@@ -191,6 +191,12 @@ progress::-webkit-progress-value {
 .div-viewer a:hover {
     color: #6db7ff;
     text-decoration: none;
+}
+
+.icon-header {
+    font-size: 25px;
+    position: relative;
+    padding: 3px;
 }
 
 .icon-folder-closed {

@@ -121,10 +121,10 @@ function readCookies(){
     (status_height) ? $("#student_info").css("height", status_height):{};
     (status_visible) ? $("#student_info").css("display", status_visible):{};
 
-    (output_visible) ? ((output_visible) == "none" ? $(".icon-auto-grading-results").removeClass("icon-selected") : $(".icon-auto-grading-results").addClass("icon-selected")) : {};
-    (files_visible) ? ((files_visible) == "none" ? $(".icon-files").removeClass("icon-selected") : $(".icon-files").addClass("icon-selected")) : {};
-    (rubric_visible) ? ((rubric_visible) == "none" ? $(".icon-grading-panel").removeClass("icon-selected") : $(".icon-grading-panel").addClass("icon-selected")) : {};
-    (status_visible) ? ((status_visible) == "none" ? $(".icon-status").removeClass("icon-selected") : $(".icon-status").addClass("icon-selected")) : {};
+    (output_visible) ? ((output_visible) == "none" ? $(".fa-list-alt").removeClass("icon-selected") : $(".fa-list-alt").addClass("icon-selected")) : {};
+    (files_visible) ? ((files_visible) == "none" ? $(".fa-folder-open").removeClass("icon-selected") : $(".fa-folder-open").addClass("icon-selected")) : {};
+    (rubric_visible) ? ((rubric_visible) == "none" ? $(".fa-pencil-square-o").removeClass("icon-selected") : $(".fa-pencil-square-o").addClass("icon-selected")) : {};
+    (status_visible) ? ((status_visible) == "none" ? $(".fa-user").removeClass("icon-selected") : $(".fa-user").addClass("icon-selected")) : {};
 }
 
 function updateCookies(){
@@ -163,29 +163,29 @@ window.onkeydown = function(e) {
 function handleKeyPress(key) {
     switch (key) {
         case "KeyA":
-            $('.icon-auto-grading-results').toggleClass('icon-selected');
+            $('.fa-list-alt').toggleClass('icon-selected');
             $("#autograding_results").toggle();
             break;
         case "KeyG":
-            $('.icon-grading-panel').toggleClass('icon-selected');
+            $('.fa-pencil-square-o').toggleClass('icon-selected');
             $("#grading_rubric").toggle();
             break;
         case "KeyO":
-            $('.icon-files').toggleClass('icon-selected');
+            $('.fa-folder-open').toggleClass('icon-selected');
             $("#submission_browser").toggle();
             break;
         case "KeyS":
-            $('.icon-status').toggleClass('icon-selected');
+            $('.fa-user').toggleClass('icon-selected');
             $("#student_info").toggle();
             break;
         case "KeyR":
-            $('.icon-auto-grading-results').addClass('icon-selected');
+            $('.fa-list-alt').addClass('icon-selected');
             $("#autograding_results").attr("style", "left:15px; top:175px; width:48%; height:37%; display:block;");
-            $('.icon-grading-panel').addClass('icon-selected');
+            $('.fa-pencil-square-o').addClass('icon-selected');
             $("#grading_rubric").attr("style", "right:15px; top:175px; width:48%; height:37%; display:block;");
-            $('.icon-files').addClass('icon-selected');
+            $('.fa-folder-open').addClass('icon-selected');
             $("#submission_browser").attr("style", "left:15px; bottom:40px; width:48%; height:30%; display:block;");
-            $('.icon-status').addClass('icon-selected');
+            $('.fa-user').addClass('icon-selected');
             $("#student_info").attr("style", "right:15px; bottom:40px; width:48%; height:30%; display:block;");
             deleteCookies();
             updateCookies();
