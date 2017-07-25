@@ -192,10 +192,6 @@
                             "type": "failure"
                         }
                     ]
-                },
-                {
-                    "actual_file": "test10_execute_logfile.txt",
-                    "description": "Execution Logfile"
                 }
             ],
             "points_awarded": 0,

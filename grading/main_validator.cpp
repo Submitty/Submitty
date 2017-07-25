@@ -296,8 +296,10 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         my_score -= ValidateGrader(my_testcase, j, autocheck_js, hw_id, testcase_message);
       }
       bool fileExists, fileEmpty;
-      fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
-      if (fileExists && !fileEmpty) {
+      std::string execute_logfile = my_testcase.getPrefix() + "_execute_logfile.txt";
+      fileStatus(execute_logfile, fileExists,fileEmpty);
+      bool show_execute_logfile = my_testcase.ShowExecuteLogfile("execute_logfile.txt");
+      if (fileExists && !fileEmpty && show_execute_logfile) {
         nlohmann::json autocheck_j;
         autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
         autocheck_j["description"] = "Execution Logfile";
@@ -311,7 +313,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       assert (my_score <= 1.00002);
       my_score = std::max(0.0,std::min(1.0,my_score));
       std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
-      testcase_pts = /*(int)*/ /*floor*/(my_score * my_testcase.getPoints());
+      testcase_pts = my_score * my_testcase.getPoints();
       std::cout << "thing " << testcase_pts << " " << my_score * my_testcase.getPoints() << std::endl;
       std::cout << "Grade: " << testcase_pts << std::endl;
     }

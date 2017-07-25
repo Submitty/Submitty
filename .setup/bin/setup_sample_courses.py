@@ -33,6 +33,7 @@ import time
 import tzlocal
 import os.path
 import sys
+import string
 
 
 # share a couple functions related to timezone
@@ -208,12 +209,8 @@ def main():
     os.system("rm /tmp/hwcron_cron_backup.txt")
     os.system("systemctl restart submitty_grading_scheduler")
 
-def generate_random_user_id(length):
-    id_base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    anon_id = ""
-    for i in range(length):
-        anon_id += random.choice(id_base)
-    return anon_id
+def generate_random_user_id(length=15):
+    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
 
 
 def generate_random_users(total, real_users):
@@ -250,7 +247,7 @@ def generate_random_users(total, real_users):
                 else:
                     user_id = user_id + "1"
             if anon_id in anon_ids:
-                anon_id = generate_random_user_id(15)
+                anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
                              "anon_id": anon_id,
                              "user_firstname": first_name,

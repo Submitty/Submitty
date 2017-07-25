@@ -126,6 +126,7 @@ CREATE TABLE electronic_gradeable (
     eg_submission_open_date timestamp(6) without time zone NOT NULL,
     eg_submission_due_date timestamp(6) without time zone NOT NULL,
     eg_late_days integer DEFAULT (-1) NOT NULL,
+    eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
 );
@@ -332,6 +333,16 @@ CREATE TABLE grading_rotating (
     g_id character varying NOT NULL
 );
 
+--
+-- Name: peer_assign; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE peer_assign (
+    g_id character varying NOT NULL,
+    grader_id character varying NOT NULL,
+    user_id character varying NOT NULL
+);
+
 
 --
 -- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -
@@ -520,6 +531,14 @@ ALTER TABLE ONLY grading_registration
 
 ALTER TABLE ONLY grading_rotating
     ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (sections_rotating_id, user_id, g_id);
+    
+    
+--
+-- Name: peer_assign_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+    
+ALTER TABLE ONLY peer_assign
+    ADD CONSTRAINT peer_assign_pkey PRIMARY KEY (g_id, grader_id, user_id);
 
 
 --
@@ -778,6 +797,30 @@ ALTER TABLE ONLY late_day_exceptions
 
 ALTER TABLE ONLY late_days
     ADD CONSTRAINT late_days_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: peer_assign_g_id_fkey; Type: FK CONSTRAINT; Schma: public; Owner: -
+--
+
+ALTER TABLE ONLY peer_assign 
+    ADD CONSTRAINT peer_assign_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: peer_assign_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY peer_assign
+    ADD CONSTRAINT peer_assign_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+    
+
+--
+-- Name: peer_assign_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY peer_assign
+    ADD CONSTRAINT peer_assign_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --

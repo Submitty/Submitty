@@ -24,6 +24,8 @@ use app\libraries\Core;
  * @method float getMaxValue()
  * @method bool getIsText();
  * @method bool getIsExtraCredit()
+ * @method bool getIsPeer()
+ * @method void setIsPeer(bool $peer_grading)
  * @method int getOrder()
  * @method float getScore()
  * @method setScore(float $score)
@@ -76,7 +78,7 @@ class GradeableComponent extends AbstractModel {
     protected $has_marks = false;
 
     /** @property @var bool Does this component use peer grading*/
-    protected $peer_grading = false;
+    protected $is_peer = false;
 
     /** @property @var \app\models\GradeableComponentMark[] */
     protected $marks = array();
@@ -94,6 +96,7 @@ class GradeableComponent extends AbstractModel {
         $this->is_text = $details['gc_is_text'];
         $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
+        $this->is_peer = isset($details['gc_is_peer']) ? $details['gc_is_peer']: false;
         
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
@@ -140,7 +143,6 @@ class GradeableComponent extends AbstractModel {
             if (isset($details['array_gcm_mark'])) {
                 $details['array_gcm_mark'] = explode(',', $details['array_gcm_mark']);
             }
-
             for ($i = 0; $i < count($details['array_gcm_id']); $i++) {
                 $mark_details = array();
                 foreach ($mark_fields as $key) {
@@ -154,7 +156,6 @@ class GradeableComponent extends AbstractModel {
                         }
                     }
                 }
-
                 
                 $this->marks[$mark_details['gcm_order']] = $this->core->loadModel(GradeableComponentMark::class, $mark_details);
             }
@@ -179,6 +180,10 @@ class GradeableComponent extends AbstractModel {
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
             }
+        }
+
+        foreach ($this->marks as $mark) {
+            $mark->saveData($gd_id, $this->id);
         }
     }
 }

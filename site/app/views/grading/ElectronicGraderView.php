@@ -1073,7 +1073,6 @@ HTML;
                     console.log("Something went wront with saving marks...");
                 }
             })
-
         }
     }
 </script>

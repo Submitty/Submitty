@@ -284,6 +284,7 @@ SELECT";
   eg.eg_is_repository,
   eg.eg_subdirectory,
   eg.eg_use_ta_grading,
+  eg.eg_peer_grading,
   eg.eg_submission_open_date,
   eg.eg_submission_due_date,
   eg.eg_late_days,
@@ -295,6 +296,10 @@ SELECT";
   gc.array_gc_max_value,
   gc.array_gc_is_text,
   gc.array_gc_is_extra_credit,
+<<<<<<< HEAD
+=======
+  gc.array_gc_is_peer,
+>>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
   gc.array_gc_order,
   gc.array_array_gcm_id,
   gc.array_array_gc_id,
@@ -306,7 +311,11 @@ SELECT";
   gd.gd_id,
   gd.gd_overall_comment,
   gd.gd_user_viewed_date,
+<<<<<<< HEAD
   gd.array_array_gcm_mark,
+=======
+  gd.array_array_gcm_id,
+>>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
   gd.array_gcd_gc_id,
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
@@ -346,6 +355,7 @@ LEFT JOIN (
 LEFT JOIN (
   SELECT
     g_id,
+    array_agg(gc_is_peer) as array_gc_is_peer,
     array_agg(gc_id) as array_gc_id,
     array_agg(gc_title) AS array_gc_title,
     array_agg(gc_ta_comment) AS array_gc_ta_comment,
@@ -387,7 +397,11 @@ LEFT JOIN (
     in_gcd.array_gcd_grader_id,
     in_gcd.array_gcd_graded_version,
     in_gcd.array_gcd_grade_time,
+<<<<<<< HEAD
     in_gcd.array_array_gcm_mark,
+=======
+    in_gcd.array_array_gcm_id,
+>>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
     in_gcd.array_gcd_user_id,
     in_gcd.array_gcd_user_firstname,
     in_gcd.array_gcd_user_preferred_firstname,
@@ -404,7 +418,11 @@ LEFT JOIN (
       array_agg(gcd_grader_id) AS array_gcd_grader_id,
       array_agg(gcd_graded_version) AS array_gcd_graded_version,
       array_agg(gcd_grade_time) AS array_gcd_grade_time,
+<<<<<<< HEAD
       array_agg(array_gcm_mark) AS array_array_gcm_mark,
+=======
+      array_agg(array_gcm_id) AS array_array_gcm_id,
+>>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
       array_agg(u.user_id) AS array_gcd_user_id,
       array_agg(u.user_firstname) AS array_gcd_user_firstname,
       array_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
@@ -412,6 +430,7 @@ LEFT JOIN (
       array_agg(u.user_email) AS array_gcd_user_email,
       array_agg(u.user_group) AS array_gcd_user_group
     FROM(
+<<<<<<< HEAD
         SELECT gcd.* , gcmd.array_gcm_mark
         FROM gradeable_component_data AS gcd 
         LEFT JOIN (
@@ -421,6 +440,16 @@ LEFT JOIN (
         ) as gcmd
     ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id
     WHERE array_gcm_mark IS NOT NULL
+=======
+        SELECT gcd.*, gcmd.array_gcm_id
+        FROM gradeable_component_data AS gcd 
+        LEFT JOIN (
+          SELECT gc_id, gd_id, array_to_string(array_agg(gcm_id), ',') as array_gcm_id
+          FROM gradeable_component_mark_data AS gcmd
+          GROUP BY gc_id, gd_id
+        ) as gcmd
+    ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id 
+>>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
     ) AS gcd
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id 
     GROUP BY gcd.gd_id
@@ -975,17 +1004,31 @@ VALUES (?, ?, ?)", $params);
 DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
     }
 
+    public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $mark->getId());
+        $this->course_db->query("
+INSERT INTO gradeable_component_mark_data (gc_id, gd_id, gcm_id)
+VALUES (?, ?, ?)", $params);
+    }
+
+    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $mark->getId());
+        $this->course_db->query("
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?");
+    }
+
     public function createNewGradeable(Gradeable $gradeable) {
         $params = array($gradeable->getId(), $gradeable->getName(), $gradeable->getInstructionsUrl(), $gradeable->getTaInstructions(), var_export($gradeable->getTeamAssignment(),true), $gradeable->getType(), var_export($gradeable->getGradeByRegistration(), true), $gradeable->getTaViewDate()->format('Y/m/d H:i:s'), $gradeable->getGradeStartDate()->format('Y/m/d H:i:s'), $gradeable->getGradeReleasedDate()->format('Y/m/d H:i:s'), $gradeable->getMinimumGradingGroup(), $gradeable->getBucket());
         $this->course_db->query("
 INSERT INTO gradeable(g_id, g_title, g_instructions_url,g_overall_ta_instructions, g_team_assignment, g_gradeable_type, g_grade_by_registration, g_ta_view_start_date, g_grade_start_date,  g_grade_released_date,  g_min_grading_group, g_syllabus_bucket) 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            $params = array($gradeable->getId(), $gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), var_export($gradeable->getPeerGrading(), true));
+            $params = array($gradeable->getId(), $gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), var_export($gradeable->getPeerGrading(), true), $gradeable->getPeerGradeSet());
             $this->course_db->query("
 INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository, 
-eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision, eg_peer_grading) 
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision, eg_peer_grading, eg_peer_grade_set) 
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+>>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
         }
     }
 
@@ -996,15 +1039,15 @@ UPDATE gradeable SET g_title=?, g_instructions_url=?, g_overall_ta_instructions=
 g_gradeable_type=?, g_grade_by_registration=?, g_ta_view_start_date=?, g_grade_start_date=?, 
 g_grade_released_date=?, g_min_grading_group=?, g_syllabus_bucket=? WHERE g_id=?", $params);
         if ($gradeable->getType() === 0) {
-          $params = array($gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), var_export($gradeable->getPeerGrading(), true), $gradeable->getId());
+          $params = array($gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), var_export($gradeable->getPeerGrading(), true), $gradeable->getPeerGradeSet(), $gradeable->getId());
           $this->course_db->query("
 UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?, 
-eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=?, eg_late_days=?, eg_precision=?, eg_peer_grading=? WHERE g_id=?", $params);
+eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=?, eg_late_days=?, eg_precision=?, eg_peer_grading=?, eg_peer_grade_set=? WHERE g_id=?", $params);
         }
     }
 
     public function createNewGradeableComponent(GradeableComponent $component, Gradeable $gradeable) {
-        $params = array($gradeable->getId(), $component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getMaxValue(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), var_export($component->getPeerGrading(), true));
+        $params = array($gradeable->getId(), $component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getMaxValue(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), var_export($component->getIsPeer(), true));
         $this->course_db->query("
 INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value, 
 gc_is_text, gc_is_extra_credit, gc_order, gc_is_peer) 
@@ -1012,7 +1055,7 @@ VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
     }   
 
     public function updateGradeableComponent(GradeableComponent $component) {
-        $params = array($component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getMaxValue(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), var_export($component->getPeerGrading(), true), $component->getId());
+        $params = array($component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getMaxValue(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), var_export($component->getIsPeer()), $component->getId());
         $this->course_db->query("
 UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?, gc_max_value=?, gc_is_text=?, gc_is_extra_credit=?, gc_order=?, gc_is_peer=? WHERE gc_id=?", $params);
     }
@@ -1298,6 +1341,19 @@ WHERE gcm_id=?", $params);
             (user_id, g_id, late_day_exceptions)
             VALUES(?,?,?)", array($user_id, $g_id, $days));
         }
+    }
+    
+    public function getPeerGradingAssignNumber($gradeable_id) {
+        $this->course_db->query("SELECT eg_peer_grade_set FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
+        return $this->course_db->row()['eg_peer_grade_set'];
+    }
+    
+    public function clearPeerGradingAssignments($gradeable_id) {
+        $this->course_db->query("DELETE FROM peer_assign WHERE g_id=?", array($gradeable_id));
+    }
+    
+    public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
+        $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
     }
 }
 
