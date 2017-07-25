@@ -285,6 +285,7 @@ SELECT";
   eg.eg_subdirectory,
   eg.eg_use_ta_grading,
   eg.eg_peer_grading,
+  eg.eg_peer_grade_set,
   eg.eg_submission_open_date,
   eg.eg_submission_due_date,
   eg.eg_late_days,
@@ -1315,6 +1316,14 @@ WHERE gcm_id=?", $params);
     
     public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
+    }
+    
+    public function getPeerComponents($gradeable_id, $student_id) {
+        $this->course_db->query("");
+    }
+    
+    public function getTotalGradedPeerComponents($gradeable_id) {
+    
     }
 }
 

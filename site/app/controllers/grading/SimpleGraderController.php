@@ -7,6 +7,9 @@ use app\models\User;
 
 class SimpleGraderController extends AbstractController  {
     public function run() {
+        if(!$this->core->getUser()->accessGrading()) {
+            $this->core->getOutput()->showError("This account doesn't have access to grading");
+        }
         switch ($_REQUEST['action']) {
             case 'lab':
                 $this->grade('lab');

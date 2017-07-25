@@ -33,10 +33,15 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $this->core->getOutput()->addBreadcrumb("Status {$gradeable->getName()}");
-
+        $peer = false;
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == 4)) {
+                $peer = true;
+            }
+            else {
+                $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            }
         }
 
         /*
@@ -47,7 +52,13 @@ class ElectronicGraderController extends AbstractController {
         $graders = array();
         $sections = array();
         $total_users = 0;
-        if ($gradeable->isGradeByRegistration()) {
+        if ($peer) {
+            $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
+            $
+            $num_components = $this->core->getQueries()->getTotalPeerComponentCount($gradeable->getId());
+            $graded_components = $this->getQueries()->getPeerGradedComponentsCount($gradeable->getId());
+        }
+        else if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getUser()->accessFullGrading()){
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
             }

@@ -16,6 +16,9 @@ class TeamListController extends AbstractController {
     }
 
     public function run() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account doesn't have access to the TeamList");
+        }
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
         $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
