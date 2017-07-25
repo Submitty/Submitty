@@ -84,8 +84,6 @@ class AdminGradeableView extends AbstractView {
             $g_instructions_url = $data[0]['g_instructions_url'];
             $team_yes_checked = $data[0]['g_team_assignment'];
             $team_no_checked = !$team_yes_checked;
-            $peer_yes_checked = $data[0]['g_peer_grading'];
-            $peer_no_checked = !$peer_yes_checked;
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
@@ -97,6 +95,8 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $peer_yes_checked = $data[3]['eg_peer_grading'];
+                $peer_no_checked = !$peer_yes_checked;
                 $old_questions = $data[5];
                 $num_old_questions = count($old_questions);                
                 $component_ids = array();
@@ -116,8 +116,6 @@ class AdminGradeableView extends AbstractView {
             $g_instructions_url = $data[0]['g_instructions_url'];
             $team_yes_checked = $data[0]['g_team_assignment'];
             $team_no_checked = !$team_yes_checked;
-            $peer_yes_checked = $data[0]['g_peer_grading'];
-            $peer_no_checked = !$peer_yes_checked;
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
@@ -126,6 +124,8 @@ class AdminGradeableView extends AbstractView {
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $peer_yes_checked = $data[3]['eg_peer_grading'];
+                $peer_no_checked = !$peer_yes_checked;
                 $old_questions = $data[5];
                 $num_old_questions = count($old_questions);                
                 $component_ids = array();
