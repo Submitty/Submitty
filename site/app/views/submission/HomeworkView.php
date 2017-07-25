@@ -57,8 +57,6 @@ HTML;
         $current_version_number = $gradeable->getCurrentVersionNumber();
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
 HTML;
@@ -119,8 +117,8 @@ HTML;
     <script type="text/javascript">
         $(document).ready(function() {
             var cookie = document.cookie;
-            student_ids = $student_ids;
-            student_without_ids = $student_without_ids;
+            student_ids = {$student_ids};
+            student_without_ids = {$student_without_ids};
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
@@ -496,7 +494,7 @@ HTML;
                     foreach ($files as $filename => $details) {
                         $clean_timestamp = str_replace("_", " ", $timestamp);
                         $path = $details["path"];
-                        if (strpos($filename, "cover") == false) {
+                        if (strpos($filename, "cover") === false) {
                             continue;
                         }
                         // get the full filename for PDF popout
