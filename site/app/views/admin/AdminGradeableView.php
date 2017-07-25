@@ -61,6 +61,8 @@ class AdminGradeableView extends AbstractView {
         $g_grade_by_registration = -1;
         $edit = json_encode($type_of_action === "edit");
         $template_value = "";
+        $precision = 0.5;
+        $electronic_gradeable['eg_precision'] = $precision;
         $gradeable_id_title = $initial_data[5]; //list of previous gradeables
         $gradeables_array = array();
 
@@ -96,6 +98,8 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_due_date']));
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
+                $precision = $data[3]['eg_precision'];
+                $electronic_gradeable['eg_precision'] = $precision;
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $old_questions = $data[5];
             }
@@ -120,6 +124,8 @@ class AdminGradeableView extends AbstractView {
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $precision = $data[3]['eg_precision'];
+                $electronic_gradeable['eg_precision'] = $precision;
                 $old_questions = $data[5];
             }
             if ($data[0]['g_gradeable_type'] === 2) {
@@ -390,7 +396,7 @@ HTML;
         $html_output .= <<<HTML
  /> No <br />
                 Point precision (for TA grading): 
-                <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
+                <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{$precision}" class="float_val" />
                 <br /> 
                 
 
@@ -437,7 +443,7 @@ HTML;
 HTML;
         $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
         $html_output .= <<<HTML
-        <input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_grade}" min="-1000" max="1000" step="0.5" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">
+        <input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_grade}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">
 HTML;
         $checked = ($question['question_extra_credit']) ? "checked" : "";
         $peer_checked = ($question['peer_component']) ? ' checked="checked"' : "";
@@ -1395,8 +1401,24 @@ $('#gradeable-form').on('submit', function(e){
     }
 
     function selectBox(question){
+        var step = $('#point_precision_id').val();
         // should be the increment value
-        return '<input type="number" id="grade-'+question+'" class="points" name="points_' + question +'" value="0" min="-1000" max="1000" step="0.5" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">';
+        return '<input type="number" id="grade-'+question+'" class="points" name="points_' + question +'" value="0" max="1000" step="'+step+'" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">';
+    }
+
+    function fixPointPrecision(me) {
+        var step = $(me).val();
+        var index = 1;
+        var exists = true;
+        while(exists){
+            if($("#grade-"+index).length){
+                $("#grade-"+index).attr('step', step);
+            }
+            else{
+                exists = false;
+            }
+            index++;
+        }
     }
 
     function calculatePercentageTotal() {
