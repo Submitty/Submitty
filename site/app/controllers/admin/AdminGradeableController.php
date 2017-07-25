@@ -227,24 +227,13 @@ class AdminGradeableController extends AbstractController {
                                 break;
                             }
                         }
-                        //special mark for all correct/all incorrect
-                        $mark = new GradeableComponentMark($this->core);
-                        $mark->setGcId($comp->getId());
-                        $mark->setPoints(0);
-                        if ($type === 1) {
-                            $mark->setNote("Incorrect");
-                        } else {
-                            $mark->setNote("Correct");
-                        }
-                        $mark->setOrder(0);
-                        $this->core->getQueries()->createGradeableComponentMark($mark);
-
+        
                         for ($y = 0; $y < $num_marks; $y++) {
                             $mark = new GradeableComponentMark($this->core);
                             $mark->setGcId($comp->getId());
                             $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
                             $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
-                            $mark->setOrder($y+1);
+                            $mark->setOrder($y);
                             $this->core->getQueries()->createGradeableComponentMark($mark);
                         }                    
                         $index++;

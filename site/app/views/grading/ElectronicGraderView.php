@@ -656,6 +656,23 @@ HTML;
             $min_val = (intval($question->getMaxValue()) > 0) ? 0 : intval($question->getMaxValue());
             $max_val = (intval($question->getMaxValue()) > 0) ? intval($question->getMaxValue()) : 0;
 
+            if ($type === 0) {
+                $question_points = $question->getMaxValue();
+            } else {
+                $question_points = 0;
+            }
+            foreach ($question->getMarks() as $mark) {
+                if($mark->getHasMark() === true) {
+                    $question_points += $mark->getPoints();
+                }
+            }
+            $question_points += $question->getScore();
+            if ($type === 0) {
+                if ($question_points < 0) $question_points = 0;
+            } else {
+                if ($question_points > $question->getMaxValue()) $question_points = $question->getMaxValue();
+            }
+
             $background = "";
             if ($question->getIsExtraCredit()) {
                 $background = "background-color: #D8F2D8;";
@@ -667,12 +684,12 @@ HTML;
             $return .= <<<HTML
                 <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
-                        <input readonly type="text" id="grade-{$question->getOrder()}" name="grade-{$question->getOrder()}" value="{$question->getScore()}" onchange="validateInput('grade-{$question->getOrder()}', '{$question->getMaxValue()}', {$precision}); calculatePercentageTotal();" style="width:50px; resize:none;" {$disabled}></textarea>
+                        <input readonly type="text" class="grades" id="grade-{$c}" name="grade-{$c}" value="{$question_points}" onchange="validateInput('grade-{$c}', '{$question->getMaxValue()}', {$precision}); calculatePercentageTotal();" data-max_points="{$question->getMaxValue()}" style="width:50px; resize:none;" {$disabled}></textarea>
                         <strong> / {$question->getMaxValue()}</strong>
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
-                            <textarea readonly id="rubric-textarea-{$c}" name="comment-{$question->getOrder()}" rows="4" style="width:95%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$question->getComment()}</textarea>
+                            <textarea readonly id="rubric-textarea-{$c}" name="comment-{$question->getOrder()}" rows="4" style="width:95%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}></textarea>
                         </div>
                     </td>
                 </tr>
@@ -719,7 +736,7 @@ HTML;
                     </td>
                 </tr>
                 <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_custom_{$c}" type="number" step="{$precision}" value="0" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_custom_{$c}" type="number" step="{$precision}" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
                     </td>
                     <td colspan="3" style="{$background}">
                         <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event);" rows="1" placeholder="Custom message for student..." style="width:95%; resize:none; float:left;">{$question->getComment()}</textarea>
@@ -729,7 +746,6 @@ HTML;
 HTML;
             $c++;
         }
-
         $return .= <<<HTML
             <tr>
                 <td colspan="4">
@@ -980,13 +996,30 @@ HTML;
         } else {
             var arr_length = $('tr[name=mark_'+num+']').length;
             var mark_data = new Array(arr_length);
+            var type = 0; //0 is deducation, 1 is addition
+            var keep_checking = true;
             for (var i = 0; i < arr_length; i++) {
                 var current_row = $('#mark_id-'+num+'-'+i);
                 var delete_mark = $('#mark_remove_id-'+num+'-'+i);
                 var is_selected = false;
+                var success = true;
                 if (current_row.find('i[name=mark_icon_'+num+'_'+i+']')[0].classList.contains('fa-square')) {
                     is_selected = true;
                 }
+
+                if (keep_checking) {
+                    if(parseFloat(current_row.find('input[name=mark_points_'+num+'_'+i+']').val()) !== 0) {
+                        if(parseFloat(current_row.find('input[name=mark_points_'+num+'_'+i+']').val()) > 0) {
+                            type = 1;
+                        }
+                        else
+                        {
+                            type = 0;
+                        }
+                        keep_checking = false;
+                    }
+                }
+
                 var mark = {
                     points: current_row.find('input[name=mark_points_'+num+'_'+i+']').val(),
                     note: current_row.find('textarea[name=mark_text_'+num+'_'+i+']').val(),
@@ -1000,6 +1033,25 @@ HTML;
             var custom_points = current_row.find('input[name=mark_points_custom_'+num+']').val();
             var custom_message = current_row.find('textarea[name=mark_text_custom_'+num+']').val();
             //alert (JSON.stringify(mark_data));
+
+            //updates the total number of points
+            var current_question = $('#grade-' + num);
+            var max_points = current_question[0].dataset.max_points;
+            var current_points = (type === 0) ? max_points : 0;
+            current_points = parseFloat(current_points);
+            for (var i = 0; i < arr_length; i++) {
+                if(mark_data[i].selected === true) {
+                    current_points += parseFloat(mark_data[i].points);
+                }                
+            }
+            if (type === 0) {
+                if (current_points < 0) current_points = 0;
+            } else {
+                if (current_points > max_points) current_points = max_points;
+            }
+            current_question.val(current_points);
+
+            calculatePercentageTotal();
             $.ajax({
                 type: "POST",
                 url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
@@ -1015,11 +1067,13 @@ HTML;
                 },
                 success: function(data) {
                     console.log("success");
+                    //alert(data);
                 },
                 error: function() {
                     console.log("Something went wront with saving marks...");
                 }
             })
+
         }
     }
 </script>

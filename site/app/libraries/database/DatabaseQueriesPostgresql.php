@@ -957,10 +957,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
     public function updateGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getGradedVersion(),$component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
+        $params = array($component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
         $this->course_db->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?",
-            $params);
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?", $params);
     }
 
     public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
@@ -1029,6 +1028,7 @@ UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?
         $this->course_db->query("
 INSERT INTO gradeable_component_mark (gc_id, gcm_points, gcm_note, gcm_order)
 VALUES (?, ?, ?, ?)", $params);
+        return $this->course_db->getLastInsertId();
     }
 
     public function updateGradeableComponentMark(GradeableComponentMark $mark) {

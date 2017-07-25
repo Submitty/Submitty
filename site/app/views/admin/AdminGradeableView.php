@@ -450,6 +450,18 @@ HTML;
                               display: block; height: auto;">{$question['student_grading_note']}</textarea>
                     <div id="deduction_questions_{$num}">
 HTML;
+    if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
+        $html_output .= <<<HTML
+            <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+            <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Sample Text</textarea> 
+            <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+            <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+            <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+            <br> 
+        </div>
+HTML;
+    }
     if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0) {
         $type_deduct = 0;
         $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
@@ -1739,6 +1751,16 @@ $('#gradeable-form').on('submit', function(e){
                     <i class="fa fa-arrow-up" aria-hidden="true"></i></a> \
             </td> \
         </tr>');
+        $("#rubric_add_deduct_" + newQ).before(' \
+            <div id="deduct_id-'+newQ+'-0" name="deduct_'+newQ+'" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;"> \
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+            <textarea rows="1" placeholder="Comment" name="deduct_text_'+newQ+'_0" style="resize: none; width: 81.5%;">Sample Text</textarea> \
+            <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            <br> \
+        </div> \
+            ');
     }
 
     function deleteDeduct(me) {
