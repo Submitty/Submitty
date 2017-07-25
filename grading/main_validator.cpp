@@ -299,7 +299,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       std::string execute_logfile = my_testcase.getPrefix() + "_execute_logfile.txt";
       fileStatus(execute_logfile, fileExists,fileEmpty);
       bool show_execute_logfile = my_testcase.ShowExecuteLogfile("execute_logfile.txt");
-      std::cout << "SHOW EXECUTE LOGFILE " << show_execute_logfile << std::endl;
       if (fileExists && !fileEmpty && show_execute_logfile) {
         nlohmann::json autocheck_j;
         autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
