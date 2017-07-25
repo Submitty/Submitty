@@ -32,6 +32,10 @@ use app\libraries\Utils;
  * @method float getNormalPoints() Returns the total number of points for testcases that are not hidden nor are extra credit
  * @method bool setTeamAssignment()
  * @method bool getTeamAssignment()
+ * @method int getPeerGradeSet()
+ * @method void setPeerGradeSet(int $assign)
+ * @method bool getPeerGrading()
+ * @method void setPeerGrading(bool $peer)
  * @method setTaViewDate(\DateTime $datetime)
  * @method \DateTime getOpenDate(\DateTime $datetime)
  * @method setOpenDate(\DateTime $datetime)
@@ -88,6 +92,9 @@ class Gradeable extends AbstractModel {
     /** @property @var bool Does this assignment use peer grading*/
     protected $peer_grading = false;
     
+    /** @property @var int How many people should each person grade*/
+    protected $peer_grade_set = 0;
+    
     /** @property @var string Iris Bucket to place gradeable */
     protected $bucket = null;
     
@@ -103,6 +110,7 @@ class Gradeable extends AbstractModel {
     /** @property @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
 
+    /** @property @var bool */
     protected $ta_grades_released = false;
 
     /** @property @var bool Should the gradeable be graded by registration section (or by rotating section) */
@@ -147,9 +155,9 @@ class Gradeable extends AbstractModel {
     protected $student_submit = true;
     /** @property @var bool Will students be able to view submissions before grades are released? Will be no for exams */
     protected $student_view = true;
-    /** @property @var */
+    /** @property @var bool */
     protected $student_download_active = false;
-    /** @property @var */
+    /** @property @var bool */
     protected $student_download_any = false;
 
     /* Config variables for submission details for this gradeable */
@@ -257,8 +265,11 @@ class Gradeable extends AbstractModel {
 
     protected $user_viewed_date = null;
 
-    public function __construct(Core $core, $details, User $user = null) {
+    public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
+        if(!isset($details['g_id'])) {
+            return;
+        }
         $this->id = $details['g_id'];
 
         $this->user = ($user === null) ? $this->core->getUser() : $user;
@@ -273,7 +284,7 @@ class Gradeable extends AbstractModel {
         $this->ta_instructions = $details['g_overall_ta_instructions'];
         $this->instructions_url = $details['g_instructions_url'];
         $this->team_assignment = isset($details['g_team_assignment']) ? $details['g_team_assignment'] === true : false;
-        $this->peer_grading = isset($details['g_peer_grading']) ? $details['g_peer_grading'] === true: false;
+        
         $this->type = $details['g_gradeable_type'];
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);
@@ -287,6 +298,9 @@ class Gradeable extends AbstractModel {
             $this->student_view = $details['eg_can_student_view'] === true;
             $this->student_download_active = $details['eg_can_student_download_active'] === true;
             $this->student_download_any = $details['eg_can_student_download_any'] === true;
+            $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
+            $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
+            $this->config_path = $details['eg_config_path'];
             if (isset($details['active_version']) && $details['active_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
@@ -310,12 +324,12 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
+                            'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
                             'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order');
+                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
@@ -329,7 +343,9 @@ class Gradeable extends AbstractModel {
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {
                 $component_details = array();
                 foreach ($component_fields as $key) {
-                    $component_details[$key] = $details["array_{$key}"][$i];
+                    if (isset($details["array_{$key}"][$i])) {
+                        $component_details[$key] = $details["array_{$key}"][$i];
+                    }             
                 }
 
 
@@ -892,7 +908,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function updateGradeable() {
-        $this->core->getQueries()->updateGradeable2($this);
+        $this->core->getQueries()->updateGradeable($this);
     }
 
     public function getActiveDaysLate() {
@@ -930,9 +946,5 @@ class Gradeable extends AbstractModel {
       
     public function getSyllabusBucket() {
         return $this->bucket;
-    }
-    
-    public function isPeer() {
-        return $this->peer_grading;
     }
 }
