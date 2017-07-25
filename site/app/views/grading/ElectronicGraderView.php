@@ -607,31 +607,19 @@ HTML;
             if($question->getIsExtraCredit()) {
                 $return .= <<<HTML
                     <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-<<<<<<< HEAD
                         <i class="icon-plus"></i> <b>{$message}</b>
-=======
-                        <i class="icon-plus"></i> $message {$note}
->>>>>>> master
 HTML;
             }
             else if($penalty) {
                 $return .= <<<HTML
                     <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-<<<<<<< HEAD
                         <i class="icon-minus"></i> <b>{$message}</b>
-=======
-                        <i class="icon-minus"></i> $message {$note}
->>>>>>> master
 HTML;
             }
             else {
                 $return .= <<<HTML
                     <td style="font-size: 12px;" colspan="4">
-<<<<<<< HEAD
                         <b>{$message}</b>
-=======
-                        $message {$note}
->>>>>>> master
 HTML;
             }
             $return .= <<<HTML

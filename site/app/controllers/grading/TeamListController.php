@@ -16,9 +16,6 @@ class TeamListController extends AbstractController {
     }
 
     public function run() {
-        if (!$this->core->getUser()->accessGrading()) {
-            $this->core->getOutput()->showError("This account is not authorized to view grading section");
-        }
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
         $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);

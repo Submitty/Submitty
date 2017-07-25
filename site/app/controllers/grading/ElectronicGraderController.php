@@ -10,12 +10,6 @@ use app\models\HWReport;
 class ElectronicGraderController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
-            case 'peer_details':
-                $this->showPeerDetails();
-                break;
-            case 'peer_status':
-                $this->showPeerStatus();
-                break;
             case 'details':
                 $this->showDetails();
                 break;
@@ -288,13 +282,5 @@ class ElectronicGraderController extends AbstractController {
 
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual);
-    }
-    
-    function showPeerStatus() {
-        
-    }
-    
-    function showPeerDetails() {
-        
     }
 }
