@@ -1,0 +1,50 @@
+{
+  "resource_limits" : {
+      "RLIMIT_NOFILE" :     1000000, //number of file descriptors
+      "RLIMIT_LOCKS" :      1000000,  //number of files open
+      "RLIMIT_CPU" : 60,
+      "RLIMIT_NPROC" : 100,
+      "RLIMIT_AS" : "RLIM_INFINITY"
+  },
+  "autograding" : {
+      "submission_to_runner" : [ "*.m"],
+      "work_to_details" : ["*.png"]
+  },
+  "allow_system_calls" : [
+        "ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+        "ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+        "ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
+        "ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE",
+        "ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD",
+        "ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SCHEDULING",
+        "ALLOW_SYSTEM_CALL_CATEGORY_UNKNOWN"
+    ],
+    "testcases" : [     
+        {
+            "title" : "matlab_test",
+            "command" : "matlab -nodisplay -automation -r 'screenshot_plot'",
+            "points" : 1,
+            "validation" :
+            [
+                {
+                    "actual_file": "student1.png",
+                    "description": "student_image_one",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                   "actual_file": "student1.png",
+                   "expected_file" : "professor1.png",
+                   "acceptable_threshold": ".01",
+                   "description": "Diff Check",
+                   "method": "ImageDiff",
+                   "show_difference_image" : "always",
+                   "show_actual": "always",
+                   "show_expected":"always",
+                   "show_message": "always"
+                }
+            ]
+        }
+    ]
+}
