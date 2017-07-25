@@ -117,7 +117,6 @@ HTML;
 HTML;
             $return .= <<<HTML
     <script type="text/javascript">
-        
         $(document).ready(function() {
             var cookie = document.cookie;
             student_ids = $student_ids;
@@ -378,6 +377,7 @@ HTML;
 
         $return .= <<<HTML
     <script type="text/javascript">
+        // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
         function moveNextInput(count) {
             var next_count = count+1;
             var next_input = "#bulk_user_id_" + next_count;
@@ -499,6 +499,8 @@ HTML;
                         if (strpos($filename, "cover") == false) {
                             continue;
                         }
+                        // get the full filename for PDF popout
+                        // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
                         $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
                         $path_full = str_replace("_cover.pdf", ".pdf", $path);
