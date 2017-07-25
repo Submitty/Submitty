@@ -1068,7 +1068,7 @@ class Gradeable(object):
         self.can_student_submit = True
         self.can_student_view = True
         self.can_student_download_active = False
-        self.can_student_download_all = False
+        self.can_student_download_any = False
         self.late_days = 2
         self.precision = 0.5
         self.syllabus_bucket = "none (for practice only)"
@@ -1152,8 +1152,8 @@ class Gradeable(object):
                 self.can_student_view = gradeable['eg_can_student_view'] is True
             if 'eg_can_student_download_active' in gradeable:
                 self.can_student_download_active = gradeable['eg_can_student_download_active'] is True
-            if 'eg_can_student_download_all' in gradeable:
-                self.can_student_download_all = gradeable['eg_can_student_download_all'] is True
+            if 'eg_can_student_download_any' in gradeable:
+                self.can_student_download_any = gradeable['eg_can_student_download_any'] is True
             if 'eg_late_days' in gradeable:
                 self.late_days = max(0, int(gradeable['eg_late_days']))
             if 'eg_precision' in gradeable:
@@ -1224,7 +1224,7 @@ class Gradeable(object):
                          eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
                          eg_use_ta_grading=self.use_ta_grading, eg_can_student_submit=self.can_student_submit,
                          eg_can_student_view=self.can_student_view, eg_can_student_download_active=self.can_student_download_active,
-                         eg_can_student_download_all=self.can_student_download_all, eg_config_path=self.config_path,
+                         eg_can_student_download_any=self.can_student_download_any, eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision)
 
         for component in self.components:

@@ -215,7 +215,13 @@ HTML;
                 if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
                     continue;
                 }
-                // if selected to not be visible to students, skip
+
+                // if student view false, never show
+                if (!$g_data->canStudentView() && !$this->core->getUser()->accessGrading()) {
+                    continue;
+                }
+
+                // if student submit false and student view true, skip unless it's graded
                 if ($title !== "GRADED" && !$g_data->canStudentSubmit() && !$this->core->getUser()->accessGrading()) {
                     continue;
                 }

@@ -150,7 +150,7 @@ class Gradeable extends AbstractModel {
     /** @property @var */
     protected $student_download_active = false;
     /** @property @var */
-    protected $student_download_all = false;
+    protected $student_download_any = false;
 
     /* Config variables for submission details for this gradeable */
     /** @property @var float Max size (in bytes) allowed for the submission */
@@ -286,7 +286,7 @@ class Gradeable extends AbstractModel {
             $this->student_submit = $details['eg_can_student_submit'] === true;
             $this->student_view = $details['eg_can_student_view'] === true;
             $this->student_download_active = $details['eg_can_student_download_active'] === true;
-            $this->student_download_all = $details['eg_can_student_download_all'] === true;
+            $this->student_download_any = $details['eg_can_student_download_any'] === true;
             if (isset($details['active_version']) && $details['active_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
@@ -851,8 +851,8 @@ class Gradeable extends AbstractModel {
         return $this->student_download_active;
     }
 
-    public function canStudentDownloadAll() {
-        return $this->student_download_all;
+    public function canStudentDownloadAny() {
+        return $this->student_download_any;
     }
 
     public function taGradesReleased() {

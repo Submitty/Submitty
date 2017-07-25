@@ -53,7 +53,7 @@ class AdminGradeableView extends AbstractView {
         $can_student_submit=true;
         $can_student_view=true;
         $can_student_download_active=false;
-        $can_student_download_all=false;
+        $can_student_download_any=false;
         $old_questions = array();
         $g_min_grading_group = 0;
         $g_overall_ta_instructions = "";
@@ -104,7 +104,7 @@ class AdminGradeableView extends AbstractView {
                 $can_student_submit = $data[3]['eg_can_student_submit'];
                 $can_student_view = $data[3]['eg_can_student_view'];
                 $can_student_download_active = $data[3]['eg_can_student_download_active'];
-                $can_student_download_all = $data[3]['eg_can_student_download_all'];
+                $can_student_download_any = $data[3]['eg_can_student_download_any'];
                 $old_questions = $data[5];
             }
             if ($data[0]['g_gradeable_type'] === 2) { //if the gradeable edited is num/text gradeable
@@ -131,7 +131,7 @@ class AdminGradeableView extends AbstractView {
                 $can_student_submit = $data[3]['eg_can_student_submit'];
                 $can_student_view = $data[3]['eg_can_student_view'];
                 $can_student_download_active = $data[3]['eg_can_student_download_active'];
-                $can_student_download_all = $data[3]['eg_can_student_download_all'];
+                $can_student_download_any = $data[3]['eg_can_student_download_any'];
                 $old_questions = $data[5];
             }
             if ($data[0]['g_gradeable_type'] === 2) {
@@ -404,12 +404,12 @@ HTML;
                 Will students be able to download files? (Select 'Yes' if this is an exam.)
                 <input type="radio" id="yes_student_download" name="student_download" value="true" class="bool_val rubric_questions"
 HTML;
-                if ($can_student_download_active || $can_student_download_all) { $html_output .= ' checked="checked"'; }
+                if ($can_student_download_active || $can_student_download_any) { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
                 /> Yes
                 <input type="radio" id="no_student_download" name="student_download" value="false"
 HTML;
-                if ($can_student_download_active===false && $can_student_download_all===false) { $html_output .= ' checked="checked"'; }
+                if ($can_student_download_active===false && $can_student_download_any===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> No 
 
@@ -421,12 +421,12 @@ HTML;
                     else { $html_output .= ' value="false"'; }
         $html_output .= <<<HTML
                     /> Active version only
-                    <input type="radio" id="student_download_all" name="student_download_all" 
+                    <input type="radio" id="student_download_any" name="student_download_any" 
 HTML;
-                    if ($can_student_download_all===true) { $html_output .= ' value="true" checked="checked"'; }
+                    if ($can_student_download_any===true) { $html_output .= ' value="true" checked="checked"'; }
                     else { $html_output .= ' value="true"'; }
         $html_output .= <<<HTML
-                    /> All files
+                    /> Any version
 
                 </fieldset>
                 <br /> <br />
@@ -1151,8 +1151,8 @@ function createCrossBrowserJSDate(val){
                 else {
                     $('#student_download_active').prop('checked', false);
                     $('#student_download_active').val(false);
-                    $('#student_download_all').prop('checked', false); 
-                    $('#student_download_all').val(false);
+                    $('#student_download_any').prop('checked', false); 
+                    $('#student_download_any').val(false);
                 }
             }
         });
@@ -1160,24 +1160,24 @@ function createCrossBrowserJSDate(val){
         $('#student_download_active').change(function() {
             if ($(this).is(':checked')) {
                 $('#student_download_active').val(true);
-                $('#student_download_all').prop('checked', false); 
+                $('#student_download_any').prop('checked', false);
+                $('#student_download_any').val(false);  
             }
             else {
                 $('#student_download_active').val(false);
             }
         });
 
-        $('#student_download_all').change(function() {
+        $('#student_download_any').change(function() {
             if ($(this).is(':checked')) {
-                $('#student_download_all').val(true);
+                $('#student_download_any').val(true);
                 $('#student_download_active').prop('checked', false); 
+                $('#student_download_active').val(false); 
             }
             else {
-                $('#student_download_all').val(false);
+                $('#student_download_any').val(false);
             }
         });
-
-
         
         
         $('[name="gradeable_template"]').change(

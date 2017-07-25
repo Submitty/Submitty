@@ -89,7 +89,7 @@
 #
 #     eg_can_student_download_active: [optional] Boolean for whether or not student can download the active version. Defaults to FALSE.
 #
-#     eg_can_student_download_all: [optional] Boolean for whether or not student can download all versions. Defaults to FALSE.
+#     eg_can_student_download_any: [optional] Boolean for whether or not student can download any version. Defaults to FALSE.
 #
 #     eg_late_days: [optional] integer for how many late days are allowed for this gradeable. Defaults to 2.
 #
