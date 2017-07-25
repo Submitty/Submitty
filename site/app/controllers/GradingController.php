@@ -7,11 +7,12 @@ use app\controllers\grading\SimpleGraderController;
 use app\controllers\grading\TeamListController;
 
 
-class GradingController extends AbstractController{
-    if (!$this->core->getUser()->accessGrading()) {
-        $this->core->getOutput()->showError("This account is not authorized to view grading section");
-    }
+class GradingController extends AbstractController {
+    
     public function run() {
+        if (!$this->core->getUser()->accessGrading()) {
+            $this->core->getOutput()->showError("This account is not authorized to view grading section");
+        }
         $controller = null;
         switch ($_REQUEST['page']) {
             case 'simple':
