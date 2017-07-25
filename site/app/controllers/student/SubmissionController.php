@@ -260,7 +260,7 @@ class SubmissionController extends AbstractController {
 
         // creating directory under gradeable_id with the timestamp
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("m-d-Y_H:i:s");
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("m-d-Y_H:i:sO");
         $version_path = FileUtils::joinPaths($pdf_path, $current_time);
         if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make gradeable path.", false);
@@ -404,7 +404,7 @@ class SubmissionController extends AbstractController {
         $this->upload_details['version_path'] = $version_path;
         $this->upload_details['version'] = $new_version;
         
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s");
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
         $max_size = $gradeable->getMaxSize();
 
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
@@ -646,7 +646,7 @@ class SubmissionController extends AbstractController {
             $part_path[1] = $version_path;
         }
         
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s e");
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
         $max_size = $gradeable->getMaxSize();
         
         if ($svn_checkout === false) {
@@ -1003,7 +1003,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
         $json["active_version"] = $new_version;
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s e");
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
 
         $json["history"][] = array("version" => $new_version, "time" => $current_time, "who" => $original_user_id, "type" => "select");
 
