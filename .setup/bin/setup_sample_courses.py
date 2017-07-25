@@ -1220,15 +1220,10 @@ class Gradeable(object):
                          eg_submission_open_date=self.submission_open_date,
                          eg_submission_due_date=self.submission_due_date,
                          eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
-<<<<<<< HEAD
                          eg_use_ta_grading=self.use_ta_grading, eg_can_student_submit=self.can_student_submit,
                          eg_can_student_view=self.can_student_view, eg_can_student_download_active=self.can_student_download_active,
                          eg_can_student_download_any=self.can_student_download_any, eg_config_path=self.config_path,
-                         eg_late_days=self.late_days, eg_precision=self.precision)
-=======
-                         eg_use_ta_grading=self.use_ta_grading, eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
->>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
 
         for component in self.components:
             component.create(self.id, conn, component_table)

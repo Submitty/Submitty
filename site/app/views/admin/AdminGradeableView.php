@@ -2054,7 +2054,7 @@ $('#gradeable-form').on('submit', function(e){
         var bad_max_score = false;
         var check1 = $('#radio_electronic_file').is(':checked');
         var check2 = $('#radio_checkpoints').is(':checked');
-        var check3 = $('#radio_numeric')..is(':checked');
+        var check3 = $('#radio_numeric').is(':checked');
         var checkRegister = $('#registration-section').is(':checked');
         var checkRotate = $('#rotating-section').is(':checked');
         var all_gradeable_ids = $js_gradeables_array;

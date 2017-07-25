@@ -155,9 +155,9 @@ class Gradeable extends AbstractModel {
     protected $student_submit = true;
     /** @property @var bool Will students be able to view submissions before grades are released? Will be no for exams */
     protected $student_view = true;
-    /** @property @var bool */
+    /** @property @var bool Will students be able to  */
     protected $student_download_active = false;
-    /** @property @var bool */
+    /** @property @var bool Will students be able to */
     protected $student_download_any = false;
 
     /* Config variables for submission details for this gradeable */

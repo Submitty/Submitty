@@ -133,9 +133,9 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setTaGrading($is_ta_grading);
             $gradeable->setStudentSubmit($_POST['student_submit']);
             $gradeable->setStudentView($_POST['student_view']);
-            $can_student_download_active = isset($_POST['student_download_active']) ? $_POST['student_download_active'] : "false";
+            $can_student_download_active = isset($_POST['student_download_active']) ? $_POST['student_download_active'] : false;
             $gradeable->setStudentDownloadActive($can_student_download_active);
-            $can_student_download_any = isset($_POST['student_download_any']) ? $_POST['student_download_any'] : "false";
+            $can_student_download_any = isset($_POST['student_download_any']) ? $_POST['student_download_any'] : false;
             $gradeable->setStudentDownloadAny($can_student_download_any);
             $gradeable->setConfigPath($_POST['config_path']);
             $is_peer_grading = (isset($_POST['peer_grading']) && $_POST['peer_grading']=='yes') ? true : false;
