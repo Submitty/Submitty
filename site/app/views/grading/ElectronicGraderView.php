@@ -710,9 +710,11 @@ HTML;
                 if ($first === true) {
                     $first = false;
                     $noChange = "readonly";
+                    $mark_text = ($type === 1) ? "No Credit" : "Full Credit";
                 }
                 else {
                     $noChange = "";
+                    $mark_text = $mark->getNote();
                 }
                 $icon_mark = ($mark->getHasMark() === true) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
@@ -721,7 +723,7 @@ HTML;
                         <span onclick="selectMark(this);"> <i class="fa {$icon_mark}" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}">
-                        <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width:95%; resize:none; float:left;" {$noChange}>{$mark->getNote()}</textarea>
+                        <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width:95%; resize:none; float:left;" {$noChange}>{$mark_text}</textarea>
                     </td>
                 </tr>
 HTML;

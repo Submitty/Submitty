@@ -296,10 +296,7 @@ SELECT";
   gc.array_gc_max_value,
   gc.array_gc_is_text,
   gc.array_gc_is_extra_credit,
-<<<<<<< HEAD
-=======
   gc.array_gc_is_peer,
->>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
   gc.array_gc_order,
   gc.array_array_gcm_id,
   gc.array_array_gc_id,
@@ -311,11 +308,7 @@ SELECT";
   gd.gd_id,
   gd.gd_overall_comment,
   gd.gd_user_viewed_date,
-<<<<<<< HEAD
   gd.array_array_gcm_mark,
-=======
-  gd.array_array_gcm_id,
->>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
   gd.array_gcd_gc_id,
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
@@ -397,11 +390,7 @@ LEFT JOIN (
     in_gcd.array_gcd_grader_id,
     in_gcd.array_gcd_graded_version,
     in_gcd.array_gcd_grade_time,
-<<<<<<< HEAD
     in_gcd.array_array_gcm_mark,
-=======
-    in_gcd.array_array_gcm_id,
->>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
     in_gcd.array_gcd_user_id,
     in_gcd.array_gcd_user_firstname,
     in_gcd.array_gcd_user_preferred_firstname,
@@ -418,11 +407,7 @@ LEFT JOIN (
       array_agg(gcd_grader_id) AS array_gcd_grader_id,
       array_agg(gcd_graded_version) AS array_gcd_graded_version,
       array_agg(gcd_grade_time) AS array_gcd_grade_time,
-<<<<<<< HEAD
       array_agg(array_gcm_mark) AS array_array_gcm_mark,
-=======
-      array_agg(array_gcm_id) AS array_array_gcm_id,
->>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
       array_agg(u.user_id) AS array_gcd_user_id,
       array_agg(u.user_firstname) AS array_gcd_user_firstname,
       array_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
@@ -430,7 +415,6 @@ LEFT JOIN (
       array_agg(u.user_email) AS array_gcd_user_email,
       array_agg(u.user_group) AS array_gcd_user_group
     FROM(
-<<<<<<< HEAD
         SELECT gcd.* , gcmd.array_gcm_mark
         FROM gradeable_component_data AS gcd 
         LEFT JOIN (
@@ -440,16 +424,6 @@ LEFT JOIN (
         ) as gcmd
     ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id
     WHERE array_gcm_mark IS NOT NULL
-=======
-        SELECT gcd.*, gcmd.array_gcm_id
-        FROM gradeable_component_data AS gcd 
-        LEFT JOIN (
-          SELECT gc_id, gd_id, array_to_string(array_agg(gcm_id), ',') as array_gcm_id
-          FROM gradeable_component_mark_data AS gcmd
-          GROUP BY gc_id, gd_id
-        ) as gcmd
-    ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id 
->>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
     ) AS gcd
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id 
     GROUP BY gcd.gd_id
@@ -1028,7 +1002,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
 INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository, 
 eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision, eg_peer_grading, eg_peer_grade_set) 
 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
->>>>>>> 13f5f67c735907902a4e4051bdec1dbcdd90f3ef
         }
     }
 
