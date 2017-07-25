@@ -323,18 +323,19 @@ function isValidSubmission(){
 /**
  * @param csrf_token
  * @param gradeable_id
- * @param student_id
- * @param submitStudentGradeable, a callback function
+ * @param user_id
+ * @param is_pdf
+ * @param path
+ * @param count
+ * @param makeSubmission, a callback function
  */
-function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGradeable) {
-    $("#submit").prop("disabled", true);
+function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, makeSubmission) {
 
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
-    formData.append('gradeable_id', gradeable_id);
-    formData.append('student_id', student_id);
+    formData.append('user_id', user_id);
 
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify'});
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
 
     $.ajax({
         url: url,
@@ -343,12 +344,10 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
         contentType: false,
         type: 'POST',
         success: function(data) {
-            $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    submitStudentGradeable(student_id, data['highest_version']);
-                    return data;
+                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count);
                 }
                 else {
                     alert("ERROR! \n\n" + data['message']);
@@ -368,9 +367,187 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
 }
 
 /**
- *
- * @param submit_url
- * @param return_url
+* @param csrf_token
+* @param gradeable_id
+* @param user_id
+* @param path
+* @param count
+*/
+function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
+
+    url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id});
+
+    var formData = new FormData();
+
+    formData.append('csrf_token', csrf_token);
+    formData.append('user_id', user_id);
+    formData.append('path', path);
+
+    $.ajax({
+        url: url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    $("#bulk_submit_" + count).prop("disabled", true);
+                    $("#bulk_delete_" + count).prop("disabled", true);
+                    $("#bulk_user_id_" + count).prop("disabled", true);
+                    var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
+                    $('#messages').append(message);
+                    setTimeout(function() {
+                        $('#submit_' + count).fadeOut();
+                    }, 5000);
+                    return;
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function() {
+            alert("ERROR! Please contact administrator that you could not upload files.");
+        }
+    });
+}
+
+/**
+* @param csrf_token
+* @param gradeable_id
+* @param path
+* @param count
+*/
+function deleteSplitItem(csrf_token, gradeable_id, path, count) {
+
+    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'delete_split', 'gradeable_id': gradeable_id});
+
+    var formData = new FormData();
+
+    formData.append('csrf_token', csrf_token);
+    formData.append('path', path);
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    $("#bulk_submit_" + count).prop("disabled", true);
+                    $("#bulk_delete_" + count).prop("disabled", true);
+                    $("#bulk_user_id_" + count).val("");
+                    $("#bulk_user_id_" + count).prop("disabled", true);
+                    var message ='<div id="delete_' + count + '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'delete_' + count + '\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
+                    $('#messages').append(message);
+                    setTimeout(function() {
+                        $('#delete_' + count).fadeOut();
+                    }, 5000);
+                    return;
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were deleting.");
+                console.log(data);
+            }
+        },
+        error: function() {
+            alert("ERROR! Please contact administrator that you could not delete files.");
+        }
+    });
+}
+
+/**
+ * @param gradeable_id
+ * @param num_pages
+ */
+function handleBulk(gradeable_id, num_pages) {
+    $("#submit").prop("disabled", true);
+
+    var formData = new FormData();
+
+    if(num_pages == "") {
+        alert("You didn't enter the # of page(s)!");
+        $("#submit").prop("disabled", false);
+        return;
+    }
+    else if(num_pages < 1 || num_pages % 1 != 0) {
+        alert(num_pages + " is not a valid # of page(s)!");
+        $("#submit").prop("disabled", false);
+        return;
+    }
+
+    formData.append('num_pages', num_pages);
+
+    for (var i = 0; i < file_array.length; i++) {
+        for (var j = 0; j < file_array[i].length; j++) {
+            if (file_array[i][j].name.indexOf("'") != -1 ||
+                file_array[i][j].name.indexOf("\"") != -1) {
+                alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("\\") != -1 ||
+                file_array[i][j].name.indexOf("/") != -1) {
+                alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("<") != -1 ||
+                file_array[i][j].name.indexOf(">") != -1) {
+                alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                return;
+            }
+            formData.append('files' + (i + 1) + '[]', file_array[i][j]);
+        }
+    }
+
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'bulk', 'gradeable_id': gradeable_id});
+    var return_url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id});
+
+    $.ajax({
+        url: url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            $("#submit").prop("disabled", false);
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    window.location.href = return_url;
+                }
+                else {
+                    alert("ERROR! \n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function() {
+            $("#submit").prop("disabled", false);
+            alert("ERROR! Please contact administrator that you could not upload files.");
+        }
+    });
+}
+
+/**
  * @param days_late
  * @param late_days_allowed
  * @param versions_used
@@ -380,16 +557,11 @@ function validateStudentId(csrf_token, gradeable_id, student_id, submitStudentGr
  * @param num_textboxes
  * @param user_id
  */
-function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, user_id) {
+function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, gradeable_id, user_id) {
     $("#submit").prop("disabled", true);
 
-    // depending on which is checked, update cookie
-    if ($('#radio_normal').is(':checked')) {
-        document.cookie="student_checked="+0;
-    };
-    if ($('#radio_student').is(':checked')) {
-        document.cookie="student_checked="+1;
-    };
+    submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id});
+    return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
 
     var message = "";
     // check versions used

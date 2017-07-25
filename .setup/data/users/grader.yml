@@ -2,4 +2,5 @@ grading_registration_group: 1
 user_firstname: Tim
 user_group: 3
 user_id: grader
+anon_id: grader
 user_lastname: Grader

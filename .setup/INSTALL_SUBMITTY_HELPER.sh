@@ -81,10 +81,8 @@ function replace_fillin_variables {
 
     sed -i -e "s|__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $1
 
-    sed -i -e "s|__INSTALL__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__|$MAX_INSTANCES_OF_GRADE_STUDENTS|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__|$GRADE_STUDENTS_IDLE_SECONDS|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__|$GRADE_STUDENTS_IDLE_TOTAL_MINUTES|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__|$GRADE_STUDENTS_STARTS_PER_HOUR|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__|$NUM_GRADING_SCHEDULER_WORKERS|g" $1
+
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
@@ -147,8 +145,8 @@ chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
 chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
 chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs
-chown  ${HWCRON_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/autograding
-chmod  u+rwx,g+rxs                                ${SUBMITTY_DATA_DIR}/logs/autograding
+chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
+chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_interactive
@@ -273,9 +271,12 @@ chmod 751 ${SUBMITTY_INSTALL_DIR}/bin
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 #replace necessary variables in the copied scripts
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/adduser.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
@@ -309,13 +310,16 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 
-# fix the permissions specifically of the grade_students.sh script
-chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 
 # fix the permissions specifically of the build_config_upload.py script
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
@@ -441,43 +445,15 @@ fi
 ################################################################################################################
 # GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
 #
-# The system requires a background process that starts automatically
-# and runs one or more instances of the grade_students.sh script
-# continuously, checking for new submissions and promptly grading them
-# in chronological order.  This script must be run as the ```hwcron```
-# user.
-#
-# Note that standard (non error) output of the grade_students.sh
-# script is discarded.  You will want to verify that the standard
-# error output is logged and/or emailed to the appropriate
-# admin/developer, so problems can be promptly addressed.
-#
 
 echo -e "Generate & install the crontab file for hwcron user"
 
 # name of temporary file
 HWCRON_CRONTAB_FILE=my_hwcron_crontab_file.txt
 
-
 # generate the file
 echo -e "\n\n"                                                                                >  ${HWCRON_CRONTAB_FILE}
 echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
-
-# sanity check
-if [[ "$GRADE_STUDENTS_STARTS_PER_HOUR" -lt 1 ||
-      "$GRADE_STUDENTS_STARTS_PER_HOUR" -gt 60 ]] ; then
-    echo "WARNING: Bad value for GRADE_STUDENTS_STARTS_PER_HOUR = $GRADE_STUDENTS_STARTS_PER_HOUR"
-else
-    # calculate the frequency -- once every how many minutes?
-    GRADE_STUDENTS_FREQUENCY=$(( 60 / ${GRADE_STUDENTS_STARTS_PER_HOUR} ))
-    minutes=0
-    while [ $minutes -lt 60 ]; do
-        printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
-        minutes2=$(($minutes + 1))
-        printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py > /dev/null\n"                 $minutes2          >> ${HWCRON_CRONTAB_FILE}
-        minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
-    done
-fi
 
 ## NOTE:  the build_config_upload script is hardcoded to run for ~5 minutes and then exit
 minutes=0
@@ -503,7 +479,7 @@ echo -e "Compile and install analysis tools"
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 
 # compile the tools
-./build.sh v0.2.1
+./build.sh v0.2.4
 
 popd
 
@@ -515,11 +491,34 @@ rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/plagiarism ${SUBMI
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
-################################################################################################################
-################################################################################################################
-
-
 echo -e "\nCompleted installation of the Submitty homework submission server\n"
+
+################################################################################################################
+################################################################################################################
+# INSTALL & START GRADING SCHEDULER DAEMON
+
+rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.service   /etc/systemd/system/submitty_grading_scheduler.service
+chown -R hwcron:hwcron /etc/systemd/system/submitty_grading_scheduler.service
+chmod 444 /etc/systemd/system/submitty_grading_scheduler.service
+
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_before=$?
+
+# if the daemon is currently running, restart it now
+systemctl try-restart submitty_grading_scheduler
+
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_after=$?
+
+if [[ $is_active_before -ne 0 ]]; then
+    echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   systemctl start submitty_grading_scheduler\n"
+else
+    if [[ $is_active_after -ne 0 ]]; then
+        echo -e "\nERROR!  Failed to restart Submitty Grading Scheduler Daemon\n"
+    fi
+    echo -e "Restarted Submitty Grading Scheduler Daemon\n"
+fi
 
 
 ################################################################################################################

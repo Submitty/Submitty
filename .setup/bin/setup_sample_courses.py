@@ -28,6 +28,19 @@ import re
 import shutil
 import subprocess
 import uuid
+import pytz
+import time
+import tzlocal
+import os.path
+import sys
+import string
+
+
+# share a couple functions related to timezone
+sys.path.append("/usr/local/submitty/bin")
+import submitty_utils
+
+
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
 
@@ -69,13 +82,14 @@ def main():
                 SUBMITTY_DATA_DIR, directory))
     use_courses = args.course
 
-    # We have to kill crontab and all running grade students processes as otherwise we end up with the process
+    # We have to kill crontab and all running grading scheduler processes as otherwise we end up with the process
     # grabbing the homework files that we are inserting before we're ready to (and permission errors exist) which
     # ends up with just having a ton of build failures. Better to wait on grading any homeworks until we've done
     # all steps of setting up a course.
+    print ("pausing the autograding scheduling daemon")
     os.system("crontab -u hwcron -l > /tmp/hwcron_cron_backup.txt")
     os.system("crontab -u hwcron -r")
-    os.system("killall grade_students.sh")
+    os.system("systemctl stop submitty_grading_scheduler")
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
@@ -189,8 +203,14 @@ def main():
         if courses[course].make_customization:
             courses[course].make_course_json()
 
+    # restart the autograding daemon
+    print ("restarting the autograding scheduling daemon")
     os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
     os.system("rm /tmp/hwcron_cron_backup.txt")
+    os.system("systemctl restart submitty_grading_scheduler")
+
+def generate_random_user_id(length=15):
+    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
 
 
 def generate_random_users(total, real_users):
@@ -210,6 +230,7 @@ def generate_random_users(total, real_users):
 
     users = []
     user_ids = []
+    anon_ids = []
     with open(os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w") as random_users_file:
         for i in range(total):
             if random.random() < 0.5:
@@ -219,13 +240,16 @@ def generate_random_users(total, real_users):
             last_name = random.choice(last_names)
             user_id = last_name.replace("'", "")[:5] + first_name[0]
             user_id = user_id.lower()
+            anon_id = generate_random_user_id(15)
             while user_id in user_ids or user_id in real_users:
                 if user_id[-1].isdigit():
                     user_id = user_id[:-1] + str(int(user_id[-1]) + 1)
                 else:
                     user_id = user_id + "1"
-
+            if anon_id in anon_ids:
+                anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
+                             "anon_id": anon_id,
                              "user_firstname": first_name,
                              "user_lastname": last_name,
                              "user_group": 4,
@@ -233,6 +257,7 @@ def generate_random_users(total, real_users):
             new_user.create()
             user_ids.append(user_id)
             users.append(new_user)
+            anon_ids.append(anon_id)
             random_users_file.write(user_id + "\n")
     return users
 
@@ -480,6 +505,7 @@ class User(object):
 
     Attributes:
         id
+        anon_id
         password
         firstname
         lastname
@@ -493,6 +519,7 @@ class User(object):
     """
     def __init__(self, user):
         self.id = user['user_id']
+        self.anon_id = user['anon_id']
         self.password = self.id
         self.firstname = user['user_firstname']
         self.lastname = user['user_lastname']
@@ -606,10 +633,11 @@ class Course(object):
         self.gradeables = []
         self.make_customization = False
         ids = []
-        for gradeable in course['gradeables']:
-            self.gradeables.append(Gradeable(gradeable))
-            assert self.gradeables[-1].id not in ids
-            ids.append(self.gradeables[-1].id)
+        if 'gradeables' in course:
+            for gradeable in course['gradeables']:
+                self.gradeables.append(Gradeable(gradeable))
+                assert self.gradeables[-1].id not in ids
+                ids.append(self.gradeables[-1].id)
         self.users = []
         self.registration_sections = 10
         self.rotating_sections = 5
@@ -653,18 +681,11 @@ class Course(object):
 
         os.environ['PGPASSWORD'] = DB_PASS
         database = "submitty_" + self.semester + "_" + self.code
-        os.system('psql -d postgres -h {} -U hsdbu -c "CREATE DATABASE {}"'.format(DB_HOST,
-                                                                                   database))
-        os.system("psql -d {} -h {} -U {} -f {}/site/data/course_tables.sql"
-                  .format(database, DB_HOST, DB_USER, SUBMITTY_REPOSITORY))
 
         print("Database created, now populating ", end="")
         submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData(bind=submitty_engine)
-
-        courses_table = Table('courses', submitty_metadata, autoload=True)
-        submitty_conn.execute(courses_table.insert(), semester=self.semester, course=self.code)
 
         engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                                  database))
@@ -711,10 +732,11 @@ class Course(object):
                                   registration_section=reg_section,
                                   manual_registration=user.get_detail(self.code, "manual"))
             update = users_table.update(values={
-                users_table.c.rotating_section: bindparam('rotating_section')
+                users_table.c.rotating_section: bindparam('rotating_section'),
+                users_table.c.anon_id: bindparam('anon_id')
             }).where(users_table.c.user_id == bindparam('b_user_id'))
 
-            conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
+            conn.execute(update, rotating_section=rot_section, anon_id=user.anon_id, b_user_id=user.id)
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(user.get_detail(self.code,"grading_registration_section"))
@@ -747,7 +769,7 @@ class Course(object):
             form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
-        os.system("chown hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
+        os.system("chown -f hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
         if not os.path.isfile(os.path.join(course_path, "ASSIGNMENTS.txt")):
             os.system("touch {}".format(os.path.join(course_path, "ASSIGNMENTS.txt")))
             os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
@@ -788,16 +810,17 @@ class Course(object):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
-                        current_time = (gradeable.submission_due_date - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+                        current_time_string = submitty_utils.write_submitty_date()
+
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
-                                     g_version=1, submission_time=current_time)
+                                     g_version=1, submission_time=current_time_string)
                         conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
                                      active_version=1)
                         with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
-                            json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time}]},
+                            json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time_string}]},
                                       open_file)
                         with open(os.path.join(submission_path, "1", ".submit.timestamp"), "w") as open_file:
-                            open_file.write(current_time + "\n")
+                            open_file.write(current_time_string + "\n")
 
                         if isinstance(gradeable.submissions, dict):
                             for key in gradeable.submissions:
@@ -1034,6 +1057,7 @@ class Gradeable(object):
         self.instructions_url = ""
         self.overall_ta_instructions = ""
         self.team_assignment = False
+        self.peer_grading = False
         self.grade_by_registration = True
         self.is_repository = False
         self.subdirectory = ""
@@ -1113,6 +1137,8 @@ class Gradeable(object):
                 self.is_repository = gradeable['eg_is_repository'] is True
             if self.is_repository and 'eg_subdirectory' in gradeable:
                 self.subdirectory = gradeable['eg_subdirectory']
+            if 'eg_peer_grading' in gradeable:
+                self.peer_grading = gradeable['eg_peer_grading'] is False
             if 'eg_use_ta_grading' in gradeable:
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
             if 'eg_late_days' in gradeable:
@@ -1163,7 +1189,8 @@ class Gradeable(object):
         conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
-                     g_team_assignment=self.team_assignment, g_gradeable_type=self.type,
+                     g_team_assignment=self.team_assignment, 
+                     g_gradeable_type=self.type,
                      g_grade_by_registration=self.grade_by_registration,
                      g_ta_view_start_date=self.ta_view_date,
                      g_grade_start_date=self.grade_start_date,
@@ -1182,7 +1209,7 @@ class Gradeable(object):
                          eg_submission_due_date=self.submission_due_date,
                          eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
                          eg_use_ta_grading=self.use_ta_grading, eg_config_path=self.config_path,
-                         eg_late_days=self.late_days, eg_precision=self.precision)
+                         eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
 
         for component in self.components:
             component.create(self.id, conn, component_table)
@@ -1280,6 +1307,7 @@ class Component(object):
 
         self.is_text = False
         self.is_extra_credit = False
+        self.is_peer = False
         self.order = order
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
@@ -1301,7 +1329,7 @@ class Component(object):
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
                                     gc_max_value=self.max_value, gc_is_text=self.is_text,
-                                    gc_is_extra_credit=self.is_extra_credit, gc_order=self.order)
+                                    gc_is_extra_credit=self.is_extra_credit, gc_is_peer=self.is_peer, gc_order=self.order)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 

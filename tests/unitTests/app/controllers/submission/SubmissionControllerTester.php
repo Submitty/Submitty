@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\models\Gradeable;
 use app\models\GradeableList;
 use tests\unitTests\BaseUnitTest;
+use app\models\User;
 
 class SubmissionControllerTester extends BaseUnitTest {
 
@@ -64,6 +65,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->core->method('loadModel')->willReturn($this->createMockGradeableList($highest_version, $num_parts, $max_size));
     }
 
+    protected function createMockUser($id) {
+        $return = $this->createMockModel(User::class);
+        $return->method("getId")->willReturn($id);
+        return $return;
+    }
+
     /**
      * Helper method to generate a mocked gradeable list with one gradeable. We can use annotations in our testcases
      * to set various aspects of the gradeable, namely @highestVersion, @numParts, and @maxSize for
@@ -79,7 +86,8 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn("test");
         $gradeable->method('getName')->willReturn("Test Gradeable");
-        $gradeable->method('getUser')->willReturn("testUser");
+        // $gradeable->method('getUser')->willReturn("testUser");
+        $gradeable->method('getUser')->willReturn($this->createMockUser('testUser'));
 
         $gradeable->method('getHighestVersion')->willReturn(intval($highest_version));
         $gradeable->method('getNumParts')->willReturn(intval($num_parts));

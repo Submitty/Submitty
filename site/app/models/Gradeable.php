@@ -32,6 +32,10 @@ use app\libraries\Utils;
  * @method float getNormalPoints() Returns the total number of points for testcases that are not hidden nor are extra credit
  * @method bool setTeamAssignment()
  * @method bool getTeamAssignment()
+ * @method int getPeerGradeSet()
+ * @method void setPeerGradeSet(int $assign)
+ * @method bool getPeerGrading()
+ * @method void setPeerGrading(bool $peer)
  * @method setTaViewDate(\DateTime $datetime)
  * @method \DateTime getOpenDate(\DateTime $datetime)
  * @method setOpenDate(\DateTime $datetime)
@@ -85,6 +89,12 @@ class Gradeable extends AbstractModel {
     /** @property @var bool Is this a team assignment */
     protected $team_assignment = false;
     
+    /** @property @var bool Does this assignment use peer grading*/
+    protected $peer_grading = false;
+    
+    /** @property @var int How many people should each person grade*/
+    protected $peer_grade_set = 0;
+    
     /** @property @var string Iris Bucket to place gradeable */
     protected $bucket = null;
     
@@ -100,6 +110,7 @@ class Gradeable extends AbstractModel {
     /** @property @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
 
+    /** @property @var bool */
     protected $ta_grades_released = false;
 
     /** @property @var bool Should the gradeable be graded by registration section (or by rotating section) */
@@ -192,6 +203,9 @@ class Gradeable extends AbstractModel {
     protected $results_files = array();
     protected $meta_files = array();
     protected $previous_files = array();
+    /** @property @var Array of all split pdfsuploads. Each key is a filename and then each element is an array
+    * that contains filename, file path, and the file size. */
+    protected $uploads_files = array();
 
     protected $result_details;
 
@@ -242,8 +256,11 @@ class Gradeable extends AbstractModel {
 
     protected $user_viewed_date = null;
 
-    public function __construct(Core $core, $details, User $user = null) {
+    public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
+        if(!isset($details['g_id'])) {
+            return;
+        }
         $this->id = $details['g_id'];
 
         $this->user = ($user === null) ? $this->core->getUser() : $user;
@@ -258,6 +275,7 @@ class Gradeable extends AbstractModel {
         $this->ta_instructions = $details['g_overall_ta_instructions'];
         $this->instructions_url = $details['g_instructions_url'];
         $this->team_assignment = isset($details['g_team_assignment']) ? $details['g_team_assignment'] === true : false;
+        
         $this->type = $details['g_gradeable_type'];
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);
@@ -267,6 +285,9 @@ class Gradeable extends AbstractModel {
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
+            $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
+            $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
+            $this->config_path = $details['eg_config_path'];
             if (isset($details['active_version']) && $details['active_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
@@ -290,12 +311,12 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
+                            'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
                             'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order');
+                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
@@ -309,7 +330,9 @@ class Gradeable extends AbstractModel {
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {
                 $component_details = array();
                 foreach ($component_fields as $key) {
-                    $component_details[$key] = $details["array_{$key}"][$i];
+                    if (isset($details["array_{$key}"][$i])) {
+                        $component_details[$key] = $details["array_{$key}"][$i];
+                    }             
                 }
 
 
@@ -427,6 +450,7 @@ class Gradeable extends AbstractModel {
 
         for ($i = 0; $i < $num_textboxes; $i++) {
           $this->textboxes[$i] = $details['textboxes'][$i];
+          // if(isset($detailes['']))
         }
 
         if (isset($details['testcases'])) {
@@ -570,8 +594,8 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Loads submission details about an electronic submission from the submissions/ and
-     * results/ directories and their respective json files.
+     * Loads submission details about an electronic submission from the submissions/,
+     * results/, and uploads/ directories and their respective json files.
      */
     public function loadResultDetails() {
         if ($this->type !== GradeableType::ELECTRONIC_FILE) {
@@ -600,6 +624,7 @@ class Gradeable extends AbstractModel {
         $submission_path = $course_path."/submissions/".$this->id."/".$user_id;
         $svn_path = $course_path."/checkout/".$this->id."/".$user_id;
         $results_path = $course_path."/results/".$this->id."/".$user_id;
+        $uploads_path = $course_path."/uploads/split_pdf/".$this->id;
 
         //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
 
@@ -644,6 +669,12 @@ class Gradeable extends AbstractModel {
             $this->results_files[$file] = $details;
         }
 
+        $uploads_current_path = $uploads_path;
+        $uploads_files = FileUtils::getAllFiles($uploads_current_path);
+        foreach ($uploads_files as $timestamp => $content) {
+            $this->uploads_files[$timestamp] = $content;
+        }
+
         if ($this->getNumParts() > 1) {
             for ($i = 1; $i <= $this->getNumParts(); $i++) {
                 $this->previous_files[$i] = array();
@@ -661,15 +692,15 @@ class Gradeable extends AbstractModel {
         if ($this->current_version > 0) {
             $this->result_details = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "results.json"));
             if ($this->result_details !== false) {
-                $results_history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "results_history.json"));
-                if ($results_history !== false) {
-                    $last_results_timestamp = $results_history[count($results_history) - 1];
+                $history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "history.json"));
+                if ($history !== false) {
+                    $last_results_timestamp = $history[count($history) - 1];
                 } else {
                     $last_results_timestamp = array('submission_time' => "UNKNOWN", "grade_time" => "UNKOWN",
                         "wait_time" => "UNKNOWN");
                 }
                 $this->result_details = array_merge($this->result_details, $last_results_timestamp);
-                $this->result_details['num_autogrades'] = count($results_history);
+                $this->result_details['num_autogrades'] = count($history);
                 for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
                     $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current_version));
                 }
@@ -848,7 +879,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function updateGradeable() {
-        $this->core->getQueries()->updateGradeable2($this);
+        $this->core->getQueries()->updateGradeable($this);
     }
 
     public function getActiveDaysLate() {

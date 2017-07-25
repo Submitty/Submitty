@@ -15,16 +15,6 @@
                     ]
                 },
                 {
-                    "actual_file": "test01_STDERR.txt",
-                    "description": "syntax error output from running python",
-                    "messages": [
-                        {
-                            "message": "WARNING: This file should be empty",
-                            "type": "warning"
-                        }
-                    ]
-                },
-                {
                     "actual_file": "test01_execute_logfile.txt",
                     "description": "Execution Logfile"
                 }

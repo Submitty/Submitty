@@ -84,6 +84,7 @@ function editUserForm(user_id) {
 }
 
 function newUserForm() {
+    $('.popup-form').css('display', 'none');
     var form = $("#edit-user-form");
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
@@ -97,6 +98,25 @@ function newUserForm() {
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
+}
+
+function newGraderListForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#grader-list-form");
+    form.css("display", "block");
+    form.css("width", "500px");
+    form.css("margin-left", "-250px");
+    $('[name="upload"]', form).val(null);
+}
+
+function newClassListForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#class-list-form");
+    form.css("display", "block");
+    form.css("width", "500px");
+    form.css("margin-left", "-250px");
+    $('[name="move_missing"]', form).prop('checked', false);
+    $('[name="upload"]', form).val(null);
 }
 
 /**
@@ -140,6 +160,11 @@ function checkVersionChange(days_late, late_days_allowed){
         return confirm(message);
     }
     return true;
+}
+
+function checkTaVersionChange(){
+    var message = "You are overriding the student's chosen submission. Are you sure you want to continue?";
+    return confirm(message);
 }
 
 function checkVersionsUsed(gradeable, versions_used, versions_allowed) {

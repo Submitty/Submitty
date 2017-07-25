@@ -64,10 +64,15 @@ abstract class AbstractDatabaseQueries {
 
     /**
      * @param User $user
+     */
+    abstract public function insertSubmittyUser(User $user);
+
+    /**
+     * @param User $user
      * @param string $semester
      * @param string $course
      */
-    abstract public function insertUser(User $user, $semester, $course);
+    abstract public function insertCourseUser(User $user, $semester, $course);
 
     /**
      * @param User $user
@@ -216,9 +221,10 @@ abstract class AbstractDatabaseQueries {
     /**
      * This inserts an row in the electronic_gradeable_data table for a given gradeable/user/version combination.
      * The values for the row are set to defaults (0 for numerics and NOW() for the timestamp) with the actual values
-     * to be later filled in by the grade_students.sh routine. We do it this way as we can properly deal with the
+     * to be later filled in by the submitty_grading_scheduler.py and insert_database_version_data.py scripts.
+     * We do it this way as we can properly deal with the
      * electronic_gradeable_version table here as the "active_version" is a concept strictly within the PHP application
-     * code and grade_students.sh has no concept of it. This will either update or insert the row in
+     * code and the grading scripts have no concept of it. This will either update or insert the row in
      * electronic_gradeable_version for the given gradeable and student.
      *
      * @param $g_id
@@ -265,7 +271,7 @@ abstract class AbstractDatabaseQueries {
      *
      * @param array $details
      */
-    abstract public function createNewGradeable($details);
+    abstract public function createNewGradeable(Gradeable $gradeable);
 
     /**
      * Gets an array that contains all revelant data in a gradeable.
@@ -281,7 +287,7 @@ abstract class AbstractDatabaseQueries {
      *
      * @param array $details
      */
-    abstract public function updateGradeable($details);
+    abstract public function updateGradeable(Gradeable $gradeable);
 
     /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
@@ -409,4 +415,24 @@ abstract class AbstractDatabaseQueries {
      * @param integer $days
      */
     abstract public function updateExtensions($user_id, $g_id, $days);
+    
+    /**
+     * Gets number of people each peer grader is assigned to grade
+     * @param string $gradeable_id
+     */
+    abstract public function getPeerGradingAssignNumber($gradeable_id);
+    
+    /**
+     * Removes peer grading assignment if instructor decides to change the number of people each person grades for assignment
+     * @param string $gradeable_id
+     */
+    abstract public function clearPeerGradingAssignments($gradeable_id);
+    
+    /**
+     * Adds an assignment for someone to grade another person for peer grading
+     * @param string $student
+     * @param string $grader
+     * @param string $gradeable_id
+    */
+    abstract public function insertPeerGradingAssignment($grader, $student, $gradeable_id);
 }

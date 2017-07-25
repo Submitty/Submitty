@@ -210,27 +210,29 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
 // =================================================================================
 // =================================================================================
 
-TestResults* TestCase::dispatch(const nlohmann::json& grader) const {
+TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_number) const {
   std::string method = grader.value("method","");
-  if      (method == "JUnitTestGrader")            { return JUnitTestGrader_doit(*this,grader);           }
-  else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader); }
-  else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);   }
-  else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);  }
+  if      (method == "")                           { return NULL;                                           }
+  else if (method == "JUnitTestGrader")            { return JUnitTestGrader_doit(*this,grader);             }
+  else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader);   }
+  else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);     }
+  else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);    }
   else if (method == "DrMemoryGrader")             { return DrMemoryGrader_doit(*this,grader);              }
-  else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);              }
-  else if (method == "searchToken")                { return searchToken_doit(*this,grader);               }
-  else if (method == "intComparison")              { return intComparison_doit(*this,grader);             }
-  else if (method == "myersDiffbyLinebyChar")      { return myersDiffbyLinebyChar_doit(*this,grader);     }
-  else if (method == "myersDiffbyLinebyWord")      { return myersDiffbyLinebyWord_doit(*this,grader);     }
-  else if (method == "myersDiffbyLine")            { return myersDiffbyLine_doit(*this,grader);           }
-  else if (method == "myersDiffbyLineNoWhite")     { return myersDiffbyLineNoWhite_doit(*this,grader);    }
-  else if (method == "diffLineSwapOk")             { return diffLineSwapOk_doit(*this,grader);            }
-  else if (method == "fileExists")                 { return fileExists_doit(*this,grader);                }
-  else if (method == "warnIfNotEmpty")             { return warnIfNotEmpty_doit(*this,grader);            }
-  else if (method == "warnIfEmpty")                { return warnIfEmpty_doit(*this,grader);               }
-  else if (method == "errorIfNotEmpty")            { return errorIfNotEmpty_doit(*this,grader);           }
-  else if (method == "errorIfEmpty")               { return errorIfEmpty_doit(*this,grader);              }
-  else                                             { return custom_dispatch(grader);                      }
+  else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);                }
+  else if (method == "searchToken")                { return searchToken_doit(*this,grader);                 }
+  else if (method == "intComparison")              { return intComparison_doit(*this,grader);               }
+  else if (method == "myersDiffbyLinebyChar")      { return myersDiffbyLinebyChar_doit(*this,grader);       }
+  else if (method == "myersDiffbyLinebyWord")      { return myersDiffbyLinebyWord_doit(*this,grader);       }
+  else if (method == "myersDiffbyLine")            { return myersDiffbyLine_doit(*this,grader);             }
+  else if (method == "myersDiffbyLineNoWhite")     { return myersDiffbyLineNoWhite_doit(*this,grader);      }
+  else if (method == "diffLineSwapOk")             { return diffLineSwapOk_doit(*this,grader);              }
+  else if (method == "fileExists")                 { return fileExists_doit(*this,grader);                  }
+  else if (method == "warnIfNotEmpty")             { return warnIfNotEmpty_doit(*this,grader);              }
+  else if (method == "warnIfEmpty")                { return warnIfEmpty_doit(*this,grader);                 }
+  else if (method == "errorIfNotEmpty")            { return errorIfNotEmpty_doit(*this,grader);             }
+  else if (method == "errorIfEmpty")               { return errorIfEmpty_doit(*this,grader);                }
+  else if (method == "ImageDiff")                  { return ImageDiff_doit(*this,grader, autocheck_number); }
+  else                                             { return custom_dispatch(grader);                        }
 }
 
 
@@ -241,10 +243,26 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader) const {
 void VerifyGraderDeductions(nlohmann::json &json_graders) {
   assert (json_graders.is_array());
   assert (json_graders.size() > 0);
-  float default_deduction = 1.0 / float(json_graders.size());
+
+  int json_grader_count = 0;
+  for (int i = 0; i < json_graders.size(); i++) {
+    nlohmann::json::const_iterator itr = json_graders[i].find("method");
+    if (itr != json_graders[i].end()) {
+      json_grader_count++;
+    }
+  }
+
+  assert (json_grader_count > 0);
+
+  float default_deduction = 1.0 / float(json_grader_count);
   float sum = 0.0;
   for (int i = 0; i < json_graders.size(); i++) {
-    nlohmann::json::const_iterator itr = json_graders[i].find("deduction");
+    nlohmann::json::const_iterator itr = json_graders[i].find("method");
+    if (itr == json_graders[i].end()) {
+      json_graders[i]["deduction"] = 0;
+      continue;
+    }
+    itr = json_graders[i].find("deduction");
     float deduction;
     if (itr == json_graders[i].end()) {
       json_graders[i]["deduction"] = default_deduction;
@@ -255,6 +273,7 @@ void VerifyGraderDeductions(nlohmann::json &json_graders) {
     }
     sum += deduction;
   }
+
   if (sum < 0.99) {
     std::cout << "ERROR! DEDUCTION SUM < 1.0: " << sum << std::endl;
   }
@@ -366,7 +385,14 @@ TestCase::TestCase (nlohmann::json& input,const nlohmann::json &whole_config) : 
         if (method == "warnIfNotEmpty" || method == "warnIfEmpty") {
           grader["show_message"] = "on_failure";
         } else {
-          grader["show_message"] = "always";
+          if (grader.find("actual_file") != grader.end() &&
+              *(grader.find("actual_file")) == "execute_logfile.txt" &&
+              grader.find("show_actual") != grader.end() &&
+              *(grader.find("show_actual")) == "never") {
+            grader["show_message"] = "never";
+          } else {
+            grader["show_message"] = "always";
+          }
         }
       } else {
         assert (validShowValue(*itr2));
@@ -648,6 +674,21 @@ const nlohmann::json TestCase::get_test_case_limits() const {
   return _test_case_limits;
 }
 
+bool TestCase::ShowExecuteLogfile(const std::string &execute_logfile) const {
+  for (int i = 0; i < numFileGraders(); i++) {
+    const nlohmann::json& grader = getGrader(i);
+    nlohmann::json::const_iterator a = grader.find("actual_file");
+    if (a != grader.end()) {
+      if (*a == execute_logfile) {
+        nlohmann::json::const_iterator s = grader.find("show_actual");
+        if (s != grader.end()) {
+          if (*s == "never") return false;
+        }
+      }
+    }
+  }
+  return true;
+}
 
 // =================================================================================
 // =================================================================================
@@ -681,7 +722,7 @@ TestResultsFixedSize TestCase::do_the_grading (int j) const {
     // perform the validation (this might hang or crash)
     assert (j >= 0 && j < numFileGraders());
     nlohmann::json tcg = getGrader(j);
-    TestResults* answer_ptr = this->dispatch(tcg);
+    TestResults* answer_ptr = this->dispatch(tcg, j);
     assert (answer_ptr != NULL);
 
     // write answer to shared memory and terminate this process

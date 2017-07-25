@@ -94,7 +94,7 @@ def get_version_details(semester, course, homework, student, version, testcases,
                 hidden = "hidden" if testcases[i]['hidden'] else "non_hidden"
                 ec = "extra_credit" if testcases[i]['extra_credit'] else "non_extra_credit"
                 entry['autograding_' + hidden + "_" + ec] += points
-        with open(os.path.join(results_path, "results_history.json")) as open_file:
+        with open(os.path.join(results_path, "history.json")) as open_file:
             json_file = json.load(open_file)
         if isinstance(json_file, list):
             a = datetime.strptime(json_file[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")

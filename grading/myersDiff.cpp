@@ -15,7 +15,7 @@
 #include "clean.h"
 
 #include "execute.h"
-
+#include "window_utils.h"
 
 
 // ==============================================================================
@@ -211,6 +211,59 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
   Difference* diff = ses(j, &text_a, &text_b, false,extraStudentOutputOk);
   diff->type = ByLineByChar;
   return diff;
+}
+
+TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int autocheck_number) {
+  std::string actual_file = j.value("actual_file","");
+  std::string expected_file = j.value("expected_file","");
+  std::string acceptable_threshold_str = j.value("acceptable_threshold","");
+
+  if(actual_file == "" || expected_file == "" || acceptable_threshold_str == ""){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Error in configuration. Please speak to your instructor.")});
+  }
+
+  if (access(expected_file.c_str(), F_OK|R_OK ) == -1)
+  {
+        return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: The instructor's image was not found. Please notify your instructor")});
+  }
+
+  float acceptable_threshold = stringToFloat(acceptable_threshold_str,6); //window_utils function.
+
+
+  actual_file = tc.getPrefix() + "_" + actual_file;
+  std::cout << "About to compare " << actual_file << " and " << expected_file << std::endl;
+
+
+  std::string command = "compare -metric RMSE " + actual_file + " " + expected_file + " NULL: 2>&1";
+  std::string output = output_of_system_command(command.c_str()); //get the string
+  std::cout << "captured the following:\n" << output << "\n" <<std::endl;
+
+  std::vector<float> values = extractFloatsFromString(output); //window_utils function.
+  if(values.size() < 2){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; Images are incomparable.")});
+  }
+
+  float difference = values[1];
+  float similarity = 1 - difference;
+
+  std::string diff_file_name = tc.getPrefix() + "_" + std::to_string(autocheck_number) + "_difference.png";
+
+  std::cout << "About to compose the images." << std::endl;
+  std::string command2 = "compare " + actual_file + " " + expected_file + " -fuzz 10% -highlight-color red -lowlight-color none -compose src " + diff_file_name;
+  system(command2.c_str());
+  std::cout << "Composed." <<std::endl;
+
+  if(difference >= acceptable_threshold){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Your image does not match the instructor's.")});
+  }
+   else{
+    // MESSAGE_NONE, MESSAGE_FAILURE, MESSAGE_WARNING, MESSAGE_SUCCESS, MESSAGE_INFORMATION
+         return new TestResults(1.0, {std::make_pair(MESSAGE_INFORMATION, "SUCCESS: Your image was close enough to your instructor's!")});
+  }
+
+
+  //   return new TestResults(0.0, {"ERROR: File comparison failed."});
+
 }
 
 

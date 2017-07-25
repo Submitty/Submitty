@@ -109,11 +109,13 @@ public:
 
   static void reset_next_test_case_id() { next_test_case_id = 1; }
 
+  bool ShowExecuteLogfile(const std::string &execute_logfile) const;
+
 private:
 
   // -------------------------------
   // PRIVATE HELPER FUNCTIONS
-  TestResults* dispatch(const nlohmann::json& grader) const;
+  TestResults* dispatch(const nlohmann::json& grader, int autocheck_number) const;
   TestResults* custom_dispatch(const nlohmann::json& grader) const;
 
   // -------------------------------

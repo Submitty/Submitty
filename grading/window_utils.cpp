@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <vector>
 
+#include <set>
 #include <cstdlib>
 #include <string>
 #include <iostream>
@@ -21,7 +22,7 @@
 /**
 *Converts a string to a double with specified precision.
 */
-double stringToFloat(std::string const &str, int precision) {
+float stringToFloat(std::string const &str, int precision) {
   float my_float;
   //just use a string stream to get the double. 
   std::stringstream stream; 
@@ -35,10 +36,7 @@ double stringToFloat(std::string const &str, int precision) {
 std::vector<float> extractFloatsFromString(std::string input){
     std::vector<float> floats;
     //Anything (lazy) followed by either a number of the form #.##### or .#####
-    std::string myReg = 
-           ".*?(-?[0-9]*[1-9][0-9]*(\\.[0-9]+)?|-?0*\\.[0-9]*[1-9][0-9]*)(.*)";
-
-
+    std::string myReg = ".*?(-?[0-9]+(\\.[0-9]+)?|-?0*\\.[0-9]+)(.*)";
     std::regex regex(myReg);
     std::smatch match;
     int i = 0;
@@ -47,7 +45,6 @@ std::vector<float> extractFloatsFromString(std::string input){
       //if we have matched, match 1 (group 1) is a float
       floats.push_back(stringToFloat(match[1].str(), 10));        
       input = match[3]; 
-      std::cout << floats[i] << std::endl;
       i++;
     }
     return floats;
@@ -57,6 +54,13 @@ std::vector<float> extractFloatsFromString(std::string input){
 *from a string. The values are returned in a vector.
 */
 std::vector<int> extractIntsFromString(std::string input){
+
+    if (input == "")
+    {
+      std::vector<int> empty;
+      return empty;
+    }
+
     std::vector<int> ints;
     //The regex below is of the form:
     //anything (lazy), followed by a 12 digit number (with or without negative 
@@ -75,7 +79,20 @@ std::vector<int> extractIntsFromString(std::string input){
     return ints;
 }
 
+std::vector<int> getPidsAssociatedWithPid(int pid)
+{
+  std::string pidQuery = "pgrep -P ";
+  pidQuery +=  std::to_string(pid);
+  std::string children = output_of_system_command(pidQuery.c_str());
+  std::vector<int> ints = extractIntsFromString(children);
 
+  std::cout << "The pids associated with " << pid << " are: (there are " << ints.size() << ") " << std::endl;
+  for(int i = 0; i < ints.size(); i++) 
+  {
+    std::cout << "\t" << ints[i] << std::endl;
+  }
+  return ints;
+}
 
 /**
 * Given a pid, this function finds any windows directly belonging to it. 
@@ -101,21 +118,7 @@ std::vector<std::string> getWindowNameAssociatedWithPid(int pid)
   * which just has some of the commands needed to exend the program in that 
   * direction.
   */
-  // std::string pidQuery = "pgrep -P ";
-  // pidQuery +=  std::to_string(pid);
-  // std::string children = output_of_system_command(pidQuery.c_str());
-  // // std::cout << "Pids associated with child " << pid << ": " << children 
-            //<< std::endl;
-  // std::vector<int> ints = extractIntsFromString(children);
-  // for(int i = 0; i < ints.size(); i++) 
-  // {
-  //   std::string pidQuery = "pgrep -P ";
-  //   pidQuery +=  ints[i];
-  //   children = output_of_system_command(pidQuery.c_str());
-  //   std::cout << "pids associated with " << ints[i] << ": " << children 
-            //<< std::endl;
-  // }
-
+  getPidsAssociatedWithPid(pid);
   //This vector will contain any windows associated with our child's pid.
   std::vector<std::string> associatedWindows; 
   //returns list of active windows with pid.
@@ -201,6 +204,53 @@ std::vector<int> getWindowData(std::string data_string,
   }  
 }
 
+std::set<std::string> snapshotOfActiveWindows()
+{
+  std::set<std::string> activeWindowSet; 
+  //returns list of active windows with pid.
+  //Example wmctrl -lp output (labels added:) 
+  //window id, desktop num, pid, pc name, window title
+  //0x0220000b  0 7924   mypc mywindow
+  std::string activeWindows = output_of_system_command("wmctrl -lp"); 
+  //We put the list of active windows into a stream so we can iterate over it.
+  std::istringstream stream(activeWindows); 
+  std::string window;    
+  std::smatch match;
+  //for every open window
+  while (std::getline(stream, window)) {    
+    //remove everthing before one or more spaces or tabs. 
+    //(view example output above)
+    std::string myReg = "(.+?)[ \\t]+(.*)"; 
+    std::regex regex(myReg);
+    //remove the first column. (hex window id)
+    if(std::regex_match(window, match, regex)){ 
+      window = match[2];
+      //remove the second column. (desktop number)
+      if(std::regex_match(window, match, regex)){ 
+        window = match[2];
+      }
+      else{
+        continue;
+      }
+    }
+    else{
+      continue;
+    }
+    if(std::regex_match(window, match, regex)){ 
+      //we now have the pid of the current window
+      window = match[2]; //otherwise, match2 has our the last 2 columns
+    }
+    else{
+      continue;
+    }
+    //We can get the final column (window name) and push it to our vec.
+    if(std::regex_match(window, match, regex)){                                                 
+      activeWindowSet.insert(match[2]);    
+    }
+  }
+  return activeWindowSet; //return our list of associated windows
+}
+
 /**
 * Using the child pid, this function queries to see which window names are 
 * associated with it and uses the first of these to set the window_name 
@@ -208,19 +258,44 @@ std::vector<int> getWindowData(std::string data_string,
 * returned we just use the first one (we don't currently support multi-window 
 * programs.) If none are returned, we fail to set the window_name variable. 
 */
-void initializeWindow(std::string& window_name, int pid){
+void initializeWindow(std::string& window_name, int pid, std::set<std::string>& active_windows){
   //get the window names associated with our pid.
-  std::vector<std::string> windows = getWindowNameAssociatedWithPid(pid); 
-  //if none exist, do not set the window_name variable                                                                                
-  if(windows.size() == 0){ 
-    std::cout << "Initialization failed..." << std::endl;
+  // std::vector<std::string> windows = getWindowNameAssociatedWithPid(pid); 
+  
+  std::set<std::string> current_windows = snapshotOfActiveWindows();
+  // std::vector<std::string> candidates;
+
+  std::set<std::string>::iterator it;
+  for (it = current_windows.begin(); it != current_windows.end(); ++it)
+  {
+    if(active_windows.find(*it) == active_windows.end())
+    {
+      window_name = *it;
+      break;
+    }
+  }
+
+  if(window_name != "")
+  {
+    std::cout << "We found the window " << window_name << std::endl;
     return;
   }
-  else{
-    //if a window exists, default to using the first entry in the vector. 
-    std::cout << "We found the window " << windows[0] << std::endl;
-    window_name = windows[0];
+  else
+  {
+    return; 
   }
+
+  //Code left on purpose; could be useful in future development
+  // //if none exist, do not set the window_name variable                                                                                
+  // if(windows.size() == 0){ 
+  //   std::cout << "Initialization failed..." << std::endl;
+  //   return;
+  // }
+  // else{
+  //   //if a window exists, default to using the first entry in the vector. 
+  //   std::cout << "We found the window " << windows[0] << std::endl;
+  //   window_name = windows[0];
+  // }
 }
 
 /**
@@ -359,11 +434,17 @@ void click(std::string window_name, int button){
 /**
 * This function moves the mouse to moved_mouse_x, moved_mouse_y, clamping 
 * between x_start x_end and y_start y_end.
+* NOTE: EXPECTS MOVED VARIALBES ALREADY IN WINDOW COORDINATES
+* This is done in the takeAction function
 */
 void mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, 
-                               int x_start, int x_end, int y_start, int y_end){
-  clamp(moved_mouse_x, x_start, x_end); //don't move outside of the window.
-  clamp(moved_mouse_y, y_start, y_end);
+                 int x_start, int x_end, int y_start, int y_end, bool no_clamp){
+
+  if(!no_clamp)
+  {
+    clamp(moved_mouse_x, x_start, x_end); //don't move outside of the window.
+    clamp(moved_mouse_y, y_start, y_end);
+  }
   //only move the mouse if the window exists. (get focus and mousemove.)
   if(windowExists(window_name)){
     std::string command = "wmctrl -R " + window_name + 
@@ -570,7 +651,8 @@ void clickAndDragDelta(std::string window_name, std::string command){
     int curr_y = mouse_y;                                              
     int moved_mouse_x, moved_mouse_y;
     //reset the mouse to the start location.
-    mouse_move(window_name, mouse_x, mouse_y, x_start, x_end, y_start, y_end); 
+    mouse_move(window_name, mouse_x, mouse_y, x_start, x_end, y_start, y_end,
+                                                                        false); 
     //determine how far we've come.
     float fraction_of_distance_remaining = remaining_distance_needed 
                                             / total_distance_needed; 
@@ -658,7 +740,7 @@ void clickAndDragDelta(std::string window_name, std::string command){
                                           << " distance left " << std::endl;
     mouseDown(window_name,mouse_button); //click
     mouse_move(window_name, moved_mouse_x, moved_mouse_y,x_start, x_end, //drag
-                                                            y_start, y_end); 
+                                                        y_start, y_end, false); 
     mouseUp(window_name,mouse_button); //release
   } //end loop.
 }
@@ -695,7 +777,7 @@ void clickAndDragAbsolute(std::string window_name, std::string command){
     clamp(start_x_position, x_start, x_end); 
     clamp(start_y_position, y_start, y_end);
     mouse_move(window_name, start_x_position, start_y_position,x_start, x_end, 
-                                                               y_start, y_end); 
+                                                        y_start, y_end, false); 
   }
   else{
     //If there's no start pos, the first two indices of the vector are the end.
@@ -710,7 +792,7 @@ void clickAndDragAbsolute(std::string window_name, std::string command){
   //These functions won't do anything if the window doesn't exist. 
   mouseDown(window_name,mouse_button); 
   mouse_move(window_name, end_x_position, end_y_position,x_start, x_end, 
-                                                          y_start, y_end);
+                                                  y_start, y_end, false);
   mouseUp(window_name,mouse_button);  
 }
 
@@ -897,15 +979,22 @@ void takeAction(const std::vector<std::string>& actions, int& actions_taken,
   }
   //MOUSE MOVE
   else if(actions[actions_taken].find("move mouse") != std::string::npos || 
-          actions[actions_taken].find("move mouse to") != std::string::npos){ 
-    std::vector<int> coordinates=extractIntsFromString(actions[actions_taken]);
-    if(coordinates.size() >= 2){
+          actions[actions_taken].find("mouse move") != std::string::npos){
+      bool no_clamp = false;
+      if(actions[actions_taken].find("no clamp") != std::string::npos){
+        no_clamp = true;
+      }
+      
+      std::vector<int> coordinates=extractIntsFromString(actions[actions_taken]);
+      if(coordinates.size() >= 2){
       int height, width, x_start, x_end, y_start, y_end;
       bool success = populateWindowData(window_name, height, width, x_start, 
                                                         x_end, y_start, y_end);
       if(success){
-        mouse_move(window_name, coordinates[0], coordinates[1], x_start, x_end,
-                                                               y_start, y_end);
+          int moved_x = x_start + coordinates[0];
+          int moved_y = y_start + coordinates[1];
+          mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, 
+                                                            y_end, no_clamp);
       }
       else{
         std::cout << "No mouse move due to unsuccessful data population."
