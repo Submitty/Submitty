@@ -64,16 +64,23 @@ HTML;
 HTML;
         if ($this->core->getUser()->accessAdmin()) {
             $students = $this->core->getQueries()->getAllUsers();
-            $students_without = $this->core->getQueries()->getAllUsersWithoutSubmissions("registration_section",$gradeable->getId());
             $student_ids = array();
-            $student_without_ids = array();
-
             foreach ($students as $student) {
                 $student_ids[] = $student->getId();
+            }
+
+            $students_without = array();
+            $student_without_ids = array();
+            $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
+            foreach ($gradeables as $g) {
+                if ($g->getActiveVersion() == 0) {
+                    $students_without[] = $g->getUser();
+                }
             }
             foreach ($students_without as $student) {
                 $student_without_ids[] = $student->getId();
             }
+
             $student_ids = json_encode($student_ids);
             $student_without_ids = json_encode($student_without_ids);
             $return .= <<<HTML
@@ -115,8 +122,6 @@ HTML;
             var cookie = document.cookie;
             student_ids = $student_ids;
             student_without_ids = $student_without_ids;
-            console.log(student_ids);
-            console.log(student_without_ids);
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
@@ -492,18 +497,13 @@ HTML;
                         $clean_timestamp = str_replace("_", " ", $timestamp);
                         $path = $details["path"];
                         if (strpos($filename, "cover") == false) {
-                            // add each file that is not a cover to count_array 
-                            // each entry is in format timestamp/filename
-                            // save each filename so that the popout is the full pdf
-                            $count_array[$count] = $timestamp."/".$filename;
-                            $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
-                            $filename_full = $filename;
                             continue;
                         }
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
                         $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
                         $path_full = str_replace("_cover.pdf", ".pdf", $path);
                         $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full;
+                        $count_array[$count] = $timestamp."/".$filename_full;
                         $return .= <<<HTML
             <tr class="tr tr-vertically-centered">
                 <td>{$count}</td>

@@ -67,7 +67,7 @@ try:
     # check that all pages are divisible
     for filename in os.listdir(bulk_path):
 
-        total_pages = subprocess.check_output("pdftk " + filename + " dump_data | awk '/NumberOfPages/{print $2}'", shell=True)
+        total_pages = subprocess.check_output("pdftk \"" + filename + "\" dump_data | awk '/NumberOfPages/{print $2}'", shell=True)
         total_pages = int(total_pages.decode('utf-8').rstrip())
         
         if (total_pages % num != 0):
@@ -83,8 +83,8 @@ try:
         for j in range(0,div):
             out_pdf = filename[:-4] + "_" + str(j) + ".pdf"
             out_cover_pdf = filename[:-4] + "_" + str(j) + "_cover.pdf"
-            subprocess.call("pdftk {in_pdf} cat {start}-{stop} output {out_pdf}".format(in_pdf=filename,start=j*num+1,stop=(j+1)*num,out_pdf=out_pdf),shell=True)
-            subprocess.call("pdftk {in_pdf} cat {start} output {out_pdf}".format(in_pdf=filename,start=j*num+1,out_pdf=out_cover_pdf),shell=True)
+            subprocess.call("pdftk \"{in_pdf}\" cat {start}-{stop} output \"{out_pdf}\"".format(in_pdf=filename,start=j*num+1,stop=(j+1)*num,out_pdf=out_pdf),shell=True)
+            subprocess.call("pdftk \"{in_pdf}\" cat {start} output \"{out_pdf}\"".format(in_pdf=filename,start=j*num+1,out_pdf=out_cover_pdf),shell=True)
 
     # get rid of unnecessary copies
     for filename in os.listdir(bulk_path):

@@ -58,27 +58,6 @@ ORDER BY u.{$section_key}, u.user_id");
         return $return;
     }
 
-    public function getAllUsersWithoutSubmissions($section_key="registration_section",$g_id=null) {
-        $keys = array("registration_section", "rotating_section");
-        $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
-        $this->course_db->query("
-SELECT u.*, sr.grading_registration_sections
-FROM users u
-LEFT JOIN (
-  SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-  FROM grading_registration
-  GROUP BY user_id
-) as sr ON u.user_id=sr.user_id
-ORDER BY u.{$section_key}, u.user_id");
-        $return = array();
-        foreach ($this->course_db->rows() as $row) {
-            if ($this->getGradeable($g_id, $row['user_id'])->getActiveVersion() == "") {
-                $return[] = new User($this->core, $row);
-            }
-        }
-        return $return;
-    }
-
     public function getAllGraders() {
         $this->course_db->query("
 SELECT u.*, sr.grading_registration_sections
