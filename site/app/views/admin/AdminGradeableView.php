@@ -1082,7 +1082,6 @@ function createCrossBrowserJSDate(val){
         if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
             $('#rubric_questions').hide();
             $('#grading_questions').hide();
-            ///// clear the date
         }
 
         if ($('input:radio[name="student_download"]:checked').attr('value') === 'false') {
@@ -1126,7 +1125,6 @@ function createCrossBrowserJSDate(val){
                     $('#grades_released_compare_date').html('TA Grading Open Date');
                 } else {
                     $('#grades_released_compare_date').html('Due Date');
-                    ///// clear date
                 }
             }
         });
@@ -1215,7 +1213,6 @@ function createCrossBrowserJSDate(val){
             if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
                 $('#rubric_questions').hide();
                 $('#grading_questions').hide();
-                // clear the date
             }
         }
         else if ($('#radio_checkpoints').is(':checked')){
@@ -1726,7 +1723,7 @@ $('#gradeable-form').on('submit', function(e){
         var bad_max_score = false;
         var check1 = $('#radio_electronic_file').is(':checked');
         var check2 = $('#radio_checkpoints').is(':checked');
-        var check3 = $('#radio_numeric').is(':checked');
+        var check3 = $('#radio_numeric')..is(':checked');
         var checkRegister = $('#registration-section').is(':checked');
         var checkRotate = $('#rotating-section').is(':checked');
         var all_gradeable_ids = $js_gradeables_array;
