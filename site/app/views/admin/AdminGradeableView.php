@@ -36,6 +36,7 @@ class AdminGradeableView extends AbstractView {
         $team_no_checked;
         $peer_yes_checked = false;
         $peer_no_checked = true;
+        $peer_grade_set = 3;
         $TA_grade_open_date = date('m/d/Y 23:59:59', strtotime( '+10 days' ));
         $TA_grade_release_date = date('m/d/Y 23:59:59', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
@@ -97,6 +98,7 @@ class AdminGradeableView extends AbstractView {
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
+                $peer_grade_set = $data[3]['eg_peer_grade_set'];
                 $old_questions = $data[5];
                 $num_old_questions = count($old_questions);                
                 $component_ids = array();
@@ -126,6 +128,7 @@ class AdminGradeableView extends AbstractView {
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
+                $peer_grade_set = $data[3]['eg_peer_grade_set'];
                 $old_questions = $data[5];
                 $num_old_questions = count($old_questions);                
                 $component_ids = array();
@@ -399,10 +402,10 @@ HTML;
  /> Yes
                 <input type="radio" id="peer_no_radio" name="peer_grading" value="no" class="peer_no"
 HTML;
-                if((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; $display_peer_checkboxes='style="display:none"'; }
+                if ((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; $display_peer_checkboxes='style="display:none"'; }
         $html_output .= <<<HTML
  /> No <br />
-                <div class="peer_input" style="display:none;">How many people should each person grade? <input style='width: 50px' type='text' name="peer_grade_set" value="3" class='int_val' /></div>
+                <div class="peer_input" style="display:none;">How many people should each person grade? <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' /></div>
                 Point precision (for TA grading): 
                 <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
                 <br /> 
@@ -1092,14 +1095,6 @@ function createCrossBrowserJSDate(val){
 
         if ($('input[name=team_assignment]').is(':checked')){
             $('input[name=team_assignment]').each(function(){
-                if(!($(this).is(':checked')) && ({$edit})){
-                    $(this).attr("disabled",true);
-                }
-            });
-        }
-        
-        if ($('input[name=peer_grading]').is(':checked')){
-            $('input[name=peer_grading]').each(function(){
                 if(!($(this).is(':checked')) && ({$edit})){
                     $(this).attr("disabled",true);
                 }
