@@ -3,20 +3,11 @@
         {
             "autochecks": [
                 {
-                    "description": "Loop Depth",
-                    "messages": [
-                        {
-                            "message": "ERROR!  Could not open student file: 'STDOUT_1.txt'",
-                            "type": "failure"
-                        },
-                        {
-                            "message": "Must have less than four nested loops",
-                            "type": "failure"
-                        }
-                    ]
+                    "actual_file": "test01_STDOUT.txt",
+                    "description": "Loop Depth"
                 }
             ],
-            "points_awarded": 0,
+            "points_awarded": 10,
             "test_name": "Test 1 Python - Determine Loop Depth"
         },
         {

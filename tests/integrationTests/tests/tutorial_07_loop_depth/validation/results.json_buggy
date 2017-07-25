@@ -3,12 +3,9 @@
         {
             "autochecks": [
                 {
+                    "actual_file": "test01_STDOUT.txt",
                     "description": "Loop Depth",
                     "messages": [
-                        {
-                            "message": "ERROR!  Could not open student file: 'STDOUT_1.txt'",
-                            "type": "failure"
-                        },
                         {
                             "message": "Must have less than four nested loops",
                             "type": "failure"
