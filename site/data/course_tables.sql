@@ -122,8 +122,8 @@ CREATE TABLE electronic_gradeable (
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
-    eg_submission_open_date timestamp(6) without time zone NOT NULL,
-    eg_submission_due_date timestamp(6) without time zone NOT NULL,
+    eg_submission_open_date timestamp(6) with time zone NOT NULL,
+    eg_submission_due_date timestamp(6) with time zone NOT NULL,
     eg_late_days integer DEFAULT (-1) NOT NULL,
     eg_precision numeric NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
@@ -143,7 +143,7 @@ CREATE TABLE electronic_gradeable_data (
     autograding_non_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
     autograding_hidden_non_extra_credit numeric DEFAULT 0 NOT NULL,
     autograding_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
-    submission_time timestamp(6) without time zone NOT NULL,
+    submission_time timestamp(6) with time zone NOT NULL,
     CONSTRAINT egd_user_team_id_check CHECK (user_id IS NOT NULL OR team_id IS NOT NULL),
     CONSTRAINT egd_g_user_team_id_unique UNIQUE (g_id, user_id, team_id, g_version)
 );
@@ -176,10 +176,10 @@ CREATE TABLE gradeable (
     g_peer_grading boolean NOT NULL,
     g_gradeable_type integer NOT NULL,
     g_grade_by_registration boolean NOT NULL,
-    g_ta_view_start_date timestamp(6) without time zone NOT NULL,
-    g_grade_start_date timestamp(6) without time zone NOT NULL,
-    g_grade_released_date timestamp(6) without time zone NOT NULL,
-    g_grade_locked_date timestamp(6) without time zone,
+    g_ta_view_start_date timestamp(6) with time zone NOT NULL,
+    g_grade_start_date timestamp(6) with time zone NOT NULL,
+    g_grade_released_date timestamp(6) with time zone NOT NULL,
+    g_grade_locked_date timestamp(6) with time zone,
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date)),
@@ -217,7 +217,7 @@ CREATE TABLE gradeable_component_data (
     gcd_component_comment character varying NOT NULL,
     gcd_grader_id character varying(255) NOT NULL,
     gcd_graded_version integer,
-    gcd_grade_time timestamp(6) without time zone NOT NULL,
+    gcd_grade_time timestamp(6) with time zone NOT NULL,
     CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id))
 );
 
@@ -250,7 +250,7 @@ CREATE TABLE gradeable_data (
     g_id character varying(255) NOT NULL,
     gd_user_id character varying(255) NOT NULL,
     gd_overall_comment character varying NOT NULL,
-    gd_user_viewed_date timestamp(6) without time zone DEFAULT NULL
+    gd_user_viewed_date timestamp(6) with time zone DEFAULT NULL
 );
 
 
@@ -312,7 +312,7 @@ CREATE TABLE late_day_exceptions (
 CREATE TABLE late_days (
     user_id character varying(255) NOT NULL,
     allowed_late_days integer NOT NULL,
-    since_timestamp timestamp without time zone NOT NULL
+    since_timestamp timestamp with time zone NOT NULL
 );
 
 
@@ -342,7 +342,7 @@ CREATE TABLE sessions (
     session_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
-    session_expires timestamp without time zone NOT NULL
+    session_expires timestamp with time zone NOT NULL
 );
 
 
@@ -361,7 +361,7 @@ CREATE TABLE users (
     registration_section integer,
     rotating_section integer,
     manual_registration boolean DEFAULT false,
-    last_updated TIMESTAMP WITHOUT time zone,
+    last_updated TIMESTAMP WITH time zone,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 0) AND (user_group <= 4)))
 );
 
