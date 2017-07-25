@@ -109,6 +109,8 @@ public:
 
   static void reset_next_test_case_id() { next_test_case_id = 1; }
 
+  bool ShowExecuteLogfile(const std::string &execute_logfile) const;
+
 private:
 
   // -------------------------------
