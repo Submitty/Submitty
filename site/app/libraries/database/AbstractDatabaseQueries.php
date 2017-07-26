@@ -406,6 +406,20 @@ abstract class AbstractDatabaseQueries {
     abstract public function getTeamsByGradeableId($g_id);
 
     /**
+     * Return array of counts of teams/users without team/graded components
+     * corresponding to each registration/rotating section
+     * @param string $g_id
+     * @param rray(int) $sections
+     * @param string $section_key
+     * @return array(int) $return
+     */
+    abstract public function getTotalTeamCountByGradingSections($g_id, $sections, $section_key);
+
+    abstract public function getUsersWithoutTeamByGradingSections($g_id, $sections, $section_key);
+
+    abstract public function getGradedComponentsCountByTeamGradingSections($g_id, $sections, $section_key);
+
+    /**
      * Return an array of users with late days
      */
     abstract public function getUsersWithLateDays();
