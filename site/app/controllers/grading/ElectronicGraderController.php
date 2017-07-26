@@ -335,7 +335,7 @@ class ElectronicGraderController extends AbstractController {
                     $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                     $mark->saveData($gradeable->getGdId(), $component->getId());
                 }
-                $response = array('status' => $debug);
+                $response = array('status' => $_POST['marks']);
                 $this->core->getOutput()->renderJson($response);
                 return $response;
             }

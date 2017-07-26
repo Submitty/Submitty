@@ -639,7 +639,7 @@ HTML;
 HTML;
             }
             $return .= <<<HTML
-            <span onclick=""> <i id="icon-{$c}" data-question_id="{$question->getId()}" class="fa fa-window-maximize" style="visibility: visible;"></i> </span> {$note} 
+            <span onclick=""> <i id="icon-{$c}" data-question_id="{$question->getId()}" class="fa fa-window-maximize" style="visibility: visible;"></i> </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());
@@ -648,7 +648,7 @@ HTML;
         
             }
             $return .= <<<HTML
-                        {$student_note}
+                        <span id="student_note-{$c}" style="display: none;">{$student_note}</span>
                     </td>
                 </tr>
 HTML;
@@ -673,7 +673,7 @@ HTML;
                         $first_text = false;
                     }
                     else {
-                        $initial_text .= "\n* " . $mark->getNote();
+                        $initial_text .= "<br>* " . $mark->getNote();
                     }
                 }
             }
@@ -683,7 +683,7 @@ HTML;
                     $first_text = false;
                 }
                 else {
-                    $initial_text .= "\n* " . $question->getComment();
+                    $initial_text .= "<br>* " . $question->getComment();
                 }
             }
             $question_points += $question->getScore();
@@ -704,12 +704,11 @@ HTML;
             $return .= <<<HTML
                 <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
-                        <input readonly type="text" class="grades" id="grade-{$c}" name="grade-{$c}" value="{$question_points}" onchange="validateInput('grade-{$c}', '{$question->getMaxValue()}', {$precision}); calculatePercentageTotal();" data-max_points="{$question->getMaxValue()}" style="width:50px; resize:none;" {$disabled}></textarea>
-                        <strong> / {$question->getMaxValue()}</strong>
+                        <strong><span id="grade-{$c}" name="grade-{$c}" data-max_points="{$question->getMaxValue()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
-                            <textarea readonly id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$initial_text}</textarea>
+                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:80px;  float:left;">{$initial_text}</span>
                         </div>
                     </td>
                 </tr>
@@ -739,7 +738,7 @@ HTML;
                 $icon_mark = ($mark->getHasMark() === true) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
                 <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
-                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
+                    <td colspan="1" style="{$background}; text-align: center; width: 7%;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
                         <span onclick="selectMark(this);"> <i class="fa {$icon_mark}" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}">
@@ -953,10 +952,14 @@ HTML;
             var current = document.getElementById('extra-' + x);
             var current_summary = document.getElementById('summary-' + x);
             var icon = document.getElementById('icon-' + x);
+            var ta_note = document.getElementById('ta_note-' + x);
+            var student_note = document.getElementById('student_note-' + x);
             if (x === row_num) {
                 if (current.style.display === 'none') {
                     current.style.display = '';
                     current_summary.style.display = 'none';
+                    ta_note.style.display = '';
+                    student_note.style.display = '';
                     if (icon.classList.contains('fa-window-maximize'))
                     {
                         icon.classList.remove('fa-window-maximize');
@@ -967,6 +970,8 @@ HTML;
                 } else {
                     current.style.display = 'none';
                     current_summary.style.display = '';
+                    ta_note.style.display = 'none';
+                    student_note.style.display = 'none';
                     if (icon.classList.contains('fa-window-close-o'))
                     {
                         icon.classList.remove('fa-window-close-o');
@@ -978,6 +983,8 @@ HTML;
             } else {
                 current.style.display = 'none';
                 current_summary.style.display = '';
+                ta_note.style.display = 'none';
+                student_note.style.display = 'none';
                 if (icon.classList.contains('fa-window-close-o'))
                 {
                     icon.classList.remove('fa-window-close-o');
@@ -1070,7 +1077,7 @@ HTML;
                         new_text += "* " + mark_data[i].note;
                         first_text = false;
                     } else {
-                        new_text += "\\n* " + mark_data[i].note;
+                        new_text += "\<br>* " + mark_data[i].note;
                     }
                 }                
             }
@@ -1081,7 +1088,7 @@ HTML;
                     new_text += "* " + custom_message;
                     first_text = false;
                 } else {
-                    new_text += "\\n* " + custom_message;
+                    new_text += "\<br>* " + custom_message;
                 }
             }
             
@@ -1091,8 +1098,8 @@ HTML;
             } else {
                 if (current_points > max_points) current_points = max_points;
             }
-            current_question_num.val(current_points);
-            current_question_text.val(new_text);
+            current_question_num[0].innerHTML = current_points;
+            current_question_text[0].innerHTML = new_text;
 
             calculatePercentageTotal();
             $.ajax({

@@ -59,4 +59,16 @@ class GradeableComponentMark extends AbstractModel {
             }
         }
     }
+
+    public function setNote($temp_note) {
+        $this->note = urlencode($temp_note);
+    }
+
+    public function getNoteNoDecode(){
+        return ($this->note);
+    }
+
+    public function getNote() {
+        return(urldecode($this->note));
+    }
 }
