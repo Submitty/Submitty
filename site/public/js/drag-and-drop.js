@@ -379,6 +379,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
 function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
 
     url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id});
+    return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
 
     var formData = new FormData();
 
@@ -411,7 +412,12 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
                     return;
                 }
                 else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    if (data['message'] == "You do not have access to that page.") {
+                        window.location.href = return_url;
+                    }
+                    else {
+                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    }
                 }
             }
             catch (e) {
@@ -539,7 +545,12 @@ function handleBulk(gradeable_id, num_pages) {
                     window.location.href = return_url;
                 }
                 else {
-                    alert("ERROR! \n\n" + data['message']);
+                    if (data['message'] == "You do not have access to that page.") {
+                        window.location.href = return_url;
+                    }
+                    else {
+                        alert("ERROR! \n\n" + data['message']);
+                    }
                 }
             }
             catch (e) {
@@ -652,7 +663,12 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                     window.location.href = return_url;
                 }
                 else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    if (data['message'] == "You do not have access to that page.") {
+                        window.location.href = return_url;
+                    }
+                    else {
+                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    }
                 }
             }
             catch (e) {

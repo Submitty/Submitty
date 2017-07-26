@@ -477,8 +477,8 @@ HTML;
             <tr>
                 <td width="3%"></td>
                 <td width="8%">Timestamp</td>
-                <td width="55%">PDF preview</td>
-                <td width="3%"></td>
+                <td width="53%">PDF preview</td>
+                <td width="5%">Full PDF</td>
                 <td width="15%">User ID</td>
                 <td width="8%">Submit</td>
                 <td width="8%">Delete</td>
