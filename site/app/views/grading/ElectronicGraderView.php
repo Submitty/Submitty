@@ -656,6 +656,10 @@ HTML;
             $min_val = (intval($question->getMaxValue()) > 0) ? 0 : intval($question->getMaxValue());
             $max_val = (intval($question->getMaxValue()) > 0) ? intval($question->getMaxValue()) : 0;
 
+
+            //gets the initial point value and text
+            $initial_text = "";
+            $first_text = true;
             if ($type === 0) {
                 $question_points = $question->getMaxValue();
             } else {
@@ -664,6 +668,22 @@ HTML;
             foreach ($question->getMarks() as $mark) {
                 if($mark->getHasMark() === true) {
                     $question_points += $mark->getPoints();
+                    if ($first_text === true) {
+                        $initial_text .= "* " . $mark->getNote();
+                        $first_text = false;
+                    }
+                    else {
+                        $initial_text .= "\n* " . $mark->getNote();
+                    }
+                }
+            }
+            if($question->getComment() != "") {
+                if ($first_text === true) {
+                    $initial_text .= "* " . $question->getComment();
+                    $first_text = false;
+                }
+                else {
+                    $initial_text .= "\n* " . $question->getComment();
                 }
             }
             $question_points += $question->getScore();
@@ -689,7 +709,7 @@ HTML;
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
-                            <textarea readonly id="rubric-textarea-{$c}" name="comment-{$question->getOrder()}" rows="4" style="width:95%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}></textarea>
+                            <textarea readonly id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$initial_text}</textarea>
                         </div>
                     </td>
                 </tr>
@@ -1034,24 +1054,45 @@ HTML;
             current_row = $('#mark_custom_id-'+num);
             var custom_points = current_row.find('input[name=mark_points_custom_'+num+']').val();
             var custom_message = current_row.find('textarea[name=mark_text_custom_'+num+']').val();
-            alert (JSON.stringify(mark_data));
 
-            //updates the total number of points
-            var current_question = $('#grade-' + num);
-            var max_points = current_question[0].dataset.max_points;
+            //updates the total number of points and text
+            var current_question_num = $('#grade-' + num);
+            var current_question_text = $('#rubric-textarea-' + num);
+            var max_points = current_question_num[0].dataset.max_points;
             var current_points = (type === 0) ? max_points : 0;
+            var new_text = "";
+            var first_text = true;
             current_points = parseFloat(current_points);
             for (var i = 0; i < arr_length; i++) {
                 if(mark_data[i].selected === true) {
                     current_points += parseFloat(mark_data[i].points);
+                    if(first_text === true) {
+                        new_text += "* " + mark_data[i].note;
+                        first_text = false;
+                    } else {
+                        new_text += "\\n* " + mark_data[i].note;
+                    }
                 }                
             }
+
+            current_points += parseFloat(custom_points);
+            if(custom_message != "") {
+                if(first_text === true) {
+                    new_text += "* " + custom_message;
+                    first_text = false;
+                } else {
+                    new_text += "\\n* " + custom_message;
+                }
+            }
+            
+
             if (type === 0) {
                 if (current_points < 0) current_points = 0;
             } else {
                 if (current_points > max_points) current_points = max_points;
             }
-            current_question.val(current_points);
+            current_question_num.val(current_points);
+            current_question_text.val(new_text);
 
             calculatePercentageTotal();
             $.ajax({

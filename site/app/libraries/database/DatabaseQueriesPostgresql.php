@@ -423,7 +423,6 @@ LEFT JOIN (
           GROUP BY gc_id, gd_id, gd_id
         ) as gcmd
     ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id
-    WHERE array_gcm_mark IS NOT NULL
     ) AS gcd
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id 
     GROUP BY gcd.gd_id
