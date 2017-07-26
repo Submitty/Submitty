@@ -1034,7 +1034,7 @@ HTML;
             current_row = $('#mark_custom_id-'+num);
             var custom_points = current_row.find('input[name=mark_points_custom_'+num+']').val();
             var custom_message = current_row.find('textarea[name=mark_text_custom_'+num+']').val();
-            //alert (JSON.stringify(mark_data));
+            alert (JSON.stringify(mark_data));
 
             //updates the total number of points
             var current_question = $('#grade-' + num);
@@ -1069,7 +1069,7 @@ HTML;
                 },
                 success: function(data) {
                     console.log("success");
-                    //alert(data);
+                    alert(data);
                 },
                 error: function() {
                     console.log("Something went wront with saving marks...");

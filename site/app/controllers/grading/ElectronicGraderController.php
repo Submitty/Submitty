@@ -310,7 +310,6 @@ class ElectronicGraderController extends AbstractController {
                 $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                 $component->setComment($_POST['custom_message']);
                 $component->setScore($_POST['custom_points']);
-                $debug = $component->getModified();
                 $component->saveData($gradeable->getGdId());
 
                 $index = 0;

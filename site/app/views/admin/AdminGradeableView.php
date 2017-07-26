@@ -102,7 +102,9 @@ class AdminGradeableView extends AbstractView {
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
-                $peer_grade_set = $data[3]['eg_peer_grade_set'];
+                if(isset($data[3]['eg_peer_grade_set'])){
+                    $peer_grade_set = $data[3]['eg_peer_grade_set'];
+                }
                 $old_questions = $data[5];
                 $num_old_questions = count($old_questions);                
                 $component_ids = array();
@@ -1782,7 +1784,7 @@ $('#gradeable-form').on('submit', function(e){
         </tr>');
         $("#rubric_add_deduct_" + newQ).before(' \
             <div id="deduct_id-'+newQ+'-0" name="deduct_'+newQ+'" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;"> \
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_'+newQ+'_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
             <textarea rows="1" placeholder="Comment" name="deduct_text_'+newQ+'_0" style="resize: none; width: 81.5%;">Sample Text</textarea> \
             <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \

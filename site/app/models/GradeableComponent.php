@@ -97,7 +97,6 @@ class GradeableComponent extends AbstractModel {
         $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
         $this->is_peer = isset($details['gc_is_peer']) ? $details['gc_is_peer']: false;
-        
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = $details['gcd_grader'];
@@ -132,7 +131,7 @@ class GradeableComponent extends AbstractModel {
             }
         }
 
-        if (isset($details['array_gcm_id'])) {
+        if (isset($details['array_gcm_id']) && $details['array_gcm_id'] !== null) {
             $this->has_marks = true;
             $mark_fields = array('gcm_id', 'gc_id', 'gcm_points',
                                     'gcm_note', 'gcm_order');
@@ -156,7 +155,7 @@ class GradeableComponent extends AbstractModel {
                         }
                     }
                 }
-                
+
                 $this->marks[$mark_details['gcm_order']] = $this->core->loadModel(GradeableComponentMark::class, $mark_details);
             }
 
@@ -180,10 +179,6 @@ class GradeableComponent extends AbstractModel {
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
             }
-        }
-
-        foreach ($this->marks as $mark) {
-            $mark->saveData($gd_id, $this->id);
         }
     }
 }
