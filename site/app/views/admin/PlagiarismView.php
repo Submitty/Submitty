@@ -9,7 +9,7 @@ class PlagiarismView extends AbstractView {
         $return .= <<<HTML
 <div class="content">
 HTML;
-    readFile("/var/local/submitty/courses/f17/development/plagiarism/var/local/submitty/courses/f17/development/submissions/cpp_cats/index.html");
+    readFile("/var/local/submitty/courses/f17/development/plagiarism/reports/var/local/submitty/courses/f17/development/submissions/cpp_cats/index.html");
         $return .= <<<HTML
 </div>
 HTML;
