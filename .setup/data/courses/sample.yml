@@ -16,11 +16,11 @@ gradeables:
   - gc_title: Question 2
     gc_max_value: 5
     gc_is_extra_credit: true
-  g_ta_view_start_date: 9995-12-31 23:59:59
-  eg_submission_open_date: 9996-12-31 23:59:59
-  eg_submission_due_date: 9997-12-31 23:59:59
-  g_grade_start_date: 9998-12-31 23:59:59
-  g_grade_released_date: 9999-12-31 23:59:59
+  g_ta_view_start_date: 9994-12-31 23:59:59
+  eg_submission_open_date: 9995-12-31 23:59:59
+  eg_submission_due_date: 9996-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
   g_bucket: homework
 
 - g_id: future_tas_homework
@@ -30,10 +30,10 @@ gradeables:
   - gc_title: Question 2
     gc_max_value: 5
     gc_is_extra_credit: true
-  eg_submission_due_date: 9997-12-31 23:59:59
-  eg_submission_open_date: 9996-12-31 23:59:59
-  g_grade_released_date: 9999-12-31 23:59:59
-  g_grade_start_date: 9998-12-31 23:59:59
+  eg_submission_due_date: 9996-12-31 23:59:59
+  eg_submission_open_date: 9995-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Future (TAs) Homework
   gradeable_config: python_simple_homework
@@ -45,10 +45,10 @@ gradeables:
   - gc_is_extra_credit: true
     gc_max_value: 5
     gc_title: Question 2
-  eg_submission_due_date: 9997-12-31 23:59:59
+  eg_submission_due_date: 9996-12-31 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_released_date: 9999-12-31 23:59:59
-  g_grade_start_date: 9998-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
   g_id: open_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Open Homework
@@ -63,8 +63,8 @@ gradeables:
     gc_title: Question 2
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_released_date: 9999-12-31 23:59:59
-  g_grade_start_date: 9998-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
   g_id: closed_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Closed Homework
@@ -79,7 +79,7 @@ gradeables:
     gc_title: Question 2
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
-  g_grade_released_date: 9999-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_id: grading_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -107,10 +107,10 @@ gradeables:
   - gc_title: Question 1
   - gc_is_extra_credit: true
     gc_title: Question 2
-  g_grade_released_date: 9999-12-31 23:59:59
-  g_grade_start_date: 9998-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
   g_id: future_no_tas_lab
-  g_ta_view_start_date: 9997-12-31 23:59:59
+  g_ta_view_start_date: 9996-12-31 23:59:59
   g_title: Future (No TAs) Lab
   g_type: 1
   g_bucket: lab
@@ -119,8 +119,8 @@ gradeables:
   - gc_title: Question 1
   - gc_is_extra_credit: true
     gc_title: Question 2
-  g_grade_released_date: 9999-12-31 23:59:59
-  g_grade_start_date: 9998-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
   g_id: future_tas_lab
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Future (TAs) Lab
@@ -131,7 +131,7 @@ gradeables:
   - gc_title: Question 1
   - gc_is_extra_credit: true
     gc_title: Question 2
-  g_grade_released_date: 9999-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_id: grading_lab
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -159,10 +159,10 @@ gradeables:
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
-  g_grade_released_date: 9999-12-31 23:59:59
-  g_grade_start_date: 9998-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
   g_id: future_no_tas_test
-  g_ta_view_start_date: 9997-12-31 23:59:59
+  g_ta_view_start_date: 9996-12-31 23:59:59
   g_title: Future (No TAs) Test
   g_type: 2
   g_bucket: test
@@ -175,8 +175,8 @@ gradeables:
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
-  g_grade_released_date: 9999-12-31 23:59:59
-  g_grade_start_date: 9998-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
   g_id: future_tas_test
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Future (TAs) Test
@@ -191,7 +191,7 @@ gradeables:
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
-  g_grade_released_date: 9999-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_id: grading_test
   g_ta_view_start_date: 1970-01-01 23:59:59
