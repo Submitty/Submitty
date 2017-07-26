@@ -4,13 +4,11 @@
             "autochecks": [
                 {
                     "actual_file": "test01_STDOUT.txt",
-                    "description": "STDOUT.txt",
-                    "difference_file": "test01_0_diff.json",
-                    "expected_file": "test_output/testassignment/fancy_hello_world.cpp"
+                    "description": "Loop Depth"
                 }
             ],
-            "points_awarded": 5,
-            "test_name": "Test 1 Reasonable Code Changes"
+            "points_awarded": 10,
+            "test_name": "Test 1 Python - Determine Loop Depth"
         },
         {
             "points_awarded": 0,

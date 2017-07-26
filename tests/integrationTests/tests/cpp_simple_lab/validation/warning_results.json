@@ -11,38 +11,12 @@
             "test_name": "Test 1 README"
         },
         {
-            "autochecks": [
-                {
-                    "actual_file": "test02_STDERR.txt",
-                    "description": "Compilation Errors and/or Warnings",
-                    "messages": [
-                        {
-                            "message": "ERROR: This file should be empty!",
-                            "type": "failure"
-                        }
-                    ]
-                }
-            ],
             "points_awarded": 3,
-            "test_name": "Test 2 Compilation",
-            "testcase_message": "Compilation Warning(s)."
+            "test_name": "Test 2 Compilation"
         },
         {
-            "autochecks": [
-                {
-                    "actual_file": "test03_STDERR.txt",
-                    "description": "Compilation Errors and/or Warnings",
-                    "messages": [
-                        {
-                            "message": "ERROR: This file should be empty!",
-                            "type": "failure"
-                        }
-                    ]
-                }
-            ],
             "points_awarded": 2,
-            "test_name": "Test 3 Dummy Compilation testing view_testcase_message",
-            "testcase_message": "Compilation Warning(s)."
+            "test_name": "Test 3 Dummy Compilation testing view_testcase_message"
         },
         {
             "autochecks": [

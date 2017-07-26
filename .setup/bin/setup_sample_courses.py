@@ -33,6 +33,7 @@ import time
 import tzlocal
 import os.path
 import sys
+import string
 
 
 # share a couple functions related to timezone
@@ -208,12 +209,8 @@ def main():
     os.system("rm /tmp/hwcron_cron_backup.txt")
     os.system("systemctl restart submitty_grading_scheduler")
 
-def generate_random_user_id(length):
-    id_base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    anon_id = ""
-    for i in range(length):
-        anon_id += random.choice(id_base)
-    return anon_id
+def generate_random_user_id(length=15):
+    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
 
 
 def generate_random_users(total, real_users):
@@ -250,7 +247,7 @@ def generate_random_users(total, real_users):
                 else:
                     user_id = user_id + "1"
             if anon_id in anon_ids:
-                anon_id = generate_random_user_id(15)
+                anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
                              "anon_id": anon_id,
                              "user_firstname": first_name,
@@ -1140,6 +1137,8 @@ class Gradeable(object):
                 self.is_repository = gradeable['eg_is_repository'] is True
             if self.is_repository and 'eg_subdirectory' in gradeable:
                 self.subdirectory = gradeable['eg_subdirectory']
+            if 'eg_peer_grading' in gradeable:
+                self.peer_grading = gradeable['eg_peer_grading'] is False
             if 'eg_use_ta_grading' in gradeable:
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
             if 'eg_late_days' in gradeable:
@@ -1191,7 +1190,6 @@ class Gradeable(object):
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
                      g_team_assignment=self.team_assignment, 
-                     g_peer_grading=self.peer_grading, 
                      g_gradeable_type=self.type,
                      g_grade_by_registration=self.grade_by_registration,
                      g_ta_view_start_date=self.ta_view_date,
@@ -1211,7 +1209,7 @@ class Gradeable(object):
                          eg_submission_due_date=self.submission_due_date,
                          eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
                          eg_use_ta_grading=self.use_ta_grading, eg_config_path=self.config_path,
-                         eg_late_days=self.late_days, eg_precision=self.precision)
+                         eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
 
         for component in self.components:
             component.create(self.id, conn, component_table)
