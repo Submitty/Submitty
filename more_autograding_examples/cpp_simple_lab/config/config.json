@@ -140,6 +140,10 @@
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDERR.txt",
                     "expected_file" : "output_7B.txt"
+                },
+                {
+                    "actual_file" : "execute_logfile.txt",
+                    "show_actual" : "never"
                 }
             ]
         }

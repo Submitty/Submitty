@@ -23,7 +23,7 @@ class GradeableComponentMark extends AbstractModel {
     protected $note = "";
     /** @property @var bool This person earned this mark*/
     protected $has_mark = false;
-
+  
     /** @property @var bool If the mark is diffirent from the one in the database*/
     protected $has_mark_modifed = false;
 
@@ -58,10 +58,5 @@ class GradeableComponentMark extends AbstractModel {
         		$this->core->getQueries()->deleteGradeableComponentMarkData($gd_id, $gc_id, $this);
         	}
         }
-    }
-
-    public function setHasMark($new_has_mark) {
-        $this->has_mark_modifed = ($new_has_mark === $this->has_mark) ? false : true;
-        $this->has_mark = filter_var($new_has_mark, FILTER_VALIDATE_BOOLEAN);
     }
 }

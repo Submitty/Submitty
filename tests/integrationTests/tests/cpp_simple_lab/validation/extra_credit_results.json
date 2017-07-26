@@ -113,10 +113,6 @@
                     "description": "STDERR.txt",
                     "difference_file": "test10_1_diff.json",
                     "expected_file": "test_output/testassignment/output_7B.txt"
-                },
-                {
-                    "actual_file": "test10_execute_logfile.txt",
-                    "description": "Execution Logfile"
                 }
             ],
             "points_awarded": 1,

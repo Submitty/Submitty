@@ -1,0 +1,33 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "description": "Number of for loops",
+                    "messages": [
+                        {
+                            "message": "Must not use for loops",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Number of while loops",
+                    "messages": [
+                        {
+                            "message": "Must use a while loop",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 1 Python - Distinguish for and while Loops"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 2 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
