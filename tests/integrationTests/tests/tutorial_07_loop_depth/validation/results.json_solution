@@ -1,0 +1,19 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01_STDOUT.txt",
+                    "description": "Loop Depth"
+                }
+            ],
+            "points_awarded": 10,
+            "test_name": "Test 1 Python - Determine Loop Depth"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 2 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

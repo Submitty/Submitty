@@ -23,13 +23,11 @@ def write_submitty_date(d=get_current_time()):
         print ("NO TIMEZONE ",d,"assuming local timezone")
         my_timezone = get_timezone()
         d = my_timezone.localize(d)
-    # answer = d.strftime("%Y-%m-%d %H:%M:%S ") + str(d.tzinfo)
-    # answer = str(d)# + " " + str(d.tzinfo)
     answer = d.strftime("%Y-%m-%d %H:%M:%S%z")
     return answer
 
 
-# convert a string (with or without the timezone) to a date time object with a timezone
+# convert a string (with the timezone) to a date time object with a timezone
 def read_submitty_date(s):
     words = s.split()
     if len(words) != 2:
@@ -40,22 +38,4 @@ def read_submitty_date(s):
         with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
     except ValueError:
         raise SystemExit("ERROR:  invalid date format %s" % s)
-    # if len(words) < 2 or len(words) > 3:
-    #     raise SystemExit("ERROR:  unexpected date format %s" % s)
-    # without_timezone = str(words[0] + ' ' + words[1])
-    # print ("the date is: %s" % s)
-    # try:
-    #     without_timezone = datetime.strptime(without_timezone,'%Y-%m-%d %H:%M:%S')
-    # except ValueError:
-    #     try:
-    #         without_timezone = datetime.strptime(without_timezone, '%Y-%m-%d %H:%M:%S%z')
-    #         print ("WARNING: INCONSISTENT DATE FORMAT ",s)
-    #     except ValueError:
-    #         raise SystemExit("ERROR:  invalid date format %s" % s)
-    # if len(words) == 2:
-    #     print ("WARNING: NO TIMEZONE ",s,"assuming local timezone")
-    #     my_timezone = get_timezone()
-    # else:
-    #     my_timezone = pytz.timezone(words[2])
-    # with_timezone = my_timezone.localize(without_timezone)
     return with_timezone
