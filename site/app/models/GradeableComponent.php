@@ -131,8 +131,7 @@ class GradeableComponent extends AbstractModel {
             }
         }
 
-        if (isset($details['array_gcm_id']) && $details['array_gcm_id'] !== null) {
-            $this->has_marks = true;
+        if (isset($details['array_gcm_id'])) {
             $mark_fields = array('gcm_id', 'gc_id', 'gcm_points',
                                     'gcm_note', 'gcm_order');
             foreach ($mark_fields as $key) {
@@ -147,7 +146,8 @@ class GradeableComponent extends AbstractModel {
                 foreach ($mark_fields as $key) {
                     $mark_details[$key] = $details["array_{$key}"][$i];
                 }
-                if (isset($details['array_gcm_mark'])) {
+                if (isset($details['array_gcm_mark']) && $details['array_gcm_mark'] !== null) {
+                    $this->has_marks = true;
                     for ($j = 0; $j < count($details['array_gcm_mark']); $j++) {
                         if ($details['array_gcm_mark'][$j] === $mark_details['gcm_id']) {
                             $mark_details['gcm_has_mark'] = true;
