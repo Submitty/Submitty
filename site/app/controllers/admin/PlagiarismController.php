@@ -9,10 +9,9 @@ class PlagiarismController extends AbstractController {
     public function run() {
         $this->core->getOutput()->addBreadcrumb("Plagiarism");
         $this->plagiarismIndex();
-        break;
     }
 
-    public function listStudents() {
+    public function plagiarismIndex() {
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismIndex');
     }
 }
