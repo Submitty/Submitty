@@ -8,7 +8,9 @@ class PlagiarismView extends AbstractView {
         $return = "";
         $return .= <<<HTML
 <div class="content">
-    <iframe src="/var/local/submitty/courses/f17/development/plagiarism/var/local/submitty/courses/f17/development/submissions/cpp_cats/index.html"></iframe>
+HTML;
+    readFile("/var/local/submitty/courses/f17/development/plagiarism/var/local/submitty/courses/f17/development/submissions/cpp_cats/index.html");
+        $return .= <<<HTML
 </div>
 HTML;
         return $return;
