@@ -41,6 +41,9 @@ class AdminController extends AbstractController {
             case 'reports':
                 $controller = new ReportController($this->core);
                 break;
+            case 'plagiarism':
+                $controller = new PlagiarismController($this->core);
+                break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
                 break;

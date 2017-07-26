@@ -96,7 +96,7 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">HWReports, CSV Reports, and Grade Summaries</a>
             </li>
             <li>
-                <a href="http://example.com">Plagiarism Detection</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism'))}">Plagiarism Detection</a>
             </li>
 
 HTML;

@@ -3,8 +3,8 @@ namespace app\views\admin;
 
 use app\views\AbstractView;
 
-class ReportView extends AbstractView {
-    public function showReportUpdates() {
+class PlagiarismView extends AbstractView {
+    public function plagiarismIndex() {
         $return = "";
         $return .= <<<HTML
 <div class="content">
