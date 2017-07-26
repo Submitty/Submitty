@@ -399,12 +399,12 @@ def parse_datetime(date_string):
     if isinstance(date_string, datetime):
         return date_string
     try:
-        return datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+        return datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S%z")
     except ValueError:
         pass
 
     try:
-        return datetime.strptime(date_string, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+        return datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S%z").replace(hour=23, minute=59, second=59)
     except ValueError:
         pass
 
@@ -427,7 +427,7 @@ def parse_datetime(date_string):
 def datetime_str(datetime_obj):
     if not isinstance(datetime_obj, datetime):
         return datetime_obj
-    return datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
+    return datetime_obj.strftime("%Y-%m-%d %H:%M:%S%z")
 
 
 def parse_args():
