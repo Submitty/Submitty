@@ -42,6 +42,10 @@ class ElectronicGraderController extends AbstractController {
         /*
          * we need number of students per section
          */
+        $total_users = array();
+        $no_team_users = array();
+        $graded_components = array();
+        $graders = array();
         if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getUser()->accessFullGrading()){
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
@@ -52,15 +56,19 @@ class ElectronicGraderController extends AbstractController {
                     $sections[$i] = $section['sections_registration_id'];
                 }
             }
-            $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
-            
-            if ($gradeable->isTeamAssignment()) {
-                $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections);
-                $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByRegistrationSections($gradeable_id, $sections);
-            }
-            else {
-                $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
-                $no_team_users = array();
+
+            if (count($sections) > 0) {
+                $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
+                if ($gradeable->isTeamAssignment()) {
+                    $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'registration_section');
+                    $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, 'registration_section');
+                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, 'registration_section');
+                }
+                else {
+                    $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
+                    $no_team_users = array();
+                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable_id, $sections);
+                }
             }
         }
         else {
@@ -73,45 +81,23 @@ class ElectronicGraderController extends AbstractController {
                     $sections[$i] = $section['sections_rotating_id'];
                 }
             }
-            $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
-            
-            if ($gradeable->isTeamAssignment()) {
-                $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections);
-                $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByRotatingSections($gradeable_id, $sections);
-            }
-            else {
-                $total_users = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
-                $no_team_users = array();
+
+            if (count($sections) > 0) {
+                $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
+                if ($gradeable->isTeamAssignment()) {
+                    $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'rotating_section');
+                    $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, 'rotating_section');
+                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, 'rotating_section');
+                }
+                else {
+                    $total_users = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
+                    $no_team_users = array();
+                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable_id, $sections);
+                }
             }
         }
 
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable_id);
-        $graded_components = array();
-        if (!$gradeable->isTeamAssignment()) {
-            if ($gradeable->isGradeByRegistration()) {
-                if (count($sections) > 0) {
-                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable->getId(), $sections);
-                }
-            }
-            else {
-                if (count($sections) > 0) {
-                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable_id, $sections);
-                }
-            }
-        }
-        else {
-            if ($gradeable->isGradeByRegistration()) {
-                if (count($sections) > 0) {
-                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable->getId(), $sections);
-                }
-            }
-            else {
-                if (count($sections) > 0) {
-                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable_id, $sections);
-                }
-            }
-        }
-
         $sections = array();
         if (count($total_users) > 0) {
             foreach ($total_users as $key => $value) {
@@ -120,6 +106,9 @@ class ElectronicGraderController extends AbstractController {
                     'graded_components' => 0,
                     'graders' => array()
                 );
+                if ($gradeable->isTeamAssignment()) {
+                    $sections[$key]['no_team'] = $no_team_users[$key];
+                }
                 if (isset($graded_components[$key])) {
                     $sections[$key]['graded_components'] = intval($graded_components[$key]);
                 }
@@ -178,7 +167,10 @@ class ElectronicGraderController extends AbstractController {
             $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
             foreach($all_teams as $team) {
                 $student_ids = array_diff($student_ids, $team->getMembers());
-                if ($team->getSize() > 0 && (in_array($team->getGradingSection(), $sections) || (isset($_GET['view']) && $_GET['view'] === "all") || $this->core->getUser()->accessAdmin())) {
+                $team_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
+                if ($team->getSize() > 0 && (in_array($team_section, $sections) || 
+                                            (isset($_GET['view']) && $_GET['view'] === "all") || 
+                                            (count($sections) === 0 && $this->core->getUser()->accessAdmin()))) {
                     $student_ids[] = $team->getMembers()[0];
                 }
             }
@@ -192,10 +184,10 @@ class ElectronicGraderController extends AbstractController {
             $team_rows = array();
             foreach($rows as $row) {
                 if ($gradeable->isGradeByRegistration()) {
-                    $section = $row->getTeam() === null ? strval($row->getUser()->getRegistrationSection()) : strval($row->getTeam()->getGradingSection());
+                    $section = $row->getTeam() === null ? strval($row->getUser()->getRegistrationSection()) : strval($row->getTeam()->getRegistrationSection());
                 }
                 else {
-                    $section = $row->getTeam() === null ? strval($row->getUser()->getRotatingSection()) : strval($row->getTeam()->getGradingSection());
+                    $section = $row->getTeam() === null ? strval($row->getUser()->getRotatingSection()) : strval($row->getTeam()->getRotatingSection());
                 }
 
                 if ($section != null && !in_array($section, $sections)) {

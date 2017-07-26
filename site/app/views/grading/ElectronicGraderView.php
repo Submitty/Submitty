@@ -19,15 +19,22 @@ class ElectronicGraderView extends AbstractView {
         $semester = $this->core->getConfig()->getSemester();
         $graded = 0;
         $total = 0;
+        $no_team_total = 0;
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
                 continue;
             }
             $graded += $section['graded_components'];
             $total += $section['total_components'];
+            if ($gradeable->isTeamAssignment()) {
+                $no_team_total += $section['no_team'];
+            }
         }
-        if ($total === 0){
+        if ($total === 0 && $no_team_total === 0){
             $percentage = -1;
+        }
+        else if ($total === 0 && $no_team_total > 0){
+            $percentage = 0;
         }
         else{
             $percentage = round(($graded / $total) * 100);
@@ -50,15 +57,30 @@ HTML;
         $return .= <<<HTML
     <div class="sub">
         Current percentage of grading done: {$percentage}% ({$graded}/{$total})
+HTML;
+        if ($gradeable->isTeamAssignment() && $no_team_total > 0) {
+            $return .= <<<HTML
+         - {$no_team_total} students with no team
+HTML;
+        }
+        $return .= <<<HTML
         <br />
         <br />
         By Grading Sections:
         <div style="margin-left: 20px">
 HTML;
         foreach ($sections as $key => $section) {
-            $percentage = round(($section['graded_components'] / $section['total_components']) * 100);
+            $percentage = $section['total_components'] !== 0 ? round(($section['graded_components'] / $section['total_components']) * 100) : 0;
             $return .= <<<HTML
-            Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})<br />
+            Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})
+HTML;
+            if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
+                $return .= <<<HTML
+             - {$section['no_team']} students with no team
+HTML;
+            }
+            $return .= <<<HTML
+            <br />
 HTML;
         }
         $return .= <<<HTML
@@ -241,14 +263,11 @@ HTML;
                 $graded = $autograding_score + $row->getGradedTAPoints();
 
                 if ($graded < 0) $graded = 0;
-                if ($gradeable->isTeamAssignment() && $row->getTeam() !== null) {
-                    $section = $row->getTeam()->getGradingSection();
-                }
-                else if ($gradeable->isGradeByRegistration()) {
-                    $section = $row->getUser()->getRegistrationSection();
+                if ($gradeable->isGradeByRegistration()) {
+                    $section = $row->getTeam() === null ? $row->getUser()->getRegistrationSection() : $row->getTeam()->getRegistrationSection();
                 }
                 else {
-                    $section = $row->getUser()->getRotatingSection();
+                    $section = $row->getTeam() === null ? $row->getUser()->getRotatingSection() : $row->getTeam()->getRotatingSection();
                 }
                 $display_section = ($section === null) ? "NULL" : $section;
                 if ($section !== $last_section) {
@@ -535,37 +554,60 @@ HTML;
         $who = $gradeable->getUser()->getId();
         $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'individual'=>$individual,
                                                       'gradeable_version' => ""))}', this)";
-        $formatting = "font-size: 13px;float:right;";
-        $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
+        $formatting = "font-size: 13px;";
         $return .= <<<HTML
-        <b>{$user->getFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
-        Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
-        Submitted:&nbsp{$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
+            <div style="float:right;">
 HTML;
-            
+        $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
+        
         // If viewing the active version, show cancel button, otherwise so button to switch active
         if ($gradeable->getCurrentVersionNumber() > 0) {
             if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
                 $version = 0;
-                $button = '<input type="submit" class="btn btn-default btn-xs" style="float: right;" value="Cancel Student Submission">';
+                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">';
             }
             else {
                 $version = $gradeable->getCurrentVersionNumber();
-                $button = '<input type="submit" class="btn btn-default btn-xs" style="float: right;" value="Grade This Version">';
+                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">';
             }
             $return .= <<<HTML
-        <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
-                action="{$this->core->buildUrl(array('component' => 'student',
-                                                     'action' => 'update',
-                                                     'gradeable_id' => $gradeable->getId(),
-                                                     'new_version' => $version, 'ta' => true, 'who' => $who, 'individual' => $individual))}">
-            <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
-            {$button}
-        </form>
-        </div>
-
+                <br/><br/>
+                <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
+                        action="{$this->core->buildUrl(array('component' => 'student',
+                                                             'action' => 'update',
+                                                             'gradeable_id' => $gradeable->getId(),
+                                                             'new_version' => $version, 'ta' => true, 'who' => $who, 'individual' => $individual))}">
+                    <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                    {$button}
+                </form>
 HTML;
         }
+        $return .= <<<HTML
+            </div>
+HTML;
+
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+            $return .= <<<HTML
+        <b>Team:<br/>
+HTML;
+            foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+                $team_member = $this->core->getQueries()->getUserById($team_member);
+                $return .= <<<HTML
+        &emsp;{$team_member->getFirstName()} {$team_member->getLastName()} ({$team_member->getId()})<br/>
+HTML;
+            }
+        }
+        else {
+            $return .= <<<HTML
+        <b>{$user->getFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
+HTML;
+        }
+
+        $return .= <<<HTML
+        Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
+        Submitted: {$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
+        </div>
+HTML;
         $return .= <<<HTML
         <form id="rubric_form" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'submit'))}" method="post">
             <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
