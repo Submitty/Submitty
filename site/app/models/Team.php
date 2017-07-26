@@ -12,6 +12,10 @@ class Team extends AbstractModel {
      
     /** @property @var string The id of this team of form "<unique number>_<creator user id>" */
     protected $id;
+    /** @property @var integer rotating section (registration or rotating) of team creator */
+    protected $registration_section;
+    /** @property @var integer registration section (registration or rotating) of team creator */
+    protected $rotating_section;
     /** @property @var array containing user ids of team members */
     protected $member_user_ids;
     /** @propety @var array containing user ids of those invited to the team */
@@ -28,6 +32,8 @@ class Team extends AbstractModel {
         parent::__construct($core);
 
         $this->id = $details[0]['team_id'];
+        $this->registration_section = $details[0]['registration_section'];
+        $this->rotating_section = $details[0]['rotating_section'];
         $this->member_user_ids = array();
         $this->invited_user_ids = array();
         foreach($details as $user) {
@@ -39,6 +45,22 @@ class Team extends AbstractModel {
             }
         }
         $this->member_list = count($this->member_user_ids) === 0 ? "[empty team]" : implode(", ", $this->member_user_ids);
+    }
+
+    /**
+     * Get registration section
+     * @return integer
+    */
+    public function getRegistrationSection() {
+        return $this->registration_section;
+    }
+
+    /**
+     * Get rotating section
+     * @return integer
+    */
+    public function getRotatingSection() {
+        return $this->rotating_section;
     }
 
     /**

@@ -49,7 +49,7 @@ class TeamController extends AbstractController {
         }
 
         $this->core->getQueries()->declineTeamInvitations($gradeable_id, $user_id);
-        $this->core->getQueries()->createTeam($gradeable_id, $user_id);
+        $this->core->getQueries()->createTeam($gradeable_id, $user_id, $this->core->getUser()->getRegistrationSection(), $this->core->getUser()->getRotatingSection());
         $this->core->addSuccessMessage("Created a new team");
         $this->core->redirect($return_url);
     }
@@ -105,7 +105,7 @@ class TeamController extends AbstractController {
         }
 
         $invite_id = $_POST['invite_id'];
-        if (!$this->core->getQueries()->getUserByID($invite_id)->isLoaded()) {
+        if ($this->core->getQueries()->getUserByID($invite_id) === null) {
             $this->core->addErrorMessage("User {$invite_id} does not exist");
             $this->core->redirect($return_url);
         }

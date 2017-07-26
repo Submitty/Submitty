@@ -170,14 +170,27 @@ HTML;
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
+HTML;
+        if ($gradeable->isTeamAssignment()) {
+            $cols = 3;
+            $return .= <<<HTML
+                <td width="3%"></td>
+                <td width="5%">Section</td>
+                <td width="50%">Team Members</td>
+HTML;
+        }
+        else {
+            $cols = 5;
+            $return .= <<<HTML
                 <td width="3%"></td>
                 <td width="5%">Section</td>
                 <td width="20%">User ID</td>
                 <td width="15%">First Name</td>
                 <td width="15%">Last Name</td>
 HTML;
-
+        }
         if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
+            $cols += 5;
             $return .= <<<HTML
                 <td width="9%">Autograding</td>
                 <td width="8%">TA Grading</td>
@@ -190,6 +203,7 @@ HTML;
         }
         else {
             $show_auto_grading_points = false;
+            $cols += 4;
             $return .= <<<HTML
                 <td width="12%">TA Grading</td>
                 <td width="12%">Total</td>
@@ -217,7 +231,6 @@ HTML;
                         $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
-                    $different = false;
                 }
                 else{
                     $viewed_grade = "";
@@ -228,7 +241,10 @@ HTML;
                 $graded = $autograding_score + $row->getGradedTAPoints();
 
                 if ($graded < 0) $graded = 0;
-                if ($gradeable->isGradeByRegistration()) {
+                if ($gradeable->isTeamAssignment() && $row->getTeam() !== null) {
+                    $section = $row->getTeam()->getGradingSection();
+                }
+                else if ($gradeable->isGradeByRegistration()) {
                     $section = $row->getUser()->getRegistrationSection();
                 }
                 else {
@@ -238,18 +254,18 @@ HTML;
                 if ($section !== $last_section) {
                     $last_section = $section;
                     $count = 1;
-                    if ($tbody_open) {
-                        $return .= <<<HTML
-        </tbody>
-HTML;
-                    }
                     if (isset($graders[$display_section]) && count($graders[$display_section]) > 0) {
                         $section_graders = implode(", ", array_map(function(User $user) { return $user->getId(); }, $graders[$display_section]));
                     }
                     else {
                         $section_graders = "Nobody";
                     }
-                    $cols = ($show_auto_grading_points) ? 10 : 9;
+                    if ($tbody_open) {
+                        $return .= <<<HTML
+        </tbody>
+HTML;
+                    }
+                    $tbody_open = true;
                     $return .= <<<HTML
         <tr class="info persist-header">
             <td colspan="{$cols}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
@@ -257,85 +273,114 @@ HTML;
         <tr class="info">
             <td colspan="{$cols}" style="text-align: center">Graders: {$section_graders}</td>
         </tr>
-        <tbody id="section-{$section}">
+        <tbody>
 HTML;
                 }
                 $style = "";
                 if ($row->getUser()->accessGrading()) {
                     $style = "style='background: #7bd0f7;'";
                 }
-                $return .= <<<HTML
+                if ($gradeable->isTeamAssignment() && $row->getTeam() === null) {
+                    $return .= <<<HTML
             <tr id="user-row-{$row->getUser()->getId()}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
                 <td>{$row->getUser()->getId()}</td>
-                <td>{$row->getUser()->getDisplayedFirstName()}</td>
-                <td>{$row->getUser()->getLastName()}</td>
 HTML;
-
-                if($show_auto_grading_points) {
-                    if ($highest_version != 0) {
-                        $return .= <<<HTML
-                <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
-HTML;
-                    }
-                    else {
+                    if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
                         $return .= <<<HTML
                 <td></td>
 HTML;
                     }
-                }
-                if ($highest_version != 0) {
                     $return .= <<<HTML
-                <td>
+                <td><b><i>No Team</i></b></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
 HTML;
-                    $box_background = "";
-                    if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
-                        $box_background = "late-box";
-                    }
-                    
-                    if ($row->beenTAgraded()) {
-                        $btn_class = "btn-default";
-                        if($row->validateVersions()) {
-                            $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-                        }
-                        else{
-                            $contents = "Version Conflict";
-                        }
+                }
+                else {
+                    $return .= <<<HTML
+            <tr id="{user-row-{$row->getUser()->getId()}}" {$style}>
+                <td>{$count}</td>
+                <td>{$display_section}</td>
+HTML;
+                    if ($gradeable->isTeamAssignment()) {
+                        $return .= <<<HTML
+                <td>{$row->getTeam()->getMemberList()}</td>
+HTML;
                     }
                     else {
-                        $btn_class = "btn-primary";
-                        $contents = "Grade";
+                        $return .= <<<HTML
+                <td>{$row->getUser()->getId()}</td>
+                <td>{$row->getUser()->getDisplayedFirstName()}</td>
+                <td>{$row->getUser()->getLastName()}</td>
+HTML;
                     }
-                    $return .= <<<HTML
+                    if($show_auto_grading_points) {
+                        if ($highest_version != 0) {
+                            $return .= <<<HTML
+                <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
+HTML;
+                        }
+                        else {
+                            $return .= <<<HTML
+                <td></td>
+HTML;
+                        }
+                    }
+                    if ($highest_version != 0) {
+                        $return .= <<<HTML
+                <td>
+HTML;
+                        $box_background = "";
+                        if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
+                            $box_background = "late-box";
+                        }
+                    
+                        if ($row->beenTAgraded()) {
+                            $btn_class = "btn-default";
+                            if($row->validateVersions()) {
+                                $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                            }
+                            else{
+                                $contents = "Version Conflict";
+                            }
+                        }
+                        else {
+                            $btn_class = "btn-primary";
+                            $contents = "Grade";
+                        }
+                        $return .= <<<HTML
                     <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
                         {$contents}
                     </a>
                 </td>
 HTML;
-                    if($row->validateVersions()) {
-                        $return .= <<<HTML
+                        if($row->validateVersions()) {
+                            $return .= <<<HTML
                 <td><div class="{$box_background}">{$graded}&nbsp;/&nbsp;{$total_possible}</div></td>
 HTML;
-                    }
-                    else{
-                        $return .= <<<HTML
+                        }
+                        else{
+                            $return .= <<<HTML
                 <td></td>
 HTML;
-                    }
-                    if($active_version == $highest_version) {
-                        $return .= <<<HTML
+                        }
+                        if($active_version == $highest_version) {
+                            $return .= <<<HTML
                 <td>{$active_version}</td>
 HTML;
+                        }
+                        else {
+                            $return .= <<<HTML
+                <td>{$active_version}&nbsp;/&nbsp;{$highest_version}</td>
+HTML;
+                        }
                     }
                     else {
                         $return .= <<<HTML
-                <td>{$active_version}&nbsp;/&nbsp;{$highest_version}</td>
-HTML;
-                    }
-                }
-                else {
-                    $return .= <<<HTML
                 <td>
                     <a class="btn btn-default" style="color:#a5a5a5;" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">Grade
                     </a>
@@ -343,11 +388,12 @@ HTML;
                 <td></td>
                 <td></td>
 HTML;
-                }
-                $return .= <<<HTML
+                    }
+                    $return .= <<<HTML
                 <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
             </tr>
 HTML;
+                }
                 $count++;
             }
             $return .= <<<HTML

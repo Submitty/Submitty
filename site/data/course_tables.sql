@@ -373,7 +373,9 @@ CREATE TABLE users (
 
 CREATE TABLE gradeable_teams (
     team_id character varying(255) NOT NULL,
-    g_id character varying(255) NOT NULL
+    g_id character varying(255) NOT NULL,
+    registration_section integer,
+    rotating_section integer
 );
 
 

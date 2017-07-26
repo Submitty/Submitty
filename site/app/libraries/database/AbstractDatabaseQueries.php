@@ -350,8 +350,10 @@ abstract class AbstractDatabaseQueries {
      * Create a new team id and team in gradeable_teams for given gradeable, add $user_id as a member
      * @param string $g_id
      * @param string $user_id
+     * @param integer $registration_section
+     * @param integer $rotating_section
      */
-    abstract public function createTeam($g_id, $user_id);
+    abstract public function createTeam($g_id, $user_id, $registration_section, $rotating_section);
 
     /**
      * Remove a user from their current team

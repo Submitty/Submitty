@@ -1250,13 +1250,14 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
         return $this->course_db->rows();
     }
       
-    public function createTeam($g_id, $user_id) {
+    public function createTeam($g_id, $user_id, $registration_section, $rotating_section) {
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable_teams");
         $team_id_prefix = strval($this->course_db->row()['cnt']);
         if (strlen($team_id_prefix) < 5) $team_id_prefix = str_repeat("0", 5-strlen($team_id_prefix)) . $team_id_prefix;
         $team_id = "{$team_id_prefix}_{$user_id}";
         
-        $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id) VALUES(?,?)", array($team_id, $g_id));
+        $params = array($team_id, $g_id, $registration_section, $rotating_section)
+        $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section) VALUES(?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
     }
 
@@ -1280,7 +1281,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
 
     public function getTeamById($team_id) {
         $this->course_db->query("
-          SELECT team_id, user_id, state FROM gradeable_teams NATURAL JOIN teams WHERE team_id=? ORDER BY user_id", array($team_id));
+          SELECT team_id, registration_section, rotating_section, user_id, state FROM gradeable_teams NATURAL JOIN teams WHERE team_id=? ORDER BY user_id", array($team_id));
 
         if (count($this->course_db->rows()) === 0) {
             return null;
@@ -1293,7 +1294,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
 
     public function getTeamByGradeableAndUser($g_id, $user_id) {
         $this->course_db->query("
-          SELECT team_id, user_id, state
+          SELECT team_id, registration_section, rotating_section, user_id, state
           FROM gradeable_teams NATURAL JOIN teams
           WHERE g_id=? AND team_id IN (
             SELECT team_id
@@ -1313,7 +1314,7 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
 
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query("
-          SELECT gt.team_id, t.user_id, t.state
+          SELECT gt.team_id, gt.registration_section, gt.rotating_section, t.user_id, t.state
           FROM gradeable_teams AS gt 
           LEFT JOIN (
             SELECT *
@@ -1335,6 +1336,94 @@ eg_subdirectory=?, eg_use_ta_grading=?, eg_late_days=?, eg_precision=? WHERE g_i
             $teams[] = new Team($this->core, $team_row);
         }
         return $teams;
+    }
+
+    public function getTotalTeamCountByGradingSections($g_id, $sections) {
+        $return = array();
+        $params = array($g_id);
+        $sections_query = "";
+        if (count($sections) > 0) {
+            $sections_query = "AND grading_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $params = array_merge($params, $sections);
+        }
+        $this->course_db->query("
+SELECT count(*) as cnt, grading_section 
+FROM gradeable_teams 
+WHERE g_id=? {$sections_query}
+GROUP BY grading_section 
+ORDER BY grading_section", $params);
+        foreach ($this->course_db->rows() as $row) {
+            if ($row['grading_section'] === null) {
+                $row['grading_section'] = "NULL";
+            }
+            $return[$row['grading_section']] = intval($row['cnt']);
+        }
+        foreach ($sections as $section) {
+            if (!isset($return[$section])) $return[$section] = 0;
+        }
+        return $return;
+    }
+
+    public function getUsersWithoutTeamByRegistrationSections($g_id, $sections) {
+        $return = array();
+        $params = array($g_id);
+        $sections_query = "";
+        if (count($sections) > 0) {
+            $sections_query= "registration_section IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
+            $params = array_merge($sections, $params);
+        }
+        $this->course_db->query("
+SELECT count(*) as cnt, registration_section 
+FROM users 
+WHERE {$sections_query} user_id NOT IN (
+  SELECT user_id
+  FROM gradeable_teams NATURAL JOIN teams
+  WHERE g_id=?
+  ORDER BY user_id
+)
+GROUP BY registration_section 
+ORDER BY registration_section", $params);
+        foreach ($this->course_db->rows() as $row) {
+            if ($row['registration_section'] === null) {
+                $row['registration_section'] = "NULL";
+            }
+            $return[$row['registration_section']] = intval($row['cnt']);
+        }
+        foreach ($sections as $section) {
+            if (!isset($return[$section])) $return[$section] = 0;
+        }
+        return $return;
+    }
+
+    public function getUsersWithoutTeamByRotatingSections($g_id, $sections) {
+        $return = array();
+        $params = array($g_id);
+        $sections_query = "";
+        if (count($sections) > 0) {
+            $sections_query = "rotating_section IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
+            $params = array_merge($sections, $params);
+        }
+        $this->course_db->query("
+SELECT count(*) as cnt, rotating_section 
+FROM users 
+WHERE {$sections_query} user_id NOT IN (
+  SELECT user_id
+  FROM gradeable_teams NATURAL JOIN teams
+  WHERE g_id=?
+  ORDER BY user_id
+)
+GROUP BY rotating_section 
+ORDER BY rotating_section", $params);
+        foreach ($this->course_db->rows() as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return[$row['rotating_section']] = intval($row['cnt']);
+        }
+        foreach ($sections as $section) {
+            if (!isset($return[$section])) $return[$section] = 0;
+        }
+        return $return;
     }
 
     public function getUsersWithLateDays() {
