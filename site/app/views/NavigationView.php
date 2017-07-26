@@ -128,10 +128,20 @@ HTML;
                 continue;
             }
 
-            // count the # of electronic gradeables in this category
+            // // count the # of electronic gradeables in this category that can be viewed
+            // // only electronic files that are viewable, and either can be submitted to or have been graded
+            // $electronic_gradeable_count = 0;
+            // foreach ($gradeable_list as $gradeable => $g_data) {
+            //     if (($g_data->getType() == GradeableType::ELECTRONIC_FILE && $g_data->getStudentView()) &&
+            //         ($g_data->getStudentSubmit() || $title == "GRADED")) {
+            //         $electronic_gradeable_count++;
+            //         continue;
+            //     }
+            // }
+            /////// hm
             $electronic_gradeable_count = 0;
             foreach ($gradeable_list as $gradeable => $g_data) {
-                if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
+                if ($g_data->getType() == GradeableType::ELECTRONIC_FILE && $g_data->getStudentView()) {
                     $electronic_gradeable_count++;
                     continue;
                 }
@@ -217,14 +227,15 @@ HTML;
                 }
 
                 // if student view false, never show
-                if (!$g_data->canStudentView() && !$this->core->getUser()->accessGrading()) {
+                if (!$g_data->getStudentView() && !$this->core->getUser()->accessGrading()) {
                     continue;
                 }
 
-                // if student submit false and student view true, skip unless it's graded
-                if ($title !== "GRADED" && !$g_data->canStudentSubmit() && !$this->core->getUser()->accessGrading()) {
-                    continue;
-                }
+                /////// hm
+                // // if student submit false, skip unless it's graded
+                // if ($title !== "GRADED" && !$g_data->getStudentSubmit() && !$this->core->getUser()->accessGrading()) {
+                //     continue;
+                // }
 
 
                 if ($g_data->getActiveVersion() < 1){

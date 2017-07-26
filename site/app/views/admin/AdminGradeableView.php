@@ -51,10 +51,10 @@ class AdminGradeableView extends AbstractView {
 		$g_gradeable_type = 0;
 		$is_repository = false;
 		$use_ta_grading=false;
-        $can_student_submit=true;
-        $can_student_view=true;
-        $can_student_download_active=false;
-        $can_student_download_any=false;
+        $student_submit=true;
+        $student_view=true;
+        $student_download_active=false;
+        $student_download_any=false;
         $old_questions = array();
         $g_min_grading_group = 0;
         $g_overall_ta_instructions = "";
@@ -104,10 +104,10 @@ class AdminGradeableView extends AbstractView {
                 $precision = $data[3]['eg_precision'];
                 $electronic_gradeable['eg_precision'] = $precision;
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
-                $can_student_submit = $data[3]['eg_can_student_submit'];
-                $can_student_view = $data[3]['eg_can_student_view'];
-                $can_student_download_active = $data[3]['eg_can_student_download_active'];
-                $can_student_download_any = $data[3]['eg_can_student_download_any'];
+                $student_submit = $data[3]['eg_student_submit'];
+                $student_view = $data[3]['eg_student_view'];
+                $student_download_active = $data[3]['eg_student_download_active'];
+                $student_download_any = $data[3]['eg_student_download_any'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
                 $peer_grade_set = $data[3]['eg_peer_grade_set'];
@@ -138,10 +138,10 @@ class AdminGradeableView extends AbstractView {
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
-                $can_student_submit = $data[3]['eg_can_student_submit'];
-                $can_student_view = $data[3]['eg_can_student_view'];
-                $can_student_download_active = $data[3]['eg_can_student_download_active'];
-                $can_student_download_any = $data[3]['eg_can_student_download_any'];
+                $student_submit = $data[3]['eg_student_submit'];
+                $student_view = $data[3]['eg_student_view'];
+                $student_download_active = $data[3]['eg_student_download_active'];
+                $student_download_any = $data[3]['eg_student_download_any'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
                 $peer_grade_set = $data[3]['eg_peer_grade_set'];
@@ -400,12 +400,12 @@ HTML;
                 Will students be able to make submissions? (Select 'No' if this is an exam.)
                 <input type="radio" id="yes_student_submit" name="student_submit" value="true" class="bool_val rubric_questions"
 HTML;
-                if ($can_student_submit===true) { $html_output .= ' checked="checked"'; }
+                if ($student_submit===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> Yes
                 <input type="radio" id="no_student_submit" name="student_submit" value="false"
 HTML;
-                if ($can_student_submit===false) { $html_output .= ' checked="checked"'; }
+                if ($student_submit===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> No 
                 <br /> <br />  
@@ -413,12 +413,12 @@ HTML;
                 Will students be able to view submissions? (Select 'No' if this is an exam.)
                 <input type="radio" id="yes_student_view" name="student_view" value="true" class="bool_val rubric_questions"
 HTML;
-                if ($can_student_view===true) { $html_output .= ' checked="checked"'; }
+                if ($student_view===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> Yes
                 <input type="radio" id="no_student_view" name="student_view" value="false"
 HTML;
-                if ($can_student_view===false) { $html_output .= ' checked="checked"'; }
+                if ($student_view===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> No 
                 <br /> <br />
@@ -426,12 +426,12 @@ HTML;
                 Will students be able to download files? (Select 'Yes' if this is an exam.)
                 <input type="radio" id="yes_student_download" name="student_download" value="true" class="bool_val rubric_questions"
 HTML;
-                if ($can_student_download_active || $can_student_download_any) { $html_output .= ' checked="checked"'; }
+                if ($student_download_active || $student_download_any) { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
                 /> Yes
                 <input type="radio" id="no_student_download" name="student_download" value="false"
 HTML;
-                if ($can_student_download_active===false && $can_student_download_any===false) { $html_output .= ' checked="checked"'; }
+                if ($student_download_active===false && $student_download_any===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> No 
 
@@ -439,14 +439,14 @@ HTML;
 
                     <input type="radio" id="student_download_active" name="student_download_active" class="bool_val rubric_questions"
 HTML;
-                    if ($can_student_download_active===true) { $html_output .= ' value="true" checked="checked"'; }
+                    if ($student_download_active===true) { $html_output .= ' value="true" checked="checked"'; }
                     else { $html_output .= ' value="false"'; }
         $html_output .= <<<HTML
                     /> Active version only
                     <input type="radio" id="student_download_any" name="student_download_any" 
 HTML;
-                    if ($can_student_download_any===true) { $html_output .= ' value="true" checked="checked"'; }
-                    else { $html_output .= ' value="true"'; }
+                    if ($student_download_any===true) { $html_output .= ' value="true" checked="checked"'; }
+                    else { $html_output .= ' value="false"'; }
         $html_output .= <<<HTML
                     /> Any version
 

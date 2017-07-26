@@ -36,6 +36,14 @@ use app\libraries\Utils;
  * @method void setPeerGradeSet(int $assign)
  * @method bool getPeerGrading()
  * @method void setPeerGrading(bool $peer)
+ * @method bool getStudentSubmit()
+ * @method void setStudentSubmit()
+ * @method bool getStudentView()
+ * @method void setStudentView()
+ * @method bool getStudentDownloadActive()
+ * @method void setStudentDownloadActive()
+ * @method bool getStudentDownloadAny()
+ * @method void setStudentDownloadAny()
  * @method setTaViewDate(\DateTime $datetime)
  * @method \DateTime getOpenDate(\DateTime $datetime)
  * @method setOpenDate(\DateTime $datetime)
@@ -294,10 +302,10 @@ class Gradeable extends AbstractModel {
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
-            $this->student_submit = $details['eg_can_student_submit'] === true;
-            $this->student_view = $details['eg_can_student_view'] === true;
-            $this->student_download_active = $details['eg_can_student_download_active'] === true;
-            $this->student_download_any = $details['eg_can_student_download_any'] === true;
+            $this->student_submit = $details['eg_student_submit'] === true;
+            $this->student_view = $details['eg_student_view'] === true;
+            $this->student_download_active = $details['eg_student_download_active'] === true;
+            $this->student_download_any = $details['eg_student_download_any'] === true;
             $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
@@ -853,22 +861,6 @@ class Gradeable extends AbstractModel {
 
     public function useTAGrading() {
         return $this->ta_grading;
-    }
-
-    public function canStudentSubmit() {
-        return $this->student_submit;
-    }
-
-    public function canStudentView() {
-        return $this->student_view;
-    }
-
-    public function canStudentDownloadActive() {
-        return $this->student_download_active;
-    }
-
-    public function canStudentDownloadAny() {
-        return $this->student_download_any;
     }
 
     public function taGradesReleased() {
