@@ -95,7 +95,7 @@ class SubmissionController extends AbstractController {
                 }
                 else {
                     $gradeable->loadResultDetails();
-                    $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
+                    $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate(), "Now", $this->core->getConfig()->getTimezone());
                     if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
                         $gradeable->updateUserViewedDate();
                     }

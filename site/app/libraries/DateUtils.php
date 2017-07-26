@@ -3,6 +3,7 @@
 namespace app\libraries;
 
 use \DateTime;
+use \DateTimeZone;
 use \DateInterval;
 
 /**
@@ -22,12 +23,12 @@ class DateUtils {
      *
      * @return int
      */
-    public static function calculateDayDiff($date1, $date2="Now") {
+    public static function calculateDayDiff($date1, $date2="Now", $timezone) {
         if (!($date1 instanceof DateTime)) {
-            $date1 = new DateTime($date1);
+            $date1 = new DateTime($date1, $timezone);
         }
         if (!($date2 instanceof DateTime)) {
-            $date2 = new DateTime($date2);
+            $date2 = new DateTime($date2, $timezone);
         }
         // Set the period as "1 day" for the interval
         if ($date1 == $date2) {
