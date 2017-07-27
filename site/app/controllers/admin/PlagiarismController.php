@@ -40,7 +40,7 @@ class PlagiarismController extends AbstractController {
     public function plagiarismTree() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
-        $assignments = scandir("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/");
+        $assignments = array_diff(scandir("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments);
     }
 }
