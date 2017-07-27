@@ -332,7 +332,7 @@ HTML;
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable_type_options electronic_file" id="electronic_file" >
                 <br />
-                Is this a team assignment?:
+                Is this a team assignment?
                 <fieldset>
                     <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes"
 HTML;
@@ -344,12 +344,12 @@ HTML;
                 if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
                 > No
-                    <div class="team_assignment team_yes" id="team_date">
+                    <div class="team_assignment team_yes" id="team_yes">
                         <br />
                         What is the maximum team size? <input style="width: 50px" name="eg_max_team_size" class="int_val" type="text" value="{$electronic_gradeable['eg_max_team_size']}"/>
                         <br />
                         What is the <em style='color: orange;'><b>Team Lock Date</b></em>? (Instructors can still manually manage teams):
-                        <input name="date_team_lock" id="date_team_lock" class="datepicker" type="text" value="{$electronic_gradeable['eg_team_lock_date']}"
+                        <input name="date_team_lock" id="date_team_lock" class="date_picker" type="text" value="{$electronic_gradeable['eg_team_lock_date']}"
                         style="cursor: auto; background-color: #FFF; width: 250px;">
                         <br />
                     </div>
@@ -1174,6 +1174,15 @@ function createCrossBrowserJSDate(val){
                 $('#rubric_questions').hide();
                 $('#grading_questions').hide();
             }
+
+            if($('#team_yes_radio').is(':checked')){
+                $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+                $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                $('#team_yes').show();
+            }
+            else {
+                $('#team_yes').hide();
+            }
         }
         else if ($('#radio_checkpoints').is(':checked')){
             var components = {$old_components};
@@ -1204,6 +1213,18 @@ function createCrossBrowserJSDate(val){
             $('input[name=gradeable_id]').attr('readonly', true);
         }
 
+        $('input:radio[name="team_assignment"]').change(
+    function(){
+        if($('#team_yes_radio').is(':checked')){
+            $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+            $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+            $('#team_yes').show();
+        }
+        else {
+            $('#team_yes').hide();
+        }
+    });
+
          $('input:radio[name="gradeable_type"]').change(
     function(){
         $('#required_type').hide();
@@ -1222,6 +1243,15 @@ function createCrossBrowserJSDate(val){
                    $('#grades_released_compare_date').html('Due Date');
                 } else { 
                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                }
+
+                if($('#team_yes_radio').is(':checked')){
+                    $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+                    $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                    $('#team_yes').show();
+                }
+                else {
+                    $('#team_yes').hide();
                 }
             }
             else if ($(this).val() == 'Checkpoints'){ 
@@ -1906,6 +1936,15 @@ $('#gradeable-form').on('submit', function(e){
                    $('#grades_released_compare_date').html('Due Date');
                 } else { 
                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                }
+
+                if($('#team_yes_radio').is(':checked')){
+                    $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+                    $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                    $('#team_yes').show();
+                }
+                else {
+                    $('#team_yes').hide();
                 }
             }
             else if ($(this).val() == 'Checkpoints'){ 
