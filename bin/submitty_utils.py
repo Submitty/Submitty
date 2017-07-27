@@ -20,9 +20,12 @@ def get_current_time():
 
 # convert a datetime object (with or without the timezone) to a string with a timezone
 def write_submitty_date(d=get_current_time()):
+    if not isinstance(d, datetime):
+        print ("ERROR:  ",d," is not a datetime object, it is of type ",type(d))
+        return d
     my_timezone = d.tzinfo
     if my_timezone is None:
-        print ("NO TIMEZONE ",d,"assuming local timezone")
+        print ("ERROR: NO TIMEZONE ",d," assuming local timezone")
         my_timezone = get_timezone()
         d = my_timezone.localize(d)
     answer = d.strftime("%Y-%m-%d %H:%M:%S%z")

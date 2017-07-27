@@ -376,12 +376,6 @@ def get_current_semester():
     return semester
 
 
-def datetime_str(datetime_obj):
-    if not isinstance(datetime_obj, datetime):
-        return datetime_obj
-    return datetime_obj.strftime('%Y-%m-%d %H:%M:%S%z')
-
-
 def parse_args():
     """
     Parses out the arguments that might be passed to this script as it's run as a commandline
@@ -1174,12 +1168,12 @@ class Gradeable(object):
         form_json['gradeable_title'] = self.title
         form_json['gradeable_type'] = self.get_gradeable_type_text()
         form_json['instructions_url'] = self.instructions_url
-        form_json['ta_view_date'] = datetime_str(self.ta_view_date)
+        form_json['ta_view_date'] = submitty_utils.write_submitty_date(self.ta_view_date)
         if self.type == 0:
-            form_json['date_submit'] = datetime_str(self.submission_open_date)
-            form_json['date_due'] = datetime_str(self.submission_due_date)
-        form_json['date_grade'] = datetime_str(self.grade_start_date)
-        form_json['date_released'] = datetime_str(self.grade_released_date)
+            form_json['date_submit'] = submitty_utils.write_submitty_date(self.submission_open_date)
+            form_json['date_due'] = submitty_utils.write_submitty_date(self.submission_due_date)
+        form_json['date_grade'] = submitty_utils.write_submitty_date(self.grade_start_date)
+        form_json['date_released'] = submitty_utils.write_submitty_date(self.grade_released_date)
 
         if self.type == 0:
             form_json['section_type'] = self.get_submission_type()
