@@ -52,42 +52,13 @@ HTML;
      * @return string
      */
     public function showGradeable($gradeable, $days_late) {
-        $upload_message = $this->core->getConfig()->getUploadMessage();
-        $current_version = $gradeable->getCurrentVersion();
-        $current_version_number = $gradeable->getCurrentVersionNumber();
-
-        $return = "";
-        if ($gradeable->getStudentView()) {
-            $return .= "student can view, ";
-        }
-        else {
-            $return .= "student can't view, ";
-        }
-        if ($gradeable->getStudentSubmit()) {
-            $return .= "student can submit, ";
-        }
-        else {
-            $return .= "student can't submit, ";
-        }
-        if ($gradeable->getStudentDownload()) {
-            $return .= "student can download, ";
-        }
-        else {
-            $return .= "student can't download, ";
-        }
-        if ($gradeable->getStudentAnyVersion()) {
-            $return .= "student can view/download any version.";
-        }
-        else {
-            $return .= "student can't view/download any version.";
-        }
-        return $return;
-
-
         // hiding entire page if user is not a grader and student cannot view
         if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
             return "";
         }
+        $upload_message = $this->core->getConfig()->getUploadMessage();
+        $current_version = $gradeable->getCurrentVersion();
+        $current_version_number = $gradeable->getCurrentVersionNumber();
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 HTML;

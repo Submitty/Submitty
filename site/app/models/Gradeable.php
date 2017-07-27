@@ -305,7 +305,7 @@ class Gradeable extends AbstractModel {
             $this->student_view = $details['eg_student_view'] === true;
             $this->student_submit = $details['eg_student_submit'] === true;
             $this->student_download = $details['eg_student_download'] === true;
-            $this->student_any_version = $details['eg_student_any_version'] === false;
+            $this->student_any_version = $details['eg_student_any_version'] === true;
             $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
