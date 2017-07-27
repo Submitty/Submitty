@@ -299,24 +299,54 @@ class ElectronicGraderController extends AbstractController {
         $user_id = $_POST['user_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $debug = "";
+        $mark_modified = false;
         foreach ($gradeable->getComponents() as $component) {
             if ($component->getId() != $_POST['gradeable_component_id']) {
                 continue;
             }
             else {
+                //checks if a mark has changed
+                $index = 0;
+                $temp_mark_selected = false;
+                foreach ($component->getMarks() as $mark) {
+                    $temp_mark_selected = ($_POST['marks'][$index]['selected'] == 'true') ? true : false;
+                    if($temp_mark_selected !== $mark->getHasMark()) {
+                        $mark_modified = true;
+                        break;
+                    }
+                    $index++;
+                }
+                if($mark_modified === false) {
+                    for ($i = $index; $i < $_POST['num_mark']; $i++) {
+                        if ($_POST['marks'][$index]['selected'] == 'true') {
+                            $mark_modified = true;
+                            break;
+                        }
+                    }
+                }
+                if($mark_modified === false) {
+                    if ($component->getComment() != $_POST['custom_message']) {
+                        $mark_modified = true;
+                    }
+                    if ($component->getScore() != $_POST['custom_points']) {
+                        $mark_modified = true;
+                    }
+                }
+
                 if($gradeable->getGdId() == null) {
                     $gradeable->saveData2();
                 }
-                if ($component->getGrader() === null) {
-                    $component->setGrader($this->core->getUser());
-                } else if($_POST['overwrite'] === "true") {
-                    $component->setGrader($this->core->getUser());
-                }                
-                $component->setGradedVersion($_POST['active_version']);
-                $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
-                $component->setComment($_POST['custom_message']);
-                $component->setScore($_POST['custom_points']);
-                $component->saveData($gradeable->getGdId());
+                if($mark_modified === true || true) {
+                    if ($component->getGrader() === null || $_POST['overwrite'] === "true") {
+                        $component->setGrader($this->core->getUser());
+                    }     
+                    $component->setGradedVersion($_POST['active_version']);
+                    $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                    $component->setComment($_POST['custom_message']);
+                    $component->setScore($_POST['custom_points']);
+                    $component->saveData($gradeable->getGdId());
+                }
+                
 
                 $index = 0;
                 // save existing marks
@@ -341,7 +371,8 @@ class ElectronicGraderController extends AbstractController {
                     $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                     $mark->saveData($gradeable->getGdId(), $component->getId());
                 }
-                $response = array('status' => $_POST['marks']);
+                $mark_modified = ($mark_modified === true) ? "true" : "false";
+                $response = array('status' => $mark_modified, 'modified' => $mark_modified);
                 $this->core->getOutput()->renderJson($response);
                 return $response;
             }

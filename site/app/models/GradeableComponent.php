@@ -108,6 +108,25 @@ class GradeableComponent extends AbstractModel {
             // will need to add a total score
             $this->score = floatval($details['gcd_score']);
             $this->comment = $details['gcd_component_comment'];
+            $this->score = floatval($details['gcd_score']);
+            if (!$this->is_text) {
+                if ($this->max_value > 0) {
+                    if ($this->max_value < $this->score) {
+                        $this->score = $this->max_value;
+                    }
+                    elseif ($this->score < 0) {
+                        $this->score = 0;
+                    }
+                }
+                else {
+                    if ($this->max_value > $this->score) {
+                        $this->score = $this->max_value;
+                    }
+                    elseif ($this->score > 0) {
+                        $this->score = 0;
+                    }
+                }
+            }
             if ($this->comment === null) {
                 $this->comment = "";
             }

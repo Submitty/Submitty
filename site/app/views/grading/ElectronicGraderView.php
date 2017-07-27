@@ -557,7 +557,7 @@ HTML;
 </div>
 
 <div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
-    <span class="grading_label">Grading Rubric</span>
+    <span class="grading_label">Grading Rubric</span> <span style="float: right; position: relative; top: 10px; right: 1%;"> Overwrite Grader: <input type='checkbox' id="overwrite-id" name='overwrite' value='1' /> </span>
 HTML;
         $disabled = '';
         if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion() || $gradeable->getCurrentVersionNumber() == 0){
@@ -642,14 +642,14 @@ HTML;
             //get the grader's id if it exists
             $grader_id = "";
             if($question->getGrader() === null) {
-                $grader_id = "no one!";
+                $grader_id = "Ungraded!";
             } else {
-                $grader_id = $question->getGrader()->getId();
+                $grader_id = "Graded by " . $question->getGrader()->getId();
             }
 
             $return .= <<<HTML
             <span onclick=""> <i id="icon-{$c}" data-question_id="{$question->getId()}" class="fa fa-window-maximize" style="visibility: visible;"></i>
-            <span id="graded-by-{$c}" style="float: right; font-style: italic;">Graded by {$grader_id}</span> 
+            <span id="graded-by-{$c}" style="float: right; font-style: italic;">{$grader_id}</span> 
             </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
 HTML;
 
@@ -754,11 +754,11 @@ HTML;
                 $icon_mark = ($mark->getHasMark() === true) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
                 <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
-                    <td colspan="1" style="{$background}; text-align: center; width: 15%;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
+                    <td colspan="1" style="{$background}; text-align: center; width: 12%;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
                         <span onclick="selectMark(this);"> <i class="fa {$icon_mark}" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
-                    <td colspan="3" style="{$background}">
-                        <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width:95%; resize:none; float:left;" {$noChange}>{$mark_text}</textarea>
+                    <td colspan="3" style="{$background}; width: 88%">
+                        <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width: 95%; resize:none; float:left;" {$noChange}>{$mark_text}</textarea>
                     </td>
                 </tr>
 HTML;
@@ -811,9 +811,6 @@ HTML;
                 </tr>
             </tbody>
         </table>
-        <div style="width:100%; margin-left:10px;">
-            <br />Overwrite Grader: <input type='checkbox' id="overwrite-id" name='overwrite' value='1' /><br />
-        </div>
 HTML;
         $return .= <<<HTML
         <div style="width:100%;">
@@ -1145,10 +1142,6 @@ HTML;
                 overwrite = "false";
             }
 
-            if(($('#graded-by-' + num)[0].innerHTML === "Graded by no one!") || (overwrite === "true")) {
-                $('#graded-by-' + num)[0].innerHTML = "Graded by you!";
-            }
-
             $.ajax({
                 type: "POST",
                 url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
@@ -1166,6 +1159,12 @@ HTML;
                 success: function(data) {
                     console.log("success");
                     alert(data);
+                    data = JSON.parse(data);
+                    if (data['modified'] === 'true') {
+                        if(($('#graded-by-' + num)[0].innerHTML === "Ungraded!") || (overwrite === "true")) {
+                            $('#graded-by-' + num)[0].innerHTML = "Graded by you!";
+                        }
+                    }
                 },
                 error: function() {
                     console.log("Something went wront with saving marks...");
