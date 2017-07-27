@@ -5,6 +5,11 @@ use app\views\AbstractView;
 
 class PlagiarismView extends AbstractView {
     public function plagiarismCompare($semester, $course, $assignment, $studenta, $studentb) {
+        if (strpos($semester, '.') === FALSE || strpos($semester == '/') === FALSE) throw new \InvalidArgumentException("Invalid semester");
+        if (strpos($course, '.') === FALSE || strpos($course == '/') == FALSE) throw new \InvalidArgumentException("Invalid course");
+        if (strpos($assignment, '.') === FALSE || strpos($assignment == '/') == FALSE) throw new \InvalidArgumentException("Invalid assignment");
+        if (strpos($studenta, '.') === FALSE || strpos($studenta == '/') == FALSE) throw new \InvalidArgumentException("Invalid assignment");
+        if (strpos($studentb, '.') === FALSE || strpos($studentb == '/') == FALSE) throw new \InvalidArgumentException("Invalid assignment");
         $return = "";
         $return .= <<<HTML
 <div class="content" style="height: 85vh">
@@ -17,6 +22,9 @@ HTML;
     }
 
     public function plagiarismIndex($semester, $course, $assignment) {
+        if (strpos($semester, '.') === FALSE || strpos($semester == '/') === FALSE) throw new \InvalidArgumentException("Invalid semester");
+        if (strpos($course, '.') === FALSE || strpos($course == '/') == FALSE) throw new \InvalidArgumentException("Invalid course");
+        if (strpos($assignment, '.') === FALSE || strpos($assignment == '/') == FALSE) throw new \InvalidArgumentException("Invalid assignment");
         $return = "";
         $return .= <<<HTML
 <div class="content">
