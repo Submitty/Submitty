@@ -244,7 +244,7 @@ class AdminGradeableView extends AbstractView {
 </style>
 <div id="container-rubric">
     <form id="gradeable-form" class="form-signin" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => $action))}" 
-          method="post" enctype="multipart/form-data" onsubmit="return checkForm()"> 
+          method="post" enctype="multipart/form-data"> 
 
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
@@ -931,7 +931,7 @@ function createCrossBrowserJSDate(val){
 
         $(function() {
             $( ".date_picker" ).datetimepicker({
-                dateFormat: 'yy-dd-mm',
+                dateFormat: 'yy-mm-dd',
                 timeFormat: "HH:mm:ssz",
                 showButtonPanel: true,
                 showTimezone: false,
@@ -946,7 +946,7 @@ function createCrossBrowserJSDate(val){
                         $( "<button>", {
                             text: "Infinity",
                             click: function() {
-                                $.datepicker._curInst.input.datepicker('setDate', "12/31/9999 23:59:59-0400").datepicker('hide');
+                                $.datepicker._curInst.input.datepicker('setDate', "9999-12-31 23:59:59-0400").datepicker('hide');
                             }
                         }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
                     }, 1 );
@@ -1252,6 +1252,7 @@ function createCrossBrowserJSDate(val){
     });
 
 $('#gradeable-form').on('submit', function(e){
+        return checkForm()
          $('<input />').attr('type', 'hidden')
             .attr('name', 'gradeableJSON')
             .attr('value', JSON.stringify($('form').serializeObject()))
