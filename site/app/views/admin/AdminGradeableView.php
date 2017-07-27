@@ -25,9 +25,9 @@ class AdminGradeableView extends AbstractView {
 	public function show_add_gradeable($type_of_action, $initial_data = array(""), $data = array("")) {
 
         $electronic_gradeable = array();
-        $TA_beta_date = date('m/d/Y 23:59:59', strtotime( '-1 days' ));
-        $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y 23:59:59', strtotime( '0 days' ));
-        $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y 23:59:59', strtotime( '+7 days' ));
+        $TA_beta_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
+        $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
+        $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
         $electronic_gradeable['eg_subdirectory'] = "temp";
         $electronic_gradeable['eg_config_path'] = "";
         $electronic_gradeable['eg_late_days'] = 2;
@@ -37,8 +37,8 @@ class AdminGradeableView extends AbstractView {
         $peer_yes_checked = false;
         $peer_no_checked = true;
         $peer_grade_set = 3;
-        $TA_grade_open_date = date('m/d/Y 23:59:59', strtotime( '+10 days' ));
-        $TA_grade_release_date = date('m/d/Y 23:59:59', strtotime( '+14 days' ));
+        $TA_grade_open_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
+        $TA_grade_release_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
 		$BASE_URL = "http://192.168.56.101/hwgrading";
 		$action = "upload_new_gradeable"; //decides how the page's data is displayed
@@ -79,9 +79,9 @@ class AdminGradeableView extends AbstractView {
             $string = "Edit";
             $button_string = "Edit";
             $extra = ($data[2]) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
-            $TA_beta_date = date('m/d/Y H:i:s', strtotime($data[0]['g_ta_view_start_date']));
-            $TA_grade_open_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_start_date']));
-            $TA_grade_release_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_released_date']));
+            $TA_beta_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_ta_view_start_date']));
+            $TA_grade_open_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_start_date']));
+            $TA_grade_release_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_released_date']));
             $gradeable_submission_id = $data[0]['g_id'];
             $gradeable_name = $data[0]['g_title'];
             $g_instructions_url = $data[0]['g_instructions_url'];
@@ -93,8 +93,8 @@ class AdminGradeableView extends AbstractView {
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) { //if the gradeable edited is electronic gradeable
-                $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_open_date']));
-                $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_due_date']));
+                $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_open_date']));
+                $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_due_date']));
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $precision = $data[3]['eg_precision'];
@@ -244,7 +244,7 @@ class AdminGradeableView extends AbstractView {
 </style>
 <div id="container-rubric">
     <form id="gradeable-form" class="form-signin" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => $action))}" 
-          method="post" enctype="multipart/form-data" onsubmit="return checkForm()"> 
+          method="post" enctype="multipart/form-data"> 
 
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
@@ -931,7 +931,8 @@ function createCrossBrowserJSDate(val){
 
         $(function() {
             $( ".date_picker" ).datetimepicker({
-                timeFormat: "HH:mm:ss",
+                dateFormat: 'yy-mm-dd',
+                timeFormat: "HH:mm:ssz",
                 showButtonPanel: true,
                 showTimezone: false,
                 showMillisec: false,
@@ -945,7 +946,7 @@ function createCrossBrowserJSDate(val){
                         $( "<button>", {
                             text: "Infinity",
                             click: function() {
-                                $.datepicker._curInst.input.datepicker('setDate', "12/31/9999 23:59:59").datepicker('hide');
+                                $.datepicker._curInst.input.datepicker('setDate', "9999-12-31 23:59:59-0400").datepicker('hide');
                             }
                         }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
                     }, 1 );
@@ -1251,6 +1252,7 @@ function createCrossBrowserJSDate(val){
     });
 
 $('#gradeable-form').on('submit', function(e){
+        return checkForm()
          $('<input />').attr('type', 'hidden')
             .attr('name', 'gradeableJSON')
             .attr('value', JSON.stringify($('form').serializeObject()))
