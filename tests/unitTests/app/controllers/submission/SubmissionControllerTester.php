@@ -772,12 +772,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         FileUtils::recursiveChmod($this->config['course_path'], 0777);
     }
 
+    // failure to create it the normal way
     public function testFailureToCreateVersionFolder() {
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"));
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), 0444);
         $return = $this->runController();
         $this->assertTrue($return['error']);
-        $this->assertEquals("Failed to make folder for the current version.", $return['message']);
+        $this->assertEquals("Warning: some versions may not be in sync with the database.", $return['message']);
         $this->assertFalse($return['success']);
         FileUtils::recursiveChmod($this->config['course_path'], 0777);
     }
@@ -789,7 +790,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
         $return = $this->runController();
-        // $this->assertTrue($return['error']);
+        $this->assertTrue($return['error']);
         $this->assertEquals("Failed to make the folder for part 1.", $return['message']);
         $this->assertFalse($return['success']);
         FileUtils::recursiveChmod($this->config['course_path'], 0777);

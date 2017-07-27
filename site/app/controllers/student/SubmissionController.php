@@ -642,20 +642,23 @@ class SubmissionController extends AbstractController {
         $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
         $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
-                return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
+            return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
     
         $new_version = count(FileUtils::getAllDirs($user_path)) + 1;
         $new_version_2 = $gradeable->getHighestVersion() + 1;
         if($new_version !== $new_version_2){
             $_SESSION['messages']['notice'][] = "Warning: some versions may not be in sync with the database.";
+            if($this->core->isTesting()){
+                return $this->uploadResult("Warning: some versions may not be in sync with the database.", false);                
+            }
             if($svn_checkout) {
                 $new_version = $new_version_2;
             }
         }
         $version_path = FileUtils::joinPaths($user_path, $new_version);
         
-        if (!FileUtils::createDir($version_path) || ($this->core->isTesting() && !FileUtils::createDir(FileUtils::joinPaths($user_path, $new_version_2)))) {
+        if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make folder for the current version.", false);
         }
     
@@ -668,7 +671,7 @@ class SubmissionController extends AbstractController {
         if ($gradeable->getNumParts() > 1) {
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 $part_path[$i] = FileUtils::joinPaths($version_path, "part".$i);
-                if (!FileUtils::createDir($part_path[$i]) || ($this->core->isTesting() &&!FileUtils::createDir(FileUtils::joinPaths($user_path, $new_version_2)))) {
+                if (!FileUtils::createDir($part_path[$i])) {
                     return $this->uploadResult("Failed to make the folder for part {$i}.", false);
                 }
             }
@@ -842,7 +845,7 @@ class SubmissionController extends AbstractController {
                             if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
                                 $dst = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
                                 $dstTesting = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
-                                if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst) || ($this->core->isTesting() && !@copy($uploaded_files[$i]["tmp_name"][$j], $dstTesting))) {
+                                if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
                                     return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
                                 }
                             }
