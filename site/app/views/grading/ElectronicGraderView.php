@@ -363,14 +363,14 @@ HTML;
         $next_href = $next_id == '' ? '' : "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual))}\"";
         $return = <<<HTML
 <div class="grading_toolbar">
-    <a {$prev_href}><i title="Go to the previous student" class="icon-left"></i></a>
-    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="icon-home" ></i></a>
-    <a {$next_href}><i title="Go to the next student" class="icon-right"></i></a>
-    <i title="Reset Rubric Panel Positions (Press R)" class="icon-refresh" onclick="handleKeyPress('KeyR');"></i>
-    <i title="Show/Hide Auto-Grading Testcases (Press A)" class="icon-auto-grading-results" onclick="handleKeyPress('KeyA');"></i>
-    <i title="Show/Hide Grading Rubric (Press G)" class="icon-grading-panel" onclick="handleKeyPress('KeyG');"></i>
-    <i title="Show/Hide Submission and Results Browser (Press O)" class="icon-files" onclick="handleKeyPress('KeyO');"></i>
-    <i title="Show/Hide Student Information (Press S)" class="icon-status" onclick="handleKeyPress('KeyS');"></i>
+    <a {$prev_href}><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
+    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
+    <a {$next_href}><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
+    <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="handleKeyPress('KeyR');"></i>
+    <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="handleKeyPress('KeyA');"></i>
+    <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="handleKeyPress('KeyG');"></i>
+    <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="handleKeyPress('KeyO');"></i>
+    <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="handleKeyPress('KeyS');"></i>
 </div>
 
 <div class="progress_bar">
@@ -434,7 +434,7 @@ HTML;
                 <div>
                     <div class="file-viewer">
                         <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count})'>
-                            <span class='icon-plus' style='vertical-align:text-bottom;'></span>
+                            <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
                         {$dir}</a> &nbsp;
                         <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
                         <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
@@ -453,7 +453,7 @@ HTML;
             <div>
                 <div class="div-viewer">
                     <a class='openAllDiv' onclick='openDiv({$count});'>
-                        <span class='icon-folder-closed' style='vertical-align:text-top;'></span>
+                        <span class="fa fa-folder" style='vertical-align:text-top;'></span>
                     {$dir}</a> 
                 </div><br/>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none'>
@@ -607,21 +607,24 @@ HTML;
             if($question->getIsExtraCredit()) {
                 $return .= <<<HTML
                     <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-                        <i class="icon-plus"></i> $message {$note}
+                        <i class="fa fa-plus-circle" aria-hidden="true"></i> $message {$note}
 HTML;
             }
             else if($penalty) {
                 $return .= <<<HTML
                     <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-                        <i class="icon-minus"></i> $message {$note}
+                        <i class="fa fa-minus-circle" aria-hidden="true"></i> $message {$note}
 HTML;
             }
             else {
                 $return .= <<<HTML
                     <td style="font-size: 12px;" colspan="4">
-                        $message {$note}
+                        <b>{$message}</b>
 HTML;
             }
+            $return .= <<<HTML
+            <span onclick="openClose({$c})"> <i id="icon-{$c}" class="fa fa-window-maximize" style="visibility: visible; cursor: pointer;"></i> </span> {$note} 
+HTML;
 
             $student_note = htmlentities($question->getStudentComment());
             if ($student_note != ''){
@@ -653,8 +656,16 @@ HTML;
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
-                            <textarea name="comment-{$question->getOrder()}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$question->getComment()}</textarea>
+                            <textarea id="rubric-textarea-{$c}" name="comment-{$question->getOrder()}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; min-height:80px; resize:none; float:left;" placeholder="Message for the student..." comment-position="0" {$disabled}>{$question->getComment()}</textarea>
                         </div>
+                    </td>
+                </tr>
+                <tr id="extra-{$c}" style="{$background}; display: none" colspan="4">
+                    <td colspan="1" style="{$background}; text-align: center;">
+                        <span onclick=""> <i class="fa fa-plus-square" style="visibility: visible; cursor: pointer;"></i> </span>
+                    </td>
+                    <td colspan="3" style="{$background}">
+                        <textarea onkeyup="autoResizeComment(event);" rows="1" style="width:98%; resize:none; float:left;"></textarea>
                     </td>
                 </tr>
 HTML;
@@ -678,14 +689,14 @@ HTML;
         if ($gradeable->beenTAgraded()) {
             // assumes that the person who graded the first question graded everything... also in electronicGraderController:150...have to rewrite to be per component
             $graders = array();
-            foreach($gradeable->getComponents() as $component){
-                $graders[] = $component->getGrader()->getId();
-            }
+            //foreach($gradeable->getComponents() as $component){
+            //    $graders[] = $component->getGrader()->getId();
+            //}
             $graders = array_unique($graders);
             $graders = implode(",", $graders);
             $return .= <<<HTML
         <div style="width:100%; margin-left:10px;">
-            Graded By: {$graders}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' {$disabled}/><br />
+            Graded By: No one<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' {$disabled}/><br />
         </div>
 HTML;
         }
@@ -740,12 +751,12 @@ HTML;
         if (!iframe.hasClass('shown')) {
             iframe.show();
             iframe.addClass('shown');
-            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-plus').addClass('icon-minus');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-plus-circle').addClass('fa-minus-circle');
         }
         else {
             iframe.hide();
             iframe.removeClass('shown');
-            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-minus').addClass('icon-plus');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-minus-circle').addClass('fa-plus-circle');
         }
         return false;
     }
@@ -779,6 +790,18 @@ HTML;
         total = Math.max(parseFloat(total + {$gradeable->getGradedAutograderPoints()}), 0);
 
         $("#score_total").html(total+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});
+    }
+
+    function openClose(row_id) {
+        var x = document.getElementById('extra-' + row_id);
+        $("#icon-" + row_id).toggleClass('fa-window-maximize fa-window-close-o');
+        if (x.style.display === 'none') {
+            x.style.display = '';
+            document.getElementById("rubric-textarea-" + row_id).disabled = true;
+        } else {
+            x.style.display = 'none';
+            document.getElementById("rubric-textarea-" + row_id).disabled = false;
+        }
     }
 </script>
 HTML;
