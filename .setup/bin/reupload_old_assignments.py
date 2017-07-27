@@ -13,7 +13,7 @@ import submitty_utils
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
-DB_PASS = "Graphics"
+DB_PASS = "hsdbu"
 
 
 
