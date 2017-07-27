@@ -121,7 +121,7 @@ fi
 
 # set the permissions of the top level directory
 chown  root:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_INSTALL_DIR}
-chmod  751                          ${SUBMITTY_INSTALL_DIR}
+chmod  751                            ${SUBMITTY_INSTALL_DIR}
 
 
 ########################################################################################################################
@@ -144,7 +144,7 @@ chmod  751                                        ${SUBMITTY_DATA_DIR}
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
 chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
 chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
-chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs
+chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
@@ -156,15 +156,15 @@ mkdir -p $SUBMITTY_DATA_DIR/to_be_built
 # set the permissions of these directories
 
 #hwphp will write items to this list, hwcron will remove them
-chown  $HWCRON_USER:$HWCRONPHP_GROUP        $SUBMITTY_DATA_DIR/to_be_graded_interactive
-chmod  770                                  $SUBMITTY_DATA_DIR/to_be_graded_interactive
+chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_interactive
+chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_interactive
 #course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
-chown  $HWCRON_USER:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/to_be_graded_batch
-chmod  770                                  $SUBMITTY_DATA_DIR/to_be_graded_batch
+chown  ${HWCRON_USER}:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/to_be_graded_batch
+chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_batch
 
 #hwphp will write items to this list, hwcron will remove them
-chown  $HWCRON_USER:$HWCRONPHP_GROUP        $SUBMITTY_DATA_DIR/to_be_built
-chmod  770                                  $SUBMITTY_DATA_DIR/to_be_built
+chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
+chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
 
 
 
@@ -266,7 +266,7 @@ echo -e "Copy the scripts"
 # make the directory (has a different name)
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin
-chmod 751 ${SUBMITTY_INSTALL_DIR}/bin
+chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
 
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
@@ -291,39 +291,43 @@ find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-chown ${HWCRON_USER}:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 
-chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
-chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
+# course builders & hwcron need access to these scripts
+chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
+chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+
+# hwcron only things
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
-chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
-
-# fix the permissions specifically of the build_config_upload.py script
-chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
+
+# root only things
+chown root:root ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
+chown root:root ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
+chown root:root ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
+chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
+chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
+chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
+
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
