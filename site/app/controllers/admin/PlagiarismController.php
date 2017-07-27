@@ -15,7 +15,7 @@ class PlagiarismController extends AbstractController {
                 $this->plagiarismIndex();
                 break;
             default:
-                $this->core->getOutput()->addBreadcrumb("Plagiarism");
+                $this->core->getOutput()->addBreadcrumb('Plagiarism');
                 $this->plagiarismTree();
                 break;
         }
@@ -40,7 +40,7 @@ class PlagiarismController extends AbstractController {
     public function plagiarismTree() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
-        $assignments = array('cpp_cats');
+        $assignments = scandir("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/");
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments);
     }
 }
