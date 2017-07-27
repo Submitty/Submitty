@@ -7,7 +7,7 @@ class PlagiarismView extends AbstractView {
     public function plagiarismCompare($semester, $course, $assignment, $studenta, $studentb) {
         $return = "";
         $return .= <<<HTML
-<div class="content">
+<div class="content" style="height: 110vh">
 HTML;
         $return .= file_get_contents("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/$assignment/compare/" . $studenta . "_" . $studentb . ".html");
         $return .= <<<HTML
@@ -31,7 +31,7 @@ HTML;
     public function plagiarismTree($semester, $course, $assignments) {
         $return = "";
         $return .= <<<HTML
-<div class="content" style="height: 110vh"><ul>
+<div class="content"><ul>
 HTML;
         foreach ($assignments as $assignment) {
             $return .= "<li><a href=\"{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'index', 'assignment' => $assignment))}\">$assignment</a></li>";
