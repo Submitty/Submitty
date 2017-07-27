@@ -7,7 +7,7 @@ class PlagiarismView extends AbstractView {
     public function plagiarismCompare($semester, $course, $assignment, $studenta, $studentb) {
         $return = "";
         $return .= <<<HTML
-<div class="content" style="height: 110vh">
+<div class="content" style="height: 85vh">
 HTML;
         $return .= file_get_contents("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/$assignment/compare/" . $studenta . "_" . $studentb . ".html");
         $return .= <<<HTML
