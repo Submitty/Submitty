@@ -33,7 +33,7 @@ HTML;
         $return = "";
         $return .= <<<HTML
 <div class="content">
-<h1 class="centered">Plagiarism Detection</h1>
+<h1 style="text-align: center">Plagiarism Detection</h1>
 <ul>
 HTML;
         foreach ($assignments as $assignment) {
