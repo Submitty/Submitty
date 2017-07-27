@@ -28,7 +28,7 @@ HTML;
         return $return;
     }
 
-    public function plagiarismIndex($semester, $course, $assignments) {
+    public function plagiarismTree($semester, $course, $assignments) {
         $return = "";
         $return .= <<<HTML
 <div class="content"><ul>
