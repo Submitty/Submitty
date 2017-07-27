@@ -638,8 +638,19 @@ HTML;
                         <b>{$message}</b>
 HTML;
             }
+
+            //get the grader's id if it exists
+            $grader_id = "";
+            if($question->getGrader() === null) {
+                $grader_id = "no one!";
+            } else {
+                $grader_id = $question->getGrader()->getId();
+            }
+
             $return .= <<<HTML
-            <span onclick=""> <i id="icon-{$c}" data-question_id="{$question->getId()}" class="fa fa-window-maximize" style="visibility: visible;"></i> </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
+            <span onclick=""> <i id="icon-{$c}" data-question_id="{$question->getId()}" class="fa fa-window-maximize" style="visibility: visible;"></i>
+            <span id="graded-by-{$c}" style="float: right; font-style: italic;">Graded by {$grader_id}</span> 
+            </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());
@@ -686,6 +697,11 @@ HTML;
                     $initial_text .= "<br>* " . $question->getComment();
                 }
             }
+
+            if($initial_text == "") {
+                $initial_text = "Click me to grade!";
+            }
+
             $question_points += $question->getScore();
             if ($type === 0) {
                 if ($question_points < 0) $question_points = 0;
@@ -704,7 +720,7 @@ HTML;
             $return .= <<<HTML
                 <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
-                        <strong><span id="grade-{$c}" name="grade-{$c}" data-max_points="{$question->getMaxValue()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
+                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-max_points="{$question->getMaxValue()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
@@ -738,7 +754,7 @@ HTML;
                 $icon_mark = ($mark->getHasMark() === true) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
                 <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
-                    <td colspan="1" style="{$background}; text-align: center; width: 7%;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
+                    <td colspan="1" style="{$background}; text-align: center; width: 15%;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
                         <span onclick="selectMark(this);"> <i class="fa {$icon_mark}" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}">
@@ -775,7 +791,12 @@ HTML;
             </tr>
             <tr onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-2, {$num_questions});">
                 <td colspan="4">
-                    <textarea name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
+                    <textarea id="comment-general-id" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
+                </td>
+            </tr>
+            <tr id="done-general" style="display: none;">
+                <td colspan="4">
+                    <span onclick="saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-1, {$num_questions});" style=" cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                 </td>
             </tr>
 HTML;
@@ -789,43 +810,15 @@ HTML;
                     </td>
                 </tr>
             </tbody>
-        </table><br/>
-HTML;
-        if ($gradeable->beenTAgraded()) {
-            // assumes that the person who graded the first question graded everything... also in electronicGraderController:150...have to rewrite to be per component
-            $return .= <<<HTML
+        </table>
         <div style="width:100%; margin-left:10px;">
-            <br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br />
+            <br />Overwrite Grader: <input type='checkbox' id="overwrite-id" name='overwrite' value='1' /><br />
         </div>
 HTML;
-        }
-        else { //Adding this checkbox to simplify checking for grader overwrite.  It's hidden from view so that the first time someone grades, $_POST['overwrite'] is guarenteed to exist
-            $return .= <<<HTML
-        <input type='checkbox' class='hidden' name='overwrite' value='1' checked='checked' style='display:none;' /> 
-HTML;
-        }
         $return .= <<<HTML
         <div style="width:100%;">
 HTML;
         $now = new \DateTime('now');        
-        if (!($now < $gradeable->getGradeStartDate()) && ($total_points > 0)) {
-            if($gradeable->beenTAgraded()) {
-                $return .= <<<HTML
-            <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);" {$disabled}/>
-HTML;
-            }
-            else {
-                $return .= <<<HTML
-            <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade" {$disabled}/>
-HTML;
-            }
-        }
-        else {
-            $return .= <<<HTML
-            <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
-        <div style="width:100%; text-align:left; color:#777;">This homework has not been opened for grading.</div>
-HTML;
-        }
         $return .= <<<HTML
         </div>
     </form>
@@ -881,14 +874,25 @@ HTML;
         var total=0;
 
         $('#rubric-table').find('.grades').each(function() {
-            if(!isNaN(parseFloat($(this).val()))) {
-                total += parseFloat($(this).val());
+            if(!isNaN(parseFloat($(this)[0].innerHTML))) {
+                total += parseFloat($(this)[0].innerHTML);
             }
         });
             
         total = Math.max(parseFloat(total + {$gradeable->getGradedAutograderPoints()}), 0);
 
         $("#score_total").html(total+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});
+    }
+
+    function fixMarkPointValue(me) {
+        var max = parseFloat($(me).attr('max'));
+        var min = parseFloat($(me).attr('min'));
+        var current_value = parseFloat($(me).val());
+        if (current_value > max) {
+            $(me).val(max);
+        } else if (current_value < min) {
+            $(me).val(min);
+        }
     }
 
     function addMark(me, num, background, min, max, precision) {
@@ -905,7 +909,7 @@ HTML;
         var new_num = last_num + 1;
         current_row.before(' \
 <tr id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'"> \
-    <td colspan="1" style="'+background+'; text-align: center;"> <input name="mark_points_'+num+'_'+new_num+'" type="number" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none;"> \
+    <td colspan="1" style="'+background+'; text-align: center;"> <input name="mark_points_'+num+'_'+new_num+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none;"> \
                         <span onclick="selectMark(this);"> <i class="fa fa-square-o" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
     </td> \
     <td colspan="3" style="'+background+'"> \
@@ -948,6 +952,14 @@ HTML;
     function openClose(row_id, num_questions) {
         var row_num = parseInt(row_id);
         var total_num = parseInt(num_questions);
+        //-2 means general comment
+        general_comment = document.getElementById('done-general');
+        if(row_num === -2) {
+            general_comment.style.display = '';
+        } else {
+            general_comment.style.display = 'none';
+        }
+
         for (var x = 1; x <= num_questions; x++) {
             var current = document.getElementById('extra-' + x);
             var current_summary = document.getElementById('summary-' + x);
@@ -996,10 +1008,30 @@ HTML;
         }
     }
 
+    //num === -3 means save gradeable comment
     //num === -2 means save last opened component
     //num === -1 means save all components, TO DO?
     function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
-        if (num === -2) {
+        if (num === -3) {
+            var comment_row = $('#comment-general-id');
+            var gradeable_comment = comment_row.val();
+            $.ajax({
+                type: "POST",
+                url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_gradeable_comment'}),
+                data: {
+                    'gradeable_id' : gradeable_id,
+                    'user_id' : user_id,
+                    'active_version' : active_version,
+                    'gradeable_comment' : gradeable_comment
+                },
+                success: function(data) {
+                    console.log("success");
+                },
+                error: function() {
+                    console.log("There was an error with saving the gradeable comment.");
+                }
+            })
+        } else if (num === -2) {
             var index = 1;
             var found = false;
             var doesExist = ($('#icon-' + index).length) ? true : false;
@@ -1019,6 +1051,9 @@ HTML;
             if (found === true) {
                 var gradeable_component_id = parseInt($('#icon-' + index)[0].dataset.question_id);
                 saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id);
+            } else
+            {
+                saveMark(-3, gradeable_id, user_id, active_version);
             }
         } else if (num === -1) {
 
@@ -1102,6 +1137,18 @@ HTML;
             current_question_text[0].innerHTML = new_text;
 
             calculatePercentageTotal();
+
+            var overwrite = "false";
+            if($('#overwrite-id').is(':checked')) {
+                overwrite = "true";
+            } else {
+                overwrite = "false";
+            }
+
+            if(($('#graded-by-' + num)[0].innerHTML === "Graded by no one!") || (overwrite === "true")) {
+                $('#graded-by-' + num)[0].innerHTML = "Graded by you!";
+            }
+
             $.ajax({
                 type: "POST",
                 url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
@@ -1113,6 +1160,7 @@ HTML;
                     'active_version' : active_version,
                     'custom_points' : custom_points,
                     'custom_message' : custom_message,
+                    'overwrite' : overwrite,
                     marks : mark_data
                 },
                 success: function(data) {

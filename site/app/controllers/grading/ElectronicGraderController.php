@@ -25,6 +25,9 @@ class ElectronicGraderController extends AbstractController {
             case 'save_one_component':
                 $this->saveSingleComponent();
                 break;
+            case 'save_gradeable_comment':
+                $this->saveGradeableComment();
+                break;
             default:
                 $this->showStatus();
                 break;
@@ -303,9 +306,12 @@ class ElectronicGraderController extends AbstractController {
             else {
                 if($gradeable->getGdId() == null) {
                     $gradeable->saveData2();
-                    $debug = "fg";
                 }
-                $component->setGrader($this->core->getUser());
+                if ($component->getGrader() === null) {
+                    $component->setGrader($this->core->getUser());
+                } else if($_POST['overwrite'] === "true") {
+                    $component->setGrader($this->core->getUser());
+                }                
                 $component->setGradedVersion($_POST['active_version']);
                 $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                 $component->setComment($_POST['custom_message']);
@@ -340,5 +346,13 @@ class ElectronicGraderController extends AbstractController {
                 return $response;
             }
         }
+    }
+
+    public function saveGradeableComment() {
+        $gradeable_id = $_POST['gradeable_id'];
+        $user_id = $_POST['user_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        $gradeable->setOverallComment($_POST['gradeable_comment']);
+        $gradeable->saveData2();
     }
 }

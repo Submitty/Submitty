@@ -500,7 +500,7 @@ HTML;
             }
             $html_output .= <<<HTML
                 <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
-                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                 <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
                 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -1502,6 +1502,17 @@ $('#gradeable-form').on('submit', function(e){
         }
     }
 
+    function fixMarkPointValue(me) {
+        var max = parseFloat($(me).attr('max'));
+        var min = parseFloat($(me).attr('min'));
+        var current_value = parseFloat($(me).val());
+        if (current_value > max) {
+            $(me).val(max);
+        } else if (current_value < min) {
+            $(me).val(min);
+        }
+    }
+
     function calculatePercentageTotal() {
         var total = 0;
         var ec = 0;
@@ -1923,7 +1934,7 @@ $('#gradeable-form').on('submit', function(e){
         var new_num = last_num + 1;
         $("#rubric_add_deduct_" + num).before('\
 <div id="deduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
-<i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
 <textarea rows="1" placeholder="Comment" name="deduct_text_'+num+'_'+new_num+'" style="resize: none; width: 81.5%;"></textarea> \
 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
@@ -2030,43 +2041,6 @@ $('#gradeable-form').on('submit', function(e){
                 $(this).find("input").val($(this).find("input").val() * -1);
             }            
         });
-    }
-
-    function addDeduct(me, num){
-        var last_num = -10;
-        var min = 0;
-        var max = 0;
-        var current_row = $(me.parentElement.parentElement.parentElement);
-        var radio_value = current_row.find('input[name=deduct_radio_'+num+']:checked').val();
-        if(radio_value == "deduction") {
-            min = -1000;
-            max = 0;
-        }
-        else if(radio_value == "addition") {
-            min = 0;
-            max = 1000;
-        }
-        else {
-            min = 0;
-            max = 0;
-        }
-        var current = $('[name=deduct_'+num+']').last().attr('id');
-        if (current == null) {
-            last_num = -1;
-        } 
-        else {
-            last_num = parseInt($('[name=deduct_'+num+']').last().attr('id').split('-')[2]);
-        }
-        var new_num = last_num + 1;
-        $("#rubric_add_deduct_" + num).before('\
-<div id="deduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
-<i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
-<textarea rows="1" placeholder="Comment" name="deduct_text_'+num+'_'+new_num+'" style="resize: none; width: 81.5%;"></textarea> \
-<a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<br> \
-</div>');
     }
 
     $('input:radio[name="gradeable_type"]').change(
