@@ -272,7 +272,8 @@ ALTER SEQUENCE gradeable_component_gc_id_seq OWNED BY gradeable_component.gc_id;
 CREATE TABLE gradeable_data (
     gd_id integer NOT NULL,
     g_id character varying(255) NOT NULL,
-    gd_user_id character varying(255) NOT NULL,
+    gd_user_id character varying(255),
+    gd_team_id character varying(255),
     gd_overall_comment character varying NOT NULL,
     gd_user_viewed_date timestamp(6) with time zone DEFAULT NULL
 );
@@ -422,7 +423,9 @@ CREATE TABLE users (
 
 CREATE TABLE gradeable_teams (
     team_id character varying(255) NOT NULL,
-    g_id character varying(255) NOT NULL
+    g_id character varying(255) NOT NULL,
+    registration_section integer,
+    rotating_section integer
 );
 
 
@@ -654,7 +657,7 @@ ALTER TABLE ONLY electronic_gradeable_version
 
 
 --
--- Name: electronic_gradeable_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: electronic_gradeable_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY electronic_gradeable_version
@@ -733,6 +736,14 @@ ALTER TABLE ONLY gradeable_data
 
 ALTER TABLE ONLY gradeable_data
     ADD CONSTRAINT gradeable_data_gd_user_id_fkey FOREIGN KEY (gd_user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: gradeable_data_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_data
+    ADD CONSTRAINT gradeable_data_gd_team_id_fkey FOREIGN KEY (gd_team_id) REFERENCES gradeable_teams(team_id) ON UPDATE CASCADE;
 
 
 --
