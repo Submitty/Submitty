@@ -34,7 +34,7 @@ HTML;
 <div class="content"><ul>
 HTML;
         foreach ($assignments as $assignment) {
-            $return .= "<li><a href=\"{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'index', 'assignment' => $assignment))}\">$assignment</a></li>
+            $return .= "<li><a href=\"{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'index', 'assignment' => $assignment))}\">$assignment</a></li>";
         }
         $return .= <<<HTML
 </ul></div>
