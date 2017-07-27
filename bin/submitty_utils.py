@@ -32,7 +32,7 @@ def write_submitty_date(d=get_current_time()):
 # convert a string (with the timezone) to a date time object with a timezone
 def read_submitty_date(s):
     words = s.split()
-    if len(words) != 2:
+    if len(words) < 2 or len(words) > 3:
         raise SystemExit("ERROR: unexpected date format %s" % s)
     thedatetime = str(words[0] + ' ' + words[1])
     try:
