@@ -28,6 +28,8 @@ def arg_parse():
     parser.add_argument("--interactive", dest="interactive", action='store_const', const=True, default=False,
                         help="What queue (INTERACTIVE or BATCH) to use for the regrading. Default "
                         "is batch.")
+    parser.add_argument("--no_input", dest="no_input", action='store_const', const=True, default=False,
+                        help="Do not wait for confirmation input, even if many things are being added to the queue.")
     return parser.parse_args()
 
 
@@ -107,7 +109,7 @@ def main():
                                     "user": my_user, "team": my_team, "who": my_who, "is_team": my_is_team, "version": my_version})
 
     # Check before adding a very large number of systems to the queue
-    if len(grade_queue) > 50:
+    if len(grade_queue) > 50 and not args.no_input:
         inp = input("Found {:d} matching submissions. Add to queue? [y/n]".format(len(grade_queue)))
         if inp.lower() not in ["yes", "y"]:
             raise SystemExit("Aborting...")

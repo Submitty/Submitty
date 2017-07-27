@@ -208,6 +208,9 @@ def main():
     os.system("rm /tmp/hwcron_cron_backup.txt")
     os.system("systemctl restart submitty_grading_scheduler")
 
+    # queue up all of the newly created submissions to grade!
+    os.system("/usr/local/submitty/bin/regrade.py /var/local/submitty/courses/ --no_input")
+
 def generate_random_user_id(length=15):
     return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
 
@@ -329,11 +332,6 @@ def create_group(group):
 
     if group == "sudo":
         return
-    # These users must be in the groups that get created as else creating the course
-    # might fail (and we wouldn't be able to read some necessary files on PHP interface
-    os.system("adduser hwphp {}".format(group))
-    os.system("adduser hwcgi {}".format(group))
-    os.system("adduser hwcron {}".format(group))
 
 
 def add_to_group(group, user_id):
@@ -621,6 +619,10 @@ class Course(object):
         add_to_group(self.code, self.instructor.id)
         add_to_group(course_group, self.instructor.id)
         add_to_group(archive_group, self.instructor.id)
+        add_to_group("course_builders", self.instructor.id)
+        add_to_group(course_group, "hwphp")
+        add_to_group(course_group, "hwcron")
+        add_to_group(course_group, "hwcgi")
         os.system("{}/bin/create_course.sh {} {} {} {}"
                   .format(SUBMITTY_INSTALL_DIR, self.semester, self.code, self.instructor.id,
                           course_group))
@@ -810,20 +812,6 @@ class Course(object):
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
 
-                if gradeable.type == 0 and submitted:
-                    queue_file = "__".join([self.semester, self.code, gradeable.id, user.id, "1"])
-                    print("Creating queue file:", queue_file)
-                    queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
-                    with open(queue_file, "w") as open_file:
-                        # FIXME: This will need to be adjusted for team assignments!
-                        json.dump({"semester": self.semester,
-                                   "course": self.code,
-                                   "gradeable": gradeable.id,
-                                   "user": user.id,
-                                   "version": 1,
-                                   "who": user.id,
-                                   "is_team": False,
-                                   "team": ""}, open_file)
         conn.close()
         submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
