@@ -31,7 +31,7 @@ HTML;
     public function plagiarismTree($semester, $course, $assignments) {
         $return = "";
         $return .= <<<HTML
-<div class="content"><ul>
+<div class="content" style="height: 110vh"><ul>
 HTML;
         foreach ($assignments as $assignment) {
             $return .= "<li><a href=\"{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'index', 'assignment' => $assignment))}\">$assignment</a></li>";
