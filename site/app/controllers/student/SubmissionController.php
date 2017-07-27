@@ -84,6 +84,11 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
                 return array('error' => true, 'message' => 'No gradeable with that id.');
             }
+            else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) {
+                $this->core->addErrorMessage('Must be on a team to access submission');
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+                return array('error' => true, 'message' => 'Must be on a team to access submission.');                
+            }
             else {
                 $loc = array('component' => 'student',
                              'gradeable_id' => $gradeable->getId());
@@ -162,10 +167,10 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
+        
         $gradeable->loadResultDetails();
         if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($gradeable_id, $user_id);
-            if ($team === null) {
+            if ($gradeable->getTeam() === null) {
                 $msg = "Student '{$_POST['user_id']}' is not part of a team.";
                 $return = array('success' => false, 'message' => $msg);
                 $this->core->getOutput()->renderJson($return);
@@ -631,11 +636,14 @@ class SubmissionController extends AbstractController {
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            $team = $gradeable->getTeam();
             if ($team !== null) {
                 $team_id = $team->getId();
                 $who_id = $team_id;
                 $user_id = "";
+            }
+            else {
+                return $this->uploadResult("Must be on a team to access submission.", false);
             }
         }
         
@@ -992,6 +1000,13 @@ class SubmissionController extends AbstractController {
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);
         }
+
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) {
+            $msg = 'Must be on a team to access submission.';
+            $this->core->addErrorMessage($msg);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            return array('error' => true, 'message' => $msg);
+        }
     
         $new_version = intval($_REQUEST['new_version']);
         if ($new_version < 0) {
@@ -1011,7 +1026,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $gradeable->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
             if ($team !== null) {
                 $user_id = $team->getId();
             }
@@ -1086,7 +1101,7 @@ class SubmissionController extends AbstractController {
 
         $user_id = $this->core->getUser()->getId();
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($g_id, $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($g_id, $user_id);
             if ($team !== null) {
                 $user_id = $team->getId();
             }
