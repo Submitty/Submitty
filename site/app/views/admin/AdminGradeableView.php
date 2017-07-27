@@ -931,7 +931,8 @@ function createCrossBrowserJSDate(val){
 
         $(function() {
             $( ".date_picker" ).datetimepicker({
-                timeFormat: "HH:mm:ss",
+                dateFormat: 'yy-dd-mm',
+                timeFormat: "HH:mm:ssz",
                 showButtonPanel: true,
                 showTimezone: false,
                 showMillisec: false,
