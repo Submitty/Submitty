@@ -11,20 +11,36 @@ class PlagiarismController extends AbstractController {
             case 'compare':
                 $this->plagiarismCompare();
                 break;
+            case 'index':
+                $this->plagiarismIndex();
+                break;
             default:
                 $this->core->getOutput()->addBreadcrumb("Plagiarism");
-                $this->plagiarismIndex();
+                $this->plagiarismTree();
                 break;
         }
     }
 
-    public function plagiarismIndex() {
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismIndex');
-    }
-
     public function plagiarismCompare() {
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
+        $assignment = $_REQUEST['assignment'];
         $studenta = $_REQUEST['studenta'];
         $studentb = $_REQUEST['studentb'];
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismCompare', $studenta, $studentb);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismCompare', $semester, $course, $assignment, $studenta, $studentb);
+    }
+
+    public function plagiarismIndex() {
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
+        $assignment = $_REQUEST['assignment'];
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismIndex', $semester, $course, $assignment);
+    }
+
+    public function plagiarismTree() {
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
+        $assignments = array('cpp_cats');
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments);
     }
 }
