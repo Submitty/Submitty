@@ -1,7 +1,5 @@
 <?php
-
 namespace tests\unitTests\app\controllers\submission;
-
 use \ZipArchive;
 use app\controllers\student\SubmissionController;
 use app\exceptions\IOException;
@@ -11,9 +9,7 @@ use app\models\Gradeable;
 use app\models\GradeableList;
 use tests\unitTests\BaseUnitTest;
 use app\models\User;
-
 class SubmissionControllerTester extends BaseUnitTest {
-
     /**
      * @var array
      */
@@ -22,7 +18,6 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     private $core;
-
     public function setUp() {
         $_REQUEST['action'] = 'upload';
         $_REQUEST['gradeable_id'] = 'test';
@@ -30,47 +25,36 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_POST['previous_files'] = "";
         $_POST['csrf_token'] = "";
         $_POST['user_id'] = "testUser";
-
         $config['tmp_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $config['semester'] = "test";
         $config['course'] = "test";
         $config['course_path'] = FileUtils::joinPaths($config['tmp_path'], "courses", $config['semester'],
             $config['course']);
-
         $this->assertTrue(FileUtils::createDir($config['course_path'], null, true));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($config['course_path'], "submissions")));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($config['tmp_path'], "to_be_graded_interactive")));
-
         $this->config = $config;
-
         $this->core = $this->createMockCore($this->config);
-
         $highest_version = 0;
         $num_parts = 1;
         $max_size = 1000000; // 1 MB
-
         $annotations = $this->getAnnotations();
         if (isset($annotations['method']['highestVersion'][0])) {
             $highest_version = intval($annotations['method']['highestVersion'][0]);
         }
-
         if (isset($annotations['method']['numParts'][0])) {
             $num_parts = intval($annotations['method']['numParts'][0]);
         }
-
         if (isset($annotations['method']['maxSize'][0])) {
             $max_size = intval($annotations['method']['maxSize'][0]);
         }
-
         $this->core->method('loadModel')->willReturn($this->createMockGradeableList($highest_version, $num_parts, $max_size));
     }
-
     protected function createMockUser($id) {
         $return = $this->createMockModel(User::class);
         $return->method("getId")->willReturn($id);
         return $return;
     }
-
     /**
      * Helper method to generate a mocked gradeable list with one gradeable. We can use annotations in our testcases
      * to set various aspects of the gradeable, namely @highestVersion, @numParts, and @maxSize for
@@ -88,16 +72,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable->method('getName')->willReturn("Test Gradeable");
         // $gradeable->method('getUser')->willReturn("testUser");
         $gradeable->method('getUser')->willReturn($this->createMockUser('testUser'));
-
         $gradeable->method('getHighestVersion')->willReturn(intval($highest_version));
         $gradeable->method('getNumParts')->willReturn(intval($num_parts));
         $gradeable->method('getMaxSize')->willReturn($max_size);
-
         $g_list = $this->createMockModel(GradeableList::class);
         $g_list->method('getSubmittableElectronicGradeables')->willReturn(array('test' => $gradeable));
         return $g_list;
     }
-
     /**
      * Cleanup routine for the tester. This deletes any folders/files we created in the tmp directory to hold our fake
      * uploaded files.
@@ -105,7 +86,6 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function tearDown() {
         $this->assertTrue(FileUtils::recursiveRmdir($this->config['tmp_path']));
     }
-
     /**
      * Creates a file with teh given contents to be used to upload for a specified part.
      *
@@ -125,7 +105,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_FILES["files{$part}"]['tmp_name'][] = $filepath;
         $_FILES["files{$part}"]['error'][] = null;
     }
-
     /**
      * Given an array, this will create a zip file using the given name (appending .zip to it) with
      * the $files array describing what will go into the zip, filling out the archive by calling the
@@ -150,7 +129,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_FILES["files{$part}"]['tmp_name'][] = $zip_path;
         $_FILES["files{$part}"]['error'][] = null;
     }
-
     /**
      * This recursive function fills out a zip archive from the given $files array. For each element in the array,
      * if the value is an array, then the key is a folder name and the value describes the contents of that folder,
@@ -197,7 +175,6 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
         }
     }
-
     /**
      * Runs the upload function in the controller using our mocked Core object, and then clearing out the $_FILES
      * array.
@@ -215,7 +192,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_FILES = array();
         return $return;
     }
-
     /**
      * Basic upload, only one part and one file, simple sanity check.
      */
@@ -224,7 +200,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $this->runController();
         $this->assertFalse($return['error'], "Error thrown: {$return['message']}");
         $this->assertTrue($return['success']);
-
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertStringEqualsFile(FileUtils::joinPaths($tmp, 'test1.txt'), "a");
         $pattern = '/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/';
@@ -258,7 +233,6 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
         }
     }
-
     /**
      * Test what happens if we have two parts
      *
@@ -271,7 +245,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $this->runController();
         $this->assertFalse($return['error'], "Error thrown: {$return['message']}");
         $this->assertTrue($return['success']);
-
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $iter = new \RecursiveDirectoryIterator($tmp);
         $files = array();
@@ -318,7 +291,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         );
         $this->assertEquals($expected, $files);
     }
-
     /**
      * Test what happens if we're uploading a zip that contains a directory.
      */
@@ -331,10 +303,8 @@ class SubmissionControllerTester extends BaseUnitTest {
         );
         $this->addUploadZip('directory_inside', $zip);
         $return = $this->runController();
-
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
-
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $iter = new \RecursiveDirectoryIterator($tmp);
         $filenames = array();
@@ -360,7 +330,6 @@ class SubmissionControllerTester extends BaseUnitTest {
                     else {
                         $this->fail("Part directory should not contain a directory itself.");
                     }
-
                     $iter2->next();
                 }
             }
@@ -372,7 +341,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($filenames);
         $this->assertEquals(array(".submit.timestamp", "test2.txt"), $filenames);
     }
-
     /**
      * Upload a second version of a gradeable with no previous files and different files per upload. Test
      * that both versions exist and neither bled over to the other.
@@ -390,7 +358,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
-
         $this->addUploadFile('test2.txt');
         $core = $this->createMockCore($this->config);
         $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
@@ -405,9 +372,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test2.txt'), $files);
-
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-
         $dirs = array();
         foreach (new \FilesystemIterator($tmp) as $iter) {
             if ($iter->isDir()) {
@@ -429,7 +394,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($dirs);
         $this->assertEquals(array('1', '2'), $dirs);
     }
-
     /**
      * @numParts 2
      */
@@ -439,7 +403,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $this->runController();
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
-
         $_POST['previous_files'] = json_encode(array(0 => array('test1.txt'), 1 => array('test1.txt')));
         $core = $this->createMockCore($this->config);
         $core->method('loadModel')->willReturn($this->createMockGradeableList(1, 2));
@@ -449,7 +412,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
     }
-
     /**
      * Upload a second version of a gradeable that includes previous files, but there's no overlap in file names
      * so we should have one file in version 1 and two files in version 2
@@ -467,7 +429,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
-
         $this->addUploadFile('test2.txt');
         $_POST['previous_files'] = json_encode(array(array('test1.txt')));
         $core = $this->createMockCore($this->config);
@@ -484,7 +445,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt', 'test2.txt'), $files);
     }
-
     /**
      * Upload a second version that has previous files that has the same filename as the file that's being uploaded.
      * This should only include the version that was uploaded (and not use the previous).
@@ -505,7 +465,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
-
         $this->addUploadFile('test1.txt', 'new_file');
         $_POST['previous_files'] = json_encode(array(array('test1.txt')));
         $core = $this->createMockCore($this->config);
@@ -525,7 +484,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
     }
-
     /**
      * This tests what happens when we upload a second version of the gradeable that is a zip that contains a file
      * that overlaps the file from the first version.
@@ -546,7 +504,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
-
         $this->addUploadZip('overlap', array('test1.txt' => 'new_file'));
         $_POST['previous_files'] = json_encode(array(array('test1.txt')));
         $core = $this->createMockCore($this->config);
@@ -566,7 +523,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
     }
-
     /**
      * Test uploading a zip that contains a file and a zip. We only unzip one level so we the inner zip should
      * be left alone.
@@ -578,10 +534,8 @@ class SubmissionControllerTester extends BaseUnitTest {
         );
         $this->addUploadZip('zip_inside', $zip);
         $return = $this->runController();
-
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
-
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $iter = new \RecursiveDirectoryIterator($tmp);
         $files = array();
@@ -601,7 +555,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array(".submit.timestamp", "basic_zip.zip", "test1.txt"), $files);
     }
-
     /**
      * This tests what happens if we upload a zip that contains "test.txt" and "test2.txt" and try
      * uploading "test.txt" to the server, in that order. The free "test.txt" file should overwrite the one
@@ -610,29 +563,22 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testSameFilenameInZip() {
         $this->addUploadZip('zippedfiles', array('test.txt' => 'zip_file', 'test2.txt' => 'zip_file2'));
         $this->addUploadFile('test.txt', 'non_zip_file');
-
         $return = $this->runController();
-
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
-
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertStringEqualsFile(FileUtils::joinPaths($tmp, "test.txt"), "non_zip_file");
         $this->assertStringEqualsFile(FileUtils::joinPaths($tmp, "test2.txt"), "zip_file2");
     }
-
     /**
      * This tests the same thing as testSameFilenameInZip(), however we submit "test.txt" before "zippedfiles.zip"
      */
     public function testSameFilenameInZipReversed() {
         $this->addUploadFile('test.txt', 'non_zip_file');
         $this->addUploadZip('zippedfiles', array('test.txt' => 'zip_file', 'test2.txt' => 'zip_file2'));
-
         $return = $this->runController();
-
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
-
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertStringEqualsFile(FileUtils::joinPaths($tmp, "test.txt"), "zip_file");
         $this->assertStringEqualsFile(FileUtils::joinPaths($tmp, "test2.txt"), "zip_file2");
@@ -643,15 +589,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test.txt', 'test2.txt'), $files);
-
     }
-
     public function testFilenameWithSpaces() {
         $this->addUploadFile("filename with spaces.txt");
         $return = $this->runController();
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
-
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $files = array();
         foreach (new \FilesystemIterator($tmp) as $iter) {
@@ -661,7 +604,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'filename with spaces.txt'), $files);
     }
-
     public function testZipContaingFilesWithSpaces() {
         $zip = array(
             'folder with spaces' => array('filename with spaces2.txt'),
@@ -694,17 +636,14 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
             $iter->next();
         }
-
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'filename with spaces.txt'), $files);
     }
-
     public function testSvnUpload() {
         $_REQUEST['svn_checkout'] = "true";
         $return = $this->runController();
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
-
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $files = array();
         foreach (new \FilesystemIterator($tmp) as $iter) {
@@ -716,7 +655,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
         $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive", $touch_file));
     }
-
     public function testErrorNotSetCsrfToken() {
         $_POST['csrf_token'] = null;
         $return = $this->runController();
@@ -724,7 +662,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Invalid CSRF token.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testErrorInvalidCsrfToken() {
         $config = $this->config;
         $config['csrf_token'] = false;
@@ -734,7 +671,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Invalid CSRF token.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     /**
      * Test that error is thrown when trying to upload to a gradeable id that does not exist in
      * our gradeable list
@@ -746,7 +682,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Invalid gradeable id 'fake'", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     /**
      * Test that error is thrown when system is trying to make a folder for the assignment (in the submissions
      * folder) and it cannot.
@@ -762,7 +697,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Failed to make folder for this assignment.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testFailureToCreateStudentFolder() {
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"), 0444);
         $return = $this->runController();
@@ -771,7 +705,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
         FileUtils::recursiveChmod($this->config['course_path'], 0777);
     }
-
     // failure to create it the normal way
     public function testFailureToCreateVersionFolder() {
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"));
@@ -782,7 +715,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
         FileUtils::recursiveChmod($this->config['course_path'], 0777);
     }
-
     /**
      * @numParts 2
      */
@@ -795,7 +727,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
         FileUtils::recursiveChmod($this->config['course_path'], 0777);
     }
-
     public function testFileUploadError() {
         $_FILES["files1"]['name'][] = "test.txt";
         $_FILES["files1"]['type'][] = "";
@@ -807,14 +738,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Upload Failed: test.txt failed to upload. Error message: The file was only partially uploaded.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testNoFilesToSubmit() {
         $return = $this->runController();
         $this->assertTrue($return['error']);
         $this->assertEquals("No files to be submitted.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testErrorPreviousFilesFirstVersion() {
         $_POST['previous_files'] = json_encode(array(0=>array('test.txt')));
         $return = $this->runController();
@@ -822,7 +751,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("No submission found. There should not be any files from a previous submission.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     /**
      * @highestVersion 2
      */
@@ -833,12 +761,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Files from previous submission not found. Folder for previous submission does not exist.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testErrorMissingPreviousFile() {
         $this->addUploadFile('test1.txt');
         $return = $this->runController();
         $this->assertTrue($return['success']);
-
         $_POST['previous_files'] = json_encode(array(0 => array('missing.txt')));
         $this->addUploadFile('test1.txt');
         $core = $this->createMockCore($this->config);
@@ -848,7 +774,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("File 'missing.txt' does not exist in previous submission.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     /**
      * We are not running through all possible invalid filenames (as the list might grow) as that is tested elsewhere,
      * just that we're using that function at all really.
@@ -860,7 +785,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Error: You may not use quotes, backslashes or angle brackets in your file name in\"valid.txt.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testInvalidFilenameInZip() {
         $this->addUploadZip("invalid", array('in"valid.txt'));
         $return = $this->runController();
@@ -868,7 +792,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside invalid.zip.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     /**
      * @maxSize 0
      */
@@ -879,7 +802,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("File(s) uploaded too large.  Maximum size is 0 kb. Uploaded file(s) was 0.001 kb.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     /**
      * Because our system does not recursively expand zip files with reckless disregard, we only need to worry
      * about someone hiding a big sized file in the outermost zip.
@@ -887,7 +809,6 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testErrorFilesInZipTooBig() {
         $this->addUploadZip('zip_bomb', array('bomb.txt' => str_repeat('01', 5120000)));
         $return = $this->runController();
-
         $this->assertTrue($return['error'], "An error should have happened");
         $this->assertEquals("File(s) uploaded too large.  Maximum size is 1000 kb. Uploaded file(s) was 10240 kb.",
             $return['message']);
@@ -895,7 +816,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertFalse(is_dir($tmp));
     }
-
     public function testErrorOnBrokenZip() {
         $this->addUploadZip('broken', array('test1.txt'));
         $path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part1', 'broken.zip');
@@ -908,14 +828,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Could not properly unpack zip file. Error message: Invalid or uninitialized Zip object.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testErrorOnCopyingPrevious() {
         $this->addUploadFile('test1.txt');
         $return = $this->runController();
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
         $prev = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1", "test1.txt");
-
         $_POST['previous_files'] = json_encode(array(0 => array('test1.txt')));
         chmod($prev, 0000);
         $core = $this->createMockCore($this->config);
@@ -926,7 +844,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
         chmod($prev, 0777);
     }
-
     public function testErrorOnCopyingFile() {
         $this->addUploadFile('test1.txt');
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
@@ -936,7 +853,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Failed to copy uploaded file test1.txt to current submission.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testErrorCleanupTempFiles() {
         $dst_dir = FileUtils::joinPaths($this->config['tmp_path'], "files");
         $dst_file = FileUtils::joinPaths($dst_dir, "test.txt");
@@ -954,7 +870,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
         chmod($dst_dir, 0777);
     }
-
     /**
      * Test that we cannot just set the $_FILES array manually under normal operation (not within our
      * test framework) and that we'll get an error.
@@ -970,7 +885,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("The tmp file 'test1.txt' was not properly uploaded.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testErrorCreateSVNFile() {
         $_REQUEST['svn_checkout'] = "true";
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
@@ -980,7 +894,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Failed to touch file for svn submission.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testErrorCreateQueueFile() {
         $this->addUploadFile('test1.txt');
         $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive");
@@ -991,7 +904,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Failed to create file for grading queue.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testErrorBrokenHistoryFile() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
         FileUtils::createDir($tmp, null, true);
@@ -1002,7 +914,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Failed to open settings file.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     /**
      * We're testing that rolling back the history works on failure to upload the second version of the file
      */
@@ -1010,17 +921,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->addUploadFile('test1.txt');
         $return = $this->runController();
         $this->assertTrue($return['success']);
-
         $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive");
         $this->assertTrue(FileUtils::recursiveRmdir($dir));
         $this->assertTrue(FileUtils::createDir($dir, 0444));
-
         $this->addUploadFile('test1.txt');
         $return = $this->runController();
         $this->assertTrue($return['error']);
         $this->assertEquals("Failed to create file for grading queue.", $return['message']);
         $this->assertFalse($return['success']);
-
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
         foreach (new \FilesystemIterator($tmp) as $iter) {
             if ($iter->isDir()) {
@@ -1038,7 +946,6 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
         }
     }
-
     public function testErrorWriteSettingsFile() {
         $this->addUploadFile('test1.txt');
         $dir = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
@@ -1052,7 +959,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
         chmod($settings, 0777);
     }
-
     public function testErrorWriteTimestampFile() {
         $this->addUploadFile('test1.txt');
         $dir = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
@@ -1065,14 +971,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Failed to save timestamp file for this submission.", $return['message']);
         $this->assertFalse($return['success']);
     }
-
     public function testShowHomeworkPageNoGradeable() {
         $_REQUEST['action'] = 'display';
         $return = $this->runController();
         $this->assertTrue($return['error']);
         $this->assertEquals("No gradeable with that id.", $return['message']);
     }
-
     public function testShowHomework() {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
@@ -1080,7 +984,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(true);
         $gradeable->method('getOpenDate')->willReturn($now);
-
         $g_list = $this->createMock(GradeableList::class);
         $g_list->method('getGradeable')->willReturn($gradeable);
         $core->method('loadModel')->willReturn($g_list);
@@ -1088,7 +991,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("test", $return['id']);
         $this->assertFalse($return['error']);
     }
-
     public function testShowHomeworkNoConfig() {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
@@ -1096,7 +998,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(false);
         $gradeable->method('getOpenDate')->willReturn($now);
-
         $g_list = $this->createMock(GradeableList::class);
         $g_list->method('getGradeable')->willReturn($gradeable);
         $core->method('loadModel')->willReturn($g_list);
@@ -1104,7 +1005,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("test", $return['id']);
         $this->assertTrue($return['error']);
     }
-
     public function testShowHomeworkNoAccess() {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore(array(), array('access_grading' => false));
@@ -1113,7 +1013,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(false);
         $gradeable->method('getOpenDate')->willReturn($now);
-
         $g_list = $this->createMockModel(GradeableList::class);
         $g_list->method('getGradeable')->willReturn($gradeable);
         $core->method('loadModel')->willReturn($g_list);
@@ -1121,7 +1020,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['error']);
         $this->assertEquals("No gradeable with that id.", $return['message']);
     }
-
     public function testUpdateSumbmissionNoId() {
         $_REQUEST['gradeable_id'] = null;
         $_REQUEST['action'] = 'update';
@@ -1129,7 +1027,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['error']);
         $this->assertEquals("Invalid gradeable id.", $return['message']);
     }
-
     public function testUpdateSubmissionNoCsrfToken() {
         $_POST['csrf_token'] = null;
         $_REQUEST['action'] = 'update';
@@ -1137,7 +1034,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['error']);
         $this->assertEquals("Invalid CSRF token. Refresh the page and try again.", $return['message']);
     }
-
     public function testUpdateNegativeVersion() {
         $_REQUEST['action'] = 'update';
         $_REQUEST['new_version'] = -1;
@@ -1145,7 +1041,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['error']);
         $this->assertEquals("Cannot set the version below 0.", $return['message']);
     }
-
     /**
      * @highestVersion 1
      */
@@ -1156,7 +1051,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['error']);
         $this->assertEquals("Cannot set the version past 1.", $return['message']);
     }
-
     /**
      * @highestVersion 2
      */
@@ -1167,7 +1061,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['error']);
         $this->assertEquals("Failed to open settings file.", $return['message']);
     }
-
     /**
      * @highestVersion 2
      */
@@ -1184,7 +1077,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['error']);
         $this->assertEquals("Could not write to settings file.", $return['message']);
     }
-
     public function testUpdateCancelSubmission() {
         $_REQUEST['action'] = 'update';
         $_REQUEST['new_version'] = 0;
@@ -1204,7 +1096,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals(0, $json['history'][1]['version']);
         $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
     }
-
     /**
      * @highestVersion 5
      */
@@ -1227,7 +1118,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals(4, $json['history'][1]['version']);
         $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
     }
-
     public function testCheckRefreshSuccess() {
         $_REQUEST['action'] = 'check_refresh';
         $_REQUEST['gradeable_version'] = 1;
@@ -1238,7 +1128,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['refresh']);
         $this->assertEquals("REFRESH_ME", $return['string']);
     }
-
     public function testCheckRefreshFailed() {
         $_REQUEST['action'] = 'check_refresh';
         $_REQUEST['gradeable_version'] = 1;
@@ -1246,5 +1135,4 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['refresh']);
         $this->assertEquals("NO_REFRESH", $return['string']);
     }
-
 }

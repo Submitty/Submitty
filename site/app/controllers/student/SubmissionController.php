@@ -649,9 +649,6 @@ class SubmissionController extends AbstractController {
         $new_version_2 = $gradeable->getHighestVersion() + 1;
         if($new_version !== $new_version_2){
             $_SESSION['messages']['notice'][] = "Warning: some versions may not be in sync with the database.";
-            if($this->core->isTesting()){
-                return $this->uploadResult("Warning: some versions may not be in sync with the database.", false);                
-            }
             if($svn_checkout) {
                 $new_version = $new_version_2;
             }
