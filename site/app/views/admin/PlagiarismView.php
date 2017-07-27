@@ -20,6 +20,7 @@ HTML;
         $return = "";
         $return .= <<<HTML
 <div class="content">
+<h1 class="centered">Plagiarism Detection - $assignment</h1>
 HTML;
         $return .= file_get_contents("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/$assignment/index.html");
         $return .= <<<HTML
@@ -31,7 +32,9 @@ HTML;
     public function plagiarismTree($semester, $course, $assignments) {
         $return = "";
         $return .= <<<HTML
-<div class="content"><ul>
+<div class="content">
+<h1 class="centered">Plagiarism Detection</h1>
+<ul>
 HTML;
         foreach ($assignments as $assignment) {
             $return .= "<li><a href=\"{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'index', 'assignment' => $assignment))}\">$assignment</a></li>";
