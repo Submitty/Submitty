@@ -136,10 +136,8 @@ class AdminGradeableController extends AbstractController {
             if ($is_peer_grading) { $gradeable->setPeerGradeSet($_POST['peer_grade_set']); }
             $is_team_assignment = (isset($_POST['team_assignment']) && $_POST['team_assignment']=='yes') ? true : false;
             $gradeable->setTeamAssignment($is_team_assignment);
-            if ($is_team_assignment) {
-                $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
-                $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
-            }
+            $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
+            $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
         }
 
         if ($edit_gradeable === 0) {
