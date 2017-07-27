@@ -51,10 +51,10 @@ class AdminGradeableView extends AbstractView {
 		$g_gradeable_type = 0;
 		$is_repository = false;
 		$use_ta_grading=false;
-        $student_submit=true;
         $student_view=true;
-        $student_download_active=false;
-        $student_download_any=false;
+        $student_submit=true;
+        $student_download=false;
+        $student_any_version=true;
         $old_questions = array();
         $g_min_grading_group = 0;
         $g_overall_ta_instructions = "";
@@ -104,10 +104,10 @@ class AdminGradeableView extends AbstractView {
                 $precision = $data[3]['eg_precision'];
                 $electronic_gradeable['eg_precision'] = $precision;
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
-                $student_submit = $data[3]['eg_student_submit'];
                 $student_view = $data[3]['eg_student_view'];
-                $student_download_active = $data[3]['eg_student_download_active'];
-                $student_download_any = $data[3]['eg_student_download_any'];
+                $student_submit = $data[3]['eg_student_submit'];
+                $student_download = $data[3]['eg_student_download'];
+                $student_any_version = $data[3]['eg_student_any_version'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
                 $peer_grade_set = $data[3]['eg_peer_grade_set'];
@@ -138,10 +138,10 @@ class AdminGradeableView extends AbstractView {
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
-                $student_submit = $data[3]['eg_student_submit'];
                 $student_view = $data[3]['eg_student_view'];
-                $student_download_active = $data[3]['eg_student_download_active'];
-                $student_download_any = $data[3]['eg_student_download_any'];
+                $student_submit = $data[3]['eg_student_submit'];
+                $student_download = $data[3]['eg_student_download'];
+                $student_any_version = $data[3]['eg_student_any_version'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
                 $peer_grade_set = $data[3]['eg_peer_grade_set'];
@@ -397,20 +397,7 @@ HTML;
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
 
-                Will students be able to make submissions? (Select 'No' if this is an exam.)
-                <input type="radio" id="yes_student_submit" name="student_submit" value="true" class="bool_val rubric_questions"
-HTML;
-                if ($student_submit===true) { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-                /> Yes
-                <input type="radio" id="no_student_submit" name="student_submit" value="false"
-HTML;
-                if ($student_submit===false) { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-                /> No 
-                <br /> <br />  
-
-                Will students be able to view submissions? (Select 'No' if this is an exam.)
+                Will students be able to view submissions?
                 <input type="radio" id="yes_student_view" name="student_view" value="true" class="bool_val rubric_questions"
 HTML;
                 if ($student_view===true) { $html_output .= ' checked="checked"'; }
@@ -423,35 +410,48 @@ HTML;
                 /> No 
                 <br /> <br />
 
-                Will students be able to download files? (Select 'Yes' if this is an exam.)
-                <input type="radio" id="yes_student_download" name="student_download" value="true" class="bool_val rubric_questions"
-HTML;
-                if ($student_download_active || $student_download_any) { $html_output .= ' checked="checked"'; }
-                $html_output .= <<<HTML
-                /> Yes
-                <input type="radio" id="no_student_download" name="student_download" value="false"
-HTML;
-                if ($student_download_active===false && $student_download_any===false) { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-                /> No 
+                <div id="student_submit_download_view">
 
-                <fieldset id="download_questions">
-
-                    <input type="radio" id="student_download_active" name="student_download_active" class="bool_val rubric_questions"
+                    Will students be able to make submissions? (Select 'No' if this is an exam.)
+                    <input type="radio" id="yes_student_submit" name="student_submit" value="true" class="bool_val rubric_questions"
 HTML;
-                    if ($student_download_active===true) { $html_output .= ' value="true" checked="checked"'; }
-                    else { $html_output .= ' value="false"'; }
+                    if ($student_submit===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
-                    /> Active version only
-                    <input type="radio" id="student_download_any" name="student_download_any" 
+                    /> Yes
+                    <input type="radio" id="no_student_submit" name="student_submit" value="false"
 HTML;
-                    if ($student_download_any===true) { $html_output .= ' value="true" checked="checked"'; }
-                    else { $html_output .= ' value="false"'; }
+                    if ($student_submit===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> No 
+                    <br /> <br />
+
+                    Will students be able to download files? (Select 'Yes' if this is an exam.)
+                    <input type="radio" id="yes_student_download" name="student_download" value="true" class="bool_val rubric_questions"
+HTML;
+                    if ($student_download===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> Yes
+                    <input type="radio" id="no_student_download" name="student_download" value="false"
+HTML;
+                    if ($student_download===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> No
+                    <br /> <br />
+
+                    Will students be view/download any or all versions? (Select 'Active version only' if this is an exam.)
+                    <input type="radio" id="yes_student_any_version" name="student_any_version" value="true" class="bool_val rubric_questions"
+HTML;
+                    if ($student_any_version===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                     /> Any version
+                    <input type="radio" id="no_student_any_version" name="student_any_version" value="false"
+HTML;
+                    if ($student_any_version===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> Active version only
+                    <br /> <br />
 
-                </fieldset>
-                <br /> <br />
+                </div>
 
                 Will this assignment also be graded by the TAs?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
@@ -464,6 +464,7 @@ HTML;
                 if ($use_ta_grading===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> No 
+                <br /><br />
                 
                 <div id="rubric_questions" class="bool_val rubric_questions">
                 Will this assignment have peer grading?: 
@@ -1156,8 +1157,11 @@ function createCrossBrowserJSDate(val){
             $('#grading_questions').hide();
         }
 
-        if ($('input:radio[name="student_download"]:checked').attr('value') === 'false') {
-            $('#download_questions').hide();
+        if ($('input:radio[name="student_view"]:checked').attr('value') === 'false') {
+            $('#no_student_submit').prop('checked', true);
+            $('#no_student_download').prop('checked',true);
+            $('#yes_student_any_version').prop('checked',true);
+            $('#student_submit_download_view').hide();
         }
 
         $('.gradeable_type_options').hide();
@@ -1204,45 +1208,33 @@ function createCrossBrowserJSDate(val){
             }
         });
 
-        $('input:radio[name="student_download"]').change(function() {
-            $('#download_questions').hide();
+        $('input:radio[name="ta_grading"]').change(function(){
+            $('#rubric_questions').hide();
+            $('#grading_questions').hide();
+            if ($(this).is(':checked')){
+                if($(this).val() == 'true'){ 
+                    $('#rubric_questions').show();
+                    $('#grading_questions').show();
+                    $('#ta_instructions_id').hide();
+                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                } else {
+                    $('#grades_released_compare_date').html('Due Date');
+                }
+            }
+        });
+
+        $('input:radio[name="student_view"]').change(function() {
             if ($(this).is(':checked')) {
                 if ($(this).val() == 'true') {
-                    $('#download_questions').show();
-                    $('#student_download_active').prop('checked', true);
-                    $('#student_download_active').val(true);
-                }
-                else {
-                    $('#student_download_active').prop('checked', false);
-                    $('#student_download_active').val(false);
-                    $('#student_download_any').prop('checked', false); 
-                    $('#student_download_any').val(false);
+                    $('#student_submit_download_view').show();
+                } else {
+                    $('#no_student_submit').prop('checked', true);
+                    $('#no_student_download').prop('checked',true);
+                    $('#yes_student_any_version').prop('checked',true);
+                    $('#student_submit_download_view').hide();
                 }
             }
         });
-
-        $('#student_download_active').change(function() {
-            if ($(this).is(':checked')) {
-                $('#student_download_active').val(true);
-                $('#student_download_any').prop('checked', false);
-                $('#student_download_any').val(false);  
-            }
-            else {
-                $('#student_download_active').val(false);
-            }
-        });
-
-        $('#student_download_any').change(function() {
-            if ($(this).is(':checked')) {
-                $('#student_download_any').val(true);
-                $('#student_download_active').prop('checked', false); 
-                $('#student_download_active').val(false); 
-            }
-            else {
-                $('#student_download_any').val(false);
-            }
-        });
-        
         
         $('[name="gradeable_template"]').change(
         function(){
@@ -2105,13 +2097,14 @@ $('#gradeable-form').on('submit', function(e){
                 alert("The config path should not be empty");
                 return false;
             }
-            // if view false while either submit or download true
-            if ($('input:radio[name="student_view"]:checked').attr('value') === 'false' &&
-               ($('input:radio[name="student_submit"]:checked').attr('value') === 'true' ||
-                $('input:radio[name="student_download"]:checked').attr('value') === 'true')) {
-                alert("Student_view cannot be false while student_submit or student_download is true");
-                return false;
-            }
+            /////
+            // // if view false while either submit or download true
+            // if ($('input:radio[name="student_view"]:checked').attr('value') === 'false' &&
+            //    ($('input:radio[name="student_submit"]:checked').attr('value') === 'true' ||
+            //     $('input:radio[name="student_download"]:checked').attr('value') === 'true')) {
+            //     alert("Student_view cannot be false while student_submit or student_download is true");
+            //     return false;
+            // }
         }
         if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'true') {
             if(date_grade < date_due) {

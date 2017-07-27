@@ -56,6 +56,34 @@ HTML;
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
 
+        $return = "";
+        if ($gradeable->getStudentView()) {
+            $return .= "student can view, ";
+        }
+        else {
+            $return .= "student can't view, ";
+        }
+        if ($gradeable->getStudentSubmit()) {
+            $return .= "student can submit, ";
+        }
+        else {
+            $return .= "student can't submit, ";
+        }
+        if ($gradeable->getStudentDownload()) {
+            $return .= "student can download, ";
+        }
+        else {
+            $return .= "student can't download, ";
+        }
+        if ($gradeable->getStudentAnyVersion()) {
+            $return .= "student can view/download any version.";
+        }
+        else {
+            $return .= "student can't view/download any version.";
+        }
+        return $return;
+
+
         // hiding entire page if user is not a grader and student cannot view
         if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
             return "";
@@ -73,33 +101,28 @@ HTML;
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
 HTML;
-<<<<<<< HEAD
             if ($this->core->getUser()->accessAdmin()) {
-                $return .= <<<HTML
-=======
-        if ($this->core->getUser()->accessAdmin()) {
-            $students = $this->core->getQueries()->getAllUsers();
-            $student_ids = array();
-            foreach ($students as $student) {
-                $student_ids[] = $student->getId();
-            }
-
-            $students_without = array();
-            $student_without_ids = array();
-            $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
-            foreach ($gradeables as $g) {
-                if ($g->getActiveVersion() == 0) {
-                    $students_without[] = $g->getUser();
+                $students = $this->core->getQueries()->getAllUsers();
+                $student_ids = array();
+                foreach ($students as $student) {
+                    $student_ids[] = $student->getId();
                 }
-            }
-            foreach ($students_without as $student) {
-                $student_without_ids[] = $student->getId();
-            }
 
-            $student_ids = json_encode($student_ids);
-            $student_without_ids = json_encode($student_without_ids);
-            $return .= <<<HTML
->>>>>>> 5983646a5bbf4fdcfe90261710c40b50160bfc8f
+                $students_without = array();
+                $student_without_ids = array();
+                $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
+                foreach ($gradeables as $g) {
+                    if ($g->getActiveVersion() == 0) {
+                        $students_without[] = $g->getUser();
+                    }
+                }
+                foreach ($students_without as $student) {
+                    $student_without_ids[] = $student->getId();
+                }
+
+                $student_ids = json_encode($student_ids);
+                $student_without_ids = json_encode($student_without_ids);
+                $return .= <<<HTML
     <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
         <div >
             <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
@@ -659,7 +682,7 @@ HTML;
                     $onsubmit = "onsubmit='return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})'";;
                 }
                 $return .= <<<HTML
-    <form style="display: inline;" method="post" {$onsubmit}
+    <form id="versions" style="display: inline;" method="post" {$onsubmit}
             action="{$this->core->buildUrl(array('component' => 'student',
                                                  'action' => 'update',
                                                  'gradeable_id' => $gradeable->getId(),
@@ -676,6 +699,16 @@ HTML;
         $(document).ready(function() {
             $("#do_not_grade").prop("disabled", true);
             $("#version_change").prop("disabled", true);
+        });
+    </script>
+HTML;
+            }
+            // disable looking at other submissions if student any version not allowed
+            if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentAnyVersion()) {
+                $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#submission_version').prop("disabled", true);
         });
     </script>
 HTML;

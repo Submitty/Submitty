@@ -131,15 +131,15 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setPointPrecision(floatval($_POST['point_precision']));
             $is_ta_grading = (isset($_POST['ta_grading']) && $_POST['ta_grading']=='true') ? true : false;
             $gradeable->setTaGrading($is_ta_grading);
-
-            $student_submit = (isset($_POST['student_submit']) && $_POST['student_submit']=='true') ? true : false;
-            $gradeable->setStudentSubmit($student_submit);
+            //////
             $student_view = (isset($_POST['student_view']) && $_POST['student_view']=='true') ? true : false;
             $gradeable->setStudentView($student_view);
-            $student_download_active = (isset($_POST['student_download_active']) && $_POST['student_download_active']=='true') ? true : false;
-            $gradeable->setStudentDownloadActive($student_download_active);
-            $student_download_any = (isset($_POST['student_download_any']) && $_POST['student_download_any']=='true') ? true : false;
-            $gradeable->setStudentDownloadAny($student_download_any);
+            $student_submit = (isset($_POST['student_submit']) && $_POST['student_submit']=='true') ? true : false;
+            $gradeable->setStudentSubmit($student_submit);
+            $student_download = (isset($_POST['student_download']) && $_POST['student_download']=='true') ? true : false;
+            $gradeable->setStudentDownload($student_download);
+            $student_any_version = (isset($_POST['student_any_version']) && $_POST['student_any_version']=='true') ? true : false;
+            $gradeable->setStudentAnyVersion($student_any_version);
 
             $gradeable->setConfigPath($_POST['config_path']);
             $is_peer_grading = (isset($_POST['peer_grading']) && $_POST['peer_grading']=='yes') ? true : false;
