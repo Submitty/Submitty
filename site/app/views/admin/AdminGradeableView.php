@@ -542,7 +542,7 @@ HTML;
         $html_output .= <<<HTML
             <tr id="add-question">
                 <td colspan="2" style="overflow: hidden; text-align: left;">
-                    <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="icon-plus icon-white"></i> Rubric Item</div>
+                    <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="fa fa-plus-circle" aria-hidden="true"></i> Rubric Item</div>
                 </td>
             </tr>
 HTML;

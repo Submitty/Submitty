@@ -23,6 +23,9 @@ class GradeableComponentMark extends AbstractModel {
     protected $note = "";
     /** @property @var bool This person earned this mark*/
     protected $has_mark = false;
+  
+    /** @property @var bool If the mark is diffirent from the one in the database*/
+    protected $has_mark_modifed = false;
 
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
@@ -39,10 +42,18 @@ class GradeableComponentMark extends AbstractModel {
         }
     }
 
+    public function save() {
+        if($this->id === null) {
+            $this->core->getQueries()->createGradeableComponentMark($this);
+        } else {
+            $this->core->getQueries()->updateGradeableComponentMark($this);
+        }
+    }
+
     public function saveData($gd_id, $gc_id) {
-        if ($this->modified) {
+        if ($this->has_mark_modifed) {
         	if ($this->has_mark) {
-                $this->core->getQueries()->insertGradeableCompnentMarkData($gd_id, $gc_id, $this);
+                $this->core->getQueries()->insertGradeableComponentMarkData($gd_id, $gc_id, $this);
         	} else {
         		$this->core->getQueries()->deleteGradeableComponentMarkData($gd_id, $gc_id, $this);
         	}
