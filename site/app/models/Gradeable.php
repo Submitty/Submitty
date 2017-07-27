@@ -884,7 +884,7 @@ class Gradeable extends AbstractModel {
 
     public function getActiveDaysLate() {
         $extended_due_date = clone $this->due_date;
-        $return =  DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time, $this->core->getConfig()->getTimezone());
+        $return =  DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);
         if ($return < 0) {
             $return = 0;
         }

@@ -23,12 +23,12 @@ class DateUtils {
      *
      * @return int
      */
-    public static function calculateDayDiff($date1, $date2="Now", $timezone) {
+    public static function calculateDayDiff($date1, $date2="Now") {
         if (!($date1 instanceof DateTime)) {
-            $date1 = new DateTime($date1, $timezone);
+            $date1 = new DateTime($date1);
         }
         if (!($date2 instanceof DateTime)) {
-            $date2 = new DateTime($date2, $timezone);
+            $date2 = new DateTime($date2);
         }
         // Set the period as "1 day" for the interval
         if ($date1 == $date2) {
