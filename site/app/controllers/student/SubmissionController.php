@@ -190,7 +190,7 @@ class SubmissionController extends AbstractController {
     */
     private function ajaxBulkUpload() {
         if (!isset($_POST['num_pages'])) {
-            $msg = "Did not pass in number of pages.";
+            $msg = "Did not pass in number of pages or files were too large.";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
@@ -202,6 +202,13 @@ class SubmissionController extends AbstractController {
         // it corresponds to one that we can access (whether through admin or it being released)
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
+        }
+
+        // make sure is admin
+        if (!$this->core->getUser()->accessAdmin()) {
+            $msg = "You do not have access to that page.";
+            $_SESSION['messages']['error'][] = $msg;
+            return $this->uploadResult($msg, false);
         }
 
         $num_pages = $_POST['num_pages'];
@@ -235,8 +242,10 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getMaxSize();
-        // make sure it is big enough for PDFs
-        $max_size *= 10;
+        // FIX ME:
+        // hard coded for now. in the future, should be obtained from the exam
+        // upload max for server seems to be 10mb
+        $max_size = 10000000;
 
         // Error checking of file name
         $file_size = 0;
@@ -357,6 +366,13 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid path.", false);
         }
 
+        // make sure is admin
+        if (!$this->core->getUser()->accessAdmin()) {
+            $msg = "You do not have access to that page.";
+            $_SESSION['messages']['error'][] = $msg;
+            return $this->uploadResult($msg, false);
+        }
+
         $gradeable_id = $_REQUEST['gradeable_id'];
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
@@ -428,7 +444,7 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        // if fsplit_pdf/gradeable_id/timestamp directory is now empty, delete that directory
+        // if split_pdf/gradeable_id/timestamp directory is now empty, delete that directory
         $timestamp = substr($path, 0, strpos($path, '/'));
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
@@ -588,6 +604,14 @@ class SubmissionController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
+
+        // make sure is admin if the two ids do not match
+        if (!$this->core->getUser()->accessAdmin() && $original_user_id != $user_id) {
+            $msg = "You do not have access to that page.";
+            $_SESSION['messages']['error'][] = $msg;
+            return $this->uploadResult($msg, false);
+        }
+
         if ($user_id == $original_user_id) {
             $gradeable = $gradeable_list[$gradeable_id];
         }

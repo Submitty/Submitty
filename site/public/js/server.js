@@ -205,12 +205,12 @@ function openDiv(id) {
     if (elem.hasClass('open')) {
         elem.hide();
         elem.removeClass('open');
-        $('#' + id + '-span').removeClass('icon-folder-open').addClass('icon-folder-closed');
+        $('#' + id + '-span').removeClass('fa-folder-open').addClass('fa-folder');
     }
     else {
         elem.show();
         elem.addClass('open');
-        $('#' + id + '-span').removeClass('icon-folder-closed').addClass('icon-folder-open');
+        $('#' + id + '-span').removeClass('fa-folder').addClass('fa-folder-open');
     }
     return false;
 }
@@ -237,12 +237,12 @@ function openFrame(url, id, filename) {
     if (!iframe.hasClass('shown')) {
         iframe.show();
         iframe.addClass('shown');
-        $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-plus').addClass('icon-minus');
+        $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-plus-circle').addClass('fa-minus-circle');
     }
     else {
         iframe.hide();
         iframe.removeClass('shown');
-        $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-minus').addClass('icon-plus');
+        $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-minus-circle').addClass('fa-plus-circle');
     }
     return false;
 }
