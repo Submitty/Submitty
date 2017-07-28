@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\libraries\Database;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
+use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
 use app\models\User;
 
