@@ -11,6 +11,7 @@ use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\GradeableList;
+use app\models\LateDaysCalculation;
 
 
 class SubmissionController extends AbstractController {
@@ -100,12 +101,16 @@ class SubmissionController extends AbstractController {
                 }
                 else {
                     $gradeable->loadResultDetails();
-                    $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
+                    $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
+                    $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable_id);
+                    $days_late = $late_days['late_days_charged'];
+                    $extensions = $late_days['extensions'];
+                    // $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
                     if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
                         $gradeable->updateUserViewedDate();
                     }
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showGradeable', $gradeable, $days_late);
+                                                           'showGradeable', $gradeable, $days_late, $extensions);
                 }
             }
             return array('id' => $gradeable_id, 'error' => $error);

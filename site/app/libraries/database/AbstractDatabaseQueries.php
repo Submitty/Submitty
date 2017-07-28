@@ -298,9 +298,9 @@ abstract class AbstractDatabaseQueries {
 
     abstract public function getAllGradeablesIdsAndTitles();
 
-    abstract public function getLateDayInformation();
+    abstract public function getLateDayInformation($user_id);
 
-    abstract public function getLateDayUpdates();
+    abstract public function getLateDayUpdates($user_id);
 
     /**
      * @todo: write phpdoc

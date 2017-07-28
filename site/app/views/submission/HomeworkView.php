@@ -51,11 +51,19 @@ HTML;
      *
      * @return string
      */
-    public function showGradeable($gradeable, $days_late) {
+    public function showGradeable($gradeable, $days_late, $extensions) {
+        $return = "";
+        if($extensions != 0){
+            $return .= <<<HTML
+<div class="content">
+    <h4>You have {$extensions} extension(s) for this homework</h4>
+</div>
+HTML;
+        }
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
-        $return = <<<HTML
+        $return .= <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>

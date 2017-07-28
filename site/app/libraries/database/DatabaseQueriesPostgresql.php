@@ -495,13 +495,18 @@ ORDER BY u.{$section_key}, {$sort_key}";
     }
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query 
-    public function getLateDayUpdates() {
-        $this->course_db->query("SELECT * FROM late_days");
+    public function getLateDayUpdates($user_id) {
+        if($user_id != null) {
+          $this->course_db->query("SELECT * FROM late_days WHERE user_id=?", array($user_id));
+        }
+        else {
+          $this->course_db->query("SELECT * FROM late_days");
+        }
         return $this->course_db->rows();
     }
     
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
-    public function getLateDayInformation() {
+    public function getLateDayInformation($user_id) {
         $params = array(300);
         $query = "SELECT
                       submissions.*
@@ -549,7 +554,6 @@ ORDER BY u.{$section_key}, {$sort_key}";
                           egv.active_version = egd.g_version
                           AND egv.g_id = egd.g_id
                           AND egv.user_id = egv.user_id
-                        --WHERE egv.user_id = ?
                         GROUP BY  egv.g_id,egv.user_id, active_version, g_version, submission_time
                         --End Details--
                     ) as details
@@ -562,8 +566,10 @@ ORDER BY u.{$section_key}, {$sort_key}";
                         late_day_exceptions AS lde 
                       ON submissions.g_id = lde.g_id 
                       AND submissions.user_id = lde.user_id";
-        //Query database and return results.
-        
+        if($user_id !== null) {
+          $query .= " WHERE submissions.user_id=?";
+          $params[] = $user_id;
+        }
         $this->course_db->query($query, $params);
         return $this->course_db->rows();
     }
