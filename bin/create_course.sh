@@ -71,7 +71,7 @@ if ! groups "$instructor" | grep -q "\b${COURSE_BUILDERS_GROUP}\b" ; then
     exit
 fi
 
-# confirm that the instructor, hwcron, and hwphp are members of the
+# confirm that the instructor, hwcron, hwphp, and hwcgi are members of the
 # ta_www_group
 if ! groups "$instructor" | grep -q "\b${ta_www_group}\b" ; then
     echo -e "ERROR: $instructor is not in group $ta_www_group\n"
@@ -83,6 +83,10 @@ if ! groups "$HWPHP_USER" | grep -q "\b${ta_www_group}\b" ; then
 fi
 if ! groups "$HWCRON_USER" | grep -q "\b${ta_www_group}\b" ; then
     echo -e "ERROR: $HWCRON_USER is not in group $ta_www_group\n"
+    exit
+fi
+if ! groups "$HWCGI_USER" | grep -q "\b${ta_www_group}\b" ; then
+    echo -e "ERROR: $HWCGI_USER is not in group $ta_www_group\n"
     exit
 fi
 

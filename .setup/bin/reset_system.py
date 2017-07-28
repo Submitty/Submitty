@@ -99,8 +99,8 @@ def main():
     remove_file("/etc/motd")
 
     # Scrub out the network interfaces that were created for Vagrant
-    subprocess.call(["ifdown", "enp0s8", "enp0s8:1", "enp0s8:2"])
-    remove_file("/etc/network/interfaces.d/enp0s8.cfg")
+    #subprocess.call(["ifdown", "enp0s8", "enp0s8:1", "enp0s8:2"])
+    #remove_file("/etc/network/interfaces.d/enp0s8.cfg")
 
     # Remove the data directories for submitty
     shutil.rmtree('/usr/local/submitty/.setup', True)

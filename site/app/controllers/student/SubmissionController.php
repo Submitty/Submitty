@@ -84,6 +84,11 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
                 return array('error' => true, 'message' => 'No gradeable with that id.');
             }
+            else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) {
+                $this->core->addErrorMessage('Must be on a team to access submission');
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+                return array('error' => true, 'message' => 'Must be on a team to access submission.');                
+            }
             else {
                 $loc = array('component' => 'student',
                              'gradeable_id' => $gradeable->getId());
@@ -162,10 +167,10 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
+        
         $gradeable->loadResultDetails();
         if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($gradeable_id, $user_id);
-            if ($team === null) {
+            if ($gradeable->getTeam() === null) {
                 $msg = "Student '{$_POST['user_id']}' is not part of a team.";
                 $return = array('success' => false, 'message' => $msg);
                 $this->core->getOutput()->renderJson($return);
@@ -185,7 +190,7 @@ class SubmissionController extends AbstractController {
     */
     private function ajaxBulkUpload() {
         if (!isset($_POST['num_pages'])) {
-            $msg = "Did not pass in number of pages.";
+            $msg = "Did not pass in number of pages or files were too large.";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
@@ -197,6 +202,13 @@ class SubmissionController extends AbstractController {
         // it corresponds to one that we can access (whether through admin or it being released)
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
+        }
+
+        // make sure is admin
+        if (!$this->core->getUser()->accessAdmin()) {
+            $msg = "You do not have access to that page.";
+            $_SESSION['messages']['error'][] = $msg;
+            return $this->uploadResult($msg, false);
         }
 
         $num_pages = $_POST['num_pages'];
@@ -230,8 +242,10 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getMaxSize();
-        // make sure it is big enough for PDFs
-        $max_size *= 10;
+        // FIX ME:
+        // hard coded for now. in the future, should be obtained from the exam
+        // upload max for server seems to be 10mb
+        $max_size = 10000000;
 
         // Error checking of file name
         $file_size = 0;
@@ -260,7 +274,7 @@ class SubmissionController extends AbstractController {
 
         // creating directory under gradeable_id with the timestamp
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("m-d-Y_H:i:s");
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("m-d-Y_H:i:sO");
         $version_path = FileUtils::joinPaths($pdf_path, $current_time);
         if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make gradeable path.", false);
@@ -352,6 +366,13 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid path.", false);
         }
 
+        // make sure is admin
+        if (!$this->core->getUser()->accessAdmin()) {
+            $msg = "You do not have access to that page.";
+            $_SESSION['messages']['error'][] = $msg;
+            return $this->uploadResult($msg, false);
+        }
+
         $gradeable_id = $_REQUEST['gradeable_id'];
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
@@ -404,7 +425,9 @@ class SubmissionController extends AbstractController {
         $this->upload_details['version_path'] = $version_path;
         $this->upload_details['version'] = $new_version;
         
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s");
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
+
         $max_size = $gradeable->getMaxSize();
 
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
@@ -423,7 +446,7 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        // if fsplit_pdf/gradeable_id/timestamp directory is now empty, delete that directory
+        // if split_pdf/gradeable_id/timestamp directory is now empty, delete that directory
         $timestamp = substr($path, 0, strpos($path, '/'));
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
@@ -439,7 +462,7 @@ class SubmissionController extends AbstractController {
         if (!file_exists($settings_file)) {
             $json = array("active_version" => $new_version,
                           "history" => array(array("version" => $new_version,
-                                                   "time" => $current_time,
+                                                   "time" => $current_time_string_tz,
                                                    "who" => $original_user_id,
                                                    "type" => "upload")));
         }
@@ -449,7 +472,7 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to open settings file.", false);
             }
             $json["active_version"] = $new_version;
-            $json["history"][] = array("version"=> $new_version, "time" => $current_time, "who" => $original_user_id, "type" => "upload");
+            $json["history"][] = array("version"=> $new_version, "time" => $current_time_string_tz, "who" => $original_user_id, "type" => "upload");
         }
     
         // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
@@ -459,7 +482,7 @@ class SubmissionController extends AbstractController {
         
         $this->upload_details['assignment_settings'] = true;
 
-        if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time."\n")) {
+        if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
@@ -583,6 +606,14 @@ class SubmissionController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
+
+        // make sure is admin if the two ids do not match
+        if (!$this->core->getUser()->accessAdmin() && $original_user_id != $user_id) {
+            $msg = "You do not have access to that page.";
+            $_SESSION['messages']['error'][] = $msg;
+            return $this->uploadResult($msg, false);
+        }
+
         if ($user_id == $original_user_id) {
             $gradeable = $gradeable_list[$gradeable_id];
         }
@@ -607,11 +638,14 @@ class SubmissionController extends AbstractController {
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            $team = $gradeable->getTeam();
             if ($team !== null) {
                 $team_id = $team->getId();
                 $who_id = $team_id;
                 $user_id = "";
+            }
+            else {
+                return $this->uploadResult("Must be on a team to access submission.", false);
             }
         }
         
@@ -646,7 +680,9 @@ class SubmissionController extends AbstractController {
             $part_path[1] = $version_path;
         }
         
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s e");
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
+
         $max_size = $gradeable->getMaxSize();
         
         if ($svn_checkout === false) {
@@ -836,7 +872,7 @@ class SubmissionController extends AbstractController {
         if (!file_exists($settings_file)) {
             $json = array("active_version" => $new_version,
                           "history" => array(array("version" => $new_version,
-                                                   "time" => $current_time,
+                                                   "time" => $current_time_string_tz,
                                                    "who" => $original_user_id,
                                                    "type" => "upload")));
         }
@@ -846,7 +882,7 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to open settings file.", false);
             }
             $json["active_version"] = $new_version;
-            $json["history"][] = array("version"=> $new_version, "time" => $current_time, "who" => $original_user_id, "type" => "upload");
+            $json["history"][] = array("version"=> $new_version, "time" => $current_time_string_tz, "who" => $original_user_id, "type" => "upload");
         }
     
         // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
@@ -856,7 +892,7 @@ class SubmissionController extends AbstractController {
         
         $this->upload_details['assignment_settings'] = true;
 
-        if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time."\n")) {
+        if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
@@ -968,6 +1004,13 @@ class SubmissionController extends AbstractController {
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);
         }
+
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) {
+            $msg = 'Must be on a team to access submission.';
+            $this->core->addErrorMessage($msg);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            return array('error' => true, 'message' => $msg);
+        }
     
         $new_version = intval($_REQUEST['new_version']);
         if ($new_version < 0) {
@@ -987,7 +1030,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $gradeable->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
             if ($team !== null) {
                 $user_id = $team->getId();
             }
@@ -1003,9 +1046,10 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
         $json["active_version"] = $new_version;
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s e");
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
-        $json["history"][] = array("version" => $new_version, "time" => $current_time, "who" => $original_user_id, "type" => "select");
+        $json["history"][] = array("version" => $new_version, "time" => $current_time_string_tz, "who" => $original_user_id, "type" => "select");
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $msg = "Could not write to settings file.";
@@ -1062,7 +1106,7 @@ class SubmissionController extends AbstractController {
 
         $user_id = $this->core->getUser()->getId();
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($g_id, $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($g_id, $user_id);
             if ($team !== null) {
                 $user_id = $team->getId();
             }
