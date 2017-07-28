@@ -995,10 +995,6 @@ class Gradeable(object):
         self.is_repository = False
         self.subdirectory = ""
         self.use_ta_grading = True
-        self.student_view = True
-        self.student_submit = True
-        self.student_download = False
-        self.student_any_version = True
         self.late_days = 2
         self.precision = 0.5
         self.syllabus_bucket = "none (for practice only)"
@@ -1073,6 +1069,10 @@ class Gradeable(object):
             self.team_assignment = False
             self.max_team_size = 1
             self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
+            self.student_view = True
+            self.student_submit = True
+            self.student_download = False
+            self.student_any_version = True
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
             if self.is_repository and 'eg_subdirectory' in gradeable:
@@ -1081,14 +1081,6 @@ class Gradeable(object):
                 self.peer_grading = gradeable['eg_peer_grading'] is False
             if 'eg_use_ta_grading' in gradeable:
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
-            if 'eg_student_view' in gradeable:
-                self.student_view = gradeable['eg_student_view'] is True
-            if 'eg_student_submit' in gradeable:
-                self.student_submit = gradeable['eg_student_submit'] is True
-            if 'eg_student_download' in gradeable:
-                self.student_download = gradeable['eg_student_download'] is False
-            if 'eg_student_any_version' in gradeable:
-                self.student_any_version = gradeable['eg_student_any_version'] is True
             if 'eg_late_days' in gradeable:
                 self.late_days = max(0, int(gradeable['eg_late_days']))
             if 'eg_precision' in gradeable:

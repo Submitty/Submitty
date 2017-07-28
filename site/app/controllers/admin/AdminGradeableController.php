@@ -128,9 +128,11 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setIsRepository(false);
             $gradeable->setSubdirectory("");
             $gradeable->setPointPrecision(floatval($_POST['point_precision']));
+            $gradeable->setTeamAssignment($is_team_assignment);
+            $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
+            $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
             $is_ta_grading = (isset($_POST['ta_grading']) && $_POST['ta_grading']=='true') ? true : false;
             $gradeable->setTaGrading($is_ta_grading);
-            //////
             $student_view = (isset($_POST['student_view']) && $_POST['student_view']=='true') ? true : false;
             $gradeable->setStudentView($student_view);
             $student_submit = (isset($_POST['student_submit']) && $_POST['student_submit']=='true') ? true : false;
@@ -139,15 +141,11 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setStudentDownload($student_download);
             $student_any_version = (isset($_POST['student_any_version']) && $_POST['student_any_version']=='true') ? true : false;
             $gradeable->setStudentAnyVersion($student_any_version);
-
             $gradeable->setConfigPath($_POST['config_path']);
             $is_peer_grading = (isset($_POST['peer_grading']) && $_POST['peer_grading']=='yes') ? true : false;
             $gradeable->setPeerGrading($is_peer_grading);
             if ($is_peer_grading) { $gradeable->setPeerGradeSet($_POST['peer_grade_set']); }
             $is_team_assignment = (isset($_POST['team_assignment']) && $_POST['team_assignment']=='yes') ? true : false;
-            $gradeable->setTeamAssignment($is_team_assignment);
-            $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
-            $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
         }
 
         if ($edit_gradeable === 0) {

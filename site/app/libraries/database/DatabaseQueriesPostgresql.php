@@ -1092,11 +1092,6 @@ WHERE gcm_id=?", $params);
             $this->course_db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
             $electronic_gradeable = $this->course_db->row();
             $use_ta_grading = $electronic_gradeable['eg_use_ta_grading'];
-            $student_view = $electronic_gradeable['eg_student_view'];
-            $student_submit = $electronic_gradeable['eg_student_submit'];
-            $student_download = $electronic_gradeable['eg_student_download'];
-            $student_any_version = $electronic_gradeable['eg_student_any_version'];
-
             $initial_ta_grading_compare_date = "Due Date (+ max allowed late days)";
 
             if ($use_ta_grading) {

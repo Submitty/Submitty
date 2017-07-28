@@ -681,7 +681,7 @@ HTML;
         }
         $(document).ready(function() {
             //$('#submission_version').prop("disabled", true);
-            $('select[name=submission_version]').prop("disabled", true);
+            //$('select[name=submission_version]').prop("disabled", true);
         });
     </script>
 HTML;
