@@ -32,10 +32,9 @@
 class submitty_student_auto_feed {
     private static $semester;
     private static $course_list;
-    private static $submitty_db;
-    private static $course_db;
+    private static $db;
     private static $psql_version;
-    private static $data = array();
+    private static $data;
     private static $log_msg_queue;
 
     public function __construct() {
@@ -45,7 +44,10 @@ class submitty_student_auto_feed {
             die("This is a command line tool.");
         }
 
-        //Make sure log msg queue is empty on start.
+        //Make sure CSV data array is empty on start.
+        self::$data = array();
+
+        //Make sure log msg queue string is empty on start.
         self::$log_msg_queue = "";
 
         //Determine current semester
@@ -59,37 +61,42 @@ class submitty_student_auto_feed {
         //Get course list, mapped to all lowercase
         self::$course_list = array_map('strtolower', get_participating_courses());
 
-        //Make connection to submitty_db
+        //Connect to submitty_db
         $db_host     = DB_HOST;
         $db_user     = DB_LOGIN;
         $db_password = DB_PASSWORD;
-        self::$submitty_db = pg_connect("host={$db_host} dbname=submitty user={$db_user} password={$db_password}");
+        self::$db = pg_connect("host={$db_host} dbname=submitty user={$db_user} password={$db_password}");
 
         //Make sure there's a DB connection to Submitty.
-        if (!test_db_conn(self::$submitty_db)) {
+        if (!test_db_conn()) {
             $this->log_it("Error: Cannot connect to submitty DB");
         } else {
             //$psql_version will determine which upsert method is used.
             //Version >= 9.5 permits update on conflict.  Version <= 9.4 uses batch transaction.
-            self::$psql_version = floatval(pg_parameter_status($submitty_db, 'server_version'));
+            self::$psql_version = floatval(pg_parameter_status($db, 'server_version'));
 
             //Auto-run class processes by executing them in constructor.
             //Halts when FALSE is returned by a method.
             switch(false) {
+            //Load CSV data and make sure data is Ok to process.
             case $this->load_and_validate_csv():
                 $this->log_it("CSV feed file could not be loaded or failed validation.");
                 break;
-            case $this->upsert():
+            //Chooses which data upsert function to run based on psql version.
+            //(upsert v9.4 with batch upsert or v9.5 with CONFLICT resloution upsert)
+            //Case condition is resolved by function return value
+            case (($psql_version >= 9.5) ? $this->upsert_psql95() : $this->upsert_psql94()):
                 $this->log_it("Error during upsert of data.");
                 break;
             }
         }
+        //END EXECUTION
     }
 
     public function __destruct() {
 
         //Close DB connection, if it exists.
-        foreach (array(self::$submitty_db, self::$course_db) as $db_conn) {
+        foreach (array(self::$db, self::$course_db) as $db_conn) {
             if (is_resource($db_conn) && get_resource_type($db_conn) === 'pgsql link') {
                 pg_close($db_con);
             }
@@ -120,8 +127,6 @@ class submitty_student_auto_feed {
                 $row = iconv("WINDOWS-1252", "UTF-8//TRANSLIT", $row);
             } unset($row);
         }
-
-        /* TO DO: NEED COURSE LIST FROM SUBMITTY DB */
 
         //Validate CSV
         $validate_num_fields = VALIDATE_NUM_FIELDS;
@@ -181,7 +186,7 @@ class submitty_student_auto_feed {
 
     private function get_participating_course_list() {
         //EXPECTED: self::$db has an active/open Postgres connection.
-        if (!test_db_conn(self::$submitty_db)) {
+        if (!test_db_conn()) {
             $this->log_it("Error: not connected to submitty DB when retrieving active course list.");
             return false;
         }
@@ -193,7 +198,7 @@ WHERE semester = $1
 AND status = 1
 SQL;
 
-        $result = pg_query_params(self::$submitty_db, $sql, array(self::$semester));
+        $result = pg_query_params(self::$db, $sql, array(self::$semester));
 
         if ($result === false) {
             $this->log_it("Error: DB query failed to retrieve course list.");
@@ -203,22 +208,20 @@ SQL;
         return pg_fetch_all($result);
     }
 
-    private function test_db_conn($db_conn) {
+    private function test_db_conn() {
         //Make sure $db connection is good.
-        if (!is_resource($db_conn) || get_resource_type($db_conn) !== 'pgsql link') {
+        if (!is_resource(self::$db) || get_resource_type(self::$db) !== 'pgsql link') {
             return false;
         }
 
         return true;
     }
 
-    private function upsert($course) {
-    //IN:  No parameters (works with class property data)
+    private function upsert_psql94() {
+    //IN:  No parameters.
     //OUT: TRUE when upsert is complete.
     //PURPOSE:  "Update/Insert" data into the database.  Code capable of "batch"
     //          upserts.
-
-        if (self::$psql_vesion < 9.5) {
 
 /* -----------------------------------------------------------------------------
  * This SQL code was adapted from upsert discussion on Stack Overflow and is
@@ -227,82 +230,83 @@ SQL;
  *  q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
  * -------------------------------------------------------------------------- */
 
-            $sql = array( 'begin'  => 'BEGIN',
-                          'commit' => 'COMMIT' );
+        $sql = array('users'         => array('begin'  => 'BEGIN',
+                                              'commit' => 'COMMIT'),
+                     'courses_users' => array('begin'  => 'BEGIN',
+                                              'commit' => 'COMMIT'));
 
         //TEMPORARY table to hold all new values that will be "upserted"
-        $sql['temp_tables']['users'] = <<<SQL
+        $sql['users']['temp_tables'] = <<<SQL
 CREATE TEMPORARY TABLE upsert_users (
-    u_user_id                  VARCHAR,
-    u_user_firstname           VARCHAR,
-    u_user_preferred_firstname VARCHAR,
-    u_last_name                VARCHAR,
-    u_email                    VARCHAR,
+    user_id                  VARCHAR,
+    user_firstname           VARCHAR,
+    user_preferred_firstname VARCHAR,
+    last_name                VARCHAR,
+    email                    VARCHAR,
 ) ON COMMIT DROP;
 SQL;
 
-        $sql['temp_tables']['courses_users'] = <<<SQL
+        $sql['courses_users']['temp_tables'] = <<<SQL
 CREATE TEMPORARY TABLE upsert_courses_users (
-    u_semester             VARCHAR,
-    u_course               VARCHAR,
-    u_user_id              VARCHAR,
-    u_user_group           INTEGER,
-    u_registration_section VARCHAR,
-    u_manual_registration  BOOLEAN
+    semester             VARCHAR,
+    course               VARCHAR,
+    user_id              VARCHAR,
+    user_group           INTEGER,
+    registration_section VARCHAR,
+    manual_registration  BOOLEAN
 ) ON COMMIT DROP;
 SQL;
 
-            //INSERT new data into temporary table -- prepares all data to be
-            //upserted in a single DB transaction.
-            foreach(self::$data as $i => $row) {
-                $sql['data'][$i]['users'] = <<<SQL
+        //INSERT new data into temporary table -- prepares all data to be
+        //upserted in a single DB transaction.
+        foreach(self::$data as $i => $row) {
+            $sql['users']['data'][$i] = <<<SQL
 INSERT INTO upsert_users VALUES ($1,$2,$3,$4,$5);
 SQL;
 
-                $sql['data'][$i]['courses_users'] = <<<SQL
-INSERT INTO upsert_courses_users VALUES ($1,$2,$3,$4,$5);
+            $sql['courses_users']['data'][$i] = <<<SQL
+INSERT INTO upsert_courses_users VALUES ($1,$2,$3,$4,$5,$6);
 SQL;
-            }
+        }
 
-            //LOCK will prevent sharing collisions while upsert is in process.
-            $sql['lock']['users'] = <<<SQL
+        //LOCK will prevent sharing collisions while upsert is in process.
+        $sql['users']['lock'] = <<<SQL
 LOCK TABLE users IN EXCLUSIVE MODE;
 SQL;
 
-            $sql['lock']['courses_users'] = <<<SQL
+        $sql['courses_users']['lock'] = <<<SQL
 LOCK TABLE courses_users IN EXCLUSIVE MODE;
 SQL;
 
-            //This portion ensures that UPDATE will only occur when a record already exists.
-            //FIX ME
-            $sql['update']['users'] = <<<SQL
+        //This portion ensures that UPDATE will only occur when a record already exists.
+        //FIX ME
+        $sql['users']['update'] = <<<SQL
 UPDATE users
 SET
-    user_firstname=temp.first_name,
-    user_lastname=temp.last_name,
-    user_preferred_firstname=temp.preferred_first_name,
-    user_email=temp.email,
-    registration_section=temp.r_section
-FROM temp
-WHERE users.user_id=temp.student_id
-    AND users.user_group=temp.s_group
+    user_firstname=upsert_users.user_firstname,
+    user_lastname=upsert_users.user_lastname,
+    user_preferred_firstname=upsert_users.user_preferred_firstname,
+    user_email=upsert_users.user_email,
+FROM upsert_users
+WHERE users.user_id=upsert_users.user_id
 SQL;
 
-            $sql['update']['courses_users'] = <<<SQL
-UPDATE users
+        $sql['courses_users']['update'] = <<<SQL
+UPDATE courses_users
 SET
-    user_firstname=temp.first_name,
-    user_lastname=temp.last_name,
-    user_preferred_firstname=temp.preferred_first_name,
-    user_email=temp.email,
-    registration_section=temp.r_section
-FROM temp
-WHERE users.user_id=temp.student_id
-    AND users.user_group=temp.s_group
+    semester=upsert_courses_users.semester,
+    course=upsert_courses_users.course,
+    user_id=upsert_courses_users.user_id,
+    user_group=upsert_courses_users.user_group,,
+    registration_section=upsert_courses_users.registration_section,
+    manual_registration=upsert_courses_users.registration_section
+FROM upsert_courses_users
+WHERE courses_users.user_id=upsert_courses_users.user_id
+AND courses_users.manual_registration = FALSE
 SQL;
 
-            //This portion ensures that INSERT will only occur when data record is new.
-            $sql['insert']['users'] = <<<SQL
+        //This portion ensures that INSERT will only occur when data record is new.
+        $sql['users']['insert'] = <<<SQL
 INSERT INTO users (
     user_id,
     user_firstname,
@@ -310,18 +314,18 @@ INSERT INTO users (
     user_preferred_firstname,
     user_email
 ) SELECT
-    upsert_users.u_user_id,
-    upsert_users.u_user_firstname,
-    upsert_users.u_user_lastname,
-    upsert_users.u_user_preferred_firstname,
-    upsert_users.u_user_email
+    upsert_users.user_id,
+    upsert_users.user_firstname,
+    upsert_users.user_lastname,
+    upsert_users.user_preferred_firstname,
+    upsert_users.user_email
 FROM upsert_users
 LEFT OUTER JOIN users
-    ON users.user_id=upsert_users.u_user_id
+    ON users.user_id=upsert_users.user_id
 WHERE users.user_id IS NULL
 SQL;
 
-            $sql['insert']['courses_users'] = <<<SQL
+        $sql['courses_users']['insert'] = <<<SQL
 INSERT INTO courses_users (
     semester,
     course,
@@ -330,64 +334,89 @@ INSERT INTO courses_users (
     registration_section,
     manual_registration
 ) SELECT
-    upsert_courses_users.u_semester,
-    upsert_courses_users.u_course,
-    upsert_courses_users.u_user_id,
-    upsert_courses_users.u_user_group,
-    upsert_courses_users.u_registration_secton,
-    upsert_courses_users.u_manual_registration
+    upsert_courses_users.semester,
+    upsert_courses_users.course,
+    upsert_courses_users.user_id,
+    upsert_courses_users.user_group,
+    upsert_courses_users.registration_secton,
+    upsert_courses_users.manual_registration
 FROM upsert_courses_users
 LEFT OUTER JOIN users
-    ON users.user_id=upsert_courses_users.u_user_id
+    ON users.user_id=upsert_courses_users.user_id
 WHERE users.user_id IS NULL
 SQL;
 
-            //We also need to move students no longer in auto feed to the NULL registered section
-            //Make sure this only affects students (AND users.user_group=$1)
-            $sql['dropped_students'] = <<<SQL
-UPDATE users
-SET registration_section=NULL,
-    rotating_section=NULL
-FROM (SELECT users.user_id
-    FROM users
-    LEFT OUTER JOIN temp
-        ON users.user_id=temp.student_id
-    WHERE temp.student_id IS NULL)
-AS dropped
-WHERE users.user_id=dropped.user_id
-AND users.user_group=$1
-AND users.manual_registration=$2
-SQL;
+        //We also need to move students no longer in auto feed to the NULL registered section
+        //Make sure this only affects students (AND users.user_group=$1)
 
-            pg_query(self::$db, $sql['begin']);
-            pg_query(self::$db, $sql['temp_tables']);
+        //Nothing to drop in users table.
+        $sql['users']['dropped_students'] = null;
+
+        $sql['courses_users']['dropped_students'] = <<<SQL
+UPDATE courses_users
+SET registration_section=NULL,
+FROM (SELECT courses_users.user_id
+    FROM courses_users
+    LEFT OUTER JOIN temp
+        ON courses_users.user_id=upsert_courses_users.user_id
+    WHERE upsert_courses_users.user_id IS NULL)
+AS dropped
+WHERE courses_users.user_id=dropped.user_id
+AND courses_users.user_group=$1
+AND courses_users.manual_registration=$2
+SQL;
+        foreach ($sql as $table_name => $table) {
+
+            pg_query(self::$db, $table['begin']);
+            pg_query(self::$db, $table['temp_tables']);
 
             //fills temp table with batch upsert data.
             foreach(self::$data as $i => $row) {
-                pg_query_params(self::$db, $sql['data'][$i], array( $row[COLUMN_CSID],
-                                                                    $row[COLUMN_FNAME],
-                                                                    $row[COLUMN_LNAME],
-                                                                    $row[COLUMN_PNAME],
-                                                                    $row[COLUMN_EMAIL],
-                                                                    $row[COLUMN_SECTION] ));
+                switch ($table_name) {
+                case 'users':
+                    pg_query_params(self::$db, $table['data'][$i], array($row[COLUMN_USERID],
+                                                                         $row[COLUMN_FIRSTNAME],
+                                                                         $row[COLUMN_LASTNAME],
+                                                                         $row[COLUMN_PREFERREDNAME],
+                                                                         $row[COLUMN_EMAIL]));
+                    break;
+                case 'courses_users':
 
+                    pg_query_params(self::$db, $table['data'][$i], array(self::$semester,
+                                                                         strtolower($row[COLUMN_COURSE_PREFIX] . $row[COLUMN_COURSE_NUMBER]),
+                                                                         $row[COLUMN_USERID],
+                                                                         4,
+                                                                         $row[COLUMN_SECTION],
+                                                                         'FALSE'));
+                    break;
+                }
             }
 
-            pg_query(self::$db, $sql['lock']);
-            pg_query(self::$db, $sql['update']);
-            pg_query(self::$db, $sql['insert']);
-            pg_query_params(self::$db, $sql['dropped_students'], array(4, 'FALSE'));
-            pg_query(self::$db, $sql['commit']);
-
-        } else {
-/* -----------------------------------------------------------------------------
- * SQL upsert code for Postgres v9.5+ (permits update on conflict)
- * -------------------------------------------------------------------------- */
-
+            pg_query(self::$db, $table['lock']);
+            pg_query(self::$db, $table['update']);
+            pg_query(self::$db, $table['insert']);
+            if (!is_null($table['dropped_students'])) {
+                pg_query_params(self::$db, $table['dropped_students'], array(4, 'FALSE'));
+            }
+            pg_query(self::$db, $table['commit']);
         }
 
         //indicate success.
         return true;
+    }
+
+    private function upsert_psql95() {
+    //IN:  No parameters.
+    //OUT: TRUE when upsert is complete.
+    //PURPOSE:  "Update/Insert" data into the database.  Code takes advantage
+    //          of ON CONFLICT clause for UPDATE
+
+/* -----------------------------------------------------------------------------
+ * SQL upsert code for Postgres v9.5+ (permits update on conflict)
+ *
+ * q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
+ * -------------------------------------------------------------------------- */
+
     }
 
     private function log_it($msg) {
@@ -399,5 +428,6 @@ SQL;
     }
 
 }
+
 /* EOF ====================================================================== */
 ?>
