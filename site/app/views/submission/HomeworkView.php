@@ -680,8 +680,7 @@ HTML;
             window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
         }
         $(document).ready(function() {
-            //$('#submission_version').prop("disabled", true);
-            //$('select[name=submission_version]').prop("disabled", true);
+            $('select[name=submission_version]').prop("disabled", true);
         });
     </script>
 HTML;
