@@ -29,6 +29,7 @@ HTML;
         $return .= <<<HTML
 <div class="content">
 <h1 class="centered">Plagiarism Detection - $assignment</h1>
+<br>
 HTML;
         $return .= file_get_contents("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/$assignment/index.html");
         $return .= <<<HTML
@@ -42,6 +43,7 @@ HTML;
         $return .= <<<HTML
 <div class="content">
 <h1 style="text-align: center">Plagiarism Detection</h1>
+<br>
 HTML;
         if ($assignments) {
             $return .= '<ul>';
@@ -51,7 +53,7 @@ HTML;
             $return .= '</ul>';
         } else {
             $return .= <<<HTML
-<p>It looks like you have yet to run plagiarism detection on any assignment. See <a href="http://submitty.org/instructor/static_analysis">here</a> for details.</p>
+<p>It looks like you have yet to run plagiarism detection on any assignment. See <a href="http://submitty.org/instructor/static_analysis">http://submitty.org/instructor/static_analysis</a> for details.</p>
 HTML;
         }
         $return .= <<<HTML
