@@ -1068,7 +1068,7 @@ class Gradeable(object):
             self.submission_due_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
             self.team_assignment = False
             self.max_team_size = 1
-            self.team_lock_date = parse_datetime(gradeable['eg_submission_due_date'])
+            self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
             if self.is_repository and 'eg_subdirectory' in gradeable:

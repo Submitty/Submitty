@@ -123,7 +123,7 @@ CREATE TABLE electronic_gradeable (
     eg_subdirectory character varying(1024) NOT NULL,
     eg_team_assignment boolean NOT NULL,
     eg_max_team_size integer NOT NULL,
-    eg_team_lock_date timestamp(6) without time zone NOT NULL,
+    eg_team_lock_date timestamp(6) with time zone NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
     eg_peer_grading boolean NOT NULL,
     eg_submission_open_date timestamp(6) with time zone NOT NULL,

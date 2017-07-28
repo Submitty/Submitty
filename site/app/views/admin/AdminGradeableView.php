@@ -33,7 +33,7 @@ class AdminGradeableView extends AbstractView {
         $electronic_gradeable['eg_late_days'] = 2;
         $electronic_gradeable['eg_precision'] = 0.5;
         $electronic_gradeable['eg_max_team_size'] = 1;
-        $electronic_gradeable['eg_team_lock_date'] = date('m/d/Y 23:59:59', strtotime( '+7 days' ));
+        $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
         $team_yes_checked = false;
         $team_no_checked = true;
         $peer_yes_checked = false;
@@ -42,7 +42,7 @@ class AdminGradeableView extends AbstractView {
         $TA_grade_open_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
         $TA_grade_release_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-		$BASE_URL = "http://192.168.56.101/hwgrading";
+		$BASE_URL = "http:/localhost/hwgrading";
 		$action = "upload_new_gradeable"; //decides how the page's data is displayed
 		$string = "Add"; //Add or Edit
 		$button_string = "Add";
@@ -100,7 +100,7 @@ class AdminGradeableView extends AbstractView {
                 $precision = $data[3]['eg_precision'];
                 $electronic_gradeable['eg_precision'] = $precision;
                 $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
-                $electronic_gradeable['eg_team_lock_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_team_lock_date']));
+                $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_team_lock_date']));
                 $team_yes_checked = $data[3]['eg_team_assignment'];
                 $team_no_checked = !$team_yes_checked;
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
