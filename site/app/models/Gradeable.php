@@ -30,8 +30,12 @@ use app\libraries\Utils;
  * @method float getMaxSize()
  * @method GradeableVersion[] getVersions()
  * @method float getNormalPoints() Returns the total number of points for testcases that are not hidden nor are extra credit
- * @method bool setTeamAssignment()
+ * @method bool setTeamAssignment(bool $team_assignment)
  * @method bool getTeamAssignment()
+ * @method int setMaxTeamSize(int $max_team_size)
+ * @method int getMaxTeamSize()
+ * @method setTeamLockDate(\DateTime $datetime)
+ * @method \DateTime getTeamLockDate()
  * @method int getPeerGradeSet()
  * @method void setPeerGradeSet(int $assign)
  * @method bool getPeerGrading()
@@ -89,6 +93,12 @@ class Gradeable extends AbstractModel {
     
     /** @property @var bool Is this a team assignment */
     protected $team_assignment = false;
+
+    /** @property @var int maximum allowed team size */
+    protected $max_team_size = 0;
+
+    /** @property @var \DateTime|null Date when students cannot create/leave/join teams without instructor's help */
+    protected $team_lock_date = null;
     
     /** @property @var bool Does this assignment use peer grading*/
     protected $peer_grading = false;
@@ -268,10 +278,6 @@ class Gradeable extends AbstractModel {
         $this->id = $details['g_id'];
 
         $this->user = ($user === null) ? $this->core->getUser() : $user;
-        $this->team_assignment = isset($details['g_team_assignment']) ? $details['g_team_assignment'] === true : false;
-        if ($this->team_assignment) {
-            $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
-        }
 
         if (isset($details['gd_id'])) {
             $this->gd_id = $details['gd_id'];
@@ -296,6 +302,9 @@ class Gradeable extends AbstractModel {
             $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
+            $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;
+            $this->max_team_size = $details['eg_max_team_size'];
+            $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
             if (isset($details['active_version']) && $details['active_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
@@ -319,12 +328,12 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
+                            'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
                             'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
+                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
@@ -348,6 +357,7 @@ class Gradeable extends AbstractModel {
                 if (isset($details['array_gcd_gc_id'])) {
                     for ($j = 0; $j < count($details['array_gcd_gc_id']); $j++) {
                         if ($details['array_gcd_gc_id'][$j] === $component_details['gc_id']) {
+                            $component_details['array_gcm_mark'] = $details['array_array_gcm_mark'][$j];
                             $component_details['gcd_score'] = $details['array_gcd_score'][$j];
                             $component_details['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
                             $component_details['gcd_graded_version'] = $details['array_gcd_graded_version'][$j];                            
@@ -919,6 +929,17 @@ class Gradeable extends AbstractModel {
         }
         foreach ($this->components as $component) {
             $component->saveData($this->gd_id);
+        }
+        $this->core->getCourseDB()->commit();
+    }
+
+    public function saveData2() {
+        $this->core->getCourseDB()->beginTransaction();
+        if ($this->gd_id === null) {
+            $this->gd_id = $this->core->getQueries()->insertGradeableData($this);
+        }
+        elseif ($this->modified) {
+            $this->core->getQueries()->updateGradeableData($this);
         }
         $this->core->getCourseDB()->commit();
     }
