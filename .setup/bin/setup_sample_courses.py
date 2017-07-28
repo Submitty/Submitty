@@ -990,7 +990,6 @@ class Gradeable(object):
         self.title = ""
         self.instructions_url = ""
         self.overall_ta_instructions = ""
-        self.team_assignment = False
         self.peer_grading = False
         self.grade_by_registration = True
         self.is_repository = False
@@ -1067,6 +1066,9 @@ class Gradeable(object):
         if self.type == 0:
             self.submission_open_date = submitty_utils.parse_datetime(gradeable['eg_submission_open_date'])
             self.submission_due_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
+            self.team_assignment = False
+            self.max_team_size = 1
+            self.team_lock_date = parse_datetime(gradeable['eg_submission_due_date'])
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
             if self.is_repository and 'eg_subdirectory' in gradeable:
@@ -1123,7 +1125,6 @@ class Gradeable(object):
         conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
-                     g_team_assignment=self.team_assignment, 
                      g_gradeable_type=self.type,
                      g_grade_by_registration=self.grade_by_registration,
                      g_ta_view_start_date=self.ta_view_date,
@@ -1142,6 +1143,9 @@ class Gradeable(object):
                          eg_submission_open_date=self.submission_open_date,
                          eg_submission_due_date=self.submission_due_date,
                          eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
+                         eg_team_assignment=self.team_assignment,
+                         eg_max_team_size=self.max_team_size,
+                         eg_team_lock_date=self.team_lock_date,
                          eg_use_ta_grading=self.use_ta_grading, eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
 
