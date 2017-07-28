@@ -47,16 +47,18 @@ class ElectronicGraderController extends AbstractController {
         /*
          * we need number of students per section
          */
+        
         $total = array();
         $graded_components = array();
         $graders = array();
         $sections = array();
         $total_users = 0;
         if ($peer) {
+            $peer_grade_set = $gradeable->getPeerGradingAssignNumber();
             $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
-            $
-            $num_components = $this->core->getQueries()->getTotalPeerComponentCount($gradeable->getId());
-            $graded_components = $this->getQueries()->getPeerGradedComponentsCount($gradeable->getId());
+            $num_components = $this->core->getQueries()->getNumPeerComponents($gradeable->getId());
+            $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
+            $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
         }
         else if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getUser()->accessFullGrading()){
@@ -83,22 +85,42 @@ class ElectronicGraderController extends AbstractController {
 
         $sections = array();
         if (count($total_users) > 0) {
-            foreach ($total_users as $key => $value) {
-                $sections[$key] = array(
-                    'total_components' => $value * $num_components,                        
+            if ($peer) {
+                $sections['stu_grad'] = array(
+                    'total_components' => $num_components * $peer_grade_set,
+                    'graded_components' => $my_grading,
+                    'graders' => array()
+                );
+                $sections['all'] = array(
+                    'total_components' => 0,
                     'graded_components' => 0,
                     'graders' => array()
                 );
-                if (isset($graded_components[$key])) {
-                    $sections[$key]['graded_components'] = intval($graded_components[$key]);
+                foreach($total_users as $key => $value) {
+                    $sections['all']['total_components'] += $value *$num_components*$peer_grade_set;
+                    $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
                 }
-                if (isset($graders[$key])) {
-                    $sections[$key]['graders'] = $graders[$key];
+                $sections['all']['total_components'] -= $peer_grade_set*$num_components;
+                $sections['all']['graded_components'] -= $my_grading;
+            }
+            else {
+                foreach ($total_users as $key => $value) {
+                    $sections[$key] = array(
+                        'total_components' => $value * $num_components,                        
+                        'graded_components' => 0,
+                        'graders' => array()
+                    );
+                    if (isset($graded_components[$key])) {
+                        $sections[$key]['graded_components'] = intval($graded_components[$key]);
+                    }
+                    if (isset($graders[$key])) {
+                        $sections[$key]['graders'] = $graders[$key];
+                    }
                 }
             }
         }
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $peer);
     }
 
     /**
@@ -108,18 +130,29 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $this->core->getOutput()->addBreadcrumb("Details {$gradeable->getName()}");
-
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-        }
-
+        $peer = false;
+        
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
         }
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
+                $peer = true;
+            }
+            else {
+                $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            }
+        }
+        
         $students = array();
-        if ($gradeable->isGradeByRegistration()) {
+        if ($peer) {
+            $student_ids = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
+            $graders = array();
+            $section_key = "registration_section";
+        }
+        else if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
             if (!isset($_GET['view']) || $_GET['view'] !== "all") {
@@ -139,11 +172,12 @@ class ElectronicGraderController extends AbstractController {
         if ((isset($_GET['view']) && $_GET['view'] === "all") || ($this->core->getUser()->accessAdmin() && count($sections) === 0)) {
             $students = $this->core->getQueries()->getAllUsers($section_key);
         }
-
-        $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
-
+        
+        if(!$peer) {
+            $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
+        }
         $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $peer);
     }
 
     public function submitGrade() {

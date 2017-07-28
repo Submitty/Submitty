@@ -14,7 +14,7 @@ class ElectronicGraderView extends AbstractView {
      * @param array     $sections
      * @return string
      */
-    public function statusPage($gradeable, $sections) {
+    public function statusPage($gradeable, $sections, $peer) {
         $course = $this->core->getConfig()->getCourse();
         $semester = $this->core->getConfig()->getSemester();
         $graded = 0;
@@ -52,45 +52,58 @@ HTML;
         Current percentage of grading done: {$percentage}% ({$graded}/{$total})
         <br />
         <br />
-        By Grading Sections:
-        <div style="margin-left: 20px">
 HTML;
-        foreach ($sections as $key => $section) {
-            $percentage = round(($section['graded_components'] / $section['total_components']) * 100);
+
+        if ($peer) {
+            $percentage = round(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100);
             $return .= <<<HTML
-            Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})<br />
-HTML;
-        }
-        $return .= <<<HTML
-        </div>
-        <br />
-        Graders:
-        <div style="margin-left: 20px">
-HTML;
-        foreach ($sections as $key => $section) {
-            if ($key === "NULL") {
-                continue;
-            }
-            if (count($section['graders']) > 0) {
-                $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
-            }
-            else {
-                $graders = "Nobody";
-            }
-            $return .= <<<HTML
-            Section {$key}: {$graders}<br />
-HTML;
-        }
-        $return .= <<<HTML
-        </div>
+        Current percentage of students grading done: {$percentage}% ({$sections['stu_grad']['graded_components']}/{$sections['stu_grad']['total_components']})
     </div>
 HTML;
+        }
+        else {
+            $return .= <<<HTML
+            By Grading Sections:
+            <div style="margin-left: 20px">
+HTML;
+            foreach ($sections as $key => $section) {
+                $percentage = round(($section['graded_components'] / $section['total_components']) * 100);
+                $return .= <<<HTML
+                Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})<br />
+HTML;
+            }
+            $return .= <<<HTML
+            </div>
+            <br />
+            Graders:
+            <div style="margin-left: 20px">
+HTML;
+            foreach ($sections as $key => $section) {
+                if ($key === "NULL") {
+                    continue;
+                }
+                if (count($section['graders']) > 0) {
+                    $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
+                }
+                else {
+                    $graders = "Nobody";
+                }
+                $return .= <<<HTML
+                Section {$key}: {$graders}<br />
+HTML;
+            }
+            $return .= <<<HTML
+            </div>
+        </div>
+HTML;
+        }
+        
     }
     //{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
     $return .= <<<HTML
     <div style="margin-top: 20px">
 HTML;
-        if($percentage !== -1 || $this->core->getUser()->accessFullGrading()){
+        if($percentage !== -1 || $this->core->getUser()->accessFullGrading() || $peer){
             $return .= <<<HTML
         <a class="btn btn-primary" 
             href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
@@ -131,7 +144,7 @@ HTML;
      * @param array       $graders
      * @return string
      */
-    public function detailsPage($gradeable, $rows, $graders) {
+    public function detailsPage($gradeable, $rows, $graders, $peer) {
         $return = <<<HTML
 <div class="content">
     
@@ -146,6 +159,9 @@ HTML;
         else{
             $text = 'View Your Sections';
             $view = null;
+        }
+        if($peer) {
+            $grading_count = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
         }
         if($gradeable->isGradeByRegistration()){
             $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
@@ -169,15 +185,40 @@ HTML;
     <h2>Grade Details for {$gradeable->getName()}</h2>
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
-            <tr>
+            <tr>    
+HTML;
+        if($peer) {
+            $return .= <<<HTML
+                <td width="13%"></td>
+                <td width="30%">Student</td>
+HTML;
+            if($gradeable->getTotalNonHiddenNonExtraCreditPoints() !== 0) {
+                $return .= <<<HTML
+                <td width="13%">Autograding</td>
+                <td width="18%">Grading</td>
+                <td width="15%">Total</td>
+                <td width="11%">Active Version</td>           
+HTML;
+            }
+            else {
+                $show_auto_grader_points = false;
+                $return .= <<<HTML
+                <td width="24%">Grading</td>
+                <td width="18%">Total</td>
+                <td width="15%">Active Version</td>                
+HTML;
+            }
+        }
+        else {
+            $return .= <<<HTML
                 <td width="3%"></td>
                 <td width="5%">Section</td>
                 <td width="20%">User ID</td>
                 <td width="15%">First Name</td>
                 <td width="15%">Last Name</td>
 HTML;
-
-        if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
+        
+            if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
             $return .= <<<HTML
                 <td width="9%">Autograding</td>
                 <td width="8%">TA Grading</td>
@@ -187,8 +228,8 @@ HTML;
             </tr>
         </thead>
 HTML;
-        }
-        else {
+            }
+            else {
             $show_auto_grading_points = false;
             $return .= <<<HTML
                 <td width="12%">TA Grading</td>
@@ -198,6 +239,7 @@ HTML;
             </tr>
         </thead>
 HTML;
+            }
         }
             $count = 1;
             $last_section = false;
@@ -205,30 +247,42 @@ HTML;
             foreach ($rows as $row) {
                 $active_version = $row->getActiveVersion();
                 $highest_version = $row->getHighestVersion();
-                $autograding_score = $row->getGradedAutograderPoints();
-                if ($row->beenTAgraded()){
-                    if ($row->getUserViewedDate() === null || $row->getUserViewedDate() === "") {
-                        $viewed_grade = "&#10008;";
+                if ($peer) {
+                    $autograding_score = $row->getGradedNonHiddenPoints();
+                    $total_possible = $row->getTotalNonHiddenNonExtraCreditPoints();
+                    $graded = $autograding_score;
+                }
+                else {
+                    $autograding_score = $row->getGradedAutograderPoints();
+                    if ($row->beenTAgraded()){
+                        if ($row->getUserViewedDate() === null || $row->getUserViewedDate() === "") {
+                            $viewed_grade = "&#10008;";
+                            $grade_viewed = "";
+                            $grade_viewed_color = "color: red; font-size: 1.5em;";
+                        }
+                        else {
+                            $viewed_grade = "&#x2714;";
+                            $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
+                            $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
+                        }
+                        $different = false;
+                    }
+                    else{
+                        $viewed_grade = "";
                         $grade_viewed = "";
-                        $grade_viewed_color = "color: red; font-size: 1.5em;";
+                        $grade_viewed_color = "";
                     }
-                    else {
-                        $viewed_grade = "&#x2714;";
-                        $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
-                        $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
-                    }
-                    $different = false;
+                    $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
+                    $graded = $autograding_score;
                 }
-                else{
-                    $viewed_grade = "";
-                    $grade_viewed = "";
-                    $grade_viewed_color = "";
-                }
-                $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
-                $graded = $autograding_score + $row->getGradedTAPoints();
+                
+                
 
                 if ($graded < 0) $graded = 0;
-                if ($gradeable->isGradeByRegistration()) {
+                if($peer) {
+                    $section = "PEER STUDENT GRADER";
+                }
+                else if ($gradeable->isGradeByRegistration()) {
                     $section = $row->getUser()->getRegistrationSection();
                 }
                 else {
@@ -246,10 +300,16 @@ HTML;
                     if (isset($graders[$display_section]) && count($graders[$display_section]) > 0) {
                         $section_graders = implode(", ", array_map(function(User $user) { return $user->getId(); }, $graders[$display_section]));
                     }
-                    else {
+                    else if (!$peer){
                         $section_graders = "Nobody";
                     }
+                    else {
+                        $section_graders = $this->core->getUser()->getId();
+                    }
                     $cols = ($show_auto_grading_points) ? 10 : 9;
+                    if($peer) {
+                        $cols -= 4;
+                    }
                     $return .= <<<HTML
         <tr class="info persist-header">
             <td colspan="{$cols}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
@@ -264,7 +324,15 @@ HTML;
                 if ($row->getUser()->accessGrading()) {
                     $style = "style='background: #7bd0f7;'";
                 }
-                $return .= <<<HTML
+                if($peer) {
+                    $return .= <<<HTML
+            <tr id="user-row-{$row->getUser()->getAnonId()}" {$style}>
+                <td>{$count}</td>
+                <td>{$row->getUser()->getAnonId()}<td>
+HTML;
+                }
+                else {
+                    $return .= <<<HTML
             <tr id="user-row-{$row->getUser()->getId()}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
@@ -272,12 +340,20 @@ HTML;
                 <td>{$row->getUser()->getDisplayedFirstName()}</td>
                 <td>{$row->getUser()->getLastName()}</td>
 HTML;
+                }
 
                 if($show_auto_grading_points) {
                     if ($highest_version != 0) {
-                        $return .= <<<HTML
+                        if(!$peer) {
+                            $return .= <<<HTML
                 <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
 HTML;
+                        }
+                        else {
+                            $return .= <<<HTML
+                <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalNonHiddenNonExtraCreditPoints()}</td>
+HTML;
+                        }
                     }
                     else {
                         $return .= <<<HTML
@@ -308,7 +384,7 @@ HTML;
                         $contents = "Grade";
                     }
                     $return .= <<<HTML
-                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
+                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getAnonId(), 'individual'=>'1'))}">
                         {$contents}
                     </a>
                 </td>
@@ -337,15 +413,19 @@ HTML;
                 else {
                     $return .= <<<HTML
                 <td>
-                    <a class="btn btn-default" style="color:#a5a5a5;" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">Grade
+                    <a class="btn btn-default" style="color:#a5a5a5;" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getAnonId(), 'individual'=>'1'))}">Grade
                     </a>
                 </td>
                 <td></td>
                 <td></td>
 HTML;
                 }
+                if(!$peer) {
                 $return .= <<<HTML
                 <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
+HTML;
+                }
+            $return .= <<<HTML
             </tr>
 HTML;
                 $count++;
