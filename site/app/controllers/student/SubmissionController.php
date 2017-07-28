@@ -105,7 +105,6 @@ class SubmissionController extends AbstractController {
                     $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable_id);
                     $days_late = $late_days['late_days_charged'];
                     $extensions = $late_days['extensions'];
-                    // $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
                     if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
                         $gradeable->updateUserViewedDate();
                     }
