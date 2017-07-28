@@ -49,6 +49,8 @@ abstract class AbstractDatabaseQueries {
      */
     abstract public function getUserById($user_id);
 
+    abstract public function getGradingSectionsByUserId($user_id);
+
     /**
      * Fetches all students from the users table, ordering by course section than user_id.
      *
@@ -121,6 +123,8 @@ abstract class AbstractDatabaseQueries {
      */
     abstract public function getGradeableComponents($g_id, $gd_id);
 
+    abstract public function getGradeableComponentsMarks($gc_id);
+
     /**
      * @param string   $g_id
      * @param string   $user_id
@@ -130,9 +134,15 @@ abstract class AbstractDatabaseQueries {
      */
     abstract public function getGradeableVersions($g_id, $user_id, $team_id, $due_date);
 
+    abstract public function getLateDayUpdates();
+
+    abstract public function getLateDayInformation();
+
     abstract public function getUsersByRegistrationSections($sections);
 
     abstract public function getTotalUserCountByRegistrationSections($sections);
+
+    abstract public function getTotalComponentCount($g_id);
 
     abstract public function getGradedComponentsCountByRegistrationSections($g_id, $sections);
 
@@ -147,8 +157,6 @@ abstract class AbstractDatabaseQueries {
     abstract public function getGradedComponentsCountByRotatingSections($g_id, $sections);
 
     abstract public function getGradersForRotatingSections($g_id, $sections);
-
-    abstract public function getGradersFromUserType($user_type);
 
     /**
      * Gets all registration sections from the sections_registration table
@@ -187,6 +195,10 @@ abstract class AbstractDatabaseQueries {
      */
     abstract public function getCountUsersRotatingSections();
 
+    abstract public function getGradersForAllRotatingSections($gradeable_id);
+
+    abstract public function getGradersFromUserType($user_type);
+
     /**
      * Returns the count of all users that are in a rotating section, but are not in an assigned registration section.
      * These are generally students who have dropped the course and have not yet been removed from a rotating
@@ -209,8 +221,6 @@ abstract class AbstractDatabaseQueries {
     abstract public function getMaxRotatingSection();
 
     abstract public function getNumberRotatingSections();
-
-    abstract public function getGradersForAllRotatingSections($gradeable_id);
 
     abstract public function insertNewRotatingSection($section);
 
@@ -266,12 +276,35 @@ abstract class AbstractDatabaseQueries {
      */
     abstract public function updateGradeableComponentData($gd_id, GradeableComponent $component);
 
+    abstract public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark);
+
+    abstract public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark);
+
     /**
      * Creates a new gradeable in the database
      *
      * @param array $details
      */
     abstract public function createNewGradeable(Gradeable $gradeable);
+
+    /**
+     * Updates the current gradeable with new properties.
+     *
+     * @param array $details
+     */
+    abstract public function updateGradeable(Gradeable $gradeable);
+
+    abstract public function createNewGradeableComponent(GradeableComponent $component, Gradeable $gradeable);
+
+    abstract public function updateGradeableComponent(GradeableComponent $component);
+
+    abstract public function deleteGradeableComponent(GradeableComponent $component);
+
+    abstract public function createGradeableComponentMark(GradeableComponentMark $mark);
+
+    abstract public function updateGradeableComponentMark(GradeableComponentMark $mark);
+
+    abstract public function deleteGradeableComponentMark(GradeableComponentMark $mark);
 
     /**
      * Gets an array that contains all revelant data in a gradeable.
@@ -283,24 +316,11 @@ abstract class AbstractDatabaseQueries {
     abstract public function getGradeableData($gradeable_id);
 
     /**
-     * Updates the current gradeable with new properties.
-     *
-     * @param array $details
-     */
-    abstract public function updateGradeable(Gradeable $gradeable);
-
-    /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
      *
      * @param \app\models\Gradeable $gradeable
      */
     abstract public function updateUserViewedDate(Gradeable $gradeable);
-
-    abstract public function getAllGradeablesIdsAndTitles();
-
-    abstract public function getLateDayInformation();
-
-    abstract public function getLateDayUpdates();
 
     /**
      * @todo: write phpdoc
@@ -339,6 +359,9 @@ abstract class AbstractDatabaseQueries {
      * @param $session_id
      */
     abstract public function removeSessionById($session_id);
+
+
+    abstract public function getAllGradeablesIdsAndTitles();
 
     /**
      * gets ids of all electronic gradeables
