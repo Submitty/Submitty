@@ -621,6 +621,14 @@ class SubmissionController extends AbstractController {
             $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         }
         $gradeable->loadResultDetails();
+
+        // if student submission, make sure that gradeable allows submissions
+        if (!$this->core->getUser()->accessGrading() && $original_user_id == $user_id && !$gradeable->getStudentSubmit()) {
+            $msg = "You do not have access to that page.";
+            $_SESSION['messages']['error'][] = $msg;
+            return $this->uploadResult($msg, false);
+        }
+
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
         

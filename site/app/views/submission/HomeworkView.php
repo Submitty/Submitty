@@ -627,7 +627,7 @@ HTML;
             $return .= <<<HTML
 <div class="content">
     {$team_header}
-    <h3 class='label' style="float: left">Select Submission Version:</h3>
+    <h3 class='label' id="submission_header" style="float: left">Select Submission Version:</h3>
 HTML;
             $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
@@ -672,11 +672,12 @@ HTML;
             if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentAnyVersion()) {
                 $return .= <<<HTML
     <script type="text/javascript">
-        function downloadFile(file, path) {
-            window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
-        }
         $(document).ready(function() {
-            $('select[name=submission_version]').prop("disabled", true);
+            $('select[name=submission_version]').hide();
+            $('#do_not_grade').hide();
+            $('#version_change').hide();
+            $('#submission_header').hide();
+            $('#submission_message').hide();
         });
     </script>
 HTML;
@@ -697,7 +698,7 @@ HTML;
 	            if($gradeable->getActiveVersion() > 0
                     && $gradeable->getActiveVersion() === $current_version->getVersion()) {
                     $return .= <<<HTML
-    <div class="sub">
+    <div class="sub" id="submission_message">
         <p class="green-message">
             Note: This version of your assignment will be graded by the instructor/TAs and the score recorded in the gradebook.
         </p>
@@ -714,7 +715,7 @@ HTML;
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
 		                $return .= <<<HTML
-   <div class="sub">
+   <div class="sub" id="submission_message">
        <p class="red-message">
             Note: This version of your assignment will not be graded the instructor/TAs. <br />
 HTML;
