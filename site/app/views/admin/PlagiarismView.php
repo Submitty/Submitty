@@ -53,7 +53,7 @@ HTML;
             $return .= '</ul>';
         } else {
             $return .= <<<HTML
-<p>It looks like you have yet to run plagiarism detection on any assignment. See <a href="http://submitty.org/instructor/static_analysis">http://submitty.org/instructor/static_analysis</a> for details.</p>
+<p>It looks like you have yet to run plagiarism detection on any assignment. See <a href="http://submitty.org/instructor/plagiarism">http://submitty.org/instructor/plagiarism</a> for details.</p>
 HTML;
         }
         $return .= <<<HTML
