@@ -7,20 +7,19 @@
   }
 </style>
 
-<canvas id="diagram" width="1000" height="500">
-  Your browser does not support the HTML5 canvas tag.
-</canvas>
-
-<!--
-<img id="image">
-<pre id="seats"></pre>
--->
+<body>
+  <canvas id="diagram" width="900" height="520">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+  <img id="image">
+  <pre id="seats"></pre>
+</body>
 
 <script>
   var seats = {
-    "left" : [3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 5, 6],
-    "middle" : [3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 5, 7, 7],
-    "right" : [4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 5, 6],
+    "left" : [3, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 1, 1],
+    "middle" : [3, 4, 4, 5, 5, 5, 6, 6, 6, 7, 8, 8, 8, 3, 2],
+    "right" : [3, 4, 4, 4, 4, 3, 3, 3, 3, 2, 2, 2, 2, 1, 1],
   }
   var used = {};
 
@@ -75,22 +74,22 @@
 
   function render_arrow(section) {
     if(section == "left") {
-      var row = 18;
-      var angle = Math.PI * 0.75;
-      var angle_start = Math.PI * 0.10;
-      var angle_end   = Math.PI * 0.33;
+      var row = 16;
+      var angle = Math.PI * 0.95;
+      var angle_start = Math.PI * 0.442 + (row * 0.00145);
+      var angle_end   = Math.PI * 0.465;
     }
     else if(section == "middle") {
-      var row = 17;
-      var angle = Math.PI * 1.07;
-      var angle_start = Math.PI * 0.38;
-      var angle_end   = Math.PI * 0.62;
+      var row = 16;
+      var angle = Math.PI * 1.03;
+      var angle_start = Math.PI * 0.475;
+      var angle_end   = Math.PI * 0.525;
     }
     else if(section == "right") {
-      var row = 18;
-      var angle = Math.PI * 1.33;
-      var angle_start = Math.PI * 0.67;
-      var angle_end   = Math.PI * 0.90;
+      var row = 16;
+      var angle = Math.PI * 1.05;
+      var angle_start = Math.PI * 0.535;
+      var angle_end   = Math.PI * 0.558 - (row * 0.00145);
     }
     else {
       console.log("Invalid section: " + section + " (skipping)");
@@ -115,6 +114,19 @@
   function render_section_row(section, row) {
     var radius = BASE_ROW_RADIUS + row * 20
     var width = BASE_ROW_WIDTH
+
+    if(section == "middle" && row >= 14) {
+      var angle_start = Math.PI * 0.475;
+      var angle_end   = Math.PI * 0.510;
+      // Draw row
+      ctx.beginPath();
+      ctx.setLineDash([]);
+      ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start, angle_end);
+      ctx.lineWidth = width;
+      ctx.strokeStyle = "#333333";
+      ctx.stroke();
+    }
+
     try {
       var empty = false;
       var color = expanded[section][row]["color"];
@@ -126,9 +138,16 @@
       ctx.setLineDash([10, 10]);
     }
 
+    // Draw row
+    ctx.beginPath();
+    ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start, angle_end);
+    ctx.lineWidth = width;
+    ctx.strokeStyle = "#333333";
+    ctx.stroke();
+
     if(section == "left") {
-      var angle_start = Math.PI * 0.10;
-      var angle_end   = Math.PI * 0.33;
+      var angle_start = Math.PI * 0.442 + (row * 0.00145);
+      var angle_end   = Math.PI * 0.465;
 
       angle_avg = (angle_start + angle_end) * 0.5;
       var offset = 4.0 * (Math.PI / radius)
@@ -138,23 +157,31 @@
       ctx.fillText(row, point[0], point[1], 100);
     }
     else if(section == "middle") {
-      var angle_start = Math.PI * 0.38;
-      var angle_end   = Math.PI * 0.62;
+      var angle_start = Math.PI * 0.475;
+      var angle_end   = Math.PI * 0.525;
 
-      point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end * 1.04);
+      point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end * 1.01);
       ctx.font = "bold 7pt sans-serif";
       ctx.fillStyle = "#333333";
       ctx.fillText(row, point[0], point[1], 100);
 
-      point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start * 0.935);
+      point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start * 0.99);
       ctx.font = "bold 7pt sans-serif";
       ctx.fillStyle = "#333333";
       ctx.fillText(row, point[0], point[1], 100);
 
+      if(row <= 13) {
+        var angle_start = Math.PI * 0.475;
+        var angle_end   = Math.PI * 0.525;
+      }
+      else {
+        var angle_start = Math.PI * 0.512;
+        var angle_end   = Math.PI * 0.525;
+      }
     }
     else if(section == "right") {
-      var angle_start = Math.PI * 0.67;
-      var angle_end   = Math.PI * 0.90;
+      var angle_start = Math.PI * 0.535;
+      var angle_end   = Math.PI * 0.558 - (row * 0.00145);
 
       angle_avg = (angle_start + angle_end) * 0.5;
       var offset = 5.0 * (Math.PI / radius)
@@ -187,15 +214,17 @@
 
     // Draw points
     if( ! empty) {
-      letter = expanded[section][row]["letter"]
-      if( ! ("points" in config[section][letter])) {
-        config[section][letter]["points"] = []
+      if(! (section == "middle" && row >= 14)) {
+        letter = expanded[section][row]["letter"]
+        if( ! ("points" in config[section][letter])) {
+          config[section][letter]["points"] = []
+        }
+        if( ! (letter in used)) {
+          used[letter] = 0
+        }
+        config[section][letter]["points"].push(point_avg);
+        used[letter] += seats[section][row - 1];
       }
-      if( ! (letter in used)) {
-        used[letter] = 0
-      }
-      config[section][letter]["points"].push(point_avg);
-      used[letter] += seats[section][row - 1];
 
       if(DRAW_ROW_BLACK_DOTS) {
         if(row <= 4) {
@@ -208,12 +237,12 @@
           limit = 3
         }
         else {
-          limit = 4
+          limit = 5
         }
 
         for(var multiplier = 0; multiplier < limit; multiplier++)
         {
-          var offset = 8.0 * (Math.PI / radius)
+          var offset = 8.1 * (Math.PI / radius)
           // var offset = (angle_end - angle_start) * 0.15
           point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start + multiplier * offset);
           ctx.beginPath();
@@ -233,9 +262,7 @@
 
   function render_row(row) {
     render_section_row("left", row);
-    if(row <= 14) {
-      render_section_row("middle", row);
-    }
+    render_section_row("middle", row);
     render_section_row("right", row);
   }
 
@@ -290,6 +317,14 @@
 
   }
 
+  function sum_array(temp) {
+    var total = 0;
+    for(var index = 0; index < temp.length; index++) {
+        total += temp[index];
+    }
+    return total;
+  }
+
   // Find diagram DOM object and configure HTML5 canvas
   var diagram = document.getElementById("diagram");
   var ctx = diagram.getContext("2d");
@@ -297,10 +332,10 @@
   ctx.textAlign = "center";
 
   var EXPANDED = expand_config(config);
-  var BASE_NUM_ROWS = 16
-  var BASE_ROW_HEIGHT = 10
+  var BASE_NUM_ROWS = 15
+  var BASE_ROW_HEIGHT = -2000
   var BASE_ROW_CENTER = document.getElementById("diagram").offsetWidth / 2.0;
-  var BASE_ROW_RADIUS = 150
+  var BASE_ROW_RADIUS = 2150
   var BASE_ROW_WIDTH = 6
   var BASE_ROW_COLOR = "grey"
   var BASE_POINT_RADIUS = 7
@@ -320,7 +355,7 @@
   // Render right note
   ctx.font = "bold 12pt sans-serif";
   ctx.fillStyle = "#333333";
-  ctx.fillText(note_right, 850, 50);
+  ctx.fillText(note_right, 775, 50);
 
   // Render front of room legend
   ctx.font = "italic 10pt sans-serif";
@@ -328,7 +363,7 @@
 
   // Render back of room legend
   ctx.font = "italic 10pt sans-serif";
-  ctx.fillText("Back of Room", BASE_ROW_CENTER, 470);
+  ctx.fillText("Back of Room", BASE_ROW_CENTER, 490);
 
   // Render arrows
   // render_arrow("left");
@@ -353,8 +388,19 @@
   }
   temp.sort();
   container = document.getElementById("seats")
+  var total = 0;
   for(var index in temp) {
     var letter = temp[index];
-    container.innerHTML += letter + " DARRIN 308 " + used[letter] + "\n";
+    container.innerHTML += letter + " SAGE 3303 " + used[letter] + "\n";
+    total += used[letter];
   }
+
+  // Get total number of seats
+  var all = 0;
+  all += sum_array(seats["left"]);
+  all += sum_array(seats["middle"]);
+  all += sum_array(seats["right"]);
+
+  container.innerHTML += "\nTOTAL: " + total + "\n";
+  container.innerHTML += "UNUSED: " + (all - total) + "\n";
 </script>
