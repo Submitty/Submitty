@@ -16,7 +16,7 @@ just the ones used for testing.
 from __future__ import print_function, division
 import argparse
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import datetime
 import glob
 import grp
 import hashlib
@@ -24,7 +24,6 @@ import json
 import os
 import pwd
 import random
-import re
 import shutil
 import subprocess
 import uuid
@@ -62,7 +61,7 @@ DB_PASS = "hsdbu"
 
 DB_ONLY = False
 
-NOW = datetime.now()
+NOW = submitty_utils.get_current_time()
 
 
 def main():
@@ -142,7 +141,7 @@ def main():
                               user_preferred_firstname=user.preferred_firstname,
                               user_lastname=user.lastname,
                               user_email=user.email,
-                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S"))
+                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     for user in extra_students:
         submitty_conn.execute(user_table.insert(),
@@ -152,7 +151,7 @@ def main():
                               user_preferred_firstname=user.preferred_firstname,
                               user_lastname=user.lastname,
                               user_email=user.email,
-                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S"))
+                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
     submitty_conn.close()
 
     today = datetime.today()
@@ -373,59 +372,6 @@ def get_current_semester():
     if today.month < 7:
         semester = "s" + str(today.year)[-2:]
     return semester
-
-
-def parse_datetime(date_string):
-    """
-    Given a string that should either represent an absolute date or an arbitrary date, parse this
-    into a datetime object that is then used. Absolute dates should be in the format of
-    YYYY-MM-DD HH:MM:SS while arbitrary dates are of the format "+/-# day(s) [at HH:MM:SS]" where
-    the last part is optional. If the time is omitted, then it uses midnight of whatever day was
-    specified.
-
-    Examples of allowed strings:
-    2016-10-14
-    2016-10-13 22:11:32
-    -1 day
-    +2 days at 00:01:01
-
-    :param date_string:
-    :type date_string: str
-    :return:
-    :rtype: datetime
-    """
-    if isinstance(date_string, datetime):
-        return date_string
-    try:
-        return datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
-    except ValueError:
-        pass
-
-    try:
-        return datetime.strptime(date_string, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
-    except ValueError:
-        pass
-
-    m = re.search('([+|\-][0-9]+) (days|day) at [0-2][0-9]:[0-5][0-9]:[0-5][0-9]', date_string)
-    if m is not None:
-        hour = int(m.group(2))
-        minu = int(m.group(3))
-        sec = int(m.group(4))
-        days = int(m.group(1))
-        return NOW.replace(hour=hour, minute=minu, second=sec) + timedelta(days=days)
-
-    m = re.search('([+|\-][0-9]+) (days|day)', date_string)
-    if m is not None:
-        days = int(m.group(1))
-        return NOW.replace(hour=23, minute=59, second=59) + timedelta(days=days)
-
-    raise ValueError("Invalid string for date parsing: " + str(date_string))
-
-
-def datetime_str(datetime_obj):
-    if not isinstance(datetime_obj, datetime):
-        return datetime_obj
-    return datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def parse_args():
@@ -858,7 +804,7 @@ class Course(object):
                                     score = random.randint(0, component.max_value * 2) / 2
                                 else:
                                     score = random.randint(component.max_value * 2, 0) / 2
-                                grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S")
+                                grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                 conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                              gcd_score=score, gcd_component_comment="lorem ipsum",
                                              gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=1)
@@ -1044,7 +990,6 @@ class Gradeable(object):
         self.title = ""
         self.instructions_url = ""
         self.overall_ta_instructions = ""
-        self.team_assignment = False
         self.peer_grading = False
         self.grade_by_registration = True
         self.is_repository = False
@@ -1115,12 +1060,15 @@ class Gradeable(object):
         if 'grading_rotating' in gradeable:
             self.grading_rotating = gradeable['grading_rotating']
 
-        self.ta_view_date = parse_datetime(gradeable['g_ta_view_start_date'])
-        self.grade_start_date = parse_datetime(gradeable['g_grade_start_date'])
-        self.grade_released_date = parse_datetime(gradeable['g_grade_released_date'])
+        self.ta_view_date = submitty_utils.parse_datetime(gradeable['g_ta_view_start_date'])
+        self.grade_start_date = submitty_utils.parse_datetime(gradeable['g_grade_start_date'])
+        self.grade_released_date = submitty_utils.parse_datetime(gradeable['g_grade_released_date'])
         if self.type == 0:
-            self.submission_open_date = parse_datetime(gradeable['eg_submission_open_date'])
-            self.submission_due_date = parse_datetime(gradeable['eg_submission_due_date'])
+            self.submission_open_date = submitty_utils.parse_datetime(gradeable['eg_submission_open_date'])
+            self.submission_due_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
+            self.team_assignment = False
+            self.max_team_size = 1
+            self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
             if self.is_repository and 'eg_subdirectory' in gradeable:
@@ -1177,7 +1125,6 @@ class Gradeable(object):
         conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
-                     g_team_assignment=self.team_assignment, 
                      g_gradeable_type=self.type,
                      g_grade_by_registration=self.grade_by_registration,
                      g_ta_view_start_date=self.ta_view_date,
@@ -1196,6 +1143,9 @@ class Gradeable(object):
                          eg_submission_open_date=self.submission_open_date,
                          eg_submission_due_date=self.submission_due_date,
                          eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
+                         eg_team_assignment=self.team_assignment,
+                         eg_max_team_size=self.max_team_size,
+                         eg_team_lock_date=self.team_lock_date,
                          eg_use_ta_grading=self.use_ta_grading, eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
 
@@ -1210,12 +1160,12 @@ class Gradeable(object):
         form_json['gradeable_title'] = self.title
         form_json['gradeable_type'] = self.get_gradeable_type_text()
         form_json['instructions_url'] = self.instructions_url
-        form_json['ta_view_date'] = datetime_str(self.ta_view_date)
+        form_json['ta_view_date'] = submitty_utils.write_submitty_date(self.ta_view_date)
         if self.type == 0:
-            form_json['date_submit'] = datetime_str(self.submission_open_date)
-            form_json['date_due'] = datetime_str(self.submission_due_date)
-        form_json['date_grade'] = datetime_str(self.grade_start_date)
-        form_json['date_released'] = datetime_str(self.grade_released_date)
+            form_json['date_submit'] = submitty_utils.write_submitty_date(self.submission_open_date)
+            form_json['date_due'] = submitty_utils.write_submitty_date(self.submission_due_date)
+        form_json['date_grade'] = submitty_utils.write_submitty_date(self.grade_start_date)
+        form_json['date_released'] = submitty_utils.write_submitty_date(self.grade_released_date)
 
         if self.type == 0:
             form_json['section_type'] = self.get_submission_type()
