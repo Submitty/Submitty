@@ -1,0 +1,307 @@
+code: sample
+instructor: instructor
+registration_sections: 10
+registered_students: 80
+no_registration_students: 15
+no_rotating_students: 15
+unregistered_students: 15
+make_customization: true
+gradeables:
+- g_id: future_no_tas_homework
+  g_title: Future (No TAs) Homework
+  gradeable_config: python_simple_homework
+  components:
+  - gc_title: Question 1
+    gc_max_value: 5
+  - gc_title: Question 2
+    gc_max_value: 5
+    gc_is_extra_credit: true
+  g_ta_view_start_date: 9994-12-31 23:59:59
+  eg_submission_open_date: 9995-12-31 23:59:59
+  eg_submission_due_date: 9996-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_bucket: homework
+
+- g_id: future_tas_homework
+  components:
+  - gc_title: Question 1
+    gc_max_value: 5
+  - gc_title: Question 2
+    gc_max_value: 5
+    gc_is_extra_credit: true
+  eg_submission_due_date: 9996-12-31 23:59:59
+  eg_submission_open_date: 9995-12-31 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Future (TAs) Homework
+  gradeable_config: python_simple_homework
+  g_bucket: homework
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_max_value: 5
+    gc_title: Question 2
+  eg_submission_due_date: 9996-12-31 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
+  g_id: open_homework
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Open Homework
+  gradeable_config: python_simple_homework
+  g_bucket: homework
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_max_value: 5
+    gc_title: Question 2
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
+  g_id: closed_homework
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Closed Homework
+  gradeable_config: python_simple_homework
+  g_bucket: homework
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_max_value: 5
+    gc_title: Question 2
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_id: grading_homework
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Grading Homework
+  gradeable_config: python_simple_homework
+  g_bucket: homework
+
+#- components:
+#  - gc_max_value: 5
+#    gc_title: Question 1
+#  - gc_is_extra_credit: true
+#    gc_max_value: 5
+#    gc_title: Question 2
+#  eg_submission_due_date: 1972-01-01 23:59:59
+#  eg_submission_open_date: 1971-01-01 23:59:59
+#  g_grade_released_date: 1974-01-01 23:59:59
+#  g_grade_start_date: 1973-01-01 23:59:59
+#  g_id: grades_released_homework
+#  g_ta_view_start_date: 1970-01-01 23:59:59
+#  g_title: Grades Released Homework
+#  gradeable_config: python_simple_homework
+#  g_bucket: homework
+
+- components:
+  - gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_title: Question 2
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
+  g_id: future_no_tas_lab
+  g_ta_view_start_date: 9996-12-31 23:59:59
+  g_title: Future (No TAs) Lab
+  g_type: 1
+  g_bucket: lab
+
+- components:
+  - gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_title: Question 2
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
+  g_id: future_tas_lab
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Future (TAs) Lab
+  g_type: 1
+  g_bucket: lab
+
+- components:
+  - gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_title: Question 2
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 1971-01-01 23:59:59
+  g_id: grading_lab
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Grading Lab
+  g_type: 1
+  g_bucket: lab
+
+- components:
+  - gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_title: Question 2
+  g_grade_released_date: 1972-01-01 23:59:59
+  g_grade_start_date: 1971-01-01 23:59:59
+  g_id: grades_released_lab
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Grades Released Lab
+  g_type: 1
+  g_bucket: lab
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_max_value: 5
+    gc_title: Question 2
+  - gc_is_text: true
+    gc_title: Text 1
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
+  g_id: future_no_tas_test
+  g_ta_view_start_date: 9996-12-31 23:59:59
+  g_title: Future (No TAs) Test
+  g_type: 2
+  g_bucket: test
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_max_value: 5
+    gc_title: Question 2
+  - gc_is_text: true
+    gc_title: Text 1
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 9997-12-31 23:59:59
+  g_id: future_tas_test
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Future (TAs) Test
+  g_type: 2
+  g_bucket: test
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_max_value: 5
+    gc_title: Question 2
+  - gc_is_text: true
+    gc_title: Text 1
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 1971-01-01 23:59:59
+  g_id: grading_test
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Grading Test
+  g_type: 2
+  g_bucket: test
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_max_value: 5
+    gc_title: Question 2
+  - gc_is_text: true
+    gc_title: Text 1
+  g_grade_released_date: 1972-01-01 23:59:59
+  g_grade_start_date: 1971-01-01 23:59:59
+  g_id: grades_released_test
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Grades Released Test
+  g_type: 2
+  g_bucket: test
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_released_date: 1974-01-01 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_id: grades_released_homework_onlyta
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: TA Grade Only Homework (Upload Only)
+  gradeable_config: upload_only
+  g_bucket: homework
+
+# For no autograding, still need components, but also ned eg_use_ta_grading flag
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_released_date: 1974-01-01 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_id: grades_released_homework_onlyauto
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Autograde Only Homework (Simple Python)
+  gradeable_config: 01_simple_python
+  eg_use_ta_grading: False
+  g_bucket: homework
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_max_value: 5
+    gc_title: Question 2
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_released_date: 1974-01-01 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_id: grades_released_homework_autota
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Autograde and TA Homework (C System Calls)
+  gradeable_config: 12_system_calls
+  g_bucket: homework
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_max_value: 5
+    gc_title: Question 2
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_released_date: 1974-01-01 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_id: grades_released_homework_autohiddenEC
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Autograder Hidden and Extra Credit (C++ Hidden Tests)
+  gradeable_config: cpp_hidden_tests
+  g_bucket: homework
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_max_value: 5
+    gc_title: Question 2
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_released_date: 1974-01-01 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_id: grades_released_homework_onlytaEC
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: TA Only w/ Extra Credit (Upload Only)
+  gradeable_config: upload_only
+  g_bucket: homework
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_max_value: -5
+    gc_title: Question 2
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_released_date: 1974-01-01 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_id: grades_released_homework_onlytaPenalty
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: TA Only w/ Penalty (Upload Only)
+  gradeable_config: upload_only
+  g_bucket: homework

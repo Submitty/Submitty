@@ -9,8 +9,8 @@ import glob
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/sample_files/sample_assignment_config/pdf_word_count"
-SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/sample_files/sample_submissions/pdf_word_count"
+SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/pdf_word_count/config"
+SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/pdf_word_count/submissions"
 
 @prebuild
 def initialize(test):
@@ -47,9 +47,10 @@ def too_few(test):
     subprocess.call(["cp",os.path.join(SAMPLE_SUBMISSIONS, "words_249.pdf"),
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
+    subprocess.call(["rm","-f",os.path.join(test.testcase_path, "data", "test01_words_249.pdf")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","too_few_results_grade.txt","-b")
+    test.diff("grade.txt","too_few_grade.txt","-b")
     test.json_diff("results.json","too_few_results.json")
     test.empty_file("test02_STDOUT_0.txt")
     test.empty_file("test02_STDERR_0.txt")
@@ -62,9 +63,10 @@ def too_many(test):
     subprocess.call(["cp",os.path.join(SAMPLE_SUBMISSIONS, "words_1463.pdf"),
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
+    subprocess.call(["rm","-f",os.path.join(test.testcase_path, "data", "test01_words_1463.pdf")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","too_many_results_grade.txt","-b")
+    test.diff("grade.txt","too_many_grade.txt","-b")
     test.json_diff("results.json","too_many_results.json")
     test.empty_file("test02_STDOUT_0.txt")
     test.empty_file("test02_STDERR_0.txt")
@@ -77,9 +79,10 @@ def just_right(test):
     subprocess.call(["cp",os.path.join(SAMPLE_SUBMISSIONS, "words_881.pdf"),
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
+    subprocess.call(["rm","-f",os.path.join(test.testcase_path, "data", "test01_words_881.pdf")])
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","just_right_results_grade.txt","-b")
+    test.diff("grade.txt","just_right_grade.txt","-b")
     test.json_diff("results.json","just_right_results.json")
     test.empty_file("test02_STDOUT_0.txt")
     test.empty_file("test02_STDERR_0.txt")

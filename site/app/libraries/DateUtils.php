@@ -3,6 +3,7 @@
 namespace app\libraries;
 
 use \DateTime;
+use \DateTimeZone;
 use \DateInterval;
 
 /**
@@ -30,7 +31,7 @@ class DateUtils {
             $date2 = new DateTime($date2);
         }
         // Set the period as "1 day" for the interval
-        if ($date1 === $date2) {
+        if ($date1 == $date2) {
             return 0;
         }
         $diff = $date1->diff($date2);
@@ -43,5 +44,37 @@ class DateUtils {
 
         return $days_late;
     }
-    
+
+    public static function validateTimestamp($timestamp) {
+    //IN:  $timestamp is actually a date string, not a Unix timestamp.
+    //OUT: TRUE when date string conforms to an accetpable pattern
+    //      FALSE otherwise.
+    //PURPOSE: Validate string to (1) be a valid date and (2) conform to specific
+    //         date patterns.
+    //         'm-d-Y' -> mm-dd-yyyy
+    //         'm-d-y' -> mm-dd-yy
+    //         'm/d/Y' -> mm/dd/yyyy
+    //         'm/d/y' -> mm/dd/yy
+
+        //This bizzare/inverted switch-case block actually does work in PHP.
+        //This operates as a form of "white list" of valid patterns.
+        //This checks to ensure a date pattern is acceptable AND the date actually
+        //exists.  e.g. "02-29-2016" is valid, while "06-31-2016" is not.
+        //That is, 2016 is a leap year, but June has only 30 days.
+        $tmp = array(date_create_from_format('m-d-Y', $timestamp),
+                     date_create_from_format('m/d/Y', $timestamp),
+                     date_create_from_format('m-d-y', $timestamp),
+                     date_create_from_format('m/d/y', $timestamp));
+
+        switch (true) {
+        case ($tmp[0] && $tmp[0]->format('m-d-Y') === $timestamp):
+        case ($tmp[1] && $tmp[1]->format('m/d/Y') === $timestamp):
+        case ($tmp[2] && $tmp[2]->format('m-d-y') === $timestamp):
+        case ($tmp[3] && $tmp[3]->format('m/d/y') === $timestamp):
+            return true;
+        default:
+            return false;
+        }
+        return true;
+    }
 }

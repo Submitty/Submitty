@@ -15,7 +15,7 @@ class UsersView extends AbstractView {
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-        <a href="{$this->core->getConfig()->getTABaseUrl()}account/admin-classlist.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&this[]=Students&this[]=Upload%20ClassList" class="btn btn-primary">Upload Classlist</a>
+        <a onclick="newClassListForm()" class="btn btn-primary">Upload Classlist</a>
         <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
     </div>
     <h2>View Students</h2>
@@ -106,7 +106,7 @@ HTML;
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-        <a href="{$this->core->getConfig()->getTABaseUrl()}account/admin-grader-list.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&this[]=Graders&this[]=Upload%20Grader%20List" class="btn btn-primary">Upload Grader list</a>
+        <a onclick="newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
         <a onclick="newUserForm();
             $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
     </div>
@@ -207,7 +207,7 @@ HTML;
         }
 
         $return = <<<HTML
-<div id="edit-user-form">
+<div class="popup-form" id="edit-user-form">
 <form method="post" action="{$this->core->buildUrl($url)}">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <input type="hidden" name="edit_user" value="false" />
@@ -273,7 +273,11 @@ HTML;
         }
         $return .= <<<HTML
     </div>
-    <div style="float: right; width: auto">
+    <div style="width: 60%">
+        Password:<br />
+        <input type="text" name="password" placeholder="New Password" />    
+    </div>
+    <div style="float: right; width: auto; margin-top: 10px">
         <a onclick="$('#edit-user-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
         <input class="btn btn-primary" type="submit" value="Submit" />
     </div>
@@ -374,6 +378,74 @@ HTML;
             </div>
         </div>
     </div>
+    </form>
+</div>
+HTML;
+        return $return;
+    }
+
+    public function graderListForm() {
+        $return = <<<HTML
+<div class="popup-form" id="grader-list-form">
+    <h2>Upload Grader List</h2>
+    <p>&emsp;</p>
+    <p>
+        Format your grader data as an .xlsx or .csv file with 5 columns:<br>
+        &emsp;username, LastName, FirstName, email, GraderGroup<br>
+    </p>
+    <p>&emsp;</p>
+    <p>
+        Where GraderGroup is:<br>
+        &emsp;1=Instructor<br>
+        &emsp;2=Full Access Grader (graduate teaching assistant)<br>
+        &emsp;3=Limited Access Grader (mentor)<br>
+        &emsp;4=Student (no grading access)<br>
+    </p>
+    <p>&emsp;</p>
+    <p>
+        Do not use a header row.<br>
+    </p>
+    <br />
+    <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'upload_grader_list'))}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        <div>
+            <input type="file" name="upload" accept=".xlsx, .csv">
+        </div>
+        <div style="float: right; width: auto">
+            <a onclick="$('#grader-list-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+            <input class="btn btn-primary" type="submit" value="Submit" />
+        </div>
+    </form>
+</div>
+HTML;
+        return $return;
+    }
+
+    public function classListForm() {
+        $return = <<<HTML
+<div class="popup-form" id="class-list-form">
+    <h2>Upload Classlist</h2>
+    <p>&emsp;</p>
+    <p>
+        Format your class list as an .xlsx or .csv file with 5 columns:<br>
+        &emsp;username, LastName, FirstName, email, RegistrationSection<br>
+    </p>
+    <p>&emsp;</p>
+    <p>
+        Do not use a header row.<br>
+    </p>
+    <br />
+    <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'upload_class_list'))}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        Move students missing from the classlist to NULL section?<input type="checkbox" name="move_missing" /><br>
+        <br />
+        <div>
+            <input type="file" name="upload" accept=".xlsx, .csv">
+        </div>
+        <div style="float: right; width: auto">
+            <a onclick="$('#class-list-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+            <input class="btn btn-primary" type="submit" value="Submit" />
+        </div>
     </form>
 </div>
 HTML;

@@ -2,58 +2,86 @@
 
 namespace app\models;
 
+use app\libraries\Core;
 use app\libraries\DatabaseUtils;
 
 /**
  * Class User
+ *
+ * @method string getId()
+ * @method void setId(string $id) Get the id of the loaded user
+ * @method void setAnonId(string $anon_id)
+ * @method string getAnonId() 
+ * @method string getPassword()
+ * @method string getFirstName() Get the first name of the loaded user
+ * @method string getPreferredFirstName() Get the preferred name of the loaded user
+ * @method string getDisplayedFirstName() Returns the preferred name if one exists and is not null or blank,
+ *                                        otherwise return the first name field for the user.
+ * @method string getLastName() Get the last name of the loaded user
+ * @method void setLastName(string $last_name)
+ * @method string getEmail()
+ * @method void setEmail(string $email)
+ * @method int getGroup()
+ * @method void setGroup(integer $group)
+ * @method int getRegistrationSection()
+ * @method int getRotatingSection()
+ * @method void setManualRegistration(bool $flag)
+ * @method bool isManualRegistration()
+ * @method array getGradingRegistrationSections()
+ * @method bool isLoaded()
  */
-class User {
+class User extends AbstractModel {
     
-    /**
-     * @var bool Is this user actually loaded (else you cannot access the other member variables)
-     */
-    private $loaded = false;
+    /** @property @var bool Is this user actually loaded (else you cannot access the other member variables) */
+    protected $loaded = false;
     
-    /** @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
-    private $id;
+    /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
+    protected $id;
+    /** @property @var string The anonymous id of this user which should be unique for each course they are in*/
+    protected $anon_id;
     /**
+     * @property
      * @var string The password for the student used for database authentication. This should be hashed and salted.
      * @link http://php.net/manual/en/function.password-hash.php
      */
-    private $password = null;
-    /** @var string The first name of the user */
-    private $first_name;
-    /** @var string The first name of the user */
-    private $preferred_first_name = "";
-    /** @var  string The name to be displayed by the system (either preferred name or first name) */
-    private $displayed_first_name;
-    /** @var string The last name of the user */
-    private $last_name;
-    /** @var string The email of the user */
-    private $email;
-    /** @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
-    private $group;
+    protected $password = null;
+    /** @property @var string The first name of the user */
+    protected $first_name;
+    /** @property @var string The first name of the user */
+    protected $preferred_first_name = "";
+    /** @property @var  string The name to be displayed by the system (either preferred name or first name) */
+    protected $displayed_first_name;
+    /** @property @var string The last name of the user */
+    protected $last_name;
+    /** @property @var string The email of the user */
+    protected $email;
+    /** @property @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
+    protected $group;
     
-    /** @var int What is the registration section that the user was assigned to for the course */
-    private $registration_section = null;
-    /** @var int What is the assigned rotating section for the user */
-    private $rotating_section = null;
+    /** @property @var int What is the registration section that the user was assigned to for the course */
+    protected $registration_section = null;
+    /** @property @var int What is the assigned rotating section for the user */
+    protected $rotating_section = null;
     
     /**
+     * @property
      * @var bool Was the user imported via a normal class list or was added manually. This is useful for students
      *           that are doing independent studies in the course, so not actually registered and so wouldn't want
      *           to be shifted to a null registration section or rotating section like a dropped student
      */
-    private $manual_registration = false;
+    protected $manual_registration = false;
 
-    /** @var array */
-    private $grading_registration_sections = array();
+    /** @property @var array */
+    protected $grading_registration_sections = array();
 
     /**
      * User constructor.
+     *
+     * @param Core  $core
      * @param array $details
      */
-    public function __construct($details) {
+    public function __construct(Core $core, $details=array()) {
+        parent::__construct($core);
         if (count($details) == 0) {
             return;
         }
@@ -63,29 +91,27 @@ class User {
         if (isset($details['user_password'])) {
             $this->setPassword($details['user_password']);
         }
+        if (isset($details['anon_id'])) {
+            $this->anon_id = $details['anon_id'];
+        }
         $this->setFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {
             $this->setPreferredFirstName($details['user_preferred_firstname']);
         }
 
-        $this->setLastName($details['user_lastname']);
-        $this->setEmail($details['user_email']);
-        $this->setGroup($details['user_group']);
-        $this->setRegistrationSection($details['registration_section']);
-        $this->setRotatingSection($details['rotating_section']);
-        $this->setManualRegistration($details['manual_registration']);
+        $this->last_name = $details['user_lastname'];
+        $this->email = $details['user_email'];
+        $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
+        if ($this->group > 4 || $this->group < 0) {
+            $this->group = 4;
+        }
+
+        $this->registration_section = isset($details['registration_section']) ? intval($details['registration_section']) : null;
+        $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
+        $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
             $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
         }
-
-    }
-    
-    /**
-     * Gets whether the user was actually loaded from the DB with the given user id
-     * @return bool
-     */
-    public function isLoaded() {
-        return $this->loaded;
     }
     
     /**
@@ -120,22 +146,6 @@ class User {
         return $this->group === 0;
     }
 
-    /**
-     * Get the id of the loaded user
-     * @return string
-     */
-    public function getId() {
-        return $this->id;
-    }
-
-    public function setId($id) {
-        $this->id = $id;
-    }
-
-    public function getPassword() {
-        return $this->password;
-    }
-
     public function setPassword($password) {
         $info = password_get_info($password);
         if ($info['algo'] === 0) {
@@ -145,26 +155,10 @@ class User {
             $this->password = $password;
         }
     }
-    
-    /**
-     * Get the first name of the loaded user
-     * @return string
-     */
-    public function getFirstName() {
-        return $this->first_name;
-    }
 
     public function setFirstName($name) {
         $this->first_name = $name;
         $this->setDisplayedFirstName();
-    }
-
-    /**
-     * Get the preferred name of the loaded user
-     * @return string
-     */
-    public function getPreferredFirstName() {
-        return $this->preferred_first_name;
     }
 
     public function setPreferredFirstName($name) {
@@ -172,16 +166,7 @@ class User {
         $this->setDisplayedFirstName();
     }
 
-    /**
-     * Returns the preferred name if one exists and is not null or blank, otherwise return the
-     * first name field for the user.
-     * @return string
-     */
-    public function getDisplayedFirstName() {
-        return $this->displayed_first_name;
-    }
-
-    public function setDisplayedFirstName() {
+    private function setDisplayedFirstName() {
         if ($this->preferred_first_name !== "" && $this->preferred_first_name !== null) {
             $this->displayed_first_name = $this->preferred_first_name;
         }
@@ -189,86 +174,13 @@ class User {
             $this->displayed_first_name = $this->first_name;
         }
     }
-    
-    /**
-     * Get the last name of the loaded user
-     * @return string
-     */
-    public function getLastName() {
-        return $this->last_name;
-    }
-
-    public function setLastName($name) {
-        $this->last_name = $name;
-    }
-    
-    /**
-     * Get the email of the loaded user
-     * @return string
-     */
-    public function getEmail() {
-        return $this->email;
-    }
-
-    public function setEmail($email) {
-        $this->email = $email;
-    }
-    
-    /**
-     * Get the group of the loaded user
-     * @return int
-     */
-    public function getGroup() {
-        return $this->group;
-    }
-
-    public function setGroup($group) {
-        $this->group = intval($group);
-    }
-    
-    /**
-     * Get the registration section of the loaded user
-     * @return int
-     */
-    public function getRegistrationSection() {
-        return $this->registration_section;
-    }
 
     public function setRegistrationSection($section) {
-        $section = ($section !== null) ? intval($section) : $section;
-        $this->registration_section = $section;
-    }
-    
-    /**
-     * Get the rotating section of the loaded user
-     * @return int
-     */
-    public function getRotatingSection() {
-        return $this->rotating_section;
+        $this->registration_section = ($section !== null) ? intval($section) : null;
     }
 
     public function setRotatingSection($section) {
-        $section = ($section !== null) ? intval($section) : $section;
-        $this->rotating_section = $section;
-    }
-    
-    /**
-     * Gets whether the user set as a manual registration
-     * @return bool
-     */
-    public function isManualRegistration() {
-        return $this->manual_registration;
-    }
-
-    public function setManualRegistration($manual) {
-        $this->manual_registration = $manual === true;
-    }
-
-    /**
-     * @return array
-     */
-    public function getGradingRegistrationSections() {
-        return $this->grading_registration_sections;
+        $this->rotating_section = ($section !== null) ? intval($section) : null;
     }
 
     public function setGradingRegistrationSections($sections) {

@@ -43,7 +43,7 @@ class FileUtils {
                     $path = "{$dir}/{$entry}";
                     // recurse into subdirectories
                     if (is_dir($path) && !in_array(strtolower($entry), $disallowed_folders)) {
-                        $temp = FileUtils::getAllFiles($path, $skip_files,$flatten);
+                        $temp = FileUtils::getAllFiles($path, $skip_files, $flatten);
                         if ($flatten) {
                             foreach ($temp as $file => $details) {
                                 if (isset($details['relative_name'])) {
@@ -56,7 +56,7 @@ class FileUtils {
                             }
                         }
                         else {
-                            $return[$entry] = $temp;
+                            $return[$entry] = array('files' => $temp, 'path' => $path);
                         }
                     }
                     else if (is_file($path) && !in_array(strtolower($entry), $skip_files) &&
@@ -184,7 +184,8 @@ class FileUtils {
     }
     
     /**
-     * Given a path, return all directories in an array that are contained in that path.
+     * Given a path, return all directories in an array that are contained in that path, ignoring several
+     * known names that are used for VCS, OS, or IDE systems that we can safely ignore.
      *
      * @param string $path
      *
@@ -382,6 +383,12 @@ class FileUtils {
                 break;
             case 'py':
                 $content_type = 'text/x-python';
+                break;
+            case 'csv':
+                $content_type = 'text/csv';
+                break;
+            case 'xlsx':
+                $content_type = 'spreadsheet/xlsx';
                 break;
             default:
                 $content_type = 'text/x-sh';

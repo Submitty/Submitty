@@ -31,10 +31,10 @@ class TestNavigationPageNonStudent(BaseTestCase):
                          .find_element_by_id('items_being_graded_tbody')
                          .find_elements_by_class_name("gradeable_row")))
         self.assertEqual("graded", elements[5].get_attribute('id'))
-        self.assertEqual(3, len(self.driver
+        self.assertEqual(8, len(self.driver
                          .find_element_by_id('graded_tbody')
                          .find_elements_by_class_name("gradeable_row")))
-        self.assertEqual(4, len(self.driver.find_element_by_class_name(
+        self.assertEqual(7, len(self.driver.find_element_by_class_name(
             'gradeable_row').find_elements_by_tag_name('td')))
 
     def test_ta(self):
@@ -58,11 +58,11 @@ class TestNavigationPageNonStudent(BaseTestCase):
                                 .find_element_by_id('items_being_graded_tbody')
                                 .find_elements_by_class_name("gradeable_row")))
         self.assertEqual("graded", elements[4].get_attribute('id'))
-        self.assertEqual(3, len(self.driver
+        self.assertEqual(8, len(self.driver
                                 .find_element_by_id('graded_tbody')
                                 .find_elements_by_class_name("gradeable_row")))
 
-        self.assertEqual(4, len(self.driver.find_element_by_class_name(
+        self.assertEqual(7, len(self.driver.find_element_by_class_name(
             'gradeable_row').find_elements_by_tag_name('td')))
 
 

@@ -1,0 +1,56 @@
+{
+   "testcases": [
+        {
+            "autochecks": [
+                {
+                    "description": "Program Output",
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/p1_out.txt",
+                    "actual_file": "test01_STDOUT_0.txt"
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Test 1 Convert Temperature"
+        },
+        {
+            "points_awarded": 1,
+            "test_name": "Test 2 Legal Variable Names",
+            "autochecks": [
+                 {
+                     "description": "Program Output",
+                     "difference_file": "test02_0_diff.json",
+                     "actual_file": "part2/p2_sol.txt"
+                 }
+            ]
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "Program Output",
+                    "difference_file": "test03_0_diff.json",
+                    "expected_file": "test_output/testassignment/p3_out.txt",
+                    "actual_file": "test03_STDOUT_0.txt"
+                }
+            ],
+            "points_awarded": 4,
+            "test_name": "Test 3 Volume and Area"
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "Program Output",
+                    "difference_file": "test04_0_diff.json",
+                    "expected_file": "test_output/testassignment/p4_out.txt",
+                    "actual_file": "test04_STDOUT_0.txt"
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Test 4 Count Odd"
+         },
+         {
+             "points_awarded": 0,
+             "test_name": "Test 5 Submission Limit",
+             "view_testcase": false
+        }
+    ]
+}

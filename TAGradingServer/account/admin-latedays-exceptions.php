@@ -1,9 +1,13 @@
 <?php
 
 //Author: Peter Bailie, Systems Programmer, RPI Computer Science, July 2016
-//Update: Jan 17 2017 by pbailie
+//Update: Feb 8 2017 by pbailie
+//Update: Apr 19 2017 by pbailie (issue 959)
 
 /* MAIN ===================================================================== */
+
+//Permit '\r' EOL encoding (e.g. CSV export from MS Excel 2008/2011 for Mac).
+ini_set("auto_detect_line_endings", true);
 
 include "../header.php";
 
@@ -37,8 +41,8 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 	}
 
 //if no file upload, examine Student ID and Late Day input fields.
-} else if (isset($_POST['student_id']) && ($_POST['student_id'] !== "") &&
-		   isset($_POST['late_days'])  && ($_POST['late_days']  !== "")) {
+} else if (isset($_POST['user_id'])   && ($_POST['user_id']   !== "") &&
+		   isset($_POST['late_days']) && ($_POST['late_days'] !== "")) {
 
 	//Validate that late days entered is an integer >= 0.
 	//Negative values will fail ctype_digit test.
@@ -46,18 +50,18 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 		$state = 'late_days_not_integer';
 	}
 
-	//Validate that student does exist in DB (per rcs_id)
+	//Validate that student does exist in DB (per user_id)
 	//"Student Not Found" error has precedence over late days being non-numerical
 	//as it is the more likely error to happen.
-	if (!verify_student_in_db($_POST['student_id'])) {
-		$state = 'student_not_found';
+	if (!verify_user_in_db($_POST['user_id'])) {
+		$state = 'user_not_found';
 	}
 
 	//Process upsert if no errors were flagged.
 	if (empty($state)) {
 
 		//upsert argument requires 2D array.
-		upsert(array(array($_POST['student_id'], $g_id, intval($_POST['late_days']))));
+		upsert(array(array($_POST['user_id'], $g_id, intval($_POST['late_days']))));
 		$state = 'upsert_done';
 	}
 }
@@ -70,8 +74,8 @@ if (!is_null($g_id)) {
 	$view->configure_form($g_id, $gradeables_db_data);
 
 	//configure student table
-	$student_table_db_data = retrieve_students_from_db($g_id);
-	$view->configure_table($student_table_db_data);
+	$user_table_db_data = retrieve_users_from_db($g_id);
+	$view->configure_table($user_table_db_data);
 } else {
 	//No gradeables exist -- we need to display an error page, instead.
 	$state = "no_gradeables";
@@ -100,7 +104,8 @@ function parse_and_validate_csv($csv_file, &$data) {
 	$mime_type = finfo_file($file_info, $_FILES['csv_upload']['tmp_name']);
 	finfo_close($file_info);
 
-	if ($mime_type !== "text/plain") {
+	//MIME type must be text, but all subtypes are acceptable.
+	if (substr($mime_type, 0, 5) !== "text/") {
 		$data = null;
 		return false;
 	}
@@ -116,22 +121,24 @@ function parse_and_validate_csv($csv_file, &$data) {
 
 		$fields = explode(',', $row);
 
+		//Remove any extraneous whitespace at beginning/end of all fields.
+		foreach($fields as &$field) {
+			$field = trim($field);
+		} unset($field);
+
 		//Each row has three fields
 		if (count($fields) !== 3) {
 			$data = null;
 			return false;
 		}
 
-		//$fields[0]: Verify student exists in class (check by RCS ID)
-		if (!verify_student_in_db($fields[0])) {
+		//$fields[0]: Verify user exists in course (check by user ID)
+		if (!verify_user_in_db($fields[0])) {
 			$data = null;
 			return false;
 		}
 
-		//$fields[1] represents gradeable id.  It must (1) be an integer >= 0
-		//           AND exist in database
-		//           ctype_digit() returns false with negative integers as strings
-		if (!ctype_digit($fields[1]) || !verify_gradeable_in_db($fields[1])) {
+		if (!verify_gradeable_in_db($fields[1])) {
 			$data = null;
 			return false;
 		}
@@ -152,10 +159,10 @@ function parse_and_validate_csv($csv_file, &$data) {
 
 /* END FUNCTION parse_and_validate_csv() ==================================== */
 
-function verify_student_in_db($student) {
-//IN:  RCS student ID
-//OUT: TRUE should RCS ID be found in the database.  FALSE otherwise.
-//PURPOSE:  Verify that student is in database (indicating the student is enrolled)
+function verify_user_in_db($user_id) {
+//IN:  User ID
+//OUT: TRUE should user ID be found in the database.  FALSE otherwise.
+//PURPOSE:  Verify that user is in database (indicating the user is enrolled)
 
 	$sql = <<<SQL
 SELECT COUNT(1)
@@ -163,13 +170,13 @@ FROM users
 WHERE user_id=?
 SQL;
 
-	\lib\Database::query($sql, array($student));
+	\lib\Database::query($sql, array($user_id));
 
 	//row() will be either 1 (true) or 0 (false)
 	return boolval(\lib\Database::row()['count']);
 }
 
-/* END FUNCTION verify_student_in_db() ====================================== */
+/* END FUNCTION verify_user_in_db() ====================================== */
 
 function verify_gradeable_in_db($gradeable_id) {
 //IN:   gradeable's ID to verify its existence
@@ -217,10 +224,12 @@ SQL;
 
 function retrieve_gradeables_from_db() {
 //IN:  No parameters
-//OUT: All permissable gradeables ID and title, ordered dscending by ID
+//OUT: All permissable gradeables ID and title, ordered descending by ID
 //PURPOSE:  To build drop down menu of selectable gradeables.  Ordered
-//          descending so "newer" are higher in the menu.
-
+//          descending so "newer" gradeables are higher in the menu.
+//
+//(Apr 19 2017) FIX ISSUE 959:
+//Now only electronic gradeables show in drop-down form
 
 	$sql = <<<SQL
 SELECT g_id, g_title
@@ -235,7 +244,7 @@ SQL;
 
 /* END FUNCTION retrieve_gradeables_from_db() =============================== */
 
-function retrieve_students_from_db($gradeable_id = 0) {
+function retrieve_users_from_db($gradeable_id = 0) {
 //IN:  gradeable ID from database
 //OUT: all students who have late day exceptions, per gradeable ID parameter.
 //     retrieves student rcs, first name, last name, and late day exceptions.
@@ -262,7 +271,7 @@ SQL;
 	return \lib\Database::rows();
 }
 
-/* END FUNCTION retrieve_students_from_db() ================================= */
+/* END FUNCTION retrieve_users_from_db() ================================= */
 
 function upsert(array $data) {
 //IN:  Data to be "upserted"
@@ -278,17 +287,12 @@ function upsert(array $data) {
  * 	q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
  * -------------------------------------------------------------------------- */
 
-	//SQL for "old schema"
 	$sql = array();
-
-
-	//SQL code for "new schema"
-
 
 	//TEMPORARY table to hold all new values that will be "upserted"
 	$sql['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE temp
-	(student_rcs VARCHAR(255),
+	(user_id VARCHAR(255),
 	gradeable_id VARCHAR(255),
 	late_days INTEGER)
 ON COMMIT DROP;
@@ -312,7 +316,7 @@ SQL;
 UPDATE late_day_exceptions
 SET late_day_exceptions=temp.late_days
 FROM temp
-WHERE late_day_exceptions.user_id=temp.student_rcs
+WHERE late_day_exceptions.user_id=temp.user_id
 	AND late_day_exceptions.g_id=temp.gradeable_id;
 SQL;
 
@@ -323,12 +327,12 @@ INSERT INTO late_day_exceptions
 	g_id,
 	late_day_exceptions)
 SELECT
-	temp.student_rcs,
+	temp.user_id,
 	temp.gradeable_id,
 	temp.late_days
 FROM temp
 LEFT OUTER JOIN late_day_exceptions
-	ON late_day_exceptions.user_id=temp.student_rcs
+	ON late_day_exceptions.user_id=temp.user_id
 	AND late_day_exceptions.g_id=temp.gradeable_id
 WHERE late_day_exceptions.user_id IS NULL
 	OR late_day_exceptions.g_id IS NULL;
@@ -414,10 +418,10 @@ HTML;
 </div>
 HTML;
 
-		self::$view['student_not_found'] = <<<HTML
+		self::$view['user_not_found'] = <<<HTML
 <div class="modal-body">
 <p><em style="color:red; font-weight:bold; font-style:normal;">
-{$this->utf8_styled_x} Student not found.</em>
+{$this->utf8_styled_x} User not found.</em>
 </div>
 HTML;
 
@@ -446,7 +450,6 @@ HTML;
 	//         Are essential for crafting a proper drop-down menu for selecting
 	//         a gradeable.  That is, only gradeables that exist are shown.
 
-
 		$BASE_URL = rtrim(__BASE_URL__, "/");
 
 		self::$view['form'] = <<<HTML
@@ -454,7 +457,7 @@ HTML;
 <form action="{$BASE_URL}/account/admin-latedays-exceptions.php?course={$_GET['course']}&semester={$_GET['semester']}&this=Excused%20Absense%20Extensions" method="POST" enctype="multipart/form-data">
 <p>
 Use this form to grant an extension (e.g., for an excused absense)
-to a student on a specific assignment.
+to a user on a specific assignment.
 </p>
 
 <p>Select Rubric:
@@ -478,7 +481,7 @@ HTML;
 </select>
 <h4>Single Student Entry</h4>
 <table style="border:5px solid white;"><tr>
-<td style="border:5px solid white;">Student ID:<br><input type="text" name="student_id"></td>
+<td style="border:5px solid white;">Student ID:<br><input type="text" name="user_id"></td>
 <td style="border:5px solid white;">Late Days:<br><input type="text" name="late_days"></td>
 <td style="border:5px solid white;"><input type="submit" value="Submit"></td>
 </tr></table>
@@ -494,13 +497,13 @@ HTML;
 
 	public function configure_table($db_data) {
 	//IN:  data from database used to build table of granted late day exceptions for selected gradeable
-	//OUT: no return (although private view['student_review_table'] property is filled)
+	//OUT: no return (although private view['user_review_table'] property is filled)
 	//PUTRPOSE: Craft HTML required to display a table of existing late day exceptions
 
 		if (!is_array($db_data) || count($db_data) < 1) {
 		//No late days in DB -- indicate as much.
 
-			self::$view['student_review_table'] = <<<HTML
+			self::$view['user_review_table'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
 <p style="font-weight:bold; font-size:1.2em;">No late day exceptions are currently entered for this assignment.
 </div>
@@ -509,7 +512,7 @@ HTML;
 		//Late days found in DB -- build table to display
 
 			//Table HEAD
-			self::$view['student_review_table'] = <<<HTML
+			self::$view['user_review_table'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
 <table style="border:5px solid white; border-collapse:collapse; margin: 0 auto; text-align:center;">
 <caption style="caption-side:top; font-weight:bold; font-size:1.2em;">
@@ -525,7 +528,7 @@ HTML;
 			$cell_color = array('white', 'aliceblue');
 			foreach ($db_data as $index => $record) {
 				$firstname = getDisplayName($record);
-				self::$view['student_review_table'] .= <<<HTML
+				self::$view['user_review_table'] .= <<<HTML
 <tr>
 <td style="background:{$cell_color[$index%2]};">{$record['user_id']}</td>
 <td style="background:{$cell_color[$index%2]};">{$firstname}</td>
@@ -536,7 +539,7 @@ HTML;
 			}
 
 			//Table TAIL
-			self::$view['student_review_table'] .= <<<HTML
+			self::$view['user_review_table'] .= <<<HTML
 </table>
 </div>
 HTML;
@@ -552,42 +555,42 @@ HTML;
 
 		switch($state) {
 		case 'no_gradeables':
-			echo self::$view['head']                 .
-			     self::$view['no_gradeables']        .
+			echo self::$view['head']          .
+			     self::$view['no_gradeables'] .
 			     self::$view['tail'];
 			break;
 		case 'bad_upload':
-			echo self::$view['head']                 .
-   			     self::$view['form']                 .
-			     self::$view['bad_upload']           .
-			     self::$view['student_review_table'] .
+			echo self::$view['head']              .
+   			     self::$view['form']              .
+			     self::$view['bad_upload']        .
+			     self::$view['user_review_table'] .
 			     self::$view['tail'];
 			break;
-		case 'student_not_found':
-			echo self::$view['head']                 .
-   			     self::$view['form']                 .
-			     self::$view['student_not_found']    .
-			     self::$view['student_review_table'] .
+		case 'user_not_found':
+			echo self::$view['head']               .
+   			     self::$view['form']               .
+			     self::$view['user_not_found']     .
+			     self::$view['user_review_table']  .
 			     self::$view['tail'];
 			break;
 		case 'late_days_not_integer':
 			echo self::$view['head']                  .
    			     self::$view['form']                  .
 			     self::$view['late_days_not_integer'] .
-			     self::$view['student_review_table']  .
+			     self::$view['user_review_table']     .
 			     self::$view['tail'];
 		    break;
 		case 'upsert_done':
-			echo self::$view['head']                 .
-			     self::$view['form']                 .
-			     self::$view['upsert_done']          .
-			     self::$view['student_review_table'] .
+			echo self::$view['head']              .
+			     self::$view['form']              .
+			     self::$view['upsert_done']       .
+			     self::$view['user_review_table'] .
 			     self::$view['tail'];
 			break;
 		default:
-			echo self::$view['head']                 .
-			     self::$view['form']                 .
-			     self::$view['student_review_table'] .
+			echo self::$view['head']              .
+			     self::$view['form']              .
+			     self::$view['user_review_table'] .
 			     self::$view['tail'];
 			break;
 		}

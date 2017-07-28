@@ -9,8 +9,8 @@ import glob
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/sample_files/sample_assignment_config/python_simple_homework"
-SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/sample_files/sample_submissions/python_simple_homework"
+SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/python_simple_homework/config"
+SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/python_simple_homework/submissions"
 
 @prebuild
 def initialize(test):
@@ -46,7 +46,7 @@ def correct(test):
     test.diff("test01_STDOUT.txt","data/hw01part1_sol.txt")
     test.empty_file("test01_STDERR.txt")
     test.empty_json_diff("test01_0_diff.json")
-    test.diff("results_grade.txt","results_grade.txt_correct","-b")
+    test.diff("grade.txt","grade.txt_correct","-b")
     test.json_diff("results.json","results.json_correct")
 
 
@@ -62,7 +62,7 @@ def buggy(test):
     test.diff("test01_STDOUT.txt","test01_STDOUT.txt_buggy")
     test.empty_file("test01_STDERR.txt")
     test.json_diff("test01_0_diff.json","test01_0_diff.json_buggy")
-    test.diff("results_grade.txt","results_grade.txt_buggy","-b")
+    test.diff("grade.txt","grade.txt_buggy","-b")
     test.json_diff("results.json","results.json_buggy")
 
 
@@ -78,7 +78,7 @@ def buggy2(test):
     test.diff("test01_STDOUT.txt","test01_STDOUT.txt_buggy2")
     test.empty_file("test01_STDERR.txt")
     test.json_diff("test01_0_diff.json","test01_0_diff.json_buggy2")
-    test.diff("results_grade.txt","results_grade.txt_buggy2","-b")
+    test.diff("grade.txt","grade.txt_buggy2","-b")
     test.json_diff("results.json","results.json_buggy2")
 
 
@@ -95,7 +95,7 @@ def syntax_error(test):
     test.diff("test01_STDERR.txt","test01_STDERR.txt_syntax_error")
     test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_syntax_error")
     test.json_diff("test01_0_diff.json","test01_0_diff.json_syntax_error")
-    test.diff("results_grade.txt","results_grade.txt_syntax_error","-b")
+    test.diff("grade.txt","grade.txt_syntax_error","-b")
     test.json_diff("results.json","results.json_syntax_error")
     # cleanup the non empty logfile
     subprocess.call(["rm",
@@ -117,7 +117,7 @@ def infinite_loop_too_much_output(test):
     test.diff_truncate(100,"test01_STDOUT.txt","test01_STDOUT.txt_infinite_loop_too_much_output")
     test.diff("test01_STDERR.txt","test01_STDERR.txt_infinite_loop_too_much_output")
     test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_too_much_output")
-    test.diff("results_grade.txt","results_grade.txt_infinite_loop_too_much_output","-b")
+    test.diff("grade.txt","grade.txt_infinite_loop_too_much_output","-b")
     test.json_diff("results.json","results.json_infinite_loop_too_much_output")
     # cleanup the non empty logfile
     subprocess.call(["rm",
@@ -137,9 +137,9 @@ def infinite_loop_time_cutoff(test):
     test.run_validator()
     test.empty_file("test01_STDOUT.txt")
     test.empty_file("test01_STDERR.txt")
-    test.json_diff("test01_0_diff.json","test01_0_diff.json_time_cutoff")
+    #test.json_diff("test01_0_diff.json","test01_0_diff.json_time_cutoff")
     test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_time_cutoff")
-    test.diff("results_grade.txt","results_grade.txt_infinite_loop_time_cutoff","-b")
+    test.diff("grade.txt","grade.txt_infinite_loop_time_cutoff","-b")
     test.json_diff("results.json","results.json_infinite_loop_time_cutoff")
     # cleanup the non empty logfile
     subprocess.call(["rm",

@@ -1,0 +1,107 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01_STDOUT_0.txt",
+                    "description": "Program Output",
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/p1_out.txt"
+                },
+                {
+                    "description": "Number of print statements",
+                    "messages": [
+                        {
+                            "message": "Looks like you forgot the 'print' statement.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 1 Convert Temperature"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "part2/p2_bug3.txt",
+                    "description": "Program Output",
+                    "difference_file": "test02_0_diff.json",
+                    "messages": [
+                        {
+                            "message": "Incorrect Answer",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 2 Legal Variable Names"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03_STDOUT_0.txt",
+                    "description": "Program Output",
+                    "difference_file": "test03_0_diff.json",
+                    "expected_file": "test_output/testassignment/p3_out.txt"
+                },
+                {
+                    "description": "Number of assignments",
+                    "messages": [
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Number of multiplications",
+                    "messages": [
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Number of additions",
+                    "messages": [
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 3 Volume and Area"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04_STDOUT_0.txt",
+                    "description": "Program Output",
+                    "difference_file": "test04_0_diff.json",
+                    "expected_file": "test_output/testassignment/p4_out.txt"
+                },
+                {
+                    "description": "Number of while loops",
+                    "messages": [
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 4 Count Odd"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 5 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

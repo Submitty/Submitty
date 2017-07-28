@@ -35,6 +35,7 @@ if($user_is_administrator){
     
     $num_numeric = $num_text = 0;
     $g_gradeable_type = $g_syllabus_bucket = $g_min_grading_group = $default_late_days = -1;
+    $team_assignment = false;
     $is_repository = false;
     $use_ta_grading = false;
     $g_overall_ta_instructions = $g_id = '';
@@ -70,7 +71,10 @@ if($user_is_administrator){
         $db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id 
                     INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($g_id));
         $has_grades= $db->row()['cnt'];
-       
+
+        //get team assignment boolean
+        $team_assignment = $old_gradeable['g_team_assignment'];
+
        //if electonic file then add all of the old questions
        if($old_gradeable['g_gradeable_type']==0){
             //get the electronic file stuff
@@ -248,7 +252,7 @@ if($user_is_administrator){
     .required::-webkit-input-placeholder { color: red; }
     .required:-moz-placeholder { color: red; }
     .required::-moz-placeholder { color: red; }
-    .required:-ms-input-placeholder { color: red; 
+    .required:-ms-input-placeholder { color: red; }
         
 </style>
 
@@ -257,7 +261,7 @@ if($user_is_administrator){
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
     </form>
     <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action={$action}&id={$old_gradeable['g_id']}" 
-          method="post" enctype="multipart/form-data"> 
+          method="post" enctype="multipart/form-data" onsubmit="return checkForm()"> 
 
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header" style="overflow: auto;">
@@ -293,11 +297,11 @@ HTML;
 
 
 <div class="modal-body">
-<b>Please Read: <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable">Submitty Wiki Instructions for "Create or Edit a Gradeable"</a></b>
+<b>Please Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
 </div>
 
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
-            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px' type='text' name='gradeable_id' class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
+            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
             <br />
             What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' class="required" value="{$gradeable_name}" placeholder="(Required)" />
             <br />
@@ -307,43 +311,40 @@ HTML;
             <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
             style="cursor: auto; background-color: #FFF; width: 250px;">
             <br />
-
-
-       <!-- <br />
-        Is this a team assignment?:
-        <input type="radio" name="team_assignment" value="yes"
 HTML;
-    
-    echo ($g_team_assignment===true)?'checked':'';
+    $team_yes_checked = ($g_team_assignment===true) ? 'checked': '';
+    $team_no_checked = ($g_team_assignment===false) ? 'checked': '';
+    $type_0_checked = ($g_gradeable_type === 0) ? 'checked': '';
+    $type_1_checked = ($g_gradeable_type === 1) ? 'checked': '';
+    $type_2_checked = ($g_gradeable_type === 2) ? 'checked': '';
+    $upload_files = 'checked'; //($is_repository === false) ? 'checked':'';
+    $use_repository = ($is_repository === true) ? 'checked':'';
+
     print <<<HTML
-        > Yes
-            <input type="radio" name="team_assignment" value ="no" 
-HTML;
-    echo ($g_team_assignment===false)?'checked':'' ;
-    print <<<HTML
-            > No -->
-            <br />   
-            What is the <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#types-of-gradeables">
-type of the gradeable</a>?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
+            Is this a team assignment?:
+            <fieldset>
+            <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes" {$team_yes_checked}> Yes
+            <input type="radio" class="team_no" name="team_assignment" value ="no" {$team_no_checked}> No
+                <div class="team_assignment team_yes" id="team_date">
+                    <!--    
+                    <br />
+                    What is the <em style='color: orange;'><b>Team Finalization Date</b></em>? <input name="date_teams_final" id="date_teams_final" class="datepicker" type="text" style="cursor: auto; background-color: #FFF; width: 250px;">
+                    <br />
+                    -->
+                </div>
+                    
+                <div class="team_assignment team_no" id="team_no">
+                </div>
+            </fieldset>
+
+            What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
             <fieldset>
-                <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
-HTML;
-    echo ($g_gradeable_type === 0)?'checked':'';
-    print <<<HTML
-            > 
+                <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File" {$type_0_checked}> 
             Electronic File
-            <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints"
-HTML;
-            echo ($g_gradeable_type === 1)?'checked':'';
-    print <<<HTML
-            >
+            <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints" {$type_1_checked}>
             Checkpoints
-            <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric"
-HTML;
-            echo ($g_gradeable_type === 2)?'checked':'';
-    print <<<HTML
-            >
+            <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric" {$type_2_checked}>
             Numeric/Text
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable_type_options electronic_file" id="electronic_file" >    
@@ -368,16 +369,10 @@ HTML;
 
                 Are students uploading files or commiting code to an SVN repository?<br />
                 <fieldset>
-                    <input type="radio" class="upload_file" name="upload_type" value="Upload File"
-HTML;
-                    echo ($is_repository === false)?'checked':'';
-        print <<<HTML
-                    > Upload File(s)
-                    <input type="radio" id="repository_radio" class="upload_repo" name="upload_type" value="Repository"
-HTML;
-                    echo ($is_repository===true)?'checked':'';
-        print <<<HTML
-                    > Repository
+                    <input type="radio" class="upload_file" name="upload_type" value="Upload File" {$upload_files}> 
+                    Upload File(s)
+                    <!--<input type="radio" id="repository_radio" class="upload_repo" name="upload_type" value="Repository" {$use_repository}> 
+                    Repository-->
                     
                     <div class="upload_type upload_file" id="upload_file">
                     </div>
@@ -392,9 +387,11 @@ HTML;
 
 		<br />
                 <b>Full path to the directory containing the autograding config.json file:</b><br>
-                See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">Submitty GitHub sample assignment configurations</a><br>
-		<kbd>/usr/local/submitty/sample_files/sample_assignment_config/no_autograding/</kbd>  (for an upload only homework)<br>
+                See samples here: <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty Tutorial example autograding configurations</a><br>
+                See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/more_autograding_examples">Additional example autograding configurations</a><br>
+		<kbd>/usr/local/submitty/more_autograding_examples/upload_only/config/</kbd>  (for an assignment with no autograding)<br>
 		<kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
+		<kbd>/var/local/submitty/courses/{$_GET['semester']}/{$_GET['course']}/config_upload/#</kbd> (for an web uploaded configuration)<br>
 
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
@@ -516,7 +513,7 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label complex_type" value="Checkpoint 0"/> 
+                               <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label" value="Checkpoint 0"/> 
                            </td>     
                            <td>     
                                 <input type="checkbox" name="checkpoint_extra_0" class="checkpoint_extra extra" value="true" />
@@ -525,7 +522,7 @@ HTML;
                       
                        <tr class="multi-field" id="mult-field-1">
                            <td>
-                               <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label complex_type" value="Checkpoint 1"/> 
+                               <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label" value="Checkpoint 1"/> 
                            </td>     
                            <td>     
                                 <input type="checkbox" name="checkpoint_extra_1" class="checkpoint_extra extra" value="true" />
@@ -542,7 +539,7 @@ HTML;
             </div>
             <div class="gradeable_type_options numeric" id="numeric">
                 <br />
-                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val"/> 
+                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" onchange="calculateTotalScore();" class="int_val"/> 
                 &emsp;&emsp;
                 
                 How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val"/>
@@ -559,17 +556,25 @@ HTML;
                                 <th> Extra Credit?</th>
                             </tr>
                         </thead>
+                        <!-- Footers -->
+                        <tfoot style="background: #E1E1E1;">
+                            <tr>
+                                <td><strong> MAX SCORE </strong></td>
+                                <td><strong id="totalScore"></strong></td>
+                                <td><strong id="totalEC"></strong></td>
+                            </tr>
+                        </tfoot>
                         <tbody style="background: #f9f9f9;">
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label complex_type" value="0"/> 
+                               <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0"/> 
                            </td>  
                             <td>     
-                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" /> 
+                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" onchange="calculateTotalScore();" value="0"/> 
                            </td>                           
                            <td>     
-                                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" />
+                                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" onclick="calculateTotalScore();" value=""/>
                            </td> 
                         </tr>
                     </table>
@@ -585,7 +590,7 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="text_label_0" type="text" class="text_label complex_type" value="0"/> 
+                               <input style="width: 200px" name="text_label_0" type="text" class="text_label" value="0"/> 
                            </td>  
                         </tr>
                     </table>
@@ -597,7 +602,7 @@ HTML;
             </div>  
             </fieldset>
             <div id="grading_questions">
-            What is the <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#grading-user-groups">
+            What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
 	    lowest privileged user group</a> that can grade this?
             <select name="minimum_grading_group" class="int_val" style="width:180px;">
 HTML;
@@ -623,7 +628,7 @@ HTML;
 </textarea>
             
             <br />
-            <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
+            <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
             <br />
             <fieldset>
                 <input type="radio" name="section_type" value="reg_section"
@@ -830,7 +835,7 @@ HTML;
             <em style='color: orange;'>must be >= <span id="grades_released_compare_date">{$initial_grades_released_compare_date}</span></em>
             <br />
             
-            What <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">syllabus category</a> does this item belong to?:
+            What <a target=_blank href="http://submitty.org/instructor/iris_rainbow_grades">syllabus category</a> does this item belong to?:
             
             <select name="gradeable_buckets" style="width: 170px;">
 HTML;
@@ -872,6 +877,7 @@ HTML;
                 <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-top:10px; margin-right: 10px; float: right;">Delete Gradeable</button>
 HTML;
     }
+    
     print <<<HTML
         </div>
     </form>
@@ -911,17 +917,12 @@ HTML;
     $.fn.serializeObject = function(){
         var o = {};
         var a = this.serializeArray();
-        var ignore = [];
+        var ignore = ["numeric_label_0", "max_score_0", "numeric_extra_0", "numeric_extra_0",
+                       "text_label_0", "checkpoint_label_0", "num_numeric_items", "num_text_items"];
 
         $('.ignore').each(function(){
             ignore.push($(this).attr('name'));
         });
-        
-        ignore.push("numeric_label_0");
-        ignore.push("max_score_0");
-        ignore.push("numeric_extra_0");
-        ignore.push("text_label_0");
-        ignore.push("checkpoint_label_0");
         
         // export appropriate users 
         if ($('[name="minimum_grading_group"]').prop('value') == 1){
@@ -939,7 +940,6 @@ HTML;
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
                if($(this).attr('class') !== undefined){
-
                   // now remove all of the child elements names for the radio button
                   $('.' + $(this).attr('class')).find('input, textarea, select').each(function(){
                       ignore.push($(this).attr('name'));
@@ -947,6 +947,99 @@ HTML;
                }
            } 
         }); 
+        
+        //parse checkpoints 
+        
+        $('.checkpoints-table').find('.multi-field').each(function(){
+            var label = '';
+            var extra_credit = false;
+            var skip = false;
+            
+            $(this).find('.checkpoint_label').each(function(){
+               label = $(this).val();
+               if ($.inArray($(this).attr('name'),ignore) !== -1){
+                   skip = true;
+               }
+               ignore.push($(this).attr('name'));
+            });
+            
+            if (skip){
+                return;
+            }
+            
+            $(this).find('.checkpoint_extra').each(function(){
+                extra_credit = $(this).attr('checked') === 'checked';
+                ignore.push($(this).attr('name'));
+            });
+            
+            if (o['checkpoints'] === undefined){
+                o['checkpoints'] = [];
+            }
+            o['checkpoints'].push({"label": label, "extra_credit": extra_credit});
+        });
+        
+        
+        // parse text items
+        
+        $('.text-table').find('.multi-field').each(function(){
+           var label = '';
+           var skip = false;
+           
+           $(this).find('.text_label').each(function(){
+                label = $(this).val();
+                if ($.inArray($(this).attr('name'),ignore) !== -1){
+                   skip = true;
+               }
+               ignore.push($(this).attr('name'));
+           });
+           
+           if (skip){
+              return;
+           }
+           
+           if (o['text_questions'] === undefined){
+               o['text_questions'] = [];
+           }
+           o['text_questions'].push({'label' : label});
+        });
+        
+        // parse numeric items
+                
+        $('.numerics-table').find('.multi-field').each(function(){
+            var label = '';  
+            var max_score = 0;
+            var extra_credit = false;
+            var skip = false;
+            
+            $(this).find('.numeric_label').each(function(){
+               label = $(this).val();
+               if ($.inArray($(this).attr('name'),ignore) !== -1){
+                   skip = true;
+               }
+               ignore.push($(this).attr('name'));
+            });
+
+            if (skip){
+                return;
+            }
+            
+            $(this).find('.max_score').each(function(){
+               max_score = parseFloat($(this).val());
+               ignore.push($(this).attr('name'));
+            });
+
+            $(this).find('.numeric_extra').each(function(){
+                extra_credit = $(this).attr('checked') === 'checked';
+                ignore.push($(this).attr('name'));
+            });
+
+            if (o['numeric_questions'] === undefined){
+                o['numeric_questions'] = [];
+            }
+            o['numeric_questions'].push({"label": label, "max_score": max_score, "extra_credit": extra_credit});
+           
+        });
+        
         
         $.each(a, function() {
             if($.inArray(this.name,ignore) !== -1) {
@@ -974,28 +1067,12 @@ HTML;
                 arr[grader] = this.value.trim();
                 o['grader'].push(arr);
             }
-            else if ($("[name="+this.name+"]").hasClass('max_score')){
-                if (o['max_score'] === undefined){
-                    o['max_score'] = [];
-                }
-                o['max_score'].push(parseFloat(this.value));
-            }
             else if ($("[name="+this.name+"]").hasClass('points')){
                 if (o['points'] === undefined){
                     o['points'] = [];
                 }
                 o['points'].push(parseFloat(this.value));
             }
-            else if($("[name="+this.name+"]").hasClass('extra')){
-                var tmp = this.name.split('_');
-                var bucket = tmp[0] + '_' + tmp[1];
-                if (o[bucket] === undefined){
-                    o[bucket] = [];
-                }
-                val = parseInt(tmp[2]);
-                o[bucket].push(val);
-            }
-            
             else if($("[name="+this.name+"]").hasClass('complex_type')){
                 var classes = $("[name="+this.name+"]").closest('.complex_type').prop('class').split(" ");
                 classes.splice( classes.indexOf('complex_type'), 1);
@@ -1005,9 +1082,7 @@ HTML;
                     o[complex_type] = [];
                 }
                 o[complex_type].push(val);
-                
             } 
-            
             else if (o[this.name] !== undefined) {
                 if (!o[this.name].push) {
                     o[this.name] = [o[this.name]];
@@ -1029,6 +1104,25 @@ HTML;
             $('#rotating-sections :input').prop('disabled',true);
          }
     });
+
+    function calculateTotalScore(){
+        var total_score = 0;
+        var total_ec = 0;
+
+        $('.numerics-table').find('.multi-field').each(function(){
+            max_score = 0;
+            extra_credit = false;
+
+            max_score = parseFloat($(this).find('.max_score').val());
+            extra_credit = $(this).find('.numeric_extra').is(':checked') == true;
+
+            if (extra_credit === true) total_ec += max_score;
+            else total_score += max_score;
+        });
+
+        $("#totalScore").html(total_score);
+        $("#totalEC").html("(" + total_ec + ")");
+    }
 
     $(document).ready(function() {
         var numCheckpoints=1;
@@ -1080,6 +1174,7 @@ HTML;
                 $('#mult-field-' + numNumeric,wrapper).find('.numeric_extra').attr('checked',true); 
             }
             $('#mult-field-' + numNumeric,wrapper).show();
+            calculateTotalScore();
         }
         
         function removeNumeric(){
@@ -1129,6 +1224,8 @@ HTML;
            }
         });
         
+        $('.team_assignment').hide();
+
         $('.gradeable_type_options').hide();
         
         if ($('input[name=gradeable_type]').is(':checked')){
@@ -1235,6 +1332,10 @@ HTML;
         if({$default_late_days} != -1){
             $('input[name=eg_late_days]').val('{$default_late_days}');
         }
+
+        if($('#team_yes_radio').is(':checked')){
+            $('#team_date').show();
+        }
         
         if($('#radio_electronic_file').is(':checked')){ 
             $('input[name=date_submit]').datetimepicker('setDate', createCrossBrowserJSDate("{$electronic_gradeable['eg_submission_open_date']}"));
@@ -1317,6 +1418,20 @@ HTML;
     }
 
     // Shows the radio inputs dynamically
+    $('input:radio[name="team_assignment"]').change(
+    function(){
+        $('.team_assignment').hide();
+        if ($(this).is(':checked')){ 
+            if($(this).val() == 'yes'){ 
+                $('#team_date').show();
+            }
+            else if ($(this).val() == 'no'){ 
+                $('#team_no').show();
+            }
+        }
+    });
+
+    // Shows the radio inputs dynamically
     $('input:radio[name="gradeable_type"]').change(
     function(){
         $('#required_type').hide();
@@ -1375,7 +1490,7 @@ HTML;
                 <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" placeholder="Rubric Item Title"></textarea> \
                 <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
-                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs"  onkeyup="autoResizeComment(event);" \
+                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
@@ -1392,7 +1507,7 @@ HTML;
         </tr>');
     }
     
-    // autoresize the comment box
+    // autoresize the comment
     function autoResizeComment(e){
         e.target.style.height ="";
         e.target.style.height = e.target.scrollHeight + "px";
@@ -1505,8 +1620,113 @@ HTML;
         currentRow.children()[1].children[1].checked = newRow.children()[child].children[1].checked;
         newRow.children()[child].children[1].checked = temp;
     }
+
+	$(function () {
+     	$("#alert-message").dialog({
+         	modal: true,
+         	autoOpen: false,
+         	buttons: {
+             	Ok: function () {
+                	 $(this).dialog("close");
+            	 }
+        	 }
+    	 });
+ 	});
+
+    //checks the form to see if it is valid
+    function checkForm()
+    {
+        var gradeable_id = $('#gradeable_id').val();
+        var date_submit = Date.parse($('#date_submit').val());
+        var date_due = Date.parse($('#date_due').val());
+        var date_ta_view = Date.parse($('#date_ta_view').val());
+        var date_grade = Date.parse($('#date_grade').val());
+        var date_released = Date.parse($('#date_released').val());
+        var config_path = $('input[name=config_path]').val();
+        var has_space = gradeable_id.includes(" ");
+        var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
+        var unique_gradeable = false;
+        var bad_max_score = false;
+        var check1 = document.getElementById('radio_electronic_file').checked;
+        var check2 = document.getElementById('radio_checkpoints').checked;
+        var check3 = document.getElementById('radio_numeric').checked;
+
+        if (!test || has_space || gradeable_id == "" || gradeable_id === null) {
+            $( "#alert-message" ).dialog( "open" );
+            return false;
+        }
+        if(check1) {
+            if(date_submit < date_ta_view) {
+                alert("DATE CONSISTENCY:  Submission Open Date must be >= TA Beta Testing Date");
+                return false;
+            }   
+            if(date_due < date_submit) {
+                alert("DATE CONSISTENCY:  Due Date must be >= Submission Open Date");
+                return false;
+            }
+            if(config_path == "" || config_path === null) {
+                alert("The config path should not be empty");
+                return false;
+            }
+        }
+        if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'true') {
+            if(date_grade < date_due) {
+                alert("DATE CONSISTENCY:  TA Grading Open Date must be >= Due Date");
+                return false;
+            }
+            if(date_released < date_due) {
+                alert("DATE CONSISTENCY:  Grades Released Date must be >= TA Grading Open Date");
+                return false;
+            }
+        }
+        else {
+            if(check1) {
+                if(date_released < date_due) {
+                    alert("DATE CONSISTENCY:  Grades Released Date must be >= Due Date");
+                    return false;
+                }
+            }
+        }
+        if($('input:radio[name="ta_grading"]:checked').attr('value') === 'true' || check2 || check3) {
+            if(date_grade < date_ta_view) {
+                alert("DATE CONSISTENCY:  TA Grading Open Date must be >= TA Beta Testing Date");
+                return false;
+            }
+            if(date_released < date_grade) {
+                alert("DATE CONSISTENCY:  Grade Released Date must be >= TA Grading Open Date");
+                return false;
+            }
+        }
+        if(!check1 && !check2 && !check3) {
+            alert("A type of gradeable must be selected");
+            return false;
+        }
+
+
+        var numOfNumeric = 0;
+        var wrapper = $('.numerics-table');
+        var i;
+        if(check3) {
+            for (i = 0; i < $('#numeric_num-items').val(); i++) {
+                numOfNumeric++;
+                if ($('#mult-field-' + numOfNumeric,wrapper).find('.max_score').attr('name','max_score_'+numOfNumeric).val() == 0) {
+                    alert("Max score cannot be 0 [Question "+ numOfNumeric + "]");
+                    return false;
+                }
+            }
+        }
+        
+    }
+
+    }
+    calculateTotalScore();
     calculatePercentageTotal();
     </script>
+HTML;
+	print <<<HTML
+<div id="alert-message" title="WARNING">
+  <p>Gradeable ID must not be blank and only contain characters <strong> a-z A-Z 0-9 _ - </strong> </p>
+</div>
 HTML;
 
 }

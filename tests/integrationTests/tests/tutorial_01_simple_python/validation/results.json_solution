@@ -1,0 +1,21 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01_STDOUT.txt",
+                    "description": "Program Output",
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/output.txt"
+                }
+            ],
+            "points_awarded": 10,
+            "test_name": "Test 1 Python - Simple Grading"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 2 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

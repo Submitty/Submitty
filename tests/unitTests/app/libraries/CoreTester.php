@@ -20,6 +20,6 @@ class CoreTester extends \PHPUnit_Framework_TestCase {
      */
     public function testErrorDatabaseBeforeConfig() {
         $core = new Core();
-        $core->loadDatabase();
+        $core->loadDatabases();
     }
 }

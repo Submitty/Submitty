@@ -30,6 +30,10 @@ class DiffViewer {
      * @var bool
      */
     private $has_expected = false;
+    private $expected_file_image = "";
+
+    private $has_difference = false;
+    private $difference_file_image = "";
 
     /**
      * @var bool
@@ -88,7 +92,7 @@ class DiffViewer {
      *
      * @throws \Exception
      */
-    public function __construct($actual_file, $expected_file, $diff_file, $id_prepend="id") {
+    public function __construct($actual_file, $expected_file, $diff_file, $image_difference, $id_prepend="id") {
         $this->reset();
         $this->id = rtrim($id_prepend,"_")."_";
         if (!file_exists($actual_file) && $actual_file != "") {
@@ -106,24 +110,40 @@ class DiffViewer {
                 $this->display_actual = true;
 	        }
         }
-        
+
         if (!file_exists($expected_file) && $expected_file != "") {
             throw new \Exception("'{$expected_file}' could not be found.");
         }
         else if ($expected_file != "") {
-            $this->expected = file_get_contents($expected_file);
-            $this->has_expected = trim($this->expected) !== "" ? true : false;
-            $this->expected = explode("\n", $this->expected);
-            $this->display_expected = true;
+            //TODO: fix this hacky way to deal with images.
+            if (substr($expected_file,strlen($expected_file)-4,4) == ".png") {
+                $this->expected_file_image = $expected_file;
+            }
+            else{
+                $this->expected = file_get_contents($expected_file);
+                $this->has_expected = trim($this->expected) !== "" ? true : false;
+                $this->expected = explode("\n", $this->expected);
+                $this->display_expected = true;
+            }
         }
-        
+
+        if (!file_exists($image_difference) && $image_difference != "") {
+            throw new \Exception("'{$expected_file}' could not be found.");
+        }
+        else if ($image_difference != "") {
+            //TODO: fix this hacky way to deal with images.
+            if (substr($image_difference,strlen($image_difference)-4,4) == ".png") {
+                $this->difference_file_image = $image_difference;
+            }
+        }
+
         if (!file_exists($diff_file) && $diff_file != "") {
             throw new \Exception("'{$diff_file}' could not be found.");
         }
         else if ($diff_file != "") {
             $diff = FileUtils::readJsonFile($diff_file);
         }
-
+        
         $this->diff = array("expected" => array(), "actual" => array());
         $this->add = array("expected" => array(), "actual" => array());
 
@@ -237,6 +257,13 @@ class DiffViewer {
     	return $this->actual_file_image;
     }
 
+    public function getExpectedImageFilename() {
+        return $this->expected_file_image;
+    }
+
+    public function getDifferenceFilename() {
+        return $this->difference_file_image;
+    }
 
     /**
      * Return the HTML for the expected display
@@ -270,7 +297,7 @@ class DiffViewer {
 
         if (isset($this->add[$type]) && count($this->add[$type]) > 0) {
             if (array_key_exists(-1, $this->add[$type])) {
-                $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][-1]}\">\n";
+                $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][-1]}'>\n";
                 for ($k = 0; $k < $this->add[$type][-1]; $k++) {
                     $html .= "\t<div class='row bad'><div class='empty_line'>&nbsp;</div></div>\n";
                 }
@@ -286,7 +313,7 @@ class DiffViewer {
             $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
-                $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$start]}\">\n";
+                $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$start]}'>\n";
             }
             if (isset($this->diff[$type][$i])) {
                 $html .= "\t<div class='bad'>";
@@ -316,7 +343,7 @@ class DiffViewer {
 
             if (isset($this->add[$type][$i])) {
                 if ($start === null) {
-                    $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$i]}\">\n";
+                    $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$i]}'>\n";
                 }
                 for ($k = 0; $k < $this->add[$type][$i]; $k++) {
                     $html .= "\t<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>\n";

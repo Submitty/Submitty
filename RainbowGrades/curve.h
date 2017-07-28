@@ -1,3 +1,4 @@
+#include <cassert>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -37,7 +38,7 @@ public:
   // ACCESSORS
 
   int num() const {
-    assert (names.size() == target_distribution.size() && names.size() == fixed_percentages.size());
+    assert (names.size() == target_distributions.size() && names.size() == fixed_percentages.size());
     return names.size();
   }
     

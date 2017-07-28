@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\libraries\Core;
 use app\libraries\Output;
+use app\libraries\Utils;
 
 /**
  * Class AuthenticationController
@@ -63,7 +64,8 @@ class AuthenticationController extends AbstractController {
      * is not strictly necessary, but still good to tidy up.
      */
     public function logout() {
-        setcookie('session_id', "", time()-3600);
+        $cookie_id = 'submitty_session_id';
+        Utils::setCookie($cookie_id, '', time() - 3600);
         $this->core->removeCurrentSession();
         $this->core->redirect($this->core->buildUrl());
     }
@@ -83,6 +85,7 @@ class AuthenticationController extends AbstractController {
      */
     public function checkLogin() {
         $redirect = array();
+        $_POST['stay_logged_in'] = (isset($_POST['stay_logged_in']));
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $_SESSION['messages']['error'][] = "Cannot leave user id or password blank";
             foreach ($_REQUEST as $key => $value) {
@@ -95,7 +98,7 @@ class AuthenticationController extends AbstractController {
 
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
-        if ($this->core->authenticate()) {
+        if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
             foreach ($_REQUEST as $key => $value) {
                 if (substr($key, 0, 4) == "old_") {
                     $redirect[substr($key, 4)] = $value;

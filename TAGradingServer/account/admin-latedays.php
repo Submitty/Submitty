@@ -1,8 +1,12 @@
 <?php
 
 //Author: Peter Bailie, Systems Programmer, RPI Computer Science, July 2016
+//Update: Feb 8 2017 by pbailie
 
 /* MAIN ===================================================================== */
+
+//Permit '\r' EOL encoding (e.g. CSV export from MS Excel 2008/2011 for Mac).
+ini_set("auto_detect_line_endings", true);
 
 include "../header.php";
 
@@ -17,7 +21,7 @@ $view = new local_view();
 $state = "";
 
 /* POST/FILES SUPERGLOBALS -------------------------------------------------- */
-	
+
 //Check to see if a CSV file was submitted.
 if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
 
@@ -29,42 +33,42 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 		$state = 'upsert_done';
 	}
 
-//if no file upload, examine Student ID and Late Day input fields.	
-} else if (isset($_POST['student_id']) && ($_POST['student_id'] !== "") &&
-		   isset($_POST['late_days'])  && ($_POST['late_days']  !== "") &&
-		   isset($_POST['datestamp'])  && ($_POST['datestamp']  !== "")) {
+//if no file upload, examine Student ID and Late Day input fields.
+} else if (isset($_POST['user_id'])   && ($_POST['user_id']   !== "") &&
+		   isset($_POST['late_days']) && ($_POST['late_days'] !== "") &&
+		   isset($_POST['datestamp']) && ($_POST['datestamp'] !== "")) {
 
 	//Validate that late days entered is an integer >= 0.
 	//Negative values will fail ctype_digit test.
 	if (!ctype_digit($_POST['late_days'])) {
 		$state = 'late_days_not_integer';
 	}
-	
+
 	//Timestamp validation
 	if (!validate_timestamp($_POST['datestamp'])) {
 		$state = 'invalid_datestamp';
 	}
-	
+
 	//Validate that student does exist in DB (per rcs_id)
 	//"Student Not Found" error has precedence over late days being non-numerical
 	//as it is the more likely error to happen.
-	if (!verify_student_in_db($_POST['student_id'])) {
-		$state = 'student_not_found';
+	if (!verify_user_in_db($_POST['user_id'])) {
+		$state = 'user_not_found';
 	}
-	
+
 	//Process upsert if no errors were flagged.
 	if (empty($state)) {
 
 		//upsert argument requires 2D array.
-		upsert(array(array($_POST['student_id'], $_POST['datestamp'], intval($_POST['late_days']))));
+		upsert(array(array($_POST['user_id'], $_POST['datestamp'], intval($_POST['late_days']))));
 		$state = 'upsert_done';
 	}
 }
 /* END POST/FILES SUPERGLOBAL ----------------------------------------------- */
 
 //configure student table
-$student_table_db_data = retrieve_students_from_db();
-$view->configure_table($student_table_db_data);
+$user_table_db_data = retrieve_users_from_db();
+$view->configure_table($user_table_db_data);
 
 //display
 $view->display($state);
@@ -83,57 +87,63 @@ function parse_and_validate_csv($csv_file, &$data) {
 //     FALSE otherwise.
 //PURPOSE:  (1) validate uploaded csv file so it may be parsed.
 //          (2) create data array of csv information that may be batch upserted.
-	
+
 	//Validate file MIME type (needs to be "text/plain")
 	$file_info = finfo_open(FILEINFO_MIME_TYPE);
 	$mime_type = finfo_file($file_info, $_FILES['csv_upload']['tmp_name']);
 	finfo_close($file_info);
-	
-	if ($mime_type !== "text/plain") {
+
+	//MIME type must be text, but all subtypes are acceptable.
+	if (substr($mime_type, 0, 5) !== "text/") {
 		$data = null;
 		return false;
 	}
-	
+
 	$rows = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-	
+
 	if ($rows === false) {
 		$data = null;
 		return false;
 	}
-	
+
 	foreach($rows as $row) {
-	
+
 		$fields = explode(',', $row);
-		
+
+		//Remove any extraneous whitespace at beginning/end of all fields.
+		foreach($fields as &$field) {
+			$field = trim($field);
+		} unset($field);
+
 		//Each row has three fields
 		if (count($fields) !== 3) {
 			$data = null;
 			return false;
 		}
-		
-		//$fields[0]: Verify student exists in class (check by RCS ID)
-		if (!verify_student_in_db($fields[0])) {
+
+		//$fields[0]: Verify student exists in class (check by student user ID)
+		if (!verify_user_in_db($fields[0])) {
 			$data = null;
 			return false;
-		}		
-		
+		}
+
 		//$fields[1] represents timestamp in the format (MM/DD/YY),
 		//(MM/DD/YYYY), (MM-DD-YY), or (MM-DD-YYYY).
 		if (!validate_timestamp($fields[1])) {
 			$data = null;
 			return false;
-		}		
-		
+		}
+
 		//$fields[2]: Number of late days must be an integer >= 0
 		if (!ctype_digit($fields[2])) {
 			$data = null;
 			return false;
 		}
-		
+
 		//Fields information seems okay.  Push fields onto data array.
 		$data[] = $fields;
 	}
-	
+
 	//Validation successful.
 	return true;
 }
@@ -141,7 +151,7 @@ function parse_and_validate_csv($csv_file, &$data) {
 /* END FUNCTION parse_and_validate_csv() ==================================== */
 
 function validate_timestamp($timestamp) {
-//IN:  $timestamp is actually a date string, not a Uix timestamp.
+//IN:  $timestamp is actually a date string, not a Unix timestamp.
 //OUT: TRUE when date string conforms to an accetpable pattern
 //      FALSE otherwise.
 //PURPOSE: Validate string to (1) be a valid date and (2) conform to specific
@@ -156,11 +166,10 @@ function validate_timestamp($timestamp) {
 	//This checks to ensure a date pattern is acceptable AND the date actually
 	//exists.  e.g. "02-29-2016" is valid, while "06-31-2016" is not.
 	//That is, 2016 is a leap year, but June has only 30 days.
-	$tmp = array(	DateTime::createFromFormat('m-d-Y', $timestamp),
-					DateTime::createFromFormat('m/d/Y', $timestamp),
-					DateTime::createFromFormat('m-d-y', $timestamp),
-					DateTime::createFromFormat('m/d/y', $timestamp)
-				);
+	$tmp = array(DateTime::createFromFormat('m-d-Y', $timestamp),
+				 DateTime::createFromFormat('m/d/Y', $timestamp),
+				 DateTime::createFromFormat('m-d-y', $timestamp),
+				 DateTime::createFromFormat('m/d/y', $timestamp));
 
 	switch (true) {
 	case ($tmp[0] && $tmp[0]->format('m-d-Y') === $timestamp):
@@ -175,27 +184,27 @@ function validate_timestamp($timestamp) {
 
 /* END FUNCTION validate_timestamp() ==================================== */
 
-function verify_student_in_db($student) {
-//IN:  RCS student ID
-//OUT: TRUE should RCS ID be found in the database.  FALSE otherwise.
-//PURPOSE:  Verify that student is in database (indicating the student is enrolled)
+function verify_user_in_db($user_id) {
+//IN:  User ID
+//OUT: TRUE should user ID be found in the database.  FALSE otherwise.
+//PURPOSE:  Verify that user is in database (indicating the user is enrolled)
 
 	$sql = <<<SQL
 SELECT COUNT(1)
 FROM users
 WHERE user_id=?
-AND	user_group=4
 SQL;
 
-	\lib\Database::query($sql, array($student));
+	\lib\Database::query($sql, array($user_id));
 
 	//row() will be either 1 (true) or 0 (false)
 	return boolval(\lib\Database::row()['count']);
+
 }
 
-/* END FUNCTION verify_student_in_db() ====================================== */
+/* END FUNCTION verify_user_in_db() ====================================== */
 
-function retrieve_students_from_db() {
+function retrieve_users_from_db() {
 //IN:  gradeable ID from database
 //OUT: all students who have late days.  Retrieves student rcs, first name,
 //     last name, timestamp and number of late days.
@@ -224,7 +233,7 @@ SQL;
 	return \lib\Database::rows();
 }
 
-/* END FUNCTION retrieve_students_from_db() ================================= */
+/* END FUNCTION retrieve_users_from_db() ================================= */
 
 function upsert(array $data) {
 //IN:  Data to be "upserted"
@@ -241,11 +250,11 @@ function upsert(array $data) {
  * -------------------------------------------------------------------------- */
 
 	$sql = array();
-	
+
 	//TEMPORARY table to hold all new values that will be "upserted"
 	$sql['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE temp
-	(student_id VARCHAR(255),
+	(user_id VARCHAR(255),
 	date TIMESTAMP,
 	late_days INTEGER)
 ON COMMIT DROP;
@@ -269,7 +278,7 @@ SQL;
 UPDATE late_days
 SET allowed_late_days=temp.late_days
 FROM temp
-WHERE late_days.user_id=temp.student_id
+WHERE late_days.user_id=temp.user_id
 	AND late_days.since_timestamp=temp.date
 SQL;
 
@@ -280,12 +289,12 @@ INSERT INTO late_days
 	since_timestamp,
 	allowed_late_days)
 SELECT
-	temp.student_id,
+	temp.user_id,
 	temp.date,
 	temp.late_days
-FROM temp 
+FROM temp
 LEFT OUTER JOIN late_days
-	ON late_days.user_id=temp.student_id
+	ON late_days.user_id=temp.user_id
 	AND late_days.since_timestamp=temp.date
 WHERE late_days.user_id IS NULL
 SQL;
@@ -293,11 +302,11 @@ SQL;
 	//Begin DB transaction
 	\lib\Database::beginTransaction();
 	\lib\Database::query($sql['temp_table']);
-	
+
 	foreach ($data as $index => $record) {
-		\lib\Database::query($sql["data_{$index}"], array($record[0], $record[1], $record[2]));
+		\lib\Database::query($sql["data_{$index}"], $record);
 	}
-	
+
 	\lib\Database::query($sql['lock']);
 	\lib\Database::query($sql['update']);
 	\lib\Database::query($sql['insert']);
@@ -318,7 +327,7 @@ class local_view {
 
 	//HTML data to be sent to browser
 	static private $view;
-	
+
 	//Constructor
 	public function __construct() {
 		//Class constants cannot be expanded in strings with {}
@@ -327,13 +336,13 @@ class local_view {
 		$utf8_checkmark = self::UTF8_CHECKMARK;
 
 		self::$view = array();
-		
+
 		self::$view['head'] = <<<HTML
 <style type="text/css">
 	body {
 		overflow-y: scroll;
 	}
-	
+
 	#container-latedays
 	{
 		width:700px;
@@ -384,9 +393,9 @@ HTML;
 {$utf8_styled_x} Something is wrong with the CSV upload.  No update done.</em>
 HTML;
 
-		self::$view['student_not_found'] = <<<HTML
+		self::$view['user_not_found'] = <<<HTML
 <p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
-{$utf8_styled_x} Student not found.</em>
+{$utf8_styled_x} User not found.</em>
 HTML;
 
 		self::$view['invalid_datestamp'] = <<<HTML
@@ -404,12 +413,12 @@ HTML;
 {$utf8_checkmark} Late days are updated.</em>
 HTML;
 
-		$BASE_URL = rtrim(__BASE_URL__, "/");	
+		$BASE_URL = rtrim(__BASE_URL__, "/");
 
 		self::$view['form'] = <<<HTML
 <form action="{$BASE_URL}/account/admin-latedays.php?course={$_GET['course']}&semester={$_GET['semester']}&this=Late%20Days%20Allowed" method="POST" enctype="multipart/form-data">
 <h4>Single Student Entry</h4>
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Student ID:<br><input type="text" name="student_id" style="width:95%;"></div>
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Student ID:<br><input type="text" name="user_id" style="width:95%;"></div>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Datestamp (MM/DD/YY):<br><input type="text" name="datestamp" style="width:95%;"></div>
 <div style="width:15%; display:inline-block; vertical-align:top; padding-right:15px;">Late Days:<br><input type="text" name="late_days" style="width:95%;"></div>
 <div style="display:inline-block; vertical-align:top; padding-top:1.5em;"><input class='btn' type="submit" value="Submit"></div>
@@ -419,8 +428,8 @@ HTML;
 HTML;
 
 	}
-	
-/* END CLASS CONSTRUCTOR ---------------------------------------------------- */	
+
+/* END CLASS CONSTRUCTOR ---------------------------------------------------- */
 
 	public function configure_table($db_data) {
 	//IN:  data from database used to build table of granted late day exceptions
@@ -428,19 +437,19 @@ HTML;
 	//OUT: no return (although private view['student_review_table'] property is
 	//     filled)
 	//PURPOSE: Craft HTML required to display a table of existing late day
-	//         exceptions	
-	
+	//         exceptions
+
 		if (!is_array($db_data) || count($db_data) < 1) {
 		//No late days in DB -- indicate as much.
 
-			self::$view['student_review_table'] = <<<HTML
+			self::$view['user_review_table'] = <<<HTML
 <p><em style="font-weight:bold; font-size:1.2em; font-style:normal;">No late days are currently entered.</em>
 HTML;
 		} else {
 		//Late days found in DB -- build table to display
 
 			//Table HEAD
-			self::$view['student_review_table'] = <<<HTML
+			self::$view['user_review_table'] = <<<HTML
 <table style="border:5px solid white; border-collapse:collapse; margin: 0 auto; text-align:center;">
 <caption style="caption-side:top; font-weight:bold; font-size:1.2em;">
 Late Days Allowed
@@ -451,12 +460,12 @@ Late Days Allowed
 <th style="background:lavender; width:20%;">Total Allowed Late Days</th>
 <th style="background:lavender;">Effective Date</th>
 HTML;
-	
+
 			//Table BODY
 			$cell_color = array('white', 'aliceblue');
 			foreach ($db_data as $index => $record) {
 				$firstname = getDisplayName($record);
-				self::$view['student_review_table'] .= <<<HTML
+				self::$view['user_review_table'] .= <<<HTML
 <tr>
 <td style="background:{$cell_color[$index%2]};">{$record['user_id']}</td>
 <td style="background:{$cell_color[$index%2]};">{$firstname}</td>
@@ -468,59 +477,59 @@ HTML;
 			}
 
 			//Table TAIL
-			self::$view['student_review_table'] .= <<<HTML
+			self::$view['user_review_table'] .= <<<HTML
 </table>
 HTML;
 		}
 	}
-	
+
 /* END CLASS METHOD configure_table() --------------------------------------- */
 
 	public function display($state) {
 	//IN:  Current "display state" determined in MAIN process
 	//OUT: No return, although ALL crafted HTML is sent to browser
 	//PURPOSE:  Display appropriate page contents.
-	
+
 		switch($state) {
 		case 'bad_upload':
-			echo self::$view['head']                 .
-   				 self::$view['form']                 . 
-			     self::$view['bad_upload']           .
-			     self::$view['student_review_table'] .
+			echo self::$view['head']              .
+   				 self::$view['form']              .
+			     self::$view['bad_upload']        .
+			     self::$view['user_review_table'] .
 			     self::$view['tail'];
 			break;
-		case 'student_not_found':
-			echo self::$view['head']                 .
-   				 self::$view['form']                 . 
-			     self::$view['student_not_found']    .
-			     self::$view['student_review_table'] .
+		case 'user_not_found':
+			echo self::$view['head']              .
+   				 self::$view['form']              .
+			     self::$view['user_not_found']    .
+			     self::$view['user_review_table'] .
 			     self::$view['tail'];
 			break;
 		case 'invalid_datestamp':
-			echo self::$view['head']                 .
-			     self::$view['form']                 . 
-			     self::$view['invalid_datestamp']    .   				 
-			     self::$view['student_review_table'] .
+			echo self::$view['head']              .
+			     self::$view['form']              .
+			     self::$view['invalid_datestamp'] .
+			     self::$view['user_review_table'] .
 			     self::$view['tail'];
 		    break;
 		case 'late_days_not_integer':
 			echo self::$view['head']                  .
-			     self::$view['form']                  . 
-			     self::$view['late_days_not_integer'] .   				 
-			     self::$view['student_review_table']  .
+			     self::$view['form']                  .
+			     self::$view['late_days_not_integer'] .
+			     self::$view['user_review_table']     .
 			     self::$view['tail'];
 		    break;
 		case 'upsert_done':
-			echo self::$view['head']                 .
-				 self::$view['form']                 . 
-				 self::$view['upsert_done']          . 
-			     self::$view['student_review_table'] .
+			echo self::$view['head']              .
+				 self::$view['form']              .
+				 self::$view['upsert_done']       .
+			     self::$view['user_review_table'] .
 			     self::$view['tail'];
 			break;
 		default:
-			echo self::$view['head']                 .
-				 self::$view['form']                 . 
-			     self::$view['student_review_table'] .
+			echo self::$view['head']              .
+				 self::$view['form']              .
+			     self::$view['user_review_table'] .
 			     self::$view['tail'];
 			break;
 		}

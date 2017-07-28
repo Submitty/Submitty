@@ -4,16 +4,14 @@ dist: trusty
 
 matrix:
   include:
-    - php: 5.5
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
-    - php: 5.5
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=true
     - php: 5.6
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
+      env: AUTH_METHOD=2 INTEGRATION_SUITE=false
     - php: 7.0
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
+      env: AUTH_METHOD=2 INTEGRATION_SUITE=false
     - php: 7.0
-      env: AUTH_METHOD=PamAuthentication INTEGRATION_SUITE=false
+      env: AUTH_METHOD=1 INTEGRATION_SUITE=false
+    - php: 7.0
+      env: AUTH_METHOD=2 INTEGRATION_SUITE=true
 
 cache:
   pip: true
@@ -23,17 +21,17 @@ cache:
     - $HOME/.cache/pip
 
 addons:
-  #firefox: "45.0"
-  postgresql: "9.3"
+  postgresql: "9.5"
   apt:
     sources:
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+    # You cannot put just any Ubuntu trusty package here and expect to install them and that
+    # they must be in this list: https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-trusty
+    # otherwise you'll have to install it via "sudo apt-get install ..." in the before_install section
     packages:
       - apache2
       - libapache2-mod-fastcgi
-      - python
-      - python-pip
       - build-essential
       - automake
       - cmake
@@ -47,34 +45,24 @@ addons:
       - flex
       - bison
       - poppler-utils
-      - python3
-      - python3-pip
       - libpcre3
       - libpcre3-dev
       - unzip
       - google-chrome-stable
       - libpam-passwdqc
+      - libboost-all-dev
 
 before_install:
-   - jdk_switcher use default
-   #- export PHANTOMJS_VERSION=2.1.1
-   #- export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH
-   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi
-   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi
-   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi
-   #- phantomjs --version
-   - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
-   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
-   #- export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
-   - sudo sed -e "s?secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?secure_path=\"${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?g" --in-place /etc/sudoers
-   - sudo cat /etc/sudoers
-   - sudo rm -rf /usr/bin/python
-   - sudo ln -s /opt/python/2.7.12/bin/python /usr/bin/python
-   - sudo chmod 777 /usr/bin/python
+  - jdk_switcher use default
+  - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
+  - PY_VERSION_2="$(python2 -V 2>&1 | egrep -o '2.7.[0-9]{2,}')"
+  - PY_VERSION_3="$(python3 -V 2>&1 | egrep -o '[0-9].[0-9].[0-9]{1,}')"
+  - sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/${PY_VERSION_2}/bin:/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
+  - mkdir -p ~/.local/bin
+  - export PATH=$HOME/.local/bin:$PATH
 
 install:
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then sudo apt-get -y install libapache2-mod-php5 php5-pgsql php5-curl; a2enmod php5; fi
+  - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then sudo apt-get -y install libapache2-mod-php5.6 php5.6-pgsql php5.6-curl; a2enmod php5.6; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo apt-get -y install libapache2-mod-php7.0 php7.0-pgsql php7.0-curl; a2enmod php7.0; fi
   - wget http://chromedriver.storage.googleapis.com/2.24/chromedriver_linux64.zip
@@ -82,27 +70,41 @@ install:
   - sudo chmod u+x chromedriver
   - sudo mv chromedriver /usr/bin/
   - travis_retry composer install --prefer-dist --no-interaction
-  - pip install -U pip
-  - pip install xlsx2csv
-  - pip install python-pam
-  - pip install sqlalchemy
-  - pip install psycopg2
-  - pip install PyYAML
-  - pip install selenium
-  - pip install nose2
-  - pip install unittest2
-  - pip install pylint_runner
-  - sudo chmod -R 555 /usr/local/lib/python2.7/*
-  - sudo chmod -R 555 /opt/python/2.7.*/lib/python2.7/*
+  - pip2 install -U pip
+  - pip2 install xlsx2csv
+  - pip2 install python-pam
+  - pip2 install sqlalchemy
+  - pip2 install psycopg2
+  - pip2 install PyYAML
+  - pip2 install selenium
+  - pip2 install nose2
+  - pip2 install unittest2
+  - pip2 install pytz
+  - pip2 install python-dateutil
+  - pip2 install tzlocal
+  - pip3 install -U pip
+  - pip3 install python-pam
+  - pip3 install psycopg2
+  - pip3 install PyYAML
+  - pip3 install sqlalchemy
+  - pip3 install pylint_runner
+  - pip3 install pytz
+  - pip3 install python-dateutil
+  - pip3 install tzlocal
+  - sudo chmod -R 555 /usr/local/lib/python*/
+  - sudo chmod -R 555 /opt/python/${PY_VERSION_2}/lib/python${PY_VERSION_2:0:3}/*
+  - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
 
 before_script:
   # Doing this helps chromedriver from hanging for some mysterious reason
   # https://github.com/SeleniumHQ/docker-selenium/issues/87
   - export DBUS_SESSION_BUS_ADDRESS=/dev/null
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
+  - PGPASSWORD=hsdbu psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+  - PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${TRAVIS_BUILD_DIR}/site/data/submitty_db.sql
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
-  - sudo python /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py csci1000
+  - if [ ${INTEGRATION_SUITE} = false ]; then sudo python /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample; fi
   - sudo ./.setup/travis/setup_test_suite.sh
   - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
   - sudo a2enmod include rewrite actions cgi alias headers
@@ -120,28 +122,30 @@ before_script:
   - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
   - sudo service apache2 restart
   #- ./.setup/travis/start.sh
-  - sudo sed -e "s?debug = false?debug = true?g" --in-place /usr/local/submitty/site/config/master.ini
-  - sudo sed -e "s?PamAuthentication?${AUTH_METHOD}?g" --in-place /usr/local/submitty/site/config/master.ini
   - sudo cat /usr/local/submitty/site/config/master.ini
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
 
 script:
-  - curl http://localhost/cgi-bin/index.cgi
+  # if these fail, travis fails
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
-  #- firefox --version
   - if [ ${INTEGRATION_SUITE} = false ]; then vendor/bin/phpunit --configuration tests/phpunit.xml; fi
-  - if [ ${INTEGRATION_SUITE} = true ]; then sudo python /usr/local/submitty/test_suite/integrationTests/run.py; fi
   - if [ ${INTEGRATION_SUITE} = false ]; then TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"; fi
+  - if [ ${INTEGRATION_SUITE} = true ]; then sudo python /usr/local/submitty/test_suite/integrationTests/run.py; fi
 
 # Add more linters to the build process here
 after_script:
   # Eventually this should be moved into the "script" once we've gotten the build to a point where all contained
   # python files will actually pass (which a lot right now will not)
-  - pylint_runner ${TRAVIS_BUILD_DIR}
-#  - sudo ./.setup/travis/print_debug.sh
+  # - pylint_runner3 -v ${TRAVIS_BUILD_DIR}
+  # - sudo ./.setup/travis/print_debug.sh
+  # if this fails, it only prints, travis does not fail
+  - sudo cat /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh
+  - sudo cat /usr/local/submitty/site/config/master.ini
+  - sudo cat /var/local/submitty/logs/site/error/*
+  - sudo /usr/local/submitty/bin/check_everything.py
 
 after_success:
   - travis_retry php vendor/bin/coveralls -v

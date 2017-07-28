@@ -27,7 +27,13 @@ class HWReport
             is_extra_credits,
             gd_active_version,
             grading_notes,
-            max_scores
+            max_scores,
+            grader_id,
+            grader_firstname,
+            grader_lastname,
+            grader_preferred,
+            grader_group,
+            grader_email
         FROM
             users AS u CROSS JOIN gradeable AS g
             LEFT JOIN (
@@ -45,34 +51,35 @@ class HWReport
                     is_extra_credits,
                     gd_active_version,
                     grading_notes,
-                    max_scores
+                    max_scores,
+                    grader.user_id as grader_id,
+                    grader.user_firstname as grader_firstname,
+                    grader.user_lastname as grader_lastname,
+                    grader.user_preferred_firstname as grader_preferred,
+                    grader.user_group as grader_group,
+                    grader.user_email as grader_email
                 FROM
                     gradeable_data AS gd INNER JOIN(
-                    SELECT
-                        gd_id,
-                        SUM(gcd_score) AS score,
-                        array_agg(gc_title ORDER BY gc_order ASC) AS titles,
-                        array_agg(gcd_component_comment ORDER BY gc_order ASC) AS comments,
-                        array_agg(gcd_score ORDER BY gc_order ASC) AS scores,
-                        array_agg(gc_is_extra_credit ORDER BY gc_order ASC) AS is_extra_credits,
-                        array_agg(gc_student_comment ORDER BY gc_order ASC) AS grading_notes,
-                        array_agg(gc_max_value ORDER BY gc_order ASC) AS max_scores
-                    FROM
-                        gradeable_component_data AS gcd INNER JOIN
-                            gradeable_component AS gc ON gcd.gc_id=gc.gc_id
-                    GROUP BY gd_id
-                ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
-                INNER JOIN electronic_gradeable AS eg ON gd.g_id=eg.g_id
+                        SELECT
+                            gd_id,
+                            SUM(gcd_score) AS score,
+                            array_agg(gc_title ORDER BY gc_order ASC) AS titles,
+                            array_agg(gcd_component_comment ORDER BY gc_order ASC) AS comments,
+                            array_agg(gcd_score ORDER BY gc_order ASC) AS scores,
+                            array_agg(gc_is_extra_credit ORDER BY gc_order ASC) AS is_extra_credits,
+                            array_agg(gc_student_comment ORDER BY gc_order ASC) AS grading_notes,
+                            array_agg(gc_max_value ORDER BY gc_order ASC) AS max_scores
+                        FROM
+                            gradeable_component_data AS gcd INNER JOIN
+                                gradeable_component AS gc ON gcd.gc_id=gc.gc_id
+                        GROUP BY gd_id
+                    ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
+                    INNER JOIN electronic_gradeable AS eg ON gd.g_id=eg.g_id
+                    LEFT JOIN (
+                      SELECT user_id, user_firstname, user_lastname, user_preferred_firstname, user_group, user_email
+                      FROM users
+                    ) AS grader ON grader.user_id = gd.gd_grader_id
             ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id
-            WHERE
-              ((
-                user_group = 4
-                AND registration_section IS NOT NULL
-              )
-              OR
-              (
-                manual_registration IS TRUE
-              ))
         ORDER BY g_syllabus_bucket ASC, g_grade_released_date ASC, u.user_id ASC
         ) AS user_grades
 
@@ -174,22 +181,28 @@ class HWReport
             $grade_user_id = $gradeable["gd_grader_id"];
             $grade_comment = htmlspecialchars($gradeable["gd_overall_comment"]);
             // Query database to gather TA info
-            $grader = $graders[$gradeable['gd_grader_id']];
-            $grade_user_first_name = $grader["user_firstname"];
-            $grade_user_last_name = $grader["user_lastname"];
-            $grade_user_email = $grader["user_email"];
 
             // Generate output
             $student_output_text_main .= strtoupper($gradeable['g_title']) . " GRADE" . $nl;
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
-            if (!($grade_user_first_name == "Mentor" || $grade_user_first_name == "TA" || $grade_user_first_name == "")) {
-                $student_output_text_main .= "Graded by: " . $grade_user_first_name . " " . $grade_user_last_name . " <" . $grade_user_email . ">" . $nl;
+            if (isset($gradeable['grader_id']) && $gradeable['grader_group'] < 3) {
+                $firstname = $gradeable['grader_firstname'];
+                if (isset($gradeable['grader_preferred']) && $gradeable['grader_preferred'] !== "") {
+                    $firstname = $gradeable['grader_preferred'];
+                }
+                $student_output_text_main .= "Graded by: {$firstname} {$gradeable['grader_lastname']} <{$gradeable['grader_email']}>" . $nl;
             }
 
-            $late_days = $ldu ->get_gradeable($student_id, $g_id);
+            $late_days = $ldu->get_gradeable($student_id, $g_id);
+
+            if (isset($gradeable['grader_id'])) {
+                $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: " . $gradeable['grader_email'] . $nl;
+            }
+            else {
+                $student_output_text_main .= "Any regrade requests are due within 7 days of posting";
+            }
 
 
-            $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: " . $grade_user_email . $nl;
             if ($late_days['late_days_used'] > 0) {
                 $student_output_text_main .= "This submission was " . $late_days['late_days_used'] . " day(s) after the due date." . $nl;
             }

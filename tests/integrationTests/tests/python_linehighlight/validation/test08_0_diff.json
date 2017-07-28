@@ -1,530 +1,1816 @@
 {
-"differences":[
-    {
-        "actual":
+    "differences": [
         {
-            "start": 0,
-            "line": [
-                {
-                    "line_number": 0
-                }, {
-                    "line_number": 1
-                }, {
-                    "line_number": 2
-                }, {
-                    "line_number": 3
-                }, {
-                    "line_number": 4
-                }, {
-                    "line_number": 5
-                }, {
-                    "line_number": 6
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            6,
+                            7
+                        ],
+                        "line_number": 0
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            5
+                        ],
+                        "line_number": 1
+                    },
+                    {
+                        "char_number": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                        ],
+                        "line_number": 2
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 3
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            4,
+                            5,
+                            7,
+                            8,
+                            9,
+                            10
+                        ],
+                        "line_number": 4
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            3,
+                            4,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16
+                        ],
+                        "line_number": 5
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6,
+                            9,
+                            10
+                        ],
+                        "line_number": 6
+                    }
+                ],
+                "start": 0
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4
+                        ],
+                        "line_number": 0
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            3,
+                            4
+                        ],
+                        "line_number": 1
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6,
+                            8,
+                            9,
+                            11
+                        ],
+                        "line_number": 2
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            5,
+                            10
+                        ],
+                        "line_number": 3
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            5,
+                            7,
+                            8
+                        ],
+                        "line_number": 4
+                    }
+                ],
+                "start": 0
+            }
         },
-        "expected":
         {
-            "start":0,
-            "line": [
-                {
-                    "line_number": 0
-                }, {
-                    "line_number": 1
-                }, {
-                    "line_number": 2
-                }, {
-                    "line_number": 3
-                }, {
-                    "line_number": 4
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 7
+            "actual": {
+                "start": 7
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 6
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 7
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 8
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 9
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 10
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 11
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                        ],
+                        "line_number": 12
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                        ],
+                        "line_number": 13
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 14
+                    }
+                ],
+                "start": 6
+            }
         },
-        "expected":
         {
-            "start":6,
-            "line": [
-                {
-                    "line_number": 6
-                }, {
-                    "line_number": 7
-                }, {
-                    "line_number": 8
-                }, {
-                    "line_number": 9
-                }, {
-                    "line_number": 10
-                }, {
-                    "line_number": 11
-                }, {
-                    "line_number": 12
-                }, {
-                    "line_number": 13
-                }, {
-                    "line_number": 14
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 9,
-            "line": [
-                {
-                    "line_number": 9
-                }, {
-                    "line_number": 10
-                }, {
-                    "line_number": 11
-                }, {
-                    "line_number": 12
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 9
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            5
+                        ],
+                        "line_number": 10
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 11
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 12
+                    }
+                ],
+                "start": 9
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            1,
+                            2,
+                            5,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 16
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3
+                        ],
+                        "line_number": 17
+                    }
+                ],
+                "start": 16
+            }
         },
-        "expected":
         {
-            "start":16,
-            "line": [
-                {
-                    "line_number": 16
-                }, {
-                    "line_number": 17
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 14,
-            "line": [
-                {
-                    "line_number": 14
-                }, {
-                    "line_number": 15
-                }, {
-                    "line_number": 16
-                }, {
-                    "line_number": 17
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10
+                        ],
+                        "line_number": 14
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                        ],
+                        "line_number": 15
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 16
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 17
+                    }
+                ],
+                "start": 14
+            },
+            "expected": {
+                "start": 18
+            }
         },
-        "expected":
         {
-            "start":18
-        }
-    }, {
-        "actual":
-        {
-            "start": 19,
-            "line": [
-                {
-                    "line_number": 19
-                }, {
-                    "line_number": 20
-                }, {
-                    "line_number": 21
-                }, {
-                    "line_number": 22
-                }, {
-                    "line_number": 23
-                }, {
-                    "line_number": 24
-                }, {
-                    "line_number": 25
-                }, {
-                    "line_number": 26
-                }, {
-                    "line_number": 27
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            8
+                        ],
+                        "line_number": 19
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            6,
+                            8,
+                            9
+                        ],
+                        "line_number": 20
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                        ],
+                        "line_number": 21
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                        ],
+                        "line_number": 22
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            5,
+                            6
+                        ],
+                        "line_number": 23
+                    },
+                    {
+                        "char_number": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            6
+                        ],
+                        "line_number": 24
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            4,
+                            6,
+                            7
+                        ],
+                        "line_number": 25
+                    },
+                    {
+                        "char_number": [
+                            1,
+                            2,
+                            3,
+                            5
+                        ],
+                        "line_number": 26
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            5,
+                            7,
+                            8,
+                            9,
+                            10,
+                            12
+                        ],
+                        "line_number": 27
+                    }
+                ],
+                "start": 19
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 20
+                    },
+                    {
+                        "char_number": [
+                            2,
+                            3
+                        ],
+                        "line_number": 21
+                    },
+                    {
+                        "char_number": [
+                            3
+                        ],
+                        "line_number": 22
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4,
+                            6,
+                            7,
+                            10
+                        ],
+                        "line_number": 23
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            3,
+                            5
+                        ],
+                        "line_number": 24
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 25
+                    }
+                ],
+                "start": 20
+            }
         },
-        "expected":
         {
-            "start":20,
-            "line": [
-                {
-                    "line_number": 20
-                }, {
-                    "line_number": 21
-                }, {
-                    "line_number": 22
-                }, {
-                    "line_number": 23
-                }, {
-                    "line_number": 24
-                }, {
-                    "line_number": 25
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 29,
-            "line": [
-                {
-                    "line_number": 29
-                }, {
-                    "line_number": 30
-                }, {
-                    "line_number": 31
-                }, {
-                    "line_number": 32
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 29
+                    },
+                    {
+                        "char_number": [
+                            0
+                        ],
+                        "line_number": 30
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3
+                        ],
+                        "line_number": 31
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            3,
+                            5
+                        ],
+                        "line_number": 32
+                    }
+                ],
+                "start": 29
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            6,
+                            7
+                        ],
+                        "line_number": 27
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            5
+                        ],
+                        "line_number": 28
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 29
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 30
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2
+                        ],
+                        "line_number": 31
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 32
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 33
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 34
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 35
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2
+                        ],
+                        "line_number": 36
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 37
+                    }
+                ],
+                "start": 27
+            }
         },
-        "expected":
         {
-            "start":27,
-            "line": [
-                {
-                    "line_number": 27
-                }, {
-                    "line_number": 28
-                }, {
-                    "line_number": 29
-                }, {
-                    "line_number": 30
-                }, {
-                    "line_number": 31
-                }, {
-                    "line_number": 32
-                }, {
-                    "line_number": 33
-                }, {
-                    "line_number": 34
-                }, {
-                    "line_number": 35
-                }, {
-                    "line_number": 36
-                }, {
-                    "line_number": 37
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 34,
-            "line": [
-                {
-                    "line_number": 34, 
-                    "char_number":[ 0, 1, 2, 3, 5 ]
-                }, {
-                    "line_number": 35, 
-                    "char_number":[ 0, 1, 2, 3, 4, 6 ]
-                }, {
-                    "line_number": 36, 
-                    "char_number":[ 0, 1, 5, 6, 7, 8, 9, 10 ]
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            5
+                        ],
+                        "line_number": 34
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            6
+                        ],
+                        "line_number": 35
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10
+                        ],
+                        "line_number": 36
+                    }
+                ],
+                "start": 34
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 39
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 40
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1
+                        ],
+                        "line_number": 41
+                    }
+                ],
+                "start": 39
+            }
         },
-        "expected":
         {
-            "start":39,
-            "line": [
-                {
-                    "line_number": 39, 
-                    "char_number":[ 0, 1, 2, 3, 4 ]
-                }, {
-                    "line_number": 40, 
-                    "char_number":[ 0, 2, 3, 4 ]
-                }, {
-                    "line_number": 41, 
-                    "char_number":[ 0, 1 ]
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 38,
-            "line": [
-                {
-                    "line_number": 38
-                }, {
-                    "line_number": 39
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            5
+                        ],
+                        "line_number": 38
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            4
+                        ],
+                        "line_number": 39
+                    }
+                ],
+                "start": 38
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 43
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            6
+                        ],
+                        "line_number": 44
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            6
+                        ],
+                        "line_number": 45
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 46
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 47
+                    }
+                ],
+                "start": 43
+            }
         },
-        "expected":
         {
-            "start":43,
-            "line": [
-                {
-                    "line_number": 43
-                }, {
-                    "line_number": 44
-                }, {
-                    "line_number": 45
-                }, {
-                    "line_number": 46
-                }, {
-                    "line_number": 47
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 40
+            "actual": {
+                "start": 40
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 49
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 50
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 51
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                        ],
+                        "line_number": 52
+                    }
+                ],
+                "start": 49
+            }
         },
-        "expected":
         {
-            "start":49,
-            "line": [
-                {
-                    "line_number": 49
-                }, {
-                    "line_number": 50
-                }, {
-                    "line_number": 51
-                }, {
-                    "line_number": 52
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 42,
-            "line": [
-                {
-                    "line_number": 42
-                }, {
-                    "line_number": 43
-                }, {
-                    "line_number": 44
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            5,
+                            6
+                        ],
+                        "line_number": 42
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            8
+                        ],
+                        "line_number": 43
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 44
+                    }
+                ],
+                "start": 42
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 54
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            5,
+                            6,
+                            7,
+                            8
+                        ],
+                        "line_number": 55
+                    },
+                    {
+                        "char_number": [
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 56
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 57
+                    }
+                ],
+                "start": 54
+            }
         },
-        "expected":
         {
-            "start":54,
-            "line": [
-                {
-                    "line_number": 54
-                }, {
-                    "line_number": 55
-                }, {
-                    "line_number": 56
-                }, {
-                    "line_number": 57
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 46,
-            "line": [
-                {
-                    "line_number": 46
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            2,
+                            4
+                        ],
+                        "line_number": 46
+                    }
+                ],
+                "start": 46
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 59
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 60
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 61
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            5
+                        ],
+                        "line_number": 62
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 63
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 64
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 65
+                    }
+                ],
+                "start": 59
+            }
         },
-        "expected":
         {
-            "start":59,
-            "line": [
-                {
-                    "line_number": 59
-                }, {
-                    "line_number": 60
-                }, {
-                    "line_number": 61
-                }, {
-                    "line_number": 62
-                }, {
-                    "line_number": 63
-                }, {
-                    "line_number": 64
-                }, {
-                    "line_number": 65
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 48,
-            "line": [
-                {
-                    "line_number": 48
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0
+                        ],
+                        "line_number": 48
+                    }
+                ],
+                "start": 48
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 67
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 68
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 69
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 70
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            6,
+                            8
+                        ],
+                        "line_number": 71
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 72
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 73
+                    }
+                ],
+                "start": 67
+            }
         },
-        "expected":
         {
-            "start":67,
-            "line": [
-                {
-                    "line_number": 67
-                }, {
-                    "line_number": 68
-                }, {
-                    "line_number": 69
-                }, {
-                    "line_number": 70
-                }, {
-                    "line_number": 71
-                }, {
-                    "line_number": 72
-                }, {
-                    "line_number": 73
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 50,
-            "line": [
-                {
-                    "line_number": 50
-                }, {
-                    "line_number": 51
-                }, {
-                    "line_number": 52
-                }, {
-                    "line_number": 53
-                }, {
-                    "line_number": 54
-                }, {
-                    "line_number": 55
-                }, {
-                    "line_number": 56
-                }, {
-                    "line_number": 57
-                }, {
-                    "line_number": 58
-                }, {
-                    "line_number": 59
-                }, {
-                    "line_number": 60
-                }, {
-                    "line_number": 61
-                }, {
-                    "line_number": 62
-                }, {
-                    "line_number": 63
-                }, {
-                    "line_number": 64
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 50
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 51
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 52
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 53
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 54
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 55
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 56
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 57
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 58
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 59
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 60
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 61
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 62
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 63
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10
+                        ],
+                        "line_number": 64
+                    }
+                ],
+                "start": 50
+            },
+            "expected": {
+                "start": 74
+            }
         },
-        "expected":
         {
-            "start":74
-        }
-    }, {
-        "actual":
-        {
-            "start": 65
+            "actual": {
+                "start": 65
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 76
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 77
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                        ],
+                        "line_number": 78
+                    }
+                ],
+                "start": 76
+            }
         },
-        "expected":
         {
-            "start":76,
-            "line": [
-                {
-                    "line_number": 76
-                }, {
-                    "line_number": 77
-                }, {
-                    "line_number": 78
-                }
-            ]
-        }
-    }, {
-        "actual":
-        {
-            "start": 67,
-            "line": [
-                {
-                    "line_number": 67
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            6,
+                            8
+                        ],
+                        "line_number": 67
+                    }
+                ],
+                "start": 67
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 80
+                    },
+                    {
+                        "char_number": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 81
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10
+                        ],
+                        "line_number": 82
+                    }
+                ],
+                "start": 80
+            }
         },
-        "expected":
         {
-            "start":80,
-            "line": [
-                {
-                    "line_number": 80
-                }, {
-                    "line_number": 81
-                }, {
-                    "line_number": 82
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            5,
+                            7
+                        ],
+                        "line_number": 69
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 70
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 71
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 72
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 73
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 74
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 75
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 76
+                    },
+                    {
+                        "char_number": [
+                            1,
+                            2,
+                            3,
+                            5,
+                            6,
+                            7
+                        ],
+                        "line_number": 77
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 78
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 79
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 80
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 81
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 82
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 83
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            4,
+                            5,
+                            6,
+                            7,
+                            9,
+                            10
+                        ],
+                        "line_number": 84
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            7
+                        ],
+                        "line_number": 85
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 86
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ],
+                        "line_number": 87
+                    },
+                    {
+                        "char_number": [
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "line_number": 88
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16,
+                            17,
+                            18,
+                            19,
+                            20,
+                            21,
+                            22,
+                            23,
+                            24,
+                            25
+                        ],
+                        "line_number": 89
+                    }
+                ],
+                "start": 69
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            3
+                        ],
+                        "line_number": 84
+                    },
+                    {
+                        "char_number": [
+                            0
+                        ],
+                        "line_number": 85
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            2,
+                            5,
+                            7
+                        ],
+                        "line_number": 86
+                    }
+                ],
+                "start": 84
+            }
         }
-    }, {
-        "actual":
-        {
-            "start": 69,
-            "line": [
-                {
-                    "line_number": 69
-                }, {
-                    "line_number": 70
-                }, {
-                    "line_number": 71
-                }, {
-                    "line_number": 72
-                }, {
-                    "line_number": 73
-                }, {
-                    "line_number": 74
-                }, {
-                    "line_number": 75
-                }, {
-                    "line_number": 76
-                }, {
-                    "line_number": 77
-                }, {
-                    "line_number": 78
-                }, {
-                    "line_number": 79
-                }, {
-                    "line_number": 80
-                }, {
-                    "line_number": 81
-                }, {
-                    "line_number": 82
-                }, {
-                    "line_number": 83
-                }, {
-                    "line_number": 84
-                }, {
-                    "line_number": 85
-                }, {
-                    "line_number": 86
-                }, {
-                    "line_number": 87
-                }, {
-                    "line_number": 88
-                }, {
-                    "line_number": 89
-                }
-            ]
-        },
-        "expected":
-        {
-            "start":84,
-            "line": [
-                {
-                    "line_number": 84
-                }, {
-                    "line_number": 85
-                }, {
-                    "line_number": 86
-                }
-            ]
-        }
-    }
-]
+    ]
 }

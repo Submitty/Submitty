@@ -16,6 +16,7 @@ set (GRADINGCODE ${SUBMITTY_INSTALL_DIR}/src)
 add_library(submitty_grading
   ${GRADINGCODE}/grading/TestCase.cpp 
   ${GRADINGCODE}/grading/JUnitGrader.cpp
+  ${GRADINGCODE}/grading/DrMemoryGrader.cpp
   ${GRADINGCODE}/grading/PacmanGrader.cpp
   ${GRADINGCODE}/grading/myersDiff.cpp 
   ${GRADINGCODE}/grading/tokens.cpp 
@@ -26,11 +27,12 @@ add_library(submitty_grading
   ${GRADINGCODE}/grading/execute.cpp 
   ${GRADINGCODE}/grading/execute_limits.cpp 
   ${GRADINGCODE}/grading/error_message.cpp
+  ${GRADINGCODE}/grading/window_utils.cpp
 )
 
 ###################################################################################
 
-target_link_libraries(submitty_grading seccomp)
+target_link_libraries(submitty_grading seccomp boost_system boost_filesystem)
 
 set_property(TARGET submitty_grading APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
 

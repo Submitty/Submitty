@@ -7,7 +7,7 @@ std::vector<std::pair<std::string,Benchmark> > DISPLAY_BENCHMARKS;
 int Benchmark::next_benchmark_position = 0;
 
 int FIND_BENCHMARK(const std::string& s) {
-  for (int i = 0; i < DISPLAY_BENCHMARKS.size(); i++) {
+  for (std::size_t i = 0; i < DISPLAY_BENCHMARKS.size(); i++) {
     if (DISPLAY_BENCHMARKS[i].first == s) return i;
   }
   return -1;
@@ -64,7 +64,7 @@ int NumVisibleBenchmarks() {
 }
 
 int WhichVisibleBenchmark(const std::string& s) {
-  for (int i = 0; i < DISPLAY_BENCHMARKS.size(); i++) {
+  for (std::size_t i = 0; i < DISPLAY_BENCHMARKS.size(); i++) {
     if (DISPLAY_BENCHMARKS[i].first == s) { return DISPLAY_BENCHMARKS[i].second.position; }
   }
   return -1;
@@ -76,7 +76,7 @@ void SetBenchmarkPercentage(const std::string& s, float v) {
           s == "lowest_c-" ||
           s == "lowest_d");
   Benchmark& b = Benchmark::GetBenchmark(s);
-  assert (v >= 0.0 & v <= 1.0);
+  assert (v >= 0.0 && v <= 1.0);
   b.percentage = v;
 }
 

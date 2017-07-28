@@ -1,0 +1,83 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 2,
+            "test_name": "Test 1 Java - Compilation"
+        },
+        {
+            "points_awarded": 2,
+            "test_name": "Test 2 Java - Student and Instructor JUnit Test Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03_STDOUT.txt",
+                    "description": "JUnit EMMA instrumentation output"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 3 Java - Instrumentation of Student Code"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04_STDOUT.txt",
+                    "description": "TestRunner output",
+                    "messages": [
+                        {
+                            "message": "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 4 Java - Running Student JUnit Tests in hw0/tests/"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test05_STDOUT.txt",
+                    "description": "EclEmma report generation output"
+                },
+                {
+                    "actual_file": "test05_emma_report.txt",
+                    "description": "JUnit EMMA coverage report",
+                    "messages": [
+                        {
+                            "message": "ERROR: Insuffficient block coverage below threshold for... hw0 (55/90 = 0.611111)",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Test 5 Java - Generating Coverage Report for Student Tests"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test06_STDOUT.txt",
+                    "description": "JUnit output",
+                    "messages": [
+                        {
+                            "message": "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test06_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 6 Java - Instructor JUnit Tests"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 7 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

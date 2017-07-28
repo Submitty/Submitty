@@ -1,3 +1,0 @@
-Solution to equation x^2 + 5x + 6 = 0:
-x1 = -2.0
-x2 = -3.0

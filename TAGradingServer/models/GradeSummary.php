@@ -10,6 +10,7 @@ class GradeSummary
         SELECT 
             g_syllabus_bucket, 
             g_title, 
+            g_grade_released_date,
             g_gradeable_type, 
             g.g_id, 
             u.user_id,
@@ -101,6 +102,7 @@ class GradeSummary
 
         $this_g["id"] = $gradeable['g_id'];
         $this_g["name"] =  $gradeable['g_title'];
+        $this_g["grade_released_date"] = $gradeable['g_grade_released_date'];
 
         // TODO: DEPRECATE THIS FIELD
         $this_g["score"] = max(0,(floatval($gradeable['score'])+floatval($autograding_score)));

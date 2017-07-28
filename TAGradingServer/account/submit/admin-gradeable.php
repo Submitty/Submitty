@@ -5,6 +5,7 @@
 
 include "../../toolbox/functions.php";
 
+
 check_administrator();
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
@@ -16,7 +17,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
      protected $g_title;
      protected $g_instructions_url;
      protected $g_overall_ta_instr;
-     protected $g_use_teams;
+     protected $g_team_assignment;
      protected $g_gradeable_type;
      protected $g_min_grading_group;
      protected $g_grade_by_registration;
@@ -30,7 +31,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
          $this->g_title = $params['gradeable_title'];
          $this->g_instructions_url = $params['instructions_url'];
          $this->g_overall_ta_instr = $params['ta_instructions'];
-         $this->g_use_teams = $params['team_assignment'];
+         $this->g_team_assignment = $params['team_assignment'];
          $this->g_gradeable_type = $params['gradeable_type'];
          $this->g_min_grading_group= $params['min_grading_group'];
          $this->g_grade_by_registration = $params['section_type'];
@@ -44,7 +45,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
       * @param \lib\Database $db
       */
     function updateGradeable($db){
-        $params = array($this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, $this->g_gradeable_type,
+        $params = array($this->g_title, $this->g_overall_ta_instr, $this->g_team_assignment, $this->g_gradeable_type,
                         $this->g_grade_by_registration, $this->g_grade_start_date, $this->g_grade_released_date,
                         $this->g_syllabus_bucket, $this->g_min_grading_group, $this->g_instructions_url,
                         $this->g_ta_view_start_date , $this->g_id);
@@ -62,7 +63,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
             $this->g_title,
             $this->g_instructions_url,
             $this->g_overall_ta_instr,
-            $this->g_use_teams,
+            $this->g_team_assignment,
             $this->g_gradeable_type,
             $this->g_grade_by_registration,
             $this->g_ta_view_start_date,
@@ -130,6 +131,10 @@ INSERT INTO gradeable(
     function get_GID(){
         return $this->g_id;
     }
+
+    function getType(){
+        return $this->g_gradeable_type;
+    }
     
      /**
       * @param \lib\Database $db
@@ -157,7 +162,7 @@ INSERT INTO gradeable(
     private $config_path;
     private $late_days;
     private $point_precision;
-    
+
      function __construct($params){
          parent::__construct($params);
          $this->date_submit = $params['date_submit'];
@@ -338,7 +343,7 @@ function constructGradeable ($db, $request_args){
     $g_title = $request_args['gradeable_title'];
     $g_instructions_url = $request_args['instructions_url'];
     $g_overall_ta_instr = $request_args['ta_instructions'];
-    $g_use_teams = (isset($request_args['team_assignment']) && $request_args['team_assignment'] === 'yes') ? "true" : "false";
+    $g_team_assignment = (isset($request_args['team_assignment']) && $request_args['team_assignment'] === 'yes') ? "true" : "false";
     $g_min_grading_group=(isset($request_args['minimum_grading_group'])) ? intval($request_args['minimum_grading_group']) : 1;
     $g_grade_by_registration = (isset($request_args['section_type']) && $request_args['section_type'] === 'reg_section') ? "true" : "false";
     $g_ta_view_start_date = $request_args['date_ta_view'];
@@ -351,7 +356,7 @@ function constructGradeable ($db, $request_args){
         'gradeable_title' => $g_title,
         'instructions_url' => $g_instructions_url,
         'ta_instructions' => $g_overall_ta_instr,
-        'team_assignment' => $g_use_teams,
+        'team_assignment' => $g_team_assignment,
         'min_grading_group' => $g_min_grading_group,
         'section_type' => $g_grade_by_registration,
         'date_grade' => $g_grade_start_date,
@@ -387,7 +392,8 @@ function constructGradeable ($db, $request_args){
             $g_constructor_params['date_grade'] = $g_grade_released_date;
         }
 
-        $is_repo = ($request_args['upload_type'] == 'Repository')? "true" : "false";
+        //$is_repo = ($request_args['upload_type'] == 'Repository')? "true" : "false";
+        $is_repo = "false";
         $subdirectory = (isset($request_args['subdirectory']) && $is_repo == "true")? $request_args['subdirectory'] : '';
 
         $config_path = $request_args['config_path'];
@@ -469,6 +475,8 @@ if ($action != 'import'){
     
     $db->commit();
     writeFormJSON($_POST['gradeable_id'],$_POST['gradeableJSON']);
+
+
 }
 // batch update or create
 else{
@@ -493,7 +501,27 @@ else{
             $gradeable->createGradeable($db);
             
             foreach($request_args AS $k=>$v){
-                if (is_array($v)){
+                if($k == 'checkpoints'){
+                    for($i=1; $i<=count($v);++$i){
+                       $request_args['checkpoint_label_' + $i] = $v[$i-1]['label']; 
+                       $request_args['checkpoint_extra_' + $i] = $v[$i-1]['extra_credit'];
+                    }
+                }
+                else if ($k == 'text_questions'){
+                    $request_args['num_text_items'] = count($v);
+                    for($i=1; $i<=count($v);++$i){
+                        $request_args['text_label_'+$i] = $v[$i-1]['label'];
+                    }
+                }
+                else if ($k == 'numeric_questions'){
+                    $request_args['num_numeric_items'] = count($v);
+                    for($i=1; $i<=count($v);++$i){
+                        $request_args['numeric_label_' + $i] = $v[$i-1]['label'];
+                        $request_args['max_score_' + $i] = $v[$i-1]['max_score'];
+                        $request_args['numeric_extra_' + $i] = $v[$i-1]['extra_credit'];
+                    }
+                }
+                else if (is_array($v)){
                     if (strpos($k, '_extra') !== false){
                         for($i=1; $i<= count($v); ++$i){
                            $request_args[$k.'_'.intval($v[$i-1])] = "";
@@ -536,6 +564,30 @@ else{
     }
 
 }
+
+
+// -------------------------------------------------------
+// Create the a file to launch a rebuild of this course/gradeable...
+
+if ($gradeable->getType() == 0) {  // is an electronic gradeable
+
+  // FIXME:  should use a variable intead of hardcoded top level path
+  $config_build_file = "/var/local/submitty/to_be_built/".__COURSE_SEMESTER__."__".__COURSE_CODE__."__".$_POST['gradeable_id'].".json";
+
+  $config_build_data = array("semester" => __COURSE_SEMESTER__,
+                             "course" => __COURSE_CODE__,
+                             "gradeable" =>  $_POST['gradeable_id']);
+
+  if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+    die("Failed to write file {$config_build_file}");
+  }
+
+}
+
+
+// -------------------------------------------------------
+
+
 
 if($action != 'import'){
   header('Location: '.__SUBMISSION_URL__.'/index.php?semester='.__COURSE_SEMESTER__.'&course='.__COURSE_CODE__);

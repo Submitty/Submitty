@@ -37,7 +37,7 @@ public:
 
   // -------------------------------
   // CONSTRUCTOR
-  TestCase (nlohmann::json& input);
+  TestCase (nlohmann::json& input,const nlohmann::json &whole_config);
 
   void General_Helper();
   void FileCheck_Helper();
@@ -54,6 +54,7 @@ public:
   int getPoints() const { return _json.value("points", 0); }
   bool getHidden() const { return _json.value("hidden", false); }
   bool getExtraCredit() const { return _json.value("extra_credit",false); }
+  bool viewTestcaseMessage() const { return _json.value("view_testcase_message",true); }
 
   bool isFileCheck() const { return _json.value("type","Execution") == "FileCheck"; }
   bool isCompilation() const { return _json.value("type","Execution") == "Compilation"; }
@@ -89,7 +90,8 @@ public:
 
   // -------------------------------
   // GRADING & GRADERS
-  TestResults* do_the_grading (int j) const;
+  TestResultsFixedSize do_the_grading (int j) const;
+
   int numFileGraders() const {
     const nlohmann::json::const_iterator itr = _json.find("validation");
     if (itr == _json.end()) return 0;
@@ -107,11 +109,13 @@ public:
 
   static void reset_next_test_case_id() { next_test_case_id = 1; }
 
+  bool ShowExecuteLogfile(const std::string &execute_logfile) const;
+
 private:
 
   // -------------------------------
   // PRIVATE HELPER FUNCTIONS
-  TestResults* dispatch(const nlohmann::json& grader) const;
+  TestResults* dispatch(const nlohmann::json& grader, int autocheck_number) const;
   TestResults* custom_dispatch(const nlohmann::json& grader) const;
 
   // -------------------------------
@@ -137,8 +141,10 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json);
 std::string getAssignmentIdFromCurrentDirectory(std::string);
 
 bool getFileContents(const std::string &filename, std::string &file_contents);
-bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::vector<std::string> &messages);
-bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, std::vector<std::string> &messages);
+bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents,
+                     std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages);
+bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents,
+                      std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages);
 
 void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty);
 

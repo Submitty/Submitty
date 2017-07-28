@@ -1,13 +1,13 @@
 <div class='diff-container'><div class='diff-code'>
 	<div><span class='line_number'>1</span><span class='line_code'>Height==&gt; 4</span></div>
 	<div><span class='line_number'>2</span><span class='line_code'>Width==&gt; 15</span></div>
-	<div class='highlight' id="id_actual_0">
+	<div class='highlight' id='id_actual_0'>
 	<div class='bad'><span class='line_number'>3</span><span class='line_code'><span class='line_code_inner'>***************  </span></span></div>
 	<div class='bad'><span class='line_number'>4</span><span class='line_code'><span class='line_code_inner'>* h: 4, w: 15 * </span></span></div>
 	<div class='bad'><span class='line_number'>5</span><span class='line_code'><span class='line_code_inner'>* area: 60    *  </span></span></div>
 	</div>
 	<div><span class='line_number'>6</span><span class='line_code'>***************</span></div>
-	<div class='highlight' id="id_actual_1">
+	<div class='highlight' id='id_actual_1'>
 	<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>
 	<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>
 	<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>

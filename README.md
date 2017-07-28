@@ -1,26 +1,41 @@
-System instructions here: [HOME](https://github.com/Submitty/Submitty/wiki)
+<img src="http://submitty.org/images/submitty_logo.png" alt="Submitty Logo" style="width: 500px;"/>
 
 [![Build Status](https://travis-ci.org/Submitty/Submitty.svg?branch=master)](https://travis-ci.org/Submitty/Submitty)
 
-# BACKGROUND
+# Usage
 
-The homework server started out as a simple server for uploading student assignments for courses like Data Structures (CSCI 1200) and Computer Science I (CSCI 1100) at [Rensselaer Polytechnic Institute (RPI)](http://rpi.edu/). Over time, the server has evolved and gained features for submission and grading which are used today for supporting more than 500 students at times for weekly homework. Because of the way the server is currently designed, creating scripts for grading homework and regrading homework are possible but require a significant amount of time for instructors. The server is currently managed by RPI lab staff and Professor Cutler from the Computer Science department. The goal of the project is to research and create algorithms to effectively grade different types of homework based on student output on submission. We will accomplish this by creating a modularized system for grading that improves the ability to create homework assignments on the server and by reducing the number of custom scripts required. Improvements to the server’s user interface will also be made to the student side to allow student to more effectively view their grades on assignment and improve the ability to submit homework.
+System instructions located at http://submitty.org/
 
-In Spring 2016 the server was renamed to Submitty. 
+# Background
+
+Submitty is an open source programming assignment submission system
+from the 
+[Rensselaer Center for Open Source Software (RCOS)](https://rcos.io/), launched
+by the [Department of Computer Science](http://www.cs.rpi.edu/) at 
+[Rensselaer Polytechnic Institute (RPI)](http://rpi.edu/).
+The Submitty project is hosted on [GitHub](https://github.com/Submitty).
+
+
+# Key Features
+
+* Secure testing of many languages: Python, C/C++, Java, Scheme, Prolog, SPIM, and anything available on GNU / Linux!
+* Customizable automated grading with immediate feedback to students
+* Advanced grading tools: static analysis, JUnit, code coverage, memory debuggers, etc.
+* Student upload by drag-and-drop, zip upload, or version control
+* Correct mistakes through multiple submissions, flexible ``late day’’ policy, hidden tests
+* Interface for complementary instructor/TA manual grading, overall grade summaries
+* Instructors have full access to logs for debugging, launch batch regrading
+* Scales to multiple courses with thousands of students
+* Supports multiple instructors and TAs per course
+* Open-source, free to use, install on your own hardware, or VPS
+
+
+# Contact Us
+
+If you have a question or would like access to our demo site, please contact us at submitty@cs.rpi.edu.
+
 
 ### LICENSING
-All non-RPI specific parts of the homework server are under the BSD "3-Clause" License.
-
-### TECHNOLOGIES USED
-The following technologies will be used in the project:
-*	C++ (Autograding algorithms portion and Security)
-*	HTML, CSS, PHP (Frontend)
-* 	Bash, Make (Backend/Setup Scripts)
-
-### GOALS
-*	Establish a test server for running previous homework submissions on new algorithms
-*	Clean out bloat-code, tidy up existing code, and comment
-*	Develop a set of algorithms that can become modules for the instructor to use without having to write custom scripts
-*	Improve UX for the Instructor when creating homework assignments.
-*	Improve the UX for students when reviewing past homework submissions and homework submission workflow
+Submitty is licensed under BSD "3-Clause" which can be viewed in [LICENSE](LICENSE.md)  
+Licenses for the 3rd party components can be viewed in [LICENSE-THIRD-PARTY](LICENSE-THIRD-PARTY.md)
 

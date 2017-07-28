@@ -14,8 +14,8 @@
    It was published in the journal "Algorithmica" in November 1986.
 
    Code similar to:
-   		http://simplygenius.net/Article/DiffTutorial1
- 		FIXME: if this was the source, should be formally credited
+      http://simplygenius.net/Article/DiffTutorial1
+    FIXME: if this was the source, should be formally credited
         (or are both just coming from the paper's pseudocode)
  */
 
@@ -52,12 +52,11 @@ TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* warnIfEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 
+TestResults* ImageDiff_doit (const TestCase &tc, const nlohmann::json& j, int autocheck_num);
 TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::json& j);
-TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc, const nlohmann::json& j);
-
 
 TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j);
 

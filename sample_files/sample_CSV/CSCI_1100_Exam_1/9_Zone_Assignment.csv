@@ -1,0 +1,7 @@
+Question ID,Name,SID,Email,Zone,Score,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Z,AA,Adjustment,Comments,Grader
+14782436,EXAMPLE STUDENT,EXAMPLE_RCS,EXAMPLE_RCS@rpi.edu,Z,0.0,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,,"",Jason Parham
+
+
+Point Values,,,,,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Rubric Numbers,,,,,,9.1,9.2,9.3,9.4,9.5,9.6,9.7,9.8,9.9,9.10,9.11,9.12,9.13,9.14,9.15,9.16
+Rubric Type,negative

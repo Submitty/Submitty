@@ -1,0 +1,29 @@
+{
+    "autograding" : {
+        "submission_to_runner" : [ "*.cpp" ]
+    },
+    "testcases" : 
+    [
+        // *************** COMPILATION *****************
+        {
+            "title" : "Reasonable Code Changes",
+            "command" : "cat *.cpp",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLinebyChar",
+                    "min_char_changes" : 75,
+                    "max_char_changes" : 125,
+                    "ignore_line_endings" : true,
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "fancy_hello_world.cpp",
+                    "show_expected" : "always",
+                    "show_actual" : "always",
+                    "show_message" : "always"/*,
+                    "failure_message" : "Source code changes are outside the allowed range"*/
+                }
+            ]
+        }
+    ]
+}
+

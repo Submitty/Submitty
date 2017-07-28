@@ -23,6 +23,7 @@ nlohmann::json printTestCase(TestCase test) {
   j["points"] = test.getPoints();
   j["extra_credit"] = test.getExtraCredit();
   j["hidden"] = test.getHidden();
+  j["view_testcase_message"] = test.viewTestcaseMessage();
 
   // THESE ELEMENTS ARE DEPRECATED / NEED TO BE REPLACED
   j["view_file_results"] = true;
@@ -31,12 +32,37 @@ nlohmann::json printTestCase(TestCase test) {
   return j;
 }
 
+void AddAutogradingConfiguration(nlohmann::json &whole_config) {
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cpp");
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.c");
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.h");
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.java");
+
+  whole_config["autograding"]["submission_to_runner"].push_back("**/*.py");
+  whole_config["autograding"]["submission_to_runner"].push_back("**/*.pdf");
+
+  whole_config["autograding"]["compilation_to_runner"].push_back("**/*.out");
+  whole_config["autograding"]["compilation_to_runner"].push_back("**/*.class");
+
+  whole_config["autograding"]["compilation_to_validation"].push_back("test*.txt");
+
+  whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
+  whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
+
+  whole_config["autograding"]["work_to_details"].push_back("test*.txt");
+  whole_config["autograding"]["work_to_details"].push_back("test*_diff.json");
+  whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
+}
+
+
 int main(int argc, char *argv[]) {
 
   nlohmann::json config_json;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
   AddSubmissionLimitTestCase(config_json);
+
+  AddAutogradingConfiguration(config_json);
 
   nlohmann::json j;
 
@@ -70,7 +96,7 @@ int main(int argc, char *argv[]) {
       if (!hidden)
         visible += points;
     }
-    TestCase tc(*itr);
+    TestCase tc(*itr,config_json);
     if (tc.isSubmissionLimit()) {
       max_submissions = tc.getMaxSubmissions();
     }
@@ -91,17 +117,17 @@ int main(int argc, char *argv[]) {
 
   if (total_nonec != AUTO_POINTS) {
     std::cout << "\n" << start_red_text << "ERROR: Automated Points do not match testcases." << total_nonec 
-	      << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
+        << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
     return 1;
   }
   if (total_ec != EXTRA_CREDIT_POINTS) {
     std::cout << "\n" << start_red_text << "ERROR: Extra Credit Points do not match testcases." << total_ec 
-	      << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
+        << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
     return 1;
   }
   if (total_nonec + TA_POINTS != TOTAL_POINTS) {
     std::cout << "\n" << start_red_text << "ERROR: Automated Points and TA Points do not match total." 
-	      << end_red_text << "\n" << std::endl;
+        << end_red_text << "\n" << std::endl;
     return 1;
   }
 
@@ -113,6 +139,14 @@ int main(int argc, char *argv[]) {
   j["id"] = id;
   if (config_json.find("assignment_message") != config_json.end()) {
     j["assignment_message"] = config_json.value("assignment_message",""); 
+  }
+  if (config_json.find("conditional_message") != config_json.end()) {
+    nlohmann::json conditional_message = config_json.value("conditional_message",nlohmann::json::object());
+    nlohmann::json cond;
+    cond["message"] = conditional_message.value("message","");
+    cond["minimum_days_early"] = conditional_message.value("minimum_days_early",0);
+    cond["minimum_points"] = conditional_message.value("minimum_points",0);
+    j["conditional_message"] = cond; 
   }
   j["max_submissions"] = max_submissions;
   j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
@@ -137,6 +171,8 @@ int main(int argc, char *argv[]) {
       textbox["rows"]  = (*textboxes)[i].value("rows",0);
       assert (int(textbox["rows"]) >= 0);
       textbox["filename"] = (*textboxes)[i].value("filename","textbox_"+std::to_string(i)+".txt");
+      //list of images to display above the text box
+      textbox["images"] = (*textboxes)[i].value("images", nlohmann::json::array({}));
       j["textboxes"].push_back(textbox);
     }
   }
@@ -166,7 +202,7 @@ int main(int argc, char *argv[]) {
 
   if (!init.is_open()) {
     std::cout << "\n" << start_red_text << "ERROR: unable to open new file for initialization... Now Exiting" 
-	      << end_red_text << "\n" << std::endl;
+        << end_red_text << "\n" << std::endl;
     return 0;
   }
 

@@ -17,20 +17,21 @@ use app\libraries\FileUtils;
  */
 class PamAuthentication extends AbstractAuthentication {
     public function authenticate() {
-        if (!FileUtils::createDir("/tmp/pam")) {
-            throw new AuthenticationException("Could not create tmp PAM directory.");
+        $user = $this->core->getQueries()->getSubmittyUser($this->user_id);
+        if ($user === null) {
+            return false;
         }
 
         do {
             $file = md5(uniqid(rand(), true));
-        } while (file_exists("/tmp/{$file}"));
+        } while (file_exists(FileUtils::joinPaths("/tmp", $file)));
 
         $contents = json_encode(array('username' => $this->user_id, 'password' => $this->password));
-        if (file_put_contents("/tmp/{$file}", $contents) === false) {
+        if (file_put_contents(FileUtils::joinPaths("/tmp", $file), $contents) === false) {
             throw new AuthenticationException("Could not create tmp user PAM file.");
         }
         register_shutdown_function(function() use ($file) {
-            unlink("/tmp/{$file}");
+            unlink(FileUtils::joinPaths("/tmp", $file));
         });
 
         // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
@@ -55,8 +56,7 @@ class PamAuthentication extends AbstractAuthentication {
         else if ($output['authenticated'] !== true) {
             return false;
         }
-        
-        $this->core->loadUser($this->user_id);
-        return $this->core->userLoaded();
+
+        return true;
     }
 }

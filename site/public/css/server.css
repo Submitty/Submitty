@@ -178,7 +178,7 @@ table tr.table-header {
 }
 
 .table-striped>tbody>tr:nth-child(even) {
-    background: #f9f9f9;
+    background: #ededed;
 }
 
 .table-striped>tbody>tr:nth-child(odd) {
@@ -204,6 +204,10 @@ table tr.table-header {
 .floating-header > td {
     display: table-cell;
     text-align: center;
+}
+
+.tr-vertically-centered > td {
+    vertical-align: middle;
 }
 
 /**********************************************************/
@@ -334,8 +338,13 @@ table tr.table-header {
     margin: 2% 15px;
 }
 
+.content h2 {
+    margin-bottom: 20px;
+}
+
 #footer {
     margin-top: 30px;
+    z-index: 9999;
 }
 
 #push, #footer {
@@ -476,6 +485,21 @@ table tr.table-header {
     width: 95%;
 }
 
+.option-small-input > textarea,
+.option-small-input > input[type="text"] {
+    width: 99%;
+    padding-right: 1px;
+    padding-left: 1px;
+}
+
+.option-small-output > input[type="text"] {
+    width: 99%;
+    padding-right: 1px;
+    padding-left: 1px;
+    border:none;
+    background: transparent;
+}
+
 .post-panel-btn {
     height: 20px;
     padding-right: 10px;
@@ -506,9 +530,28 @@ table tr.table-header {
     color: #008800;
 }
 
+.blue-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #0a6496;
+}
+
 .red-message {
     font-style: italic;
+    font-weight: bold;
     color: #af0000;
+}
+
+.yellow-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #eac73d;
+}
+
+.black-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #000000;
 }
 
 .sub-text {
@@ -680,6 +723,13 @@ table .instructor .two-options{
     float: right;
 }
 
+.btn-nav {
+    width:100%;
+    padding: 0px !important; 
+    padding-top: 10px !important; 
+    padding-bottom: 10px !important;
+}
+
 .rainbow {
     background: -moz-linear-gradient( left ,
     rgba(255, 0, 0, 1) 0%,
@@ -699,7 +749,7 @@ table .instructor .two-options{
     color-stop(100%, rgba(255, 0, 0, 0.4)));
 }
 
-#edit-user-form {
+.popup-form {
     z-index: 2000;
     position: fixed;
     top: 10%;
@@ -713,7 +763,7 @@ table .instructor .two-options{
     display: none;
 }
 
-#edit-user-form div {
+.popup-form div {
     width: 30%;
     display: inline-block;
     vertical-align: top;
@@ -721,6 +771,62 @@ table .instructor .two-options{
     padding-bottom: 10px;
 }
 
-#edit-user-form > div > input[type="text"] {
+.popup-form > div > input[type="text"] {
     width: 95%;
+}
+
+.cell-all,
+.cell-grade {
+    cursor: pointer;
+}
+
+.cell-grade {
+    border-left: 1px solid #dddddd;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.late-box {
+    background:#d9534f;
+    padding:3px;
+    margin-top:3px;
+    margin-bottom:3px;
+    margin-left:5%;
+    margin-right:5%;
+    border-radius:4px;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 220px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    margin-left: -240px;
+    margin-top: -35px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 40%;
+    right: -4%;
+    border: 5px solid transparent;
+    border-left-color: #555;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
 }

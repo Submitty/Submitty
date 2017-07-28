@@ -13,6 +13,9 @@ class StudentController extends AbstractController {
             case 'rainbow':
                 $controller = new student\RainbowGradesController($this->core);
                 break;
+            case 'team':
+                $controller = new student\TeamController($this->core);
+                break;
             case 'submission':
             default:
                 $controller = new student\SubmissionController($this->core);

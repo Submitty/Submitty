@@ -1,0 +1,73 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 2,
+            "test_name": "Test 1 Java - Compilation"
+        },
+        {
+            "points_awarded": 2,
+            "test_name": "Test 2 Java - Student and Instructor JUnit Test Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03_STDOUT.txt",
+                    "description": "JUnit EMMA instrumentation output"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 3 Java - Instrumentation of Student Code"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04_STDOUT.txt",
+                    "description": "TestRunner output"
+                }
+            ],
+            "points_awarded": 4,
+            "test_name": "Test 4 Java - Running Student JUnit Tests in hw0/tests/"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test05_STDOUT.txt",
+                    "description": "EclEmma report generation output"
+                },
+                {
+                    "actual_file": "test05_emma_report.txt",
+                    "description": "JUnit EMMA coverage report",
+                    "messages": [
+                        {
+                            "message": "ERROR: Insuffficient block coverage below threshold for... hw0 (42/90 = 0.466667)",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Test 5 Java - Generating Coverage Report for Student Tests"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test06_STDOUT.txt",
+                    "description": "JUnit output",
+                    "messages": [
+                        {
+                            "message": "ERROR: Number of tests specified in configuration does not match!",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 6 Java - Instructor JUnit Tests"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 7 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

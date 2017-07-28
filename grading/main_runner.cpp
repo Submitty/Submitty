@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 
   CustomizeAutoGrading(rcsid,config_json);
 
-  system("find . -type f");
+  system("find . -type f -exec ls -sh {} +");
 
   // Run each test case and create output files
   nlohmann::json::iterator tc = config_json.find("testcases");
@@ -60,11 +60,12 @@ int main(int argc, char *argv[]) {
     std::cout << "========================================================" << std::endl;
     std::cout << "TEST #" << i+1 << std::endl;
 
-    TestCase my_testcase((*tc)[i]);
+    TestCase my_testcase((*tc)[i],config_json);
 
     if (my_testcase.isFileCheck()) continue;
     if (my_testcase.isCompilation()) continue;
     std::vector<std::string> commands = stringOrArrayOfStrings((*tc)[i],"command");
+    std::vector<std::string> actions  = stringOrArrayOfStrings((*tc)[i],"actions");
     assert (commands.size() > 0);
 
     std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
@@ -87,9 +88,11 @@ int main(int argc, char *argv[]) {
       int exit_no = execute(commands[x] +
                             " 1>" + my_testcase.getPrefix() + "_STDOUT" + which + ".txt" +
                             " 2>" + my_testcase.getPrefix() + "_STDERR" + which + ".txt",
+                            actions,
                             logfile,
                             my_testcase.get_test_case_limits(),
-                            config_json.value("resource_limits",nlohmann::json())); 
+                            config_json.value("resource_limits",nlohmann::json()),
+                            config_json); 
       
     }
     
@@ -105,10 +108,13 @@ int main(int argc, char *argv[]) {
         std::string filename     = my_testcase.getMyPrefixFilename(v,i);
         assert (raw_filename != "");
         if (access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
-          execute ("/bin/mv "+raw_filename+" "+filename,
-                   "/dev/null",
-                   my_testcase.get_test_case_limits(),
-                   config_json.value("resource_limits",nlohmann::json()));
+          std::vector<std::string> actions;
+          execute("/bin/mv "+raw_filename+" "+filename,
+                  actions,
+                  "/dev/null",
+                  my_testcase.get_test_case_limits(),
+                  config_json.value("resource_limits",nlohmann::json()),
+                  config_json);
           std::cout << "RUNNER!  /bin/mv "+raw_filename+" "+filename << std::endl;
         }
       }

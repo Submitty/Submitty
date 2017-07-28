@@ -1,0 +1,123 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "part1/README.txt",
+                    "description": "part1/README.txt"
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Test 1 README"
+        },
+        {
+            "points_awarded": 3,
+            "test_name": "Test 2 Compilation"
+        },
+        {
+            "points_awarded": 2,
+            "test_name": "Test 3 Dummy Compilation testing view_testcase_message"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test04_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_1.txt"
+                }
+            ],
+            "points_awarded": 5,
+            "test_name": "Test 4 non leap year"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test05_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test05_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_2.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 5 leap year"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test06_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test06_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_3.txt"
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Test 6 corner case A"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test07_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test07_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_4.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 7 corner case B"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test08_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test08_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_5.txt"
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 8 corner case C"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test09_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test09_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_6.txt"
+                },
+                {
+                    "actual_file": "test09_STDERR.txt",
+                    "description": "STDERR.txt",
+                    "difference_file": "test09_1_diff.json",
+                    "expected_file": "test_output/testassignment/output_6B.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 9 error case A"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test10_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test10_0_diff.json",
+                    "expected_file": "test_output/testassignment/output_7.txt"
+                },
+                {
+                    "actual_file": "test10_STDERR.txt",
+                    "description": "STDERR.txt",
+                    "difference_file": "test10_1_diff.json",
+                    "expected_file": "test_output/testassignment/output_7B.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 10 error case B"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 11 Submission Limit",
+            "view_testcase": false
+       }
+    ]
+}

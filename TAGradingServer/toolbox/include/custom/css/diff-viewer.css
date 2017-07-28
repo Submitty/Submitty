@@ -1,0 +1,59 @@
+.diff-container {
+    background-color: #F8F8F8;
+    border: 1px solid #ddd;
+    width: 100%;
+}
+
+.diff-code {
+    font-family: monospace;
+}
+
+.diff-code .row {
+    width: 100%;
+}
+
+.diff-code .bad {
+    background-color: #fdffe0;
+}
+
+.diff-code .highlight {
+
+}
+
+.highlight-hover {
+    background-color: #ddf !important;
+}
+
+.highlight-char {
+    background-color: #fe5b5b;
+}
+
+.line_number {
+    color: gray;
+    display: inline-block;
+    min-width: 20px;
+    border-right: 1px solid lightgrey;
+}
+
+.line_number, .line_code {
+    vertical-align: top;
+    max-height: 20px !important;
+    height: 20px !important;
+    font-family: 'Inconsolata', monospace !important;
+    font-size: 16px;
+    line-height: 20px !important;
+    padding: 0 0 0 5px;
+}
+
+.line_code_inner {
+    max-height: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+    padding: 0 !important;
+    overflow-x: scroll !important;
+}
+
+.line_code {
+    white-space: pre;
+    padding-left: 10px;
+}

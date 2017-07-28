@@ -61,18 +61,18 @@ bool ShowHelper(const std::string& when, bool success) {
 }
 
 
-double ValidateGrader(const TestCase &my_testcase, int which_grader,
-                      nlohmann::json &autocheck_js, const std::string &hw_id) {
+double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::json &autocheck_js,
+                      const std::string &hw_id, std::string &testcase_message) {
 
-  //std::cerr << "----------------------------------------" << std::endl;
-  std::cerr << "autocheck #" << which_grader << std::endl;
-  TestResults* result = my_testcase.do_the_grading(which_grader);
-  assert (result != NULL);
+  std::cout << "-------------------------------------------------------------" << std::endl;
+  std::cout << "autocheck #" << which_grader+1 << " / " << my_testcase.numFileGraders() << std::endl;
+
+  TestResultsFixedSize result = my_testcase.do_the_grading(which_grader);
 
   // loop over the student files
   const nlohmann::json& tcg = my_testcase.getGrader(which_grader);
 
-  float grade = result->getGrade();
+  float grade = result.getGrade();
   std::cout << "  grade=" << grade << "  ";
   assert (grade >= 0.0 && grade <= 1.0);
   double deduction = tcg.value("deduction",1.0);
@@ -81,16 +81,19 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
   double score = deduction*(1-grade);
   std::cout << "score=" << score << std::endl;
 
-  bool show_message  = ShowHelper(tcg.value("show_message", "never"),result->getSuccess());
-  bool show_actual   = ShowHelper(tcg.value("show_actual",  "never"),result->getSuccess());
-  bool show_expected = ShowHelper(tcg.value("show_expected","never"),result->getSuccess());
+  int full_points = my_testcase.getPoints();
+  std::cout << "FULL POINTS " << full_points << std::endl;
 
+  //bool test_case_success = (result.getMessages().size() == 0);
+  bool test_case_success = !(deduction > 0.0 && grade < 1.0);
+  bool show_message    = ShowHelper(tcg.value("show_message", "never"),test_case_success);
+  bool show_actual     = ShowHelper(tcg.value("show_actual",  "never"),test_case_success);
+  bool show_image_diff = ShowHelper(tcg.value("show_difference_image",  "never"),test_case_success);
+  bool show_expected   = ShowHelper(tcg.value("show_expected","never"),test_case_success);
   std::string BROKEN_CONFIG_ERROR_MESSAGE;
 
-  //std::cout << "sm=" << show_message << "  sa=" << show_actual << "  se=" << show_expected << std::endl;
-
   if (show_actual == false && show_expected == true) {
-    std::cout << "ERROR show_actual == false & show_expected == true" << std::endl;
+    //std::cout << "ERROR show_actual == false & show_expected == true" << std::endl;
   }
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"actual_file");
@@ -110,12 +113,21 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     if (my_testcase.isCompilation() && autocheck_j.value("description","") == "Create Executable") {
       // MISSING EXECUTABLE
     } else {
-      std::string actual_file = my_testcase.getPrefix() + "_" + filenames[FN];
-      actual_file = replace_slash_with_double_underscore(actual_file);
+      std::string actual_file = filenames[FN];
+      //if (!my_testcase.isFileCheck()) {
+      //  actual_file = my_testcase.getPrefix() + "_" + actual_file;
+      //}
+      //actual_file = replace_slash_with_double_underscore(actual_file);
       std::vector<std::string> files;
+
+      // try with and without the prefix
       wildcard_expansion(files, actual_file, std::cout);
+      if (files.size() == 0) {
+        wildcard_expansion(files, my_testcase.getPrefix() + "_" + actual_file, std::cout);
+      }
       for (int i = 0; i < files.size(); i++) {
-	actual_file = files[i];
+        actual_file = files[i];
+        std::cout << "MATCH " << files[i] << std::endl;
       }
       bool studentFileExists, studentFileEmpty;
       bool expectedFileExists=false, expectedFileEmpty=false;
@@ -124,63 +136,72 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
       if (studentFileExists) {
         if (show_actual) {
           autocheck_j["actual_file"] = actual_file;
-	}
+        }
         expected = tcg.value("expected_file", "");
-	if (expected != "") {
-	  fileStatus(expected, expectedFileExists,expectedFileEmpty);
-	  if (!expectedFileExists) {
-	    BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
-	    std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
-	  }
-	  else {
-	    // PREPARE THE JSON DIFF FILE
-	    std::stringstream diff_path;
-	    diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
-	    std::ofstream diff_stream(diff_path.str().c_str());
-	    result->printJSON(diff_stream);
-	    std::stringstream expected_path;
-	    std::string id = hw_id;
-	    std::string expected_out_dir = "test_output/" + id + "/";
-	    expected_path << expected_out_dir << expected;
-	    if (show_expected) {
-	      autocheck_j["expected_file"] = expected_path.str();
-	    }
-	    if (show_actual) {
-	      autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
-	    }
-	  }
-	}
-      }
-      std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
-      std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
-
-      if (studentFileExists && !studentFileEmpty) {
-	actual_file_to_print = true;
-      }
-    }
-
-
-    std::vector<std::string> messages = result->getMessages();
-
-    if (BROKEN_CONFIG_ERROR_MESSAGE != "") {
-      messages.push_back(BROKEN_CONFIG_ERROR_MESSAGE);
-    }
-
-    std::string fm = tcg.value("failure_message","");
-
-    if (show_message) {
-      bool failure_message_already_added = false;
-      if (FN==0) {
-        for (int m = 0; m < messages.size(); m++) {
-          if (messages[m] != "") {
-            if (messages[m] == fm) failure_message_already_added = true;
-            autocheck_j["messages"].push_back(messages[m]);
+        if (expected != "") {
+          fileStatus(expected, expectedFileExists,expectedFileEmpty);
+          if (!expectedFileExists) {
+            BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
+            std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
+          }
+          else {
+            // PREPARE THE JSON DIFF FILE
+            std::stringstream diff_path;
+            diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
+            std::ofstream diff_stream(diff_path.str().c_str());
+            result.printJSON(diff_stream);
+            std::stringstream expected_path;
+            std::string id = hw_id;
+            std::string expected_out_dir = "test_output/" + id + "/";
+            expected_path << expected_out_dir << expected;
+            if (show_expected) {
+             autocheck_j["expected_file"] = expected_path.str();
+            }
+            if (show_image_diff)
+            {
+              autocheck_j["image_difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_difference.png";
+            }
+            if (show_actual) {
+             autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+            }
           }
         }
       }
 
+      if (studentFileExists && !studentFileEmpty) {
+        actual_file_to_print = true;
+      }
+    }
+
+
+    std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages = result.getMessages();
+
+    if (BROKEN_CONFIG_ERROR_MESSAGE != "") {
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,BROKEN_CONFIG_ERROR_MESSAGE));
+    }
+
+    std::string fm = tcg.value("failure_message","");
+    if (!test_case_success) {
+      bool failure_message_already_added = false;
+      if (FN==0) {
+        for (int m = 0; m < messages.size(); m++) {
+          assert (messages[m].second != "");
+          if (messages[m].second == fm) failure_message_already_added = true;
+          nlohmann::json new_message;
+          new_message["message"] = messages[m].second;
+          if (messages[m].first == MESSAGE_FAILURE) new_message["type"] = "failure";
+          else if (messages[m].first == MESSAGE_WARNING) new_message["type"] = "warning";
+          else if (messages[m].first == MESSAGE_SUCCESS) new_message["type"] = "success";
+          else { assert (messages[m].first == MESSAGE_INFORMATION); new_message["type"] = "information"; }
+          autocheck_j["messages"].push_back(new_message);
+        }
+      }
+
       if (fm != "" && !failure_message_already_added) {
-        autocheck_j["messages"].push_back(fm);
+        nlohmann::json new_message;
+        new_message["message"] = fm;
+        new_message["type"] = "failure";
+        autocheck_j["messages"].push_back(new_message);
       }
     }
 
@@ -190,14 +211,24 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
       num_messages = autocheck_j.find("messages")->size();
       assert (num_messages > 0);
     }
-    
-    if ((show_message && num_messages > 0) 
-        || show_actual 
+
+    if ((show_message && num_messages > 0)
+        || show_actual
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
+      if (my_testcase.isFileCheck() && num_messages > 0 && messages.size() > 0 && messages[0].second.find("README") != std::string::npos) {
+        testcase_message = "README missing.";
+      } else if (my_testcase.isCompilation() && num_messages > 0) {
+        if (result.hasCompilationError()) {
+          testcase_message = "Compilation Error(s).";
+        } else if (result.hasCompilationWarning() && testcase_message.find("ERROR") == std::string::npos) {
+          testcase_message = "Compilation Warning(s).";
+        } else {
+          testcase_message = "Compilation Error(s).";
+        }
+      }
     }
   }
-  delete result;
   return score;
 }
 
@@ -210,7 +241,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   sstr >> config_json;
   AddSubmissionLimitTestCase(config_json);
 
-  std::string grade_path = "results_grade.txt";
+  std::string grade_path = "grade.txt";
   std::ofstream gradefile(grade_path.c_str());
 
   int automated_points_awarded = 0;
@@ -223,8 +254,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   CustomizeAutoGrading(rcsid,config_json);
 
-  system ("ls -lta");
-  system("find . -type f");
+  system("find . -type f -exec ls -sh {} +");
 
   // LOOP OVER ALL TEST CASES
   nlohmann::json::iterator tc = config_json.find("testcases");
@@ -232,10 +262,11 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   for (unsigned int i = 0; i < tc->size(); i++) {
 
     std::cout << "------------------------------------------\n";
-    TestCase my_testcase((*tc)[i]);
+    TestCase my_testcase((*tc)[i],config_json);
     std::string title = "Test " + std::to_string(i+1) + " " + (*tc)[i].value("title","MISSING TITLE");
     int points = (*tc)[i].value("points",0);
     std::cout << title << " - points: " << points << std::endl;
+    std::string testcase_message = "";
 
     nlohmann::json tc_j;
     tc_j["test_name"] = title;
@@ -256,17 +287,19 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       } else {
         std::cout << "EXCESSIVE SUBMISSIONS PENALTY = " << testcase_pts << std::endl;
       }
-    } 
+    }
     else {
       double my_score = 1.0;
       std::cout << "NUM FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
       assert (my_testcase.numFileGraders() > 0);
       for (int j = 0; j < my_testcase.numFileGraders(); j++) {
-        my_score -= ValidateGrader(my_testcase, j, autocheck_js,hw_id);
+        my_score -= ValidateGrader(my_testcase, j, autocheck_js, hw_id, testcase_message);
       }
       bool fileExists, fileEmpty;
-      fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
-      if (fileExists && !fileEmpty) {
+      std::string execute_logfile = my_testcase.getPrefix() + "_execute_logfile.txt";
+      fileStatus(execute_logfile, fileExists,fileEmpty);
+      bool show_execute_logfile = my_testcase.ShowExecuteLogfile("execute_logfile.txt");
+      if (fileExists && !fileEmpty && show_execute_logfile) {
         nlohmann::json autocheck_j;
         autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
         autocheck_j["description"] = "Execution Logfile";
@@ -275,12 +308,16 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       if (autocheck_js.size() > 0) {
         tc_j["autochecks"] = autocheck_js;
       }
-      assert (my_score <= 1.00001);
+      assert (my_score <= 1.00002);
+      my_score += 0.00001;
+      assert (my_score <= 1.00002);
       my_score = std::max(0.0,std::min(1.0,my_score));
       std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
-      testcase_pts = (int)floor(my_score * my_testcase.getPoints());
+      testcase_pts = my_score * my_testcase.getPoints();
+      std::cout << "thing " << testcase_pts << " " << my_score * my_testcase.getPoints() << std::endl;
       std::cout << "Grade: " << testcase_pts << std::endl;
     }
+    if (testcase_message != "") tc_j["testcase_message"] = testcase_message;
     tc_j["points_awarded"] = testcase_pts;
     automated_points_awarded += testcase_pts;
     if (!my_testcase.getHidden()) {
@@ -292,7 +329,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         nonhidden_automated_points_possible += my_testcase.getPoints();
       }
     }
-    all_testcases.push_back(tc_j); 
+    all_testcases.push_back(tc_j);
     gradefile << "Testcase"
               << std::setw(3) << std::right << i+1 << ": "
               << std::setw(50) << std::left << my_testcase.getTitle() << " ";
@@ -325,8 +362,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",automated_points_possible);
   assert (AUTO_POINTS == automated_points_possible);
   int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
-  
-  // Generate results.json 
+
+  // Generate results.json
   nlohmann::json sj;
   sj["testcases"] = all_testcases;
   std::ofstream json_file("results.json");

@@ -51,8 +51,8 @@ foreach($rows AS $row){
     $params = array($gd_id, $gc_id);
     $db->query("DELETE FROM gradeable_component_data WHERE gd_id=? AND gc_id=?", $params);
     
-    $params = array($gc_id, $gd_id, $grade, $comment);
-    $db->query("INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment) VALUES(?,?,?,?)",$params);
+    $params = array($gc_id, $gd_id, $grade, $comment, \models\User::$user_id, date('Y-m-d H:i:s'));
+    $db->query("INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grade_time) VALUES(?,?,?,?,?,?)",$params);
 }
 
 //update the gradeable data
@@ -67,8 +67,16 @@ else{
     $active_version = $results['active_version'];
 }
 
-$params = array(\models\User::$user_id, $active_version, $overall_comment, $status, intval($_POST['late']), $gd_id);
-$db->query("UPDATE gradeable_data SET gd_grader_id=?, gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=? WHERE gd_id=?",$params);
+// Only changes the grader id if the overwrite grader box was checked
+if (isset($_POST['overwrite'])) {
+	$params = array(\models\User::$user_id, $active_version, $overall_comment, $status, intval($_POST['late']), $gd_id);
+	$db->query("UPDATE gradeable_data SET gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=?, gd_user_viewed_date=NULL WHERE gd_id=?",$params);
+}
+else {
+	$params = array($active_version, $overall_comment, $status, intval($_POST['late']), $gd_id);
+	$db->query("UPDATE gradeable_data SET gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=?, gd_user_viewed_date=NULL WHERE gd_id=?",$params);
+}
+
 
 //update the number of late days for the student the first time grades are submitted
 if ($status == 1 && !$is_graded){
@@ -79,7 +87,7 @@ $hwReport = new HWReport();
 $hwReport->generateSingleReport($student, $g_id);
 
 if($_GET["individual"] == "1") {
-    header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&semester='.$_GET['semester'].'&g_id=' . $_GET["g_id"]."#user-row-".$student);
+    header('Location: '.$SUBMISSION_URL."/index.php?semester={$_GET['semester']}&course={$_GET['course']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET['g_id']}#user-row-".$student);
 }
 else {
     header('Location: '.$BASE_URL.'/account/index.php?course='.$_GET['course'].'&semester='.$_GET['semester'].'&g_id=' . $_GET["g_id"]);

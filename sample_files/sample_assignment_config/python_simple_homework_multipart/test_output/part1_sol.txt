@@ -1,2 +1,0 @@
-The square root of 16: 4.0
-The square root of 9: 3.0

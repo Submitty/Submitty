@@ -9,8 +9,8 @@ import glob
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/sample_files/sample_assignment_config/cpp_custom"
-SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/sample_files/sample_submissions/cpp_custom"
+SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/cpp_custom/config"
+SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/cpp_custom/submissions"
 
 @prebuild
 def initialize(test):
@@ -54,7 +54,7 @@ def correct(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_correct","-b")
+    test.diff("grade.txt","grade.txt_correct","-b")
     test.json_diff("results.json","results.json_correct")
 
 
@@ -68,7 +68,7 @@ def missing_label(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_missing_label","-b")
+    test.diff("grade.txt","grade.txt_missing_label","-b")
     test.json_diff("results.json","results.json_missing_label")
 
 
@@ -82,7 +82,7 @@ def wrong_num(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_wrong_num","-b")
+    test.diff("grade.txt","grade.txt_wrong_num","-b")
     test.json_diff("results.json","results.json_wrong_num")
 
 
@@ -96,7 +96,7 @@ def wrong_total(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_wrong_total","-b")
+    test.diff("grade.txt","grade.txt_wrong_total","-b")
     test.json_diff("results.json","results.json_wrong_total")
 
 
@@ -110,7 +110,7 @@ def not_random(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_not_random","-b")
+    test.diff("grade.txt","grade.txt_not_random","-b")
     test.json_diff("results.json","results.json_not_random")
 
 
@@ -124,7 +124,7 @@ def all_bugs(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","results_grade.txt_all_bugs","-b")
+    test.diff("grade.txt","grade.txt_all_bugs","-b")
     test.json_diff("results.json","results.json_all_bugs")
 
 

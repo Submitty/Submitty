@@ -182,12 +182,12 @@ print <<<HTML
                             <th>User ID</th>
                             <th>Name</th>
 HTML;
-if ($colspan2 === 0){
+if ($colspan2 === 0){ 
     print <<<HTML
-                            <th width="80%"colspan="{$colspan}">Grades</th>
+                            <th width="80%"colspan="{$colspan}">Grades</th> 
 HTML;
 }
-else{
+else if($colspan !== 0){
     print <<<HTML
                             <th width="30%"colspan="{$colspan}">Grades</th>
 HTML;
@@ -212,7 +212,7 @@ $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating
 
 
 $params = array($user_id);
-if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
+if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true) {
     $params = array();
     $query = ($grade_by_reg_section ? "SELECT * FROM sections_registration ORDER BY sections_registration_id ASC"
                                     : "SELECT * FROM sections_rotating ORDER BY sections_rotating_id ASC");
@@ -234,12 +234,25 @@ $colspan += 4;
 $colspan += $colspan2;
 $student_cnt = 0;
 
-foreach($db->rows() as $section){
+$sections = $db->rows();
+if ((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true) {
+    $sections[] = array($section_param => null);
+}
+
+foreach ($sections as $section) {
     $params = array($section[$section_param]);
-    $db->query("SELECT COUNT(*) AS cnt FROM users WHERE ".$user_section_param."=?",$params);
-    if($db->row()['cnt']==0) continue;
+    if ($section[$section_param] === null) {
+        $db->query("SELECT COUNT(*) AS cnt FROM users WHERE ".$user_section_param." IS NULL");
+    }
+    else {
+        $db->query("SELECT COUNT(*) AS cnt FROM users WHERE ".$user_section_param." = ?",$params);
+    }
+
+    if ($db->row()['cnt'] == 0) {
+        continue;
+    }
     
-    $section_id = intval($section[$section_param]);
+    $section_id = ($section[$section_param] !== null) ? intval($section[$section_param]) : "null";
     $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
     $enrolled_assignment = ($grade_by_reg_section ? "enrolled in": "assigned to");
     print <<<HTML
@@ -249,7 +262,17 @@ foreach($db->rows() as $section){
                             </td>
                         </tr>
 HTML;
-    $params = array($nt_gradeable['g_id'],intval($section_id),4);
+
+    if ($section[$section_param] === null) {
+        $user_query = "s.{$user_section_param} IS NULL";
+        $params = array($nt_gradeable['g_id']);
+    }
+    else {
+        $user_query = "s.{$user_section_param} = ?";
+        $params = array($nt_gradeable['g_id'], $section[$section_param]);
+    }
+
+
     $db->query("
         
 SELECT
@@ -293,9 +316,7 @@ FROM
             gd_user_id
             , g_id
     ) AS gcds ON gcds.gd_user_id = s.user_id
-WHERE s.".$user_section_param.
-    "=?
-    AND s.user_group=?
+WHERE {$user_query}
 ORDER BY
     s.user_id", $params);
     
@@ -449,6 +470,7 @@ echo <<<HTML
 
             for (var j = questions; j < questions+text_fields; ++j){
                 var text = $("#cell-"+nt_gradeable+"-"+user_id+"-t"+j).val();
+                text = encodeURIComponent(text); //this makes it so & don't get deleted when entered by user
                 extra += "&t"+j+"="+text;
             }
 

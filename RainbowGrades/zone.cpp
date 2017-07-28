@@ -25,6 +25,16 @@ int myrandomzone (int i) { return std::rand()%i;}
 
 //==========================================================================
 
+// More intuitive sort function to organize zones first by length (#
+// of characters), then alphabetical.
+class ZoneSorter {
+public:
+  bool operator()(const std::string& a, const std::string& b) const {
+    return (a.size() < b.size() ||
+            (a.size() == b.size() && a < b));
+  }
+};
+
 
 void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::string &zone_assignments_filename, std::vector<Student*> &students) {
 
@@ -37,7 +47,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
   // ============================================================
   // read in the desired zone counts
 
-  std::map<std::string,ZoneInfo> zones;
+  std::map<std::string,ZoneInfo,ZoneSorter> zones;
   std::ifstream istr_zone_counts(zone_counts_filename.c_str());
   assert (istr_zone_counts.good());
   
@@ -160,12 +170,12 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
         std::cout << "OOPS!  we ran out of exam seating" << std::endl;
       }
       assert (next_za < (int)randomized_available.size());
-      ZoneInfo &zi = zones.find(randomized_available[next_za])->second;
-      s->setExamRoom(zi.building+std::string(" ")+zi.room);
-      s->setExamZone(zi.zone);
+      ZoneInfo &next_zi = zones.find(randomized_available[next_za])->second;
+      s->setExamRoom(next_zi.building+std::string(" ")+next_zi.room);
+      s->setExamZone(next_zi.zone);
       next_za++;
       new_zone_assign++;
-      zi.count++;
+      next_zi.count++;
     }
   }
   

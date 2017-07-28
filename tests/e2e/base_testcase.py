@@ -65,7 +65,7 @@ class BaseTestCase(unittest2.TestCase):
         :return:
         """
         if url is None:
-            url = "/index.php?semester=" + self.semester + "&course=csci1000"
+            url = "/index.php?semester=" + self.semester + "&course=sample"
         if user_id is None:
             user_id = self.user_id
         if user_password is None:
@@ -73,8 +73,8 @@ class BaseTestCase(unittest2.TestCase):
         if user_name is None:
             user_name = self.user_name
         self.get(url)
-
-        self.assertIn("CSCI1000", self.driver.title)
+        print(self.driver.page_source)
+        self.assertIn("SAMPLE", self.driver.title)
         self.driver.find_element_by_name('user_id').send_keys(user_id)
         self.driver.find_element_by_name('password').send_keys(user_password)
         self.driver.find_element_by_name('login').click()
@@ -115,5 +115,5 @@ class BaseTestCase(unittest2.TestCase):
             semester = "s" + str(today.year)[-2:]
         return semester
 
-#if __name__ == "__main__":
+# if __name__ == "__main__":
 #    unittest2.main()

@@ -1,0 +1,27 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/fancy_hello_world.cpp",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Approx 37 characters added and/or deleted.  Fewer character changes than allowed.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 1 Reasonable Code Changes"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 2 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

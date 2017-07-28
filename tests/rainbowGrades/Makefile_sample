@@ -1,0 +1,11 @@
+# =============================================================================
+# EDIT THESE VARIABLES
+
+USERNAME=instructor
+RAINBOW_GRADES_DIRECTORY=/cygdrive/d/SubmittyDev/RainbowGrades
+HWSERVER=localhost
+REPORTS_DIRECTORY=/var/local/submitty/courses/s17/sample/reports
+
+# =============================================================================
+
+include ${RAINBOW_GRADES_DIRECTORY}/MakefileHelper

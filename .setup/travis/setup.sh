@@ -27,8 +27,6 @@ auth required pam_unix.so
 account required pam_unix.so" > /etc/pam.d/httpd'
 sudo sed -i '25s/^/\#/' /etc/pam.d/common-password
 sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
-PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
-sudo sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
 
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
@@ -54,13 +52,20 @@ sudo chown hwphp:hwphp ${SUBMITTY_DATA_DIR}
 sudo chmod 777         ${SUBMITTY_INSTALL_DIR}
 sudo chmod 777         ${SUBMITTY_DATA_DIR}
 
-sudo echo -e "localhost
+echo -e "/var/run/postgresql
 hsdbu
 hsdbu
 http://localhost
-http://localhost/TAGrading
-http://localhost/cgi-bin
-svn+ssh:192.168.56.103" | sudo bash ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
+${AUTH_METHOD}" | sudo ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+
+
+mkdir -p ${SUBMITTY_DATA_DIR}/instructors
+mkdir -p ${SUBMITTY_DATA_DIR}/bin
+touch ${SUBMITTY_DATA_DIR}/instructors/authlist
+touch ${SUBMITTY_DATA_DIR}/instructors/valid
+[ ! -f ${SUBMITTY_DATA_DIR}/bin/authonly.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/authonly.pl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
+[ ! -f ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/validate.auth.pl ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl
+chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
+chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
 
 sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
-sudo bash ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup

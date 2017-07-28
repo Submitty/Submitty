@@ -25,8 +25,8 @@
 //
 // =====================================================================
 
+#define SYSTEM_CALL_CATEGORIES_HEADER "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/src/grading/system_call_categories.cpp"
 
-#define SYSTEM_CALL_CATEGORIES_HEADER "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/src/grading/system_call_categories.h"
 
 // ================================================================================================
 // ================================================================================================
@@ -38,81 +38,120 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
                         std::map<std::string,std::string>& categories) {
   std::string line;
   std::string category;
-  bool in_preprocessor_if = false;
-
+  std::string restriction;
+  std::string actual_restriction;
+  bool skip_this = false;
+  
   // loop over all lines of the file
   while (std::getline(system_call_categories_file,line)) {
 
     // if it's a system call
     if (line.find("ALLOW_SYSCALL(") != std::string::npos) {
+      int startpoint = line.find("ALLOW_SYSCALL(");
       int endpoint = line.find(");");
+      assert (startpoint != std::string::npos);
       assert (endpoint != std::string::npos);
       assert (category != "");
+      assert (restriction != "");
+      assert (restriction == actual_restriction);
       // there should be nothing else on this line
       assert (line.size() == endpoint+2);
-      assert (endpoint-14 > 1);
-      std::string system_call = line.substr(14,endpoint-14);
+      assert (endpoint-startpoint-14 > 1);
+      std::string system_call = line.substr(startpoint+14,endpoint-startpoint-14);
       // make sure there aren't duplicates
       assert (all_system_calls.find(system_call) == all_system_calls.end());
       all_system_calls[system_call] = category;
     } 
-
-    // handle blank lines or #endif (end of category) 
+    
+    // ignore blank lines
     else if (line == "") {
-      category = "";
+      continue;
+    }
+
+    // ignore preprocessor logic
+    else if (line[0] == '#') {
+      skip_this = !skip_this;
+      continue;
     } 
-    else if (line == "#endif") {
-      assert (in_preprocessor_if);
-      in_preprocessor_if = false;
-      category = "";
+
+    // the single function in this file
+    else if (line.find ("void allow_system_calls(") != std::string::npos) {
+      continue;
     } 
     
     else {
-      //std::cout << "LINE " << line << std::endl;
       std::stringstream ss(line);
       std::string token, type;
       ss >> token; 
 
-      if (token == "#define") {
-	assert (in_preprocessor_if);
-	assert (category != "");
-	continue;
+      // closing an if block ends the category
+      if (token == "}") {
+        category = "";
+        restriction = "";
+        actual_restriction = "";
+        // make sure nothing else is on that line!
+        assert (ss.rdbuf()->in_avail() == 0);
+        continue;
+      }
+
+      // comments
+      if (token == "//") {
+        ss >> type;
+        if (type != "WHITELIST" && type != "RESTRICTED" && type != "FORBIDDEN") {
+          // ignore other comments
+          continue;
+        };
+        
+        // This is a category.  Verify that the comment matches the
+        // category enforcement and the category name.
+        ss >> token;
+        assert (token == ":");
+        ss >> category;
+        assert (category != "");
+        assert (categories.find(category) == categories.end());
+        categories[category] = type;
+        // make sure nothing else is on that line!
+        assert (ss.rdbuf()->in_avail() == 0);
+        restriction = type;
+        assert (type == "WHITELIST" || type == "RESTRICTED" || type == "FORBIDDEN");
+        actual_restriction = "WHITELIST";
       } 
 
-      assert (token == "//");
-      ss >> type;
-      if (type != "WHITELIST" && type != "RESTRICTED" && type != "FORBIDDEN") {
-        // just a comment
-        continue;
-      };
+      // if's are used to enforce the restriction & forbidden categories
+      else if (token == "if") {
+        assert (category != "");
+        ss >> token;
+        if (token == "(0)") {
+          assert (restriction == "FORBIDDEN");
+          actual_restriction = "FORBIDDEN";
+        } else {
+          assert (restriction == "RESTRICTED");
+          actual_restriction = "RESTRICTED";
+          assert (token.substr(0,18) == "(categories.find(\"");
+          assert (token.substr(18,token.size()-20) == category);
+          assert (token.substr(token.size()-2,2) == "\")");
+          ss >> token;
+          assert (token == "!=");
+          ss >> token;
+          assert (token == "categories.end())");
+          ss >> token;
+          assert (token == "{");
+          // make sure nothing else is on that line!
+          assert (ss.rdbuf()->in_avail() == 0);
+        }
+      }
 
-      // otherwise this is a category
-      ss >> token;
-      assert (token == ":");
-      ss >> category;
-      assert (category != "");
-      assert (categories.find(category) == categories.end());
-      categories[category] = type;
-      // make sure nothing else is on that line!
-      assert (ss.rdbuf()->in_avail() == 0);
-      assert (in_preprocessor_if == false);
-
-      if (type == "RESTRICTED") {
-        std::getline(system_call_categories_file,line);
-        assert (line == "#ifdef ALLOW_SYSTEM_CALL_CATEGORY_"+category);
-        in_preprocessor_if = true;
-      } else if (type == "FORBIDDEN") {
-        std::getline(system_call_categories_file,line);
-        assert (line == "#if 0");
-        in_preprocessor_if = true;
-      } else {
-
+      // something unexpected...
+      else {
+        std::cout << "LINE '" << line << "'" << std::endl;
+        exit(0);
       }
     }
   }
 
   // verify that we have all of the linux system calls (32 & 64 bit)
-  assert (all_system_calls.size() == 385);
+  //std::cout << "all_system_calls.size() " <<  all_system_calls.size() << std::endl;
+  assert (all_system_calls.size() == 393);
 }
 
 
@@ -180,8 +219,8 @@ void parse_strace_output(std::ifstream &strace_output_file,
       }
 
       if (itr == all_system_calls.end()) {
-	std::cout << "ERROR!  couldn't find system call " << full_name << std::endl;
-	continue;
+        std::cout << "ERROR!  couldn't find system call " << full_name << std::endl;
+        continue;
       }
       assert (itr != all_system_calls.end());
       std::string which_category = itr->second;
@@ -218,6 +257,7 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
 
   bool first = true;
 
+  int restricted_count = 0;
   // loop over all categories
   for (std::map<std::string,std::map<std::string,int> >::const_iterator itr = USED_CATEGORIES.begin(); 
        itr != USED_CATEGORIES.end(); itr++) {
@@ -249,7 +289,7 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
     }
     std::cout << "CATEGORY: " << itr->first << std::endl;  
     if (cat_itr->second == "RESTRICTED") {
-      std::cout << "    #define ALLOW_SYSTEM_CALL_CATEGORY_" << itr->first << std::endl;
+      restricted_count++;
     }
 
     // print the system calls in that category that were used & the usage count
@@ -259,6 +299,23 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
     }
   }
 
+  if (restricted_count > 0) {
+    std::cout << "\nTo enable these system calls, add this block to the config.json for this gradeable:\n" << std::endl;
+    std::cout << "    \"allow_system_calls\" : [" << std::endl;
+    for (std::map<std::string,std::map<std::string,int> >::const_iterator itr = USED_CATEGORIES.begin(); 
+         itr != USED_CATEGORIES.end(); itr++) {
+      std::map<std::string,std::string>::const_iterator cat_itr = categories.find(itr->first);
+      assert (cat_itr != categories.end());
+      if (cat_itr->second != "RESTRICTED") continue;
+      std::cout << "        \"ALLOW_SYSTEM_CALL_CATEGORY_" << itr->first << "\"";
+      if (restricted_count > 1) std::cout << ",";
+      std::cout << std::endl;    
+      restricted_count--;
+    }
+    std::cout << "    ]" << std::endl;
+  }
+
+  
   if (!first) {
     std::cout << std::endl;
   }

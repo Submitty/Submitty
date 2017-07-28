@@ -27,7 +27,28 @@ public:
       status = s;
     }
   }
-  float getValue() const { return value; }
+  float getValue() const { 
+
+    float adjusted_value = value;
+    if (late_days_used > 0) {
+      //std::cout << "LATE DAYS! " << late_days_used << std::endl;
+      // FIXME:  Currently a flat penalty no matter how many days used
+      adjusted_value = (1-LATE_DAY_PERCENTAGE_PENALTY)*value;
+      //std::cout << "value " << value << "-> " << adjusted_value << std::endl;
+    }
+    
+    /*
+    // grab the maximum score for this homework
+    assert (PERFECT_STUDENT_POINTER != NULL);
+    std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::const_iterator ps_itr = PERFECT_STUDENT_POINTER->all_item_grades.find(g);
+    assert (ps_itr != all_item_grades.end());
+    float ps_value = ps_itr->second[i].getValue();
+    */
+    // adjust the homework score
+    //value = std::max(0.0f, value - d*LATE_DAY_PERCENTAGE_PENALTY*ps_value);
+
+    return adjusted_value; 
+  }
   int getLateDaysUsed() const { return late_days_used; }
   const std::string& getNote() const { return note; }
   const std::string& getStatus() const { return status; }
@@ -157,7 +178,7 @@ public:
   float adjusted_test(int i) const;
   float adjusted_test_pct() const;
   float lowest_test_counts_half_pct() const;
-  float quiz_normalize_and_drop_two() const;
+  float quiz_normalize_and_drop(int num) const;
   float overall_b4_moss() const;
   std::string grade(bool flag_b4_moss, Student *lowest_d) const;
   void outputgrade(std::ostream &ostr,bool flag_b4_moss,Student *lowest_d) const;

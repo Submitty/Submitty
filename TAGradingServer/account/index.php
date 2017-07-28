@@ -270,7 +270,7 @@ HTML;
 
             <div class="modal-footer">
                 <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>
-                <a class="btn" href="{$BASE_URL}/account/account-summary.php?g_id={$_GET["g_id"]}&course={$_GET['course']}&semester={$_GET['semester']}">{$g_title} Overview</a>
+                <a class="btn" href="{$SUBMISSION_URL}/index.php?semester={$_GET['semester']}&course={$_GET['course']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET['g_id']}">{$g_title} Status</a>
                 <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
             </div>
         </div>
@@ -293,7 +293,7 @@ HTML;
 
             <div class="modal-footer">
                 <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>
-                <a class="btn" href="{$BASE_URL}/account/account-summary.php?g_id={$_GET["g_id"]}&course={$_GET['course']}&semester={$_GET['semester']}">{$g_title} Overview</a>
+                <a class="btn" href="{$SUBMISSION_URL}/index.php?semester={$_GET['semester']}&course={$_GET['course']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET['g_id']}">{$g_title} Status</a>
                 <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
             </div>
         </div>
@@ -398,7 +398,7 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
     <i title="Show/Hide Submission and Results Browser (Press O)" class="icon-files" onclick="handleKeyPress('KeyO')"></i>
     <i title="Reset Rubric Panel Positions" class="icon-refresh" onclick="handleKeyPress('KeyR')"></i>
     <a <?php echo ($previous_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&prev={$previous_user_id}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_user_id == "" ? 'icon-disabled' : ''); ?>" ></i></a>
-    <a <?php echo ("href=\"{$BASE_URL}/account/account-summary.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}\""); ?> ><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
+    <a <?php echo ("href='{$SUBMISSION_URL}/index.php?semester={$_GET['semester']}&course={$_GET['course']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET['g_id']}'"); ?> ><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
     <a <?php echo ($next_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&next={$next_user_id}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_user_id == "" ? 'icon-disabled' : ''); ?>" ></i></a>
 </div>
 

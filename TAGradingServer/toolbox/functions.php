@@ -35,9 +35,17 @@ $start_time = microtime_float();
 $_GET['course'] = isset($_GET['course']) ? str_replace("/", "_", $_GET['course']) : "";
 $_GET['semester'] = isset($_GET['semester']) ? str_replace("/", "_", $_GET['semester']) : "";
 
-$a = IniParser::readFile(__DIR__."/../../site/config/master.ini");
+$old_method = false;
+if (is_file(__DIR__."/../../site/config/master.ini")) {
+    $old_method = true;
+    $a = IniParser::readFile(__DIR__."/../../site/config/master.ini");
+}
+else {
+    $a = IniParser::readFile(__DIR__."/../../../config/master.ini");
+}
+
 $base_url = $a['site_details']['base_url'];
-define("__BASE_URL__", $a['site_details']['ta_base_url']);
+$ta_base_url = $a['site_details']['ta_base_url'];
 define("__CGI_URL__", $a['site_details']['cgi_url']);
 define("__SUBMISSION_GRACE_PERIOD_SECONDS__", 5 * 60);
 define("__OUTPUT_MAX_LENGTH__", 100000);
@@ -71,6 +79,12 @@ if (isset($a['hidden_details']['course_url'])) {
 else {
     define("__SUBMISSION_URL__", $base_url);
 }
+if (isset($a['hidden_details']['ta_base_url'])) {
+    define("__BASE_URL__", $a['hidden_details']['ta_base_url']);
+}
+else {
+    define("__BASE_URL__", $ta_base_url);
+}
 define("__COURSE_NAME__", $a['course_details']['course_name']);
 define("__CALCULATE_DIFF__", true);
 define("__DEFAULT_HW_LATE_DAYS__", $a['course_details']['default_hw_late_days']);
@@ -102,21 +116,46 @@ $SUBMISSION_URL = rtrim(__SUBMISSION_URL__, "/");
 header("Content-Type: text/html; charset=UTF-8");
 
 $user_id = 0;
+$suggested_username = null;
 if ($DEBUG && isset($_GET['useUser'])) {
     $suggested_username = $_GET['userUser'];
 }
 else {
+    $key = 'submitty_session_id';
+    if (isset($_COOKIE[$key])) {
+        $cookie = json_decode($_COOKIE[$key], true);
+        $db->query("SELECT * FROM sessions WHERE session_id=?", array($cookie['session_id']));
+        $row = $db->row();
+        if (isset($row['user_id'])) {
+            $suggested_username = $row['user_id'];
+            if ($cookie['expire_time'] > 0) {
+                $cookie['expire_time'] = time() + (7 * 24 * 60 * 60);
+                $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] != 'off';
+                setcookie($key, json_encode($cookie), $cookie['expire_time'], "/", "", $secure);
+            }
+        }
+        else {
+            setcookie($key, "", time() - 3600);
+        }
+    }
     if (isset($_SERVER['PHP_AUTH_USER'])) {
         $suggested_username = $_SERVER['PHP_AUTH_USER'];
     }
     else if (isset($_SERVER['REMOTE_USER'])) {
         $suggested_username = $_SERVER['PHP_AUTH_USER'];
     }
-    else {
+}
+
+if ($suggested_username === null) {
+    if ($old_method) {
         // if not already authenticated do it
         header('WWW-Authenticate: Basic realm=HWServer');
         header('HTTP/1.0 401 Unauthorized');
         exit;
+    }
+    else {
+        header("Location: ".$SUBMISSION_URL."/index.php?semester={$_GET['semester']}&course={$_GET['course']}");
+        exit();
     }
 }
 

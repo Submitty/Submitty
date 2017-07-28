@@ -136,4 +136,23 @@ class Utils {
     public static function endsWith($haystack, $needle) {
         return substr($haystack, (-1*strlen($needle)), strlen($needle)) === $needle;
     }
+
+    /**
+     * Wrapper around the PHP function setcookie that deals with figuring out if we should be setting this cookie
+     * such that it should only be accessed via HTTPS (secure) as well as allow easily passing an array to set as
+     * the cookie data.
+     *
+     * @param string        $name name of the cookie
+     * @param string|array  $data data of the cookie, if array, will json_encode it
+     * @param int           $expire when should the cookie expire
+     *
+     * @return bool true if successfully able to set the cookie, else false
+     */
+    public static function setCookie($name, $data, $expire=0) {
+        if (is_array($data)) {
+            $data = json_encode($data);
+        }
+        $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
+        return setcookie($name, $data, $expire, "/", "", $secure);
+    }
 }

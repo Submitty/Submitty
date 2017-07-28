@@ -7,6 +7,8 @@ allows for install_system.sh to run cleanly and not end up with duplicate lines
 in configuration files or pre-existing databses.
 """
 
+from __future__ import print_function
+import glob
 import os
 import pwd
 import shutil
@@ -19,13 +21,12 @@ CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 
 
-def load_data_yaml(file_name):
+def load_data_yaml(file_path):
     """
     Loads yaml file from the .setup/data directory returning the parsed structure
-    :param file_name: name of file to load
+    :param file_path: name of file to load
     :return: parsed YAML structure from loaded file
     """
-    file_path = os.path.join(SETUP_DATA_PATH, file_name)
     if not os.path.isfile(file_path):
         raise IOError("Missing the yaml file {}".format(file_path))
     with open(file_path) as open_file:
@@ -45,7 +46,7 @@ def remove_lines(filename, lines):
     """
     if not os.path.isfile(filename):
         return
-    if not isinstance(lines, list) or len(lines) == 0:
+    if not isinstance(lines, list) or not lines:
         return
     stat = os.stat(filename)
     with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
@@ -91,24 +92,19 @@ def delete_user(user_id):
 
 
 def main():
+    if not os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
+        raise SystemExit("This script can only be run against the vagrant installation")
+
     # Remove the MOT.D
     remove_file("/etc/motd")
 
-    # Scrub the hosts file
-    hosts = ["192.168.56.101    test-submit test-submit.cs.rpi.edu",
-             "192.168.56.102    test-cgi test-cgi.cs.rpi.edu",
-             "192.168.56.103    test-svn test-svn.cs.rpi.edu",
-             "192.168.56.104    test-hwgrading test-hwgrading.cs.rpi.edu"]
-    remove_lines("/etc/hosts", hosts)
-
     # Scrub out the network interfaces that were created for Vagrant
-    subprocess.call(["ifdown", "eth1", "eth1:1", "eth1:2", "eth1:3"])
-    remove_file("/etc/network/interfaces.d/eth1.cfg")
+    #subprocess.call(["ifdown", "enp0s8", "enp0s8:1", "enp0s8:2"])
+    #remove_file("/etc/network/interfaces.d/enp0s8.cfg")
 
     # Remove the data directories for submitty
     shutil.rmtree('/usr/local/submitty/.setup', True)
     shutil.rmtree('/var/local/submitty', True)
-    shutil.rmtree('/var/lib/svn', True)
 
     # If we have psql cmd available, then PostgreSQL is installed so we should scrub out any
     # submitty DBs
@@ -120,10 +116,11 @@ def main():
 
         psql_version = subprocess.check_output("psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}'",
                                                shell=True).strip()
-        hosts = ["hostssl    all    all    192.168.56.0/24    pam",
-                 "host       all    all    192.168.56.0/24    pam",
-                 "host       all    all    all                md5"]
-        remove_lines('/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf', hosts)
+
+        try:
+            shutil.move('/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf.backup', '/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf')
+        except FileNotFoundError:
+            pass
 
     for i in range(0, 60):
         j = str(i).zfill(2)
@@ -148,16 +145,18 @@ def main():
 
     shutil.rmtree('/root/bin', True)
 
-    users = load_data_yaml("users.yml")
-    for user in users:
+    for user_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "users", "*.yml")):
+        user = load_data_yaml(user_file)
         delete_user(user['user_id'])
 
+    os.system('pkill -u username hwcron')
+    os.system('crontab -u hwcron -r')
     for user in ["hwcgi", "hwphp", "hwcron", "hsdbu"]:
         delete_user(user)
 
     groups = ["hwcronphp", "course_builders"]
-    courses = load_data_yaml("courses.yml")
-    for course in courses:
+    for course_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "courses", "*.yml")):
+        course = load_data_yaml(course_file)
         groups.append(course['code'])
         groups.append(course['code'] + "_archive")
         groups.append(course['code'] + "_tas_www")

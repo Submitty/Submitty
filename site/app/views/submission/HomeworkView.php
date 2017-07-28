@@ -2,10 +2,9 @@
 
 namespace app\views\submission;
 
-use app\libraries\FileUtils;
-use app\libraries\Utils;
 use app\models\Gradeable;
 use app\views\AbstractView;
+use app\libraries\FileUtils;
 
 class HomeworkView extends AbstractView {
 
@@ -18,9 +17,10 @@ class HomeworkView extends AbstractView {
 HTML;
         }
         else {
+            $gradeable = htmlentities($gradeable_id, ENT_QUOTES);
             return <<<HTML
 <div class="content">
-    {$gradeable_id} is not a valid electronic submission gradeable. Contact your instructor if you think this
+    {$gradeable} is not a valid electronic submission gradeable. Contact your instructor if you think this
     is an error.
 </div>
 HTML;
@@ -59,6 +59,100 @@ HTML;
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
+HTML;
+        if ($this->core->getUser()->accessAdmin()) {
+            $students = $this->core->getQueries()->getAllUsers();
+            $student_ids = array();
+            foreach ($students as $student) {
+                $student_ids[] = $student->getId();
+            }
+
+            $students_without = array();
+            $student_without_ids = array();
+            $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
+            foreach ($gradeables as $g) {
+                if ($g->getActiveVersion() == 0) {
+                    $students_without[] = $g->getUser();
+                }
+            }
+            foreach ($students_without as $student) {
+                $student_without_ids[] = $student->getId();
+            }
+
+            $student_ids = json_encode($student_ids);
+            $student_without_ids = json_encode($student_without_ids);
+            $return .= <<<HTML
+    <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
+        <div >
+            <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
+                Normal Submission
+            <input type='radio' id="radio_student" name="submission_type">
+                Make Submission for a Student
+HTML;
+            if ($gradeable->getNumParts() == 1) {
+                $return .= <<<HTML
+            <input type='radio' id="radio_bulk" name="submission_type">
+                Bulk Upload
+HTML;
+            }
+            $return .= <<<HTML
+        </div>
+        <div id="user_id_input" style="display: none">
+            <div class="sub">
+                Input the user_id of the student you wish to submit for. This <i>permanently</i> affects the student's submissions, so please use with caution.
+            </div>
+            <div class="sub">
+                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                user_id: <input type="text" id= "user_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
+            </div>
+        </div>
+        <div class = "sub" id="pdf_submit_button" style="display: none">
+            <div class="sub">
+                # of page(s) per PDF: <input type="number" id= "num_pages" placeholder="required"/>
+            </div>
+        </div>
+    </form>
+HTML;
+            $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var cookie = document.cookie;
+            student_ids = {$student_ids};
+            student_without_ids = {$student_without_ids};
+            if (cookie.indexOf("student_checked=") !== -1) {
+                var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
+                $("#radio_student").prop("checked", cookieValue==1);
+                $("#radio_bulk").prop("checked", cookieValue==2);
+                document.cookie="student_checked="+0;
+            }
+            if ($("#radio_student").is(":checked")) {
+                $('#user_id_input').show();
+            }
+            if ($("#radio_bulk").is(":checked")) {
+                $('#pdf_submit_button').show();
+            }
+            $('#radio_normal').click(function() {
+                $('#user_id_input').hide();
+                $('#pdf_submit_button').hide();
+                $('#user_id').val('');
+            });
+            $('#radio_student').click(function() {
+                $('#pdf_submit_button').hide();
+                $('#user_id_input').show();
+            });
+            $('#radio_bulk').click(function()  {
+                $('#user_id_input').hide();
+                $('#pdf_submit_button').show();
+                $('#user_id').val('');
+            });
+            $( "#user_id" ).autocomplete({
+                source: student_ids
+            });
+        });
+    </script>
+HTML;
+        }
+        $return .= <<<HTML
     <div class="sub">
 HTML;
         if ($gradeable->hasAssignmentMessage()) {
@@ -79,10 +173,52 @@ HTML;
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
 
-
             for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
-                $label = $gradeable->getTextBoxes()[$i]['label'];
-                $rows = $gradeable->getTextBoxes()[$i]['rows'];
+
+                $image_width = $image_height = 0;
+
+                if (isset($gradeable->getTextboxes()[$i]['images']) && $gradeable->getTextboxes()[$i]['images'] != ""){
+                    $tester = $gradeable->getTextboxes()[$i]['images'];
+                }
+                else{
+                    $tester = array();
+                }
+
+                //
+                foreach((array)$tester as $currImage){
+                    $currImageName = $currImage["image_name"];
+                    $imgPath = $this->core->getConfig()->getCoursePath() . "/test_input/" . $gradeable->getName() . "/".$currImageName;
+                    $content_type = FileUtils::getContentType($imgPath);
+                    if (substr($content_type, 0, 5) === "image") {
+                       // Read image path, convert to base64 encoding
+                       $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                       // Format the image SRC:  data:{mime};base64,{data};
+                       $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
+                       // insert the sample image data
+
+                        if(isset($currImage['image_height']) && (int)$currImage['image_height'] > 0){
+                            $image_height = $currImage['image_height'];
+                        }
+
+                        if(isset($currImage['image_width']) && (int)$currImage['image_width'] > 0){
+                            $image_width = $currImage['image_width'];
+                        }
+
+                       $image_display = '<img src="'.$textBoximagesrc.'"';
+
+                       if($image_width > 0){
+                        $image_display .= ' width="'.$image_width.'"';
+                       }
+                       if($image_height > 0){
+                        $image_display .= ' height="'.$image_height.'"';
+                       }
+                       $image_display .= ">";
+                       $return .= $image_display;
+                    }
+                }
+
+                $label = $gradeable->getTextboxes()[$i]['label'];
+                $rows = $gradeable->getTextboxes()[$i]['rows'];
                 if ($rows == 0) {
                   $return .= <<<HTML
                     <p style="max-width: 50em;">
@@ -128,7 +264,7 @@ HTML;
             }
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 if ($gradeable->getNumParts() > 1) {
-                    $label = "Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser";
+                    $label = "Drag your {$gradeable->getPartNames()[$i]} here or click to open file browser";
                 }
                 else {
                     $label = "Drag your file(s) here or click to open file browser";
@@ -137,7 +273,7 @@ HTML;
 
         <div id="upload{$i}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
             <h3 class="label" id="label{$i}">{$label}</h3>
-            <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" />
+            <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" multiple />
         </div>
 HTML;
             }
@@ -158,7 +294,7 @@ HTML;
             if($current_version_number === $gradeable->getHighestVersion()
                 && $current_version_number > 0) {
                 $return .= <<<HTML
-    <button type="button" id= "getprev" class="btn btn-primary">Get Most Recent Files</button>
+    <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
             }
 
@@ -239,31 +375,241 @@ HTML;
 
         $return .= <<<HTML
     <script type="text/javascript">
+        // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
+        function moveNextInput(count) {
+            var next_count = count+1;
+            var next_input = "#bulk_user_id_" + next_count;
+            if ($(next_input).length) {
+                $(next_input).focus();
+                $(next_input).select(); 
+
+                var inputOffset = $(next_input).offset().top;
+                var inputHeight = $(next_input).height();
+                var windowHeight = $(window).height();
+                var offset;
+
+                if (inputHeight < windowHeight) {
+                    offset = inputOffset - ((windowHeight / 2) - (inputHeight / 2));
+                }
+                else {
+                    offset = inputOffset;
+                }
+                var speed = 500;
+                $('html, body').animate({scrollTop:offset}, speed); 
+            }
+        }
+        function makeSubmission(user_id, highest_version, is_pdf, path, count) {
+            // submit the selected pdf
+            if (is_pdf) {
+                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count);
+                moveNextInput(count);
+            }
+            // otherwise, this is a regular submission of the uploaded files
+            else if (user_id == "") {
+                handleSubmission({$days_late},
+                                {$gradeable->getAllowedLateDays()},
+                                {$gradeable->getHighestVersion()},
+                                {$gradeable->getMaxSubmissions()},
+                                "{$this->core->getCsrfToken()}",
+                                {$svn_string},
+                                {$gradeable->getNumTextBoxes()},
+                                "{$gradeable->getId()}",
+                                "{$gradeable->getUser()->getId()}");
+            }
+            else {
+                handleSubmission({$days_late},
+                                {$gradeable->getAllowedLateDays()},
+                                highest_version,
+                                {$gradeable->getMaxSubmissions()},
+                                "{$this->core->getCsrfToken()}",
+                                {$svn_string},
+                                {$gradeable->getNumTextBoxes()},
+                                "{$gradeable->getId()}",
+                                user_id);
+            }
+        }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
-                handleSubmission("{$this->core->buildUrl(array('component' => 'student',
-                                                               'page' => 'submission',
-                                                               'action' => 'upload',
-                                                               'gradeable_id' => $gradeable->getId()))}",
-                                 "{$this->core->buildUrl(array('component' => 'student',
-                                                               'gradeable_id' => $gradeable->getId()))}",
-                                 {$days_late},
-                                 {$gradeable->getAllowedLateDays()},
-                                 {$gradeable->getHighestVersion()},
-                                 {$gradeable->getMaxSubmissions()},
-                                 "{$this->core->getCsrfToken()}",
-                                 {$svn_string},
-                                 {$gradeable->getNumTextBoxes()});
+                var user_id = "";
+                var num_pages = 0;
+                // depending on which is checked, update cookie
+                if ($('#radio_normal').is(':checked')) {
+                    document.cookie="student_checked="+0;
+                };
+                if ($('#radio_student').is(':checked')) {
+                    document.cookie="student_checked="+1;
+                    user_id = $("#user_id").val();
+                };
+                if ($('#radio_bulk').is(':checked')) {
+                    document.cookie="student_checked="+2;
+                    num_pages = $("#num_pages").val();
+                };
+                // bulk upload
+                if ($("#radio_bulk").is(":checked")) {
+                    handleBulk("{$gradeable->getId()}", num_pages);
+                }
+                // no user id entered, upload for whoever is logged in
+                else if (user_id == ""){
+                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "")
+                }
+                // user id entered, need to validate first
+                else {
+                    validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, false, "", "", makeSubmission);
+                }
                 e.stopPropagation();
             });
         });
     </script>
 </div>
 HTML;
+        if ($this->core->getUser()->accessAdmin()) {
 
+            $all_directories = $gradeable->getUploadsFiles();
+
+            if (count($all_directories) > 0) {
+
+                $return .= <<<HTML
+<div class="content">
+    <h2>Unassigned PDF Uploads</h2>
+    <form id="bulkForm" method="post">
+    <table class="table table-striped table-bordered persist-area">
+        <thead class="persist-thead">
+            <tr>
+                <td width="3%"></td>
+                <td width="8%">Timestamp</td>
+                <td width="53%">PDF preview</td>
+                <td width="5%">Full PDF</td>
+                <td width="15%">User ID</td>
+                <td width="8%">Submit</td>
+                <td width="8%">Delete</td>
+            </tr>
+        </thead>
+        <tbody>
+HTML;
+                $count = 1;
+                $count_array = array();
+                foreach ($all_directories as $timestamp => $content) {
+                    $files = $content["files"];
+
+                    foreach ($files as $filename => $details) {
+                        $clean_timestamp = str_replace("_", " ", $timestamp);
+                        $path = $details["path"];
+                        if (strpos($filename, "cover") === false) {
+                            continue;
+                        }
+                        // get the full filename for PDF popout
+                        // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
+                        $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
+                        $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
+                        $path_full = str_replace("_cover.pdf", ".pdf", $path);
+                        $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full;
+                        $count_array[$count] = $timestamp."/".$filename_full;
+                        $return .= <<<HTML
+            <tr class="tr tr-vertically-centered">
+                <td>{$count}</td>
+                <td>{$clean_timestamp}</td> 
+                <td>
+                    {$filename_full}</br>
+                    <object data="{$url}" type="application/pdf" width="100%" height="300">
+                        alt : <a href="{$url}">pdf.pdf</a>
+                    </object>
+                </td>
+                <td>
+                    <a onclick="openFile('{$url_full}')"><i class="fa fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
+                </td>
+                <td>
+                    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                    <input type="text" id="bulk_user_id_{$count}" value =""/>
+                </td>
+                <td>
+                    <button type="button" id="bulk_submit_{$count}" class="btn btn-success">Submit</button>
+                </td>
+                <td>
+                    <button type="button" id="bulk_delete_{$count}" class="btn btn-danger">Delete</button>
+                </td>
+            </tr>
+HTML;
+                    $count++;
+                    }
+                $count_array_json = json_encode($count_array);
+                }
+                $return .= <<<HTML
+<script type="text/javascript">
+    function openFile(url_full) {
+        window.open(url_full,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    }
+    $(document).ready(function() {
+        $("#bulkForm input").autocomplete({
+            source: student_without_ids
+        });
+        $("#bulkForm button").click(function(e){
+            var btn = $(document.activeElement);
+            var id = btn.attr("id");
+            var count = btn.parent().parent().index()+1;
+            var user_id = $("#bulk_user_id_"+count).val();
+            var js_count_array = $count_array_json;
+            var path = js_count_array[count];
+            if (id.includes("delete")) {
+                message = "Are you sure you want to delete this submission?";
+                if (!confirm(message)) {
+                    return;
+                }
+                deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
+                moveNextInput(count);
+            }
+            else {
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        $("#bulkForm input").keydown(function(e) {
+            if(e.keyCode === 13) { // enter was pressed
+                var text = $(document.activeElement);
+                var id = text.attr("id");
+                var count = text.parent().parent().index()+1;
+                var user_id = $(document.activeElement).val();
+                var js_count_array = $count_array_json;
+                var path = js_count_array[count];
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+        $("#bulkForm button").keydown(function(e) {
+            if(e.keyCode === 9) { // tab was pressed
+                var text = $(document.activeElement);
+                var id = text.attr("id");
+                var count = text.parent().parent().index()+1;
+                // default behavior is okay for input/submit, but delete should go to next input
+                if (id.includes("delete")) {
+                    moveNextInput(count);
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        });
+    });
+</script>
+HTML;
+                $return .= <<<HTML
+        </tbody>
+    </table>
+    </form>
+</div>
+HTML;
+            }
+        }
+        $team_header = '';
+        if ($gradeable->isTeamAssignment()) {
+            $team_header = <<<HTML
+    <h3>Team: {$gradeable->getTeam()->getMemberList()}</h3><br />
+HTML;
+        }
         if ($gradeable->getSubmissionCount() === 0) {
             $return .= <<<HTML
 <div class="content">
+    {$team_header}
     <span style="font-style: italic">No submissions for this assignment.</span>
 </div>
 HTML;
@@ -271,50 +617,14 @@ HTML;
         else {
             $return .= <<<HTML
 <div class="content">
-
+    {$team_header}
     <h3 class='label' style="float: left">Select Submission Version:</h3>
-    <select style="margin: 0 10px;" name="submission_version"
-    onChange="versionChange('{$this->core->buildUrl(array('component' => 'student',
+HTML;
+            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
-                                                          'gradeable_version' => ""))}', this)">
+                                                          'gradeable_version' => ""))}', this)";
+            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange);
 
-HTML;
-            if ($gradeable->getActiveVersion() == 0) {
-                $selected = ($current_version_number == $gradeable->getActiveVersion()) ? "selected" : "";
-                $return .= <<<HTML
-        <option value="0" {$selected}>Do Not Grade Assignment</option>
-HTML;
-
-            }
-            foreach ($gradeable->getVersions() as $version) {
-                $selected = "";
-                $select_text = array("Version #{$version->getVersion()}");
-                if ($gradeable->getNormalPoints() > 0) {
-                    $select_text[] = "Score: ".$version->getNonHiddenTotal()." / " . $gradeable->getTotalNonHiddenNonExtraCreditPoints();
-                }
-
-                if ($version->getDaysLate() > 0) {
-                    $select_text[] = "Days Late: ".$version->getDaysLate();
-                }
-
-                if ($version->isActive()) {
-                    $select_text[] = "GRADE THIS VERSION";
-                }
-
-                if ($version->getVersion() == $current_version_number) {
-                    $selected = "selected";
-                }
-
-                $select_text = implode("&nbsp;&nbsp;&nbsp;", $select_text);
-                $return .= <<<HTML
-        <option value="{$version->getVersion()}" {$selected}>{$select_text}</option>
-
-HTML;
-            }
-
-            $return .= <<<HTML
-    </select>
-HTML;
             // If viewing the active version, show cancel button, otherwise so button to switch active
             if ($current_version_number > 0) {
                 if ($current_version->getVersion() == $gradeable->getActiveVersion()) {
@@ -362,6 +672,13 @@ HTML;
         </p>
     </div>
 HTML;
+                    if ($gradeable->hasConditionalMessage()) {
+                        $return .= <<<HTML
+    <div class="sub" id="conditional_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
+    </div>
+HTML;
+                    }
                 }
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
@@ -408,6 +725,7 @@ HTML;
 HTML;
                 $results = $gradeable->getResults();
                 if($gradeable->hasResults()) {
+
                     $return .= <<<HTML
 submission timestamp: {$current_version->getSubmissionTime()}<br />
 days late: {$current_version->getDaysLate()} (before extensions)<br />
@@ -468,7 +786,6 @@ HTML;
                     }
 
                 }
-
                 if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
                     if ($gradeable->beingGradedInteractiveQueue() ||
                         (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
@@ -497,235 +814,43 @@ HTML;
 HTML;
                 }
                 else {
-                    $has_badges = false;
-                    if ($gradeable->getNormalPoints() > 0) {
-                        $has_badges = true;
-                        if ($current_version->getNonHiddenTotal() >= $gradeable->getNormalPoints()) {
-                            $background = "green-background";
-                        }
-                        else if ($current_version->getNonHiddenTotal() > 0) {
-                            $background = "yellow-background";
-                        }
-                        else {
-                            $background = "red-background";
-                        }
-                        $return .= <<<HTML
-        <div class="box">
-            <div class="box-title">
-                <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
-                <h4>Total</h4>
-            </div>
-        </div>
-HTML;
-                    }
-
-                    $count = 0;
-                    $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
-                    foreach ($gradeable->getTestcases() as $testcase) {
-                        if (!$testcase->viewTestcase()) {
-                          continue;
-                        }
-                        $div_click = "";
-                        if ($testcase->hasDetails()) {
-                            $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
-                        }
-                        $return .= <<<HTML
-        <div class="box">
-            <div class="box-title" {$div_click}>
-HTML;
-                        if ($testcase->hasDetails()) {
-                            $return .= <<<HTML
-                <div style="float:right; color: #0000EE; text-decoration: underline">Details</div>
-HTML;
-                        }
-                        if ($testcase->hasPoints()) {
-                            if ($testcase->isHidden()) {
-                                $return .= <<<HTML
-                <div class="badge">Hidden</div>
-HTML;
-                            }
-                            else {
-                                $showed_badge = false;
-                                $background = "";
-                                if ($testcase->isExtraCredit()) {
-                                    if ($testcase->getPointsAwarded() > 0) {
-                                        $showed_badge = true;
-                                        $background = "green-background";
-                                        $return .= <<<HTML
-                <div class="badge {$background}"> &nbsp; +{$testcase->getPointsAwarded()} &nbsp; </div>
-HTML;
-                                    }
-                                }
-                                else if ($testcase->getPoints() > 0) {
-                                    if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
-                                        $background = "green-background";
-                                    }
-                                    else if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
-                                        $background = "red-background";
-                                    }
-                                    else {
-                                        $background = "yellow-background";
-                                    }
-                                    $showed_badge = true;
-                                    $return .= <<<HTML
-                <div class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</div>
-HTML;
-                                }
-                                else if ($testcase->getPoints() < 0) {
-                                    if ($testcase->getPointsAwarded() < 0) {
-                                        if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
-                                            $background = "red-background";
-                                        }
-                                        else if ($testcase->getPointsAwarded() < 0) {
-                                            $background = "yellow-background";
-                                        }
-                                        $showed_badge = true;
-                                        $return .= <<<HTML
-                <div class="badge {$background}"> &nbsp; {$testcase->getPointsAwarded()} &nbsp; </div>
-HTML;
-                                    }
-                                }
-                                if (!$showed_badge) {
-                                    $return .= <<<HTML
-                <div class="no-badge"></div>
-HTML;
-                                }
-                            }
-                        }
-                        else if ($has_badges) {
-                            $return .= <<<HTML
-                <div class="no-badge"></div>
-HTML;
-                        }
-                        $name = htmlentities($testcase->getName());
-                        $extra_credit = "";
-                        if($testcase->isExtraCredit()) {
-                          $extra_credit = "<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
-                        }
-                        $command = htmlentities($testcase->getDetails());
-                        $return .= <<<HTML
-                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}</h4>
-            </div>
-HTML;
-                        if ($testcase->hasDetails()) {
-                            $return .= <<<HTML
-            <div id="testcase_{$count}" style="display: {$display_box};">
-HTML;
-                            if (!$testcase->isHidden()) {
-                                $autocheck_cnt = 0;
-                                $autocheck_len = count($testcase->getAutochecks());
-                                foreach ($testcase->getAutochecks() as $autocheck) {
-                                    $description = $autocheck->getDescription();
-                                    $diff_viewer = $autocheck->getDiffViewer();
-
-                                    $return .= <<<HTML
-                <div class="box-block">
-HTML;
-
-                                    $title = "";
-                                    $return .= <<<HTML
-                            <div class='diff-element'>
-HTML;
-                                    if ($diff_viewer->hasDisplayExpected()) {
-                                        $title = "Student ";
-                                    }
-                                    $title .= $description;
-                                    $return .= <<<HTML
-                                <h4>{$title}</h4>
-HTML;
-                                    foreach ($autocheck->getMessages() as $message) {
-                                        $return .= <<<HTML
-                                <span class="red-message">{$message}</span><br />
-HTML;
-                                    }
-
-                                    $myimage = $diff_viewer->getActualImageFilename();
-                                    if ($myimage != "") {
-                                        // borrowed from file-display.php
-                                        $content_type = FileUtils::getContentType($myimage);
-                                        if (substr($content_type, 0, 5) === "image") {
-                                           // Read image path, convert to base64 encoding
-                                           $imageData = base64_encode(file_get_contents($myimage));
-                                           // Format the image SRC:  data:{mime};base64,{data};
-                                           $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
-                                           // insert the sample image data
-                                           $return .= '<img src="'.$myimagesrc.'">';
-                                        }
-                                    }
-                                    else if ($diff_viewer->hasDisplayActual()) {
-                                        $return .= <<<HTML
-                                {$diff_viewer->getDisplayActual()}
-HTML;
-                                    }
-                                    $return .= <<<HTML
-                            </div>
-HTML;
-
-                                    if ($diff_viewer->hasDisplayExpected()) {
-                                        $return .= <<<HTML
-                            <div class='diff-element'>
-                                <h4>Expected {$description}</h4>
-HTML;
-                                        for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
-                                            $return .= <<<HTML
-                                <br />
-HTML;
-                                        }
-                                        $return .= <<<HTML
-                                {$diff_viewer->getDisplayExpected()}
-                            </div>
-HTML;
-                                    }
-
-                                    $return .= <<<HTML
-                </div>
-HTML;
-                                    if (++$autocheck_cnt < $autocheck_len) {
-                                        $return .= <<<HTML
-                <div class="clear"></div>
-HTML;
-                                    }
-                                }
-                            }
-                            $return .= <<<HTML
-            </div>
-HTML;
-                        }
-                        $return .= <<<HTML
-        </div>
-HTML;
-                        $count++;
-                    }
+                    $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable);
                 }
                 $return .= <<<HTML
     </div>
 HTML;
             }
-
             $return .= <<<HTML
 </div>
 HTML;
-            if ($gradeable->taGradesReleased()) {
-                $return .= <<<HTML
+	}
+        if ($gradeable->taGradesReleased()) {
+            $return .= <<<HTML
 <div class="content">
 HTML;
-                if($gradeable->hasGradeFile()) {
-                    $return .= <<<HTML
+            if($gradeable->hasGradeFile()) {
+                $return .= <<<HTML
     <h3 class="label">TA grade</h3>
     <pre>{$gradeable->getGradeFile()}</pre>
 HTML;
-                }
-                else {
-                    $return .= <<<HTML
+            }
+            else {
+                $return .= <<<HTML
     <h3 class="label">TA grade not available</h3>
 HTML;
-                }
-                $return .= <<<HTML
+            }
+            $return .= <<<HTML
 </div>
 HTML;
-            }
         }
 
+        return $return;
+    }
+
+    public function showPopUp($gradeable) {
+        $return = <<<HTML
+            <p>Banana</p>
+HTML;
         return $return;
     }
 }

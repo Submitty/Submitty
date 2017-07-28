@@ -1,9 +1,0 @@
-Testcase  1: Compilation of student code: Factorial.java  2 /  2
-Testcase  2: Compilation of student and instructor test cases: *Test.java  2 /  2
-Testcase  3: Instrumentation of student code  0 /  0
-Testcase  4: Running student tests in hw0/tests/  4 /  4
-Testcase  5: Generating coverage report for student tests  6 /  6
-Testcase  6: Instructor Test                 6 /  6
-Testcase  7: Submission Limit 
-Automatic grading total:                           20 / 20
-Non-hidden automatic grading total:                           20 / 20

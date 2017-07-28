@@ -1,6 +1,7 @@
 ##Members
 [Barbara Cutler](http://www.cs.rpi.edu/~cutler/)  
-[Matthew Peveler](http://mpeveler.com/)
+[Matthew Peveler](http://mpeveler.com/)  
+Jeramey Tyler
 
 **Members of [Rensselaer Center for Open Source](rcos.rpi.edu) (RCOS)**  
 Chris Berger  

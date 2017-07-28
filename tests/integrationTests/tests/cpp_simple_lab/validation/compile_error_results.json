@@ -1,0 +1,206 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "part1/README.txt",
+                    "description": "part1/README.txt"
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Test 1 README"
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "Create Executable",
+                    "messages": [
+                        {
+                            "message": "ERROR: required files not found:  a.out",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test02_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 2 Compilation",
+            "testcase_message": "Compilation Error(s)."
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "Create Executable",
+                    "messages": [
+                        {
+                            "message": "ERROR: required files not found:  a_2.out",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test03_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 3 Dummy Compilation testing view_testcase_message",
+            "testcase_message": "Compilation Error(s)."
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test04_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 4 non leap year"
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test05_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 5 leap year"
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test06_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 6 corner case A"
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test07_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 7 corner case B"
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test08_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 8 corner case C"
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "STDERR.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test09_execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 9 error case A"
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "STDERR.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 10 error case B"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 11 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

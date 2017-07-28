@@ -1,0 +1,55 @@
+.icon-ok {
+    background: url('../img/glyphicons-halflings.png') no-repeat -288px 0px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-time {
+    background: url('../img/glyphicons-halflings.png') no-repeat -48px -24px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-print {
+    background: url('../img/glyphicons-halflings.png') no-repeat -96px -48px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-plus {
+    background: url('../img/glyphicons-halflings.png') no-repeat 0px -96px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-minus {
+    background: url('../img/glyphicons-halflings.png') no-repeat -24px -96px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-folder-closed {
+    background: url('../img/glyphicons-halflings.png') no-repeat -384px -120px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.icon-folder-open {
+    background: url('../img/glyphicons-halflings.png') no-repeat -410px -120px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}

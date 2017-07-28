@@ -5,6 +5,7 @@ use app\libraries\AutoLoader;
 use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
+use app\libraries\Utils;
 
 /*
  * The user's umask is ignored for the user running php, so we need
@@ -32,11 +33,14 @@ require_once(__DIR__ . "/../app/libraries/AutoLoader.php");
 AutoLoader::registerDirectory(__DIR__ . "/../app", true, "app");
 
 $core = new Core();
-/*
+
+/**
  * Register custom expection and error handlers that will get run anytime our application
  * throws something or suffers a fatal error. This allows us to print a very generic error
  * page instead of the actual exception/stack trace during execution, both logging the error
  * and preventing the user from knowing exactly how our system is failing.
+ *
+ * @param Throwable $throwable
  */
 function exception_handler($throwable) {
     global $core;
@@ -96,11 +100,11 @@ $core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()
 $core->getOutput()->addBreadcrumb("Submitty", $core->buildUrl());
 
 
-date_default_timezone_set($core->getConfig()->getTimezone());
+date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 Logger::setLogPath($core->getConfig()->getLogPath());
-ExceptionHandler::setLogExceptions($core->getConfig()->getLogExceptions());
+ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
-$core->loadDatabase();
+$core->loadDatabases();
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
@@ -113,15 +117,19 @@ if($core->getConfig()->isDebug()) {
 // Check if we have a saved cookie with a session id and then that there exists a session with that id
 // If there is no session, then we delete the cookie
 $logged_in = false;
-$cookie_key = $semester."_".$course."_session_id";
+$cookie_key = 'submitty_session_id';
 if (isset($_COOKIE[$cookie_key])) {
-    $logged_in = $core->getSession($_COOKIE[$cookie_key]);
+    $cookie = json_decode($_COOKIE[$cookie_key], true);
+    $logged_in = $core->getSession($cookie['session_id']);
     if (!$logged_in) {
         // delete the stale and invalid cookie
-        setcookie($cookie_key, "", time() - 3600);
+        Utils::setCookie($cookie_key, "", time() - 3600);
     }
     else {
-        setcookie($cookie_key, $_COOKIE[$cookie_key], time() + (7 * 24 * 60 * 60), "/");
+        if ($cookie['expire_time'] > 0) {
+            $cookie['expire_time'] = time() + (7 * 24 * 60 * 60);
+            Utils::setCookie($cookie_key, $cookie, $cookie['expire_time']);
+        }
     }
 }
 
@@ -148,7 +156,15 @@ if (!$logged_in) {
         $_REQUEST['page'] = 'login';
     }
 }
+elseif ($core->getUser() === null) {
+    $core->loadSubmittyUser();
+    if ($_REQUEST['component'] !== 'authentication') {
+        $_REQUEST['component'] = 'navigation';
+        $_REQUEST['page'] = 'no_access';
+    }
+}
 
+// Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
     $log = false;
     $action = "";
@@ -191,10 +207,13 @@ switch($_REQUEST['component']) {
         $control = new app\controllers\StudentController($core);
         $control->run();
         break;
+    case 'misc':
+        $control = new app\controllers\MiscController($core);
+        $control->run();
+        break;
     default:
         $control = new app\controllers\NavigationController($core);
         $control->run();
         break;
 }
-
-echo($core->getOutput()->getOutput());
+$core->getOutput()->displayOutput();

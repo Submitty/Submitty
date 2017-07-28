@@ -44,15 +44,15 @@ def num_to_weekday(num):
         6: "Sat"
     }[num]
 
-path = '/var/local/submitty/autograding_logs/'
+path = '/var/local/submitty/logs/autograding/'
 submissions_per_hour = [0]*24
 avg_hours_ot_week = [[0]*24 for _ in range(7)]
-avg_hours_ot_week_csci1200 = [[0]*24 for _ in range(7)]
+avg_hours_ot_week_datastructures = [[0]*24 for _ in range(7)]
 avg_waittime_ot_week = [[0]*24 for _ in range(7)]  # average wait time per assignment per week
 avg_gradingtime_ot_week = [[0]*24 for _ in range(7)]  # average grade time per assignment per week
 number_of_weekdays = [0]*7
 
-submissions_csci1200 = []
+submissions_datastructures = []
 submission_temp_cs1100 = 0
 submission_temp_cs1200 = 0
 submission_temp_cs2200 = 0
@@ -109,9 +109,9 @@ for filename in os.listdir(path):
             elif (line[101:106] == "grade"):
                 avg_gradingtime_ot_week[day_of_week][hour] += int(line[107:114])
 
-            if (info[1] == "csci1200"):  # Data Structures
+            if (info[1] == "datastructures"):  # Data Structures
                 submission_temp_cs1200 += 1
-                avg_hours_ot_week_csci1200[day_of_week][hour] += 1
+                avg_hours_ot_week_datastructures[day_of_week][hour] += 1
             elif (info[1] == "csci2600"):  # Principles of Software
                 submission_temp_cs2600 += 1
             elif (info[1] == "csci1100"):  # cs1
@@ -190,7 +190,7 @@ f2.write("\n")
 for x in range(7):
     # lets make avg hours a week an avg lol
     avg_hours_ot_week[x][:] = [d // (2*number_of_weekdays[x]) for d in avg_hours_ot_week[x]]
-    avg_hours_ot_week_csci1200[x][:] = [d // (2*number_of_weekdays[x]) for d in avg_hours_ot_week_csci1200[x]]
+    avg_hours_ot_week_datastructures[x][:] = [d // (2*number_of_weekdays[x]) for d in avg_hours_ot_week_datastructures[x]]
 
     # for h in range(24):
     #     if (avg_hours_ot_week[x][h] != 0):

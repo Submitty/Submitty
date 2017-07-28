@@ -48,11 +48,15 @@ function build_homework {
 
 
     echo "--------------------------------------------------------------------------------------"
+    date
     echo "INSTALL assignment config: $hw_source"
     echo "        destination:       $hw_build_path"
     
+
+
+
     # copy the files to the build directory 
-    rsync -ruz --delete  $hw_source/   $hw_build_path
+    rsync -ruz --delete  $hw_source/   $hw_build_path || ( echo 'ERROR: configuration source directory does not exist or hwcron cannot read this directory' ; exit 1 )
     find $hw_build_path -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $hw_build_path -type f -exec chmod -f ug+rw,o= {} \;
 

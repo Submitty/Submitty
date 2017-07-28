@@ -1,12 +1,12 @@
 <div class='diff-container'><div class='diff-code'>
 	<div><span class='line_number'>1</span><span class='line_code'>Please enter a country ==&gt; Germany</span></div>
 	<div><span class='line_number'>2</span><span class='line_code'>All games:</span></div>
-	<div class='highlight' id="id_actual_0">
+	<div class='highlight' id='id_actual_0'>
 	<div class='bad'><span class='line_number'>3</span><span class='line_code'>                 <span class='highlight-char'>  </span>G<span class='highlight-char'>h</span>an<span class='highlight-char'>a</span>   <span class='highlight-char'>1</span>-<span class='highlight-char'>2</span>   <span class='highlight-char'>USA</span>                <span class='highlight-char'>     </span>Winner: <span class='highlight-char'>USA</span><span class='line_code_inner'></span></span></div>
 	<div class='bad'><span class='line_number'>4</span><span class='line_code'>                    <span class='highlight-char'> USA   </span>2-2   <span class='highlight-char'>Portug</span>a<span class='highlight-char'>l</span><span class='line_code_inner'>                Winner: Draw</span></span></div>
 	</div>
 	<div><span class='line_number'>5</span><span class='line_code'>                     USA   0-1   Germany                 Winner: Germany</span></div>
-	<div class='highlight' id="id_actual_1">
+	<div class='highlight' id='id_actual_1'>
 	<div class='bad'><span class='line_number'>6</span><span class='line_code'><span class='line_code_inner'>                 Belgium   2-1   USA                     Winner: Belgium</span></span></div>
 	<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>
 	<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>
@@ -14,7 +14,7 @@
 	</div>
 	<div><span class='line_number'>7</span><span class='line_code'>Scores:</span></div>
 	<div><span class='line_number'>8</span><span class='line_code'>Games Wins  Lose  Draw  GF    GA</span></div>
-	<div class='highlight' id="id_actual_2">
+	<div class='highlight' id='id_actual_2'>
 	<div class='bad'><span class='line_number'>9</span><span class='line_code'><span class='line_code_inner'>4     1     2     1     5     6     </span></span></div>
 	<div class='bad'><span class='line_number'>10</span><span class='line_code'><span class='line_code_inner'>The highest achievement in 2014 World cup was round of 16</span></span></div>
 	<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>

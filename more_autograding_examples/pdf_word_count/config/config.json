@@ -1,0 +1,62 @@
+{
+    // 1 mb maximum submission size
+    "max_submission_size" : 1000000,
+    "assignment_message" : "Please upload a single .pdf file containing 500-1000 words.",
+
+    "autograding" : {
+        "submission_to_compilation" : [ "*.pdf" ],
+        "submission_to_runner" : [ "*.pdf" ],
+        "submission_to_validation" : [ "*.pdf" ]
+    },
+    
+    "testcases" : [ 
+
+        {
+            "type" : "FileCheck",
+            "title" : "Submitted a .pdf file",
+            "actual_file" : "*.pdf",
+            "points" : 1
+        },
+
+        {
+            "title" : "Required 500-1000 Words",
+            "command" : [ "pdftotext *.pdf plaintext.txt",
+                          "wc -w < plaintext.txt" ],
+            "points" : 1,
+            "validation" : [
+                {
+                    // words must be >= 500
+                    "method" : "intComparison",
+                    "actual_file" : "STDOUT_1.txt",
+                    "description" : "Word Count",
+		    "comparison" : "ge",
+                    "deduction": 1.0,
+                    "term" : 500,
+                    "failure_message" : "Too few words",
+                    "show_message" : "on_failure",
+                    "show_actual" : "on_failure"
+                },
+                {
+                    // words must be <= 1000
+                    "method" : "intComparison",
+                    "actual_file" : "STDOUT_1.txt",
+                    "description" : "Word Count",
+		    "comparison" : "le",
+                    "deduction": 1.0,
+                    "term" : 1000,
+                    "failure_message" : "Too many words",
+                    "show_message" : "on_failure",
+                    "show_actual" : "on_failure"
+                },
+                {
+                    "actual_file": "plaintext.txt",
+                    "deduction": 1.0,
+                    "description": "plaintext.txt",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                }
+            ]
+        }
+    ]
+}

@@ -307,7 +307,7 @@ SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gra
             }
             ///TODO UPDATE THE STATUS
             $params = array($this->g_id, $this->student_id, User::$user_id, '', 1, 0, $active_version);
-            Database::query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params);
+            Database::query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version, gd_user_viewed_date ) VALUES(?,?,?,?,?,?,?, NULL)", $params);
             $this->gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
 
             Database::query($eg_details_query, array($this->student_id, $this->g_id));

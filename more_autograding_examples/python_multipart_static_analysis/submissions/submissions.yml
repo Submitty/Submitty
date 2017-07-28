@@ -1,0 +1,18 @@
+part1:
+  - p1_bug.py
+  - p1_sol.py
+part2:
+  - p2_bug.txt
+  - p2_bug2.txt
+  - p2_bug3.txt
+  - p2_sol.txt
+part3:
+  - p3_bug.py
+  - p3_bug2.py
+  - p3_bug3.py
+  - p3_sol.py
+part4:
+  - p4_bug.py
+  - p4_sol.py
+part5:
+  - p5_sol.py

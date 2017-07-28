@@ -4,7 +4,15 @@
         "AUTO_POINTS" : 10
     },
 
+    "whitelist_executables" : [ "a.out" ],
+
     "testcases" : [
+        {
+            "title" : "dummy compilation",
+            "command" : [ "ls ." ],
+            "type" : "Compilation",
+            "executable_name" : "a.out"
+        },
         {
             "title" : "hello world",
 	    "details" : "details",
@@ -15,7 +23,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "description" : "Standard OUTPUT (STDOUT)",
-		    "expected_file" : "test1_output.txt"
+		    "expected_file" : "test2_output.txt"
                 }
             ]
         }

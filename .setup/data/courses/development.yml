@@ -1,0 +1,168 @@
+code: development
+instructor: instructor
+gradeables:
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: upload_only
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: cpp_simple_lab
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: cpp_cats
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: minimal_code_editing
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: cpp_custom
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: cpp_hidden_tests
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: c_failure_messages
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: python_simple_homework
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: python_linehighlight
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: python_multipart_static_analysis
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: iclicker_upload
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: paragraph_textboxes
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+  
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: pdf_word_count
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: choice_of_language
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0
+
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  gradeable_config: cpp_provided_code
+  g_ta_view_start_date: -2 days
+  eg_submission_open_date: -1 days
+  eg_submission_due_date: +1000 days
+  g_grade_start_date: +1005 days
+  g_grade_released_date: +1010 days
+  eg_max_random_submissions: 0

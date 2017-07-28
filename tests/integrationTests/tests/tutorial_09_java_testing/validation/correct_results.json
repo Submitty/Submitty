@@ -1,0 +1,27 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 2,
+            "test_name": "Test 1 Java - Compilation"
+        },
+        {
+            "points_awarded": 2,
+            "test_name": "Test 2 Java - Instructor JUnit Test Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03_STDOUT.txt",
+                    "description": "JUnit output"
+                }
+            ],
+            "points_awarded": 16,
+            "test_name": "Test 3 Java - JUnit Test"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 4 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

@@ -32,31 +32,31 @@
  * to the longer string.
  */
 Change diffNaive ( const std::string& student, const std::string& expected ) {
-	Change differences;
-	differences.a_start = 0;
-	differences.b_start = 0;
+  Change differences;
+  differences.a_start = 0;
+  differences.b_start = 0;
 
-	unsigned int len =
-		( unsigned int ) ( student.size() < expected.size() ) ?
-		( unsigned int ) student.length() :
-		( unsigned int ) expected.length();
+  unsigned int len =
+    ( unsigned int ) ( student.size() < expected.size() ) ?
+    ( unsigned int ) student.length() :
+    ( unsigned int ) expected.length();
 
-	unsigned int i = 0;
-	for ( i = 0; i < len; i++ ) {
-		if ( student[i] != expected[i] ) {
-			differences.a_changes.push_back( i );
-			differences.b_changes.push_back( i );
-		}
-	}
-	while ( i < expected.length() ) {
-		differences.b_changes.push_back( i );
-		i++;
-	}
-	while ( i < student.length() ) {
-		differences.a_changes.push_back( i );
-		i++;
-	}
-	return differences;
+  unsigned int i = 0;
+  for ( i = 0; i < len; i++ ) {
+    if ( student[i] != expected[i] ) {
+      differences.a_changes.push_back( i );
+      differences.b_changes.push_back( i );
+    }
+  }
+  while ( i < expected.length() ) {
+    differences.b_changes.push_back( i );
+    i++;
+  }
+  while ( i < student.length() ) {
+    differences.a_changes.push_back( i );
+    i++;
+  }
+  return differences;
 }
 
 /* METHOD: diffNoSpace
@@ -69,43 +69,43 @@ Change diffNaive ( const std::string& student, const std::string& expected ) {
  * in linear time with respect to the longer string.
  */
 Change diffNoSpace ( const std::string& _student,
-		     const std::string& _expected ) {
-	Change differences;
-	differences.a_start = 0;
-	differences.b_start = 0;
-	
-	std::string student = string_trim_right( _student );
-	std::string expected = string_trim_right( _expected );
-	
-	unsigned int i = 0;
-	unsigned int j = 0;
-	while ( i != student.size() && j != expected.size() ) {
-		if ( student[i] == ' ' ) {
-			i++;
-			continue;
-		}
-		if ( expected[j] == ' ' ) {
-			j++;
-			continue;
-		}
-		if ( student[i] != expected[j] ) {
-			differences.a_changes.push_back( i );
-			differences.b_changes.push_back( j );
-		}
-		i++;
-		j++;
-	}
-	while ( i != student.size() ) {
-		if ( student[i] != ' ' )
-			differences.a_changes.push_back( i );
-		i++;
-	}	
-	while ( j != expected.size() ) {
-		if ( expected[j] != ' ' )
-			differences.b_changes.push_back( j );
-		j++;
-	}
-	return differences;
+         const std::string& _expected ) {
+  Change differences;
+  differences.a_start = 0;
+  differences.b_start = 0;
+  
+  std::string student = string_trim_right( _student );
+  std::string expected = string_trim_right( _expected );
+  
+  unsigned int i = 0;
+  unsigned int j = 0;
+  while ( i != student.size() && j != expected.size() ) {
+    if ( student[i] == ' ' ) {
+      i++;
+      continue;
+    }
+    if ( expected[j] == ' ' ) {
+      j++;
+      continue;
+    }
+    if ( student[i] != expected[j] ) {
+      differences.a_changes.push_back( i );
+      differences.b_changes.push_back( j );
+    }
+    i++;
+    j++;
+  }
+  while ( i != student.size() ) {
+    if ( student[i] != ' ' )
+      differences.a_changes.push_back( i );
+    i++;
+  }  
+  while ( j != expected.size() ) {
+    if ( expected[j] != ' ' )
+      differences.b_changes.push_back( j );
+    j++;
+  }
+  return differences;
 }
 
 /* METHOD: diffLine
@@ -119,54 +119,54 @@ Change diffNoSpace ( const std::string& _student,
  * with respect to the longer string.
  */
 TestResults* diffLine ( const std::string& _student,
-			const std::string& _expected ) {
-	Difference* diffs = new Difference();
-	diffs->type = 1;
-	
-	diffs->output_length_a = 0;
-	diffs->output_length_b = 0;
-	Change file;
-	file.a_start = file.b_start = 0;
-	std::stringstream student;
-	student.str( _student );
-	std::stringstream expected;
-	expected.str( _expected );
-	std::string s_line;
-	std::string i_line;
-	unsigned int i = 0;
-	bool i_eof = false;
-	bool s_eof = false;
-	while ( !i_eof || !s_eof ) {
-		std::getline( student, s_line );
-		std::getline( expected, i_line );
-		if ( !i_eof )
-			diffs->output_length_b++;
-		if ( !s_eof )
-			diffs->output_length_a++;
-		if ( !student ) {
-			s_eof = true;
-			s_line = "";
-		}
-		if ( !expected ) {
-			i_eof = true;
-			i_line = "";
-		}
-		Change changes = diffNaive( s_line, i_line );
-		if ( changes.a_changes.size() || changes.b_changes.size() ) {
-			if ( !s_eof )
-				file.a_changes.push_back( i );
-			if ( !i_eof )
-				file.b_changes.push_back( i );
-			file.a_characters.push_back( changes.a_changes );
-			file.b_characters.push_back( changes.b_changes );
-		}
-		i++;
-	}
-	diffs->distance = ( int ) std::max( file.a_changes.size(),
-					    file.b_changes.size() );
+      const std::string& _expected ) {
+  Difference* diffs = new Difference();
+  diffs->type = 1;
+  
+  diffs->output_length_a = 0;
+  diffs->output_length_b = 0;
+  Change file;
+  file.a_start = file.b_start = 0;
+  std::stringstream student;
+  student.str( _student );
+  std::stringstream expected;
+  expected.str( _expected );
+  std::string s_line;
+  std::string i_line;
+  unsigned int i = 0;
+  bool i_eof = false;
+  bool s_eof = false;
+  while ( !i_eof || !s_eof ) {
+    std::getline( student, s_line );
+    std::getline( expected, i_line );
+    if ( !i_eof )
+      diffs->output_length_b++;
+    if ( !s_eof )
+      diffs->output_length_a++;
+    if ( !student ) {
+      s_eof = true;
+      s_line = "";
+    }
+    if ( !expected ) {
+      i_eof = true;
+      i_line = "";
+    }
+    Change changes = diffNaive( s_line, i_line );
+    if ( changes.a_changes.size() || changes.b_changes.size() ) {
+      if ( !s_eof )
+        file.a_changes.push_back( i );
+      if ( !i_eof )
+        file.b_changes.push_back( i );
+      file.a_characters.push_back( changes.a_changes );
+      file.b_characters.push_back( changes.b_changes );
+    }
+    i++;
+  }
+  diffs->setDistance ( ( int ) std::max( file.a_changes.size(),
+                                               file.b_changes.size() ) );
 
-	diffs->changes.push_back( file );
-	return diffs;
+  diffs->changes.push_back( file );
+  return diffs;
 }
 
 /* METHOD: diffLineNoSpace
@@ -180,47 +180,47 @@ TestResults* diffLine ( const std::string& _student,
  * the longer string.
  */
 TestResults* diffLineNoSpace ( const std::string& _student,
-			       const std::string& _expected ) {
-	Difference* diffs = new Difference();
-	diffs->type = 1;
+             const std::string& _expected ) {
+  Difference* diffs = new Difference();
+  diffs->type = 1;
 
-	Change file;
-	file.a_start = file.b_start = 0;
-	std::stringstream student;
-	student.str( _student );
-	std::stringstream expected;
-	expected.str( _expected );
-	std::string s_line;
-	std::string i_line;
-	int i = 0;
-	bool i_eof = false;
-	bool s_eof = false;
-	while ( !i_eof || !s_eof ) {
-		std::getline( student, s_line );
-		std::getline( expected, i_line );
-		if ( !student ) {
-			s_eof = true;
-			s_line = "";
-		}
-		if ( !expected ) {
-			i_eof = true;
-			i_line = "";
-		}
-		Change changes = diffNoSpace( s_line, i_line );
-		if ( changes.a_changes.size() || changes.b_changes.size() ) {
-			if ( !s_eof )
-				file.a_changes.push_back( i );
-			if ( !i_eof )
-				file.b_changes.push_back( i );
-			file.a_characters.push_back( changes.a_changes );
-			file.b_characters.push_back( changes.b_changes );
-		}
-		i++;
-	}
-	diffs->distance = ( int ) std::max( file.a_changes.size(),
-					    file.b_changes.size() );
-	diffs->changes.push_back( file );
-	return diffs;
+  Change file;
+  file.a_start = file.b_start = 0;
+  std::stringstream student;
+  student.str( _student );
+  std::stringstream expected;
+  expected.str( _expected );
+  std::string s_line;
+  std::string i_line;
+  int i = 0;
+  bool i_eof = false;
+  bool s_eof = false;
+  while ( !i_eof || !s_eof ) {
+    std::getline( student, s_line );
+    std::getline( expected, i_line );
+    if ( !student ) {
+      s_eof = true;
+      s_line = "";
+    }
+    if ( !expected ) {
+      i_eof = true;
+      i_line = "";
+    }
+    Change changes = diffNoSpace( s_line, i_line );
+    if ( changes.a_changes.size() || changes.b_changes.size() ) {
+      if ( !s_eof )
+        file.a_changes.push_back( i );
+      if ( !i_eof )
+        file.b_changes.push_back( i );
+      file.a_characters.push_back( changes.a_changes );
+      file.b_characters.push_back( changes.b_changes );
+    }
+    i++;
+  }
+  diffs->setDistance( ( int ) std::max( file.a_changes.size(),
+                                              file.b_changes.size() ));
+  diffs->changes.push_back( file );
+  return diffs;
 }
 
 #endif //__DIFFNAIVE__

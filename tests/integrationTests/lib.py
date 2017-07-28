@@ -14,6 +14,7 @@ if sys.version_info[0] == 3:
 
 # global variable available to be used by the test suite modules
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
+SUBMITTY_TUTORIAL_DIR = "__INSTALL__FILLIN__SUBMITTY_TUTORIAL_DIR__"
 
 GRADING_SOURCE_DIR =  SUBMITTY_INSTALL_DIR + "/src/grading"
 
@@ -76,7 +77,7 @@ white = ASCIIEscapeManager([37])
 # Run the given list of test case names
 def run_tests(names):
     totalmodules = len(names)
-    for name in names:
+    for name in sorted(names):
         name = name.split(".")
         key = name[0]
         val = to_run[key]
@@ -130,7 +131,7 @@ def run_tests(names):
             totalmodules -= 1
     if totalmodules == len(names):
         with bold + green:
-            print("All modules passed")
+            print("All " + str(len(names)) + " modules passed")
     else:
         with bold + red:
             print(str(totalmodules) + "/" + str(len(names)) + " modules passed")
@@ -188,8 +189,8 @@ class TestcaseWrapper:
             return_code = subprocess.call(["make"],
                     cwd=os.path.join(self.testcase_path, "build"), stdout=make_output, stderr=make_output)
             if return_code != 0:
+                self.debug_print("log/make_output.txt")
                 raise RuntimeError("Build (make) exited with exit code " + str(return_code))
-
 
 
     # Run compile.out using some sane arguments.
@@ -262,8 +263,20 @@ class TestcaseWrapper:
         out, err = process.communicate()
         if process.returncode == 1:
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
-            " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
+                               " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
+
+    # Helpful for debugging make errors on travis
+    def debug_print(self,f):
+        filename=os.path.join(self.testcase_path,f)
+        print ("\nDEBUG_PRINT: ",filename)
+        if os.path.exists(filename):
+            with open(filename, 'r') as fin:
+                print (fin.read())
+        else:
+            print ("  < file does not exist >")
+
+            
     # Loads 2 files, truncates them after specified number of lines,
     # and then checks to see if they match
     def diff_truncate(self, num_lines_to_compare, f1, f2=""):

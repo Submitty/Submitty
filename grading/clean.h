@@ -17,6 +17,8 @@
 #include <sstream>
 #include <vector>
 
+#include "json.hpp"
+
 typedef std::vector<std::vector<std::string> > vectorOfWords;
 typedef std::vector<std::string> vectorOfLines;
 
@@ -44,7 +46,7 @@ vectorOfWords stringToWordsLimitLineLength(std::string text);
  * RETURN: vectorOfLines: a vector of strings 
  * PURPOSE: eachstring is a line of text from the input
  */
-vectorOfLines stringToLines(std::string text);
+vectorOfLines stringToLines(std::string text, const nlohmann::json &j);
 
 /* METHOD: linesToString
  * ARGS: text: the body of text that needs cleaning

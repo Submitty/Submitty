@@ -20,3 +20,4 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite/log
 cp -r tests/. ${SUBMITTY_INSTALL_DIR}/test_suite
 
 sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|${SUBMITTY_INSTALL_DIR}|g" ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/lib.py
+sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_TUTORIAL_DIR__|${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial|g" ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/lib.py

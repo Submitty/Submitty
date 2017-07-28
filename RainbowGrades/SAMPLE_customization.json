@@ -1,408 +1,185 @@
 {
-	//display options | "instructor_notes", "exam_seating", "moss_details",
-	//display options | "final_grade", "grade_summary", "iclicker",
-	"display": ["grade_details"],
-	"gradeables": {
-		"lab": {
-			"count": 14,
-			"percent": 0.15,
-			"ids": {
-				"lab01": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab02": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab03": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab04": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab05": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab06": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab07": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab08": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab09": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab10": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab11": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab12": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab13": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-				"lab14": {
-					"max": 3,
-					"curve": [3.0, 2.5, 2.0, 1.5, 1.0],
-					"percent": 0.01,
-					"clamped": 3,
-					"add_curve": 1
-				},
-			}
-		},
-		"hw": {
-			"count": 10,
-			"percent": 0.35,
-			"ids": {
-				"hw01": {
-					//required
-					"max": 50,
-					//optional
-					"curve": [50.0, 45.0, 40.0, 35.0, 30.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.035,
-					//optional
-					"clamped": 50,
-					//optional
-					"add_curve": 5
-				},
-				"hw02": {
-					//required
-					"max": 50,
-					//optional
-					"curve": [50.0, 45.0, 40.0, 35.0, 30.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.035,
-					//optional
-					"clamped": 50,
-					//optional
-					"add_curve": 0
-				},
-				"hw03": {
-					//required
-					"max": 50,
-					//optional
-					"curve": [50.0, 45.0, 40.0, 35.0, 30.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.035,
-					//optional
-					"clamped": 50,
-					//optional
-					"add_curve": 5
-				},
-				"hw04":  {
-					//required
-					"max": 50,
-					//optional
-					"curve": [50.0, 45.0, 40.0, 35.0, 30.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.035,
-					//optional
-					"clamped": 50,
-					//optional
-					"add_curve": 5
-				},
-				"hw05":  {
-					//required
-					"max": 50,
-					//optional
-					"curve": [50.0, 45.0, 40.0, 35.0, 30.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.035,
-					//optional
-					"clamped": 50,
-					//optional
-					"add_curve": 5
-				},
-				"hw06": {
-					//required
-					"max": 50,
-					//optional
-					"curve": [50.0, 45.0, 40.0, 35.0, 30.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.035,
-					//optional
-					"clamped": 50,
-					//optional
-					"add_curve": 5
-				},
-				"hw07": {
-					//required
-					"max": 50,
-					//optional
-					"curve": [50.0, 45.0, 40.0, 35.0, 30.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.035,
-					//optional
-					"clamped": 50,
-					//optional
-					"add_curve": 5
-				},
-				"hw08": {
-					//required
-					"max": 50,
-					//optional
-					"curve": [50.0, 45.0, 40.0, 35.0, 30.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.035,
-					//optional
-					"clamped": 50,
-					//optional
-					"add_curve": 5
-				},
-				"hw09": {
-					//required
-					"max": 50,
-					//optional
-					"curve": [50.0, 45.0, 40.0, 35.0, 30.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.035,
-					//optional
-					"clamped": 50,
-					//optional
-					"add_curve": 5
-				},
-				"hw10": {
-					//required
-					"max": 50,
-					//optional
-					"curve": [50.0, 45.0, 40.0, 35.0, 30.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.035,
-					//optional
-					"clamped": 50,
-					//optional
-					"add_curve": 5
-				},
-			}
-		},
-		"test": {
-			"count": 3,
-			"percent": 0.30,
-			"ids": {
-				"test01": {
-					//required
-					"max": 100,
-					//optional
-					"curve": [100.0, 90.0, 80.0, 70.0, 60.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.10,
-					//optional
-					"clamped": 100,
-					//optional
-					"add_curve": 5
-				},
-				"test02": {
-					//required
-					"max": 100,
-					//optional
-					"curve": [100.0, 90.0, 80.0, 70.0, 60.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.10,
-					//optional
-					"clamped": 100,
-					//optional
-					"add_curve": 5
-				},
-				"test03": {
-					//required
-					"max": 100,
-					//optional
-					"curve": [100.0, 90.0, 80.0, 70.0, 60.0],
-					//optional (add up to gradeable percent)
-					"percent": 0.10,
-					//optional
-					"clamped": 100,
-					//optional
-					"add_curve": 5
-				},
-			}
-		}
-		"exam": {
-			"count": 1,
-			"percent": 0.20,
-			"points": 150,
-			"exam01": {
-				"curve": [150.0, 135.0, 130.0, 115.0, 100.0],
-				//seating
-				//"title": "My Favorite CS Class, Test 1",
-				//"date": "Monday April 1st",
-				//"time": "6-7:50pm",
-				// Don't assign a zone if the student doesn't have at least this many points overall (probably dropped)
-				//"min_overall_for_zone_assignment": 1.0,
-				// Where should students go if they do not have a room assignment?
-				//"default_room": "DCC 308",
-				//"exam_seating": ["exam1_zone_counts.txt", "exam1_seating.txt"]
-				//exam_seating exam2_zone_counts.txt exam2_seating.txt
-				//exam_seating exam3_zone_counts.txt exam3_seating.txt
-				//exam_seating exam4_zone_counts.txt exam4_seating.txt
-			}
-		}
-	}
-	// move to inside a gradeable
-	"use": {
-		//move to test
-		"test_improvement_averaging_adjustment": true,
+    "display": [
+        "instructor_notes",
+        "grade_summary",
+        "grade_details"
+        //"exam_seating",
+        //"moss_details",
+        //"final_grade",
+        //"iclicker"
+    ],
+    "display_benchmark": [
+        "average",
+        "stddev",
+        "perfect",
+        "lowest_a-",
+        "lowest_b-",
+        "lowest_c-",
+        "lowest_d"
+    ],
+    // These are the default curves applied to each benchmark
+    // (can be overridden per item below)
+    "benchmark_percent": {
+    "lowest_a-": 0.9,
+    "lowest_b-": 0.8,
+    "lowest_c-": 0.7,
+    "lowest_d": 0.6
+    },
+    "gradeables": [
+  { "type" : "lab",
+    "count": 14,
+    "percent": 0.15,
+    "ids": [
+        { "id":"lab01", "max": 3 }
+    ]
+  },
+  { "type" : "hw",
+      "count": 10,
+      "percent": 0.35,
+      "ids": [
+    { "id":"hw01", "max": 50, "curve": [45.0, 40.0, 35.0, 30.0]},
+    { "id":"hw02", "max": 50, "curve": [45.0, 40.0, 35.0, 30.0]},
+    { "id":"hw03", "max": 50, "curve": [45.0, 40.0, 35.0, 30.0], "released":false },
+    { "id":"hw04", "max": 50, "curve": [45.0, 40.0, 35.0, 30.0], "released":false }
+      ]
+  },
+  { "type": "test",
+    "count": 3,
+    "percent": 0.30,
+    "ids": [
+        { "id":"test01", "max": 100, "curve": [90.0, 80.0, 70.0, 60.0]},
+        { "id":"test02", "max": 100, "curve": [90.0, 80.0, 70.0, 60.0], "released":false },
+        { "id":"test03", "max": 100, "curve": [90.0, 80.0, 70.0, 60.0], "released":false }
+          ]
+  },
+  { "type": "exam",
+    "count": 1,
+    "percent": 0.20,
+    "ids" : [
+              { "id":"exam01","max":150,"curve": [135.0, 130.0, 115.0, 100.0]
+    //seating
+    //"title": "My Favorite CS Class, Test 1",
+    //"date": "Monday April 1st",
+    //"time": "6-7:50pm",
+    // Don't assign a zone if the student doesn't have at least this many points overall (probably dropped)
+    //"min_overall_for_zone_assignment": 1.0,
+    // Where should students go if they do not have a room assignment?
+    //"default_room": "DCC 308",
+    //"exam_seating": ["exam1_zone_counts.txt", "exam1_seating.txt"]
+    //exam_seating exam2_zone_counts.txt exam2_seating.txt
+    //exam_seating exam3_zone_counts.txt exam3_seating.txt
+    //exam_seating exam4_zone_counts.txt exam4_seating.txt
+        }
+    ]
+        }
+    ],
 
-		"quiz_normalize_and_drop_two": true,
-		"lowest_test_counts_half": true,
-		"late_day_penalty": .25
-	},
-	//"final_cutoff": {
-	//	"A": 93.0,
-	//	"A-": 90.0,
-	//	"B+": 87.0,
-	//	"B": 83.0,
-	//	"B-": 80.0,
-	//	"C+": 77.0,
-	//	"C": 73.0,
-	//	"C-": 70.0,
-	//	"D+": 65.0,
-	//	"D": 60.0
-	//},
-	"section": {
-		1: "TA_name_1",
-		2: "TA_name_2",
-		3: "TA_name_3",
-		4: "TA_name_4",
-		5: "TA_name_1",
-		6: "TA_name_2",
-		7: "TA_name_3",
-		8: "TA_name_4"
-	},
-	"messages": {
-		"msg1": "<b>My Favorite CS Class</b>",
-		"msg2": "Note: Please be patient with data entry/grade corrections for the most recent lab, homework, and test.",
-		"msg3": "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week.",
-		//"msg4": "<em>Note: All grades for lab & hw are uploaded.</em>",
-		//"msg5": "<em>Note: All regrade requests have been processed.</em>"
-	},
-	////////////////////////////////////////////////////////////////////////////////
-	// ICLICKER LECTURE
-	//
-	//"iclicker_ids": "<CSV_FILE>",
-	//
-	//"iclicker": {
-	//	"<WHICH_LECTURE>": {
-	//		"file": "<CSV_FILE>",
-	//		"column": "<COLUMN>",
-	//		"answer": "<CORRECT_ANSWER(S)"
-	//	}
-	//},
-	//
-	////////////////////////////////////////////////////////////////////////////////
-	// ACADEMIC INTEGRITY VIOLATION
-	//
-	//"moss": [
-	//	"<USERNAME>": {
-	//		"hw": "<WHICH_HOMEWORK>",
-	//		"penalty": "<GRADE_LETTER_PENALTY>"
-	//	},
-	//	"smithj": {
-	//		"hw": 5,
-	//		"penalty": 1.0
-	//	}
-	//],
-	//
-	//
-	////////////////////////////////////////////////////////////////////////////////
-	// EWS
-	//
-	//"warning": [
-	//	{
-	//		"user": "<USERNAME>",
-	//		"date": "<DATE>",
-	//		"msg": "<MESSAGE>",
-	//	},
-	//],
-	//
-	////////////////////////////////////////////////////////////////////////////////
-	// UTA RECOMMENDATIONS
-	//
-	//"recommend": [
-	//	{
-	//		"user": "<USERNAME>",
-	//		"date": "<DATE>",
-	//		"msg": "<MESSAGE>",
-	//	},
-	//],
-	//
-	////////////////////////////////////////////////////////////////////////////////
-	// OTHER NOTES
-	//
-	//"note": [
-	//	{
-	//		"user": "<USERNAME>",
-	//		"date": "<DATE>",
-	//		"msg": "<MESSAGE>",
-	//	},
-	//],
-	//
-	////////////////////////////////////////////////////////////////////////////////
-	// MANUAL FINAL GRADES
-	//
-	//"manual_grade": {
-	//	"<USERNAME>": {
-	//		"grade": "<GRADE>",
-	//		"note": "<NOTE>"
-	//	}
-	//}
-	//
+    // move to inside a gradeable
+    "use": {
+  //move to test
+  "test_improvement_averaging_adjustment": true,
+
+  "quiz_normalize_and_drop_two": true,
+  "lowest_test_counts_half": true,
+  "late_day_penalty": 0.10
+    }
+/*,
+   //"final_cutoff": {
+    //  "A": 93.0,
+    //  "A-": 90.0,
+    //  "B+": 87.0,
+    //  "B": 83.0,
+    //  "B-": 80.0,
+    //  "C+": 77.0,
+    //  "C": 73.0,
+    //  "C-": 70.0,
+    //  "D+": 65.0,
+    //  "D": 60.0
+    //},
+*/
+,
+    "section": {
+  "1": "TA_name_1",
+  "2": "TA_name_2",
+  "3": "TA_name_3",
+  "4": "TA_name_4",
+  "5": "TA_name_1",
+  "6": "TA_name_2",
+  "7": "TA_name_3",
+  "8": "TA_name_4"
+    }/*,
+    "messages": {
+  "<b>My Favorite CS Class</b>",
+  "Note: Please be patient with data entry/grade corrections for the most recent lab, homework, and test.",
+  "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week."
+  //"<em>Note: All grades for lab & hw are uploaded.</em>",
+  //"<em>Note: All regrade requests have been processed.</em>"
+    }
+*/
+    ////////////////////////////////////////////////////////////////////////////////
+    // ICLICKER LECTURE
+    //
+    //"iclicker_ids": "<CSV_FILE>",
+    //
+    //"iclicker": {
+    //  "<WHICH_LECTURE>": {
+    //    "file": "<CSV_FILE>",
+    //    "column": "<COLUMN>",
+    //    "answer": "<CORRECT_ANSWER(S)"
+    //  }
+    //},
+    //
+    ////////////////////////////////////////////////////////////////////////////////
+    // ACADEMIC INTEGRITY VIOLATION
+    //
+    //"moss": [
+    //  "<USERNAME>": {
+    //    "hw": "<WHICH_HOMEWORK>",
+    //    "penalty": "<GRADE_LETTER_PENALTY>"
+    //  },
+    //  "smithj": {
+    //    "hw": 5,
+    //    "penalty": 1.0
+    //  }
+    //],
+    //
+    //
+    ////////////////////////////////////////////////////////////////////////////////
+    // EWS
+    /*
+    "warning": [
+      {
+            "msg": "EWS: TEST 1",
+          "ids" : [ "test01" ],
+            "value" : 47
+        },
+      {
+            "msg": "EWS: HW 1&2",
+          "ids" : [ "hw01", "hw02" ],
+            "value" : 34
+        }
+    ],
+    */
+    ////////////////////////////////////////////////////////////////////////////////
+    // OTHER NOTES
+    //
+    //"note": [
+    //  {
+    //    "user": "<USERNAME>",
+    //    "date": "<DATE>",
+    //    "msg": "<MESSAGE>",
+    //  },
+    //],
+    //
+    ////////////////////////////////////////////////////////////////////////////////
+    // MANUAL FINAL GRADES
+    //
+    //"manual_grade": {
+    //  "<USERNAME>": {
+    //    "grade": "<GRADE>",
+    //    "note": "<NOTE>"
+    //  }
+    //}
+    //
 }
+

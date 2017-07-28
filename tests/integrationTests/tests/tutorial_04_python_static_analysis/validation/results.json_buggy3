@@ -1,0 +1,48 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01_STDOUT_0.txt",
+                    "description": "Program Output",
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/output.txt"
+                },
+                {
+                    "description": "Number of assignments",
+                    "messages": [
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Number of multiplications",
+                    "messages": [
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Number of additions",
+                    "messages": [
+                        {
+                            "message": "Re-read the problem instructions.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 1 Python - Static Analysis"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 2 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

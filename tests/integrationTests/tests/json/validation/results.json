@@ -1,20 +1,37 @@
 {
-"testcases": [
+    "testcases": [
+        {
+            "autochecks": [
                 {
-                        "test_name": "Test 1 hello world",
-                        "autochecks": [
-                                {                                        "actual_file":"test01_STDOUT.txt",
-                                        "expected_file":"test_output/testassignment/test1_output.txt",
-                                        "difference_file":"test01_0_diff.json",
-                                        "description": "Standard OUTPUT (STDOUT)"
-                                }
-                        ],
-                        "points_awarded": 10
-                },
-                {
-                    "points_awarded": 0,
-                    "test_name": "Test 2 Submission Limit",
-                    "view_testcase": false
+                    "description": "Create Executable",
+                    "messages": [
+                        {
+                            "message": "ERROR: required files not found:  a.out",
+                            "type": "failure"
+                        }
+                    ]
                 }
-        ]
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 1 dummy compilation",
+            "testcase_message": "Compilation Error(s)."
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_STDOUT.txt",
+                    "description": "Standard OUTPUT (STDOUT)",
+                    "difference_file": "test02_0_diff.json",
+                    "expected_file": "test_output/testassignment/test2_output.txt"
+                }
+            ],
+            "points_awarded": 10,
+            "test_name": "Test 2 hello world"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 3 Submission Limit",
+            "view_testcase": false
+        }
+    ]
 }

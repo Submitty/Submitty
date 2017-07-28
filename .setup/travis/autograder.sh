@@ -63,14 +63,9 @@ chmod 444 TestRunner.class
 popd
 
 # --------------------------------------
-echo -e "Compile and install analysis tools"
+echo -e "Download analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-git pull origin master
-make
 
-mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-
-popd
+# --------------------------------------
+echo -e "Compile and install the tutorial repository"
+git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial

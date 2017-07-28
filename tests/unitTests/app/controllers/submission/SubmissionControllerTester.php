@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\models\Gradeable;
 use app\models\GradeableList;
 use tests\unitTests\BaseUnitTest;
+use app\models\User;
 
 class SubmissionControllerTester extends BaseUnitTest {
 
@@ -28,6 +29,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['svn_checkout'] = false;
         $_POST['previous_files'] = "";
         $_POST['csrf_token'] = "";
+        $_POST['user_id'] = "testUser";
 
         $config['tmp_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $config['semester'] = "test";
@@ -63,6 +65,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->core->method('loadModel')->willReturn($this->createMockGradeableList($highest_version, $num_parts, $max_size));
     }
 
+    protected function createMockUser($id) {
+        $return = $this->createMockModel(User::class);
+        $return->method("getId")->willReturn($id);
+        return $return;
+    }
+
     /**
      * Helper method to generate a mocked gradeable list with one gradeable. We can use annotations in our testcases
      * to set various aspects of the gradeable, namely @highestVersion, @numParts, and @maxSize for
@@ -75,15 +83,17 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
     private function createMockGradeableList($highest_version = 0, $num_parts = 1, $max_size = 1000000.) {
-        $gradeable = $this->createMock(Gradeable::class);
+        $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn("test");
         $gradeable->method('getName')->willReturn("Test Gradeable");
+        // $gradeable->method('getUser')->willReturn("testUser");
+        $gradeable->method('getUser')->willReturn($this->createMockUser('testUser'));
 
         $gradeable->method('getHighestVersion')->willReturn(intval($highest_version));
         $gradeable->method('getNumParts')->willReturn(intval($num_parts));
         $gradeable->method('getMaxSize')->willReturn($max_size);
 
-        $g_list = $this->createMock(GradeableList::class);
+        $g_list = $this->createMockModel(GradeableList::class);
         $g_list->method('getSubmittableElectronicGradeables')->willReturn(array('test' => $gradeable));
         return $g_list;
     }
@@ -1065,8 +1075,8 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testShowHomework() {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
-        $now = new \DateTime("now", new \DateTimeZone($core->getConfig()->getTimezone()));
-        $gradeable = $this->createMock(Gradeable::class);
+        $now = new \DateTime("now", $core->getConfig()->getTimezone());
+        $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(true);
         $gradeable->method('getOpenDate')->willReturn($now);
 
@@ -1081,8 +1091,8 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testShowHomeworkNoConfig() {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
-        $now = new \DateTime("now", new \DateTimeZone($core->getConfig()->getTimezone()));
-        $gradeable = $this->createMock(Gradeable::class);
+        $now = new \DateTime("now", $core->getConfig()->getTimezone());
+        $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(false);
         $gradeable->method('getOpenDate')->willReturn($now);
 
@@ -1098,12 +1108,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore(array(), array('access_grading' => false));
         /** @noinspection PhpUndefinedMethodInspection */
-        $now = new \DateTime("tomorrow", new \DateTimeZone($core->getConfig()->getTimezone()));
-        $gradeable = $this->createMock(Gradeable::class);
+        $now = new \DateTime("tomorrow", $core->getConfig()->getTimezone());
+        $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(false);
         $gradeable->method('getOpenDate')->willReturn($now);
 
-        $g_list = $this->createMock(GradeableList::class);
+        $g_list = $this->createMockModel(GradeableList::class);
         $g_list->method('getGradeable')->willReturn($gradeable);
         $core->method('loadModel')->willReturn($g_list);
         $return = $this->runController($core);

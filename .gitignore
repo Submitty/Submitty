@@ -34,3 +34,5 @@ vendor/
 composer.lock
 
 db_update.php
+.setup/data/random_users.txt
+.vscode

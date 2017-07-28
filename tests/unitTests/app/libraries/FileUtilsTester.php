@@ -141,4 +141,20 @@ class FileUtilsTester extends \PHPUnit_Framework_TestCase {
     public function testContentType($filename, $expected) {
         $this->assertEquals($expected, FileUtils::getContentType($filename));
     }
+
+    public function testGetAllDirs() {
+        $base_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
+        FileUtils::createDir($base_dir);
+        $folders = array();
+        for ($i = 0; $i < 10; $i++) {
+            FileUtils::createDir(FileUtils::joinPaths($base_dir, "folder{$i}"));
+            $folders[] = "folder{$i}";
+        }
+        FileUtils::createDir(FileUtils::joinPaths($base_dir, ".git"));
+        $dirs = FileUtils::getAllDirs($base_dir);
+        sort($folders);
+        sort($dirs);
+        $this->assertEquals($folders, $dirs);
+        FileUtils::recursiveRmdir($base_dir);
+    }
 }

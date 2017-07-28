@@ -3,14 +3,34 @@
 #include <sys/stat.h>
 #include "TestCase.h"
 #include "JUnitGrader.h"
+#include "DrMemoryGrader.h"
 #include "PacmanGrader.h"
 #include "myersDiff.h"
 #include "tokenSearch.h"
 #include "execute.h"
 
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <unistd.h>
+#include <iostream>
+
+
+// Set mode bits on shared memory
+#define SHM_MODE (SHM_W | SHM_R | IPC_CREAT)
+
+
 int TestCase::next_test_case_id = 1;
 
 std::string rlimit_name_decoder(int i);
+
+void TerminateProcess(float &elapsed, int childPID);
+int resident_set_size(int childPID);
 
 void adjust_test_case_limits(nlohmann::json &modified_test_case_limits,
                              int rlimit_name, rlim_t value) {
@@ -79,11 +99,11 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
 
 
 bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, 
-		     std::vector<std::string> &messages) {
+                     std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages) {
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(j,"actual_file");
   if (filenames.size() != 1) {
-    messages.push_back("ERROR!  STUDENT FILENAME MISSING");
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  STUDENT FILENAME MISSING"));
     return false;
   }
 
@@ -94,13 +114,15 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
   if (p_filename.find('*') != std::string::npos) {
     std::cout << "HAS WILDCARD!  MUST EXPAND '" << p_filename << "'" << std::endl;
     std::vector<std::string> files;
-    p_filename = replace_slash_with_double_underscore(p_filename);
     wildcard_expansion(files, p_filename, std::cout);
     if (files.size() == 0) {
-      messages.push_back("ERROR!  No matches to wildcard pattern");
+      wildcard_expansion(files, filename, std::cout);
+    }
+    if (files.size() == 0) {
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  No matches to wildcard pattern"));
       return false;
     } else if (files.size() > 1) {
-      messages.push_back("ERROR!  Multiple matches to wildcard pattern");
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Multiple matches to wildcard pattern"));
       return false;
     } else {
       p_filename = files[0];
@@ -109,13 +131,13 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
   }
 
   if (!getFileContents(p_filename,student_file_contents)) {
-    messages.push_back("ERROR!  Could not open student file: '" + filename + "'");
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Could not open student file: '" + filename + "'"));
     return false;
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
-    messages.push_back("ERROR!  Student file '" + p_filename + "' too large for grader (" +
-		       std::to_string(student_file_contents.size()) + " vs. " +
-		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Student file '" + p_filename + "' too large for grader (" +
+                                      std::to_string(student_file_contents.size()) + " vs. " +
+                                      std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")"));
     return false;
   }
   return true;
@@ -123,21 +145,21 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 
 
 bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, 
-		      std::vector<std::string> &messages) {
+                      std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages) {
 
   std::string filename = j.value("expected_file","");
   if (filename == "") {
-    messages.push_back("ERROR!  EXPECTED FILENAME MISSING");
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  EXPECTED FILENAME MISSING"));
     return false;
   }
   if (!getFileContents(filename,expected_file_contents)) {
-    messages.push_back("ERROR!  Could not open expected file: '" + filename);
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Could not open expected file: '" + filename));
     return false;
   }
   if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
-    messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader (" +
-		       std::to_string(expected_file_contents.size()) + " vs. " +
-		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Expected file '" + filename + "' too large for grader (" +
+                                      std::to_string(expected_file_contents.size()) + " vs. " +
+                                      std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")"));
     return false;
   }
   return true;
@@ -146,19 +168,19 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
 
 TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
   std::string student_file_contents;
-  std::vector<std::string> error_messages;
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > error_messages;
   if (!openStudentFile(tc,j,student_file_contents,error_messages)) {
     return new TestResults(0.0,error_messages);
   }
   if (student_file_contents.size() == 0) {
-    return new TestResults(0.0,{"ERROR!  FILE EMPTY"});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR!  FILE EMPTY")});
   }
   try {
     int value = std::stoi(student_file_contents);
     std::cout << "DONE STOI " << value << std::endl;
     nlohmann::json::const_iterator itr = j.find("term");
     if (itr == j.end() || !itr->is_number()) {
-      return new TestResults(0.0,{"ERROR!  integer \"term\" not specified"});
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR!  integer \"term\" not specified")});
     }
     int term = (*itr);
     std::string cmpstr = j.value("comparison","MISSING COMPARISON");
@@ -170,16 +192,16 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
     else if (cmpstr == "ge") success = (value >= term);
     else if (cmpstr == "le") success = (value <= term);
     else {
-      return new TestResults(0.0, {"ERROR! UNKNOWN COMPARISON "+cmpstr});
+      return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE,"ERROR! UNKNOWN COMPARISON "+cmpstr)});
     }
     if (success)
       return new TestResults(1.0);
     std::string description = j.value("description","MISSING DESCRIPTION");
     std::string failure_message = j.value("failure_message",
                                           "ERROR! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term));
-    return new TestResults(0.0,{failure_message});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,failure_message)});
   } catch (...) {
-    return new TestResults(0.0,{"int comparison do it error stoi"});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"int comparison do it error stoi")});
   }
 }
 
@@ -188,26 +210,29 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
 // =================================================================================
 // =================================================================================
 
-TestResults* TestCase::dispatch(const nlohmann::json& grader) const {
+TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_number) const {
   std::string method = grader.value("method","");
-  if      (method == "JUnitTestGrader")            { return JUnitTestGrader_doit(*this,grader);           }
-  else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader); }
-  else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);   }
-  else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);  }
-  else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);              }
-  else if (method == "searchToken")                { return searchToken_doit(*this,grader);               }
-  else if (method == "intComparison")              { return intComparison_doit(*this,grader);             }
-  else if (method == "myersDiffbyLinebyChar")      { return myersDiffbyLinebyChar_doit(*this,grader);     }
-  else if (method == "myersDiffbyLinebyWord")      { return myersDiffbyLinebyWord_doit(*this,grader);     }
-  else if (method == "myersDiffbyLine")            { return myersDiffbyLine_doit(*this,grader);           }
-  else if (method == "myersDiffbyLineNoWhite")     { return myersDiffbyLineNoWhite_doit(*this,grader);    }
-  else if (method == "diffLineSwapOk")             { return diffLineSwapOk_doit(*this,grader);            }
-  else if (method == "fileExists")                 { return fileExists_doit(*this,grader);                }
-  else if (method == "warnIfNotEmpty")             { return warnIfNotEmpty_doit(*this,grader);            }
-  else if (method == "warnIfEmpty")                { return warnIfEmpty_doit(*this,grader);               }
-  else if (method == "errorIfNotEmpty")            { return errorIfNotEmpty_doit(*this,grader);           }
-  else if (method == "errorIfEmpty")               { return errorIfEmpty_doit(*this,grader);              }
-  else                                             { return custom_dispatch(grader);                      }
+  if      (method == "")                           { return NULL;                                           }
+  else if (method == "JUnitTestGrader")            { return JUnitTestGrader_doit(*this,grader);             }
+  else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader);   }
+  else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);     }
+  else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);    }
+  else if (method == "DrMemoryGrader")             { return DrMemoryGrader_doit(*this,grader);              }
+  else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);                }
+  else if (method == "searchToken")                { return searchToken_doit(*this,grader);                 }
+  else if (method == "intComparison")              { return intComparison_doit(*this,grader);               }
+  else if (method == "myersDiffbyLinebyChar")      { return myersDiffbyLinebyChar_doit(*this,grader);       }
+  else if (method == "myersDiffbyLinebyWord")      { return myersDiffbyLinebyWord_doit(*this,grader);       }
+  else if (method == "myersDiffbyLine")            { return myersDiffbyLine_doit(*this,grader);             }
+  else if (method == "myersDiffbyLineNoWhite")     { return myersDiffbyLineNoWhite_doit(*this,grader);      }
+  else if (method == "diffLineSwapOk")             { return diffLineSwapOk_doit(*this,grader);              }
+  else if (method == "fileExists")                 { return fileExists_doit(*this,grader);                  }
+  else if (method == "warnIfNotEmpty")             { return warnIfNotEmpty_doit(*this,grader);              }
+  else if (method == "warnIfEmpty")                { return warnIfEmpty_doit(*this,grader);                 }
+  else if (method == "errorIfNotEmpty")            { return errorIfNotEmpty_doit(*this,grader);             }
+  else if (method == "errorIfEmpty")               { return errorIfEmpty_doit(*this,grader);                }
+  else if (method == "ImageDiff")                  { return ImageDiff_doit(*this,grader, autocheck_number); }
+  else                                             { return custom_dispatch(grader);                        }
 }
 
 
@@ -218,10 +243,26 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader) const {
 void VerifyGraderDeductions(nlohmann::json &json_graders) {
   assert (json_graders.is_array());
   assert (json_graders.size() > 0);
-  float default_deduction = 1.0 / float(json_graders.size());
+
+  int json_grader_count = 0;
+  for (int i = 0; i < json_graders.size(); i++) {
+    nlohmann::json::const_iterator itr = json_graders[i].find("method");
+    if (itr != json_graders[i].end()) {
+      json_grader_count++;
+    }
+  }
+
+  assert (json_grader_count > 0);
+
+  float default_deduction = 1.0 / float(json_grader_count);
   float sum = 0.0;
   for (int i = 0; i < json_graders.size(); i++) {
-    nlohmann::json::const_iterator itr = json_graders[i].find("deduction");
+    nlohmann::json::const_iterator itr = json_graders[i].find("method");
+    if (itr == json_graders[i].end()) {
+      json_graders[i]["deduction"] = 0;
+      continue;
+    }
+    itr = json_graders[i].find("deduction");
     float deduction;
     if (itr == json_graders[i].end()) {
       json_graders[i]["deduction"] = default_deduction;
@@ -232,6 +273,7 @@ void VerifyGraderDeductions(nlohmann::json &json_graders) {
     }
     sum += deduction;
   }
+
   if (sum < 0.99) {
     std::cout << "ERROR! DEDUCTION SUM < 1.0: " << sum << std::endl;
   }
@@ -246,7 +288,8 @@ void VerifyGraderDeductions(nlohmann::json &json_graders) {
 void AddDefaultGrader(const std::string &command,
                       const std::set<std::string> &files_covered,
                       nlohmann::json& json_graders,
-                      const std::string &filename) {
+                      const std::string &filename,
+                      const nlohmann::json &whole_config) {
   if (files_covered.find(filename) != files_covered.end())
     return;
   //std::cout << "ADD GRADER WarnIfNotEmpty test for " << filename << std::endl;
@@ -256,7 +299,7 @@ void AddDefaultGrader(const std::string &command,
   if (filename.find("STDOUT") != std::string::npos) {
     j["description"] = "Standard Output (STDOUT)";
   } else if (filename.find("STDERR") != std::string::npos) {
-    std::string program_name = get_program_name(command);
+    std::string program_name = get_program_name(command,whole_config);
     if (program_name == "/usr/bin/python") {
       j["description"] = "syntax error output from running python";
     } else if (program_name == "/usr/bin/java") {
@@ -279,7 +322,8 @@ void AddDefaultGrader(const std::string &command,
 // Every command sends standard output and standard error to two
 // files.  Make sure those files are sent to a grader.
 void AddDefaultGraders(const std::vector<std::string> &commands,
-                       nlohmann::json &json_graders) {
+                       nlohmann::json &json_graders,
+                       const nlohmann::json &whole_config) {
   std::set<std::string> files_covered;
   assert (json_graders.is_array());
   for (int i = 0; i < json_graders.size(); i++) {
@@ -289,12 +333,12 @@ void AddDefaultGraders(const std::vector<std::string> &commands,
     }
   }
   if (commands.size() == 1) {
-    AddDefaultGrader(commands[0],files_covered,json_graders,"STDOUT.txt");
-    AddDefaultGrader(commands[0],files_covered,json_graders,"STDERR.txt");
+    AddDefaultGrader(commands[0],files_covered,json_graders,"STDOUT.txt",whole_config);
+    AddDefaultGrader(commands[0],files_covered,json_graders,"STDERR.txt",whole_config);
   } else {
     for (int i = 0; i < commands.size(); i++) {
-      AddDefaultGrader(commands[i],files_covered,json_graders,"STDOUT_"+std::to_string(i)+".txt");
-      AddDefaultGrader(commands[i],files_covered,json_graders,"STDERR_"+std::to_string(i)+".txt");
+      AddDefaultGrader(commands[i],files_covered,json_graders,"STDOUT_"+std::to_string(i)+".txt",whole_config);
+      AddDefaultGrader(commands[i],files_covered,json_graders,"STDERR_"+std::to_string(i)+".txt",whole_config);
     }
   }
 }
@@ -311,7 +355,7 @@ bool validShowValue(const nlohmann::json& v) {
            v == "on_success"));
 }
 
-TestCase::TestCase (nlohmann::json& input) : _json(input) {
+TestCase::TestCase (nlohmann::json& input,const nlohmann::json &whole_config) : _json(input) {
   test_case_id = next_test_case_id;
   next_test_case_id++;
   General_Helper();
@@ -330,7 +374,7 @@ TestCase::TestCase (nlohmann::json& input) : _json(input) {
     assert (itr->is_array());
     VerifyGraderDeductions(*itr);
     std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
-    AddDefaultGraders(commands,*itr);
+    AddDefaultGraders(commands,*itr,whole_config);
 
      for (int i = 0; i < (*itr).size(); i++) {
       nlohmann::json& grader = (*itr)[i];
@@ -341,7 +385,14 @@ TestCase::TestCase (nlohmann::json& input) : _json(input) {
         if (method == "warnIfNotEmpty" || method == "warnIfEmpty") {
           grader["show_message"] = "on_failure";
         } else {
-          grader["show_message"] = "always";
+          if (grader.find("actual_file") != grader.end() &&
+              *(grader.find("actual_file")) == "execute_logfile.txt" &&
+              grader.find("show_actual") != grader.end() &&
+              *(grader.find("show_actual")) == "never") {
+            grader["show_message"] = "never";
+          } else {
+            grader["show_message"] = "always";
+          }
         }
       } else {
         assert (validShowValue(*itr2));
@@ -445,12 +496,28 @@ void TestCase::FileCheck_Helper() {
   }
 }
 
+bool HasActualFileCheck(const nlohmann::json &v_itr, const std::string &actual_file) {
+  assert (actual_file != "");
+  const std::vector<nlohmann::json> tmp = v_itr.get<std::vector<nlohmann::json> >();
+  for (int i = 0; i < tmp.size(); i++) {
+    if (tmp[i].value("actual_file","") == actual_file) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void TestCase::Compilation_Helper() {
   nlohmann::json::iterator f_itr,v_itr,w_itr;
 
   // Check the required fields for all test types
   f_itr = _json.find("executable_name");
   v_itr = _json.find("validation");
+
+  if (v_itr != _json.end()) {
+    assert (v_itr->is_array());
+    std::vector<nlohmann::json> tmp = v_itr->get<std::vector<nlohmann::json> >();
+  }
 
   if (f_itr != _json.end()) {
 
@@ -476,7 +543,12 @@ void TestCase::Compilation_Helper() {
       v2["show_actual"] = "on_failure";
       v2["show_message"] = "on_failure";
       v2["deduction"] = warning_fraction;
-      _json["validation"].push_back(v2);
+
+      v_itr = _json.find("validation");
+      if (v_itr == _json.end() ||
+          !HasActualFileCheck(*v_itr,v2["actual_file"])) {
+        _json["validation"].push_back(v2);
+      }
     }
 
 
@@ -490,17 +562,23 @@ void TestCase::Compilation_Helper() {
       v["show_actual"] = "on_failure";
       v["show_message"] = "on_failure";
       v["deduction"] = 1.0/executable_names.size();
-      _json["validation"].push_back(v);
+
+      v_itr = _json.find("validation");
+      if (v_itr == _json.end() ||
+          !HasActualFileCheck(*v_itr,v["actual_file"])) {
+        _json["validation"].push_back(v);
+      }
     }
-    _json.erase(f_itr);
   }
 
-  f_itr = _json.find("executable_name");
   v_itr = _json.find("validation");
 
-  assert (f_itr == _json.end());
+  if (v_itr != _json.end()) {
+    assert (v_itr->is_array());
+    std::vector<nlohmann::json> tmp = v_itr->get<std::vector<nlohmann::json> >();
+  }
+
   assert (v_itr != _json.end());
-  //assert (commands.size() > 0);
 }
 
 void TestCase::Execution_Helper() {
@@ -596,18 +674,127 @@ const nlohmann::json TestCase::get_test_case_limits() const {
   return _test_case_limits;
 }
 
-
-// =================================================================================
-// =================================================================================
-
-
-
-TestResults* TestCase::do_the_grading (int j) const {
-  assert (j >= 0 && j < numFileGraders());
-
-  nlohmann::json tcg = getGrader(j);
-  return this->dispatch(tcg);
+bool TestCase::ShowExecuteLogfile(const std::string &execute_logfile) const {
+  for (int i = 0; i < numFileGraders(); i++) {
+    const nlohmann::json& grader = getGrader(i);
+    nlohmann::json::const_iterator a = grader.find("actual_file");
+    if (a != grader.end()) {
+      if (*a == execute_logfile) {
+        nlohmann::json::const_iterator s = grader.find("show_actual");
+        if (s != grader.end()) {
+          if (*s == "never") return false;
+        }
+      }
+    }
+  }
+  return true;
 }
+
+// =================================================================================
+// =================================================================================
+
+
+TestResultsFixedSize TestCase::do_the_grading (int j) const {
+
+  // ALLOCATE SHARED MEMORY
+  int memid;
+  TestResultsFixedSize *tr_ptr;
+  if ((memid = shmget(IPC_PRIVATE,sizeof(TestResultsFixedSize),SHM_MODE)) == -1) {
+    std::cout << "Unsuccessful memory get" << std::endl;
+    std::cout << "Errno was " << errno << std::endl;
+    exit(-1);
+  }
+
+
+  // FORK A CHILD THREAD TO DO THE VALIDATION
+  pid_t childPID = fork();
+  // ensure fork was successful
+  assert (childPID >= 0);
+
+
+  if (childPID == 0) {
+    // CHILD
+
+    // attach to shared memory
+    tr_ptr = (TestResultsFixedSize*) shmat(memid,0 ,0);
+    tr_ptr->initialize();
+
+    // perform the validation (this might hang or crash)
+    assert (j >= 0 && j < numFileGraders());
+    nlohmann::json tcg = getGrader(j);
+    TestResults* answer_ptr = this->dispatch(tcg, j);
+    assert (answer_ptr != NULL);
+
+    // write answer to shared memory and terminate this process
+    answer_ptr->PACK(tr_ptr);
+    //std::cout << "do_the_grading, child completed successfully " << std::endl;
+    exit(0);
+
+  } else {
+    // PARENT
+
+    // attach to shared memory
+    tr_ptr = (TestResultsFixedSize *)  shmat(memid,0 ,0);
+
+    bool time_kill=false;
+    bool memory_kill=false;
+    pid_t wpid = 0;
+    int status;
+    float elapsed = 0;
+    float next_checkpoint = 0;
+    int rss_memory = 0;
+    int seconds_to_run = 20;
+    int allowed_rss_memory = 1000000;
+
+    // loop while waiting for child to finish
+    do {
+      wpid = waitpid(childPID, &status, WNOHANG);
+      if (wpid == 0) {
+        // terminate for excessive time
+        if (elapsed > seconds_to_run) {
+          std::cout << "do_the_grading error:  Killing child process " << childPID
+                    << " after " << elapsed << " seconds elapsed." << std::endl;
+          TerminateProcess(elapsed,childPID);
+          time_kill=true;
+        }
+        // terminate for excessive memory usage (RSS = resident set size = RAM)
+        if (rss_memory > allowed_rss_memory) {
+          std::cout << "do_the_grading error:  Killing child process " << childPID
+                    << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
+          TerminateProcess(elapsed,childPID);
+          memory_kill=true;
+        }
+        // monitor time & memory usage
+        if (!time_kill && !memory_kill) {
+          // sleep 1/10 of a second
+          usleep(100000);
+          elapsed+= 0.1;
+        }
+        if (elapsed >= next_checkpoint) {
+          rss_memory = resident_set_size(childPID);
+          //std::cout << "do_the_grading running, time elapsed = " << elapsed
+          //          << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
+          next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
+        }
+      }
+    } while (wpid == 0);
+  }
+
+  // COPY result from shared memory
+  TestResultsFixedSize answer = *tr_ptr;
+
+  // detach shared memory and destroy the memory queue
+  shmdt((void *)tr_ptr);
+  if (shmctl(memid,IPC_RMID,0) < 0) {
+    std::cout << "Problems destroying shared memory ID" << std::endl;
+    std::cout << "Errno was " <<  errno << std::endl;
+    exit(-1);
+  }
+
+  std::cout << "do the grading complete: " << answer << std::endl;
+  return answer;
+}
+
 
 
 std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
@@ -646,7 +833,7 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
   nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
-    TestCase my_testcase((*tc)[i]);
+    TestCase my_testcase((*tc)[i],config_json);
     int points = (*tc)[i].value("points",0);
     if (points > 0) {
       total_points += points;
@@ -720,6 +907,12 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
     int assigned = (sum % mod_value)+1; 
   
     std::string repl = std::to_string(assigned);
+
+    nlohmann::json::iterator association = j2.find("association");
+    if (association != j2.end()) {
+      repl = (*association)[repl];
+    }
+
     nlohmann::json::iterator itr = j.find("testcases");
     if (itr != j.end()) {
       RecursiveReplace(*itr,placeholder,repl);

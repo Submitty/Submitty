@@ -42,13 +42,22 @@ class Gradeable {
 public:
 
   // CONSTRUTORS
-  Gradeable() { count=0;percent=0;maximum=0; remove_lowest=0; }
-  Gradeable(int c, float p, float m) : count(c),percent(p),maximum(m) { remove_lowest=0; }
+  Gradeable() { count=0;percent=0;remove_lowest=0; }
+  Gradeable(int c, float p) : count(c),percent(p) { remove_lowest=0; }
 
   // ACCESSORS
   int getCount() const { return count; }
   float getPercent() const { return percent; }
-  float getMaximum() const { return maximum; }
+  float getMaximum() const { 
+    if (maximums.size() == 0) return 0;
+    assert (maximums.size() > 0);
+    int max_sum = 0;
+    for (std::map<std::string,float>::const_iterator itr = maximums.begin();
+         itr != maximums.end(); itr++) {
+      max_sum += itr->second;
+    }
+    return max_sum * getCount() / maximums.size();
+  }
   int getRemoveLowest() const { return remove_lowest; }
 
   std::string getID(int index) const {
@@ -61,6 +70,12 @@ public:
   }
 
   bool hasCorrespondence(const std::string &id) const {
+    /*
+    for (std::map<std::string,std::pair<int,std::string> >::const_iterator itr = correspondences.begin();
+         itr != correspondences.end(); itr++) {
+      std::cout << "looking for " << id << " " << itr->first << std::endl;
+    }
+    */
     std::map<std::string,std::pair<int,std::string> >::const_iterator itr =  correspondences.find(id);
     return (itr != correspondences.end());
   }
@@ -70,11 +85,25 @@ public:
     return correspondences.find(id)->second;
   }
 
+  bool isReleased(const std::string &id) const {
+    assert (released.find(id) != released.end());
+    return released.find(id)->second;
+  }
+  float getMaximum(const std::string &id) const {
+    assert (maximums.find(id) != maximums.end());
+    return maximums.find(id)->second;
+  }
+  float getClamp(const std::string &id) const {
+    assert (clamps.find(id) != clamps.end());
+    return clamps.find(id)->second;
+  }
+
   // MODIFIERS
   void setRemoveLowest(int r) { remove_lowest=r; }
 
   int setCorrespondence(const std::string& id) {
     assert (!hasCorrespondence(id));
+    //std::cout << "SET CORR " << id << std::endl;
     assert (int(correspondences.size()) < count);
     int index = correspondences.size();
     correspondences[id] = std::make_pair(index,"");
@@ -87,15 +116,33 @@ public:
     correspondences[id].second = name;
   }
 
+  void setReleased(const std::string&id, bool is_released) {
+    assert (hasCorrespondence(id));
+    assert (released.find(id) == released.end());
+    released[id] = is_released;
+  }
+
+  void setMaximum(const std::string&id, float maximum) {
+    assert (hasCorrespondence(id));
+    assert (maximums.find(id) == maximums.end());
+    maximums[id] = maximum;
+  }
+  void setClamp(const std::string&id, float clamp) {
+    assert (hasCorrespondence(id));
+    assert (clamps.find(id) == clamps.end());
+    clamps[id] = clamp;
+  }
 
 private:
 
   // REPRESENTATION
   int count;
   float percent;
-  float maximum;
   int remove_lowest;
   std::map<std::string,std::pair<int,std::string> > correspondences;
+  std::map<std::string,float> maximums;
+  std::map<std::string,float> clamps;
+  std::map<std::string,bool> released;
 };
 
 // ===============================================================================
@@ -103,6 +150,21 @@ private:
 extern std::vector<GRADEABLE_ENUM>    ALL_GRADEABLES;
 
 extern std::map<GRADEABLE_ENUM,Gradeable>  GRADEABLES;
+
+
+inline void LookupGradeable(const std::string &id,
+                     GRADEABLE_ENUM &g_e, int &i) {
+  for (std::size_t k = 0; k < ALL_GRADEABLES.size(); k++) {
+    GRADEABLE_ENUM e = ALL_GRADEABLES[k];
+    Gradeable g = GRADEABLES[e];
+    if (g.hasCorrespondence(id)) {
+      g_e = e;
+      i = g.getCorrespondence(id).first;
+      return;
+    }
+  }
+  assert (0);
+}
 
 
 #endif

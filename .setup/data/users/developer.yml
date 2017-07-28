@@ -1,0 +1,6 @@
+sudo: true
+user_firstname: Nancy
+user_group: 0
+user_id: developer
+anon_id: developer
+user_lastname: Developer

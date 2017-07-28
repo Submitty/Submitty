@@ -4,7 +4,7 @@
 	<div><span class='line_number'>3</span><span class='line_code'>verb ==&gt; eat</span></div>
 	<div><span class='line_number'>4</span><span class='line_code'>adjective ==&gt; silly</span></div>
 	<div><span class='line_number'>5</span><span class='line_code'>noun ==&gt; mouse</span></div>
-	<div class='highlight' id="id_actual_0">
+	<div class='highlight' id='id_actual_0'>
 	<div class='bad'><span class='line_number'>6</span><span class='line_code'>adjective ==&gt; <span class='highlight-char'>sill</span><span class='line_code_inner'>y</span></span></div>
 	</div>
 	<div><span class='line_number'>7</span><span class='line_code'>noun ==&gt; computer</span></div>

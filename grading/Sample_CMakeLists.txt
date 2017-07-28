@@ -153,13 +153,13 @@ add_executable(validate.out
 
 ###################################################################################
 
-target_link_libraries(custom_functions seccomp)
+target_link_libraries(custom_functions seccomp boost_system boost_filesystem)
 set_property(TARGET custom_functions APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
 
-target_link_libraries(configure.out  ${GRADINGLIB}  seccomp  custom_functions)
-target_link_libraries(compile.out    ${GRADINGLIB}  seccomp  custom_functions)
-target_link_libraries(run.out        ${GRADINGLIB}  seccomp  custom_functions)
-target_link_libraries(validate.out   ${GRADINGLIB}  seccomp  custom_functions)
+target_link_libraries(configure.out  ${GRADINGLIB}  seccomp  custom_functions boost_system boost_filesystem)
+target_link_libraries(compile.out    ${GRADINGLIB}  seccomp  custom_functions boost_system boost_filesystem)
+target_link_libraries(run.out        ${GRADINGLIB}  seccomp  custom_functions boost_system boost_filesystem)
+target_link_libraries(validate.out   ${GRADINGLIB}  seccomp  custom_functions boost_system boost_filesystem)
 
 set_property(TARGET configure.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
 set_property(TARGET compile.out   APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")

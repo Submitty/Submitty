@@ -1,7 +1,9 @@
 var siteUrl = undefined;
+var csrfToken = undefined;
 
-function setSiteUrl(url) {
-    siteUrl = url
+function setSiteDetails(url, setCsrfToken) {
+    siteUrl = url;
+    csrfToken = setCsrfToken;
 }
 
 /**
@@ -10,7 +12,7 @@ function setSiteUrl(url) {
  * construct them there as it makes sense (which helps on cutting down on potential
  * duplication of effort where we can replicate JS functions across multiple pages).
  *
- * @param parts - Object representing URL parts to append to the URL
+ * @param {object} parts - Object representing URL parts to append to the URL
  * @returns {string} - Built up URL to use
  */
 function buildUrl(parts) {
@@ -43,21 +45,21 @@ function editUserForm(user_id) {
                 user.addClass('readonly');
             }
             $('[name="user_firstname"]', form).val(json['user_firstname']);
-            if (json['user_preferred_firstname'] == null) {
+            if (json['user_preferred_firstname'] === null) {
                 json['user_preferred_firstname'] = "";
             }
             $('[name="user_preferred_firstname"]', form).val(json['user_preferred_firstname']);
             $('[name="user_lastname"]', form).val(json['user_lastname']);
             $('[name="user_email"]', form).val(json['user_email']);
             var registration_section;
-            if (json['registration_section'] == null) {
+            if (json['registration_section'] === null) {
                 registration_section = "null";
             }
             else {
                 registration_section = json['registration_section'].toString();
             }
             var rotating_section;
-            if (json['rotating_section'] == null) {
+            if (json['rotating_section'] === null) {
                 rotating_section = "null";
             }
             else {
@@ -68,7 +70,7 @@ function editUserForm(user_id) {
             $('[name="manual_registration"]', form).prop('checked', json['manual_registration']);
             $('[name="user_group"] option[value="' + json['user_group'] + '"]', form).prop('selected', true);
             $("[name='grading_registration_section[]']").prop('checked', false);
-            if (json['grading_registration_sections'] != null && json['grading_registration_sections'] != undefined) {
+            if (json['grading_registration_sections'] !== null && json['grading_registration_sections'] !== undefined) {
                 json['grading_registration_sections'].forEach(function(val) {
                     $('#grs_' + val).prop('checked', true);
                 });
@@ -82,6 +84,7 @@ function editUserForm(user_id) {
 }
 
 function newUserForm() {
+    $('.popup-form').css('display', 'none');
     var form = $("#edit-user-form");
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
@@ -95,6 +98,25 @@ function newUserForm() {
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
+}
+
+function newGraderListForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#grader-list-form");
+    form.css("display", "block");
+    form.css("width", "500px");
+    form.css("margin-left", "-250px");
+    $('[name="upload"]', form).val(null);
+}
+
+function newClassListForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#class-list-form");
+    form.css("display", "block");
+    form.css("width", "500px");
+    form.css("margin-left", "-250px");
+    $('[name="move_missing"]', form).prop('checked', false);
+    $('[name="upload"]', form).val(null);
 }
 
 /**
@@ -140,6 +162,11 @@ function checkVersionChange(days_late, late_days_allowed){
     return true;
 }
 
+function checkTaVersionChange(){
+    var message = "You are overriding the student's chosen submission. Are you sure you want to continue?";
+    return confirm(message);
+}
+
 function checkVersionsUsed(gradeable, versions_used, versions_allowed) {
     versions_used = parseInt(versions_used);
     versions_allowed = parseInt(versions_allowed);
@@ -171,6 +198,63 @@ function check_server(url) {
             }
         }
     );
+}
+
+function openDiv(id) {
+    var elem = $('#' + id);
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $('#' + id + '-span').removeClass('fa-folder-open').addClass('fa-folder');
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $('#' + id + '-span').removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return false;
+}
+
+function openUrl(url) {
+    window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
+    return false;
+}
+
+function openFrame(url, id, filename) {
+    var iframe = $('#file_viewer_' + id);
+    if (!iframe.hasClass('open')) {
+        var iframeId = "file_viewer_" + id + "_iframe";
+        // handle pdf
+        if(filename.substring(filename.length - 3) === "pdf") {
+            iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='600px' style='border: 0'></iframe>");
+        }
+        else {
+            iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='" + url + "' width='750px' style='border: 0'></iframe>");
+        }
+        iframe.addClass('open');
+    }
+
+    if (!iframe.hasClass('shown')) {
+        iframe.show();
+        iframe.addClass('shown');
+        $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-plus-circle').addClass('fa-minus-circle');
+    }
+    else {
+        iframe.hide();
+        iframe.removeClass('shown');
+        $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-minus-circle').addClass('fa-plus-circle');
+    }
+    return false;
+}
+
+function resizeFrame(id) {
+    var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
+    if (height > 500) {
+        document.getElementById(id).height= "500px";
+    }
+    else {
+        document.getElementById(id).height = (height+18) + "px";
+    }
 }
 
 function batchImportJSON(url, csrf_token){
@@ -285,6 +369,175 @@ $(function() {
 });
 */
 
+function updateCheckpointCell(elem, setFull) {
+    elem = $(elem);
+    if (!setFull && elem.data("score") === 1.0) {
+        elem.data("score", 0.5);
+        elem.css("background-color", "#88d0f4");
+        elem.css("border-right", "15px solid #f9f9f9");
+    }
+    else if (!setFull && elem.data("score") === 0.5) {
+        elem.data("score", 0);
+        elem.css("background-color", "");
+        elem.css("border-right", "15px solid #ddd");
+    }
+    else {
+        elem.data("score", 1);
+        elem.css("background-color", "#149bdf");
+        elem.css("border-right", "15px solid #f9f9f9");
+    }
+}
+
+function submitAJAX(url, data, callbackSuccess, callbackFailure) {
+    $.ajax(url, {
+        type: "POST",
+        data: data
+    })
+    .done(function(response) {
+        try{
+            response = JSON.parse(response);
+            if (response['status'] === 'success') {
+                callbackSuccess(response);
+            }
+            else {
+                console.log(response['message']);
+                callbackFailure();
+                if (response['status'] === 'error') {
+                    window.alert("[SAVE ERROR] Refresh Page");
+                }
+            }
+        }
+        catch (e) {
+            console.log(response);
+            callbackFailure();
+            window.alert("[SAVE ERROR] Refresh Page");
+        }
+    })
+    .fail(function() {
+        window.alert("[SAVE ERROR] Refresh Page");
+    });
+}
+
+function setupCheckboxCells() {
+    $("td[class^=cell-]").click(function() {
+        var parent = $(this).parent();
+        var elems = [];
+        var scores = {};
+        if ($(this).hasClass('cell-all')) {
+            var lastScore = null;
+            var setFull = false;
+            parent.children(".cell-grade").each(function() {
+                if (lastScore === null) {
+                    lastScore = $(this).data("score");
+                }
+                else if (lastScore !== $(this).data("score")) {
+                    setFull = true;
+                }
+                scores[$(this).data('id')] = $(this).data('score');
+            });
+            parent.children(".cell-grade").each(function() {
+                updateCheckpointCell(this, setFull);
+                elems.push(this);
+            });
+        }
+        else {
+            updateCheckpointCell(this);
+            elems.push(this);
+            scores[$(this).data('id')] = $(this).data('score');
+        }
+        
+        submitAJAX(
+            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
+            {
+              'csrf_token': csrfToken,
+              'user_id': parent.data("user"),
+              'g_id': parent.data('gradeable'),
+              'scores': scores
+            },
+            function() {
+                elems.forEach(function(elem) {
+                    $(elem).animate({"border-right-width": "0px"}, 400);
+                });
+            },
+            function() {
+                elems.forEach(function(elem) {
+                    console.log(elem);
+                    $(elem).css("border-right-width", "15px");
+                    $(elem).stop(true, true).animate({"border-right-color": "#DA4F49"}, 400);
+                });
+            }
+        );
+    });
+}
+
+function setupNumericTextCells() {
+  $("input[class=option-small-box]").keydown(function(key){
+    var cell=this.id.split('-');
+    // right
+    if(key.keyCode === 39){
+      if(this.selectionEnd == this.value.length){
+        $('#cell-'+cell[1]+'-'+(++cell[2])).focus();
+      }
+    }
+    // left
+    else if(key.keyCode == 37){
+      if(this.selectionStart == 0){
+        $('#cell-'+cell[1]+'-'+(--cell[2])).focus();
+      }
+    }
+    // up
+    else if(key.keyCode == 38){
+      $('#cell-'+(--cell[1])+'-'+cell[2]).focus();
+
+    }
+    // down
+    else if(key.keyCode == 40){
+      $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
+    }
+  });
+
+  $("input[class=option-small-box]").change(function() {
+    var elem = this;
+    if(this.value == 0){
+      $(this).css("color", "#bbbbbb");
+    }
+    else{
+      $(this).css("color", "");
+    }
+    var scores = {};
+    var total = 0;
+    var parent = $(this).parent().parent();
+    scores[$(this).data('id')] = this.value;
+
+    $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
+      $(this).children(".option-small-box").each(function(){
+        if($(this).data('num') === true){
+          total += parseFloat(this.value);
+        }
+        if($(this).data('total') === true){
+          this.value = total;
+        }
+      });
+    });
+
+    submitAJAX(
+      buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
+      {
+        'csrf_token': csrfToken,
+        'user_id': parent.data('user'),
+        'g_id': parent.data('gradeable'),
+        scores: scores
+      },
+      function() {
+        $(elem).css("background-color", "#ffffff");
+      },
+      function() {
+        $(elem).css("background-color", "#ff7777");
+      }
+    );
+  });
+}
+
 $(function() {
     if (window.location.hash !== "") {
         if ($(window.location.hash).offset().top > 0) {
@@ -296,4 +549,317 @@ $(function() {
     setTimeout(function() {
         $('.inner-message').fadeOut();
     }, 5000);
+
+    setupCheckboxCells();
+    setupNumericTextCells();
 });
+
+function setupNumericTextCells() {
+    $("input[class=option-small-box]").keydown(function(key){
+        var cell=this.id.split('-');
+        // right
+        if(key.keyCode === 39){
+            if(this.selectionEnd == this.value.length){
+                $('#cell-'+cell[1]+'-'+(++cell[2])).focus();
+            }
+        }
+        // left
+        else if(key.keyCode == 37){
+            if(this.selectionStart == 0){
+                $('#cell-'+cell[1]+'-'+(--cell[2])).focus();
+            }
+        }
+        // up
+        else if(key.keyCode == 38){
+            $('#cell-'+(--cell[1])+'-'+cell[2]).focus();
+
+        }
+        // down
+        else if(key.keyCode == 40){
+            $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
+        }
+    });
+
+    $("input[class=option-small-box]").change(function() {
+        elem = this;
+        if(this.value == 0){
+            $(this).css("color", "#bbbbbb");
+        }
+        else{
+            $(this).css("color", "");
+        }
+        var scores = {};
+        var total = 0;
+        $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
+            $(this).children(".option-small-box").each(function(){
+                if($(this).data('num') === true){
+                    total += parseFloat(this.value);
+                }
+                if($(this).data('total') === true){
+                    this.value = total;
+                }
+                else{
+                    scores[$(this).data("id")] = this.value;
+                }
+            });
+        });
+
+        submitAJAX(
+            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
+            {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
+            function() {
+                $(elem).css("background-color", "#ffffff");
+            },
+            function() {
+                $(elem).css("background-color", "#ff7777");
+            }
+        );
+    });
+
+    $("input[class=csvButtonUpload]").change(function() { 
+        var confirmation = window.confirm("WARNING! \nPreviously entered data may be overwritten! " +
+        "This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for " +
+        "student id and one column for each field. Columns and field types must match.");
+        if (confirmation) {
+            var f = $('#csvUpload').get(0).files[0];                        
+            if(f) {
+                var reader = new FileReader();
+                reader.readAsText(f);
+                reader.onload = function(evt) {
+                    var breakOut = false; //breakOut is used to break out of the function and alert the user the format is wrong
+                    var lines = (reader.result).trim().split(/\r\n|\n/);
+                    var tempArray = lines[0].split(','); 
+                    var csvLength = tempArray.length; //gets the length of the array, all the tempArray should be the same length
+                    for (var k = 0; k < lines.length && !breakOut; k++) {                        
+                        tempArray = lines[k].split(',');
+                        breakOut = (tempArray.length === csvLength) ? false : true; //if tempArray is not the same length, break out
+                    }
+                    var textChecker = 0;
+                    var num_numeric = 0;
+                    var num_text = 0;
+                    var user_ids = [];
+                    var component_ids = [];
+                    var get_once = true;
+                    var gradeable_id = "";
+                    if (!breakOut){
+                        $('.cell-all').each(function() {
+                            user_ids.push($(this).parent().data("user"));
+                            if(get_once) {
+                                num_numeric = $(this).parent().parent().data("numnumeric");
+                                num_text = $(this).parent().parent().data("numtext");
+                                component_ids = $(this).parent().parent().data("compids");
+                                gradeable_id = $(this).parent().data("gradeable");
+                                get_once = false;
+                                if (csvLength !== 4 + num_numeric + num_text) {
+                                    breakOut = true;
+                                    return false;
+                                }
+                                var k = 3; //checks if the file has the right number of numerics
+                                tempArray = lines[0].split(','); 
+                                if(num_numeric > 0) {
+                                    for (k = 3; k < num_numeric + 4; k++) { 
+                                        if (isNaN(Number(tempArray[k]))) {
+                                            breakOut = true;
+                                            return false;                                           
+                                        }
+                                    }
+                                }
+                                    
+                                //checks if the file has the right number of texts
+                                while (k < csvLength) {
+                                    textChecker++;
+                                    k++;
+                                }
+                                if (textChecker !== num_text) {
+                                    breakOut = true;
+                                    return false;
+                                }
+                            }
+                        });
+                    }
+                    if (!breakOut){
+                        submitAJAX(
+                            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'upload_csv_numeric'}),
+                            {'csrf_token': csrfToken, 'g_id': gradeable_id, 'users': user_ids, 'component_ids' : component_ids,
+                            'num_numeric' : num_numeric, 'num_text' : num_text, 'big_file': reader.result},
+                            function(returned_data) {
+                                $('.cell-all').each(function() {
+                                    for (var x = 0; x < returned_data['data'].length; x++) {
+                                        if ($(this).parent().data("user") === returned_data['data'][x]['username']) {
+                                            var starting_index1 = 0;
+                                            var starting_index2 = 3;
+                                            var value_str = "value_";
+                                            var status_str = "status_";
+                                            var value_temp_str = "value_";
+                                            var status_temp_str = "status_";
+                                            var total = 0;
+                                            var y = starting_index1;
+                                            var z = starting_index2; //3 is the starting index of the grades in the csv
+                                            //puts all the data in the form
+                                            for (z = starting_index2; z < num_numeric + starting_index2; z++, y++) {
+                                                value_temp_str = value_str + y;
+                                                status_temp_str = status_str + y;
+                                                $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val(returned_data['data'][x][value_temp_str]);
+                                                if (returned_data['data'][x][status_temp_str] === "OK") {
+                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ffffff"); 
+                                                } else {
+                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ff7777");
+                                                }
+
+                                                if($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val() == 0) {
+                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "#bbbbbb");
+                                                } else {
+                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "");
+                                                }
+
+                                                total += Number($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val());
+                                            }
+                                            $('#total-'+$(this).parent().data("row")).val(total);
+                                            z++;
+                                            var counter = 0;
+                                            while (counter < num_text) {
+                                                value_temp_str = value_str + y;
+                                                status_temp_str = status_str + y;
+                                                $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2-1)).val(returned_data['data'][x][value_temp_str]);
+                                                z++;
+                                                y++;
+                                                counter++;
+                                            }
+
+                                            x = returned_data['data'].length;
+                                        }
+                                    }
+                                });
+                            },
+                            function() {
+                                alert("submission error");
+                            }
+                        );
+                    }
+
+                    if (breakOut) {
+                        alert("CVS upload failed! Format file incorrect.");
+                    }
+                }
+            }
+        } else {
+            var f = $('#csvUpload');
+            f.replaceWith(f = f.clone(true));
+        }
+    });
+}
+
+function openPopUp(css, title, count, testcase_num, side) {
+    var element_id = "container_" + count + "_" + testcase_num + "_" + side;
+    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
+    elem_html += title + document.getElementById(element_id).innerHTML;
+    my_window = window.open("", "_blank", "status=1,width=750,height=500");
+    my_window.document.write(elem_html);
+    my_window.document.close(); 
+    my_window.focus();
+}
+
+function updateHomeworkExtensions(data) {
+    var fd = new FormData($('#excusedAbsenseForm').get(0));
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        success: function(data) {
+            var json = JSON.parse(data);
+            if(json['error']){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            var form = $("#load-homework-extensions");
+            $('#my_table tr:gt(0)').remove();
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            $('#title').replaceWith(title);
+            if(json['users'].length === 0){
+                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+            }
+            json['users'].forEach(function(elem){
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
+                $('#my_table').append(bits.join('</td><td>'));
+            });
+            $('#user_id').val(this.defaultValue);
+            $('#late_days').val(this.defaultValue);
+            $('#csv_upload').val(this.defaultValue);
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
+            $('#messages').append(message);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    })
+    return false;
+}
+
+function loadHomeworkExtensions(g_id) {
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            var json = JSON.parse(data);
+            var form = $("#load-homework-extensions");
+            $('#my_table tr:gt(0)').remove();
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            $('#title').replaceWith(title);
+            if(json['users'].length === 0){
+                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+            }
+            json['users'].forEach(function(elem){
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
+                $('#my_table').append(bits.join('</td><td>'));
+            });
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    });
+}
+
+
+function updateLateDays(data) {
+    var fd = new FormData($('#lateDayForm').get(0));
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late'});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(data) {
+            var json = JSON.parse(data);
+            if(json['error']){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            var form = $("#load-late-days");
+            $('#late_day_table tr:gt(0)').remove();
+            if(json['users'].length === 0){
+                $('#late_day_table').append('<tr><td colspan="4">No late days are currently entered.</td></tr>');
+            }
+            json['users'].forEach(function(elem){
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'] + '</td></tr>'];
+                $('#late_day_table').append(bits.join('</td><td>'));
+            });
+            $('#user_id').val(this.defaultValue);
+            $('#datestamp').val(this.defaultValue);
+            $('#late_days').val(this.defaultValue);
+            $('#csv_upload').val(this.defaultValue);
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days have been updated.</div>';
+            $('#messages').append(message);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    })
+    return false;
+}
