@@ -613,10 +613,16 @@ HTML;
 HTML;
             }
         }
-
+        $team_header = '';
+        if ($gradeable->isTeamAssignment()) {
+            $team_header = <<<HTML
+    <h3>Team: {$gradeable->getTeam()->getMemberList()}</h3><br />
+HTML;
+        }
         if ($gradeable->getSubmissionCount() === 0) {
             $return .= <<<HTML
 <div class="content">
+    {$team_header}
     <span style="font-style: italic">No submissions for this assignment.</span>
 </div>
 HTML;
@@ -624,6 +630,7 @@ HTML;
         else {
             $return .= <<<HTML
 <div class="content">
+    {$team_header}
     <h3 class='label' style="float: left">Select Submission Version:</h3>
 HTML;
             $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'student',

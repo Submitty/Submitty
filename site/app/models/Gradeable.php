@@ -30,8 +30,12 @@ use app\libraries\Utils;
  * @method float getMaxSize()
  * @method GradeableVersion[] getVersions()
  * @method float getNormalPoints() Returns the total number of points for testcases that are not hidden nor are extra credit
- * @method bool setTeamAssignment()
+ * @method bool setTeamAssignment(bool $team_assignment)
  * @method bool getTeamAssignment()
+ * @method int setMaxTeamSize(int $max_team_size)
+ * @method int getMaxTeamSize()
+ * @method setTeamLockDate(\DateTime $datetime)
+ * @method \DateTime getTeamLockDate()
  * @method int getPeerGradeSet()
  * @method void setPeerGradeSet(int $assign)
  * @method bool getPeerGrading()
@@ -68,6 +72,7 @@ use app\libraries\Utils;
  * @method float getPointPrecision()
  * @method User getUser()
  * @method void setUser(User $user)
+ * @method Team getTeam()
  * @method GradeableComponent[] getComponents()
  * @method string getOverallComment()
  * @method void setOverallComment(string $comment)
@@ -96,6 +101,12 @@ class Gradeable extends AbstractModel {
     
     /** @property @var bool Is this a team assignment */
     protected $team_assignment = false;
+
+    /** @property @var int maximum allowed team size */
+    protected $max_team_size = 0;
+
+    /** @property @var \DateTime|null Date when students cannot create/leave/join teams without instructor's help */
+    protected $team_lock_date = null;
     
     /** @property @var bool Does this assignment use peer grading*/
     protected $peer_grading = false;
@@ -271,6 +282,9 @@ class Gradeable extends AbstractModel {
     /** @property @var \app\models\User|null */
     protected $user = null;
 
+    /** @property @var \app\models\Team|null */
+    protected $team = null;
+
     protected $user_viewed_date = null;
 
     public function __construct(Core $core, $details=array(), User $user = null) {
@@ -281,6 +295,7 @@ class Gradeable extends AbstractModel {
         $this->id = $details['g_id'];
 
         $this->user = ($user === null) ? $this->core->getUser() : $user;
+
         if (isset($details['gd_id'])) {
             $this->gd_id = $details['gd_id'];
             $this->overall_comment = $details['gd_overall_comment'];
@@ -291,8 +306,7 @@ class Gradeable extends AbstractModel {
 
         $this->ta_instructions = $details['g_overall_ta_instructions'];
         $this->instructions_url = $details['g_instructions_url'];
-        $this->team_assignment = isset($details['g_team_assignment']) ? $details['g_team_assignment'] === true : false;
-        
+
         $this->type = $details['g_gradeable_type'];
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);
@@ -309,6 +323,9 @@ class Gradeable extends AbstractModel {
             $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
+            $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;
+            $this->max_team_size = $details['eg_max_team_size'];
+            $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
             if (isset($details['active_version']) && $details['active_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
@@ -512,7 +529,7 @@ class Gradeable extends AbstractModel {
 
         $user_id = $this->user->getId();
         if ($this->team_assignment) {
-            $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $user_id);
             if ($team !== null) {
                 $user_id = $team->getId();
             }
@@ -629,7 +646,7 @@ class Gradeable extends AbstractModel {
 
         $user_id = $this->user->getId();
         if ($this->team_assignment) {
-            $team = $this->core->getQueries()->getTeamByUserId($this->id, $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $user_id);
             if ($team !== null) {
                 $user_id = $team->getId();
             }

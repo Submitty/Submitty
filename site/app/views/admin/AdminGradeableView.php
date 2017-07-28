@@ -25,22 +25,24 @@ class AdminGradeableView extends AbstractView {
 	public function show_add_gradeable($type_of_action, $initial_data = array(""), $data = array("")) {
 
         $electronic_gradeable = array();
-        $TA_beta_date = date('m/d/Y 23:59:59', strtotime( '-1 days' ));
-        $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y 23:59:59', strtotime( '0 days' ));
-        $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y 23:59:59', strtotime( '+7 days' ));
+        $TA_beta_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
+        $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
+        $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
         $electronic_gradeable['eg_subdirectory'] = "temp";
         $electronic_gradeable['eg_config_path'] = "";
         $electronic_gradeable['eg_late_days'] = 2;
         $electronic_gradeable['eg_precision'] = 0.5;
-        $team_yes_checked;
-        $team_no_checked;
+        $electronic_gradeable['eg_max_team_size'] = 1;
+        $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
+        $team_yes_checked = false;
+        $team_no_checked = true;
         $peer_yes_checked = false;
         $peer_no_checked = true;
         $peer_grade_set = 3;
-        $TA_grade_open_date = date('m/d/Y 23:59:59', strtotime( '+10 days' ));
-        $TA_grade_release_date = date('m/d/Y 23:59:59', strtotime( '+14 days' ));
+        $TA_grade_open_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
+        $TA_grade_release_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-		$BASE_URL = "http://192.168.56.101/hwgrading";
+		$BASE_URL = "http:/localhost/hwgrading";
 		$action = "upload_new_gradeable"; //decides how the page's data is displayed
 		$string = "Add"; //Add or Edit
 		$button_string = "Add";
@@ -83,26 +85,28 @@ class AdminGradeableView extends AbstractView {
             $string = "Edit";
             $button_string = "Edit";
             $extra = ($data[2]) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
-            $TA_beta_date = date('m/d/Y H:i:s', strtotime($data[0]['g_ta_view_start_date']));
-            $TA_grade_open_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_start_date']));
-            $TA_grade_release_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_released_date']));
+            $TA_beta_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_ta_view_start_date']));
+            $TA_grade_open_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_start_date']));
+            $TA_grade_release_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_released_date']));
             $gradeable_submission_id = $data[0]['g_id'];
             $gradeable_name = $data[0]['g_title'];
             $g_instructions_url = $data[0]['g_instructions_url'];
-            $team_yes_checked = $data[0]['g_team_assignment'];
-            $team_no_checked = !$team_yes_checked;
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) { //if the gradeable edited is electronic gradeable
-                $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_open_date']));
-                $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_due_date']));
+                $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_open_date']));
+                $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_due_date']));
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $precision = $data[3]['eg_precision'];
                 $electronic_gradeable['eg_precision'] = $precision;
+                $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
+                $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_team_lock_date']));
+                $team_yes_checked = $data[3]['eg_team_assignment'];
+                $team_no_checked = !$team_yes_checked;
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $student_view = $data[3]['eg_student_view'];
                 $student_submit = $data[3]['eg_student_submit'];
@@ -128,8 +132,6 @@ class AdminGradeableView extends AbstractView {
         //if the user is using a template
         if ($type_of_action === "add_template") {
             $g_instructions_url = $data[0]['g_instructions_url'];
-            $team_yes_checked = $data[0]['g_team_assignment'];
-            $team_no_checked = !$team_yes_checked;
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
@@ -137,6 +139,9 @@ class AdminGradeableView extends AbstractView {
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
+                $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
+                $team_yes_checked = $data[3]['eg_team_assignment'];
+                $team_no_checked = !$team_yes_checked;
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $student_view = $data[3]['eg_student_view'];
                 $student_submit = $data[3]['eg_student_submit'];
@@ -256,7 +261,7 @@ class AdminGradeableView extends AbstractView {
 </style>
 <div id="container-rubric">
     <form id="gradeable-form" class="form-signin" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => $action))}" 
-          method="post" enctype="multipart/form-data" onsubmit="return checkForm()"> 
+          method="post" enctype="multipart/form-data"> 
 
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
@@ -314,30 +319,7 @@ HTML;
             <input name="date_ta_view" id="date_ta_view" class="date_picker" type="text" value="{$TA_beta_date}"
             style="cursor: auto; background-color: #FFF; width: 250px;">
             <br />
-            <br />
-            Is this a team assignment?:
-            <fieldset>
-            <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes"
-HTML;
-        if (($type_of_action === "edit" || $type_of_action === "add_template") && $team_yes_checked) { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-            > Yes
-            <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="no"
-HTML;
-        if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-            > No
-                <div class="team_assignment team_yes" id="team_date">
-                    <!--    
-                    <br />
-                    What is the <em style='color: orange;'><b>Team Finalization Date</b></em>? <input name="date_teams_final" id="date_teams_final" class="datepicker" type="text" style="cursor: auto; background-color: #FFF; width: 250px;">
-                    <br />
-                    -->
-                </div>
-                    
-                <div class="team_assignment team_no" id="team_no">
-                </div>
-            </fieldset>   
+            <br /> 
             What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
             <fieldset>
@@ -360,7 +342,31 @@ HTML;
             >
             Numeric/Text
             <!-- This is only relevant to Electronic Files -->
-            <div class="gradeable_type_options electronic_file" id="electronic_file" >    
+            <div class="gradeable_type_options electronic_file" id="electronic_file" >
+                <br />
+                Is this a team assignment?
+                <fieldset>
+                    <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes"
+HTML;
+                if (($type_of_action === "edit" || $type_of_action === "add_template") && $team_yes_checked) { $html_output .= ' checked="checked"'; }
+                $html_output .= <<<HTML
+                > Yes
+                    <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="no"
+HTML;
+                if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; }
+                $html_output .= <<<HTML
+                > No
+                    <div class="team_assignment team_yes" id="team_yes">
+                        <br />
+                        What is the maximum team size? <input style="width: 50px" name="eg_max_team_size" class="int_val" type="text" value="{$electronic_gradeable['eg_max_team_size']}"/>
+                        <br />
+                        What is the <em style='color: orange;'><b>Team Lock Date</b></em>? (Instructors can still manually manage teams):
+                        <input name="date_team_lock" id="date_team_lock" class="date_picker" type="text" value="{$electronic_gradeable['eg_team_lock_date']}"
+                        style="cursor: auto; background-color: #FFF; width: 250px;">
+                        <br />
+                    </div>
+                    <div class="team_assignment team_no" id="team_no"></div>
+                </fieldset>      
                 <br />
                 What is the <em style='color: orange;'><b>Submission Open Date</b></em>? (submission available to students):
                 <input id="date_submit" name="date_submit" class="date_picker" type="text" value="{$electronic_gradeable['eg_submission_open_date']}"
@@ -999,7 +1005,8 @@ function createCrossBrowserJSDate(val){
 
         $(function() {
             $( ".date_picker" ).datetimepicker({
-                timeFormat: "HH:mm:ss",
+                dateFormat: 'yy-mm-dd',
+                timeFormat: "HH:mm:ssz",
                 showButtonPanel: true,
                 showTimezone: false,
                 showMillisec: false,
@@ -1013,7 +1020,7 @@ function createCrossBrowserJSDate(val){
                         $( "<button>", {
                             text: "Infinity",
                             click: function() {
-                                $.datepicker._curInst.input.datepicker('setDate', "12/31/9999 23:59:59").datepicker('hide');
+                                $.datepicker._curInst.input.datepicker('setDate', "9999-12-31 23:59:59-0400").datepicker('hide');
                             }
                         }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
                     }, 1 );
@@ -1270,6 +1277,15 @@ function createCrossBrowserJSDate(val){
                 $('#rubric_questions').hide();
                 $('#grading_questions').hide();
             }
+
+            if($('#team_yes_radio').is(':checked')){
+                $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+                $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                $('#team_yes').show();
+            }
+            else {
+                $('#team_yes').hide();
+            }
         }
         else if ($('#radio_checkpoints').is(':checked')){
             var components = {$old_components};
@@ -1300,6 +1316,18 @@ function createCrossBrowserJSDate(val){
             $('input[name=gradeable_id]').attr('readonly', true);
         }
 
+        $('input:radio[name="team_assignment"]').change(
+    function(){
+        if($('#team_yes_radio').is(':checked')){
+            $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+            $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+            $('#team_yes').show();
+        }
+        else {
+            $('#team_yes').hide();
+        }
+    });
+
          $('input:radio[name="gradeable_type"]').change(
     function(){
         $('#required_type').hide();
@@ -1318,6 +1346,15 @@ function createCrossBrowserJSDate(val){
                    $('#grades_released_compare_date').html('Due Date');
                 } else { 
                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                }
+
+                if($('#team_yes_radio').is(':checked')){
+                    $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+                    $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                    $('#team_yes').show();
+                }
+                else {
+                    $('#team_yes').hide();
                 }
             }
             else if ($(this).val() == 'Checkpoints'){ 
@@ -1353,6 +1390,7 @@ function createCrossBrowserJSDate(val){
     });
 
 $('#gradeable-form').on('submit', function(e){
+        return checkForm()
          $('<input />').attr('type', 'hidden')
             .attr('name', 'gradeableJSON')
             .attr('value', JSON.stringify($('form').serializeObject()))
@@ -2002,6 +2040,15 @@ $('#gradeable-form').on('submit', function(e){
                    $('#grades_released_compare_date').html('Due Date');
                 } else { 
                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                }
+
+                if($('#team_yes_radio').is(':checked')){
+                    $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+                    $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                    $('#team_yes').show();
+                }
+                else {
+                    $('#team_yes').hide();
                 }
             }
             else if ($(this).val() == 'Checkpoints'){ 

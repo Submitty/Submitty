@@ -9,6 +9,7 @@ use \app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
+use \DateTime;
 
 class AdminGradeableController extends AbstractController {
 	public function run() {
@@ -104,8 +105,6 @@ class AdminGradeableController extends AbstractController {
         $gradeable->setName(htmlentities($_POST['gradeable_title']));
         $gradeable->setInstructionsUrl($_POST['instructions_url']);
         $gradeable->setTaInstructions($_POST['ta_instructions']);
-        $is_team_assignment = (isset($_POST['team_assignment']) && $_POST['team_assignment']=='yes') ? true : false;
-        $gradeable->setTeamAssignment($is_team_assignment);
         $gradeable_type = $_POST['gradeable_type'];
         if ($gradeable_type === "Electronic File") {
             $gradeable_type = GradeableType::ELECTRONIC_FILE;
@@ -145,6 +144,10 @@ class AdminGradeableController extends AbstractController {
             $is_peer_grading = (isset($_POST['peer_grading']) && $_POST['peer_grading']=='yes') ? true : false;
             $gradeable->setPeerGrading($is_peer_grading);
             if ($is_peer_grading) { $gradeable->setPeerGradeSet($_POST['peer_grade_set']); }
+            $is_team_assignment = (isset($_POST['team_assignment']) && $_POST['team_assignment']=='yes') ? true : false;
+            $gradeable->setTeamAssignment($is_team_assignment);
+            $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
+            $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
         }
 
         if ($edit_gradeable === 0) {
