@@ -359,7 +359,7 @@ HTML;
 
     public function showVersionChoice($gradeable, $onChange, $formatting = "") {
         $return = <<<HTML
-    <select style="margin: 0 10px;{$formatting} " id="submission_version" name="submission_version"
+    <select style="margin: 0 10px;{$formatting} " name="submission_version"
     onChange="{$onChange}">
 
 HTML;

@@ -26,9 +26,10 @@ class MiscController extends AbstractController {
 
     private function displayFile() {
         //Additional security
-        if (!($this->core->getUser()->accessGrading())) {
-            throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
-        }
+        // FIXME: need to add more security
+        // if (!($this->core->getUser()->accessGrading())) {
+        //     throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
+        // }
         foreach (explode(DIRECTORY_SEPARATOR, $_REQUEST['path']) as $part) {
             if ($part == ".." || $part == ".") {
                 throw new \InvalidArgumentException("Cannot have a part of the path just be dots");
@@ -101,9 +102,10 @@ class MiscController extends AbstractController {
 
     private function downloadFile() {
         //Additional security
-        if (!($this->core->getUser()->accessGrading())) {
-            throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
-        }
+        // FIXME: need to add security
+        // if (!($this->core->getUser()->accessGrading())) {
+        //     throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
+        // }
         if (!file_exists($_REQUEST['path'])) {
             throw new \InvalidArgumentException("File does not exist");
         }

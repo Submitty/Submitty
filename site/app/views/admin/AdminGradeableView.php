@@ -2097,14 +2097,13 @@ $('#gradeable-form').on('submit', function(e){
                 alert("The config path should not be empty");
                 return false;
             }
-            /////
-            // // if view false while either submit or download true
-            // if ($('input:radio[name="student_view"]:checked').attr('value') === 'false' &&
-            //    ($('input:radio[name="student_submit"]:checked').attr('value') === 'true' ||
-            //     $('input:radio[name="student_download"]:checked').attr('value') === 'true')) {
-            //     alert("Student_view cannot be false while student_submit or student_download is true");
-            //     return false;
-            // }
+            // if view false while either submit or download true
+            if ($('input:radio[name="student_view"]:checked').attr('value') === 'false' &&
+               ($('input:radio[name="student_submit"]:checked').attr('value') === 'true' ||
+                $('input:radio[name="student_download"]:checked').attr('value') === 'true')) {
+                alert("Student_view cannot be false while student_submit or student_download is true");
+                return false;
+            }
         }
         if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'true') {
             if(date_grade < date_due) {

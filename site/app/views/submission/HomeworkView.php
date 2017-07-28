@@ -614,15 +614,6 @@ HTML;
             }
         }
 
-        // // if before grades released and submit is not active, don't show the rest of the divs
-        // if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentSubmit()) {
-        //     $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
-        //     if ($now <= $gradeable->getGradeReleasedDate()) {
-        //         return $return;
-        //     }
-        // }
-        ////////// hm
-
         if ($gradeable->getSubmissionCount() === 0) {
             $return .= <<<HTML
 <div class="content">
@@ -678,8 +669,12 @@ HTML;
             if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentAnyVersion()) {
                 $return .= <<<HTML
     <script type="text/javascript">
+        function downloadFile(file, path) {
+            window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
+        }
         $(document).ready(function() {
-            $('#submission_version').prop("disabled", true);
+            //$('#submission_version').prop("disabled", true);
+            $('select[name=submission_version]').prop("disabled", true);
         });
     </script>
 HTML;
@@ -751,7 +746,28 @@ HTML;
                     else {
                         $size = number_format(-1);
                     }
-                    $return .= "{$file['relative_name']} ({$size}kb)<br />";
+                    $return .= "{$file['relative_name']} ({$size}kb)";
+                    // insert icon link here
+                    if (!$gradeable->useSvnCheckout() && $gradeable->getStudentDownload()) {
+                        // if not active version and student cannot see any more than active version
+                        if ($gradeable->getCurrentVersionNumber() !== $gradeable->getActiveVersion() && !$gradeable->getStudentAnyVersion()) {
+                            $return .= "<br />";
+                            continue;
+                        }
+                        $return .= <<<HTML
+            <script type="text/javascript">
+                function downloadFile(file, path) {
+                    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
+                }
+            </script>
+HTML;
+                        $filename = $file['relative_name'];
+                        $filepath = $file['path'];
+                        $return .= <<< HTML
+            <a onclick="downloadFile('$filename','$filepath')"><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <br />
+HTML;
+                    }
                 }
                 $return .= <<<HTML
         </div>
