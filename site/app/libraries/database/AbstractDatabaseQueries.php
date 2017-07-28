@@ -271,7 +271,7 @@ abstract class AbstractDatabaseQueries {
      *
      * @param array $details
      */
-    abstract public function createNewGradeable($details);
+    abstract public function createNewGradeable(Gradeable $gradeable);
 
     /**
      * Gets an array that contains all revelant data in a gradeable.
@@ -287,7 +287,7 @@ abstract class AbstractDatabaseQueries {
      *
      * @param array $details
      */
-    abstract public function updateGradeable($details);
+    abstract public function updateGradeable(Gradeable $gradeable);
 
     /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
@@ -350,29 +350,53 @@ abstract class AbstractDatabaseQueries {
      * Create a new team id and team in gradeable_teams for given gradeable, add $user_id as a member
      * @param string $g_id
      * @param string $user_id
+     * @param integer $registration_section
+     * @param integer $rotating_section
      */
-    abstract public function newTeam($g_id, $user_id);
+    abstract public function createTeam($g_id, $user_id, $registration_section, $rotating_section);
+
+    /**
+     * Remove a user from their current team
+     * @param string $team_id
+     * @param string $user_id
+     */
+    abstract public function leaveTeam($team_id, $user_id);
 
     /**
      * Add user $user_id to team $team_id as an invited user
      * @param string $team_id
      * @param string $user_id
      */
-    abstract public function newTeamInvite($team_id, $user_id);
+    abstract public function sendTeamInvitation($team_id, $user_id);
 
     /**
      * Add user $user_id to team $team_id as a team member
      * @param string $team_id
      * @param string $user_id
      */
-    abstract public function newTeamMember($team_id, $user_id);
+    abstract public function acceptTeamInvitation($team_id, $user_id);
 
     /**
-     * Remove a user from their current team, decline all invitiations for that user
+     * Decline all pending team invitiations for a user
      * @param string $g_id
      * @param string $user_id
      */
-    abstract public function removeTeamUser($g_id, $user_id);
+    abstract public function declineTeamInvitations($g_id, $user_id);
+
+    /**
+     * Return Team object for team whith given Team ID
+     * @param string $team_id
+     * @return \app\models\Team
+     */
+    abstract public function getTeamById($team_id);
+
+    /**
+     * Return Team object for team which the given user belongs to on the given gradeable
+     * @param string $g_id
+     * @param string $user_id
+     * @return \app\models\Team
+     */
+    abstract public function getTeamByGradeableAndUser($g_id, $user_id);
 
     /**
      * Return an array of Team objects for all teams on given gradeable
@@ -382,12 +406,18 @@ abstract class AbstractDatabaseQueries {
     abstract public function getTeamsByGradeableId($g_id);
 
     /**
-     * Return Team object for team which the given user belongs to on the given gradeable
+     * Return array of counts of teams/users without team/graded components
+     * corresponding to each registration/rotating section
      * @param string $g_id
-     * @param string $user_id
-     * @return \app\models\Team
+     * @param rray(int) $sections
+     * @param string $section_key
+     * @return array(int) $return
      */
-    abstract public function getTeamByUserId($g_id, $user_id);
+    abstract public function getTotalTeamCountByGradingSections($g_id, $sections, $section_key);
+
+    abstract public function getUsersWithoutTeamByGradingSections($g_id, $sections, $section_key);
+
+    abstract public function getGradedComponentsCountByTeamGradingSections($g_id, $sections, $section_key);
 
     /**
      * Return an array of users with late days
@@ -415,4 +445,24 @@ abstract class AbstractDatabaseQueries {
      * @param integer $days
      */
     abstract public function updateExtensions($user_id, $g_id, $days);
+    
+    /**
+     * Gets number of people each peer grader is assigned to grade
+     * @param string $gradeable_id
+     */
+    abstract public function getPeerGradingAssignNumber($gradeable_id);
+    
+    /**
+     * Removes peer grading assignment if instructor decides to change the number of people each person grades for assignment
+     * @param string $gradeable_id
+     */
+    abstract public function clearPeerGradingAssignments($gradeable_id);
+    
+    /**
+     * Adds an assignment for someone to grade another person for peer grading
+     * @param string $student
+     * @param string $grader
+     * @param string $gradeable_id
+    */
+    abstract public function insertPeerGradingAssignment($grader, $student, $gradeable_id);
 }

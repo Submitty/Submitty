@@ -1,0 +1,5 @@
+{
+    // 10 mb maximum submission size
+    "max_submission_size" : 10000000,
+    "testcases" : [ ] 
+}

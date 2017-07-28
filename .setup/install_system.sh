@@ -75,7 +75,7 @@ addgroup hwcronphp
 # managers to write website custimization files and run course
 # management scripts.
 
-addgroup course_builders
+addgroup ${COURSE_BUILDERS_GROUP}
 
 if [ ${VAGRANT} == 1 ]; then
 	adduser vagrant sudo
@@ -347,10 +347,12 @@ fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
+
 # (re)start the submitty grading scheduler daemon
 systemctl restart submitty_grading_scheduler
 # also, set it to automatically start on boot
 sudo systemctl enable submitty_grading_scheduler
+
 
 
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
@@ -420,6 +422,7 @@ chmod 2771 ${SUBMITTY_INSTALL_DIR}
 service apache2 restart
 service php7.0-fpm restart
 service postgresql restart
+
 
 echo "Done."
 exit 0

@@ -72,7 +72,7 @@ CREATE TABLE sessions (
     session_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
-    session_expires timestamp without time zone NOT NULL
+    session_expires timestamp with time zone NOT NULL
 );
 
 
@@ -90,7 +90,7 @@ CREATE TABLE users (
     user_email character varying NOT NULL,
     user_updated BOOLEAN NOT NULL DEFAULT FALSE,
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
-    last_updated timestamp WITHOUT time zone
+    last_updated timestamp WITH time zone
 );
 
 
