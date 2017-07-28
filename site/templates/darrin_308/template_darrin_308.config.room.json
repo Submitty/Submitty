@@ -1,0 +1,83 @@
+{
+  "title": "Darrin 308",
+  "note": "skip every other seat",
+
+  "colors": {
+    "red": "#d00000",
+    "blue": "#0400d0",
+    "green": "#0b8f0a",
+    "yellow": "#e4c012",
+    "important": "#d000d0"
+  },
+
+  "zones" : {
+    "left": {
+      "J": {
+        "rows": [13,14],
+        "color": "red",
+        "density": 0.5
+      },
+      "K": {
+        "rows": [9,10,11],
+        "color": "green",
+        "density": 0.5
+      },
+      "L": {
+        "rows": [5,6,7],
+        "color": "blue",
+        "density": 0.5
+      },
+      "M": {
+        "rows": [1,2,3],
+        "color": "yellow",
+        "density": 0.5
+      }
+    },
+
+    "middle": {
+      "N": {
+        "rows": [12,13],
+        "color": "blue",
+        "density": 0.5
+      },
+      "O": {
+        "rows": [9,10],
+        "color": "yellow",
+        "density": 0.5
+      },
+      "P": {
+        "rows": [5,6,7],
+        "color": "red",
+        "density": 0.5
+      },
+      "Q": {
+        "rows": [1,2,3],
+        "color": "green",
+        "density": 0.5
+      }
+    },
+
+    "right": {
+      "R": {
+        "rows": [13,14],
+        "color": "red",
+        "density": 0.5
+      },
+      "S": {
+        "rows": [9,10,11],
+        "color": "green",
+        "density": 0.5
+      },
+      "T": {
+        "rows": [5,6,7],
+        "color": "blue",
+        "density": 0.5
+      },
+      "U": {
+        "rows": [1,2,3],
+        "color": "yellow",
+        "density": 0.5
+      }
+    }
+  }
+}

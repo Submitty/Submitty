@@ -1,0 +1,504 @@
+
+<!-- INSERT CONFIG JAVASCRIPT SCRIPT TAG HERE -->
+
+<style>
+#diagram {
+  border: 1px solid #d3d3d3;
+}
+</style>
+
+<body>
+  <canvas id="diagram" width="1050" height="800">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+  <img id="image">
+  <pre id="seats"></pre>
+</body>
+
+<script>
+
+  var seats = {
+    "left" :   [0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 3, 3, 2, 2, 3, 2, 3, 3, 2, 2, 3, 3, 0, 0],
+    "middle" : [6, 8, 9, 9, 9, 9, 9, 9, 9, 9, 6, 7, 0, 3, 8, 9, 9, 9, 9, 9, 9, 7, 9, 9, 9, 9, 2],
+    "right" :  [0, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+  }
+  var used = {};
+
+  function expand_config(config) {
+    expanded = {}
+    try {
+      for(var section in config) {
+        expanded[section] = {}
+        for(var letter in config[section]) {
+          // config[section][letter]["rows"].sort();
+          for(var index = 0; index < config[section][letter]["rows"].length; index++) {
+            row = config[section][letter]["rows"][index];
+            color = config[section][letter]["color"];
+            expanded[section][row] = {
+              "letter": letter,
+              "color": color,
+            }
+          }
+        }
+      }
+    }
+    catch(err) {
+      throw new Error("Invalid config");
+    }
+    return expanded
+  }
+
+  function find_angle(x_start, y_start, x_end, y_end) {
+    return Math.atan2((y_end - y_start) , (x_end - x_start));
+  }
+
+  function find_point(x, y, radius, angle){
+    return [x + Math.cos(angle) * radius, y + Math.sin(angle) * radius];
+  }
+
+  function render_arrow_head(x, y, angle, width, height) {
+    var half_width = width / 2.0;
+    var half_height = height / 2.0;
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.translate(-1.0 * half_width, -1.0 * half_height);
+    ctx.beginPath();
+    ctx.moveTo(0.0, 0.0);
+    ctx.lineTo(0.0, height);
+    ctx.lineTo(width, half_height);
+    ctx.closePath();
+    ctx.fill();
+    ctx.translate(half_width, half_height);
+    ctx.rotate(-angle);
+    ctx.translate(-1.0 * x, -1.0 * y);
+  }
+
+  function render_arrow(section) {
+    if(section == "left") {
+      var row = 13.5;
+      var angle = Math.PI * 0.95;
+      var angle_start = Math.PI * 0.442;
+      var angle_end   = Math.PI * 0.46;
+    }
+    else if(section == "middle") {
+      var row = 13.5;
+      var angle = Math.PI * 1.05;
+      var angle_start = Math.PI * 0.47;
+      var angle_end   = Math.PI * 0.53;
+    }
+    else if(section == "right") {
+      var row = 13.5;
+      var angle = Math.PI * 1.05;
+      var angle_start = Math.PI * 0.54;
+      var angle_end   = Math.PI * 0.558;
+    }
+    else {
+      console.log("Invalid section: " + section + " (skipping)");
+    }
+
+    var radius = BASE_ROW_RADIUS + row * 20;
+    var width = 1;
+    var color = BASE_ROW_COLOR;
+    ctx.setLineDash([]);
+
+    // Draw row
+    ctx.beginPath();
+    ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start, angle_end);
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+
+    point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end);
+    render_arrow_head(point[0], point[1], angle, 10, 10);
+  }
+
+  function render_section_row(section, row) {
+    var radius = BASE_ROW_RADIUS + row * 20
+    var width = BASE_ROW_WIDTH
+    var isle = false;
+    var past_walkway = row >= 15;
+
+    try {
+      var empty = false;
+      if(past_walkway)
+        var color = expanded[section][row - 2]["color"];
+      else
+        var color = expanded[section][row]["color"];
+      ctx.setLineDash([]);
+    }
+    catch(err) {
+      var empty = true;
+      var color = BASE_ROW_COLOR
+      ctx.setLineDash([10, 10]);
+    }
+
+    if(row == 13 || row == 14)
+    {
+      return
+    }
+
+    if((section == "left" && row == 11) || (section == "left" && row == 12)) {
+      var isle = true;
+      var empty = true;
+      var color = "#ffffff";
+      ctx.setLineDash([]);
+    }
+
+    if(section == "left") {
+      if(row <= 12) {
+        var angle_start = Math.PI * 0.45;
+        var angle_end   = Math.PI * 0.46;
+      }
+      else {
+        var angle_start = Math.PI * 0.442;
+        var angle_end   = Math.PI * 0.46;
+      }
+
+      if( ! isle) {
+        angle_avg = (angle_start + angle_end) * 0.5;
+        var offset = 4.0 * (Math.PI / radius)
+        point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start - offset);
+        ctx.font = "bold 7pt sans-serif";
+        ctx.fillStyle = "#333333";
+        if(past_walkway)
+          ctx.fillText(row - 2, point[0], point[1], 100);
+        else
+          ctx.fillText(row, point[0], point[1], 100);
+      }
+    }
+    else if(section == "middle") {
+      var angle_start = Math.PI * 0.47;
+      var angle_end   = Math.PI * 0.53;
+
+      if( ! isle) {
+        point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end * 1.01);
+        ctx.font = "bold 7pt sans-serif";
+        ctx.fillStyle = "#333333";
+        if(past_walkway)
+          ctx.fillText(row - 2, point[0], point[1], 100);
+        else
+          ctx.fillText(row, point[0], point[1], 100);
+
+        point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start * 0.99);
+        ctx.font = "bold 7pt sans-serif";
+        ctx.fillStyle = "#333333";
+        if(past_walkway)
+          ctx.fillText(row - 2, point[0], point[1], 100);
+        else
+          ctx.fillText(row, point[0], point[1], 100);
+      }
+    }
+    else if(section == "right") {
+      var angle_start = Math.PI * 0.54;
+      var angle_end   = Math.PI * 0.558;
+
+      if( ! isle) {
+        angle_avg = (angle_start + angle_end) * 0.5;
+        var offset = 5.0 * (Math.PI / radius)
+        point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end + offset);
+        ctx.font = "bold 7pt sans-serif";
+        ctx.fillStyle = "#333333";
+        if(past_walkway)
+          ctx.fillText(row - 2, point[0], point[1], 100);
+        else
+          ctx.fillText(row, point[0], point[1], 100);
+      }
+    }
+    else {
+      console.log("Invalid section: " + section + " (skipping)");
+    }
+
+    // Draw row
+    if(section == "middle" && (row == 15 || row == 16)) {
+      ctx.beginPath();
+      ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start, angle_start + 0.03);
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end - 0.03, angle_end);
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.setLineDash([]);
+      ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start + 0.04, angle_end - 0.04);
+      ctx.lineWidth = width;
+      ctx.strokeStyle = "#333333";
+      ctx.stroke();
+    }
+    else {
+      ctx.beginPath();
+      ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start, angle_end);
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color;
+      ctx.stroke();
+    }
+
+    if(section == "left" && row <= 12) {
+      ctx.beginPath();
+      ctx.setLineDash([]);
+      ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start - 0.04, angle_start - 0.015);
+      ctx.lineWidth = width * 4;
+      ctx.strokeStyle = "#333333";
+      ctx.stroke();
+    }
+
+    angle_avg = (angle_start + angle_end) * 0.5;
+    point_avg = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_avg);
+
+    // if(isle && section == "middle" && row == 14) {
+    //   // Draw row label
+    //   message = "WALKWAY";
+    //   ctx.font = "bold 20pt sans-serif";
+    //   point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius - 9, angle_avg);
+
+    //   var width2 = ctx.measureText(message).width + 18.0;
+    //   var height2 = 22.0
+    //   var width_half2 = width2 / 2.0;
+    //   var height_half2 = height2 / 2.0;
+    //   ctx.fillStyle = "#ffffff";
+    //   ctx.fillRect(point[0] - width_half2, point[1] - height_half2, width2, height2);
+
+    //   ctx.fillStyle = "#333333";
+    //   ctx.fillText(message, point[0], point[1]);
+    // }
+
+    if(DRAW_ROW_CENTER_LABELS) {
+      point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius - 9, angle_avg);
+      ctx.font = "bold 7pt sans-serif";
+      ctx.fillStyle = "#333333";
+      ctx.fillText(row, point[0], point[1]);
+    }
+
+    // Draw points
+    if( ! (empty || isle)) {
+      if(past_walkway)
+        letter = expanded[section][row - 2]["letter"];
+      else
+        letter = expanded[section][row]["letter"];
+
+      if( ! ("points" in config[section][letter])) {
+        config[section][letter]["points"] = []
+      }
+      if( ! (letter in used)) {
+        used[letter] = 0
+      }
+      config[section][letter]["points"].push(point_avg);
+      if(past_walkway)
+        used[letter] += seats[section][row - 1 - 2];
+      else
+        used[letter] += seats[section][row - 1];
+
+      if(DRAW_ROW_BLACK_DOTS) {
+        if(row <= 4) {
+          limit = 1
+        }
+        else if(row <= 8) {
+          limit = 2
+        }
+        else if(row <= 12) {
+          limit = 3
+        }
+        else {
+          limit = 4
+        }
+
+        for(var multiplier = 0; multiplier < limit; multiplier++)
+        {
+          var offset = 8.0 * (Math.PI / radius)
+          // var offset = (angle_end - angle_start) * 0.15
+          point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start + multiplier * offset);
+          ctx.beginPath();
+          ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
+          ctx.fillStyle = "#333333";
+          ctx.fill();
+        }
+      }
+
+      if( ! (section == "middle" && row <= 12))
+      {
+        point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end);
+        ctx.beginPath();
+        ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
+        ctx.fillStyle = "#d000d0";
+        ctx.fill();
+      }
+    }
+  }
+
+  function render_row(row) {
+    render_section_row("left", row);
+    render_section_row("middle", row);
+    render_section_row("right", row);
+  }
+
+  function render_section(section) {
+    for(var row = 1; row <= BASE_NUM_ROWS; row++) {
+      render_section_row(section, row);
+    }
+  }
+
+  function render_zone_labels(config) {
+    try {
+      for(var section in config) {
+        console.log(section)
+        for(var letter in config[section]) {
+          console.log(letter)
+          console.log(config[section][letter]);
+          var num_points = config[section][letter]["points"].length;
+          var total_x = 0.0;
+          var total_y = 0.0;
+
+          for(var index = 0; index < num_points; index++) {
+            point = config[section][letter]["points"][index];
+            total_x += point[0];
+            total_y += point[1];
+          }
+
+          console.log(num_points);
+          total_x /= num_points;
+          total_y /= num_points;
+
+          message = letter + " (rows " + config[section][letter]["rows"][0] + "-" + + config[section][letter]["rows"][num_points - 1] + ")"
+          ctx.font = "bold 12pt sans-serif";
+
+          var width = ctx.measureText(message).width + 20.0;
+          var height = 24.0
+          var width_half = width / 2.0;
+          var height_half = height / 2.0;
+          ctx.fillStyle = "#333333";
+          ctx.fillRect(total_x - width_half, total_y - height_half, width, height);
+
+          var width = ctx.measureText(message).width + 18.0;
+          var height = 22.0
+          var width_half = width / 2.0;
+          var height_half = height / 2.0;
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(total_x - width_half, total_y - height_half, width, height);
+
+          ctx.fillStyle = config[section][letter]["color"];
+          ctx.fillText(message, total_x, total_y);
+        }
+      }
+    }
+    catch(err) {
+      throw new Error("Invalid config");
+    }
+    return expanded
+
+  }
+
+  function sum_array(temp) {
+    var total = 0;
+    for(var index = 0; index < temp.length; index++) {
+        total += temp[index];
+    }
+    return total;
+  }
+
+  // Find diagram DOM object and configure HTML5 canvas
+  var diagram = document.getElementById("diagram");
+  var ctx = diagram.getContext("2d");
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+
+  var EXPANDED = expand_config(config);
+  var BASE_NUM_ROWS = 29
+  var BASE_ROW_HEIGHT = -2000
+  var BASE_ROW_CENTER = document.getElementById("diagram").offsetWidth / 2.0;
+  var BASE_ROW_RADIUS = 2150
+  var BASE_ROW_WIDTH = 6
+  var BASE_ROW_COLOR = "grey"
+  var BASE_POINT_RADIUS = 7
+
+  var DRAW_ROW_BLACK_DOTS = false;
+  var DRAW_ROW_CENTER_LABELS = false;
+
+  // Render title
+  ctx.font = "bold 20pt sans-serif";
+  ctx.fillText(title, BASE_ROW_CENTER, 50);
+
+  // Render left note
+  ctx.font = "bold 12pt sans-serif";
+  ctx.fillStyle = "#d000d0";
+  ctx.fillText(note_left, 150, 50);
+
+  // Render right note
+  ctx.font = "bold 12pt sans-serif";
+  ctx.fillStyle = "#333333";
+  ctx.fillText(note_right, 900, 50);
+
+  // Render front of room legend
+  ctx.font = "italic 10pt sans-serif";
+  ctx.fillText("Front of Room (Stage)", BASE_ROW_CENTER, 120);
+
+  // Render back of room legend
+  ctx.font = "italic 10pt sans-serif";
+  ctx.fillText("Back of Room", BASE_ROW_CENTER, 770);
+
+  // Render rows and points
+  for(var row = 1; row <= BASE_NUM_ROWS; row++) {
+    render_row(row);
+  }
+
+  // Render arrows
+  // render_arrow("left");
+  // render_arrow("middle");
+  // render_arrow("right");
+
+  // render_section_row("middle", 13);
+  // render_section_row("middle", 14);
+
+  // Draw WALKWAY row label
+  row = 14;
+  var angle_start = Math.PI * 0.47;
+  var angle_end   = Math.PI * 0.53;
+  angle_avg = (angle_start + angle_end) * 0.5;
+  radius = BASE_ROW_RADIUS + row * 20
+  message = "WALKWAY";
+  ctx.font = "bold 20pt sans-serif";
+  point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius - 9, angle_avg);
+
+  var width2 = ctx.measureText(message).width + 18.0;
+  var height2 = 22.0
+  var width_half2 = width2 / 2.0;
+  var height_half2 = height2 / 2.0;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(point[0] - width_half2, point[1] - height_half2, width2, height2);
+
+  ctx.fillStyle = "#333333";
+  ctx.fillText(message, point[0], point[1]);
+
+
+  // Render zone labels
+  render_zone_labels(config);
+
+  // Render to image
+  document.getElementById("image").src = diagram.toDataURL();
+
+  // Print seats used
+  var temp = [];
+  for(var letter in used) {
+    temp.push(letter)
+  }
+  temp.sort();
+  container = document.getElementById("seats")
+  var total = 0;
+  for(var index in temp) {
+    var letter = temp[index];
+    container.innerHTML += letter + " WEST-HALL AUDITORIUM " + used[letter] + "\n";
+    total += used[letter];
+  }
+
+  // Get total number of seats
+  var all = 0;
+  all += sum_array(seats["left"]);
+  all += sum_array(seats["middle"]);
+  all += sum_array(seats["right"]);
+
+  container.innerHTML += "\nTOTAL: " + total + "\n";
+  container.innerHTML += "UNUSED: " + (all - total) + "\n";
+</script>
