@@ -349,12 +349,12 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
+                            'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
                             'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
+                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
@@ -378,6 +378,7 @@ class Gradeable extends AbstractModel {
                 if (isset($details['array_gcd_gc_id'])) {
                     for ($j = 0; $j < count($details['array_gcd_gc_id']); $j++) {
                         if ($details['array_gcd_gc_id'][$j] === $component_details['gc_id']) {
+                            $component_details['array_gcm_mark'] = $details['array_array_gcm_mark'][$j];
                             $component_details['gcd_score'] = $details['array_gcd_score'][$j];
                             $component_details['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
                             $component_details['gcd_graded_version'] = $details['array_gcd_graded_version'][$j];                            
@@ -949,6 +950,17 @@ class Gradeable extends AbstractModel {
         }
         foreach ($this->components as $component) {
             $component->saveData($this->gd_id);
+        }
+        $this->core->getCourseDB()->commit();
+    }
+
+    public function saveData2() {
+        $this->core->getCourseDB()->beginTransaction();
+        if ($this->gd_id === null) {
+            $this->gd_id = $this->core->getQueries()->insertGradeableData($this);
+        }
+        elseif ($this->modified) {
+            $this->core->getQueries()->updateGradeableData($this);
         }
         $this->core->getCourseDB()->commit();
     }

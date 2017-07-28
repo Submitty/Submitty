@@ -41,7 +41,12 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             $name_and_emails = array();
             foreach($gradeable->getComponents() as $component){
-                $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>".$nl;
+                if($component->getGrader() === null) {
+                    $name_and_emails[] = "No one".$nl;
+                } else {
+                    $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>".$nl;
+                }
+                
             }
             $name_and_emails = implode(",", $name_and_emails);
 
@@ -86,17 +91,57 @@ class HWReport extends AbstractModel {
                     $student_output_text .= "submission version #" . $active_version .$nl;
                     $student_output_text .= $nl.$gradefilecontents.$nl;
                 }
+
                 foreach($gradeable->getComponents() as $component) {
-                    $student_output_text .= $component->getTitle() . "[" . $component->getScore() . "/" . $component->getMaxValue() . "] (Graded by {$component->getGrader()->getId()})".$nl;
+                    $temp_notes = "";
+                    $type = 0; // 0 is deduct, 1 is addition
+                    foreach($component->getMarks() as $mark) {
+                        if($mark->getPoints() < 0) {
+                            $type = 0;
+                            break;
+                        }
+                        if($mark->getPoints() > 0) {
+                            $type = 1;
+                            break;
+                        }
+                    }
+                    $temp_score = ($type === 0) ? $component->getMaxValue() : 0;
+                    foreach($component->getMarks() as $mark) {
+                        if($mark->getHasMark()) {
+                            $temp_score += $mark->getPoints();
+                            $temp_notes .= $mark->getPoints() . " : " . $mark->getNote() . $nl;
+                        }
+                    }
+
+                    if(!($component->getScore() == 0 && $component->getComment() == "")) {
+                        $temp_score += $component->getScore();
+                        $temp_notes .= $component->getScore() . " : " . $component->getComment() . $nl;
+                    }
+
+                    if($type === 0) {
+                        if($temp_score < 0) {
+                            $temp_score = 0;
+                        }
+                    } else {
+                        if($temp_score > $component->getMaxValue()) {
+                            $temp_score = $component->getMaxValue();
+                        }
+                    }
+
+                    $student_output_text .= $component->getTitle() . "[" . $temp_score . "/" . $component->getMaxValue() . "] (Graded by {$component->getGrader()->getId()})".$nl;
                     if($component->getStudentComment() != "") {
                         $student_output_text .= "Rubric: " . $component->getStudentComment() . $nl;
                     }
-                    if($component->getComment() != "") {
-                        $student_output_text .= "TA NOTE: " . $component->getComment() . $nl;
-                    }
+                    //if($component->getComment() != "") {
+                    //    $student_output_text .= "TA NOTE: " . $component->getComment() . $nl;
+                    //}
+
+                    $student_output_text .= $temp_notes;
+
                     $student_output_text .= $nl;
                     
-                    $student_grade += $component->getScore();
+                    //$student_grade += $component->getScore();
+                    $student_grade += $temp_score;
                     if(!$component->getIsExtraCredit() && $component->getMaxValue() > 0) {
                         $rubric_total += $component->getMaxValue();
                         $ta_max_score += $component->getMaxValue();
