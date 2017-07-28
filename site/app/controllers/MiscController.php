@@ -81,7 +81,7 @@ class MiscController extends AbstractController {
 
         // if instructor or grader, then it's okay
         if ($this->core->getUser()->accessGrading()) {
-            return true;
+            return;
         }
 
         // otherwise, check that they are trying to access a directory that is theirs
