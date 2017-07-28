@@ -1,75 +1,57 @@
 #!/usr/bin/env bash
 
+# this script must be run by root or sudo
+if [[ "$UID" -ne "0" ]] ; then
+    echo "ERROR: This script must be run by root or sudo"
+    exit
+fi
+
 # TIMEZONE
 timedatectl set-timezone America/New_York
 
-#PATHS
+#################################################################
+# CONSTANTS
+#################
+
+# PATHS
+SOURCE="${BASH_SOURCE[0]}"
+CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
+# Groups
 COURSE_BUILDERS_GROUP=course_builders
-
-# Ensure we have python and pip installed before doing anything else so we can use
-# python as our glue
-apt-get update
-apt-get install -qqy python python-pip python-dev python3 python3-pip python3-dev libpython3.5
-pip2 install -U pip
-pip3 install -U pip
 
 #################################################################
 # PROVISION SETUP
 #################
+
 if [[ $1 == vagrant ]]; then
   echo "Non-interactive vagrant script..."
-  VAGRANT=1
+  export VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
 else
   #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
-  VAGRANT=0
+  export VAGRANT=0
 fi
 
 #################################################################
-# UBUNTU SETUP
+# DISTRO SETUP
 #################
+
+source ${CURRENT_DIR}/distro_setup/setup_distro.sh
+
 if [ ${VAGRANT} == 1 ]; then
-    chmod -x /etc/update-motd.d/*
-    chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
-    chmod +x /etc/update-motd.d/00-header
-
-    echo -e '
- _______  __   __  _______  __   __  ___   _______  _______  __   __
-|       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
-|  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
-| |_____ |  |_|  ||       ||       ||   |   |   |    |   |  |       |
-|_____  ||       ||  _   | |       ||   |   |   |    |   |  |_     _|
- _____| ||       || |_|   || ||_|| ||   |   |   |    |   |    |   |
-|_______||_______||_______||_|   |_||___|   |___|    |___|    |___|
-
-############################################################
-##  All user accounts have same password unless otherwise ##
-##  noted below. The following user accounts exist:       ##
-##    vagrant/vagrant, root/vagrant, hsdbu, hwphp,        ##
-##    hwcgi hwcron, ta, instructor, developer,            ##
-##    postgres                                            ##
-##                                                        ##
-##  The following accounts have database accounts         ##
-##  with same password as above:                          ##
-##    hsdbu, postgres, root, vagrant                      ##
-##                                                        ##
-##  The VM can be accessed with the following urls:       ##
-##    http://192.168.56.101 (submission)                  ##
-##    http://192.168.56.101/cgi-bin (cgi-bin scripts)     ##
-##    http://192.168.56.101/hwgrading (tagrading)         ##
-##                                                        ##
-##  The database can be accessed on the host machine at   ##
-##   localhost:15432                                      ##
-##                                                        ##
-##  Happy developing!                                     ##
-############################################################
-' > /etc/motd
-    chmod +rx /etc/motd
+    # We only might build analysis tools from source while using vagrant
+    echo "Installing stack (haskell)"
+    curl -sSL https://get.haskellstack.org/ | sh
 fi
+
+# Check to make sure you got the right setup by typing:
+#   apache2ctl -V | grep MPM
+# (it should say event)
+apachectl -V | grep MPM
 
 #################################################################
 # USERS SETUP
@@ -93,7 +75,7 @@ addgroup hwcronphp
 # managers to write website custimization files and run course
 # management scripts.
 
-addgroup course_builders
+addgroup ${COURSE_BUILDERS_GROUP}
 
 if [ ${VAGRANT} == 1 ]; then
 	adduser vagrant sudo
@@ -125,132 +107,11 @@ echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwc
 adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 
 if [ ${VAGRANT} == 1 ]; then
-	echo "hwphp:hwphp" | sudo chpasswd
-	echo "hwcgi:hwcgi" | sudo chpasswd
-	echo "hwcron:hwcron" | sudo chpasswd
-	echo "hsdbu:hsdbu" | sudo chpasswd
 	# add these users so that they can write to .vagrant/logs folder
 	adduser hwphp vagrant
 	adduser hwcgi vagrant
 	adduser hwcron vagrant
 fi
-
-#################################################################
-# PACKAGE SETUP
-#################
-echo "\n" | add-apt-repository ppa:webupd8team/java
-apt-get -qq update
-
-
-############################
-# NTP: Network Time Protocol
-# You want to be sure the clock stays in sync, especially if you have
-# deadlines for homework to be submitted.
-#
-# The default settings are ok, but you can edit /etc/ntp.conf and
-# replace the default servers with your local ntp server to reduce
-# traffic through your campus uplink (To replace the default servers
-# with your own, comment out the default servers by adding a # before
-# the lines that begin with “server” and add your server under the
-# line that says “Specify one or more NTP servers” with something
-# along the lines of “server xxx.xxx.xxx.xxx”)
-
-apt-get install -qqy ntp
-service ntp restart
-
-echo "Preparing to install packages.  This may take a while."
-
-# path for untrusted user creation script will be different if not using Vagrant
-
-apt-get install -qqy libpam-passwdqc
-
-
-# Set up apache to run with suphp in pre-fork mode since not all
-# modules are thread safe (do not combine the commands or you may get
-# the worker/threaded mode instead)
-
-apt-get install -qqy ssh sshpass unzip
-apt-get install -qqy postgresql-9.5
-apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup
-apt-get install -qqy php7.0 php7.0-cli php-xdebug libapache2-mod-fastcgi php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt
-apt-get install -qqy php7.0-zip
-
-# Check to make sure you got the right setup by typing:
-#   apache2ctl -V | grep MPM
-# (it should say prefork)
-
-apachectl -V | grep MPM
-
-# Add additional packages for compiling, authentication, and security,
-# and program support
-
-# DOCUMENTATION FIXME: Go through this list and categorize purpose of
-# these packages (as appropriate.. )
-
-apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
-hardening-includes p7zip-full patchutils \
-libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
-javascript-common  \
-libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils
-
-#CMAKE
-echo "installing cmake" 
-apt-get install -qqy cmake
-
-#GLEW and GLM
-echo "installing graphics libraries"
-apt-get install -qqy glew-utils libglew-dev libglm-dev
-apt-get install -qqy libxrandr-dev xorg-dev
-
-#GLFW
-wget https://github.com/glfw/glfw/releases/download/3.2.1/glfw-3.2.1.zip
-unzip glfw-3.2.1.zip
-cd glfw-3.2.1
-mkdir build 
-cd build                              
-cmake .. 
-make 
-sudo make install 
-cd ../..
-rm -R glfw-3.2.1
-rm glfw-3.2.1.zip
-
-#CMAKE permissions
-#These permissions are necessary so that untrusted user can use pkgconfig with cmake.
-#Note that pkgconfig does not appear until after graphics installs (Section above)
-chmod -R o+rx /usr/local/lib/pkgconfig 
-chmod -R o+rx /usr/local/lib/cmake
-
-# Install stack (used to build analysis tools)
-curl -sSL https://get.haskellstack.org/ | sh
-
-# Enable PHP5-mcrypt
-#php5enmod mcrypt
-
-# Install Oracle 8 Non-Interactively
-echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
-echo "installing java8"
-apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
-
-# Install Racket and Swi-prolog for Programming Languages
-echo "installing Racket and Swi-prolog"
-apt-add-repository -y ppa:plt/racket  > /dev/null 2>&1
-apt-get install -qqy racket > /dev/null 2>&1
-apt-get install -qqy swi-prolog > /dev/null 2>&1
-
-# Install Image Magick for image comparison, etc.
-apt-get install -qqy imagemagick
-
-# Install pdftk for exam pdf uploads 
-apt-get install -qqy pdftk
-
-# Used by Network Programming class
-apt-get install -qqy libssl-dev
-
-apt-get -qqy autoremove
-
 
 # TODO: We should look into making it so that only certain users have access to certain packages
 # so that hwphp is the only one who could use PAM for example
@@ -285,28 +146,41 @@ sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
 #################################################################
 # JAR SETUP
 #################
+
+pushd /tmp > /dev/null
+
 echo "Getting JUnit..."
+JUNIT_VER=4.12
+HAMCREST_VER=1.3
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/JUnit
 chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
 cd ${SUBMITTY_INSTALL_DIR}/JUnit
 
-wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
-mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
-wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -o /dev/null > /dev/null 2>&1
-mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
+wget http://search.maven.org/remotecontent?filepath=junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
+mv remotecontent?filepath=junit%2Fjunit%2F${JUNIT_VER}%2Fjunit-${JUNIT_VER}.jar junit-${JUNIT_VER}.jar
+wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
+mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F${HAMCREST_VER}%2Fhamcrest-core-${HAMCREST_VER}.jar hamcrest-core-${HAMCREST_VER}.jar
+
+popd > /dev/null
 
 # EMMA is a tool for computing code coverage of Java programs
 
 echo "Getting emma..."
-wget https://github.com/Submitty/emma/releases/download/2.0.5312/emma-2.0.5312.zip -o /dev/null > /dev/null 2>&1
-unzip emma-2.0.5312.zip > /dev/null
-mv emma-2.0.5312/lib/emma.jar emma.jar
-rm -rf emma-2.0.5312
-rm emma-2.0.5312.zip
+
+pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
+
+EMMA_VER=2.0.5312
+wget https://github.com/Submitty/emma/releases/download/${EMMA_VER}/emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
+unzip emma-${EMMA_VER}.zip > /dev/null
+mv emma-${EMMA_VER}/lib/emma.jar emma.jar
+rm -rf emma-${EMMA_VER}
+rm emma-${EMMA_VER}.zip
 rm index.html* > /dev/null 2>&1
 
 chmod o+r . *.jar
+
+popd > /dev/null
 
 #################################################################
 # DRMEMORY SETUP
@@ -314,67 +188,19 @@ chmod o+r . *.jar
 
 # Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
 
+pushd /tmp > /dev/null
+
 echo "Getting DrMemory..."
-mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
-cd ${SUBMITTY_INSTALL_DIR}/DrMemory
 DRMEM_TAG=release_1.10.1
 DRMEM_VER=1.10.1-3
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
-ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
-rm DrMemory-Linux-${DRMEM_VER}.tar.gz
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/DrMemory
-# FIXME: these permissions could probably be adjusted
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/DrMemory
+tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
+mv /tmp/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
+rm -rf /tmp/DrMemory*
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
+chmod 755 ${SUBMITTY_INSTALL_DIR}/drmemory
 
-#################################################################
-# NETWORK CONFIGURATION
-#################
-if [ ${VAGRANT} == 1 ]; then
-    #
-    # The goal here is to ensure the VM is accessible from your own
-    # computer for code testing, has an outgoing connection to the
-    # Internet to access github and receive Ubuntu updates, but is also
-    # unreachable via incoming Internet connections so to block uninvited
-    # guests.
-    #
-    # Open the VM’s Settings window and click on the “Network” tab.  There
-    # are tabs for four network adapters.  Enable adapters #1 and #2.
-    #
-    # Adapter #1 should be attached to NAT and make sure the cable
-    # connected box (under advanced) is checked.  You may ignore all other
-    # settings for adapter #1.  This provides the VM’s outgoing Internet
-    # connection, but uninvited guests on the Internet cannot see the VM.
-    #
-    # Adapter #2 should be attached to Host-only Network.  Under “name”,
-    # there is a drop down menu to select Host-only Ethernet Adapter (or
-    # vboxnet).  Recall that this was created in the previous section,
-    # Create Virtual Network Adapters.  This adapter can only communicate
-    # between your host OS and the VM, and it is unreachable to and from
-    # the Internet.
-    #
-    # After Ubuntu is fully installed, you need to adjust the networking
-    # configuration so that you may access the VM via static IP addressing
-    # as a convenience for code testing.
-    #
-    # The VM’s host-only adapter provides a private connection to the VM,
-    # but Ubuntu also needs to be configured to use this adapter.
-
-    echo "Binding static IPs to \"Host-Only\" virtual network interface."
-
-    # Note: Ubuntu 16.04 switched from the eth# scheme to ep0s# scheme.
-    # enp0s3 is auto-configured by Vagrant as NAT.  enp0s8 is a host-only adapter and
-    # not auto-configured.  enp0s8 is manually set so that the host-only network
-    # interface remains consistent among VM reboots as Vagrant has a bad habit of
-    # discarding and recreating networking interfaces everytime the VM is restarted.
-    # eth1 is statically bound to 192.168.56.101, 102, and 103.
-    echo -e "auto enp0s8\niface enp0s8 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
-    echo -e "auto enp0s8:1\niface enp0s8:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
-    echo -e "auto enp0s8:2\niface enp0s8:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
-
-    # Turn them on.
-    ifup enp0s8 enp0s8:1 enp0s8:2
-fi
+popd > /dev/null
 
 #################################################################
 # APACHE SETUP
@@ -458,7 +284,6 @@ ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
 if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
-	#sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5\nlocal      all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
 	cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
 	cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
@@ -503,23 +328,31 @@ fi
 # SUBMITTY SETUP
 #################
 
+
 if [ ${VAGRANT} == 1 ]; then
+    # This should be set by setup_distro.sh for whatever distro we have, but
+    # in case it is not, default to our primary URL
+    if [ -z "${SUBMISSION_URL}" ]; then
+        SUBMISSION_URL='http://192.168.56.101'
+    fi
     echo -e "/var/run/postgresql
 hsdbu
 hsdbu
-http://192.168.56.101
+${SUBMISSION_URL}
 1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 else
-	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
+	${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
 fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+
 
 # (re)start the submitty grading scheduler daemon
 systemctl restart submitty_grading_scheduler
 # also, set it to automatically start on boot
 sudo systemctl enable submitty_grading_scheduler
+
 
 
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
@@ -543,17 +376,19 @@ if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much
     echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
 
+    DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g")
+
     rm -rf ${SUBMITTY_DATA_DIR}/logs/*
-    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/logs/*
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
+    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/*
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/autograding
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
     chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/logs/autograding
     chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/access
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/logs/site_errors
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/access ${SUBMITTY_DATA_DIR}/logs/access
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/logs/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/access
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/site_errors
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/access ${SUBMITTY_DATA_DIR}/logs/access
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
     chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/access
     chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
     chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site_errors
@@ -587,6 +422,7 @@ chmod 2771 ${SUBMITTY_INSTALL_DIR}
 service apache2 restart
 service php7.0-fpm restart
 service postgresql restart
+
 
 echo "Done."
 exit 0

@@ -31,7 +31,7 @@ class HWReport extends AbstractModel {
         $student_grade = 0;
         $grade_comment = "";
         
-        $student_id = $gradeable->getUser()->getId();
+        $student_id = $gradeable->isTeamAssignment() ? $gradeable->getTeam()->getId() : $gradeable->getUser()->getId();
         $student_output_filename = $student_id.".txt";
         $late_days_used_overall = 0;
         
@@ -53,7 +53,7 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= "Graded by : " . $name_and_emails;
 
             // Calculate late days for this gradeable
-            $late_days = $ldu->getGradeable($student_id, $g_id);
+            $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $g_id);
             // TODO: add functionality to choose who regrade requests will be sent to
             $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$name_and_emails.$nl;
             if($gradeable->getDaysLate() > 0) {

@@ -51,34 +51,62 @@ class ElectronicGraderController extends AbstractController {
         /*
          * we need number of students per section
          */
-        $total = array();
+        $total_users = array();
+        $no_team_users = array();
         $graded_components = array();
         $graders = array();
-        $sections = array();
-        $total_users = 0;
         if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getUser()->accessFullGrading()){
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
             }
-            if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
-                $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
-                $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable->getId(), $sections);
+            else {
+                $sections = $this->core->getQueries()->getRegistrationSections();
+                foreach ($sections as $i => $section) {
+                    $sections[$i] = $section['sections_registration_id'];
+                }
+            }
+
+            if (count($sections) > 0) {
                 $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
+                if ($gradeable->isTeamAssignment()) {
+                    $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'registration_section');
+                    $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, 'registration_section');
+                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, 'registration_section');
+                }
+                else {
+                    $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
+                    $no_team_users = array();
+                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable_id, $sections);
+                }
             }
         }
         else {
             if(!$this->core->getUser()->accessFullGrading()){
                 $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
             }
-            if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
-                $total_users = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
-                $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable_id, $sections);
+            else {
+                $sections = $this->core->getQueries()->getRotatingSections();
+                foreach ($sections as $i => $section) {
+                    $sections[$i] = $section['sections_rotating_id'];
+                }
+            }
+
+            if (count($sections) > 0) {
                 $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
+                if ($gradeable->isTeamAssignment()) {
+                    $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'rotating_section');
+                    $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, 'rotating_section');
+                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, 'rotating_section');
+                }
+                else {
+                    $total_users = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
+                    $no_team_users = array();
+                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable_id, $sections);
+                }
             }
         }
 
+        $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable_id);
         $sections = array();
         if (count($total_users) > 0) {
             foreach ($total_users as $key => $value) {
@@ -87,6 +115,9 @@ class ElectronicGraderController extends AbstractController {
                     'graded_components' => 0,
                     'graders' => array()
                 );
+                if ($gradeable->isTeamAssignment()) {
+                    $sections[$key]['no_team'] = $no_team_users[$key];
+                }
                 if (isset($graded_components[$key])) {
                     $sections[$key]['graded_components'] = intval($graded_components[$key]);
                 }
@@ -140,7 +171,71 @@ class ElectronicGraderController extends AbstractController {
 
         $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
 
+        if ($gradeable->isTeamAssignment()) {
+            // Only give getGradeables one User ID per team
+            $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+            foreach($all_teams as $team) {
+                $student_ids = array_diff($student_ids, $team->getMembers());
+                $team_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
+                if ($team->getSize() > 0 && (in_array($team_section, $sections) || 
+                                            (isset($_GET['view']) && $_GET['view'] === "all") || 
+                                            (count($sections) === 0 && $this->core->getUser()->accessAdmin()))) {
+                    $student_ids[] = $team->getMembers()[0];
+                }
+            }
+        }
+
         $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
+        if ($gradeable->isTeamAssignment()) {
+            // Rearrange gradeables arrray into form (sec 1 teams, sec 1 individuals, sec 2 teams, sec 2 individuals, etc...)
+            $sections = array();
+            $individual_rows = array();
+            $team_rows = array();
+            foreach($rows as $row) {
+                if ($gradeable->isGradeByRegistration()) {
+                    $section = $row->getTeam() === null ? strval($row->getUser()->getRegistrationSection()) : strval($row->getTeam()->getRegistrationSection());
+                }
+                else {
+                    $section = $row->getTeam() === null ? strval($row->getUser()->getRotatingSection()) : strval($row->getTeam()->getRotatingSection());
+                }
+
+                if ($section != null && !in_array($section, $sections)) {
+                    $sections[] = $section;
+                }
+
+                if ($row->getTeam() === null) {
+                    if (!isset($individual_rows[$section])) {
+                        $individual_rows[$section] = array();
+                    }
+                    $individual_rows[$section][] = $row;
+                }
+                else {
+                    if (!isset($team_rows[$section])) {
+                        $team_rows[$section] = array();
+                    }
+                    $team_rows[$section][] = $row;
+                }
+            }
+
+            asort($sections);
+            $rows = array();
+            foreach($sections as $section) {
+                if (isset($team_rows[$section])) {
+                    $rows = array_merge($rows, $team_rows[$section]);
+                }
+                if (isset($individual_rows[$section])) {
+                    $rows = array_merge($rows, $individual_rows[$section]);
+                }
+            }
+            // Put null section at end of array
+            if (isset($team_rows[""])) {
+                $rows = array_merge($rows, $team_rows[""]);
+            }
+            if (isset($individual_rows[""])) {
+                $rows = array_merge($rows, $individual_rows[""]);
+            }
+        }
+
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders);
     }
 

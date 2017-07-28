@@ -286,7 +286,14 @@ HTML;
 						if ($points_percent > 100) { 
                             $points_percent = 100; 
                         }
-						if (($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() != 0 && $g_data->getActiveVersion() >= 1
+                        if ($g_data->isTeamAssignment() && $g_data->getTeam() === null) {
+                            $gradeable_open_range = <<<HTML
+                <a class="btn {$title_to_button_type_submission[$title]} btn-nav" disabled>
+                     MUST BE ON A TEAM TO SUBMIT<br>{$display_date}
+                </a>
+HTML;
+                        }
+						else if (($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() != 0 && $g_data->getActiveVersion() >= 1
 							&& $title_save == "CLOSED" && $points_percent >= 50) || ($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() == 0 && $g_data->getActiveVersion() >= 1)) {
 						$gradeable_open_range = <<<HTML
                  <a class="btn btn-default btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable}">
@@ -511,7 +518,7 @@ HTML;
                 // Team management button, only visible on team assignments
                 $gradeable_team_range = '';
                 $admin_team_list = '';
-                if (($g_data->isTeamAssignment()) && (($title == "OPEN") || ($title == "BETA"))) {
+                if (($g_data->isTeamAssignment()) ){ //&& (($title == "OPEN") || ($title == "BETA"))) {
                     $gradeable_team_range = <<<HTML
                 <a class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable, 'page' => 'team'))}"> MANAGE TEAM
                 </a>
