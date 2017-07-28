@@ -251,7 +251,7 @@ class AdminGradeableView extends AbstractView {
 </style>
 <div id="container-rubric">
     <form id="gradeable-form" class="form-signin" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => $action))}" 
-          method="post" enctype="multipart/form-data"> 
+          method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
@@ -1310,7 +1310,6 @@ function createCrossBrowserJSDate(val){
     });
 
 $('#gradeable-form').on('submit', function(e){
-        return checkForm()
          $('<input />').attr('type', 'hidden')
             .attr('name', 'gradeableJSON')
             .attr('value', JSON.stringify($('form').serializeObject()))
