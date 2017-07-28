@@ -62,10 +62,6 @@ HTML;
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 HTML;
-        // from this point on view is true
-        // if submission is not true student cannot view submissions portion
-        // display view if it is graded
-
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
             $return .= <<<HTML
@@ -651,7 +647,7 @@ HTML;
                     $onsubmit = "onsubmit='return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})'";;
                 }
                 $return .= <<<HTML
-    <form id="versions" style="display: inline;" method="post" {$onsubmit}
+    <form style="display: inline;" method="post" {$onsubmit}
             action="{$this->core->buildUrl(array('component' => 'student',
                                                  'action' => 'update',
                                                  'gradeable_id' => $gradeable->getId(),
@@ -753,7 +749,7 @@ HTML;
                         $size = number_format(-1);
                     }
                     $return .= "{$file['relative_name']} ({$size}kb)";
-                    // insert icon link here
+                    // download icon if student can download files
                     if (!$gradeable->useSvnCheckout() && $gradeable->getStudentDownload()) {
                         // if not active version and student cannot see any more than active version
                         if ($gradeable->getCurrentVersionNumber() !== $gradeable->getActiveVersion() && !$gradeable->getStudentAnyVersion()) {
@@ -773,6 +769,9 @@ HTML;
             <a onclick="downloadFile('$filename','$filepath')"><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
             <br />
 HTML;
+                    }
+                    else {
+                        $return .= "<br />";
                     }
                 }
                 $return .= <<<HTML

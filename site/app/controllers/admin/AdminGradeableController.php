@@ -128,6 +128,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setIsRepository(false);
             $gradeable->setSubdirectory("");
             $gradeable->setPointPrecision(floatval($_POST['point_precision']));
+            $is_team_assignment = (isset($_POST['team_assignment']) && $_POST['team_assignment']=='yes') ? true : false;
             $gradeable->setTeamAssignment($is_team_assignment);
             $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
             $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
@@ -145,7 +146,6 @@ class AdminGradeableController extends AbstractController {
             $is_peer_grading = (isset($_POST['peer_grading']) && $_POST['peer_grading']=='yes') ? true : false;
             $gradeable->setPeerGrading($is_peer_grading);
             if ($is_peer_grading) { $gradeable->setPeerGradeSet($_POST['peer_grade_set']); }
-            $is_team_assignment = (isset($_POST['team_assignment']) && $_POST['team_assignment']=='yes') ? true : false;
         }
 
         if ($edit_gradeable === 0) {

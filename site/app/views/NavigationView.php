@@ -129,16 +129,6 @@ HTML;
             }
 
             // // count the # of electronic gradeables in this category that can be viewed
-            // // only electronic files that are viewable, and either can be submitted to or have been graded
-            // $electronic_gradeable_count = 0;
-            // foreach ($gradeable_list as $gradeable => $g_data) {
-            //     if (($g_data->getType() == GradeableType::ELECTRONIC_FILE && $g_data->getStudentView()) &&
-            //         ($g_data->getStudentSubmit() || $title == "GRADED")) {
-            //         $electronic_gradeable_count++;
-            //         continue;
-            //     }
-            // }
-            /////// hm
             $electronic_gradeable_count = 0;
             foreach ($gradeable_list as $gradeable => $g_data) {
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE && $g_data->getStudentView()) {
