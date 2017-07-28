@@ -652,10 +652,17 @@ class SubmissionController extends AbstractController {
         $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
         $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
-                return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
+            return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
     
-        $new_version = $gradeable->getHighestVersion() + 1;
+        $new_version = count(FileUtils::getAllDirs($user_path)) + 1;
+        $new_version_2 = $gradeable->getHighestVersion() + 1;
+        if($new_version !== $new_version_2){
+            $_SESSION['messages']['notice'][] = "Warning: some versions may not be in sync with the database.";
+            if($svn_checkout) {
+                $new_version = $new_version_2;
+            }
+        }
         $version_path = FileUtils::joinPaths($user_path, $new_version);
         
         if (!FileUtils::createDir($version_path)) {
@@ -818,7 +825,7 @@ class SubmissionController extends AbstractController {
                 if (isset($previous_files[$i])){
                     for ($j=0; $j < count($previous_files[$i]); $j++){
                         $src = FileUtils::joinPaths($previous_part_path[$i], $previous_files[$i][$j]);
-                        $dst = FileUtils::joinPaths($part_path[$i], $previous_files[$i][$j]);
+                        $dst = FileUtils::joinPaths(FileUtils::joinPaths($user_path, $new_version_2), $previous_files[$i][$j]);
                         if (!@copy($src, $dst)) {
                             return $this->uploadResult("Failed to copy previously submitted file {$previous_files[$i][$j]} to current submission.", false);
                         }
@@ -846,6 +853,7 @@ class SubmissionController extends AbstractController {
                         else {
                             if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
                                 $dst = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
+                                $dstTesting = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
                                 if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
                                     return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
                                 }
