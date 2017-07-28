@@ -333,10 +333,11 @@ class ElectronicGraderController extends AbstractController {
                     }
                 }
 
+
                 if($gradeable->getGdId() == null) {
                     $gradeable->saveData2();
                 }
-                if($mark_modified === true || true) {
+                if($mark_modified === true) {
                     if ($component->getGrader() === null || $_POST['overwrite'] === "true") {
                         $component->setGrader($this->core->getUser());
                     }     
@@ -347,7 +348,6 @@ class ElectronicGraderController extends AbstractController {
                     $component->saveData($gradeable->getGdId());
                 }
                 
-
                 $index = 0;
                 // save existing marks
                 foreach ($component->getMarks() as $mark) {
@@ -372,11 +372,31 @@ class ElectronicGraderController extends AbstractController {
                     $mark->saveData($gradeable->getGdId(), $component->getId());
                 }
                 $mark_modified = ($mark_modified === true) ? "true" : "false";
-                $response = array('status' => $mark_modified, 'modified' => $mark_modified);
-                $this->core->getOutput()->renderJson($response);
-                return $response;
             }
         }
+
+        if ($this->core->getUser()->getGroup() === 3) {
+            if ($gradeable->isGradeByRegistration()) {
+                $sections = $this->core->getUser()->getGradingRegistrationSections();
+                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            }
+            else {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+                $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
+            $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
+            if (!in_array($who_id, $user_ids_to_grade)) {
+                $_SESSION['messages']['error'][] = "You do not have permission to grade {$who_id}";
+                return;
+            }
+        }
+
+        $hwReport = new HWReport($this->core);
+        $hwReport->generateSingleReport($user_id, $gradeable_id);
+
+        $response = array('status' => $mark_modified, 'modified' => $mark_modified);
+                $this->core->getOutput()->renderJson($response);
+                return $response;
     }
 
     public function saveGradeableComment() {
@@ -385,5 +405,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $gradeable->setOverallComment($_POST['gradeable_comment']);
         $gradeable->saveData2();
+        $hwReport = new HWReport($this->core);
+        $hwReport->generateSingleReport($user_id, $gradeable_id);
     }
 }
