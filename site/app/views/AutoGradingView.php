@@ -13,6 +13,7 @@ class AutogradingView extends AbstractView {
         $current_version = $gradeable->getCurrentVersion();
         $popup_css_file = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
         $has_badges = false;
+        $display_total = (count($gradeable->getTestcases()) > 2) ? "block" : "none";
         if ($current_version->getNonHiddenTotal() > 0) {
             $has_badges = true;
             if ($current_version->getNonHiddenTotal() >= $gradeable->getNormalPoints()) {
@@ -26,7 +27,7 @@ class AutogradingView extends AbstractView {
             }
             if (($current_version->getNonHiddenNonExtraCredit() + $current_version->getHiddenNonExtraCredit() > $gradeable->getNormalPoints()) && $show_hidden) {
                 $return .= <<<HTML
-<div class="box">
+<div class="box" style="display: {$display_total};">
     <div class="box-title">
         <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
         <h4>Total (No Hidden Points)</h4>
@@ -44,7 +45,7 @@ HTML;
                     $background = "red-background";
                 }
                 $return .= <<<HTML
-<div class="box" style="background-color:#D3D3D3;">
+<div class="box" style="background-color:#D3D3D3;" style="display: {$display_total};">
     <div class="box-title">
         <span class="badge {$background}">{$all_autograder_points} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</span>
         <h4>Total (With Hidden Points)</h4>
@@ -54,7 +55,7 @@ HTML;
             }
             else {
                 $return .= <<<HTML
-<div class="box">
+<div class="box" style="display: {$display_total};">
     <div class="box-title">
         <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
         <h4>Total</h4>
