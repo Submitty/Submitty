@@ -1202,14 +1202,18 @@ WHERE gcm_id=?", $params);
     }
 
     public function sendTeamInvitation($team_id, $user_id) {
-        $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,0)", array($team_id, $user_id,));
+        $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,0)", array($team_id, $user_id));
     }
 
     public function acceptTeamInvitation($team_id, $user_id) {
-        $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id,));
+        $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
     }
 
-    public function declineTeamInvitations($g_id, $user_id) {
+    public function cancelTeamInvitation($team_id, $user_id) {
+        $this->course_db->query("DELETE FROM teams WHERE team_id=? AND user_id=? AND state=0", array($team_id, $user_id));
+    }
+
+    public function declineAllTeamInvitations($g_id, $user_id) {
         $this->course_db->query("DELETE FROM teams AS t USING gradeable_teams AS gt
           WHERE gt.g_id=? AND gt.team_id = t.team_id AND t.user_id=? AND t.state=0", array($g_id, $user_id));
     }

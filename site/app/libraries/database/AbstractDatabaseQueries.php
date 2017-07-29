@@ -401,11 +401,18 @@ abstract class AbstractDatabaseQueries {
     abstract public function acceptTeamInvitation($team_id, $user_id);
 
     /**
+     * Cancel a pending team invitation
+     * @param string $team_id
+     * @param string $user_id
+     */
+    abstract public function cancelTeamInvitation($team_id, $user_id);
+
+    /**
      * Decline all pending team invitiations for a user
      * @param string $g_id
      * @param string $user_id
      */
-    abstract public function declineTeamInvitations($g_id, $user_id);
+    abstract public function declineAllTeamInvitations($g_id, $user_id);
 
     /**
      * Return Team object for team whith given Team ID
