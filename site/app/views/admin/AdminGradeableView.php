@@ -2175,6 +2175,12 @@ $('#gradeable-form').on('submit', function(e){
                 return false;
             }
         }
+        if($('#team_yes_radio').is(':checked')) {
+            if ($("input[name^='eg_max_team_size']").val() < 2) {
+                alert("Maximum team size must be at least 2");
+                return false;
+            }
+        }
         if (!($edit)) {
             var x;
             for (x = 0; x < all_gradeable_ids.length; x++) {
