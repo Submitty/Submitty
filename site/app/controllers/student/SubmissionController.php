@@ -101,15 +101,17 @@ class SubmissionController extends AbstractController {
                 }
                 else {
                     $gradeable->loadResultDetails();
-                    $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
+                    $ldu = $this->core->loadModel(LateDaysCalculation::class, $gradeable->getUser()->getId());
                     $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable_id);
-                    $days_late = $late_days['late_days_charged'];
                     $extensions = $late_days['extensions'];
+                    $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
+                    $late_days_use = $days_late - $extensions;
+                    $late_days_use = ($late_days_use < 0) ? 0 : $late_days_use;
                     if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
                         $gradeable->updateUserViewedDate();
                     }
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showGradeable', $gradeable, $days_late, $extensions);
+                                                           'showGradeable', $gradeable, $late_days_use, $extensions);
                 }
             }
             return array('id' => $gradeable_id, 'error' => $error);
