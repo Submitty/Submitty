@@ -1213,6 +1213,18 @@ HTML;
                         if (current_row.find('i[name=mark_icon_'+num+'_'+x+']')[0].classList.contains('fa-square')) {
                             current_row.find('i[name=mark_icon_'+num+'_'+x+']').toggleClass("fa-square-o fa-square");
                         }
+                    }     
+                }
+                current_row = $('#mark_custom_id-'+num);
+                current_row.find('input[name=mark_points_custom_'+num+']').val(data['data'][x]['custom_score']);
+                current_row.find('textarea[name=mark_text_custom_'+num+']').val(data['data'][x]['custom_note']);
+                if (current_row.find('input[name=mark_points_custom_'+num+']').val() == 0 && current_row.find('textarea[name=mark_text_custom_'+num+']').val() == "") {
+                    if (current_row.find('i[name=mark_icon_'+num+'_custom]')[0].classList.contains('fa-square')) {
+                        current_row.find('i[name=mark_icon_'+num+'_custom]').toggleClass("fa-square-o fa-square");
+                    }
+                } else {
+                    if (current_row.find('i[name=mark_icon_'+num+'_custom]')[0].classList.contains('fa-square-o')) {
+                        current_row.find('i[name=mark_icon_'+num+'_custom]').toggleClass("fa-square-o fa-square");
                     }
                 }
             },
