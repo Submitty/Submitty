@@ -37,7 +37,7 @@ std::set<std::string> snapshotOfActiveWindows();
 * if any names are returned we just use the first one (we don't currently support multi-window programs.)
 * if none are returned, we simply fail to set the window_name variable. 
 */
-void initializeWindow(std::string& window_name, int pid, std::set<std::string>& active_windows);
+void initializeWindow(std::string& window_name, int pid, std::set<std::string>& active_windows, float elapsed);
 
 /**
 *This function modifies pos to be <= min and >= max. It is used to set pos to be within the window border.
