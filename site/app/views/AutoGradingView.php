@@ -13,14 +13,23 @@ class AutogradingView extends AbstractView {
         $current_version = $gradeable->getCurrentVersion();
         $popup_css_file = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
         $has_badges = false;
-        $num_testcases = 0;
+        $num_visible_testcases = 0;
         foreach ($gradeable->getTestcases() as $testcase) {
             if ($testcase->viewTestcase()) {
-                $num_testcases++;
+                $num_visible_testcases++;
             }
         }
-        $display_total = ($num_testcases > 1) ? "block" : "none";
-        if ($current_version->getNonHiddenTotal() > 0) {
+        $display_total = ($num_visible_testcases > 1) ? "block" : "none";
+        if ($num_visible_testcases == 1) {
+            $return.= <<<HTML
+<script type="text/javascript">
+    $(document).ready(function() {
+        toggleDiv('testcase_0');
+    });
+</script>
+HTML;
+        }
+        if ($current_version->getNonHiddenTotal() >= 0) {
             $has_badges = true;
             if ($current_version->getNonHiddenTotal() >= $gradeable->getNormalPoints()) {
                 $background = "green-background";
@@ -83,8 +92,7 @@ HTML;
 HTML;
         }
         $count = 0;
-        $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
-        $display_open = ($num_testcases==1) ? "block" : "none";
+        $display_box = ($num_visible_testcases == 0) ? "block" : "none";
         foreach ($gradeable->getTestcases() as $testcase) {
             if (!$testcase->viewTestcase()) {
                 continue;
@@ -98,19 +106,10 @@ HTML;
             $div_click = "";
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
                 $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
-//                 if ($num_testcases == 1) {
-// //                     $return.= <<<HTML
-// // <script type="text/javascript">
-// //     $(document).ready(function() {
-// //         toggleDiv();
-// //     });
-// // </script>
-// // HTML;
-//                 }
             }
             $return .= <<<HTML
 <div class="box" {$background}>
-    <div class="box-title" {$div_click} style="display: {$display_open}">
+    <div class="box-title" {$div_click}>
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
                 $return .= <<<HTML
