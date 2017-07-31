@@ -67,27 +67,21 @@ HTML;
         <br />
         <br />
 HTML;
-<<<<<<< HEAD
-
         if ($peer) {
             $percentage = round(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100);
             $return .= <<<HTML
         Current percentage of students grading done: {$percentage}% ({$sections['stu_grad']['graded_components']}/{$sections['stu_grad']['total_components']})
     </div>
-=======
+HTML;
         foreach ($sections as $key => $section) {
             $percentage = $section['total_components'] !== 0 ? round(($section['graded_components'] / $section['total_components']) * 100) : 0;
             $return .= <<<HTML
             Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})
 HTML;
-            if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
-                $return .= <<<HTML
-             - {$section['no_team']} students with no team
-HTML;
+            
             }
             $return .= <<<HTML
             <br />
->>>>>>> master
 HTML;
         }
         else {
@@ -100,7 +94,11 @@ HTML;
                 $return .= <<<HTML
                 Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})<br />
 HTML;
-            }
+                if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
+                    $return .= <<<HTML
+                - {$section['no_team']} students with no team
+HTML;
+                }
             $return .= <<<HTML
             </div>
             <br />
@@ -214,7 +212,6 @@ HTML;
     <h2>Grade Details for {$gradeable->getName()}</h2>
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
-<<<<<<< HEAD
             <tr>    
 HTML;
         if($peer) {
@@ -240,36 +237,27 @@ HTML;
             }
         }
         else {
-=======
-            <tr>
-HTML;
-        if ($gradeable->isTeamAssignment()) {
-            $cols = 3;
-            $return .= <<<HTML
+            if ($gradeable->isTeamAssignment()) {
+                $cols = 3;
+                $return .= <<<HTML
                 <td width="3%"></td>
                 <td width="5%">Section</td>
                 <td width="50%">Team Members</td>
 HTML;
-        }
-        else {
-            $cols = 5;
->>>>>>> master
-            $return .= <<<HTML
+            }
+            else {
+                $cols = 5;
+                $return .= <<<HTML
                 <td width="3%"></td>
                 <td width="5%">Section</td>
                 <td width="20%">User ID</td>
                 <td width="15%">First Name</td>
                 <td width="15%">Last Name</td>
 HTML;
-<<<<<<< HEAD
-        
+            }
             if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
-=======
-        }
-        if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
-            $cols += 5;
->>>>>>> master
-            $return .= <<<HTML
+                $cols += 5;
+                $return .= <<<HTML
                 <td width="9%">Autograding</td>
                 <td width="8%">TA Grading</td>
                 <td width="7%">Total</td>
@@ -280,9 +268,9 @@ HTML;
 HTML;
             }
             else {
-            $show_auto_grading_points = false;
-            $cols += 4;
-            $return .= <<<HTML
+                $show_auto_grading_points = false;
+                $cols += 4;
+                $return .= <<<HTML
                 <td width="12%">TA Grading</td>
                 <td width="12%">Total</td>
                 <td width="10%">Active Version</td>
@@ -292,62 +280,49 @@ HTML;
 HTML;
             }
         }
-            $count = 1;
-            $last_section = false;
-            $tbody_open = false;
-            foreach ($rows as $row) {
-                $active_version = $row->getActiveVersion();
-                $highest_version = $row->getHighestVersion();
-                if ($peer) {
-                    $autograding_score = $row->getGradedNonHiddenPoints();
-                    $total_possible = $row->getTotalNonHiddenNonExtraCreditPoints();
-                    $graded = $autograding_score;
-                }
-                else {
-                    $autograding_score = $row->getGradedAutograderPoints();
-                    if ($row->beenTAgraded()){
-                        if ($row->getUserViewedDate() === null || $row->getUserViewedDate() === "") {
-                            $viewed_grade = "&#10008;";
-                            $grade_viewed = "";
-                            $grade_viewed_color = "color: red; font-size: 1.5em;";
-                        }
-                        else {
-                            $viewed_grade = "&#x2714;";
-                            $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
-                            $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
-                        }
-                        $different = false;
-                    }
-                    else{
-                        $viewed_grade = "";
+        $count = 1;
+        $last_section = false;
+        $tbody_open = false;
+        foreach ($rows as $row) {
+            $active_version = $row->getActiveVersion();
+            $highest_version = $row->getHighestVersion();
+            if ($peer) {
+                $autograding_score = $row->getGradedNonHiddenPoints();
+                $total_possible = $row->getTotalNonHiddenNonExtraCreditPoints();
+                $graded = $autograding_score;
+            }
+            else {
+                $autograding_score = $row->getGradedAutograderPoints();
+                if ($row->beenTAgraded()){
+                    if ($row->getUserViewedDate() === null || $row->getUserViewedDate() === "") {
+                        $viewed_grade = "&#10008;";
                         $grade_viewed = "";
-                        $grade_viewed_color = "";
+                        $grade_viewed_color = "color: red; font-size: 1.5em;";
                     }
-<<<<<<< HEAD
-                    $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
-                    $graded = $autograding_score;
-=======
+                    else {
+                        $viewed_grade = "&#x2714;";
+                        $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
+                        $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
+                    }
+                    $different = false;
                 }
                 else{
                     $viewed_grade = "";
                     $grade_viewed = "";
                     $grade_viewed_color = "";
->>>>>>> master
                 }
+                $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
+                $graded = $autograding_score;
+            }
                 
                 
 
-                if ($graded < 0) $graded = 0;
-<<<<<<< HEAD
+            if ($graded < 0) $graded = 0;
                 if($peer) {
                     $section = "PEER STUDENT GRADER";
                 }
                 else if ($gradeable->isGradeByRegistration()) {
-                    $section = $row->getUser()->getRegistrationSection();
-=======
-                if ($gradeable->isGradeByRegistration()) {
                     $section = $row->getTeam() === null ? $row->getUser()->getRegistrationSection() : $row->getTeam()->getRegistrationSection();
->>>>>>> master
                 }
                 else {
                     $section = $row->getTeam() === null ? $row->getUser()->getRotatingSection() : $row->getTeam()->getRotatingSection();
@@ -362,7 +337,6 @@ HTML;
                     else if (!$peer){
                         $section_graders = "Nobody";
                     }
-<<<<<<< HEAD
                     else {
                         $section_graders = $this->core->getUser()->getId();
                     }
@@ -370,14 +344,12 @@ HTML;
                     if($peer) {
                         $cols -= 4;
                     }
-=======
                     if ($tbody_open) {
                         $return .= <<<HTML
         </tbody>
 HTML;
                     }
                     $tbody_open = true;
->>>>>>> master
                     $return .= <<<HTML
         <tr class="info persist-header">
             <td colspan="{$cols}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
@@ -392,7 +364,7 @@ HTML;
                 if ($row->getUser()->accessGrading()) {
                     $style = "style='background: #7bd0f7;'";
                 }
-<<<<<<< HEAD
+
                 if($peer) {
                     $return .= <<<HTML
             <tr id="user-row-{$row->getUser()->getAnonId()}" {$style}>
@@ -401,24 +373,13 @@ HTML;
 HTML;
                 }
                 else {
-=======
-                if ($gradeable->isTeamAssignment() && $row->getTeam() === null) {
->>>>>>> master
+                    if ($gradeable->isTeamAssignment() && $row->getTeam() === null) {
                     $return .= <<<HTML
             <tr id="user-row-{$row->getUser()->getId()}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
                 <td>{$row->getUser()->getId()}</td>
 HTML;
-<<<<<<< HEAD
-                }
-
-                if($show_auto_grading_points) {
-                    if ($highest_version != 0) {
-                        if(!$peer) {
-                            $return .= <<<HTML
-                <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
-=======
                     if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
                         $return .= <<<HTML
                 <td></td>
@@ -441,7 +402,14 @@ HTML;
                     if ($gradeable->isTeamAssignment()) {
                         $return .= <<<HTML
                 <td>{$row->getTeam()->getMemberList()}</td>
->>>>>>> master
+HTML;
+                    }
+                }
+                if($show_auto_grading_points) {
+                    if ($highest_version != 0) {
+                        if(!$peer) {
+                            $return .= <<<HTML
+                <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
 HTML;
                         }
                         else {
@@ -491,7 +459,6 @@ HTML;
                             $btn_class = "btn-primary";
                             $contents = "Grade";
                         }
-<<<<<<< HEAD
                     }
                     else {
                         $btn_class = "btn-primary";
@@ -499,10 +466,6 @@ HTML;
                     }
                     $return .= <<<HTML
                     <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getAnonId(), 'individual'=>'1'))}">
-=======
-                        $return .= <<<HTML
-                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
->>>>>>> master
                         {$contents}
                     </a>
                 </td>
@@ -537,14 +500,9 @@ HTML;
                 <td></td>
                 <td></td>
 HTML;
-<<<<<<< HEAD
-                }
-                if(!$peer) {
-                $return .= <<<HTML
-=======
                     }
+                    if(!$peer) {
                     $return .= <<<HTML
->>>>>>> master
                 <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
 HTML;
                 }
