@@ -608,7 +608,7 @@ class SubmissionController extends AbstractController {
         $user_id = $_POST['user_id'];
 
         // make sure is admin if the two ids do not match
-        if (!$this->core->getUser()->accessAdmin() && $original_user_id != $user_id) {
+        if ($original_user_id != $user_id && !$this->core->getUser()->accessAdmin()) {
             $msg = "You do not have access to that page.";
             $_SESSION['messages']['error'][] = $msg;
             return $this->uploadResult($msg, false);
