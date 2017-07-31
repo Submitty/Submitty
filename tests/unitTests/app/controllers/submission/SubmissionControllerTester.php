@@ -1079,6 +1079,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(true);
         $gradeable->method('getOpenDate')->willReturn($now);
+        $gradeable->method('getUser')->willReturn($this->createMockUser('testUser'));
 
         $g_list = $this->createMock(GradeableList::class);
         $g_list->method('getGradeable')->willReturn($gradeable);
