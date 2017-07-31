@@ -20,6 +20,7 @@ class HWReport extends AbstractModel {
             mkdir(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports")));
         }
         $nl = "\n";
+        $TEMP_EMAIL = "I am the temp email"; //temparary, please remove before merge
         $write_output = True;
         $g_id = $gradeable->getId();
         $rubric_total = 0;
@@ -42,19 +43,25 @@ class HWReport extends AbstractModel {
             $name_and_emails = array();
             foreach($gradeable->getComponents() as $component){
                 if($component->getGrader() === null) {
-                    $name_and_emails[] = "No one".$nl;
+                    //nothing happens
+                } 
+                else if($component->getGrader()->accessFullGrading()) {
+                    $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>";
                 } else {
-                    $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>".$nl;
+                    $name_and_emails[] = $TEMP_EMAIL;
                 }
                 
             }
-            $name_and_emails = implode(",", $name_and_emails);
+
+            $name_and_emails = array_unique($name_and_emails);
+            $name_and_emails = implode(", ", $name_and_emails);
 
             $student_output_text_main .= "Graded by : " . $name_and_emails;
 
             // Calculate late days for this gradeable
             $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $g_id);
             // TODO: add functionality to choose who regrade requests will be sent to
+            $student_output_text_main .= $nl;
             $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$name_and_emails.$nl;
             if($gradeable->getDaysLate() > 0) {
                 $student_output_text_main .= "This submission was submitted ".$gradeable->getDaysLate()." day(s) after the due date.".$nl;
@@ -128,7 +135,15 @@ class HWReport extends AbstractModel {
                         }
                     }
 
-                    $student_output_text .= $component->getTitle() . "[" . $temp_score . "/" . $component->getMaxValue() . "] (Graded by {$component->getGrader()->getId()})".$nl;
+                    $student_output_text .= $component->getTitle() . "[" . $temp_score . "/" . $component->getMaxValue() . "] ";
+                    if ($component->getGrader() === null) {
+                        $student_output_text .= $nl;
+                    } else if ($component->getGrader()->accessFullGrading()) {
+                        $student_output_text .= "(Graded by {$component->getGrader()->getId()})".$nl;
+                    } else {
+                        $student_output_text .= $nl;
+                    }
+                    
                     if($component->getStudentComment() != "") {
                         $student_output_text .= "Rubric: " . $component->getStudentComment() . $nl;
                     }

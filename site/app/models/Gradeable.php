@@ -793,7 +793,40 @@ class Gradeable extends AbstractModel {
     }
 
     public function getGradedTAPoints() {
-        return $this->graded_tagrading;
+        $points = 0;
+        foreach($this->components as $component) {
+            $marks = $component->getMarks();
+            $type = 0; // 0 is deduction, 1 is addition
+            foreach ($marks as $mark) {
+                if ($mark->getPoints() > 0) {
+                    $type = 1;
+                    break;
+                }
+                if ($mark->getPoints() < 0) {
+                    $type = 0;
+                    break;
+                }
+            }
+            $temp_points = ($type === 0 ) ? $component->getMaxValue() : 0;
+            foreach ($marks as $mark) {
+                if ($mark->getHasMark()) {
+                    $temp_points += $mark->getPoints();
+                }
+            }
+
+            if ($type === 0) {
+                if ($temp_points < 0) {
+                    $temp_points = 0;
+                }
+            } else {
+                if ($temp_points > $component->getMaxValue()) {
+                    $temp_points = $component->getMaxValue();
+                }
+            }
+
+            $points += $temp_points;
+        }
+        return $points;
     }
 
     public function getTotalTANonExtraCreditPoints() {

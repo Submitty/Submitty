@@ -647,9 +647,11 @@ HTML;
 <div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
     <span class="grading_label">Grading Rubric</span> <span style="float: right; position: relative; top: 10px; right: 1%;"> Overwrite Grader: <input type='checkbox' id="overwrite-id" name='overwrite' value='1' /> </span>
 HTML;
+        $break_onclick = "";
         $disabled = '';
         if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion() || $gradeable->getCurrentVersionNumber() == 0){
             $disabled='disabled';
+            $break_onclick = "return false; ";
             $return .= <<<HTML
     <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
@@ -668,6 +670,7 @@ HTML;
             $type = 0; //0 is common deductable, 1 is common additive
             $min = -1000;
             $max = 0;
+            $ungraded = false;
             foreach ($question->getMarks() as $mark) {
                 if($mark->getPoints() < 0) {
                     $min = -1000;
@@ -788,6 +791,7 @@ HTML;
 
             if($initial_text == "") {
                 $initial_text = "Click me to grade!";
+                $ungraded = true;
             }
 
             $question_points += $question->getScore();
@@ -795,6 +799,10 @@ HTML;
                 if ($question_points < 0) $question_points = 0;
             } else {
                 if ($question_points > $question->getMaxValue()) $question_points = $question->getMaxValue();
+            }
+
+            if($ungraded === true) {
+                $question_points = " ";
             }
 
             $background = "";
@@ -806,7 +814,7 @@ HTML;
             }
             
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
+                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
                         <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-max_points="{$question->getMaxValue()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
@@ -823,7 +831,7 @@ HTML;
                             <div style="float: right;">
                                 <span onclick="cancelMark({$c}, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose({$c}, {$num_questions});" style="cursor: pointer;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                                 </span>
-                                <span onclick="saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose({$c}, {$num_questions});" style="cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                                <span onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose({$c}, {$num_questions});" style="cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                             </div>
                     </td>
                 </tr>
@@ -866,7 +874,7 @@ HTML;
                 $return .= <<<HTML
                 <tr>
                     <td colspan="4" style="{$background};">
-                        <span style="cursor: pointer;" onclick="addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+                        <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
                         Add New {$word}</span>
                     </td>
                 </tr>
@@ -888,14 +896,14 @@ HTML;
                     <b>General Comment</b> <span onclick=""> <i id="icon-general-comment" class="fa fa-window-maximize" style="visibility: visible;"></i>
                 </td>
             </tr>
-            <tr onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-2, {$num_questions});">
+            <tr onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-2, {$num_questions});">
                 <td colspan="4">
                     <textarea id="comment-general-id" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
                 </td>
             </tr>
             <tr id="done-general" style="display: none;">
                 <td colspan="4">
-                    <span onclick="saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-1, {$num_questions});" style=" cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                    <span onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-1, {$num_questions});" style=" cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                 </td>
             </tr>
 HTML;
@@ -1089,10 +1097,20 @@ HTML;
 
     function selectMark(me, first_override = false) {
         var icon = $(me).find("i");
-        icon.toggleClass("fa-square-o fa-square");
-
+        var skip = true; //if the table is all false initially, skip check marks.
         var question_num = parseInt(icon.attr('name').split('_')[2]);
-        checkMarks(question_num);
+        var mark_table = $('#extra-'+question_num);
+        mark_table.find('.mark').each(function() {
+            if($(this)[0].classList.contains('fa-square')) {
+                skip = false;
+                return false;
+            }
+        });
+
+        icon.toggleClass("fa-square-o fa-square");
+        if (skip === false) {
+            checkMarks(question_num);
+        }        
     }
 
     function openClose(row_id, num_questions) {

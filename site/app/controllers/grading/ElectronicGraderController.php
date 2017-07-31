@@ -398,6 +398,24 @@ class ElectronicGraderController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $debug = "";
         $mark_modified = false;
+
+        //makes sure only the users a grader is assigned to can be graded
+        if ($this->core->getUser()->getGroup() === 3) {
+            if ($gradeable->isGradeByRegistration()) {
+                $sections = $this->core->getUser()->getGradingRegistrationSections();
+                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            }
+            else {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+                $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
+            $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
+            if (!in_array($user_id, $user_ids_to_grade)) {
+                $_SESSION['messages']['error'][] = "You do not have permission to grade {$user_id}";
+                return;
+            }
+        }
+
         foreach ($gradeable->getComponents() as $component) {
             if ($component->getId() != $_POST['gradeable_component_id']) {
                 continue;
@@ -431,10 +449,11 @@ class ElectronicGraderController extends AbstractController {
                     }
                 }
 
+                //if no gradeable id exists adds one to the gradeable data
                 if($gradeable->getGdId() == null) {
                     $gradeable->saveData2();
                 }
-                if($mark_modified === true) {
+                if($mark_modified === true) { //only change the component information is the mark was modified
                     if ($component->getGrader() === null || $_POST['overwrite'] === "true") {
                         $component->setGrader($this->core->getUser());
                     }     
@@ -473,22 +492,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        if ($this->core->getUser()->getGroup() === 3) {
-            if ($gradeable->isGradeByRegistration()) {
-                $sections = $this->core->getUser()->getGradingRegistrationSections();
-                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
-            }
-            else {
-                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
-                $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
-            }
-            $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
-            if (!in_array($who_id, $user_ids_to_grade)) {
-                $_SESSION['messages']['error'][] = "You do not have permission to grade {$who_id}";
-                return;
-            }
-        }
-
+        //generates the HW Report each time a mark is saved
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
 
@@ -508,6 +512,7 @@ class ElectronicGraderController extends AbstractController {
     }
 
     public function getMarkDetails() {
+        //gets all the details from the database of a mark to readd it to the view
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $_POST['user_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
