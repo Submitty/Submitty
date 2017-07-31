@@ -818,10 +818,13 @@ HTML;
                 </tr>
                 <tbody id="extra-{$c}" style="{$background}; display: none" colspan="4">
                 <tr id="mark_header_id={$c}" name="mark_header_{$c}">
-                    <td colspan="4", style="{$background}">
+                    <td colspan="4", style="{$background};">
                             Common Grade {$word}
-                        <span onclick="saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose({$c}, {$num_questions});" style="float: right; cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i>
-                        </span>
+                            <div style="float: right;">
+                                <span onclick="cancelMark({$c}, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose({$c}, {$num_questions});" style="cursor: pointer;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                                </span>
+                                <span onclick="saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose({$c}, {$num_questions});" style="cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                            </div>
                     </td>
                 </tr>
 HTML;
@@ -843,7 +846,7 @@ HTML;
                 $return .= <<<HTML
                 <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
                     <td colspan="1" style="{$background}; text-align: center; width: 12%;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
-                        <span onclick="selectMark(this);"> <i class="fa {$icon_mark}" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                        <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}; width: 88%">
                         <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width: 95%; resize:none; float:left;" {$noChange}>{$mark_text}</textarea>
@@ -852,7 +855,14 @@ HTML;
 HTML;
             $d++;
             }
-
+                $has_mark = false;
+                if($question->getScore() == 0 && $question->getComment() == "") {
+                    $has_mark = false;
+                }
+                else {
+                    $has_mark = true;
+                }
+                $icon_mark = ($has_mark === true) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
                 <tr>
                     <td colspan="4" style="{$background};">
@@ -861,10 +871,11 @@ HTML;
                     </td>
                 </tr>
                 <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_custom_{$c}" type="number" step="{$precision}" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this);" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                    <span onclick=""> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}">
-                        <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event);" rows="1" placeholder="Custom message for student..." style="width:95%; resize:none; float:left;">{$question->getComment()}</textarea>
+                        <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this);" rows="1" placeholder="Custom message for student..." style="width:95%; resize:none; float:left;">{$question->getComment()}</textarea>
                     </td>
                 </tr>
                 </tbody>
@@ -980,6 +991,32 @@ HTML;
         }
     }
 
+    //if type == 0 number input, type == 1 textarea
+    function checkIfSelected(me) {
+        var table_row = $(me.parentElement.parentElement);
+        var is_selected = false;
+        var icon = table_row.find("i");
+        var number_input = table_row.find("input");
+        var text_input = table_row.find("textarea");
+        var question_num = parseInt(icon.attr('name').split('_')[2]);
+
+        if(number_input.val() != 0 || text_input.val() != "") {
+            is_selected = true;
+        }
+
+        if (is_selected === true) {
+            if(icon[0].classList.contains('fa-square-o')) {
+                icon.toggleClass("fa-square-o fa-square");
+            }
+        } else {
+            if(icon[0].classList.contains('fa-square')) {
+                icon.toggleClass("fa-square-o fa-square");
+            }
+        }
+
+        checkMarks(question_num);
+    }
+
     function addMark(me, num, background, min, max, precision) {
         var last_num = -10;
         var current_row = $(me.parentElement.parentElement);
@@ -995,7 +1032,7 @@ HTML;
         current_row.before(' \
 <tr id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'"> \
     <td colspan="1" style="'+background+'; text-align: center;"> <input name="mark_points_'+num+'_'+new_num+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none;"> \
-                        <span onclick="selectMark(this);"> <i class="fa fa-square-o" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
+                        <span onclick="selectMark(this);"> <i class="fa fa-square-o mark" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
     </td> \
     <td colspan="3" style="'+background+'"> \
         <textarea name="mark_text_'+num+'_'+new_num+'" onkeyup="autoResizeComment(event);" rows="1" style="width:95%; resize:none; float:left;"></textarea> \
@@ -1029,9 +1066,33 @@ HTML;
         }
     }
 
-    function selectMark(me) {
+    function checkMarks(question_num) {
+        question_num = parseInt(question_num);
+        var mark_table = $('#extra-'+question_num);
+        var first_mark = mark_table.find('i[name=mark_icon_'+question_num+'_0]');
+        var all_false = true;
+        mark_table.find('.mark').each(function() {
+            if($(this)[0].classList.contains('fa-square')) {
+                all_false = false;
+                return false;
+            }
+        });
+
+        if(all_false === true) {
+            first_mark.toggleClass("fa-square-o fa-square");
+        } else {
+            if (first_mark[0].classList.contains('fa-square')) {
+                first_mark.toggleClass("fa-square-o fa-square");
+            }
+        }
+    }
+
+    function selectMark(me, first_override = false) {
         var icon = $(me).find("i");
         icon.toggleClass("fa-square-o fa-square");
+
+        var question_num = parseInt(icon.attr('name').split('_')[2]);
+        checkMarks(question_num);
     }
 
     function openClose(row_id, num_questions) {
@@ -1091,6 +1152,38 @@ HTML;
                 }
             }
         }
+    }
+
+    function cancelMark(num, gradeable_id, user_id, gc_id) {
+        var arr_length = $('tr[name=mark_'+num+']').length;
+        for (var i = 0; i < arr_length; i++) {
+            var current_row = $('#mark_id-'+num+'-'+i);
+            var delete_mark = $('#mark_remove_id-'+num+'-'+i);
+            if (typeof delete_mark[0] !== 'undefined') {
+                current_row.remove();
+            }
+        }
+        var arr_length = $('tr[name=mark_'+num+']').length;
+        $.ajax({
+            type: "POST",
+            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
+            data: {
+                'gradeable_id' : gradeable_id,
+                'user_id' : user_id,
+                'gradeable_component_id' : gc_id
+            },
+            success: function(data) {
+                console.log("success");
+                data = JSON.parse(data);
+                alert(JSON.stringify(data['data']));
+                for (var x = 0; x < arr_length; x++) {
+
+                }
+            },
+            error: function() {
+                console.log("You make me sad. The cancel mark errored out.");
+            }
+        })
     }
 
     //num === -3 means save gradeable comment

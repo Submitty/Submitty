@@ -28,6 +28,9 @@ class ElectronicGraderController extends AbstractController {
             case 'save_gradeable_comment':
                 $this->saveGradeableComment();
                 break;
+            case 'get_mark_data':
+                $this->getMarkDetails();
+                break;
             default:
                 $this->showStatus();
                 break;
@@ -436,11 +439,12 @@ class ElectronicGraderController extends AbstractController {
                     if ($component->getGrader() === null || $_POST['overwrite'] === "true") {
                         $component->setGrader($this->core->getUser());
                     }     
+                    
                     $component->setGradedVersion($_POST['active_version']);
                     $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                     $component->setComment($_POST['custom_message']);
                     $component->setScore($_POST['custom_points']);
-                    $component->saveData($gradeable->getGdId());
+                    $debug = $component->saveData($gradeable->getGdId());
                 }
                 
                 $index = 0;
@@ -489,9 +493,9 @@ class ElectronicGraderController extends AbstractController {
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
 
-        $response = array('status' => $mark_modified, 'modified' => $mark_modified);
-                $this->core->getOutput()->renderJson($response);
-                return $response;
+        $response = array('status' => $debug, 'modified' => $mark_modified);
+        $this->core->getOutput()->renderJson($response);
+        return $response;
     }
 
     public function saveGradeableComment() {
@@ -503,4 +507,35 @@ class ElectronicGraderController extends AbstractController {
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
     }
+
+    public function getMarkDetails() {
+        $gradeable_id = $_POST['gradeable_id'];
+        $user_id = $_POST['user_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->getId() != $_POST['gradeable_component_id']) {
+                continue;
+            }
+            else {
+                $return_data = array();
+                foreach ($component->getMarks() as $mark) {
+                    $temp_array = array();
+                    $temp_array['score'] = $mark->getPoints();
+                    $temp_array['note'] = $mark->getNote();
+                    $temp_array['has_mark'] = $mark->getHasMark();
+                    $return_data[] = $temp_array;
+                }
+                $temp_array = array();
+                $temp_array['custom_score'] = $component->getScore();
+                $temp_array['custom_note'] = $component->getComment();
+                $return_data[] = $temp_array;
+            }
+        }
+
+        $response = array('status' => 'success', 'data' => $return_data);
+        $this->core->getOutput()->renderJson($response);
+        return $response;
+    }
+
+
 }
