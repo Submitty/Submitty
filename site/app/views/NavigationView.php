@@ -128,7 +128,7 @@ HTML;
                 continue;
             }
 
-            // // count the # of electronic gradeables in this category that can be viewed
+            // count the # of electronic gradeables in this category that can be viewed
             $electronic_gradeable_count = 0;
             foreach ($gradeable_list as $gradeable => $g_data) {
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE && $g_data->getStudentView()) {
@@ -220,13 +220,6 @@ HTML;
                 if (!$g_data->getStudentView() && !$this->core->getUser()->accessGrading()) {
                     continue;
                 }
-
-                /////// hm
-                // // if student submit false, skip unless it's graded
-                // if ($title !== "GRADED" && !$g_data->getStudentSubmit() && !$this->core->getUser()->accessGrading()) {
-                //     continue;
-                // }
-
 
                 if ($g_data->getActiveVersion() < 1){
                     if ($title == "GRADED" || $title == "ITEMS BEING GRADED"){

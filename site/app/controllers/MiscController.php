@@ -24,7 +24,7 @@ class MiscController extends AbstractController {
         }
     }
 
-    // security hooray
+    // function to check that this is a valid access request
     private function checkValidAccess($is_zip, $dir="",$path="",$user_id="") {
 
         // if not a zip
@@ -85,11 +85,33 @@ class MiscController extends AbstractController {
         }
 
         // otherwise, check that they are trying to access a directory that is theirs
-        // for now, check that path contains their user_id
+        // FIXME: need a different check for peer grading since the user_ids are not going to match
         $current_user_id = $this->core->getUser()->getId();
         if (!$is_zip) {
-            if (strpos($path, $current_user_id) === false) {
-                throw new \InvalidArgumentException("You're not allowed access to that file");
+            // get the gradeable_id
+            $path_folder = FileUtils::joinPaths($course_path, $dir);
+            $path_rest = substr($path, strlen($path_folder)+1);
+            $path_gradeable = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
+            $gradeable = $this->core->getQueries()->getGradeable($path_gradeable);
+            $path_rest = substr($path_rest, strlen($path_gradeable)+1);
+            $path_user_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
+            // if team assignment, check that team id matches the team of the current user
+            if ($gradeable->isTeamAssignment()) {
+                $path_team_id = $path_user_id;
+                $current_team = $this->core->getQueries()->getTeamByGradeableAndUser($path_gradeable,$current_user_id);
+                if ($current_team === null) {
+                    throw new \InvalidArgumentException("You're not allowed access to that file");
+                }
+                $current_team_id = $current_team->getId();
+                if ($path_team_id != $current_team_id) {
+                    throw new \InvalidArgumentException("You're not allowed access to that file");
+                }
+            }
+            // else, just check that the user ids match
+            else {
+                if ($current_user != $path_user) {
+                    throw new \InvalidArgumentException("You're not allowed access to that file");
+                }
             }
         }
         // or for a zip, that the entered user_id is theirs
@@ -98,9 +120,6 @@ class MiscController extends AbstractController {
                 throw new \InvalidArgumentException("You're not allowed access to that file");
             }
         }
-        // FIXME: need a different check for peer grading since the user_ids are not going to match
-
-
     }
 
     private function displayFile() {
