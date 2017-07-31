@@ -326,6 +326,9 @@ class Gradeable extends AbstractModel {
             $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;
             $this->max_team_size = $details['eg_max_team_size'];
             $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
+            if ($this->team_assignment) {
+                $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
+            }
             if (isset($details['active_version']) && $details['active_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
