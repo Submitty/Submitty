@@ -38,22 +38,27 @@ class SimpleLateUser extends AbstractModel {
         }
 
         $this->loaded = true;
-        $this->setId($details['user_id']);
-        $this->setFirstName($details['user_firstname']);
+        $this->id = $details['user_id'];
+        $this->first_name = $details['user_firstname'];
         if (isset($details['user_preferred_firstname']) && $details['user_preferred_firstname'] !== "") {
-            $this->setPreferredFirstName($details['user_preferred_firstname']);
-            $this->setDisplayedFirstName($details['user_preferred_firstname']);
+            $this->prefered_first_name = $details['user_preferred_firstname'];
+            $this->displayed_first_name = $details['user_preferred_firstname'];
         }
         else{
-            $this->setDisplayedFirstName($details['user_firstname']);
+            $this->displayed_first_name = $details['user_firstname'];
         }
-        $this->setLastName($details['user_lastname']);
+        $this->last_name = $details['user_lastname'];
         if(isset($details['allowed_late_days']) && isset($details['since_timestamp'])){
-            $this->setAllowedLateDays($details['allowed_late_days']);
-            $this->setSinceTimestamp($details['since_timestamp']);
+            $this->allowed_late_days = $details['allowed_late_days'];
+            $this->since_timestamp = new \DateTime($details['since_timestamp']);
+
         }
         if(isset($details['late_day_exceptions'])){
-            $this->setLateDayExceptions($details['late_day_exceptions']);
+            $this->late_day_exceptions = $details['late_day_exceptions'];
         }
+    }
+
+    public function getSinceTimestamp() {
+        return $this->since_timestamp->format("m/d/Y h:i:s A");
     }
 }

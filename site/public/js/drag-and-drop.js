@@ -19,6 +19,9 @@ var changed = false;        // if files from previous submission changed
 
 var empty_textboxes = true;
 
+var student_ids = [];           // all student ids
+var student_without_ids = [];   // student ids for those w/o submissions
+
 // initializing file_array and prevous_files
 function createArray(num_parts){
     if(file_array.length == 0){
@@ -376,6 +379,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
 function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
 
     url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id});
+    return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
 
     var formData = new FormData();
 
@@ -401,13 +405,23 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
                     setTimeout(function() {
                         $('#submit_' + count).fadeOut();
                     }, 5000);
+                    var index = student_without_ids.indexOf(user_id);
+                    if (index > -1) {
+                        student_without_ids.splice(index, 1);
+                    }
                     return;
                 }
                 else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    if (data['message'] == "You do not have access to that page.") {
+                        window.location.href = return_url;
+                    }
+                    else {
+                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    }
                 }
             }
             catch (e) {
+                console.log(e);
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);
@@ -531,7 +545,12 @@ function handleBulk(gradeable_id, num_pages) {
                     window.location.href = return_url;
                 }
                 else {
-                    alert("ERROR! \n\n" + data['message']);
+                    if (data['message'] == "You do not have access to that page.") {
+                        window.location.href = return_url;
+                    }
+                    else {
+                        alert("ERROR! \n\n" + data['message']);
+                    }
                 }
             }
             catch (e) {
@@ -644,7 +663,12 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                     window.location.href = return_url;
                 }
                 else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    if (data['message'] == "You do not have access to that page.") {
+                        window.location.href = return_url;
+                    }
+                    else {
+                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    }
                 }
             }
             catch (e) {

@@ -41,10 +41,8 @@ def solution(test):
     test.run_run()
     test.run_validator()
 
-    print ("TODO:  FIX TUTORIAL 07 LOOP DEPTH TEST - SOLUTION")
-
-    #test.diff("grade.txt", "grade.txt_solution", "-b")
-    #test.json_diff("results.json", "results.json_solution")
+    test.diff("grade.txt", "grade.txt_solution", "-b")
+    test.json_diff("results.json", "results.json_solution")
 
 
 
@@ -57,9 +55,7 @@ def buggy(test):
     test.run_run()
     test.run_validator()
 
-    print ("TODO:  FIX TUTORIAL 07 LOOP DEPTH TEST - BUGGY")
-    
-    #test.diff("grade.txt", "grade.txt_buggy", "-b")
-    #test.json_diff("results.json", "results.json_buggy")
+    test.diff("grade.txt", "grade.txt_buggy", "-b")
+    test.json_diff("results.json", "results.json_buggy")
 
 

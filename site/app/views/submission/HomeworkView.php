@@ -61,6 +61,26 @@ HTML;
     <h2>New submission for: {$gradeable->getName()}</h2>
 HTML;
         if ($this->core->getUser()->accessAdmin()) {
+            $students = $this->core->getQueries()->getAllUsers();
+            $student_ids = array();
+            foreach ($students as $student) {
+                $student_ids[] = $student->getId();
+            }
+
+            $students_without = array();
+            $student_without_ids = array();
+            $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
+            foreach ($gradeables as $g) {
+                if ($g->getActiveVersion() == 0) {
+                    $students_without[] = $g->getUser();
+                }
+            }
+            foreach ($students_without as $student) {
+                $student_without_ids[] = $student->getId();
+            }
+
+            $student_ids = json_encode($student_ids);
+            $student_without_ids = json_encode($student_without_ids);
             $return .= <<<HTML
     <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
         <div >
@@ -84,7 +104,7 @@ HTML;
             <div class="sub">
                 <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
                 user_id: <input type="text" id= "user_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
-            </div class="sub">
+            </div>
         </div>
         <div class = "sub" id="pdf_submit_button" style="display: none">
             <div class="sub">
@@ -97,6 +117,8 @@ HTML;
     <script type="text/javascript">
         $(document).ready(function() {
             var cookie = document.cookie;
+            student_ids = {$student_ids};
+            student_without_ids = {$student_without_ids};
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
@@ -122,6 +144,9 @@ HTML;
                 $('#user_id_input').hide();
                 $('#pdf_submit_button').show();
                 $('#user_id').val('');
+            });
+            $( "#user_id" ).autocomplete({
+                source: student_ids
             });
         });
     </script>
@@ -350,10 +375,34 @@ HTML;
 
         $return .= <<<HTML
     <script type="text/javascript">
+        // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
+        function moveNextInput(count) {
+            var next_count = count+1;
+            var next_input = "#bulk_user_id_" + next_count;
+            if ($(next_input).length) {
+                $(next_input).focus();
+                $(next_input).select(); 
+
+                var inputOffset = $(next_input).offset().top;
+                var inputHeight = $(next_input).height();
+                var windowHeight = $(window).height();
+                var offset;
+
+                if (inputHeight < windowHeight) {
+                    offset = inputOffset - ((windowHeight / 2) - (inputHeight / 2));
+                }
+                else {
+                    offset = inputOffset;
+                }
+                var speed = 500;
+                $('html, body').animate({scrollTop:offset}, speed); 
+            }
+        }
         function makeSubmission(user_id, highest_version, is_pdf, path, count) {
             // submit the selected pdf
             if (is_pdf) {
                 submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count);
+                moveNextInput(count);
             }
             // otherwise, this is a regular submission of the uploaded files
             else if (user_id == "") {
@@ -426,9 +475,10 @@ HTML;
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
-                <td width="4%"></td>
-                <td width="10%">Timestamp</td>
-                <td width="55%">PDF preview</td>
+                <td width="3%"></td>
+                <td width="8%">Timestamp</td>
+                <td width="53%">PDF preview</td>
+                <td width="5%">Full PDF</td>
                 <td width="15%">User ID</td>
                 <td width="8%">Submit</td>
                 <td width="8%">Delete</td>
@@ -444,21 +494,28 @@ HTML;
                     foreach ($files as $filename => $details) {
                         $clean_timestamp = str_replace("_", " ", $timestamp);
                         $path = $details["path"];
-                        if (strpos($filename, 'cover') == false) {
-                            // add each file that is not a cover to count_array 
-                            // each entry is in format timestamp/filename
-                            $count_array[$count] = $timestamp."/".$filename;
+                        if (strpos($filename, "cover") === false) {
                             continue;
                         }
+                        // get the full filename for PDF popout
+                        // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
+                        $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
+                        $path_full = str_replace("_cover.pdf", ".pdf", $path);
+                        $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full;
+                        $count_array[$count] = $timestamp."/".$filename_full;
                         $return .= <<<HTML
             <tr class="tr tr-vertically-centered">
                 <td>{$count}</td>
                 <td>{$clean_timestamp}</td> 
                 <td>
+                    {$filename_full}</br>
                     <object data="{$url}" type="application/pdf" width="100%" height="300">
                         alt : <a href="{$url}">pdf.pdf</a>
                     </object>
+                </td>
+                <td>
+                    <a onclick="openFile('{$url_full}')"><i class="fa fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
                 </td>
                 <td>
                     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
@@ -478,11 +535,17 @@ HTML;
                 }
                 $return .= <<<HTML
 <script type="text/javascript">
+    function openFile(url_full) {
+        window.open(url_full,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    }
     $(document).ready(function() {
+        $("#bulkForm input").autocomplete({
+            source: student_without_ids
+        });
         $("#bulkForm button").click(function(e){
             var btn = $(document.activeElement);
             var id = btn.attr("id");
-            var count = id.substring(12,id.length);
+            var count = btn.parent().parent().index()+1;
             var user_id = $("#bulk_user_id_"+count).val();
             var js_count_array = $count_array_json;
             var path = js_count_array[count];
@@ -492,9 +555,38 @@ HTML;
                     return;
                 }
                 deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
+                moveNextInput(count);
             }
             else {
                 validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        $("#bulkForm input").keydown(function(e) {
+            if(e.keyCode === 13) { // enter was pressed
+                var text = $(document.activeElement);
+                var id = text.attr("id");
+                var count = text.parent().parent().index()+1;
+                var user_id = $(document.activeElement).val();
+                var js_count_array = $count_array_json;
+                var path = js_count_array[count];
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+        $("#bulkForm button").keydown(function(e) {
+            if(e.keyCode === 9) { // tab was pressed
+                var text = $(document.activeElement);
+                var id = text.attr("id");
+                var count = text.parent().parent().index()+1;
+                // default behavior is okay for input/submit, but delete should go to next input
+                if (id.includes("delete")) {
+                    moveNextInput(count);
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
             }
         });
     });
@@ -508,9 +600,16 @@ HTML;
 HTML;
             }
         }
+        $team_header = '';
+        if ($gradeable->isTeamAssignment()) {
+            $team_header = <<<HTML
+    <h3>Team: {$gradeable->getTeam()->getMemberList()}</h3><br />
+HTML;
+        }
         if ($gradeable->getSubmissionCount() === 0) {
             $return .= <<<HTML
 <div class="content">
+    {$team_header}
     <span style="font-style: italic">No submissions for this assignment.</span>
 </div>
 HTML;
@@ -518,6 +617,7 @@ HTML;
         else {
             $return .= <<<HTML
 <div class="content">
+    {$team_header}
     <h3 class='label' style="float: left">Select Submission Version:</h3>
 HTML;
             $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'student',

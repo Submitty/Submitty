@@ -12,82 +12,92 @@ class TeamView extends AbstractView {
     * @param Team[] $teams
     * @return string
     */
-    public function showTeamPage($gradeable, $teams) {
+    public function showTeamPage($gradeable, $teams, $lock) {
         $site_url = $this->core->getConfig()->getSiteUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        
         $user_id = $this->core->getUser()->getId();
-        $has_team = false;
-        foreach ($teams as $t) {
-            if ($t->hasMember($user_id)) {
-                $has_team = true;
-                $team = $t;
-                break;
-            }
-        }
-
+        
+        $team = $gradeable->getTeam();
         $return = <<<HTML
 <div class="content">
-    <h2>Manage Team For: {$gradeable->getName()}</h2> <br />
+    <h2>Manage Team For: {$gradeable->getName()}</h2>
 HTML;
+    
+    if ($lock) {
+        if ($team === null) {
+        $return .= <<<HTML
+    <p class="red-message">
+    Teams are now locked for this assignment.<br>
+    You can create a new team of 1 or accept an invitation sent before teams were locked.<br>
+    Contact your instructor to make further changes to your team.
+    </p><br />
+HTML;
+        }
+        else {
+            $return .= <<<HTML
+    <p class="red-message">
+    Teams are now locked for this assignment.<br>
+    Contact your instructor to make changes to your team.
+    </p><br />
+HTML;
+        }
+    }
 
     //Top content box, has team
-    if ($has_team) {
+    if ($team !== null) {
 
-        //Team members status
-        if($team->getSize() === 1) {
+        //List team members
+        $return .= <<<HTML
+    <h3>Your Team:</h3> <br />
+HTML;
+        foreach ($team->getMembers() as $teammate) {
+            $teammate = $this->core->getQueries()->getUserById($teammate);
             $return .= <<<HTML
-    <span>You are the only member of the team.</span> <br />
+        <span>&emsp;{$teammate->getFirstName()} {$teammate->getLastName()} ({$teammate->getId()}) - {$teammate->getEmail()}</span> <br />
 HTML;
         }
-        else {
-            $teammates = implode(", ", array_diff($t->getMembers(), array($user_id)));
-            $return .= <<<HTML
-    <span>You are on a team with {$teammates}.</span> <br />
-HTML;
-        }
-
         //Team invitations status
-        $invites_sent = $team->getInvitations();
-        if(count($invites_sent) === 0) {
+        if (count($team->getInvitations()) !== 0) {
             $return .= <<<HTML
-    <span>No invitations have been sent.</span> <br />        
+    <br />
+    <h3>Pending Invitations:</h3> <br />
 HTML;
-        }
-        else {
-            $invites_sent = implode(", ", $invites_sent);
-            $return .= <<<HTML
-    <span>Invitation(s) have been sent to {$invites_sent}.</span> <br />
+            foreach ($team->getInvitations() as $invited) {
+                if ($lock) {
+                    $return .= <<<HTML
+    <span>&emsp;{$invited}</span> <br />
 HTML;
+                }
+                else {
+                    $return .= <<<HTML
+    <form action="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'cancel'))}" method="post">
+        <input type="hidden" name="cancel_id" value={$invited} />
+        &emsp;{$invited}: <input type="submit" value = "Cancel" class="btn btn-danger" />
+    </form><br />
+HTML;
+                }
+            }
         }
     }
 
     //Top content box, no team
     else {
         $return .= <<<HTML
-    <span>You are not on a team.</span>
+    <h4>You are not on a team.</h4> <br />
 HTML;
     }
     $return .= <<<HTML
 </div>
-
-<div class="content">
 HTML;
 
-    //Bottom content box, has team
-    if ($has_team) {
+    //Bottom content box, has team, teams not locked
+    if ($team !== null && !$lock) {
         $return .= <<<HTML
-    <!--<h3>Your team is full.</h3>-->
+<div class="content">
     <h3>Invite new teammates by their user ID:</h3>
     <br />
-    <form action="{$site_url}" method="post">
-        <input type="hidden" name="semester" value="{$semester}" />
-        <input type="hidden" name="course" value="{$course}" />
-        <input type="hidden" name="component" value="student" />
-        <input type="hidden" name="gradeable_id" value="{$gradeable->getId()}" />
-        <input type="hidden" name="page" value="team" />
-        <input type="hidden" name="action" value="invitation" />
+    <form action="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'invitation'))}" method="post">
         <input type="text" name="invite_id" placeholder="User ID" />
         <input type="submit" value = "Invite" class="btn btn-primary" />
     </form>
@@ -97,36 +107,32 @@ HTML;
     }
 
     //Bottom content box, no team
-    else {
+    else if ($team === null) {
 
         //Invitations received
         $invites_received = array();
         foreach($teams as $t) {
             if ($t->sentInvite($user_id)) {
-                $pair = array();
-                $pair['team_id'] = $t->getId();
-                $pair['members'] = implode(", ", $t->getMembers());
-                $invites_received[] = $pair;
+                $invites_received[] = $t;
             }
         }
 
         if(count($invites_received) === 0) {
             $return .= <<<HTML
-    <span>You have not received any invitations.</span> <br />
+<div class="content">
+    <h4>You have not received any invitations.</h4> <br />
 HTML;
         }
         else {
+            $return .= <<<HTML
+<div class="content">
+    <h3>Invitations:</h3> <br />
+HTML;
             foreach ($invites_received as $invite) {
                 $return .= <<<HTML
-    <form action="{$site_url}" method="post">
-        <input type="hidden" name="semester" value="{$semester}" />
-        <input type="hidden" name="course" value="{$course}" />
-        <input type="hidden" name="component" value="student" />
-        <input type="hidden" name="gradeable_id" value="{$gradeable->getId()}" />
-        <input type="hidden" name="page" value="team" />
-        <input type="hidden" name="action" value="accept" />
-        <input type="hidden" name="team_id" value={$invite['team_id']} />
-        Invitation from {$invite['members']}: <input type="submit" value = "Accept" class="btn btn-success" />
+    <form action="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'accept'))}" method="post">
+        <input type="hidden" name="team_id" value={$invite->getId()} />
+        &emsp;{$invite->getMemberList()}: <input type="submit" value = "Accept" class="btn btn-success" />
     </form>
     <br />
 HTML;

@@ -25,22 +25,24 @@ class AdminGradeableView extends AbstractView {
 	public function show_add_gradeable($type_of_action, $initial_data = array(""), $data = array("")) {
 
         $electronic_gradeable = array();
-        $TA_beta_date = date('m/d/Y 23:59:59', strtotime( '-1 days' ));
-        $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y 23:59:59', strtotime( '0 days' ));
-        $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y 23:59:59', strtotime( '+7 days' ));
+        $TA_beta_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
+        $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
+        $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
         $electronic_gradeable['eg_subdirectory'] = "temp";
         $electronic_gradeable['eg_config_path'] = "";
         $electronic_gradeable['eg_late_days'] = 2;
         $electronic_gradeable['eg_precision'] = 0.5;
-        $team_yes_checked;
-        $team_no_checked;
+        $electronic_gradeable['eg_max_team_size'] = 1;
+        $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
+        $team_yes_checked = false;
+        $team_no_checked = true;
         $peer_yes_checked = false;
         $peer_no_checked = true;
         $peer_grade_set = 3;
-        $TA_grade_open_date = date('m/d/Y 23:59:59', strtotime( '+10 days' ));
-        $TA_grade_release_date = date('m/d/Y 23:59:59', strtotime( '+14 days' ));
+        $TA_grade_open_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
+        $TA_grade_release_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-		$BASE_URL = "http://192.168.56.101/hwgrading";
+		$BASE_URL = "http:/localhost/hwgrading";
 		$action = "upload_new_gradeable"; //decides how the page's data is displayed
 		$string = "Add"; //Add or Edit
 		$button_string = "Add";
@@ -79,30 +81,34 @@ class AdminGradeableView extends AbstractView {
             $string = "Edit";
             $button_string = "Edit";
             $extra = ($data[2]) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
-            $TA_beta_date = date('m/d/Y H:i:s', strtotime($data[0]['g_ta_view_start_date']));
-            $TA_grade_open_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_start_date']));
-            $TA_grade_release_date = date('m/d/Y H:i:s', strtotime($data[0]['g_grade_released_date']));
+            $TA_beta_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_ta_view_start_date']));
+            $TA_grade_open_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_start_date']));
+            $TA_grade_release_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_released_date']));
             $gradeable_submission_id = $data[0]['g_id'];
             $gradeable_name = $data[0]['g_title'];
             $g_instructions_url = $data[0]['g_instructions_url'];
-            $team_yes_checked = $data[0]['g_team_assignment'];
-            $team_no_checked = !$team_yes_checked;
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) { //if the gradeable edited is electronic gradeable
-                $electronic_gradeable['eg_submission_open_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_open_date']));
-                $electronic_gradeable['eg_submission_due_date'] = date('m/d/Y H:i:s', strtotime($data[3]['eg_submission_due_date']));
+                $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_open_date']));
+                $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_due_date']));
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $precision = $data[3]['eg_precision'];
                 $electronic_gradeable['eg_precision'] = $precision;
+                $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
+                $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_team_lock_date']));
+                $team_yes_checked = $data[3]['eg_team_assignment'];
+                $team_no_checked = !$team_yes_checked;
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
-                $peer_grade_set = $data[3]['eg_peer_grade_set'];
+                if(isset($data[3]['eg_peer_grade_set'])){
+                    $peer_grade_set = $data[3]['eg_peer_grade_set'];
+                }
                 $old_questions = $data[5];
                 $num_old_questions = count($old_questions);                
                 $component_ids = array();
@@ -120,8 +126,6 @@ class AdminGradeableView extends AbstractView {
         //if the user is using a template
         if ($type_of_action === "add_template") {
             $g_instructions_url = $data[0]['g_instructions_url'];
-            $team_yes_checked = $data[0]['g_team_assignment'];
-            $team_no_checked = !$team_yes_checked;
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
             $g_min_grading_group = $data[0]['g_min_grading_group'];
@@ -129,6 +133,9 @@ class AdminGradeableView extends AbstractView {
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) {
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
+                $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
+                $team_yes_checked = $data[3]['eg_team_assignment'];
+                $team_no_checked = !$team_yes_checked;
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
@@ -244,7 +251,7 @@ class AdminGradeableView extends AbstractView {
 </style>
 <div id="container-rubric">
     <form id="gradeable-form" class="form-signin" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => $action))}" 
-          method="post" enctype="multipart/form-data" onsubmit="return checkForm()"> 
+          method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
@@ -302,30 +309,7 @@ HTML;
             <input name="date_ta_view" id="date_ta_view" class="date_picker" type="text" value="{$TA_beta_date}"
             style="cursor: auto; background-color: #FFF; width: 250px;">
             <br />
-            <br />
-            Is this a team assignment?:
-            <fieldset>
-            <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes"
-HTML;
-        if (($type_of_action === "edit" || $type_of_action === "add_template") && $team_yes_checked) { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-            > Yes
-            <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="no"
-HTML;
-        if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-            > No
-                <div class="team_assignment team_yes" id="team_date">
-                    <!--    
-                    <br />
-                    What is the <em style='color: orange;'><b>Team Finalization Date</b></em>? <input name="date_teams_final" id="date_teams_final" class="datepicker" type="text" style="cursor: auto; background-color: #FFF; width: 250px;">
-                    <br />
-                    -->
-                </div>
-                    
-                <div class="team_assignment team_no" id="team_no">
-                </div>
-            </fieldset>   
+            <br /> 
             What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
             <fieldset>
@@ -348,7 +332,31 @@ HTML;
             >
             Numeric/Text
             <!-- This is only relevant to Electronic Files -->
-            <div class="gradeable_type_options electronic_file" id="electronic_file" >    
+            <div class="gradeable_type_options electronic_file" id="electronic_file" >
+                <br />
+                Is this a team assignment?
+                <fieldset>
+                    <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes"
+HTML;
+                if (($type_of_action === "edit" || $type_of_action === "add_template") && $team_yes_checked) { $html_output .= ' checked="checked"'; }
+                $html_output .= <<<HTML
+                > Yes
+                    <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="no"
+HTML;
+                if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; }
+                $html_output .= <<<HTML
+                > No
+                    <div class="team_assignment team_yes" id="team_yes">
+                        <br />
+                        What is the maximum team size? <input style="width: 50px" name="eg_max_team_size" class="int_val" type="text" value="{$electronic_gradeable['eg_max_team_size']}"/>
+                        <br />
+                        What is the <em style='color: orange;'><b>Team Lock Date</b></em>? (Instructors can still manually manage teams):
+                        <input name="date_team_lock" id="date_team_lock" class="date_picker" type="text" value="{$electronic_gradeable['eg_team_lock_date']}"
+                        style="cursor: auto; background-color: #FFF; width: 250px;">
+                        <br />
+                    </div>
+                    <div class="team_assignment team_no" id="team_no"></div>
+                </fieldset>      
                 <br />
                 What is the <em style='color: orange;'><b>Submission Open Date</b></em>? (submission available to students):
                 <input id="date_submit" name="date_submit" class="date_picker" type="text" value="{$electronic_gradeable['eg_submission_open_date']}"
@@ -459,6 +467,18 @@ HTML;
                               display: block; height: auto;">{$question['student_grading_note']}</textarea>
                     <div id="deduction_questions_{$num}">
 HTML;
+    if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
+        $html_output .= <<<HTML
+            <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+            <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Sample Text</textarea> 
+            <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+            <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+            <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+            <br> 
+        </div>
+HTML;
+    }
     if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0) {
         $type_deduct = 0;
         $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
@@ -467,7 +487,15 @@ HTML;
                 $type_deduct = 1;
             }
         }
+        $first = true;
         foreach ($marks as $mark) {
+            if($first === true) {
+                $first = false;
+                $hidden = "display: none;";
+            }
+            else {
+                $hidden = "";
+            }
             if ($type_deduct === 1) {
                 $min = 0;
                 $max = 1000;
@@ -477,8 +505,8 @@ HTML;
                 $max = 0;
             }
             $html_output .= <<<HTML
-                <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px;">
-                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
+                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                 <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
                 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -536,7 +564,7 @@ HTML;
         $html_output .= <<<HTML
             <tr id="add-question">
                 <td colspan="2" style="overflow: hidden; text-align: left;">
-                    <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="icon-plus icon-white"></i> Rubric Item</div>
+                    <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="fa fa-plus-circle" aria-hidden="true"></i> Rubric Item</div>
                 </td>
             </tr>
 HTML;
@@ -931,7 +959,8 @@ function createCrossBrowserJSDate(val){
 
         $(function() {
             $( ".date_picker" ).datetimepicker({
-                timeFormat: "HH:mm:ss",
+                dateFormat: 'yy-mm-dd',
+                timeFormat: "HH:mm:ssz",
                 showButtonPanel: true,
                 showTimezone: false,
                 showMillisec: false,
@@ -945,7 +974,7 @@ function createCrossBrowserJSDate(val){
                         $( "<button>", {
                             text: "Infinity",
                             click: function() {
-                                $.datepicker._curInst.input.datepicker('setDate', "12/31/9999 23:59:59").datepicker('hide');
+                                $.datepicker._curInst.input.datepicker('setDate', "9999-12-31 23:59:59-0400").datepicker('hide');
                             }
                         }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
                     }, 1 );
@@ -1168,6 +1197,15 @@ function createCrossBrowserJSDate(val){
                 $('#rubric_questions').hide();
                 $('#grading_questions').hide();
             }
+
+            if($('#team_yes_radio').is(':checked')){
+                $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+                $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                $('#team_yes').show();
+            }
+            else {
+                $('#team_yes').hide();
+            }
         }
         else if ($('#radio_checkpoints').is(':checked')){
             var components = {$old_components};
@@ -1198,6 +1236,18 @@ function createCrossBrowserJSDate(val){
             $('input[name=gradeable_id]').attr('readonly', true);
         }
 
+        $('input:radio[name="team_assignment"]').change(
+    function(){
+        if($('#team_yes_radio').is(':checked')){
+            $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+            $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+            $('#team_yes').show();
+        }
+        else {
+            $('#team_yes').hide();
+        }
+    });
+
          $('input:radio[name="gradeable_type"]').change(
     function(){
         $('#required_type').hide();
@@ -1216,6 +1266,15 @@ function createCrossBrowserJSDate(val){
                    $('#grades_released_compare_date').html('Due Date');
                 } else { 
                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                }
+
+                if($('#team_yes_radio').is(':checked')){
+                    $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+                    $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                    $('#team_yes').show();
+                }
+                else {
+                    $('#team_yes').hide();
                 }
             }
             else if ($(this).val() == 'Checkpoints'){ 
@@ -1480,6 +1539,17 @@ $('#gradeable-form').on('submit', function(e){
         }
     }
 
+    function fixMarkPointValue(me) {
+        var max = parseFloat($(me).attr('max'));
+        var min = parseFloat($(me).attr('min'));
+        var current_value = parseFloat($(me).val());
+        if (current_value > max) {
+            $(me).val(max);
+        } else if (current_value < min) {
+            $(me).val(min);
+        }
+    }
+
     function calculatePercentageTotal() {
         var total = 0;
         var ec = 0;
@@ -1531,6 +1601,8 @@ $('#gradeable-form').on('submit', function(e){
         row.find('textarea[name=student_comment_' + oldNum + ']').attr('name', 'student_comment_' + newNum).attr('id', 'student_' + newNum);
         row.find('input[name=points_' + oldNum + ']').attr('name', 'points_' + newNum);
         row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
+        row.find('div[id=peer_checkbox_' + oldNum +']').attr('id', 'peer_checkbox_' + newNum);
+        row.find('input[name=peer_component_'+ oldNum + ']').attr('name', 'peer_component_' + newNum);
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
         row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
@@ -1552,6 +1624,11 @@ $('#gradeable-form').on('submit', function(e){
         var child = 0;
         if (question == 1) {
             child = 1;
+        }
+        var new_question = parseInt(question) + 1;
+
+        if(!newRow.length) {
+            return false;
         }
 
         if(!newRow.length) {
@@ -1585,8 +1662,12 @@ $('#gradeable-form').on('submit', function(e){
         currentRow.children()[child].children[2].checked = newRow.children()[1].children[2].checked;
         newRow.children()[1].children[2].checked = temp;
 
+        //Move peer grading box
+        temp = currentRow.find('input[name=peer_component_' + question +']')[0].checked;
+        currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + new_question +']')[0].checked;
+        newRow.find('input[name=peer_component_' + new_question +']')[0].checked = temp;
+
         //Move the radio button
-        var new_question = parseInt(question) + 1;
         var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
         var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
         document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + new_question).checked;
@@ -1666,6 +1747,11 @@ $('#gradeable-form').on('submit', function(e){
         currentRow.children()[1].children[2].checked = newRow.children()[child].children[2].checked;
         newRow.children()[child].children[2].checked = temp;
 
+        //Move peer grading box
+        temp = currentRow.find('input[name=peer_component_' + question +']')[0].checked;
+        currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked;
+        newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked = temp;
+
         //Move the radio button
         var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
         var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
@@ -1744,6 +1830,154 @@ $('#gradeable-form').on('submit', function(e){
                     <i class="fa fa-arrow-up" aria-hidden="true"></i></a> \
             </td> \
         </tr>');
+        $("#rubric_add_deduct_" + newQ).before(' \
+            <div id="deduct_id-'+newQ+'-0" name="deduct_'+newQ+'" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;"> \
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_'+newQ+'_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+            <textarea rows="1" placeholder="Comment" name="deduct_text_'+newQ+'_0" style="resize: none; width: 81.5%;">Sample Text</textarea> \
+            <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            <br> \
+        </div> \
+            ');
+    }
+
+    function deleteDeduct(me) {
+        var question_id = me.parentElement.id.split('-')[1];
+        var current_id = me.parentElement.id.split('-')[2];
+        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
+        current_row.remove();
+        var last_deduct = $('[name=deduct_'+question_id+']').last().attr('id');
+        var totalD = -1;
+        if (last_deduct == null) {
+            totalD = -1;
+        } 
+        else {
+            totalD = parseInt($('[name=deduct_'+question_id+']').last().attr('id').split('-')[2]);
+        }
+        current_id = parseInt(current_id);
+        for(var i=current_id+1; i<= totalD; ++i){
+            updateDeduct(i,i-1, question_id);
+        }
+    }
+
+    function updateDeduct(old_num, new_num, question_num) {
+        var current_deduct = $('#deduct_id-'+question_num+'-'+old_num);
+        current_deduct.find('input[name=deduct_points_'+question_num+'_'+old_num+']').attr('name', 'deduct_points_'+question_num+'_'+new_num);
+        current_deduct.find('textarea[name=deduct_text_'+question_num+'_'+old_num+']').attr('name', 'deduct_text_'+question_num+'_'+new_num);
+        current_deduct.attr('id', 'deduct_id-'+question_num+'-'+new_num);
+    }
+
+    function moveDeductDown(me) {
+        var question_id = me.parentElement.id.split('-')[1];
+        var current_id = me.parentElement.id.split('-')[2];
+        current_id = parseInt(current_id);
+        //checks if the element exists
+        if (!($('#deduct_id-'+question_id+'-'+(current_id+1)).length)) {
+            return false;
+        }
+        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
+        var current_textarea_value = current_row.find("textarea").val();
+        var current_input_value = current_row.find("input").val();
+
+        var new_row = $('#deduct_id-'+question_id+'-'+(current_id+1));
+        var new_textarea_value = new_row.find("textarea").val();
+        var new_input_value = new_row.find("input").val();
+
+        var temp_textarea_value = new_textarea_value;
+        var temp_input_value = new_input_value;
+
+        new_row.find("textarea").val(current_textarea_value);
+        new_row.find("input").val(current_input_value);
+
+        current_row.find("textarea").val(temp_textarea_value);
+        current_row.find("input").val(temp_input_value);
+    }
+
+    function moveDeductUp(me) {
+        var question_id = me.parentElement.id.split('-')[1];
+        var current_id = me.parentElement.id.split('-')[2];
+        current_id = parseInt(current_id);
+        if (current_id == 0 || current_id == 1) {
+            return false;
+        }
+        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
+        var current_textarea_value = current_row.find("textarea").val();
+        var current_input_value = current_row.find("input").val();
+
+        var new_row = $('#deduct_id-'+question_id+'-'+(current_id-1));
+        var new_textarea_value = new_row.find("textarea").val();
+        var new_input_value = new_row.find("input").val();
+
+        var temp_textarea_value = new_textarea_value;
+        var temp_input_value = new_input_value;
+
+        new_row.find("textarea").val(current_textarea_value);
+        new_row.find("input").val(current_input_value);
+
+        current_row.find("textarea").val(temp_textarea_value);
+        current_row.find("input").val(temp_input_value);
+    }
+
+    function onDeduction(me) {
+        var current_row = $(me.parentElement.parentElement);
+        var current_question = parseInt(current_row.attr('id').split('-')[1]);
+        current_row.find('div[name=deduct_'+current_question+']').each(function () {
+            $(this).find("input").attr('min', -1000);
+            $(this).find("input").attr('max', 0);
+            if ($(this).find("input").val() > 0) {
+                $(this).find("input").val($(this).find("input").val() * -1);
+            }            
+        });
+    }
+
+    function onAddition(me) {
+        var current_row = $(me.parentElement.parentElement);
+        var current_question = parseInt(current_row.attr('id').split('-')[1]);
+        current_row.find('div[name=deduct_'+current_question+']').each(function () {
+            $(this).find("input").attr('min', 0);
+            $(this).find("input").attr('max', 1000);
+            if ($(this).find("input").val() < 0) {
+                $(this).find("input").val($(this).find("input").val() * -1);
+            }            
+        });
+    }
+
+    function addDeduct(me, num){
+        var last_num = -10;
+        var min = 0;
+        var max = 0;
+        var current_row = $(me.parentElement.parentElement.parentElement);
+        var radio_value = current_row.find('input[name=deduct_radio_'+num+']:checked').val();
+        if(radio_value == "deduction") {
+            min = -1000;
+            max = 0;
+        }
+        else if(radio_value == "addition") {
+            min = 0;
+            max = 1000;
+        }
+        else {
+            min = 0;
+            max = 0;
+        }
+        var current = $('[name=deduct_'+num+']').last().attr('id');
+        if (current == null) {
+            last_num = -1;
+        } 
+        else {
+            last_num = parseInt($('[name=deduct_'+num+']').last().attr('id').split('-')[2]);
+        }
+        var new_num = last_num + 1;
+        $("#rubric_add_deduct_" + num).before('\
+<div id="deduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
+<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+<textarea rows="1" placeholder="Comment" name="deduct_text_'+num+'_'+new_num+'" style="resize: none; width: 81.5%;"></textarea> \
+<a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<br> \
+</div>');
     }
 
     function deleteDeduct(me) {
@@ -1846,43 +2080,6 @@ $('#gradeable-form').on('submit', function(e){
         });
     }
 
-    function addDeduct(me, num){
-        var last_num = -10;
-        var min = 0;
-        var max = 0;
-        var current_row = $(me.parentElement.parentElement.parentElement);
-        var radio_value = current_row.find('input[name=deduct_radio_'+num+']:checked').val();
-        if(radio_value == "deduction") {
-            min = -1000;
-            max = 0;
-        }
-        else if(radio_value == "addition") {
-            min = 0;
-            max = 1000;
-        }
-        else {
-            min = 0;
-            max = 0;
-        }
-        var current = $('[name=deduct_'+num+']').last().attr('id');
-        if (current == null) {
-            last_num = -1;
-        } 
-        else {
-            last_num = parseInt($('[name=deduct_'+num+']').last().attr('id').split('-')[2]);
-        }
-        var new_num = last_num + 1;
-        $("#rubric_add_deduct_" + num).before('\
-<div id="deduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
-<i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
-<textarea rows="1" placeholder="Comment" name="deduct_text_'+num+'_'+new_num+'" style="resize: none; width: 81.5%;"></textarea> \
-<a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<br> \
-</div>');
-    }
-
     $('input:radio[name="gradeable_type"]').change(
     function(){
         $('#required_type').hide();
@@ -1900,6 +2097,15 @@ $('#gradeable-form').on('submit', function(e){
                    $('#grades_released_compare_date').html('Due Date');
                 } else { 
                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                }
+
+                if($('#team_yes_radio').is(':checked')){
+                    $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
+                    $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                    $('#team_yes').show();
+                }
+                else {
+                    $('#team_yes').hide();
                 }
             }
             else if ($(this).val() == 'Checkpoints'){ 
@@ -1966,6 +2172,12 @@ $('#gradeable-form').on('submit', function(e){
             }
             if (!found_reg_component) {
                 alert("At least one component must be for ta grading");
+                return false;
+            }
+        }
+        if($('#team_yes_radio').is(':checked')) {
+            if ($("input[name^='eg_max_team_size']").val() < 2) {
+                alert("Maximum team size must be at least 2");
                 return false;
             }
         }

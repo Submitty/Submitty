@@ -31,7 +31,7 @@ class HWReport extends AbstractModel {
         $student_grade = 0;
         $grade_comment = "";
         
-        $student_id = $gradeable->getUser()->getId();
+        $student_id = $gradeable->isTeamAssignment() ? $gradeable->getTeam()->getId() : $gradeable->getUser()->getId();
         $student_output_filename = $student_id.".txt";
         $late_days_used_overall = 0;
         
@@ -41,14 +41,19 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             $name_and_emails = array();
             foreach($gradeable->getComponents() as $component){
-                $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>".$nl;
+                if($component->getGrader() === null) {
+                    $name_and_emails[] = "No one".$nl;
+                } else {
+                    $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>".$nl;
+                }
+                
             }
             $name_and_emails = implode(",", $name_and_emails);
 
             $student_output_text_main .= "Graded by : " . $name_and_emails;
 
             // Calculate late days for this gradeable
-            $late_days = $ldu->getGradeable($student_id, $g_id);
+            $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $g_id);
             // TODO: add functionality to choose who regrade requests will be sent to
             $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$name_and_emails.$nl;
             if($gradeable->getDaysLate() > 0) {
@@ -86,17 +91,57 @@ class HWReport extends AbstractModel {
                     $student_output_text .= "submission version #" . $active_version .$nl;
                     $student_output_text .= $nl.$gradefilecontents.$nl;
                 }
+
                 foreach($gradeable->getComponents() as $component) {
-                    $student_output_text .= $component->getTitle() . "[" . $component->getScore() . "/" . $component->getMaxValue() . "] (Graded by {$component->getGrader()->getId()})".$nl;
+                    $temp_notes = "";
+                    $type = 0; // 0 is deduct, 1 is addition
+                    foreach($component->getMarks() as $mark) {
+                        if($mark->getPoints() < 0) {
+                            $type = 0;
+                            break;
+                        }
+                        if($mark->getPoints() > 0) {
+                            $type = 1;
+                            break;
+                        }
+                    }
+                    $temp_score = ($type === 0) ? $component->getMaxValue() : 0;
+                    foreach($component->getMarks() as $mark) {
+                        if($mark->getHasMark()) {
+                            $temp_score += $mark->getPoints();
+                            $temp_notes .= $mark->getPoints() . " : " . $mark->getNote() . $nl;
+                        }
+                    }
+
+                    if(!($component->getScore() == 0 && $component->getComment() == "")) {
+                        $temp_score += $component->getScore();
+                        $temp_notes .= $component->getScore() . " : " . $component->getComment() . $nl;
+                    }
+
+                    if($type === 0) {
+                        if($temp_score < 0) {
+                            $temp_score = 0;
+                        }
+                    } else {
+                        if($temp_score > $component->getMaxValue()) {
+                            $temp_score = $component->getMaxValue();
+                        }
+                    }
+
+                    $student_output_text .= $component->getTitle() . "[" . $temp_score . "/" . $component->getMaxValue() . "] (Graded by {$component->getGrader()->getId()})".$nl;
                     if($component->getStudentComment() != "") {
                         $student_output_text .= "Rubric: " . $component->getStudentComment() . $nl;
                     }
-                    if($component->getComment() != "") {
-                        $student_output_text .= "TA NOTE: " . $component->getComment() . $nl;
-                    }
+                    //if($component->getComment() != "") {
+                    //    $student_output_text .= "TA NOTE: " . $component->getComment() . $nl;
+                    //}
+
+                    $student_output_text .= $temp_notes;
+
                     $student_output_text .= $nl;
                     
-                    $student_grade += $component->getScore();
+                    //$student_grade += $component->getScore();
+                    $student_grade += $temp_score;
                     if(!$component->getIsExtraCredit() && $component->getMaxValue() > 0) {
                         $rubric_total += $component->getMaxValue();
                         $ta_max_score += $component->getMaxValue();

@@ -74,6 +74,9 @@ class GradeableComponent extends AbstractModel {
     /** @property @var bool */
     protected $has_grade = false;
 
+    /** @property @var bool */
+    protected $has_marks = false;
+
     /** @property @var bool Does this component use peer grading*/
     protected $is_peer = false;
 
@@ -94,7 +97,6 @@ class GradeableComponent extends AbstractModel {
         $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
         $this->is_peer = isset($details['gc_is_peer']) ? $details['gc_is_peer']: false;
-        
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = $details['gcd_grader'];
@@ -104,6 +106,8 @@ class GradeableComponent extends AbstractModel {
             }
             // will need to edit this to clarify this is only personalized score
             // will need to add a total score
+            $this->score = floatval($details['gcd_score']);
+            $this->comment = $details['gcd_component_comment'];
             $this->score = floatval($details['gcd_score']);
             if (!$this->is_text) {
                 if ($this->max_value > 0) {
@@ -123,30 +127,30 @@ class GradeableComponent extends AbstractModel {
                     }
                 }
             }
-            $this->comment = $details['gcd_component_comment'];
             if ($this->comment === null) {
                 $this->comment = "";
             }
         }
 
         if (isset($details['array_gcm_id'])) {
-
             $mark_fields = array('gcm_id', 'gc_id', 'gcm_points',
                                     'gcm_note', 'gcm_order');
             foreach ($mark_fields as $key) {
                 $details["array_{$key}"] = explode(',', $details["array_{$key}"]);
             }
 
+            if (isset($details['array_gcm_mark'])) {
+                $details['array_gcm_mark'] = explode(',', $details['array_gcm_mark']);
+            }
             for ($i = 0; $i < count($details['array_gcm_id']); $i++) {
                 $mark_details = array();
                 foreach ($mark_fields as $key) {
                     $mark_details[$key] = $details["array_{$key}"][$i];
                 }
-
-                // see if this actually works...
-                if (isset($details['array_gcmd_gcm_id'])) {
-                    for ($j = 0; $j < count($details['array_gcmd_gcm_id']); $j++) {
-                        if ($details['array_gcmd_gcm_id'][$j] === $mark_details['gcm_id']) {
+                if (isset($details['array_gcm_mark']) && $details['array_gcm_mark'] !== null) {
+                    $this->has_marks = true;
+                    for ($j = 0; $j < count($details['array_gcm_mark']); $j++) {
+                        if ($details['array_gcm_mark'][$j] === $mark_details['gcm_id']) {
                             $mark_details['gcm_has_mark'] = true;
                             break;
                         }
@@ -154,7 +158,6 @@ class GradeableComponent extends AbstractModel {
                 }
 
                 $this->marks[$mark_details['gcm_order']] = $this->core->loadModel(GradeableComponentMark::class, $mark_details);
-
             }
 
             ksort($this->marks);
@@ -171,16 +174,12 @@ class GradeableComponent extends AbstractModel {
 
     public function saveData($gd_id) {
         if ($this->modified) {
-            if ($this->has_grade) {
+            if ($this->has_grade || $this->has_marks) {
                 $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
             }
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
             }
-        }
-
-        foreach ($this->marks as $mark) {
-            $mark->saveData($gd_id, $this->id);
         }
     }
 }

@@ -13,8 +13,6 @@ class GradeableComponentMark extends AbstractModel {
     protected $id = null;
     /** @property @var int Unique identifier for the component associated with this mark */
     protected $gc_id = null;
-    /** @property @var float Maximum value that the component can have */
-    protected $max_value = 0;
     /** @property @var int Order for marks to be shown in */
     protected $order = 1;
     /** @property @var float Points for this mark */
@@ -23,6 +21,8 @@ class GradeableComponentMark extends AbstractModel {
     protected $note = "";
     /** @property @var bool This person earned this mark*/
     protected $has_mark = false;
+    /** @property @var bool What the database says about if this person earned this mark*/
+    protected $original_has_mark = false;
 
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
@@ -35,17 +35,40 @@ class GradeableComponentMark extends AbstractModel {
         $this->order = $details['gcm_order'];
         $this->note = $details['gcm_note'];
         if (isset($details['gcm_has_mark']) && $details['gcm_has_mark'] !== null) {
-            $has_mark = true;
+            $this->has_mark = true;
+            $this->original_has_mark = true;
+        }
+    }
+
+    public function save() {
+        if($this->id === null) {
+            return $this->core->getQueries()->createGradeableComponentMark($this);
+        } else {
+            $this->core->getQueries()->updateGradeableComponentMark($this);
         }
     }
 
     public function saveData($gd_id, $gc_id) {
-        if ($this->modified) {
-        	if ($this->has_mark) {
-                $this->core->getQueries()->insertGradeableCompnentMarkData($gd_id, $gc_id, $this);
-        	} else {
-        		$this->core->getQueries()->deleteGradeableComponentMarkData($gd_id, $gc_id, $this);
-        	}
+        if($this->modified){
+            if($this->has_mark != $this->original_has_mark) {
+            	if ($this->has_mark) {
+                    $this->core->getQueries()->insertGradeableComponentMarkData($gd_id, $gc_id, $this);
+            	} else {
+            		$this->core->getQueries()->deleteGradeableComponentMarkData($gd_id, $gc_id, $this);
+            	}
+            }
         }
+    }
+
+    public function setNote($temp_note) {
+        $this->note = urlencode($temp_note);
+    }
+
+    public function getNoteNoDecode(){
+        return ($this->note);
+    }
+
+    public function getNote() {
+        return(urldecode($this->note));
     }
 }
