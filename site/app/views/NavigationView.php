@@ -518,10 +518,41 @@ HTML;
                 // Team management button, only visible on team assignments
                 $gradeable_team_range = '';
                 $admin_team_list = '';
-                if (($g_data->isTeamAssignment()) ){ //&& (($title == "OPEN") || ($title == "BETA"))) {
+                if (($g_data->isTeamAssignment()) ) {
+                    if ($g_data->getTeam() === null) {
+                        if ($date->format('Y-m-d H:i:s') < $g_data->getTeamLockDate()->format('Y-m-d H:i:s')) {
+                            $button_type = 'btn-primary';
+                            $display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$g_data->getTeamLockDate()->format("m/d/Y{$time}")})</span>";
+                        }
+                        else {
+                            $button_type = 'btn-danger';
+                            $display_date = '';
+                        }
+                        $button_text = 'CREATE TEAM';
+                        $teams = $this->core->getQueries()->getTeamsByGradeableId($g_data->getId());
+                        foreach($teams as $t) {
+                            if ($t->sentInvite($this->core->getUser()->getId())) {
+                                $button_text = 'CREATE/JOIN TEAM';
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        if ($date->format('Y-m-d H:i:s') < $g_data->getTeamLockDate()->format('Y-m-d H:i:s')) {
+                            $button_type = 'btn-primary';
+                            $display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$g_data->getTeamLockDate()->format("m/d/Y{$time}")})</span>";
+                            $button_text = 'MANAGE TEAM';
+                        }
+                        else {
+                            $button_type = 'btn-default';
+                            $display_date = '';
+                            $button_text = 'VIEW TEAM';
+                        }
+                    }
                     $gradeable_team_range = <<<HTML
-                <a class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable, 'page' => 'team'))}"> MANAGE TEAM
-                </a>
+                <a class="btn {$button_type}" style="width:100%;"
+                href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable, 'page' => 'team'))}">
+                {$button_text}{$display_date}
 HTML;
                 }
                     // View teams button, only visible to instructors on team assignments
