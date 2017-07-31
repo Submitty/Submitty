@@ -1550,12 +1550,8 @@
 			$dp = inst.dpDiv;
 		var tp_inst = this._get(inst, 'timepicker');
 		selectLocalTimezone(tp_inst);
-		// var now = new Date();
-		// this._setTime(inst, now);
-
 		var now = new Date();
-		var utcNow = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-		this._setTime(inst, utcNow);
+		this._setTime(inst, now);
 		this._setDate(inst, now);
 		this._base_gotoToday(id);
 	};
