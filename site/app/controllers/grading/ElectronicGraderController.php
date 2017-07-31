@@ -431,7 +431,6 @@ class ElectronicGraderController extends AbstractController {
                     }
                 }
 
-
                 if($gradeable->getGdId() == null) {
                     $gradeable->saveData2();
                 }

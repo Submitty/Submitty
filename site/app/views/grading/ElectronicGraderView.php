@@ -1155,6 +1155,7 @@ HTML;
     }
 
     function cancelMark(num, gradeable_id, user_id, gc_id) {
+        //removes the new marks first
         var arr_length = $('tr[name=mark_'+num+']').length;
         for (var i = 0; i < arr_length; i++) {
             var current_row = $('#mark_id-'+num+'-'+i);
@@ -1163,6 +1164,7 @@ HTML;
                 current_row.remove();
             }
         }
+        //gets the data in the database and applys it back
         var arr_length = $('tr[name=mark_'+num+']').length;
         $.ajax({
             type: "POST",
@@ -1175,9 +1177,25 @@ HTML;
             success: function(data) {
                 console.log("success");
                 data = JSON.parse(data);
-                alert(JSON.stringify(data['data']));
                 for (var x = 0; x < arr_length; x++) {
-
+                    current_row = $('#mark_id-'+num+'-'+x);
+                    var is_selected = false;
+                    if (data['data'][x]['has_mark'] === true) {
+                        is_selected = true;
+                    } else {
+                        is_selected = false;
+                    }
+                    current_row.find('input[name=mark_points_'+num+'_'+x+']').val(data['data'][x]['score']);
+                    current_row.find('textarea[name=mark_text_'+num+'_'+x+']').val(data['data'][x]['note']);
+                    if (is_selected === true) {
+                        if (current_row.find('i[name=mark_icon_'+num+'_'+x+']')[0].classList.contains('fa-square-o')) {
+                            current_row.find('i[name=mark_icon_'+num+'_'+x+']').toggleClass("fa-square-o fa-square");
+                        }
+                    } else {
+                        if (current_row.find('i[name=mark_icon_'+num+'_'+x+']')[0].classList.contains('fa-square')) {
+                            current_row.find('i[name=mark_icon_'+num+'_'+x+']').toggleClass("fa-square-o fa-square");
+                        }
+                    }
                 }
             },
             error: function() {
