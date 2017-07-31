@@ -754,13 +754,13 @@ HTML;
                 $return .= <<<HTML
     <div class="sub">
 HTML;
-                $num_testcases = 0;
+                $num_visible_testcases = 0;
                 foreach ($gradeable->getTestcases() as $testcase) {
                     if ($testcase->viewTestcase()) {
-                        $num_testcases++;
+                        $num_visible_testcases++;
                     }
                 }
-                if ($num_testcases > 0) {
+                if ($num_visible_testcases > 0) {
                     $return .= <<<HTML
         <h4>Results</h4>
 HTML;
