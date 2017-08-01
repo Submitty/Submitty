@@ -54,7 +54,7 @@ HTML;
      */
     public function showGradeable($gradeable, $late_days_use, $extensions) {
         $return = "";
-        if($extensions != 0){
+        if($extensions > 0){
             $return .= <<<HTML
 <div class="content">
     <h4>You have a {$extensions} day extension for this homework</h4>

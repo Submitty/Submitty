@@ -110,8 +110,7 @@ class SubmissionController extends AbstractController {
                         $extensions = $late_days['extensions'];
                     }
                     $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
-                    $late_days_use = $days_late - $extensions;
-                    $late_days_use = ($late_days_use < 0) ? 0 : $late_days_use;
+                    $late_days_use = max(0, $days_late - $extensions);
                     if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
                         $gradeable->updateUserViewedDate();
                     }
