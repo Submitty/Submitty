@@ -54,7 +54,9 @@ HTML;
     public function showGradeable($gradeable, $days_late) {
         // hiding entire page if user is not a grader and student cannot view
         if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
-            return "";
+            $message = "Students cannot view that gradeable.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();

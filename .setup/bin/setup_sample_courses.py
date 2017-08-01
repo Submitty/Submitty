@@ -1081,6 +1081,14 @@ class Gradeable(object):
                 self.peer_grading = gradeable['eg_peer_grading'] is False
             if 'eg_use_ta_grading' in gradeable:
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
+            if 'eg_student_view' in gradeable:
+                self.student_view = gradeable['eg_student_view'] is True
+            if 'eg_student_submit' in gradeable:
+                self.student_submit = gradeable['eg_student_submit'] is True
+            if 'eg_student_download' in gradeable:
+                self.student_download = gradeable['eg_student_download'] is True
+            if 'eg_student_any_version' in gradeable:
+                self.student_any_version = gradeable['eg_student_any_version'] is True
             if 'eg_late_days' in gradeable:
                 self.late_days = max(0, int(gradeable['eg_late_days']))
             if 'eg_precision' in gradeable:

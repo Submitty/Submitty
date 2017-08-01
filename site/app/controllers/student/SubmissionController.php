@@ -447,7 +447,7 @@ class SubmissionController extends AbstractController {
         }
 
         // if split_pdf/gradeable_id/timestamp directory is now empty, delete that directory
-        $timestamp = substr($path, 0, strpos($path, '/'));
+        $timestamp = substr($path, 0, strpos($path, DIRECTORY_SEPARATOR));
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
@@ -566,7 +566,7 @@ class SubmissionController extends AbstractController {
         }
 
         // delete timestamp folder if empty
-        $timestamp = substr($path, 0, strpos($path, '/'));
+        $timestamp = substr($path, 0, strpos($path, DIRECTORY_SEPARATOR));
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
