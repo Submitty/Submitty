@@ -763,7 +763,13 @@ HTML;
                 $return .= <<<HTML
     <div class="sub">
 HTML;
-                if (count($gradeable->getTestcases()) > 0) {
+                $num_visible_testcases = 0;
+                foreach ($gradeable->getTestcases() as $testcase) {
+                    if ($testcase->viewTestcase()) {
+                        $num_visible_testcases++;
+                    }
+                }
+                if ($num_visible_testcases > 0) {
                     $return .= <<<HTML
         <h4>Results</h4>
 HTML;

@@ -13,7 +13,23 @@ class AutogradingView extends AbstractView {
         $current_version = $gradeable->getCurrentVersion();
         $popup_css_file = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
         $has_badges = false;
-        if ($current_version->getNonHiddenTotal() > 0) {
+        $num_visible_testcases = 0;
+        foreach ($gradeable->getTestcases() as $testcase) {
+            if ($testcase->viewTestcase()) {
+                $num_visible_testcases++;
+            }
+        }
+        $display_total = ($num_visible_testcases > 1) ? "block" : "none";
+        if ($num_visible_testcases == 1) {
+            $return.= <<<HTML
+<script type="text/javascript">
+    $(document).ready(function() {
+        toggleDiv('testcase_0');
+    });
+</script>
+HTML;
+        }
+        if ($current_version->getNonHiddenTotal() >= 0) {
             $has_badges = true;
             if ($current_version->getNonHiddenTotal() >= $gradeable->getNormalPoints()) {
                 $background = "green-background";
@@ -26,7 +42,7 @@ class AutogradingView extends AbstractView {
             }
             if (($current_version->getNonHiddenNonExtraCredit() + $current_version->getHiddenNonExtraCredit() > $gradeable->getNormalPoints()) && $show_hidden) {
                 $return .= <<<HTML
-<div class="box">
+<div class="box" style="display: {$display_total};">
     <div class="box-title">
         <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
         <h4>Total (No Hidden Points)</h4>
@@ -44,7 +60,7 @@ HTML;
                     $background = "red-background";
                 }
                 $return .= <<<HTML
-<div class="box" style="background-color:#D3D3D3;">
+<div class="box" style="background-color:#D3D3D3;" style="display: {$display_total};">
     <div class="box-title">
         <span class="badge {$background}">{$all_autograder_points} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</span>
         <h4>Total (With Hidden Points)</h4>
@@ -54,7 +70,7 @@ HTML;
             }
             else {
                 $return .= <<<HTML
-<div class="box">
+<div class="box" style="display: {$display_total};">
     <div class="box-title">
         <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
         <h4>Total</h4>
@@ -76,7 +92,7 @@ HTML;
 HTML;
         }
         $count = 0;
-        $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
+        $display_box = ($num_visible_testcases == 0) ? "block" : "none";
         foreach ($gradeable->getTestcases() as $testcase) {
             if (!$testcase->viewTestcase()) {
                 continue;
