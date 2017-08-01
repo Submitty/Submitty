@@ -336,7 +336,7 @@ class Gradeable extends AbstractModel {
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
+                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
