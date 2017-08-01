@@ -195,14 +195,14 @@ HTML;
                     //
                     foreach((array)$tester as $currImage){
                         $currImageName = $currImage["image_name"];
-                        $imgPath = $this->core->getConfig()->getCoursePath() . "/test_input/" . $gradeable->getName() . "/".$currImageName;
+                        $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "test_input", $gradeable->getName(), $currImageName);
                         $content_type = FileUtils::getContentType($imgPath);
                         if (substr($content_type, 0, 5) === "image") {
-                           // Read image path, convert to base64 encoding
-                           $textBoxImageData = base64_encode(file_get_contents($imgPath));
-                           // Format the image SRC:  data:{mime};base64,{data};
-                           $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
-                           // insert the sample image data
+                            // Read image path, convert to base64 encoding
+                            $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                            // Format the image SRC:  data:{mime};base64,{data};
+                            $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
+                            // insert the sample image data
 
                             if(isset($currImage['image_height']) && (int)$currImage['image_height'] > 0){
                                 $image_height = $currImage['image_height'];
@@ -212,16 +212,16 @@ HTML;
                                 $image_width = $currImage['image_width'];
                             }
 
-                           $image_display = '<img src="'.$textBoximagesrc.'"';
+                            $image_display = '<img src="'.$textBoximagesrc.'"';
 
-                           if($image_width > 0){
-                            $image_display .= ' width="'.$image_width.'"';
-                           }
-                           if($image_height > 0){
-                            $image_display .= ' height="'.$image_height.'"';
-                           }
-                           $image_display .= ">";
-                           $return .= $image_display;
+                            if($image_width > 0){
+                                $image_display .= ' width="'.$image_width.'"';
+                            }
+                            if($image_height > 0){
+                                $image_display .= ' height="'.$image_height.'"';
+                            }
+                            $image_display .= ">";
+                            $return .= $image_display;
                         }
                     }
 
@@ -512,7 +512,7 @@ HTML;
                         $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
                         $path_full = str_replace("_cover.pdf", ".pdf", $path);
                         $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full;
-                        $count_array[$count] = $timestamp."/".$filename_full;
+                        $count_array[$count] = FileUtils::joinPaths($timestamp, $filename_full);
                         $return .= <<<HTML
             <tr class="tr tr-vertically-centered">
                 <td>{$count}</td>

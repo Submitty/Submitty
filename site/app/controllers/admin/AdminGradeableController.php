@@ -92,6 +92,11 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "edit", $ini_data, $data);
     }
 
+    // check whether radio button's value is 'true'
+    private function isRadioButtonTrue($name) {
+        return isset($_POST[$name]) && $_POST[$name] === 'true';
+    }
+
     //if $edit_gradeable === 0 then it uploads the gradeable to the database
     //if $edit_gradeable === 1 then it updates the gradeable to the database
     private function modifyGradeable($edit_gradeable) {
@@ -128,22 +133,16 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setIsRepository(false);
             $gradeable->setSubdirectory("");
             $gradeable->setPointPrecision(floatval($_POST['point_precision']));
-            $is_team_assignment = (isset($_POST['team_assignment']) && $_POST['team_assignment']=='yes') ? true : false;
-            $gradeable->setTeamAssignment($is_team_assignment);
+            $gradeable->setTeamAssignment($this->isRadioButtonTrue('team_assignment'));
             $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
             $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
-            $is_ta_grading = (isset($_POST['ta_grading']) && $_POST['ta_grading']=='true') ? true : false;
-            $gradeable->setTaGrading($is_ta_grading);
-            $student_view = (isset($_POST['student_view']) && $_POST['student_view']=='true') ? true : false;
-            $gradeable->setStudentView($student_view);
-            $student_submit = (isset($_POST['student_submit']) && $_POST['student_submit']=='true') ? true : false;
-            $gradeable->setStudentSubmit($student_submit);
-            $student_download = (isset($_POST['student_download']) && $_POST['student_download']=='true') ? true : false;
-            $gradeable->setStudentDownload($student_download);
-            $student_any_version = (isset($_POST['student_any_version']) && $_POST['student_any_version']=='true') ? true : false;
-            $gradeable->setStudentAnyVersion($student_any_version);
+            $gradeable->setTaGrading($this->isRadioButtonTrue('ta_grading'));
+            $gradeable->setStudentView($this->isRadioButtonTrue('student_view'));
+            $gradeable->setStudentSubmit($this->isRadioButtonTrue('student_submit'));
+            $gradeable->setStudentDownload($this->isRadioButtonTrue('student_download'));
+            $gradeable->setStudentAnyVersion($this->isRadioButtonTrue('student_any_version'));
             $gradeable->setConfigPath($_POST['config_path']);
-            $is_peer_grading = (isset($_POST['peer_grading']) && $_POST['peer_grading']=='yes') ? true : false;
+            $is_peer_grading = $this->isRadioButtonTrue('peer_grading');
             $gradeable->setPeerGrading($is_peer_grading);
             if ($is_peer_grading) { $gradeable->setPeerGradeSet($_POST['peer_grade_set']); }
         }

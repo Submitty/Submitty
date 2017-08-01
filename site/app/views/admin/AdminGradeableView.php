@@ -52,11 +52,11 @@ class AdminGradeableView extends AbstractView {
 		$g_instructions_url = "";
 		$g_gradeable_type = 0;
 		$is_repository = false;
-		$use_ta_grading=false;
-        $student_view=true;
-        $student_submit=true;
-        $student_download=false;
-        $student_any_version=true;
+		$use_ta_grading = false;
+        $student_view = true;
+        $student_submit = true;
+        $student_download = false;
+        $student_any_version = true;
         $old_questions = array();
         $g_min_grading_group = 0;
         $g_overall_ta_instructions = "";
@@ -348,12 +348,12 @@ HTML;
                 <br />
                 Is this a team assignment?
                 <fieldset>
-                    <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes"
+                    <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="true"
 HTML;
                 if (($type_of_action === "edit" || $type_of_action === "add_template") && $team_yes_checked) { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
                 > Yes
-                    <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="no"
+                    <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="false"
 HTML;
                 if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
@@ -476,13 +476,13 @@ HTML;
                 
                 <div id="rubric_questions" class="bool_val rubric_questions">
                 Will this assignment have peer grading?: 
-                <input type="radio" id="peer_yes_radio" name="peer_grading" value="yes" class="peer_yes"
+                <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes"
 HTML;
         $display_peer_checkboxes = "";
                 if(($type_of_action === "edit" || $type_of_action === "add_template") && $peer_yes_checked) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
  /> Yes
-                <input type="radio" id="peer_no_radio" name="peer_grading" value="no" class="peer_no"
+                <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no"
 HTML;
                 if ((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; $display_peer_checkboxes='style="display:none"'; }
         $html_output .= <<<HTML
@@ -1195,16 +1195,16 @@ function createCrossBrowserJSDate(val){
 
         $('.gradeable_type_options').hide();
         
-        if ($('input[name=gradeable_type]').is(':checked')){
-            $('input[name=gradeable_type]').each(function(){
+        if ($('input[name="gradeable_type"]').is(':checked')){
+            $('input[name="gradeable_type"]').each(function(){
                 if(!($(this).is(':checked')) && ({$edit})){
                     $(this).attr("disabled",true);
                 }
             });
         }
 
-        if ($('input[name=team_assignment]').is(':checked')){
-            $('input[name=team_assignment]').each(function(){
+        if ($('input[name="team_assignment"]').is(':checked')){
+            $('input[name="team_assignment"]').each(function(){
                 if(!($(this).is(':checked')) && ({$edit})){
                     $(this).attr("disabled",true);
                 }
@@ -1230,7 +1230,7 @@ function createCrossBrowserJSDate(val){
             $('.peer_input').hide();
             $('#peer_averaging_scheme').hide();
             if ($(this).is(':checked')) {
-                if($(this).val() == 'yes') {
+                if($(this).val() == 'true') {
                     $('.peer_input').show();
                     $('#peer_averaging_scheme').show();
                 }
@@ -1278,15 +1278,15 @@ function createCrossBrowserJSDate(val){
         });
         
         if({$default_late_days} != -1){
-            $('input[name=eg_late_days]').val('{$default_late_days}');
+            $('input[name="eg_late_days"]').val('{$default_late_days}');
         }
         
         if($('#radio_electronic_file').is(':checked')){ 
             
-            $('input[name=subdirectory]').val('{$electronic_gradeable['eg_subdirectory']}');
-            $('input[name=config_path]').val('{$electronic_gradeable['eg_config_path']}');
-            $('input[name=eg_late_days]').val('{$electronic_gradeable['eg_late_days']}');
-            $('input[name=point_precision]').val('{$electronic_gradeable['eg_precision']}');
+            $('input[name="subdirectory"]').val('{$electronic_gradeable['eg_subdirectory']}');
+            $('input[name="config_path"]').val('{$electronic_gradeable['eg_config_path']}');
+            $('input[name="eg_late_days"]').val('{$electronic_gradeable['eg_late_days']}');
+            $('input[name="point_precision"]').val('{$electronic_gradeable['eg_precision']}');
             $('#ta_instructions_id').hide();
             
             if($('#repository_radio').is(':checked')){
@@ -1301,8 +1301,8 @@ function createCrossBrowserJSDate(val){
             }
 
             if($('#team_yes_radio').is(':checked')){
-                $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
-                $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                $('input[name="eg_max_team_size"]').val('{$electronic_gradeable['eg_max_team_size']}');
+                $('input[name="date_team_lock"]').val('{$electronic_gradeable['eg_team_lock_date']}');
                 $('#team_yes').show();
             }
             else {
@@ -1335,14 +1335,14 @@ function createCrossBrowserJSDate(val){
             $('#grading_questions').show();
         }
         if({$edit}){
-            $('input[name=gradeable_id]').attr('readonly', true);
+            $('input[name="gradeable_id"]').attr('readonly', true);
         }
 
         $('input:radio[name="team_assignment"]').change(
     function(){
         if($('#team_yes_radio').is(':checked')){
-            $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
-            $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+            $('input[name="eg_max_team_size"]').val('{$electronic_gradeable['eg_max_team_size']}');
+            $('input[name="date_team_lock"]').val('{$electronic_gradeable['eg_team_lock_date']}');
             $('#team_yes').show();
         }
         else {
@@ -1371,8 +1371,8 @@ function createCrossBrowserJSDate(val){
                 }
 
                 if($('#team_yes_radio').is(':checked')){
-                    $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
-                    $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                    $('input[name="eg_max_team_size"]').val('{$electronic_gradeable['eg_max_team_size']}');
+                    $('input[name="date_team_lock"]').val('{$electronic_gradeable['eg_team_lock_date']}');
                     $('#team_yes').show();
                 }
                 else {
