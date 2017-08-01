@@ -136,7 +136,9 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(getrusage);
     ALLOW_SYSCALL(move_pages);
     ALLOW_SYSCALL(prlimit64);
+#ifdef __NR_seccomp
     ALLOW_SYSCALL(seccomp);
+#endif
     ALLOW_SYSCALL(setrlimit);
     ALLOW_SYSCALL(ugetrlimit);
     ALLOW_SYSCALL(ulimit);

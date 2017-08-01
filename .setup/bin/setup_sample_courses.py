@@ -163,7 +163,7 @@ def main():
     with open(list_of_courses_file, "w") as courses_file:
         courses_file.write("")
         for course_id in courses.keys():
-            courses_file.write('<a href="http://192.168.56.101/index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
+            courses_file.write('<a href="'+args.submission_url+'index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
             courses_file.write('<br />')
 
     for course_id in courses.keys():
@@ -390,6 +390,7 @@ def parse_args():
     parser.add_argument("--users_path", default=os.path.join(SETUP_DATA_PATH, "users"),
                         help="Path to folder that contains .yml files to use for user creation. Defaults to "
                              "../data/users")
+    parser.add_argument("--submission_url", type=str, default="",help="top level url for the website")
     parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
                         help="Path to the folder that contains .yml files to use for course creation. Defaults to "
                              "../data/courses")
