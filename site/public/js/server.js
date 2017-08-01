@@ -119,6 +119,60 @@ function newClassListForm() {
     $('[name="upload"]', form).val(null);
 }
 
+function adminTeamForm(new_team, who_id, section, members, max_members) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#admin-team-form");
+    form.css("display", "block");
+
+    var title_div = $("#admin-team-title");
+    title_div.empty();
+    if (new_team) {
+        title_div.append('Create New Team: ' + who_id);
+    }
+    else {
+        title_div.append('Edit Team: ' + who_id);
+    }
+
+    $('[name="section"] option[value="' + section + '"]', form).prop('selected', true);
+
+    var members_div = $("#admin-team-members");
+    members_div.empty();
+    members_div.append('Team Member IDs:<br />');
+
+    if (new_team) {
+        members_div.append('<input class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
+        for (var i = 1; i < max_members; i++) {
+            members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+        }
+    }
+    else {
+        for (var i = 0; i < members.length; i++) {
+            members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
+                <i id="remove_member_'+i+'" class="fa fa-times" onclick="removeTeamMemberInput('+i+');" style="color:red; cursor:pointer;" aria-hidden="true"></i><br />');
+        }
+        for (var i = members.length; i < max_members; i++) {
+            members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+        }
+    }
+
+    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+max_members+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+        Add More Users</span>');
+}
+
+function removeTeamMemberInput(i) {
+    var form = $("#admin-team-form");
+    $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $("#remove_member_"+i).remove();
+}
+
+function addTeamMemberInput(old, i) {
+    old.remove()
+    var members_div = $("#admin-team-members");
+    members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+        Add More Users</span>');
+}
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details

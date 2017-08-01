@@ -1260,7 +1260,7 @@ WHERE gcm_id=?", $params);
             FROM teams
           ) AS t ON gt.team_id=t.team_id
           WHERE g_id=?
-          ORDER BY user_id",
+          ORDER BY team_id, user_id",
           array($g_id));
 
         $team_rows = array();

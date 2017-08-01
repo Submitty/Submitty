@@ -92,7 +92,7 @@ class Team extends AbstractModel {
      * @return integer
     */
     public function getSize() {
-        return count($this->member_user_ids) + count($this->invited_user_ids);
+        return count($this->member_user_ids);
     }
 
     /**

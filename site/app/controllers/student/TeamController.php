@@ -114,7 +114,7 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if ($team->getSize() >= $gradeable->getMaxTeamSize()) {
+        if (($team->getSize() + count($team->getInvitations())) >= $gradeable->getMaxTeamSize()) {
             $this->core->addErrorMessage("Maximum team size is {$gradeable->getMaxTeamSize()}");
             $this->core->redirect($return_url);
         }

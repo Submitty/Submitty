@@ -171,6 +171,7 @@ class ElectronicGraderController extends AbstractController {
 
         $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
 
+        $empty_teams = array();
         if ($gradeable->isTeamAssignment()) {
             // Only give getGradeables one User ID per team
             $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
@@ -181,6 +182,9 @@ class ElectronicGraderController extends AbstractController {
                                             (isset($_GET['view']) && $_GET['view'] === "all") || 
                                             (count($sections) === 0 && $this->core->getUser()->accessAdmin()))) {
                     $student_ids[] = $team->getMembers()[0];
+                }
+                if ($team->getSize() === 0 && $this->core->getUser()->accessAdmin()) {
+                    $empty_teams[] = $team;
                 }
             }
         }
@@ -235,8 +239,22 @@ class ElectronicGraderController extends AbstractController {
                 $rows = array_merge($rows, $individual_rows[""]);
             }
         }
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $empty_teams);
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders);
+        if ($gradeable->isTeamAssignment() && $this->core->getUser()->accessAdmin()) {
+            if ($gradeable->isGradeByRegistration()) {
+                $all_sections = $this->core->getQueries()->getRegistrationSections();
+                $key = 'sections_registration_id';
+            }
+            else {
+                $all_sections = $this->core->getQueries()->getRotatingSections();
+                $key = 'sections_rotating_id';
+            }
+            foreach ($all_sections as $i => $section) {
+                $all_sections[$i] = $section[$key];
+            }
+            $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'adminTeamForm', $gradeable, $all_sections);
+        }
     }
 
     public function submitGrade() {
