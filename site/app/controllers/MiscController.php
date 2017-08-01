@@ -26,8 +26,8 @@ class MiscController extends AbstractController {
 
     // function to check that this is a valid access request
     private function checkValidAccess($is_zip) {
+        // only allow zip if it's a grader
         if ($is_zip) {
-            // only allow zip if it's a grader
             return ($this->core->getUser()->accessGrading());
         }
         // from this point on, is not a zip
@@ -45,96 +45,82 @@ class MiscController extends AbstractController {
             return false;
         }
 
+        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout");
+        if (!in_array($dir, $possible_directories)) {
+            return false;
+        }
+
         $course_path = $this->core->getConfig()->getCoursePath();
-        if ($dir === "config_upload") {
-            $check = FileUtils::joinPaths($course_path, "config_upload");
-            if (!Utils::startsWith($path, $check)) {
-                return false;
-            }
-            if (!file_exists($path)) {
-                return false;
-            }
+        $check = FileUtils::joinPaths($course_path, $dir);
+        if (!Utils::startsWith($path, $check)) {
+            return false;
+        }
+        if (!file_exists($path)) {
+            return false;
+        }
+
+        if ($dir === "config_upload" || $dir === "uploads") {
             return ($this->core->getUser()->accessAdmin());
         }
-        else if ($dir === "submissions" || $dir === "results" || $dir === "uploads") {
-            if (!file_exists($path)) {
+        else if ($dir === "submissions" || $dir === "results") {
+            // if instructor or grader, then it's okay
+            if ($this->core->getUser()->accessGrading()) {
+                return true;
+            }
+
+            // FIXME: need to make this work for peer grading
+
+            $current_user_id = $this->core->getUser()->getId();
+            // get the gradeable_id
+            $path_folder = FileUtils::joinPaths($course_path, $dir);
+            $path_rest = substr($path, strlen($path_folder)+1);
+            $path_gradeable_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
+            $path_rest = substr($path_rest, strlen($path_gradeable_id)+1);
+            $path_user_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
+            $path_rest = substr($path_rest, strlen($path_user_id)+1);
+            $path_version = intval(substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR)));
+
+            $path_gradeable = $this->core->getQueries()->getGradeable($path_gradeable_id, $path_user_id);
+            if ($path_gradeable === null) {
                 return false;
             }
-        }
-        else {
-            return false;
-        }
 
-        $access = false;
-        foreach (array('submissions', 'results', 'checkout', 'uploads') as $folder) {
-            if (Utils::startsWith($path, FileUtils::joinPaths($course_path, $folder))) {
-                $access = true;
-                break;
+            // if gradeable student view or download false, don't allow anything
+            if (!$path_gradeable->getStudentView() || !$path_gradeable->getStudentDownload()) {
+                return false;
             }
-        }
 
-        if(!$access) {
-            return false;
-        }
+            // make sure that version is active version if student any version is false
+            if (!$path_gradeable->getStudentAnyVersion() && $path_version !== $path_gradeable->getActiveVersion()) {
+                return false;
+            }
 
-        // logged in user has access to those files
-        // check that they are trying to access a directory that is theirs
-        // FIXME: need a different check for peer grading since the user_ids are not going to match
-        $current_user_id = $this->core->getUser()->getId();
-
-        // if instructor or grader, then it's okay
-        if ($this->core->getUser()->accessGrading()) {
+            // if team assignment, check that team id matches the team of the current user
+            if ($path_gradeable->isTeamAssignment()) {
+                $path_team_id = $path_user_id;
+                $current_team = $this->core->getQueries()->getTeamByGradeableAndUser($path_gradeable_id,$current_user_id);
+                if ($current_team === null) {
+                    return false;
+                }
+                $current_team_id = $current_team->getId();
+                if ($path_team_id != $current_team_id) {
+                    return false;
+                }
+            }
+            // else, just check that the user ids match
+            else {
+                if ($current_user_id != $path_user_id) {
+                    return false;
+                }
+            }
             return true;
         }
-
-        // get the gradeable_id
-        $path_folder = FileUtils::joinPaths($course_path, $dir);
-        $path_rest = substr($path, strlen($path_folder)+1);
-        $path_gradeable_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
-        $path_rest = substr($path_rest, strlen($path_gradeable_id)+1);
-        $path_user_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
-        $path_rest = substr($path_rest, strlen($path_user_id)+1);
-        $path_version = intval(substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR)));
-
-        $path_gradeable = $this->core->getQueries()->getGradeable($path_gradeable_id, $path_user_id);
-        if ($path_gradeable === null) {
-            return false;
-        }
-
-        // if gradeable is not view don't allow anything
-        if (!$path_gradeable->getStudentView() || !$path_gradeable->getStudentDownload()) {
-            return false;
-        }
-
-        // make sure that version is active version if any_version is not allowed
-        if (!$path_gradeable->getStudentAnyVersion() && $path_version !== $path_gradeable->getActiveVersion()) {
-            return false;
-        }
-
-        // if team assignment, check that team id matches the team of the current user
-        if ($path_gradeable->isTeamAssignment()) {
-            $path_team_id = $path_user_id;
-            $current_team = $this->core->getQueries()->getTeamByGradeableAndUser($path_gradeable_id,$current_user_id);
-            if ($current_team === null) {
-                return false;
-            }
-            $current_team_id = $current_team->getId();
-            if ($path_team_id != $current_team_id) {
-                return false;
-            }
-        }
-        // else, just check that the user ids match
         else {
-            if ($current_user_id != $path_user_id) {
-                return false;
-            }
-        }      
-
-        return true;
+            return false;
+        }
     }
 
     private function displayFile() {
-
         // security check
         if (!$this->checkValidAccess(false)) {
             $message = "You do not have access to that page.";
@@ -182,7 +168,6 @@ class MiscController extends AbstractController {
     }
 
     private function downloadZip() {
-
         // security check
         if (!$this->checkValidAccess(true)) {
             $message = "You do not have access to that page.";

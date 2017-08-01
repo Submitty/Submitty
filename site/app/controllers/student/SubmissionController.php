@@ -1035,6 +1035,13 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
 
+        if (!$this->core->getUser()->accessGrading() || !$gradeable->getStudentSubmit()) {
+            $msg = "Cannot submit for this assignment.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($url);
+            return array('error' => true, 'message' => $msg);
+        }
+
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $gradeable->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
