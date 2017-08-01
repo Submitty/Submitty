@@ -791,7 +791,7 @@ class Course(object):
                                 create_gradeable_submission(src, dst)
 
                 if gradeable.grade_start_date < NOW:
-                    if gradeable.grade_released_date < NOW or (random.random() < 0.5 and submitted):
+                    if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
