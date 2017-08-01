@@ -390,7 +390,7 @@ def parse_args():
     parser.add_argument("--users_path", default=os.path.join(SETUP_DATA_PATH, "users"),
                         help="Path to folder that contains .yml files to use for user creation. Defaults to "
                              "../data/users")
-    parser.add_argument("--submission_url", default="http://192.168.56.101/",help="top level url for the website")
+    parser.add_argument("--submission_url", type=str, default="",help="top level url for the website")
     parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
                         help="Path to the folder that contains .yml files to use for course creation. Defaults to "
                              "../data/courses")
