@@ -9,6 +9,7 @@ use app\controllers\admin\AdminGradeableController;
 use app\controllers\admin\ConfigurationController;
 use app\controllers\admin\UsersController;
 use app\controllers\admin\LateController;
+use app\controllers\admin\PlagiarismController;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\models\User;
@@ -40,6 +41,9 @@ class AdminController extends AbstractController {
                 break;
             case 'reports':
                 $controller = new ReportController($this->core);
+                break;
+            case 'plagiarism':
+                $controller = new PlagiarismController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
