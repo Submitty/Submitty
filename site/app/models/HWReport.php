@@ -112,7 +112,12 @@ class HWReport extends AbstractModel {
                             break;
                         }
                     }
-                    $temp_score = ($type === 0) ? $component->getMaxValue() : 0;
+                    if ($component->getMaxValue() < 0) {
+                        $temp_score = ($type === 0) ? 0 : $component->getMaxValue();
+                    } else {
+                        $temp_score = ($type === 0) ? $component->getMaxValue() : 0;
+                    }
+                    
                     foreach($component->getMarks() as $mark) {
                         if($mark->getHasMark()) {
                             $temp_score += $mark->getPoints();
@@ -125,16 +130,28 @@ class HWReport extends AbstractModel {
                         $temp_notes .= $component->getScore() . " : " . $component->getComment() . $nl;
                     }
 
-                    if($type === 0) {
-                        if($temp_score < 0) {
-                            $temp_score = 0;
+                    if ($component->getMaxValue() < 0) {
+                        if ($type === 0) {
+                            if ($temp_score < $component->getMaxValue()) {
+                                $temp_score = $component->getMaxValue();
+                            }
+                        } else {
+                            if ($temp_score > 0) {
+                                $temp_score = 0;
+                            }
                         }
                     } else {
-                        if($temp_score > $component->getMaxValue()) {
-                            $temp_score = $component->getMaxValue();
+                        if($type === 0) {
+                            if($temp_score < 0) {
+                                $temp_score = 0;
+                            }
+                        } else {
+                            if($temp_score > $component->getMaxValue()) {
+                                $temp_score = $component->getMaxValue();
+                            }
                         }
                     }
-
+                    
                     $student_output_text .= $component->getTitle() . "[" . $temp_score . "/" . $component->getMaxValue() . "] ";
                     if ($component->getGrader() === null) {
                         $student_output_text .= $nl;
