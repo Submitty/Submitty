@@ -755,10 +755,6 @@ HTML;
                 </tr>
 HTML;
 
-            $min_val = (intval($question->getMaxValue()) > 0) ? 0 : intval($question->getMaxValue());
-            $max_val = (intval($question->getMaxValue()) > 0) ? intval($question->getMaxValue()) : 0;
-
-
             //gets the initial point value and text
             $initial_text = "";
             $first_text = true;
@@ -1078,6 +1074,8 @@ HTML;
         else {
             totalD = parseInt($('[name=mark_'+num+']').last().attr('id').split('-')[2]);
         }
+
+        //updates the remaining marks's info
         var current_num = parseInt(last_num);
         for (var i = current_num + 1; i <= totalD; i++) {
             var new_num = i-1;
@@ -1091,6 +1089,7 @@ HTML;
         }
     }
 
+    //check if the first mark (Full/no credit) should be selected
     function checkMarks(question_num) {
         question_num = parseInt(question_num);
         var mark_table = $('#extra-'+question_num);
@@ -1130,10 +1129,11 @@ HTML;
         }        
     }
 
+    //closes all the questions except the one being opened
     function openClose(row_id, num_questions) {
         var row_num = parseInt(row_id);
         var total_num = parseInt(num_questions);
-        //-2 means general comment
+        //-2 means general comment, else open the row_id with the number
         general_comment = document.getElementById('done-general');
         if(row_num === -2) {
             general_comment.style.display = '';
@@ -1210,6 +1210,7 @@ HTML;
                 'gradeable_component_id' : gc_id
             },
             success: function(data) {
+                //if success reinput all the data back into the form
                 console.log("success");
                 data = JSON.parse(data);
                 for (var x = 0; x < arr_length; x++) {
@@ -1291,11 +1292,10 @@ HTML;
                 }
                 index++;
             }
-            if (found === true) {
+            if (found === true) { //if nothing was found, assumes it needs to save the gradeable comment
                 var gradeable_component_id = parseInt($('#icon-' + index)[0].dataset.question_id);
                 saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id);
-            } else
-            {
+            } else {
                 saveMark(-3, gradeable_id, user_id, active_version);
             }
         } else if (num === -1) {

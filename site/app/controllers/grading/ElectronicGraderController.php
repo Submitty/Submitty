@@ -421,7 +421,7 @@ class ElectronicGraderController extends AbstractController {
                 continue;
             }
             else {
-                //checks if a mark has changed
+                //checks if a component has changed, i.e. a mark has been selected or unselected since last time
                 $index = 0;
                 $temp_mark_selected = false;
                 foreach ($component->getMarks() as $mark) {

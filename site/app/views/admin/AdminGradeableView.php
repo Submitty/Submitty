@@ -479,7 +479,7 @@ HTML;
         </div>
 HTML;
     }
-    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0) {
+    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
         $type_deduct = 0;
         $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
         foreach ($marks as $mark) {

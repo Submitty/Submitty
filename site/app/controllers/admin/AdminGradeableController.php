@@ -131,6 +131,9 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setPointPrecision(floatval($_POST['point_precision']));
             $is_ta_grading = (isset($_POST['ta_grading']) && $_POST['ta_grading']=='true') ? true : false;
             $gradeable->setTaGrading($is_ta_grading);
+            if($is_ta_grading === false) { // sets that in order to not break a database constraint
+                $gradeable->setGradeStartDate(new \DateTime($_POST['date_released'], $this->core->getConfig()->getTimezone()));
+            }
             $gradeable->setConfigPath($_POST['config_path']);
             $is_peer_grading = (isset($_POST['peer_grading']) && $_POST['peer_grading']=='yes') ? true : false;
             $gradeable->setPeerGrading($is_peer_grading);
