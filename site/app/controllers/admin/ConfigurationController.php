@@ -32,7 +32,9 @@ class ConfigurationController extends AbstractController {
             'upload_message'            => $this->core->getConfig()->getUploadMessage(),
             'keep_previous_files'       => $this->core->getConfig()->keepPreviousFiles(),
             'display_iris_grades_summary' => $this->core->getConfig()->displayIrisGradesSummary(),
-            'display_custom_message'      => $this->core->getConfig()->displayCustomMessage()
+            'display_custom_message'      => $this->core->getConfig()->displayCustomMessage(),
+            'vcs_base_url'              => $this->core->getConfig()->getVcsBaseUrl(),
+            'vcs_type'                  => $this->core->getConfig()->getVcsType()
         );
 
         foreach (array('course_name', 'upload_message') as $key) {
@@ -85,6 +87,10 @@ class ConfigurationController extends AbstractController {
             $_POST[$key] = (isset($_POST[$key]) && $_POST[$key] == "true") ? true : false;
         }
 
+        if (!isset($_POST['vcs_type'])) {
+            $_POST['vcs_type'] = "";
+        }
+
         $save_array = array(
             'hidden_details' => $this->core->getConfig()->getHiddenDetails(),
             'course_details' => array(
@@ -96,7 +102,9 @@ class ConfigurationController extends AbstractController {
                 'upload_message'            => nl2br($_POST['upload_message']),
                 'keep_previous_files'       => $_POST['keep_previous_files'],
                 'display_iris_grades_summary' => $_POST['display_iris_grades_summary'],
-                'display_custom_message'      => $_POST['display_custom_message']
+                'display_custom_message'      => $_POST['display_custom_message'],
+                'vcs_base_url'              => $_POST['vcs_base_url'],
+                'vcs_type'                  => $_POST['vcs_type']
             )
         );
         

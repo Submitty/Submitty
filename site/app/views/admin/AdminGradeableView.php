@@ -375,11 +375,29 @@ HTML;
                 <br /> <br />
                 
 
-                Are students uploading files or commiting code to an SVN repository?<br />
+                Are students uploading files or submitting to a VCS repository?<br />
                 <fieldset>
-                    <input type="radio" class="upload_file" name="upload_type" value="Upload File" checked> Upload File(s)
-                    
+
+                    <input type="radio" id="file_radio" class="upload_file" name="upload_type" value="Upload File"
+HTML;
+                    if ($is_repository === false) { $html_output .= ' checked="checked"'; }
+
+                $html_output .= <<<HTML
+                    > Upload File(s)
+
+                    <input type="radio" id="repository_radio" class="upload_repo" name="upload_type" value="Repository"
+HTML;
+                    if ($is_repository === true) { $html_output .= ' checked="checked"'; }
+                $html_output .= <<<HTML
+                    > VCS Repository
+                      
                     <div class="upload_type upload_file" id="upload_file">
+                    </div>
+                     
+                    <div class="upload_type upload_repo" id="repository">
+                        <br />
+                        Which subdirectory of the repository?<input style='width: 227px' type='text' name='subdirectory' value="src" />
+                        <br />
                     </div>
                     
                 </fieldset>

@@ -39,7 +39,7 @@ class ConfigurationView extends AbstractView {
         <div class="option">
             <div class="option-input"><input type="text" name="default_student_late_days" value="{$fields['default_student_late_days']}" /></div>
             <div class="option-desc">
-              <div class="option-title">Initial Allowed Late Days (Per Student, Per Semester)</div>
+                <div class="option-title">Initial Allowed Late Days (Per Student, Per Semester)</div>
                 <div class="option-alt">Number of allowed late days given to each student when they are added to
                                         the course.  Additional late days can be granted (e.g., as incentives)
                                         using the "Late Days Allowed" form.</div>
@@ -96,7 +96,25 @@ class ConfigurationView extends AbstractView {
             </div>
         </div>
 
+        <div class="option">
+            <div class="option-input"><input type="text" name="vcs_base_url" value="{$fields['vcs_base_url']}" /></div>
+            <div class="option-desc">
+                <div class="option-title">VCS Base URL</div>
+                <div class="option-alt">Base URL if students are submitting via VCS repository.</div>
+            </div>
+        </div>
 
+        <div class="option">
+            <div class="option-input">
+                <input type="radio" name="vcs_type" value="git"/> Git
+                <input type="radio" name="vcs_type" value="svn"/> SVN
+                <input type="radio" name="vcs_type" value="mer"/> Mercurial
+            </div>
+            <div class="option-desc">
+                <div class="option-title">VCS Type</div>
+                <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
+            </div>
+        </div>
 
     </div>
     <div class="post-panel-btn">
@@ -106,6 +124,14 @@ class ConfigurationView extends AbstractView {
     </div>
     </form>
 </div>
+HTML;
+
+    $return .= <<<HTML
+<script type="text/javascript">
+    $(document).ready(function() {
+        
+    });
+</script>
 HTML;
 
     }
