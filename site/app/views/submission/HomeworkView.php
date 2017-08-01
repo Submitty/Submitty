@@ -192,8 +192,7 @@ HTML;
                         $tester = array();
                     }
 
-                    //
-                    foreach((array)$tester as $currImage){
+                    foreach($tester as $currImage){
                         $currImageName = $currImage["image_name"];
                         $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "test_input", $gradeable->getName(), $currImageName);
                         $content_type = FileUtils::getContentType($imgPath);

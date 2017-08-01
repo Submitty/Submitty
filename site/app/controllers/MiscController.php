@@ -32,56 +32,47 @@ class MiscController extends AbstractController {
             // first check that path is valid 
             foreach (explode(DIRECTORY_SEPARATOR, $path) as $part) {
                 if ($part == ".." || $part == ".") {
-                    throw new \InvalidArgumentException("Cannot have a part of the path just be dots");
+                    return false;
                 }
             }
             $course_path = $this->core->getConfig()->getCoursePath();
             if ($dir === "config_upload") {
                 $check = FileUtils::joinPaths($course_path, "config_upload");
                 if (!Utils::startsWith($path, $check)) {
-                    throw new \InvalidArgumentException("Path must start with path to config_upload");
+                    return false;
                 }
                 if (!file_exists($path)) {
-                    throw new \InvalidArgumentException("File does not exist");
+                    return false;
                 }
             }
-            else if ($dir === "submissions" || $dir === "uploads") {
+            else if ($dir === "submissions" || $dir === "results" || $dir === "uploads") {
                 if (!file_exists($path)) {
-                    throw new \InvalidArgumentException("File does not exist");
+                    return false;
                 }
             }
             else {
-                throw new \InvalidArgumentException("Invalid dir used");
+                return false;
             }
             if (!FileUtils::isValidFileName($path)) {
-                throw new \InvalidArgumentException("Not a valid file name");
+                return false;
             }
-            $folder_names = array();
-            $folder_names[] = "submissions";
-            $folder_names[] = "results";
-            $folder_names[] = "checkout";
-            $folder_names[] = "uploads";
-            $path_anchors = array();
-            $path_anchors[] = FileUtils::joinPaths($course_path, $folder_names[0]);
-            $path_anchors[] = FileUtils::joinPaths($course_path, $folder_names[1]);
-            $path_anchors[] = FileUtils::joinPaths($course_path, $folder_names[2]);
-            $path_anchors[] = FileUtils::joinPaths($course_path, $folder_names[3]);
-            $arr_count = count($path_anchors);
+
             $access = false;
-            for ($x = 0; $x < $arr_count; $x++) {
-                if(Utils::startsWith($path, $path_anchors[$x])){
+            foreach (array('submissions', 'results', 'checkout', 'uploads') as $folder) {
+                if (Utils::startsWith($path, FileUtils::joinPaths($course_path, $folder))) {
                     $access = true;
+                    break;
                 }
             }
 
             if(!$access) {
-                throw new \InvalidArgumentException("You're not allowed access to that file");
+                return false;
             }
         }
 
         // if instructor or grader, then it's okay
         if ($this->core->getUser()->accessGrading()) {
-            return;
+            return true;
         }
 
         // otherwise, check that they are trying to access a directory that is theirs
@@ -91,35 +82,48 @@ class MiscController extends AbstractController {
             // get the gradeable_id
             $path_folder = FileUtils::joinPaths($course_path, $dir);
             $path_rest = substr($path, strlen($path_folder)+1);
-            $path_gradeable = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
-            $gradeable = $this->core->getQueries()->getGradeable($path_gradeable);
-            $path_rest = substr($path_rest, strlen($path_gradeable)+1);
+            $path_gradeable_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
+            $path_rest = substr($path_rest, strlen($path_gradeable_id)+1);
             $path_user_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
+            $path_rest = substr($path_rest, strlen($path_user_id)+1);
+            $path_version = intval(substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR)));
+
+            $path_gradeable = $this->core->getQueries()->getGradeable($path_gradeable_id, $path_user_id);
+            if ($path_gradeable === null) {
+                return false;
+            }
+
             // if team assignment, check that team id matches the team of the current user
-            if ($gradeable->isTeamAssignment()) {
+            if ($path_gradeable->isTeamAssignment()) {
                 $path_team_id = $path_user_id;
-                $current_team = $this->core->getQueries()->getTeamByGradeableAndUser($path_gradeable,$current_user_id);
+                $current_team = $this->core->getQueries()->getTeamByGradeableAndUser($path_gradeable_id,$current_user_id);
                 if ($current_team === null) {
-                    throw new \InvalidArgumentException("You're not allowed access to that file");
+                    return false;
                 }
                 $current_team_id = $current_team->getId();
                 if ($path_team_id != $current_team_id) {
-                    throw new \InvalidArgumentException("You're not allowed access to that file");
+                    return false;
                 }
             }
             // else, just check that the user ids match
             else {
-                if ($current_user != $path_user) {
-                    throw new \InvalidArgumentException("You're not allowed access to that file");
+                if ($current_user_id != $path_user_id) {
+                    return false;
                 }
+            }
+            // make sure that version is active version is any_version is not allowed
+            if (!$path_gradeable->getStudentAnyVersion() && $path_version !== $path_gradeable->getActiveVersion()) {
+                return false;
             }
         }
         // or for a zip, that the entered user_id is theirs
         else {
             if ($user_id !== $current_user_id) {
-                throw new \InvalidArgumentException("You're not allowed access to that file");
+                return false;
             }
         }
+
+        return true;
     }
 
     private function displayFile() {
@@ -127,7 +131,9 @@ class MiscController extends AbstractController {
         // security check
         $dir = $_REQUEST['dir'];
         $path = $_REQUEST['path'];
-        $this->checkValidAccess(false,$dir,$path);
+        if (!$this->checkValidAccess(false,$dir,$path)) {
+            return;
+        }
 
         $mime_type = FileUtils::getMimeType($_REQUEST['path']);
         $this->core->getOutput()->useHeader(false);
@@ -155,7 +161,9 @@ class MiscController extends AbstractController {
         // security check
         $dir = $_REQUEST['dir'];
         $path = $_REQUEST['path'];
-        $this->checkValidAccess(false,$dir,$path);
+        if (!$this->checkValidAccess(false,$dir,$path)) {
+            return;
+        }
         
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -170,7 +178,9 @@ class MiscController extends AbstractController {
 
         // security check
         $user_id = $_REQUEST['user_id'];
-        $this->checkValidAccess(true,"","",$user_id);
+        if (!$this->checkValidAccess(true,"","",$user_id)) {
+            return;
+        }
 
         $zip_file_name = $_REQUEST['gradeable_id'] . "_" . $_REQUEST['user_id'] . "_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);

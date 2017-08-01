@@ -486,11 +486,12 @@ HTML;
 HTML;
                 if ((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; $display_peer_checkboxes='style="display:none"'; }
         $html_output .= <<<HTML
- /> No <br />
+ /> No 
+                <br /><br />
                 <div class="peer_input" style="display:none;">How many people should each person grade? <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' /></div>
                 Point precision (for TA grading): 
                 <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{$precision}" class="float_val" />
-                <br /> 
+                <br /><br />
                 
                 <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
