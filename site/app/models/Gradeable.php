@@ -73,6 +73,7 @@ use app\libraries\Utils;
  * @method int|null getGdId()
  * @method void setGdId(int $gd_id)
  * @method \DateTime getUserViewedDate()
+ * @method float getTotalPeerGradingNonExtraCredit()
  */
 class Gradeable extends AbstractModel {
     
@@ -262,8 +263,8 @@ class Gradeable extends AbstractModel {
     protected $total_tagrading_non_extra_credit = 0;
     protected $total_tagrading_extra_credit = 0;
     
-    protected $total_peergrading = 0;
-    protected $total_peergrading_extra_credit=0;
+    protected $total_peer_grading_non_extra_credit = 0;
+    protected $total_peer_grading_extra_credit=0;
 
     /** @property @var \app\models\User|null */
     protected $user = null;
@@ -333,17 +334,17 @@ class Gradeable extends AbstractModel {
         }
 
         if (isset($details['array_gc_id'])) {
-            $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
+            $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text', 'gc_is_peer',
                             'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
                             'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
-            $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
+            $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_is_peer',
                                       'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
-            $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
+            $user_fields = array('user_id', 'anon_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
-            $bools = array('gc_is_text', 'gc_is_extra_credit');
+            $bools = array('gc_is_text', 'gc_is_extra_credit', 'gc_is_peer');
             foreach ($fields as $key) {
                 if (isset($details['array_'.$key])) {
                     $details['array_'.$key] = DatabaseUtils::fromPGToPHPArray($details['array_'.$key], in_array($key, $bools));
@@ -389,10 +390,10 @@ class Gradeable extends AbstractModel {
                     if ($max_value > 0) {
                         if ($this->components[$component_details['gc_order']]->getIsPeer()) {
                             if ($this->components[$component_details['gc_order']]->getIsExtraCredit()) {
-                                $this->total_peergrading_extra_credit += $max_value;
+                                $this->total_peer_grading_extra_credit += $max_value;
                             }
                             else {
-                                $this->total_peergrading_non_extra_credit += $max_value;
+                                $this->total_peer_grading_non_extra_credit += $max_value;
                             }
                         }
                         else {
@@ -925,14 +926,25 @@ class Gradeable extends AbstractModel {
         return $return;
     }
     
-    public function validateVersions() {
+    public function validateVersions($peer=false) {
         $active_check = $this->active_version;
-        foreach($this->components as $component) {
-            if($component->getGradedVersion() !== $active_check) {
-                return false;
+        if(is_string($peer) && $this->peer_grading) {
+            foreach($this->components as $cmpt) {
+                if($cmpt->getGrader()->getId() === $peer && $cmpt->getGradedVersion() !== $active_check) {
+                    return false;
+                }
             }
+            return true;
         }
-        return true;
+        else {
+            foreach($this->components as $component) {
+                if($component->getGradedVersion() !== $active_check) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
     }
 
     public function saveData() {
@@ -962,5 +974,38 @@ class Gradeable extends AbstractModel {
       
     public function getSyllabusBucket() {
         return $this->bucket;
+    }
+    
+    public function getNumPeerComponents() {
+        $count = 0;
+        foreach($this->components as $cmpt) {
+            if($cmpt->getIsPeer()) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+    
+    public function getNumTAComponents() {
+        if(!$this->peer_grading) {
+            return count($this->components);
+        }
+        $count = 0;
+        foreach($this->components as $cmpt) {
+            if(!$cmpt->getIsPeer()) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+    
+    public function getComponentsGradedBy($grader_id) {
+        $return = array();
+        foreach($this->components as $cmpt) {
+            if($cmpt->getGrader() !== null && $cmpt->getGrader()->getId() == $grader_id) {
+                $return[] = $cmpt;
+            }
+        }
+        return $return;
     }
 }

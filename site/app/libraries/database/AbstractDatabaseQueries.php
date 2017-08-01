@@ -478,12 +478,6 @@ abstract class AbstractDatabaseQueries {
     abstract public function updateExtensions($user_id, $g_id, $days);
     
     /**
-     * Gets number of people each peer grader is assigned to grade
-     * @param string $gradeable_id
-     */
-    abstract public function getPeerGradingAssignNumber($gradeable_id);
-    
-    /**
      * Removes peer grading assignment if instructor decides to change the number of people each person grades for assignment
      * @param string $gradeable_id
      */
