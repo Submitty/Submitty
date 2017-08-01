@@ -924,15 +924,6 @@ class Gradeable extends AbstractModel {
         return true;
     }
 
-    public function printVersions() {
-        $versions = "";
-        foreach($this->components as $comp) {
-            $versions .= $comp->getGradedVersion();
-            $versions .= "|";
-        }
-        return $versions;
-    }
-
     public function saveData() {
         $this->core->getCourseDB()->beginTransaction();
         if ($this->gd_id === null) {
