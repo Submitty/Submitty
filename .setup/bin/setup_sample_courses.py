@@ -756,8 +756,8 @@ class Course(object):
                     #         (random.random() < 0.3) or \
                     #         (max_submissions is not None and submission_count >= max_submissions)):
                     if (gradeable.gradeable_config is not None and \
-                            (gradeable.submission_due_date >= NOW or random.random() >= 0.5) and \
-                            # (random.random() >= 0.3) and \
+                            (gradeable.submission_due_date < NOW or random.random() < 0.5) and \
+                            (random.random() < 0.9) and \
                             (max_submissions is None or submission_count < max_submissions)):
 
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
@@ -794,7 +794,7 @@ class Course(object):
                                 create_gradeable_submission(src, dst)
 
                 if gradeable.grade_start_date < NOW:
-                    if gradeable.grade_released_date < NOW or random.random() < 0.8 or submitted:
+                    if gradeable.grade_released_date < NOW or (random.random() < 0.5 and submitted):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
