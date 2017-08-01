@@ -32,10 +32,11 @@ class ConfigurationController extends AbstractController {
             'upload_message'            => $this->core->getConfig()->getUploadMessage(),
             'keep_previous_files'       => $this->core->getConfig()->keepPreviousFiles(),
             'display_iris_grades_summary' => $this->core->getConfig()->displayIrisGradesSummary(),
-            'display_custom_message'      => $this->core->getConfig()->displayCustomMessage()
+            'display_custom_message'      => $this->core->getConfig()->displayCustomMessage(),
+            'course_email'              => $this->core->getConfig()->getCourseEmail()
         );
 
-        foreach (array('course_name', 'upload_message') as $key) {
+        foreach (array('course_name', 'upload_message', 'course_email') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = htmlentities($_SESSION['request'][$key]);
             }
@@ -96,7 +97,8 @@ class ConfigurationController extends AbstractController {
                 'upload_message'            => nl2br($_POST['upload_message']),
                 'keep_previous_files'       => $_POST['keep_previous_files'],
                 'display_iris_grades_summary' => $_POST['display_iris_grades_summary'],
-                'display_custom_message'      => $_POST['display_custom_message']
+                'display_custom_message'      => $_POST['display_custom_message'],
+                'course_email'                => $_POST['course_email']
             )
         );
         

@@ -762,11 +762,20 @@ HTML;
             //gets the initial point value and text
             $initial_text = "";
             $first_text = true;
-            if ($type === 0) {
-                $question_points = $question->getMaxValue();
+            if ($question->getMaxValue() < 0) {
+                if ($type === 0) {
+                    $question_points = 0;
+                } else {
+                    $question_points = $question->getMaxValue();
+                }
             } else {
-                $question_points = 0;
+                if ($type === 0) {
+                    $question_points = $question->getMaxValue();
+                } else {
+                    $question_points = 0;
+                }
             }
+            
             foreach ($question->getMarks() as $mark) {
                 if($mark->getHasMark() === true) {
                     $question_points += $mark->getPoints();
@@ -795,12 +804,20 @@ HTML;
             }
 
             $question_points += $question->getScore();
-            if ($type === 0) {
-                if ($question_points < 0) $question_points = 0;
+            if($question->getMaxValue() < 0) {
+                if ($type === 0) {
+                    if ($question_points < $question->getMaxValue()) $question_points = $question->getMaxValue();
+                } else {
+                    if ($question_points > 0) $question_points = 0;
+                }
             } else {
-                if ($question_points > $question->getMaxValue()) $question_points = $question->getMaxValue();
+                if ($type === 0) {
+                    if ($question_points < 0) $question_points = 0;
+                } else {
+                    if ($question_points > $question->getMaxValue()) $question_points = $question->getMaxValue();
+                }
             }
-
+            
             if($ungraded === true) {
                 $question_points = " ";
             }
@@ -1326,8 +1343,13 @@ HTML;
             //updates the total number of points and text
             var current_question_num = $('#grade-' + num);
             var current_question_text = $('#rubric-textarea-' + num);
-            var max_points = current_question_num[0].dataset.max_points;
-            var current_points = (type === 0) ? max_points : 0;
+            var max_points = parseFloat(current_question_num[0].dataset.max_points);
+            var current_points = 0;
+            if (max_points < 0) { //is penalty
+                current_points = (type === 0) ? 0 : max_points;
+            } else {
+                current_points = (type === 0) ? max_points : 0;
+            }
             var new_text = "";
             var first_text = true;
             current_points = parseFloat(current_points);
@@ -1353,12 +1375,21 @@ HTML;
                 }
             }
             
-
-            if (type === 0) {
-                if (current_points < 0) current_points = 0;
-            } else {
-                if (current_points > max_points) current_points = max_points;
+            if (max_points < 0) { //is penalty
+                if (type === 0) {
+                    if (current_points < max_points) current_points = max_points;
+                } else {
+                    if (current_points > 0) current_points = 0;
+                }
             }
+            else {
+                if (type === 0) {
+                    if (current_points < 0) current_points = 0;
+                } else {
+                    if (current_points > max_points) current_points = max_points;
+                }
+            }
+            
             current_question_num[0].innerHTML = current_points;
             current_question_text[0].innerHTML = new_text;
 

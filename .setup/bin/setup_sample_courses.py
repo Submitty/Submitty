@@ -707,13 +707,15 @@ class Course(object):
         electronic_table = Table("electronic_gradeable", metadata, autoload=True)
         reg_table = Table("grading_rotating", metadata, autoload=True)
         component_table = Table('gradeable_component', metadata, autoload=True)
+        mark_table = Table('gradeable_component_mark', metadata, autoload=True)
         gradeable_data = Table("gradeable_data", metadata, autoload=True)
         gradeable_component_data = Table("gradeable_component_data", metadata, autoload=True)
+        gradeable_component_mark_data = Table('gradeable_component_mark_data', metadata, autoload=True)
         electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload=True)
         electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload=True)
         course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
         for gradeable in self.gradeables:
-            gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table)
+            gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table, mark_table)
             form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
@@ -1121,7 +1123,7 @@ class Gradeable(object):
                 component['gc_max_value'] = 1
             self.components.append(Component(component, i+1))
 
-    def create(self, conn, gradeable_table, electronic_table, reg_table, component_table):
+    def create(self, conn, gradeable_table, electronic_table, reg_table, component_table, mark_table):
         conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
@@ -1150,7 +1152,7 @@ class Gradeable(object):
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
 
         for component in self.components:
-            component.create(self.id, conn, component_table)
+            component.create(self.id, conn, component_table, mark_table)
 
     def create_form(self):
         form_json = OrderedDict()
@@ -1247,6 +1249,12 @@ class Component(object):
         self.is_extra_credit = False
         self.is_peer = False
         self.order = order
+        self.marks = []
+        if 'marks' in component:
+            for i in range(len(component['marks'])):
+                mark = component['marks'][i]
+                self.marks.append(Mark(mark, i))
+
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
         if 'gc_student_comment' in component:
@@ -1263,7 +1271,7 @@ class Component(object):
 
         self.key = None
 
-    def create(self, g_id, conn, table):
+    def create(self, g_id, conn, table, mark_table):
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
                                     gc_max_value=self.max_value, gc_is_text=self.is_text,
@@ -1271,5 +1279,21 @@ class Component(object):
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 
+        for mark in self.marks:
+            mark.create(self.key, conn, mark_table)
+
+class Mark(object):
+    def __init__(self, mark, order):
+        self.note = mark['gcm_note']
+        self.points = mark['gcm_points']
+        self.order = order
+        self.key = None
+
+    def create(self, gc_id, conn, table):
+        ins = table.insert().values(gc_id=gc_id, gcm_points=self.points, gcm_note=self.note,
+                                    gcm_order=self.order)
+        res = conn.execute(ins)
+        self.key = res.inserted_primary_key[0]
+        
 if __name__ == "__main__":
     main()

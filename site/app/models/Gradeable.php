@@ -807,22 +807,43 @@ class Gradeable extends AbstractModel {
                     break;
                 }
             }
-            $temp_points = ($type === 0 ) ? $component->getMaxValue() : 0;
+            if ($component->getMaxValue() < 0) {
+                $temp_points = ($type === 0 ) ? 0 : $component->getMaxValue();
+            } else {
+                $temp_points = ($type === 0 ) ? $component->getMaxValue() : 0;
+            }
+            
             foreach ($marks as $mark) {
                 if ($mark->getHasMark()) {
                     $temp_points += $mark->getPoints();
                 }
             }
 
-            if ($type === 0) {
-                if ($temp_points < 0) {
-                    $temp_points = 0;
-                }
-            } else {
-                if ($temp_points > $component->getMaxValue()) {
-                    $temp_points = $component->getMaxValue();
+            $temp_points += $component->getScore();
+
+            if ($component->getMaxValue() < 0) {
+                if ($type === 0) {
+                    if ($temp_points < $component->getMaxValue()) {
+                        $temp_points = $component->getMaxValue();
+                    }
+                } else {
+                    if ($temp_points > 0) {
+                        $temp_points = 0;
+                    }
                 }
             }
+            else {
+                if ($type === 0) {
+                    if ($temp_points < 0) {
+                        $temp_points = 0;
+                    }
+                } else {
+                    if ($temp_points > $component->getMaxValue()) {
+                        $temp_points = $component->getMaxValue();
+                    }
+                }
+            }
+            
 
             $points += $temp_points;
         }

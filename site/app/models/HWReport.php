@@ -20,7 +20,7 @@ class HWReport extends AbstractModel {
             mkdir(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports")));
         }
         $nl = "\n";
-        $TEMP_EMAIL = "I am the temp email"; //temparary, please remove before merge
+        $TEMP_EMAIL = $this->core->getConfig()->getCourseEmail();
         $write_output = True;
         $g_id = $gradeable->getId();
         $rubric_total = 0;
