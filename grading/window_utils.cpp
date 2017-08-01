@@ -103,21 +103,6 @@ std::vector<int> getPidsAssociatedWithPid(int pid)
 */
 std::vector<std::string> getWindowNameAssociatedWithPid(int pid)
 {
-  std::cout << "Attempting to find a window associated with pid: " << pid 
-            << std::endl;
-
-  /*
-  * At the moment, this method finds any window names associated with the 
-  * child's pid. This works fine. However, it is conceivable that the child 
-  * could fork/generate a window with its own pid. In this case we could 
-  * recursively traverse the pid tree below our child and gather them up. We 
-  * could then match this list of pids against the pids which own the current 
-  * list of active windows. This extension wouldn't be difficult, but I wonder 
-  * whether we want to support processes forking and then having their children
-  * create new windows. Regardless, please disregard the chunk of code below, 
-  * which just has some of the commands needed to exend the program in that 
-  * direction.
-  */
   getPidsAssociatedWithPid(pid);
   //This vector will contain any windows associated with our child's pid.
   std::vector<std::string> associatedWindows; 
@@ -258,44 +243,74 @@ std::set<std::string> snapshotOfActiveWindows()
 * returned we just use the first one (we don't currently support multi-window 
 * programs.) If none are returned, we fail to set the window_name variable. 
 */
-void initializeWindow(std::string& window_name, int pid, std::set<std::string>& active_windows){
-  //get the window names associated with our pid.
-  // std::vector<std::string> windows = getWindowNameAssociatedWithPid(pid); 
+void initializeWindow(std::string& window_name, int pid, std::set<std::string>& invalid_windows, float elapsed){
   
-  std::set<std::string> current_windows = snapshotOfActiveWindows();
-  // std::vector<std::string> candidates;
-
-  std::set<std::string>::iterator it;
-  for (it = current_windows.begin(); it != current_windows.end(); ++it)
+  //for the first two seconds, only try to init via pid.
+  std::cout << "Elapsed is " << elapsed << std::endl;
+  if (elapsed < 2)
   {
-    if(active_windows.find(*it) == active_windows.end())
-    {
-      window_name = *it;
-      break;
+    //get the window names associated with our pid.
+     std::vector<std::string> windows = getWindowNameAssociatedWithPid(pid);
+    if(windows.size() == 0){
+      return;
+    }
+    else{
+      //if a window exists, default to using the first entry in the vector.
+      std::cout << "Using the pid method, we found the window " << windows[0] << std::endl;
+      window_name = windows[0];
     }
   }
-
-  if(window_name != "")
-  {
-    std::cout << "We found the window " << window_name << std::endl;
-    return;
-  }
+  //else try to init using both.
   else
   {
-    return; 
-  }
+    std::string window_name_pid_method = "";
+    std::string window_name_name_method = "";
 
-  //Code left on purpose; could be useful in future development
-  // //if none exist, do not set the window_name variable                                                                                
-  // if(windows.size() == 0){ 
-  //   std::cout << "Initialization failed..." << std::endl;
-  //   return;
-  // }
-  // else{
-  //   //if a window exists, default to using the first entry in the vector. 
-  //   std::cout << "We found the window " << windows[0] << std::endl;
-  //   window_name = windows[0];
-  // }
+    //get the window names associated with our pid.
+    std::vector<std::string> windows = getWindowNameAssociatedWithPid(pid);
+    if(windows.size() != 0){
+      //if a window exists, default to using the first entry in the vector.
+      std::cout << "Using the pid method, we found the window " << windows[0] << std::endl;
+      window_name_pid_method = windows[0];
+    }
+
+    std::set<std::string> current_windows = snapshotOfActiveWindows();
+    std::set<std::string>::iterator it;
+    for (it = current_windows.begin(); it != current_windows.end(); ++it)
+    {
+      //If the window is not in the invalid set, it is good.
+      if(invalid_windows.find(*it) == invalid_windows.end())
+      {
+        window_name_name_method = *it;
+        break;
+      }
+    }
+
+    if(window_name_pid_method != "" && window_name_name_method != "")
+    {
+      if(window_name_pid_method == window_name_name_method)
+      {
+        window_name = window_name_pid_method;
+        std::cout << "both methods agreed on the window " << window_name << std::endl;
+      }
+      else
+      {
+        std::cout << "The two methods disagreed on the window name, so we defaulted to the pid method's answer: "
+                    << window_name << std::endl;
+        window_name = window_name_pid_method;
+      }
+    }
+    else if (window_name_pid_method != "")
+    {
+      std::cout << "The pid method found the window " << window_name_pid_method << std::endl;
+      window_name = window_name_pid_method;
+    }
+    else if (window_name_name_method != "")
+    {
+      std::cout << "The name method found the window " << window_name_name_method << std::endl;
+      window_name = window_name_name_method;
+    }
+  }
 }
 
 /**
@@ -860,6 +875,35 @@ void moveMouseToOrigin(std::string window_name){
 }
 
 /**
+* This function was written to allow users to type special keys.
+* The function wraps the xdotool key command, which can multipress
+* keys. (e.g. ctrl+alt+del)
+*/
+void key(std::string command, std::string window_name)
+{
+  std::string buf; // Have a buffer string
+  std::stringstream ss(command); // Insert the string into a stream
+  std::vector<std::string> tokens; // Create vector to hold our words
+  while (ss >> buf){
+    tokens.push_back(buf);
+  }
+  if(tokens.size() < 1){
+    std::cout <<"ERROR: invalid command: " << command << std::endl;
+    return;
+  }
+  std::string toType = tokens[1];
+  //the second token is the special key to type
+  //get window focus then type the string toType.
+  std::string internal_command = "wmctrl -R " + window_name
+                                    +" &&  xdotool key " + toType;
+  //for number of presses requested, check that the window exists and that we
+  //have something to type.
+  if(windowExists(window_name) && toType != ""){
+    system(internal_command.c_str());
+  }
+}
+
+/**
 * This function processes the 'type' action, which types a quoted string one 
 * character at a time an optional number of times with an optional delay 
 * between repetitions. Because of the delay, we need all parameters necessary 
@@ -956,6 +1000,11 @@ void takeAction(const std::vector<std::string>& actions, int& actions_taken,
   else if(actions[actions_taken].find("type") != std::string::npos){ 
     type(actions[actions_taken],window_name,childPID,elapsed, next_checkpoint, 
        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);
+  }
+  //KEY
+  else if(actions[actions_taken].find("key") != std::string::npos)
+  {
+    key(actions[actions_taken], window_name);
   }
   //CLICK AND DRAG    
   else if(actions[actions_taken].find("click and drag") != std::string::npos){ 
