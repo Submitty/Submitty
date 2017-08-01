@@ -178,16 +178,15 @@ HTML;
                 $image_width = $image_height = 0;
 
                 if (isset($gradeable->getTextboxes()[$i]['images']) && $gradeable->getTextboxes()[$i]['images'] != ""){
-                    $tester = $gradeable->getTextboxes()[$i]['images'];
+                    $images = $gradeable->getTextboxes()[$i]['images'];
                 }
                 else{
-                    $tester = array();
+                    $images = array();
                 }
 
-                //
-                foreach((array)$tester as $currImage){
+                foreach((array)$images as $currImage){
                     $currImageName = $currImage["image_name"];
-                    $imgPath = $this->core->getConfig()->getCoursePath() . "/test_input/" . $gradeable->getName() . "/".$currImageName;
+                    $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(),"test_input",$gradeable->getId(),$currImageName);
                     $content_type = FileUtils::getContentType($imgPath);
                     if (substr($content_type, 0, 5) === "image") {
                        // Read image path, convert to base64 encoding
