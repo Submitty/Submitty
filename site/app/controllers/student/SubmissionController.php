@@ -1035,7 +1035,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
 
-        if (!$this->core->getUser()->accessGrading() || !$gradeable->getStudentSubmit()) {
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentSubmit()) {
             $msg = "Cannot submit for this assignment.";
             $_SESSION['messages']['error'][] = $msg;
             $this->core->redirect($url);
