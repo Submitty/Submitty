@@ -1418,7 +1418,7 @@ HTML;
                 },
                 success: function(data) {
                     console.log("success");
-                    alert(data);
+                    console.log(data);
                     data = JSON.parse(data);
                     if (data['modified'] === 'true') {
                         if(($('#graded-by-' + num)[0].innerHTML === "Ungraded!") || (overwrite === "true")) {
