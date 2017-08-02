@@ -708,13 +708,15 @@ class Course(object):
         electronic_table = Table("electronic_gradeable", metadata, autoload=True)
         reg_table = Table("grading_rotating", metadata, autoload=True)
         component_table = Table('gradeable_component', metadata, autoload=True)
+        mark_table = Table('gradeable_component_mark', metadata, autoload=True)
         gradeable_data = Table("gradeable_data", metadata, autoload=True)
         gradeable_component_data = Table("gradeable_component_data", metadata, autoload=True)
+        gradeable_component_mark_data = Table('gradeable_component_mark_data', metadata, autoload=True)
         electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload=True)
         electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload=True)
         course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
         for gradeable in self.gradeables:
-            gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table)
+            gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table, mark_table)
             form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
@@ -752,10 +754,11 @@ class Course(object):
                 submission_path = os.path.join(gradeable_path, user.id)
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
-                    if not (gradeable.gradeable_config is None or \
-                            (gradeable.submission_due_date < NOW and random.random() < 0.5) or \
-                            (random.random() < 0.3) or \
-                            (max_submissions is not None and submission_count >= max_submissions)):
+                    if (gradeable.gradeable_config is not None and \
+                            (gradeable.submission_due_date < NOW or random.random() < 0.5) and \
+                            (random.random() < 0.9) and \
+                            (max_submissions is None or submission_count < max_submissions)):
+
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
@@ -790,7 +793,7 @@ class Course(object):
                                 create_gradeable_submission(src, dst)
 
                 if gradeable.grade_start_date < NOW:
-                    if gradeable.grade_released_date < NOW or random.random() < 0.8:
+                    if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
@@ -1070,6 +1073,10 @@ class Gradeable(object):
             self.team_assignment = False
             self.max_team_size = 1
             self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
+            self.student_view = True
+            self.student_submit = True
+            self.student_download = False
+            self.student_any_version = True
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
             if self.is_repository and 'eg_subdirectory' in gradeable:
@@ -1078,6 +1085,14 @@ class Gradeable(object):
                 self.peer_grading = gradeable['eg_peer_grading'] is False
             if 'eg_use_ta_grading' in gradeable:
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
+            if 'eg_student_view' in gradeable:
+                self.student_view = gradeable['eg_student_view'] is True
+            if 'eg_student_submit' in gradeable:
+                self.student_submit = gradeable['eg_student_submit'] is True
+            if 'eg_student_download' in gradeable:
+                self.student_download = gradeable['eg_student_download'] is True
+            if 'eg_student_any_version' in gradeable:
+                self.student_any_version = gradeable['eg_student_any_version'] is True
             if 'eg_late_days' in gradeable:
                 self.late_days = max(0, int(gradeable['eg_late_days']))
             if 'eg_precision' in gradeable:
@@ -1122,7 +1137,7 @@ class Gradeable(object):
                 component['gc_max_value'] = 1
             self.components.append(Component(component, i+1))
 
-    def create(self, conn, gradeable_table, electronic_table, reg_table, component_table):
+    def create(self, conn, gradeable_table, electronic_table, reg_table, component_table, mark_table):
         conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
@@ -1147,11 +1162,14 @@ class Gradeable(object):
                          eg_team_assignment=self.team_assignment,
                          eg_max_team_size=self.max_team_size,
                          eg_team_lock_date=self.team_lock_date,
-                         eg_use_ta_grading=self.use_ta_grading, eg_config_path=self.config_path,
+                         eg_use_ta_grading=self.use_ta_grading, 
+                         eg_student_view=self.student_view, 
+                         eg_student_submit=self.student_submit, eg_student_download=self.student_download,
+                         eg_student_any_version=self.student_any_version, eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
 
         for component in self.components:
-            component.create(self.id, conn, component_table)
+            component.create(self.id, conn, component_table, mark_table)
 
     def create_form(self):
         form_json = OrderedDict()
@@ -1248,6 +1266,12 @@ class Component(object):
         self.is_extra_credit = False
         self.is_peer = False
         self.order = order
+        self.marks = []
+        if 'marks' in component:
+            for i in range(len(component['marks'])):
+                mark = component['marks'][i]
+                self.marks.append(Mark(mark, i))
+
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
         if 'gc_student_comment' in component:
@@ -1264,7 +1288,7 @@ class Component(object):
 
         self.key = None
 
-    def create(self, g_id, conn, table):
+    def create(self, g_id, conn, table, mark_table):
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
                                     gc_max_value=self.max_value, gc_is_text=self.is_text,
@@ -1272,5 +1296,21 @@ class Component(object):
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 
+        for mark in self.marks:
+            mark.create(self.key, conn, mark_table)
+
+class Mark(object):
+    def __init__(self, mark, order):
+        self.note = mark['gcm_note']
+        self.points = mark['gcm_points']
+        self.order = order
+        self.key = None
+
+    def create(self, gc_id, conn, table):
+        ins = table.insert().values(gc_id=gc_id, gcm_points=self.points, gcm_note=self.note,
+                                    gcm_order=self.order)
+        res = conn.execute(ins)
+        self.key = res.inserted_primary_key[0]
+        
 if __name__ == "__main__":
     main()
