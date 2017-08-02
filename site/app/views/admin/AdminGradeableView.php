@@ -416,7 +416,7 @@ HTML;
                         <br />
                         The VCS Base URL is configured in Course Settings. Specify the rest of the path using some or all the following allowed string replacement variables: gradeable_id, user_id, repo_id in format $&#123;&hellip;&#125; (ex. <kbd>/$&#123;gradeable_id&#125;/$&#123;user_id&#125;/$&#123;repo_id&#125;</kbd>), or specify the entire path if the entire path changes for each assignment.
                         <br />
-                        <input style='width: 83%' type='text' name='vcs_path' value="" class="required" placeholder="(Required)"/>
+                        <input style='width: 83%' type='text' name='subdirectory' value="" class="required" placeholder="(Required)"/>
                         <br />
                     </div>
                     
@@ -1325,7 +1325,7 @@ function createCrossBrowserJSDate(val){
         
         if($('#radio_electronic_file').is(':checked')){ 
             
-            $('input[name="vcs_path"]').val('{$electronic_gradeable['eg_subdirectory']}');
+            $('input[name="subdirectory"]').val('{$electronic_gradeable['eg_subdirectory']}');
             $('input[name="config_path"]').val('{$electronic_gradeable['eg_config_path']}');
             $('input[name="eg_late_days"]').val('{$electronic_gradeable['eg_late_days']}');
             $('input[name="point_precision"]').val('{$electronic_gradeable['eg_precision']}');
@@ -2287,7 +2287,7 @@ $('#gradeable-form').on('submit', function(e){
         var date_ta_view = Date.parse($('#date_ta_view').val());
         var date_grade = Date.parse($('#date_grade').val());
         var date_released = Date.parse($('#date_released').val());
-        var vcs_path = $('input[name="vcs_path"]').val().trim();
+        var subdirectory = $('input[name="subdirectory"]').val();
         var config_path = $('input[name=config_path]').val();
         var has_space = gradeable_id.includes(" ");
         var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
@@ -2349,7 +2349,7 @@ $('#gradeable-form').on('submit', function(e){
                 return false;
             }
             if ($('input:radio[name="upload_type"]:checked').attr('value') === 'repository') {
-                if(vcs_path == "" || vcs_path === null) {
+                if(subdirectory == "" || subdirectory === null) {
                     alert("The VCS path should not be empty");
                     return false;
                 }

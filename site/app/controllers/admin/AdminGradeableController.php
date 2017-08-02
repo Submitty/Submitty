@@ -132,7 +132,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setLateDays($_POST['eg_late_days']);
             $is_repository = (isset($_POST['upload_type']) && $_POST['upload_type']=='repository') ? true : false;
             $gradeable->setIsRepository($is_repository);
-            $gradeable->setSubdirectory($_POST['vcs_path']);
+            $gradeable->setSubdirectory($_POST['subdirectory']);
             $gradeable->setPointPrecision(floatval($_POST['point_precision']));
             $gradeable->setTeamAssignment($this->isRadioButtonTrue('team_assignment'));
             $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);

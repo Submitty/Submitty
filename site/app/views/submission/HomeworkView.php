@@ -480,7 +480,7 @@ HTML;
                 }
                 // user id entered, need to validate first
                 else {
-                    validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, false, "", "", makeSubmission);
+                    validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, false, "", "", repo_id, makeSubmission);
                 }
                 e.stopPropagation();
             });
@@ -585,7 +585,7 @@ HTML;
                 moveNextInput(count);
             }
             else {
-                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, "", makeSubmission);
             }
             e.preventDefault();
             e.stopPropagation();
@@ -598,7 +598,7 @@ HTML;
                 var user_id = $(document.activeElement).val();
                 var js_count_array = $count_array_json;
                 var path = js_count_array[count];
-                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, "", makeSubmission);
                 e.preventDefault();
                 e.stopPropagation();
             }

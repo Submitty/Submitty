@@ -332,7 +332,7 @@ function isValidSubmission(){
  * @param count
  * @param makeSubmission, a callback function
  */
-function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, makeSubmission) {
+function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, repo_id, makeSubmission) {
 
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
@@ -350,7 +350,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count, "");
+                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
                 }
                 else {
                     alert("ERROR! \n\n" + data['message']);
