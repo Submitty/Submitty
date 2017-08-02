@@ -84,7 +84,9 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
                 'upload_message' => "",
                 'keep_previous_files' => false,
                 'display_iris_grades_summary' => false,
-                'display_custom_message' => false
+                'display_custom_message' => false,
+                'vcs_base_url' => '',
+                'vcs_type' => 'git'
             )
         );
 
@@ -158,6 +160,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'keep_previous_files' => false,
             'display_iris_grades_summary' => false,
             'display_custom_message' => false,
+            'vcs_base_url' => '',
+            'vcs_type' => 'git',
             'hidden_details' => array(
                 'database_name' => 'submitty_s17_csci0000'
             ),
@@ -256,7 +260,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'course_details' => array(
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
                 'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
-                'display_custom_message'
+                'display_custom_message', 'vcs_base_url', 'vcs_type'
             )
         );
         $return = array();
