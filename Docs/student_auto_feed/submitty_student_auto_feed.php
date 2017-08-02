@@ -68,7 +68,7 @@ class submitty_student_auto_feed {
         self::$db = pg_connect("host={$db_host} dbname=submitty user={$db_user} password={$db_password}");
 
         //Make sure there's a DB connection to Submitty.
-        if (!test_db_conn()) {
+        if (!$this->test_db_conn()) {
             $this->log_it("Error: Cannot connect to submitty DB");
         } else {
             //$psql_version will determine which upsert method is used.
@@ -96,11 +96,10 @@ class submitty_student_auto_feed {
     public function __destruct() {
 
         //Close DB connection, if it exists.
-        foreach (array(self::$db, self::$course_db) as $db_conn) {
-            if (is_resource($db_conn) && get_resource_type($db_conn) === 'pgsql link') {
-                pg_close($db_con);
-            }
+        if ($this->test_db_conn()) {
+        	pg_close(self::$db);
         }
+
 
         //Output logs, if any.
         if (!empty($log_msg_queue)) {
@@ -186,7 +185,7 @@ class submitty_student_auto_feed {
 
     private function get_participating_course_list() {
         //EXPECTED: self::$db has an active/open Postgres connection.
-        if (!test_db_conn()) {
+        if (!$this->test_db_conn()) {
             $this->log_it("Error: not connected to submitty DB when retrieving active course list.");
             return false;
         }
@@ -205,7 +204,7 @@ SQL;
             return false;
         }
 
-        return pg_fetch_all($result);
+        return pg_fetch_all_columns($result, 0);
     }
 
     private function test_db_conn() {
@@ -241,8 +240,8 @@ CREATE TEMPORARY TABLE upsert_users (
     user_id                  VARCHAR,
     user_firstname           VARCHAR,
     user_preferred_firstname VARCHAR,
-    last_name                VARCHAR,
-    email                    VARCHAR,
+    user_lastname            VARCHAR,
+    user_email               VARCHAR
 ) ON COMMIT DROP;
 SQL;
 
@@ -252,7 +251,7 @@ CREATE TEMPORARY TABLE upsert_courses_users (
     course               VARCHAR,
     user_id              VARCHAR,
     user_group           INTEGER,
-    registration_section VARCHAR,
+    registration_section INTEGER,
     manual_registration  BOOLEAN
 ) ON COMMIT DROP;
 SQL;
@@ -279,14 +278,13 @@ LOCK TABLE courses_users IN EXCLUSIVE MODE;
 SQL;
 
         //This portion ensures that UPDATE will only occur when a record already exists.
-        //FIX ME
         $sql['users']['update'] = <<<SQL
 UPDATE users
 SET
     user_firstname=upsert_users.user_firstname,
     user_lastname=upsert_users.user_lastname,
     user_preferred_firstname=upsert_users.user_preferred_firstname,
-    user_email=upsert_users.user_email,
+    user_email=upsert_users.user_email
 FROM upsert_users
 WHERE users.user_id=upsert_users.user_id
 SQL;
@@ -297,12 +295,12 @@ SET
     semester=upsert_courses_users.semester,
     course=upsert_courses_users.course,
     user_id=upsert_courses_users.user_id,
-    user_group=upsert_courses_users.user_group,,
+    user_group=upsert_courses_users.user_group,
     registration_section=upsert_courses_users.registration_section,
-    manual_registration=upsert_courses_users.registration_section
+    manual_registration=upsert_courses_users.manual_registration
 FROM upsert_courses_users
 WHERE courses_users.user_id=upsert_courses_users.user_id
-AND courses_users.manual_registration = FALSE
+AND courses_users.manual_registration=FALSE
 SQL;
 
         //This portion ensures that INSERT will only occur when data record is new.
@@ -329,7 +327,7 @@ SQL;
 INSERT INTO courses_users (
     semester,
     course,
-    user_id.
+    user_id,
     user_group,
     registration_section,
     manual_registration
@@ -338,12 +336,12 @@ INSERT INTO courses_users (
     upsert_courses_users.course,
     upsert_courses_users.user_id,
     upsert_courses_users.user_group,
-    upsert_courses_users.registration_secton,
+    upsert_courses_users.registration_section,
     upsert_courses_users.manual_registration
 FROM upsert_courses_users
-LEFT OUTER JOIN users
-    ON users.user_id=upsert_courses_users.user_id
-WHERE users.user_id IS NULL
+LEFT OUTER JOIN courses_users
+    ON courses_users.user_id=upsert_courses_users.user_id
+WHERE courses_users.user_id IS NULL
 SQL;
 
         //We also need to move students no longer in auto feed to the NULL registered section
@@ -354,7 +352,7 @@ SQL;
 
         $sql['courses_users']['dropped_students'] = <<<SQL
 UPDATE courses_users
-SET registration_section=NULL,
+SET registration_section=NULL
 FROM (SELECT courses_users.user_id
     FROM courses_users
     LEFT OUTER JOIN temp
@@ -374,7 +372,7 @@ SQL;
             foreach(self::$data as $i => $row) {
                 switch ($table_name) {
                 case 'users':
-                    pg_query_params(self::$db, $table['data'][$i], array($row[COLUMN_USERID],
+                    pg_query_params(self::$db, $table['data'][$i], array($row[COLUMN_USER_ID],
                                                                          $row[COLUMN_FIRSTNAME],
                                                                          $row[COLUMN_LASTNAME],
                                                                          $row[COLUMN_PREFERREDNAME],
@@ -384,7 +382,7 @@ SQL;
 
                     pg_query_params(self::$db, $table['data'][$i], array(self::$semester,
                                                                          strtolower($row[COLUMN_COURSE_PREFIX] . $row[COLUMN_COURSE_NUMBER]),
-                                                                         $row[COLUMN_USERID],
+                                                                         $row[COLUMN_USER_ID],
                                                                          4,
                                                                          $row[COLUMN_SECTION],
                                                                          'FALSE'));
