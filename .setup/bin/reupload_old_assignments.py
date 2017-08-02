@@ -133,7 +133,8 @@ def main():
             with open(os.path.join(CURRENT_user_path, "user_assignment_settings.json"), "w") as open_file:
                 json.dump({"active_version": submission, "history": [{"version": submission, "time": current_time_string}]},
                           open_file)
-            with open(os.path.join(CURRENT_submission_path, ".submit.timestamp"), "w") as open_file:
+            timestamp_path = os.path.join(CURRENT_submission_path, ".submit.timestamp")
+            with open(timestamp_path, "w") as open_file:
                 open_file.write(current_time_string + "\n")
 
                 if args.grade:
@@ -151,6 +152,8 @@ def main():
                                    "who": user_name,
                                    "is_team": False,
                                    "team": ""}, open_file)
+            os.system("chown -R hwphp:{}_tas_www {}".format(args.course_name, timestamp_path))
+
     conn.close()
 
 if __name__ == "__main__":
