@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\libraries\Core;
+use \app\models\User;
 
 class LateDaysCalculation extends AbstractModel {
     /*var Core */
@@ -20,10 +21,10 @@ class LateDaysCalculation extends AbstractModel {
     /* Holds grace period in seconds (300 seconds = 5 minutes)*/
     protected $SUBMISSION_GRACE_PERIOD = 300;
     
-    function __construct(Core $main_core) {
+    function __construct(Core $main_core, $user_id = null) {
         $this->core = $main_core;
-        $this->submissions = $this->core->getQueries()->getLateDayInformation();
-        $this->latedays = $this->core->getQueries()->getLateDayUpdates();
+        $this->submissions = $this->core->getQueries()->getLateDayInformation($user_id);
+        $this->latedays = $this->core->getQueries()->getLateDayUpdates($user_id);
         $this->students = $this->parseStudents($this->submissions, $this->latedays);
         //Calculate lateday usages for all students for all assignments queried
         $this->all_latedays = $this->calculateStudentLatedayUsage($this->students);

@@ -20,6 +20,7 @@ class HWReport extends AbstractModel {
             mkdir(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports")));
         }
         $nl = "\n";
+        $TEMP_EMAIL = $this->core->getConfig()->getCourseEmail();
         $write_output = True;
         $g_id = $gradeable->getId();
         $rubric_total = 0;
@@ -42,19 +43,25 @@ class HWReport extends AbstractModel {
             $name_and_emails = array();
             foreach($gradeable->getComponents() as $component){
                 if($component->getGrader() === null) {
-                    $name_and_emails[] = "No one".$nl;
+                    //nothing happens
+                } 
+                else if($component->getGrader()->accessFullGrading()) {
+                    $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>";
                 } else {
-                    $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>".$nl;
+                    $name_and_emails[] = $TEMP_EMAIL;
                 }
                 
             }
-            $name_and_emails = implode(",", $name_and_emails);
+
+            $name_and_emails = array_unique($name_and_emails);
+            $name_and_emails = implode(", ", $name_and_emails);
 
             $student_output_text_main .= "Graded by : " . $name_and_emails;
 
             // Calculate late days for this gradeable
             $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $g_id);
             // TODO: add functionality to choose who regrade requests will be sent to
+            $student_output_text_main .= $nl;
             $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$name_and_emails.$nl;
             if($gradeable->getDaysLate() > 0) {
                 $student_output_text_main .= "This submission was submitted ".$gradeable->getDaysLate()." day(s) after the due date.".$nl;
@@ -105,7 +112,12 @@ class HWReport extends AbstractModel {
                             break;
                         }
                     }
-                    $temp_score = ($type === 0) ? $component->getMaxValue() : 0;
+                    if ($component->getMaxValue() < 0) {
+                        $temp_score = ($type === 0) ? 0 : $component->getMaxValue();
+                    } else {
+                        $temp_score = ($type === 0) ? $component->getMaxValue() : 0;
+                    }
+                    
                     foreach($component->getMarks() as $mark) {
                         if($mark->getHasMark()) {
                             $temp_score += $mark->getPoints();
@@ -118,17 +130,37 @@ class HWReport extends AbstractModel {
                         $temp_notes .= $component->getScore() . " : " . $component->getComment() . $nl;
                     }
 
-                    if($type === 0) {
-                        if($temp_score < 0) {
-                            $temp_score = 0;
+                    if ($component->getMaxValue() < 0) {
+                        if ($type === 0) {
+                            if ($temp_score < $component->getMaxValue()) {
+                                $temp_score = $component->getMaxValue();
+                            }
+                        } else {
+                            if ($temp_score > 0) {
+                                $temp_score = 0;
+                            }
                         }
                     } else {
-                        if($temp_score > $component->getMaxValue()) {
-                            $temp_score = $component->getMaxValue();
+                        if($type === 0) {
+                            if($temp_score < 0) {
+                                $temp_score = 0;
+                            }
+                        } else {
+                            if($temp_score > $component->getMaxValue()) {
+                                $temp_score = $component->getMaxValue();
+                            }
                         }
                     }
-
-                    $student_output_text .= $component->getTitle() . "[" . $temp_score . "/" . $component->getMaxValue() . "] (Graded by {$component->getGrader()->getId()})".$nl;
+                    
+                    $student_output_text .= $component->getTitle() . "[" . $temp_score . "/" . $component->getMaxValue() . "] ";
+                    if ($component->getGrader() === null) {
+                        $student_output_text .= $nl;
+                    } else if ($component->getGrader()->accessFullGrading()) {
+                        $student_output_text .= "(Graded by {$component->getGrader()->getId()})".$nl;
+                    } else {
+                        $student_output_text .= $nl;
+                    }
+                    
                     if($component->getStudentComment() != "") {
                         $student_output_text .= "Rubric: " . $component->getStudentComment() . $nl;
                     }
@@ -193,7 +225,7 @@ class HWReport extends AbstractModel {
     public function generateSingleReport($student_id, $gradeable_id) {
         $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $student_id, "registration_section", "u.user_id", 0);
         $graders = $this->core->getQueries()->getAllGraders();
-        $ldu = new LateDaysCalculation($this->core);
+        $ldu = new LateDaysCalculation($this->core, $student_id);
         foreach($gradeables as $gradeable) {
             $this->generateReport($gradeable, $ldu);
         }
@@ -213,7 +245,7 @@ class HWReport extends AbstractModel {
     public function generateAllReportsForStudent($stu_id) {
         $gradeables = $this->core->getQueries()->getGradeables(null, $stu_id, "registration_section", "u.user_id", 0);
         $graders = $this->core->getQueries()->getAllGraders();
-        $ldu = new LateDaysCalculation($this->core);
+        $ldu = new LateDaysCalculation($this->core, $stu_id);
         foreach($gradeables as $gradeable) {
             $this->generateReport($gradeable, $ldu);
         }

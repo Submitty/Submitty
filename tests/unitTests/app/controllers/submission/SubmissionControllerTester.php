@@ -11,6 +11,7 @@ use app\models\Gradeable;
 use app\models\GradeableList;
 use tests\unitTests\BaseUnitTest;
 use app\models\User;
+use app\models\LateDaysCalculation;
 
 class SubmissionControllerTester extends BaseUnitTest {
 
@@ -71,6 +72,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         return $return;
     }
 
+    protected function createMockLateDaysCalculation() {
+        $return = $this->createMockModel(LateDaysCalculation::class);
+        $return->method("getGradeable")->willReturn(array('late_days_charged' => 0, 'extensions' => 0));
+        return $return;
+    }
+
     /**
      * Helper method to generate a mocked gradeable list with one gradeable. We can use annotations in our testcases
      * to set various aspects of the gradeable, namely @highestVersion, @numParts, and @maxSize for
@@ -92,6 +99,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable->method('getHighestVersion')->willReturn(intval($highest_version));
         $gradeable->method('getNumParts')->willReturn(intval($num_parts));
         $gradeable->method('getMaxSize')->willReturn($max_size);
+        $gradeable->method('getStudentSubmit')->willReturn(true);
 
         $g_list = $this->createMockModel(GradeableList::class);
         $g_list->method('getSubmittableElectronicGradeables')->willReturn(array('test' => $gradeable));
@@ -1076,13 +1084,15 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
         $now = new \DateTime("now", $core->getConfig()->getTimezone());
+        $ldu = $this->createMockLateDaysCalculation();
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(true);
         $gradeable->method('getOpenDate')->willReturn($now);
+        $gradeable->method('getUser')->willReturn($this->createMockUser('testUser'));
 
         $g_list = $this->createMock(GradeableList::class);
         $g_list->method('getGradeable')->willReturn($gradeable);
-        $core->method('loadModel')->willReturn($g_list);
+        $core->method('loadModel')->willReturnOnConsecutiveCalls($g_list, $ldu);
         $return = $this->runController($core);
         $this->assertEquals("test", $return['id']);
         $this->assertFalse($return['error']);
