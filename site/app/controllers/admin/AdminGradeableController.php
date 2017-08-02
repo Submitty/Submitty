@@ -92,6 +92,11 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "edit", $ini_data, $data);
     }
 
+    // check whether radio button's value is 'true'
+    private function isRadioButtonTrue($name) {
+        return isset($_POST[$name]) && $_POST[$name] === 'true';
+    }
+
     //if $edit_gradeable === 0 then it uploads the gradeable to the database
     //if $edit_gradeable === 1 then it updates the gradeable to the database
     private function modifyGradeable($edit_gradeable) {
@@ -101,8 +106,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setId($_POST['gradeable_id']);
         } else {
             $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
-        }
-        
+        }        
         $gradeable->setName(htmlentities($_POST['gradeable_title']));
         $gradeable->setInstructionsUrl($_POST['instructions_url']);
         $gradeable->setTaInstructions($_POST['ta_instructions']);
@@ -134,14 +138,17 @@ class AdminGradeableController extends AbstractController {
             if($is_ta_grading === false) { // sets that in order to not break a database constraint
                 $gradeable->setGradeStartDate(new \DateTime($_POST['date_released'], $this->core->getConfig()->getTimezone()));
             }
-            $gradeable->setConfigPath($_POST['config_path']);
-            $is_peer_grading = (isset($_POST['peer_grading']) && $_POST['peer_grading']=='yes') ? true : false;
-            $gradeable->setPeerGrading($is_peer_grading);
-            if ($is_peer_grading) { $gradeable->setPeerGradeSet($_POST['peer_grade_set']); }
-            $is_team_assignment = (isset($_POST['team_assignment']) && $_POST['team_assignment']=='yes') ? true : false;
-            $gradeable->setTeamAssignment($is_team_assignment);
+            $gradeable->setTeamAssignment($this->isRadioButtonTrue('team_assignment'));
             $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
             $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
+            $gradeable->setStudentView($this->isRadioButtonTrue('student_view'));
+            $gradeable->setStudentSubmit($this->isRadioButtonTrue('student_submit'));
+            $gradeable->setStudentDownload($this->isRadioButtonTrue('student_download'));
+            $gradeable->setStudentAnyVersion($this->isRadioButtonTrue('student_any_version'));
+            $gradeable->setConfigPath($_POST['config_path']);
+            $is_peer_grading = $this->isRadioButtonTrue('peer_grading');
+            $gradeable->setPeerGrading($is_peer_grading);
+            if ($is_peer_grading) { $gradeable->setPeerGradeSet($_POST['peer_grade_set']); }
         }
 
         if ($edit_gradeable === 0) {

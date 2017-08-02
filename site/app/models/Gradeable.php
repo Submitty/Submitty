@@ -40,6 +40,14 @@ use app\libraries\Utils;
  * @method void setPeerGradeSet(int $assign)
  * @method bool getPeerGrading()
  * @method void setPeerGrading(bool $peer)
+ * @method bool getStudentView()
+ * @method void setStudentView(bool $student_view)
+ * @method bool getStudentSubmit()
+ * @method void setStudentSubmit(bool $student_submit)
+ * @method bool getStudentDownload()
+ * @method void setStudentDownload(bool $student_download)
+ * @method bool getStudentAnyVersion()
+ * @method void setStudentAnyVersion(bool $student_any_version)
  * @method setTaViewDate(\DateTime $datetime)
  * @method \DateTime getOpenDate(\DateTime $datetime)
  * @method setOpenDate(\DateTime $datetime)
@@ -161,6 +169,15 @@ class Gradeable extends AbstractModel {
 
     /** @property @var bool Is there any TA grading to be done for this gradeable (ie. any rubric questions) */
     protected $ta_grading = false;
+
+    /** @property @var bool Will students be able to view submissions? */
+    protected $student_view = true;
+    /** @property @var bool Will students be able to make submissions? */
+    protected $student_submit = true;
+    /** @property @var bool Will students be able to download submissions? */
+    protected $student_download = false;
+    /** @property @var bool Will students be able to view/download any version or just the active version? */
+    protected $student_any_version = true;
 
     /* Config variables for submission details for this gradeable */
     /** @property @var float Max size (in bytes) allowed for the submission */
@@ -299,6 +316,10 @@ class Gradeable extends AbstractModel {
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
+            $this->student_view = $details['eg_student_view'] === true;
+            $this->student_submit = $details['eg_student_submit'] === true;
+            $this->student_download = $details['eg_student_download'] === true;
+            $this->student_any_version = $details['eg_student_any_version'] === true;
             $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
