@@ -169,9 +169,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # --------------------------------------------------------
     # various paths
-    test_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_code",obj["gradeable"])
+    provided_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"provded_code",obj["gradeable"])
     test_input_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_input",obj["gradeable"])
     test_output_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_output",obj["gradeable"])
+    custom_validation_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"custom_validation_code",obj["gradeable"])
     bin_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"bin")
 
     #checkout_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/checkout/$gradeable/$who/$version"
@@ -234,7 +235,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
-    copy_contents_into(test_code_path,tmp_compilation)
+    copy_contents_into(provided_code_path,tmp_compilation)
 
     subprocess.call(['ls', '-la', tmp_compilation], stdout=open(tmp_logs + "/overall.txt", 'a'))
     
@@ -350,6 +351,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # copy output files to tmp_work directory
     copy_contents_into(test_output_path,tmp_work)
 
+    # copy any instructor provided code files to tmp compilation directory
+    copy_contents_into(custom_validation_code_path,tmp_work)
+    
     subprocess.call(['ls', '-la', tmp_work], stdout=open(tmp_logs + "/overall.txt", 'a'))
         
     # copy validator.out to the current directory
