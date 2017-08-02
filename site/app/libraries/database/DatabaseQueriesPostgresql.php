@@ -629,18 +629,18 @@ ORDER BY {$section_key}", $params);
         }
         $this->course_db->query("
 SELECT count(u.*) as cnt, u.{$section_key}
-FROM users AS u
-INNER JOIN (
-  SELECT * FROM gradeable_data AS gd LEFT JOIN gradeable_component_data AS gcd ON gcd.gd_id = gd.gd_id WHERE g_id=?
-) AS gd ON u.user_id = gd.gd_user_id
+FROM(
+  SELECT * FROM gradeable_component_data AS gcd LEFT JOIN gradeable_data AS gd ON gcd.gd_id = gd.gd_id WHERE g_id=?
+) AS gd 
+INNER JOIN users AS u ON u.user_id = gd.gd_user_id
 {$where}
 GROUP BY u.{$section_key}
 ORDER BY u.{$section_key}", $params);
         foreach ($this->course_db->rows() as $row) {
-            if ($row['{$section_key}'] === null) {
-                $row['{$section_key}'] = "NULL";
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
             }
-            $return[$row['{$section_key}']] = intval($row['cnt']);
+            $return[$row[$section_key]] = intval($row['cnt']);
         }
         return $return;
     }
