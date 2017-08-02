@@ -357,7 +357,7 @@ class Gradeable extends AbstractModel {
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
+                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
@@ -814,7 +814,61 @@ class Gradeable extends AbstractModel {
     }
 
     public function getGradedTAPoints() {
-        return $this->graded_tagrading;
+        $points = 0;
+        foreach($this->components as $component) {
+            $marks = $component->getMarks();
+            $type = 0; // 0 is deduction, 1 is addition
+            foreach ($marks as $mark) {
+                if ($mark->getPoints() > 0) {
+                    $type = 1;
+                    break;
+                }
+                if ($mark->getPoints() < 0) {
+                    $type = 0;
+                    break;
+                }
+            }
+            if ($component->getMaxValue() < 0) {
+                $temp_points = ($type === 0 ) ? 0 : $component->getMaxValue();
+            } else {
+                $temp_points = ($type === 0 ) ? $component->getMaxValue() : 0;
+            }
+            
+            foreach ($marks as $mark) {
+                if ($mark->getHasMark()) {
+                    $temp_points += $mark->getPoints();
+                }
+            }
+
+            $temp_points += $component->getScore();
+
+            if ($component->getMaxValue() < 0) {
+                if ($type === 0) {
+                    if ($temp_points < $component->getMaxValue()) {
+                        $temp_points = $component->getMaxValue();
+                    }
+                } else {
+                    if ($temp_points > 0) {
+                        $temp_points = 0;
+                    }
+                }
+            }
+            else {
+                if ($type === 0) {
+                    if ($temp_points < 0) {
+                        $temp_points = 0;
+                    }
+                } else {
+                    if ($temp_points > $component->getMaxValue()) {
+                        $temp_points = $component->getMaxValue();
+                    }
+                }
+            }
+            
+
+            $points += $temp_points;
+        }
+        return $points;
     }
 
     public function getTotalTANonExtraCreditPoints() {

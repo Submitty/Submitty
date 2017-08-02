@@ -84,7 +84,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
                 'upload_message' => "",
                 'keep_previous_files' => false,
                 'display_iris_grades_summary' => false,
-                'display_custom_message' => false
+                'display_custom_message' => false,
+                'course_email' => 'Please contact your TA or instructor for a regrade request.'
             )
         );
 
@@ -158,6 +159,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'keep_previous_files' => false,
             'display_iris_grades_summary' => false,
             'display_custom_message' => false,
+            'course_email' => 'Please contact your TA or instructor for a regrade request.',
             'hidden_details' => array(
                 'database_name' => 'submitty_s17_csci0000'
             ),
@@ -256,7 +258,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'course_details' => array(
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
                 'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
-                'display_custom_message'
+                'display_custom_message', 'course_email'
             )
         );
         $return = array();

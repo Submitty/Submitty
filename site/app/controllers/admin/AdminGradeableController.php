@@ -133,10 +133,14 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setIsRepository(false);
             $gradeable->setSubdirectory("");
             $gradeable->setPointPrecision(floatval($_POST['point_precision']));
+            $is_ta_grading = (isset($_POST['ta_grading']) && $_POST['ta_grading']=='true') ? true : false;
+            $gradeable->setTaGrading($is_ta_grading);
+            if($is_ta_grading === false) { // sets that in order to not break a database constraint
+                $gradeable->setGradeStartDate(new \DateTime($_POST['date_released'], $this->core->getConfig()->getTimezone()));
+            }
             $gradeable->setTeamAssignment($this->isRadioButtonTrue('team_assignment'));
             $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
             $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
-            $gradeable->setTaGrading($this->isRadioButtonTrue('ta_grading'));
             $gradeable->setStudentView($this->isRadioButtonTrue('student_view'));
             $gradeable->setStudentSubmit($this->isRadioButtonTrue('student_submit'));
             $gradeable->setStudentDownload($this->isRadioButtonTrue('student_download'));
