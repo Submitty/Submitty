@@ -225,7 +225,7 @@ class HWReport extends AbstractModel {
     public function generateSingleReport($student_id, $gradeable_id) {
         $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $student_id, "registration_section", "u.user_id", 0);
         $graders = $this->core->getQueries()->getAllGraders();
-        $ldu = new LateDaysCalculation($this->core);
+        $ldu = new LateDaysCalculation($this->core, $student_id);
         foreach($gradeables as $gradeable) {
             $this->generateReport($gradeable, $ldu);
         }
@@ -245,7 +245,7 @@ class HWReport extends AbstractModel {
     public function generateAllReportsForStudent($stu_id) {
         $gradeables = $this->core->getQueries()->getGradeables(null, $stu_id, "registration_section", "u.user_id", 0);
         $graders = $this->core->getQueries()->getAllGraders();
-        $ldu = new LateDaysCalculation($this->core);
+        $ldu = new LateDaysCalculation($this->core, $stu_id);
         foreach($gradeables as $gradeable) {
             $this->generateReport($gradeable, $ldu);
         }
