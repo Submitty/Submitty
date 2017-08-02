@@ -491,8 +491,19 @@ HTML;
         $reg_or_rot = $gradeable->isGradeByRegistration() ? "Registration" : "Rotating";
         $return = <<<HTML
 <div class="popup-form" id="admin-team-form" style="width:500px; margin-left:-250px;">
-    <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'edit_team'))}">
+    <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'submit_team_form', 'gradeable_id'=>$gradeable->getId()))}">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+    <input type="hidden" name="new_team" />
+    <input type="hidden" name="new_team_user_id" />
+    <input type="hidden" name="edit_team_team_id" />
+    <input type="hidden" name="num_users" />
+HTML;
+    if (isset($_REQUEST['view'])) {
+        $return .= <<<HTML
+    <input type="hidden" name="view" value="{$_REQUEST['view']}" />
+HTML;
+    }
+    $return .= <<<HTML
     <h2 id="admin-team-title"></h2>
     <br />
     <div id="admin-team-members" style="width:50%;"></div>

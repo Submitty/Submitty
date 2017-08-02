@@ -380,6 +380,15 @@ abstract class AbstractDatabaseQueries {
     abstract public function createTeam($g_id, $user_id, $registration_section, $rotating_section);
 
     /**
+     * Set team $team_id's registration/rotating section to $section
+     * @param string $team_id
+     * @param int $section
+     */
+    abstract public function updateTeamRegistrationSection($team_id, $section);
+
+    abstract public function updateTeamRotatingSection($team_id, $section);
+
+    /**
      * Remove a user from their current team
      * @param string $team_id
      * @param string $user_id

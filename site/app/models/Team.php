@@ -31,17 +31,17 @@ class Team extends AbstractModel {
     public function __construct(Core $core, $details) {
         parent::__construct($core);
 
-        $this->id = $details[0]['team_id'];
-        $this->registration_section = $details[0]['registration_section'];
-        $this->rotating_section = $details[0]['rotating_section'];
+        $this->id = $details['team_id'];
+        $this->registration_section = $details['registration_section'];
+        $this->rotating_section = $details['rotating_section'];
         $this->member_user_ids = array();
         $this->invited_user_ids = array();
-        foreach($details as $user) {
-            if ($user['state'] === 1) {
-                $this->member_user_ids[] = $user['user_id'];
+        foreach($details['users'] as $user_details) {
+            if ($user_details['state'] === 1) {
+                $this->member_user_ids[] = $user_details['user_id'];
             }
-            else {
-                $this->invited_user_ids[] = $user['user_id'];
+            else if ($user_details['state'] === 0) {
+                $this->invited_user_ids[] = $user_details['user_id'];
             }
         }
         $this->member_list = count($this->member_user_ids) === 0 ? "[empty team]" : implode(", ", $this->member_user_ids);
