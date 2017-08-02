@@ -1082,7 +1082,6 @@ class Gradeable(object):
                 self.peer_grading = gradeable['eg_peer_grading'] is False
             if 'eg_use_ta_grading' in gradeable:
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
-                
             if 'eg_student_view' in gradeable:
                 self.student_view = gradeable['eg_student_view'] is True
             if 'eg_student_submit' in gradeable:

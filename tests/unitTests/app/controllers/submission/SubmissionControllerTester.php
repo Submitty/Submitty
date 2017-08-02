@@ -27,7 +27,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function setUp() {
         $_REQUEST['action'] = 'upload';
         $_REQUEST['gradeable_id'] = 'test';
-        $_REQUEST['svn_checkout'] = false;
+        $_REQUEST['vcs_checkout'] = false;
         $_POST['previous_files'] = "";
         $_POST['csrf_token'] = "";
         $_POST['user_id'] = "testUser";
@@ -707,8 +707,8 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals(array('.submit.timestamp', 'filename with spaces.txt'), $files);
     }
 
-    public function testSvnUpload() {
-        $_REQUEST['svn_checkout'] = "true";
+    public function testVcsUpload() {
+        $_REQUEST['vcs_checkout'] = "true";
         $return = $this->runController();
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
@@ -720,7 +720,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $files[] = $iter->getFilename();
         }
         sort($files);
-        $this->assertEquals(array('.submit.SVN_CHECKOUT', '.submit.timestamp'), $files);
+        $this->assertEquals(array('.submit.VCS_CHECKOUT', '.submit.timestamp'), $files);
         $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
         $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive", $touch_file));
     }
@@ -978,13 +978,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
     }
 
-    public function testErrorCreateSVNFile() {
-        $_REQUEST['svn_checkout'] = "true";
+    public function testErrorCreateVcsFile() {
+        $_REQUEST['vcs_checkout'] = "true";
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
         $return = $this->runController();
         $this->assertTrue($return['error']);
-        $this->assertEquals("Failed to touch file for svn submission.", $return['message']);
+        $this->assertEquals("Failed to touch file for vcs submission.", $return['message']);
         $this->assertFalse($return['success']);
     }
 

@@ -42,6 +42,7 @@ class AdminGradeableView extends AbstractView {
         $TA_grade_open_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
         $TA_grade_release_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
+        $vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
         $BASE_URL = "http:/localhost/hwgrading";
         $action = "upload_new_gradeable"; //decides how the page's data is displayed
         $string = "Add"; //Add or Edit
@@ -389,7 +390,7 @@ HTML;
                                                                          type="text"/>
                 <br /> <br />
 
-                Are students uploading files or submitting to a VCS repository?<br />
+                Are students uploading files or submitting to a Version Control System (VCS) repository?<br />
                 <fieldset>
 
                     <input type="radio" id="upload_file_radio" class="upload_file" name="upload_type" value="upload_file"
@@ -403,17 +404,17 @@ HTML;
 HTML;
                     if ($is_repository === true) { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
-                    > VCS Repository
+                    > Version Control System (VCS) Repository
                       
                     <div class="upload_type upload_file" id="upload_file"></div>
                      
                     <div class="upload_type upload_repo" id="repository">
                         <br />
-                        <b>Rest of the VCS path:</b>
+                        <b>Path for the Version Control System (VCS) repository:</b>
                         <br />
-                        The VCS base URL is configured in Course Settings. Specify the rest of the path using some or all the following allowed string replacement variables: gradeable_id, user_id, repo_id 
+                        VCS Base URL: <kbd>{$vcs_base_url}</kbd>
                         <br />
-                        ex. <kbd>/gradeable_id/user_id/repo_id</kbd>
+                        The VCS Base URL is configured in Course Settings. Specify the rest of the path using some or all the following allowed string replacement variables: gradeable_id, user_id, repo_id in format $&#123;&hellip;&#125; (ex. <kbd>/$&#123;gradeable_id&#125;/$&#123;user_id&#125;/$&#123;repo_id&#125;</kbd>), or specify the entire path if the entire path changes for each assignment.
                         <br />
                         <input style='width: 83%' type='text' name='vcs_path' value="" class="required" placeholder="(Required)"/>
                         <br />
@@ -2286,7 +2287,7 @@ $('#gradeable-form').on('submit', function(e){
         var date_ta_view = Date.parse($('#date_ta_view').val());
         var date_grade = Date.parse($('#date_grade').val());
         var date_released = Date.parse($('#date_released').val());
-        var vcs_path = $('input[name="vcs_path"]').val();
+        var vcs_path = $('input[name="vcs_path"]').val().trim();
         var config_path = $('input[name=config_path]').val();
         var has_space = gradeable_id.includes(" ");
         var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
@@ -2349,21 +2350,8 @@ $('#gradeable-form').on('submit', function(e){
             }
             if ($('input:radio[name="upload_type"]:checked').attr('value') === 'repository') {
                 if(vcs_path == "" || vcs_path === null) {
-                    alert("The vcs path should not be empty");
+                    alert("The VCS path should not be empty");
                     return false;
-                }
-                vcs_path_parts = vcs_path.split("/");
-                possible_variables = ["gradeable_id","user_id","repo_id"];
-                var x=0;
-                if (vcs_path_parts[x] !== "") {
-                    alert("The vcs path needs to start with '/'");
-                    return false;
-                }
-                for (x=1; x < vcs_path_parts.length; x++) {
-                    if (possible_variables.indexOf(vcs_path_parts[x]) === -1) {
-                        alert("Part of the vcs path is not a valid variable");
-                        return false;
-                    }
                 }
             }
             if(config_path == "" || config_path === null) {

@@ -350,7 +350,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count);
+                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count, "");
                 }
                 else {
                     alert("ERROR! \n\n" + data['message']);
@@ -572,11 +572,12 @@ function handleBulk(gradeable_id, num_pages) {
  * @param versions_used
  * @param versions_allowed
  * @param csrf_token
- * @param svn_checkout
+ * @param vcs_checkout
  * @param num_textboxes
  * @param user_id
+ * @param repo_id
  */
-function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, gradeable_id, user_id) {
+function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id) {
     $("#submit").prop("disabled", true);
 
     submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id});
@@ -607,10 +608,11 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
-    formData.append('svn_checkout', svn_checkout);
+    formData.append('vcs_checkout', vcs_checkout);
     formData.append('user_id', user_id);
+    formData.append('repo_id', repo_id);
 
-    if (!svn_checkout) {
+    if (!vcs_checkout) {
         // Check if new submission
         if (!isValidSubmission() && empty_textboxes) {
             alert("Not a new submission.");

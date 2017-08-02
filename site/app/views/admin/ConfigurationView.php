@@ -102,7 +102,7 @@ class ConfigurationView extends AbstractView {
         <div class="option">
             <div class="option-input"><input type="text" name="vcs_base_url" value="{$fields['vcs_base_url']}" /></div>
             <div class="option-desc">
-                <div class="option-title">VCS Base URL</div>
+                <div class="option-title">Version Control System (VCS) Base URL</div>
                 <div class="option-alt">
                     Base URL if students are submitting via VCS repository.<br />
                     external ex. <kbd>https://github.com/test-course</kbd><br />
@@ -118,7 +118,7 @@ class ConfigurationView extends AbstractView {
                 <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {$vcs_type_mer}/> Mercurial
             </div>
             <div class="option-desc">
-                <div class="option-title">VCS Type</div>
+                <div class="option-title">Version Control System (VCS) Type</div>
                 <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
             </div>
         </div>
@@ -132,23 +132,6 @@ class ConfigurationView extends AbstractView {
     </form>
 </div>
 HTML;
-
-    $return .= <<<HTML
-<script type="text/javascript">
-    $(document).ready(function() {
-        // if ('{$fields["vcs_type"]}' == 'git') {
-        //     $("#vcs_type_git").prop("checked",true);
-        // }
-        // else if ('{$fields["vcs_type"]}' == 'svn') {
-        //     $("#vcs_type_svn").prop("checked",true);
-        // }
-        // else if ('{$fields["vcs_type"]}' == 'mer') {
-        //     $("#vcs_type_mer").prop("checked",true);
-        // }
-    });
-</script>
-HTML;
-
     }
 
 }

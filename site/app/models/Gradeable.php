@@ -58,7 +58,7 @@ use app\libraries\Utils;
  * @method setGradeReleasedDate(\DateTime $datetime)
  * @method bool getGradeByRegistration()
  * @method array getSubmittedFiles()
- * @method array getSvnFiles()
+ * @method array getVcsFiles()
  * @method array getTestcases()
  * @method bool getIsRepository()
  * @method string getSubdirectory()
@@ -148,10 +148,10 @@ class Gradeable extends AbstractModel {
     /** @property @var \DateTime|null Due date for an electronic submission */
     protected $due_date = null;
 
-    /** @property @var bool Is the electronic submission a SVN repository or allow uploads */
+    /** @property @var bool Is the electronic submission a VCS repository or allow uploads */
     protected $is_repository = false;
 
-    /** @property @var string What is the subdirectory for SVN */
+    /** @property @var string What is the subdirectory for VCS */
     protected $subdirectory = "";
 
     /** @property @var int Number of days you can submit */
@@ -227,7 +227,7 @@ class Gradeable extends AbstractModel {
     /** @property @var array Array of all files for a specified submission number where each key is a previous file
      * and then each element is an array that contains filename, file path, and the file size. */
     protected $submitted_files = array();
-    protected $svn_files = array();
+    protected $vcs_files = array();
     protected $results_files = array();
     protected $meta_files = array();
     protected $previous_files = array();
@@ -664,7 +664,7 @@ class Gradeable extends AbstractModel {
         $course_path = $this->core->getConfig()->getCoursePath();
 
         $submission_path = $course_path."/submissions/".$this->id."/".$user_id;
-        $svn_path = $course_path."/checkout/".$this->id."/".$user_id;
+        $vcs_path = $course_path."/checkout/".$this->id."/".$user_id;
         $results_path = $course_path."/results/".$this->id."/".$user_id;
         $uploads_path = $course_path."/uploads/split_pdf/".$this->id;
 
@@ -699,10 +699,10 @@ class Gradeable extends AbstractModel {
             }
         }
 
-        $svn_current_path = $svn_path."/".$this->current_version;
-        $svn_files = FileUtils::getAllFiles($svn_current_path, array(), true);
-        foreach ($svn_files as $file => $details) {
-            $this->svn_files[$file] = $details;
+        $vcs_current_path = $vcs_path."/".$this->current_version;
+        $vcs_files = FileUtils::getAllFiles($vcs_current_path, array(), true);
+        foreach ($vcs_files as $file => $details) {
+            $this->vcs_files[$file] = $details;
         }
 
         $results_current_path = FileUtils::joinPaths($results_path,$this->current_version);
@@ -864,7 +864,7 @@ class Gradeable extends AbstractModel {
         return trim($this->conditional_message) !== "";
     }
 
-    public function useSvnCheckout() {
+    public function useVcsCheckout() {
         return $this->is_repository;
     }
 

@@ -599,7 +599,7 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
-        $svn_checkout = isset($_REQUEST['svn_checkout']) ? $_REQUEST['svn_checkout'] === "true" : false;
+        $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
     
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         
@@ -703,7 +703,7 @@ class SubmissionController extends AbstractController {
 
         $max_size = $gradeable->getMaxSize();
         
-        if ($svn_checkout === false) {
+        if ($vcs_checkout === false) {
             $uploaded_files = array();
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++){
                 if (isset($_FILES["files{$i}"])) {
@@ -881,8 +881,8 @@ class SubmissionController extends AbstractController {
             }
         }
         else {
-            if (!@touch(FileUtils::joinPaths($version_path, ".submit.SVN_CHECKOUT"))) {
-                return $this->uploadResult("Failed to touch file for svn submission.", false);
+            if (!@touch(FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT"))) {
+                return $this->uploadResult("Failed to touch file for vcs submission.", false);
             }
         }
     
