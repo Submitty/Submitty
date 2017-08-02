@@ -457,7 +457,7 @@ class SubmissionController extends AbstractController {
         }
 
         // if split_pdf/gradeable_id/timestamp directory is now empty, delete that directory
-        $timestamp = substr($path, 0, strpos($path, '/'));
+        $timestamp = substr($path, 0, strpos($path, DIRECTORY_SEPARATOR));
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
@@ -576,7 +576,7 @@ class SubmissionController extends AbstractController {
         }
 
         // delete timestamp folder if empty
-        $timestamp = substr($path, 0, strpos($path, '/'));
+        $timestamp = substr($path, 0, strpos($path, DIRECTORY_SEPARATOR));
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
@@ -618,7 +618,7 @@ class SubmissionController extends AbstractController {
         $user_id = $_POST['user_id'];
 
         // make sure is admin if the two ids do not match
-        if (!$this->core->getUser()->accessAdmin() && $original_user_id != $user_id) {
+        if ($original_user_id !== $user_id && !$this->core->getUser()->accessAdmin()) {
             $msg = "You do not have access to that page.";
             $_SESSION['messages']['error'][] = $msg;
             return $this->uploadResult($msg, false);
@@ -631,6 +631,14 @@ class SubmissionController extends AbstractController {
             $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         }
         $gradeable->loadResultDetails();
+
+        // if student submission, make sure that gradeable allows submissions
+        if (!$this->core->getUser()->accessGrading() && $original_user_id == $user_id && !$gradeable->getStudentSubmit()) {
+            $msg = "You do not have access to that page.";
+            $_SESSION['messages']['error'][] = $msg;
+            return $this->uploadResult($msg, false);
+        }
+
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
         
@@ -1032,6 +1040,13 @@ class SubmissionController extends AbstractController {
         
         if ($new_version > $gradeable->getHighestVersion()) {
             $msg = "Cannot set the version past {$gradeable->getHighestVersion()}.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($url);
+            return array('error' => true, 'message' => $msg);
+        }
+
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentSubmit()) {
+            $msg = "Cannot submit for this assignment.";
             $_SESSION['messages']['error'][] = $msg;
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);

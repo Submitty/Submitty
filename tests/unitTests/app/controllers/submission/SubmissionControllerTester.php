@@ -99,6 +99,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable->method('getHighestVersion')->willReturn(intval($highest_version));
         $gradeable->method('getNumParts')->willReturn(intval($num_parts));
         $gradeable->method('getMaxSize')->willReturn($max_size);
+        $gradeable->method('getStudentSubmit')->willReturn(true);
 
         $g_list = $this->createMockModel(GradeableList::class);
         $g_list->method('getSubmittableElectronicGradeables')->willReturn(array('test' => $gradeable));
