@@ -83,6 +83,14 @@
 #     eg_use_ta_grading: [optional] Boolean for whether or not to have any TA grading (regardless if there are defined
 #         components). Defaults to TRUE
 #
+#     eg_student_view: [optional] Boolean for whether or not student can view submissions. Defaults to TRUE.
+#
+#     eg_student_submit: [optional] Boolean for whether or not student can make submissions. Defaults to TRUE.
+#
+#     eg_student_download: [optional] Boolean for whether or not student can download files. Defaults to FALSE.
+#
+#     eg_student_any_version: [optional] Boolean for whether or not student can view/download any version (TRUE) or just the active (FALSE). Defaults to TRUE.
+#
 #     eg_late_days: [optional] integer for how many late days are allowed for this gradeable. Defaults to 2.
 #
 #     eg_precision: [optional] what is the precision to be used on the rubric page per item when grading.
