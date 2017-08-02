@@ -377,122 +377,74 @@ HTML;
                         if ($g_data->useTAGrading()) {
                             $gradeable_core = $this->core->getQueries()->getGradeable($gradeable);
                             $gradeable_id = $gradeable_core->getId();
-                            // $total_users = array();
-                            // $graded = array();
-                            // $graders = array();
-                            // $sections = array();
-                            // if ($gradeable_core->isGradeByRegistration()) {
-                            //     if(!$this->core->getUser()->accessFullGrading()){
-                            //         $sections = $this->core->getUser()->getGradingRegistrationSections();
-                            //     }
-                            //     if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
-                            //         $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
-                            //         $total_components = $this->core->getQueries()->getTotalComponentCount($gradeable_core->getId());
-                            //         $graded = $this->core->getQueries()->getGradedComponentsCountByRegistrationSections($gradeable_core->getId(), $sections);
-                            //         $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
-                            //     }
-                            // }
-                            // else {
-                            //     if(!$this->core->getUser()->accessFullGrading()){
-                            //         $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable, $this->core->getUser()->getId());
-                            //     }
-                            //     if (count($sections) > 0 || $this->core->getUser()->accessFullGrading()) {
-                            //         $total_users = $this->core->getQueries()->getTotalUserCountByRotatingSections($sections);
-                            //         $total_components = $this->core->getQueries()->getTotalComponentCount($gradeable_core->getId());
-                            //         $graded = $this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable, $sections);
-                            //         $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable_core->getId(), $sections);
-                            //     }
-                            // }
 
-                            // $sections = array();
-                            // if (count($total_users) > 0) {
-                            //     foreach ($total_users as $key => $value) {
-                            //         $sections[$key] = array(
-                            //             'total_components' => $value * $total_components,
-                            //             'graded_components' => 0,
-                            //             'graders' => array()
-                            //         );
-                            //         if (isset($graded[$key])) {
-                            //             $sections[$key]['graded_components'] = intval($graded[$key]) * $total_components;
-                            //         }
-                            //         if (isset($graders[$key])) {
-                            //             $sections[$key]['graders'] = $graders[$key];
-                            //         }
-                            //     }
-                            // }
-
-        $total_users = array();
-        $no_team_users = array();
-        $graded_components = array();
-        $graders = array();
-        if ($gradeable_core->isGradeByRegistration()) {
-            if(!$this->core->getUser()->accessFullGrading()){
-                $sections = $this->core->getUser()->getGradingRegistrationSections();
-            }
-            else {
-                $sections = $this->core->getQueries()->getRegistrationSections();
-                foreach ($sections as $i => $section) {
-                    $sections[$i] = $section['sections_registration_id'];
-                }
-            }
-            $section_key='registration_section';
-            if (count($sections) > 0) {
-                $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
-            }
-        }
-        else {
-            if(!$this->core->getUser()->accessFullGrading()){
-                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
-            }
-            else {
-                $sections = $this->core->getQueries()->getRotatingSections();
-                foreach ($sections as $i => $section) {
-                    $sections[$i] = $section['sections_rotating_id'];
-                }
-            }
-            $section_key='rotating_section';
-            if (count($sections) > 0) {
-                $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable_id, $sections);
-            }
-        }
-        if (count($sections) > 0) {
-            if ($gradeable_core->isTeamAssignment()) {
-                $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
-                $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key);
-            }
-            else {
-                $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
-                $no_team_users = array();
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key);
-            }
-        }
-        
-        $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable_id);
-        $sections = array();
-        if (count($total_users) > 0) {
-            foreach ($total_users as $key => $value) {
-                $sections[$key] = array(
-                    'total_components' => $value * $num_components,                        
-                    'graded_components' => 0,
-                    'graders' => array()
-                );
-                if ($gradeable_core->isTeamAssignment()) {
-                    $sections[$key]['no_team'] = $no_team_users[$key];
-                }
-                if (isset($graded_components[$key])) {
-                    $sections[$key]['graded_components'] = intval($graded_components[$key]);
-                }
-                if (isset($graders[$key])) {
-                    $sections[$key]['graders'] = $graders[$key];
-                }
-            }
-        }
-
-
-
-
-
+                            $total_users = array();
+                            $no_team_users = array();
+                            $graded_components = array();
+                            $graders = array();
+                            if ($gradeable_core->isGradeByRegistration()) {
+                                if(!$this->core->getUser()->accessFullGrading()){
+                                    $sections = $this->core->getUser()->getGradingRegistrationSections();
+                                }
+                                else {
+                                    $sections = $this->core->getQueries()->getRegistrationSections();
+                                    foreach ($sections as $i => $section) {
+                                        $sections[$i] = $section['sections_registration_id'];
+                                    }
+                                }
+                                $section_key='registration_section';
+                                if (count($sections) > 0) {
+                                    $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
+                                }
+                            }
+                            else {
+                                if(!$this->core->getUser()->accessFullGrading()){
+                                    $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+                                }
+                                else {
+                                    $sections = $this->core->getQueries()->getRotatingSections();
+                                    foreach ($sections as $i => $section) {
+                                        $sections[$i] = $section['sections_rotating_id'];
+                                    }
+                                }
+                                $section_key='rotating_section';
+                                if (count($sections) > 0) {
+                                    $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable_id, $sections);
+                                }
+                            }
+                            if (count($sections) > 0) {
+                                if ($gradeable_core->isTeamAssignment()) {
+                                    $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
+                                    $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
+                                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key);
+                                }
+                                else {
+                                    $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
+                                    $no_team_users = array();
+                                    $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key);
+                                }
+                            }
+                            
+                            $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable_id);
+                            $sections = array();
+                            if (count($total_users) > 0) {
+                                foreach ($total_users as $key => $value) {
+                                    $sections[$key] = array(
+                                        'total_components' => $value * $num_components,                        
+                                        'graded_components' => 0,
+                                        'graders' => array()
+                                    );
+                                    if ($gradeable_core->isTeamAssignment()) {
+                                        $sections[$key]['no_team'] = $no_team_users[$key];
+                                    }
+                                    if (isset($graded_components[$key])) {
+                                        $sections[$key]['graded_components'] = intval($graded_components[$key]);
+                                    }
+                                    if (isset($graders[$key])) {
+                                        $sections[$key]['graders'] = $graders[$key];
+                                    }
+                                }
+                            }
 
                             $components_graded = 0;
                             $components_total = 0;
