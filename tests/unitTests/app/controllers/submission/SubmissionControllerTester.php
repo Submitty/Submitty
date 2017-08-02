@@ -11,6 +11,7 @@ use app\models\Gradeable;
 use app\models\GradeableList;
 use tests\unitTests\BaseUnitTest;
 use app\models\User;
+use app\models\LateDaysCalculation;
 
 class SubmissionControllerTester extends BaseUnitTest {
 
@@ -68,6 +69,12 @@ class SubmissionControllerTester extends BaseUnitTest {
     protected function createMockUser($id) {
         $return = $this->createMockModel(User::class);
         $return->method("getId")->willReturn($id);
+        return $return;
+    }
+
+    protected function createMockLateDaysCalculation() {
+        $return = $this->createMockModel(LateDaysCalculation::class);
+        $return->method("getGradeable")->willReturn(array('late_days_charged' => 0, 'extensions' => 0));
         return $return;
     }
 
@@ -1077,13 +1084,15 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
         $now = new \DateTime("now", $core->getConfig()->getTimezone());
+        $ldu = $this->createMockLateDaysCalculation();
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(true);
         $gradeable->method('getOpenDate')->willReturn($now);
+        $gradeable->method('getUser')->willReturn($this->createMockUser('testUser'));
 
         $g_list = $this->createMock(GradeableList::class);
         $g_list->method('getGradeable')->willReturn($gradeable);
-        $core->method('loadModel')->willReturn($g_list);
+        $core->method('loadModel')->willReturnOnConsecutiveCalls($g_list, $ldu);
         $return = $this->runController($core);
         $this->assertEquals("test", $return['id']);
         $this->assertFalse($return['error']);

@@ -47,21 +47,30 @@ HTML;
      * TODO: BREAK UP THIS FUNCTION INTO EASIER TO MANAGE CHUNKS
      *
      * @param Gradeable $gradeable
-     * @param int       $days_late
+     * @param int       $late_days_use
+     * @param int       $extensions
      *
      * @return string
      */
-    public function showGradeable($gradeable, $days_late) {
+    public function showGradeable($gradeable, $late_days_use, $extensions) {
+        $return = "";
         // hiding entire page if user is not a grader and student cannot view
         if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
             $message = "Students cannot view that gradeable.";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+        if($extensions > 0){
+            $return .= <<<HTML
+<div class="content">
+    <h4>You have a {$extensions} day extension for this homework</h4>
+</div>
+HTML;
+        }
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
-        $return = <<<HTML
+        $return .= <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 HTML;
         // showing submission if user is grader or student can submit
@@ -415,7 +424,7 @@ HTML;
             }
             // otherwise, this is a regular submission of the uploaded files
             else if (user_id == "") {
-                handleSubmission({$days_late},
+                handleSubmission({$late_days_use},
                                 {$gradeable->getAllowedLateDays()},
                                 {$gradeable->getHighestVersion()},
                                 {$gradeable->getMaxSubmissions()},
@@ -426,7 +435,7 @@ HTML;
                                 "{$gradeable->getUser()->getId()}");
             }
             else {
-                handleSubmission({$days_late},
+                handleSubmission({$late_days_use},
                                 {$gradeable->getAllowedLateDays()},
                                 highest_version,
                                 {$gradeable->getMaxSubmissions()},
