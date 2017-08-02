@@ -47,15 +47,24 @@ HTML;
      * TODO: BREAK UP THIS FUNCTION INTO EASIER TO MANAGE CHUNKS
      *
      * @param Gradeable $gradeable
-     * @param int       $days_late
+     * @param int       $late_days_use
+     * @param int       $extensions
      *
      * @return string
      */
-    public function showGradeable($gradeable, $days_late) {
+    public function showGradeable($gradeable, $late_days_use, $extensions) {
+        $return = "";
+        if($extensions > 0){
+            $return .= <<<HTML
+<div class="content">
+    <h4>You have a {$extensions} day extension for this homework</h4>
+</div>
+HTML;
+        }
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
-        $return = <<<HTML
+        $return .= <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
     <h2>New submission for: {$gradeable->getName()}</h2>
@@ -406,7 +415,7 @@ HTML;
             }
             // otherwise, this is a regular submission of the uploaded files
             else if (user_id == "") {
-                handleSubmission({$days_late},
+                handleSubmission({$late_days_use},
                                 {$gradeable->getAllowedLateDays()},
                                 {$gradeable->getHighestVersion()},
                                 {$gradeable->getMaxSubmissions()},
@@ -417,7 +426,7 @@ HTML;
                                 "{$gradeable->getUser()->getId()}");
             }
             else {
-                handleSubmission({$days_late},
+                handleSubmission({$late_days_use},
                                 {$gradeable->getAllowedLateDays()},
                                 highest_version,
                                 {$gradeable->getMaxSubmissions()},
@@ -754,7 +763,13 @@ HTML;
                 $return .= <<<HTML
     <div class="sub">
 HTML;
-                if (count($gradeable->getTestcases()) > 0) {
+                $num_visible_testcases = 0;
+                foreach ($gradeable->getTestcases() as $testcase) {
+                    if ($testcase->viewTestcase()) {
+                        $num_visible_testcases++;
+                    }
+                }
+                if ($num_visible_testcases > 0) {
                     $return .= <<<HTML
         <h4>Results</h4>
 HTML;

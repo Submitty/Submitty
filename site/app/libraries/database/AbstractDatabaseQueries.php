@@ -135,9 +135,9 @@ abstract class AbstractDatabaseQueries {
      */
     abstract public function getGradeableVersions($g_id, $user_id, $team_id, $due_date);
 
-    abstract public function getLateDayUpdates();
+    abstract public function getLateDayUpdates($user_id);
 
-    abstract public function getLateDayInformation();
+    abstract public function getLateDayInformation($user_id);
 
     abstract public function getUsersByRegistrationSections($sections);
 

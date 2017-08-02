@@ -729,11 +729,11 @@ HTML;
             <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
 HTML;
 
-            //Late day calculation
-            $ldu = new LateDaysCalculation($this->core);
-            $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
-            $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
-            $status = $late_days_data['status'];
+        //Late day calculation
+        $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
+        $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
+        $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
+        $status = $late_days_data['status'];
 
             $color = "green";
             if($status != "Good" && $status != "Late") {
