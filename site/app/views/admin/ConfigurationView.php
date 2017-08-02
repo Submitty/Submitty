@@ -10,6 +10,9 @@ class ConfigurationView extends AbstractView {
         $keep_previous_files = ($fields['keep_previous_files'] === true) ? 'checked' : '';
         $display_iris_grades_summary = ($fields['display_iris_grades_summary'] === true) ? 'checked' : '';
         $display_custom_message = ($fields['display_custom_message'] === true) ? 'checked' : '';
+        $vcs_type_git = ($fields['vcs_type'] === 'git') ? 'checked' : '';
+        $vcs_type_svn = ($fields['vcs_type'] === 'svn') ? 'checked' : '';
+        $vcs_type_mer = ($fields['vcs_type'] === 'mer') ? 'checked' : '';
 
 
         return <<<HTML
@@ -100,15 +103,19 @@ class ConfigurationView extends AbstractView {
             <div class="option-input"><input type="text" name="vcs_base_url" value="{$fields['vcs_base_url']}" /></div>
             <div class="option-desc">
                 <div class="option-title">VCS Base URL</div>
-                <div class="option-alt">Base URL if students are submitting via VCS repository.</div>
+                <div class="option-alt">
+                    Base URL if students are submitting via VCS repository.<br />
+                    external ex. <kbd>https://github.com/test-course</kbd><br />
+                    internal ex. <kbd>ssh+svn://192.168.56.101/test-course</kbd>
+                </div>
             </div>
         </div>
 
         <div class="option">
             <div class="option-input">
-                <input type="radio" name="vcs_type" value="git"/> Git
-                <input type="radio" name="vcs_type" value="svn"/> SVN
-                <input type="radio" name="vcs_type" value="mer"/> Mercurial
+                <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {$vcs_type_git}/> Git
+                <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {$vcs_type_svn}/> SVN
+                <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {$vcs_type_mer}/> Mercurial
             </div>
             <div class="option-desc">
                 <div class="option-title">VCS Type</div>
@@ -129,7 +136,15 @@ HTML;
     $return .= <<<HTML
 <script type="text/javascript">
     $(document).ready(function() {
-        
+        // if ('{$fields["vcs_type"]}' == 'git') {
+        //     $("#vcs_type_git").prop("checked",true);
+        // }
+        // else if ('{$fields["vcs_type"]}' == 'svn') {
+        //     $("#vcs_type_svn").prop("checked",true);
+        // }
+        // else if ('{$fields["vcs_type"]}' == 'mer') {
+        //     $("#vcs_type_mer").prop("checked",true);
+        // }
     });
 </script>
 HTML;

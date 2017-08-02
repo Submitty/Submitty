@@ -28,7 +28,7 @@ class AdminGradeableView extends AbstractView {
         $TA_beta_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
         $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
         $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
-        $electronic_gradeable['eg_subdirectory'] = "temp";
+        $electronic_gradeable['eg_subdirectory'] = "";
         $electronic_gradeable['eg_config_path'] = "";
         $electronic_gradeable['eg_late_days'] = 2;
         $electronic_gradeable['eg_precision'] = 0.5;
@@ -100,6 +100,7 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_open_date']));
                 $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_due_date']));
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
+                $electronic_gradeable['eg_subdirectory'] = $data[3]['eg_subdirectory'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $precision = $data[3]['eg_precision'];
                 $electronic_gradeable['eg_precision'] = $precision;
@@ -107,6 +108,7 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_team_lock_date']));
                 $team_yes_checked = $data[3]['eg_team_assignment'];
                 $team_no_checked = !$team_yes_checked;
+                $is_repository = $data[3]['eg_is_repository'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $student_view = $data[3]['eg_student_view'];
                 $student_submit = $data[3]['eg_student_submit'];
@@ -140,6 +142,7 @@ class AdminGradeableView extends AbstractView {
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) {
+                $electronic_gradeable['eg_subdirectory'] = $data[3]['eg_subdirectory'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
                 $team_yes_checked = $data[3]['eg_team_assignment'];
@@ -389,25 +392,30 @@ HTML;
                 Are students uploading files or submitting to a VCS repository?<br />
                 <fieldset>
 
-                    <input type="radio" id="file_radio" class="upload_file" name="upload_type" value="Upload File"
+                    <input type="radio" id="upload_file_radio" class="upload_file" name="upload_type" value="upload_file"
 HTML;
                     if ($is_repository === false) { $html_output .= ' checked="checked"'; }
 
                 $html_output .= <<<HTML
                     > Upload File(s)
 
-                    <input type="radio" id="repository_radio" class="upload_repo" name="upload_type" value="Repository"
+                    <input type="radio" id="repository_radio" class="upload_repo" name="upload_type" value="repository"
 HTML;
                     if ($is_repository === true) { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
                     > VCS Repository
                       
-                    <div class="upload_type upload_file" id="upload_file">
-                    </div>
+                    <div class="upload_type upload_file" id="upload_file"></div>
                      
                     <div class="upload_type upload_repo" id="repository">
                         <br />
-                        Which subdirectory of the repository?<input style='width: 227px' type='text' name='subdirectory' value="src" />
+                        <b>Rest of the VCS path:</b>
+                        <br />
+                        The VCS base URL is configured in Course Settings. Specify the rest of the path using some or all the following allowed string replacement variables: gradeable_id, user_id, repo_id 
+                        <br />
+                        ex. <kbd>/gradeable_id/user_id/repo_id</kbd>
+                        <br />
+                        <input style='width: 83%' type='text' name='vcs_path' value="" class="required" placeholder="(Required)"/>
                         <br />
                     </div>
                     
@@ -1212,6 +1220,10 @@ function createCrossBrowserJSDate(val){
             $('#student_submit_download_view').hide();
         }
 
+        if ($('input:radio[name="upload_type"]:checked').attr('value') === 'upload_file') {
+            $('#repository').hide();
+        }
+
         $('.gradeable_type_options').hide();
         
         if ($('input[name="gradeable_type"]').is(':checked')){
@@ -1283,6 +1295,16 @@ function createCrossBrowserJSDate(val){
                 }
             }
         });
+
+        $('input:radio[name="upload_type"]').change(function() {
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'repository') {
+                    $('#repository').show();
+                } else {
+                    $('#repository').hide();
+                }
+            }
+        });
         
         $('[name="gradeable_template"]').change(
         function(){
@@ -1302,7 +1324,7 @@ function createCrossBrowserJSDate(val){
         
         if($('#radio_electronic_file').is(':checked')){ 
             
-            $('input[name="subdirectory"]').val('{$electronic_gradeable['eg_subdirectory']}');
+            $('input[name="vcs_path"]').val('{$electronic_gradeable['eg_subdirectory']}');
             $('input[name="config_path"]').val('{$electronic_gradeable['eg_config_path']}');
             $('input[name="eg_late_days"]').val('{$electronic_gradeable['eg_late_days']}');
             $('input[name="point_precision"]').val('{$electronic_gradeable['eg_precision']}');
@@ -2264,6 +2286,7 @@ $('#gradeable-form').on('submit', function(e){
         var date_ta_view = Date.parse($('#date_ta_view').val());
         var date_grade = Date.parse($('#date_grade').val());
         var date_released = Date.parse($('#date_released').val());
+        var vcs_path = $('input[name="vcs_path"]').val();
         var config_path = $('input[name=config_path]').val();
         var has_space = gradeable_id.includes(" ");
         var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
@@ -2323,6 +2346,21 @@ $('#gradeable-form').on('submit', function(e){
             if(date_due < date_submit) {
                 alert("DATE CONSISTENCY:  Due Date must be >= Submission Open Date");
                 return false;
+            }
+            if ($('input:radio[name="upload_type"]:checked').attr('value') === 'repository') {
+                if(vcs_path == "" || vcs_path === null) {
+                    alert("The vcs path should not be empty");
+                    return false;
+                }
+                vcs_path_parts = vcs_path.split("/");
+                possible_variables = ["gradeable_id","user_id","repo_id"];
+                var x;
+                for (x=1; x < vcs_path_parts.length; x++) {
+                    if (possible_variables.indexOf(vcs_path_parts[x]) === -1) {
+                        alert("Part of the vcs path is not a valid variable");
+                        return false;
+                    }
+                }
             }
             if(config_path == "" || config_path === null) {
                 alert("The config path should not be empty");

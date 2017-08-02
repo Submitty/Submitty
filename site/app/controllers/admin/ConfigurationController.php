@@ -87,10 +87,6 @@ class ConfigurationController extends AbstractController {
             $_POST[$key] = (isset($_POST[$key]) && $_POST[$key] == "true") ? true : false;
         }
 
-        if (!isset($_POST['vcs_type'])) {
-            $_POST['vcs_type'] = "";
-        }
-
         $save_array = array(
             'hidden_details' => $this->core->getConfig()->getHiddenDetails(),
             'course_details' => array(
