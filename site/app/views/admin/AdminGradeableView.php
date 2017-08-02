@@ -42,17 +42,21 @@ class AdminGradeableView extends AbstractView {
         $TA_grade_open_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
         $TA_grade_release_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-		$BASE_URL = "http:/localhost/hwgrading";
-		$action = "upload_new_gradeable"; //decides how the page's data is displayed
-		$string = "Add"; //Add or Edit
-		$button_string = "Add";
-		$extra = "";
-		$gradeable_submission_id = "";
-		$gradeable_name = "";
-		$g_instructions_url = "";
-		$g_gradeable_type = 0;
-		$is_repository = false;
-		$use_ta_grading=false;
+        $BASE_URL = "http:/localhost/hwgrading";
+        $action = "upload_new_gradeable"; //decides how the page's data is displayed
+        $string = "Add"; //Add or Edit
+        $button_string = "Add";
+        $extra = "";
+        $gradeable_submission_id = "";
+        $gradeable_name = "";
+        $g_instructions_url = "";
+        $g_gradeable_type = 0;
+        $is_repository = false;
+        $use_ta_grading = false;
+        $student_view = true;
+        $student_submit = true;
+        $student_download = false;
+        $student_any_version = true;
         $old_questions = array();
         $g_min_grading_group = 0;
         $g_overall_ta_instructions = "";
@@ -104,6 +108,10 @@ class AdminGradeableView extends AbstractView {
                 $team_yes_checked = $data[3]['eg_team_assignment'];
                 $team_no_checked = !$team_yes_checked;
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $student_view = $data[3]['eg_student_view'];
+                $student_submit = $data[3]['eg_student_submit'];
+                $student_download = $data[3]['eg_student_download'];
+                $student_any_version = $data[3]['eg_student_any_version'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
                 if(isset($data[3]['eg_peer_grade_set'])){
@@ -137,6 +145,10 @@ class AdminGradeableView extends AbstractView {
                 $team_yes_checked = $data[3]['eg_team_assignment'];
                 $team_no_checked = !$team_yes_checked;
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $student_view = $data[3]['eg_student_view'];
+                $student_submit = $data[3]['eg_student_submit'];
+                $student_download = $data[3]['eg_student_download'];
+                $student_any_version = $data[3]['eg_student_any_version'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
                 $peer_grade_set = $data[3]['eg_peer_grade_set'];
@@ -336,12 +348,12 @@ HTML;
                 <br />
                 Is this a team assignment?
                 <fieldset>
-                    <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="yes"
+                    <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="true"
 HTML;
                 if (($type_of_action === "edit" || $type_of_action === "add_template") && $team_yes_checked) { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
                 > Yes
-                    <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="no"
+                    <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="false"
 HTML;
                 if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
@@ -373,7 +385,6 @@ HTML;
                 How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
                                                                          type="text"/>
                 <br /> <br />
-                
 
                 Are students uploading files or commiting code to an SVN repository?<br />
                 <fieldset>
@@ -394,6 +405,62 @@ HTML;
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
 
+                Will students be able to view submissions?
+                <input type="radio" id="yes_student_view" name="student_view" value="true" class="bool_val rubric_questions"
+HTML;
+                if ($student_view===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                /> Yes
+                <input type="radio" id="no_student_view" name="student_view" value="false"
+HTML;
+                if ($student_view===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                /> No 
+                <br /> <br />
+
+                <div id="student_submit_download_view">
+
+                    Will students be able to make submissions? (Select 'No' if this is an exam.)
+                    <input type="radio" id="yes_student_submit" name="student_submit" value="true" class="bool_val rubric_questions"
+HTML;
+                    if ($student_submit===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> Yes
+                    <input type="radio" id="no_student_submit" name="student_submit" value="false"
+HTML;
+                    if ($student_submit===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> No 
+                    <br /> <br />
+
+                    Will students be able to download files? (Select 'Yes' if this is an exam.)
+                    <input type="radio" id="yes_student_download" name="student_download" value="true" class="bool_val rubric_questions"
+HTML;
+                    if ($student_download===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> Yes
+                    <input type="radio" id="no_student_download" name="student_download" value="false"
+HTML;
+                    if ($student_download===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> No
+                    <br /> <br />
+
+                    Will students be view/download any or all versions? (Select 'Active version only' if this is an exam.)
+                    <input type="radio" id="yes_student_any_version" name="student_any_version" value="true" class="bool_val rubric_questions"
+HTML;
+                    if ($student_any_version===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> Any version
+                    <input type="radio" id="no_student_any_version" name="student_any_version" value="false"
+HTML;
+                    if ($student_any_version===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> Active version only
+                    <br /> <br />
+
+                </div>
+
                 Will this assignment also be graded by the TAs?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
@@ -405,24 +472,26 @@ HTML;
                 if ($use_ta_grading===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> No 
+                <br /><br />
                 
                 <div id="rubric_questions" class="bool_val rubric_questions">
                 Will this assignment have peer grading?: 
-                <input type="radio" id="peer_yes_radio" name="peer_grading" value="yes" class="peer_yes"
+                <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes"
 HTML;
         $display_peer_checkboxes = "";
                 if(($type_of_action === "edit" || $type_of_action === "add_template") && $peer_yes_checked) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
  /> Yes
-                <input type="radio" id="peer_no_radio" name="peer_grading" value="no" class="peer_no"
+                <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no"
 HTML;
                 if ((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; $display_peer_checkboxes='style="display:none"'; }
         $html_output .= <<<HTML
- /> No <br />
+ /> No 
+                <br /><br />
                 <div class="peer_input" style="display:none;">How many people should each person grade? <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' /></div>
                 Point precision (for TA grading): 
                 <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{$precision}" class="float_val" />
-                <br /> 
+                <br /><br />
                 
                 <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
@@ -1118,18 +1187,25 @@ function createCrossBrowserJSDate(val){
             $('#grading_questions').hide();
         }
 
+        if ($('input:radio[name="student_view"]:checked').attr('value') === 'false') {
+            $('#no_student_submit').prop('checked', true);
+            $('#no_student_download').prop('checked',true);
+            $('#yes_student_any_version').prop('checked',true);
+            $('#student_submit_download_view').hide();
+        }
+
         $('.gradeable_type_options').hide();
         
-        if ($('input[name=gradeable_type]').is(':checked')){
-            $('input[name=gradeable_type]').each(function(){
+        if ($('input[name="gradeable_type"]').is(':checked')){
+            $('input[name="gradeable_type"]').each(function(){
                 if(!($(this).is(':checked')) && ({$edit})){
                     $(this).attr("disabled",true);
                 }
             });
         }
 
-        if ($('input[name=team_assignment]').is(':checked')){
-            $('input[name=team_assignment]').each(function(){
+        if ($('input[name="team_assignment"]').is(':checked')){
+            $('input[name="team_assignment"]').each(function(){
                 if(!($(this).is(':checked')) && ({$edit})){
                     $(this).attr("disabled",true);
                 }
@@ -1155,13 +1231,40 @@ function createCrossBrowserJSDate(val){
             $('.peer_input').hide();
             $('#peer_averaging_scheme').hide();
             if ($(this).is(':checked')) {
-                if($(this).val() == 'yes') {
+                if($(this).val() == 'true') {
                     $('.peer_input').show();
                     $('#peer_averaging_scheme').show();
                 }
             }
         });
-        
+
+        $('input:radio[name="ta_grading"]').change(function(){
+            $('#rubric_questions').hide();
+            $('#grading_questions').hide();
+            if ($(this).is(':checked')){
+                if($(this).val() == 'true'){ 
+                    $('#rubric_questions').show();
+                    $('#grading_questions').show();
+                    $('#ta_instructions_id').hide();
+                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                } else {
+                    $('#grades_released_compare_date').html('Due Date');
+                }
+            }
+        });
+
+        $('input:radio[name="student_view"]').change(function() {
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'true') {
+                    $('#student_submit_download_view').show();
+                } else {
+                    $('#no_student_submit').prop('checked', true);
+                    $('#no_student_download').prop('checked',true);
+                    $('#yes_student_any_version').prop('checked',true);
+                    $('#student_submit_download_view').hide();
+                }
+            }
+        });
         
         $('[name="gradeable_template"]').change(
         function(){
@@ -1176,15 +1279,15 @@ function createCrossBrowserJSDate(val){
         });
         
         if({$default_late_days} != -1){
-            $('input[name=eg_late_days]').val('{$default_late_days}');
+            $('input[name="eg_late_days"]').val('{$default_late_days}');
         }
         
         if($('#radio_electronic_file').is(':checked')){ 
             
-            $('input[name=subdirectory]').val('{$electronic_gradeable['eg_subdirectory']}');
-            $('input[name=config_path]').val('{$electronic_gradeable['eg_config_path']}');
-            $('input[name=eg_late_days]').val('{$electronic_gradeable['eg_late_days']}');
-            $('input[name=point_precision]').val('{$electronic_gradeable['eg_precision']}');
+            $('input[name="subdirectory"]').val('{$electronic_gradeable['eg_subdirectory']}');
+            $('input[name="config_path"]').val('{$electronic_gradeable['eg_config_path']}');
+            $('input[name="eg_late_days"]').val('{$electronic_gradeable['eg_late_days']}');
+            $('input[name="point_precision"]').val('{$electronic_gradeable['eg_precision']}');
             $('#ta_instructions_id').hide();
             
             if($('#repository_radio').is(':checked')){
@@ -1199,8 +1302,8 @@ function createCrossBrowserJSDate(val){
             }
 
             if($('#team_yes_radio').is(':checked')){
-                $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
-                $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                $('input[name="eg_max_team_size"]').val('{$electronic_gradeable['eg_max_team_size']}');
+                $('input[name="date_team_lock"]').val('{$electronic_gradeable['eg_team_lock_date']}');
                 $('#team_yes').show();
             }
             else {
@@ -1233,14 +1336,14 @@ function createCrossBrowserJSDate(val){
             $('#grading_questions').show();
         }
         if({$edit}){
-            $('input[name=gradeable_id]').attr('readonly', true);
+            $('input[name="gradeable_id"]').attr('readonly', true);
         }
 
         $('input:radio[name="team_assignment"]').change(
     function(){
         if($('#team_yes_radio').is(':checked')){
-            $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
-            $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+            $('input[name="eg_max_team_size"]').val('{$electronic_gradeable['eg_max_team_size']}');
+            $('input[name="date_team_lock"]').val('{$electronic_gradeable['eg_team_lock_date']}');
             $('#team_yes').show();
         }
         else {
@@ -1269,8 +1372,8 @@ function createCrossBrowserJSDate(val){
                 }
 
                 if($('#team_yes_radio').is(':checked')){
-                    $('input[name=eg_max_team_size]').val('{$electronic_gradeable['eg_max_team_size']}');
-                    $('input[name=date_team_lock]').val('{$electronic_gradeable['eg_team_lock_date']}');
+                    $('input[name="eg_max_team_size"]').val('{$electronic_gradeable['eg_max_team_size']}');
+                    $('input[name="date_team_lock"]').val('{$electronic_gradeable['eg_team_lock_date']}');
                     $('#team_yes').show();
                 }
                 else {
@@ -2148,11 +2251,11 @@ $('#gradeable-form').on('submit', function(e){
         var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
         var unique_gradeable = false;
         var bad_max_score = false;
-        var check1 = document.getElementById('radio_electronic_file').checked;
-        var check2 = document.getElementById('radio_checkpoints').checked;
-        var check3 = document.getElementById('radio_numeric').checked;
-        var checkRegister = document.getElementById('registration-section').checked;
-        var checkRotate = document.getElementById('rotating-section').checked;
+        var check1 = $('#radio_electronic_file').is(':checked');
+        var check2 = $('#radio_checkpoints').is(':checked');
+        var check3 = $('#radio_numeric').is(':checked');
+        var checkRegister = $('#registration-section').is(':checked');
+        var checkRotate = $('#rotating-section').is(':checked');
         var all_gradeable_ids = $js_gradeables_array;
         if($('#peer_yes_radio').is(':checked')) {
             var found_peer_component = false;
@@ -2205,6 +2308,13 @@ $('#gradeable-form').on('submit', function(e){
             }
             if(config_path == "" || config_path === null) {
                 alert("The config path should not be empty");
+                return false;
+            }
+            // if view false while either submit or download true
+            if ($('input:radio[name="student_view"]:checked').attr('value') === 'false' &&
+               ($('input:radio[name="student_submit"]:checked').attr('value') === 'true' ||
+                $('input:radio[name="student_download"]:checked').attr('value') === 'true')) {
+                alert("Student_view cannot be false while student_submit or student_download is true");
                 return false;
             }
         }
