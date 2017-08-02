@@ -159,6 +159,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'keep_previous_files' => false,
             'display_iris_grades_summary' => false,
             'display_custom_message' => false,
+            'course_email' => 'Please contact your TA or instructor for a regrade request.',
             'hidden_details' => array(
                 'database_name' => 'submitty_s17_csci0000'
             ),
