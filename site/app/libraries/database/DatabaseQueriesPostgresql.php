@@ -221,6 +221,10 @@ SELECT";
   eg.eg_max_team_size,
   eg.eg_team_lock_date,
   eg.eg_use_ta_grading,
+  eg.eg_student_view,
+  eg.eg_student_submit,
+  eg.eg_student_download,
+  eg.eg_student_any_version,
   eg.eg_peer_grading,
   eg.eg_submission_open_date,
   eg.eg_submission_due_date,
@@ -496,13 +500,18 @@ ORDER BY egd.g_version", array($g_id, $user_id));
     }
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query 
-    public function getLateDayUpdates() {
-        $this->course_db->query("SELECT * FROM late_days");
+    public function getLateDayUpdates($user_id) {
+        if($user_id != null) {
+          $this->course_db->query("SELECT * FROM late_days WHERE user_id=?", array($user_id));
+        }
+        else {
+          $this->course_db->query("SELECT * FROM late_days");
+        }
         return $this->course_db->rows();
     }
     
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
-    public function getLateDayInformation() {
+    public function getLateDayInformation($user_id) {
         $params = array(300);
         $query = "SELECT
                       submissions.*
@@ -550,7 +559,6 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                           egv.active_version = egd.g_version
                           AND egv.g_id = egd.g_id
                           AND egv.user_id = egv.user_id
-                        --WHERE egv.user_id = ?
                         GROUP BY  egv.g_id,egv.user_id, active_version, g_version, submission_time
                         --End Details--
                     ) as details
@@ -563,8 +571,10 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                         late_day_exceptions AS lde 
                       ON submissions.g_id = lde.g_id 
                       AND submissions.user_id = lde.user_id";
-        //Query database and return results.
-        
+        if($user_id !== null) {
+          $query .= " WHERE submissions.user_id=?";
+          $params[] = $user_id;
+        }
         $this->course_db->query($query, $params);
         return $this->course_db->rows();
     }
@@ -1007,11 +1017,12 @@ DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?
 INSERT INTO gradeable(g_id, g_title, g_instructions_url,g_overall_ta_instructions, g_gradeable_type, g_grade_by_registration, g_ta_view_start_date, g_grade_start_date,  g_grade_released_date,  g_min_grading_group, g_syllabus_bucket) 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            $params = array($gradeable->getId(), $gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), var_export($gradeable->getTeamAssignment(),true), $gradeable->getMaxTeamSize(), $gradeable->getTeamLockDate()->format('Y/m/d H:i:s'), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), var_export($gradeable->getPeerGrading(), true), $gradeable->getPeerGradeSet());
+            $params = array($gradeable->getId(), $gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTeamAssignment(),true), $gradeable->getMaxTeamSize(), $gradeable->getTeamLockDate()->format('Y/m/d H:i:s'), var_export($gradeable->getTaGrading(), true), var_export($gradeable->getStudentView(), true), var_export($gradeable->getStudentSubmit(), true),  var_export($gradeable->getStudentDownload(), true), var_export($gradeable->getStudentAnyVersion(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), var_export($gradeable->getPeerGrading(), true), $gradeable->getPeerGradeSet());
             $this->course_db->query("
-INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository, eg_subdirectory, eg_use_ta_grading,
-eg_team_assignment, eg_max_team_size, eg_team_lock_date, eg_config_path, eg_late_days, eg_precision, eg_peer_grading, eg_peer_grade_set) 
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository, 
+eg_subdirectory, eg_team_assignment, eg_max_team_size, eg_team_lock_date, eg_use_ta_grading, eg_student_view, eg_student_submit, eg_student_download,
+eg_student_any_version, eg_config_path, eg_late_days, eg_precision, eg_peer_grading, eg_peer_grade_set) 
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
     }
 
@@ -1022,10 +1033,11 @@ UPDATE gradeable SET g_title=?, g_instructions_url=?, g_overall_ta_instructions=
 g_gradeable_type=?, g_grade_by_registration=?, g_ta_view_start_date=?, g_grade_start_date=?, 
 g_grade_released_date=?, g_min_grading_group=?, g_syllabus_bucket=? WHERE g_id=?", $params);
         if ($gradeable->getType() === 0) {
-          $params = array($gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTaGrading(), true), var_export($gradeable->getTeamAssignment(),true), $gradeable->getMaxTeamSize(), $gradeable->getTeamLockDate()->format('Y/m/d H:i:s'), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), var_export($gradeable->getPeerGrading(), true), $gradeable->getPeerGradeSet(), $gradeable->getId());
+          $params = array($gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTeamAssignment(),true), $gradeable->getMaxTeamSize(), $gradeable->getTeamLockDate()->format('Y/m/d H:i:s'), var_export($gradeable->getTaGrading(), true), var_export($gradeable->getStudentView(), true), var_export($gradeable->getStudentSubmit(), true), var_export($gradeable->getStudentDownload(), true), var_export($gradeable->getStudentAnyVersion(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), var_export($gradeable->getPeerGrading(), true), $gradeable->getPeerGradeSet(), $gradeable->getId());
           $this->course_db->query("
-UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?, eg_subdirectory=?, eg_use_ta_grading=?,
-eg_team_assignment=?, eg_max_team_size=?, eg_team_lock_date=?, eg_config_path=?, eg_late_days=?, eg_precision=?, eg_peer_grading=?, eg_peer_grade_set=? WHERE g_id=?", $params);
+UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?, 
+eg_subdirectory=?, eg_team_assignment=?, eg_max_team_size=?, eg_team_lock_date=?, eg_use_ta_grading=?, eg_student_view=?, eg_student_submit=?,
+eg_student_download=?, eg_student_any_version=?, eg_config_path=?, eg_late_days=?, eg_precision=?, eg_peer_grading=?, eg_peer_grade_set=? WHERE g_id=?", $params);
         }
     }
 
@@ -1093,7 +1105,6 @@ WHERE gcm_id=?", $params);
             $this->course_db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
             $electronic_gradeable = $this->course_db->row();
             $use_ta_grading = $electronic_gradeable['eg_use_ta_grading'];
-
             $initial_ta_grading_compare_date = "Due Date (+ max allowed late days)";
 
             if ($use_ta_grading) {
