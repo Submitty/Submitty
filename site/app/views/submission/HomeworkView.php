@@ -198,22 +198,22 @@ HTML;
                     $image_width = $image_height = 0;
 
                     if (isset($gradeable->getTextboxes()[$i]['images']) && $gradeable->getTextboxes()[$i]['images'] != ""){
-                        $tester = $gradeable->getTextboxes()[$i]['images'];
+                        $images = $gradeable->getTextboxes()[$i]['images'];
                     }
                     else{
-                        $tester = array();
+                        $images = array();
                     }
 
-                    foreach($tester as $currImage){
+                    foreach($images as $currImage){
                         $currImageName = $currImage["image_name"];
-                        $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "test_input", $gradeable->getName(), $currImageName);
+                        $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(),"test_input",$gradeable->getId(),$currImageName);
                         $content_type = FileUtils::getContentType($imgPath);
                         if (substr($content_type, 0, 5) === "image") {
-                            // Read image path, convert to base64 encoding
-                            $textBoxImageData = base64_encode(file_get_contents($imgPath));
-                            // Format the image SRC:  data:{mime};base64,{data};
-                            $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
-                            // insert the sample image data
+                           // Read image path, convert to base64 encoding
+                           $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                           // Format the image SRC:  data:{mime};base64,{data};
+                           $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
+                           // insert the sample image data
 
                             if(isset($currImage['image_height']) && (int)$currImage['image_height'] > 0){
                                 $image_height = $currImage['image_height'];

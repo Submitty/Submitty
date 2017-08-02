@@ -97,8 +97,6 @@ select {
     height: 34px;
     background: #FFF url('../img/down_arrow.png') no-repeat right 10px center;
     background-size: 20px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
 }
 
 input[type="checkbox"]{

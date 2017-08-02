@@ -418,7 +418,7 @@ HTML;
                                         'graders' => array()
                                     );
                                     if (isset($graded[$key])) {
-                                        $sections[$key]['graded_components'] = intval($graded[$key]) * $total_components;
+                                        $sections[$key]['graded_components'] = intval($graded[$key]);
                                     }
                                     if (isset($graders[$key])) {
                                         $sections[$key]['graders'] = $graders[$key];

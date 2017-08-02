@@ -100,6 +100,14 @@ class ConfigurationView extends AbstractView {
         </div>
 
         <div class="option">
+            <div class="option-input"><input type="text" name="course_email" value="{$fields['course_email']}" /></div>
+            <div class="option-desc">
+                <div class="option-title">Course Regrade</div>
+                <div class="option-alt">Input the message used for regrades or the course's email</div>
+            </div>
+        </div>
+
+        <div class="option">
             <div class="option-input"><input type="text" name="vcs_base_url" value="{$fields['vcs_base_url']}" /></div>
             <div class="option-desc">
                 <div class="option-title">Version Control System (VCS) Base URL</div>
