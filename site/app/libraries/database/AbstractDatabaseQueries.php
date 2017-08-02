@@ -141,21 +141,17 @@ abstract class AbstractDatabaseQueries {
 
     abstract public function getUsersByRegistrationSections($sections);
 
-    abstract public function getTotalUserCountByRegistrationSections($sections);
+    abstract public function getTotalUserCountByGradingSections($sections, $section_key);
 
     abstract public function getTotalComponentCount($g_id);
 
-    abstract public function getGradedComponentsCountByRegistrationSections($g_id, $sections);
+    abstract public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key);
 
     abstract public function getGradersForRegistrationSections($sections);
 
     abstract public function getRotatingSectionsForGradeableAndUser($g_id, $user_id);
 
     abstract public function getUsersByRotatingSections($sections);
-
-    abstract public function getTotalUserCountByRotatingSections($sections);
-
-    abstract public function getGradedComponentsCountByRotatingSections($g_id, $sections);
 
     abstract public function getGradersForRotatingSections($g_id, $sections);
 
