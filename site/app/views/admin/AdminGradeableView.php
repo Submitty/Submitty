@@ -2354,7 +2354,11 @@ $('#gradeable-form').on('submit', function(e){
                 }
                 vcs_path_parts = vcs_path.split("/");
                 possible_variables = ["gradeable_id","user_id","repo_id"];
-                var x;
+                var x=0;
+                if (vcs_path_parts[x] !== "") {
+                    alert("The vcs path needs to start with '/'");
+                    return false;
+                }
                 for (x=1; x < vcs_path_parts.length; x++) {
                     if (possible_variables.indexOf(vcs_path_parts[x]) === -1) {
                         alert("Part of the vcs path is not a valid variable");
