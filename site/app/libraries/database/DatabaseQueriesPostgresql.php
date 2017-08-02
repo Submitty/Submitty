@@ -949,17 +949,17 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
 UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?", $params);
     }
 
+    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $mark->getId());
+        $this->course_db->query("
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
+    }
+
     public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
         $params = array($gc_id, $gd_id, $mark->getId());
         $this->course_db->query("
 INSERT INTO gradeable_component_mark_data (gc_id, gd_id, gcm_id)
 VALUES (?, ?, ?)", $params);
-    }
-
-    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
-        $params = array($gc_id, $gd_id, $mark->getId());
-        $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
     }
 
     public function createNewGradeable(Gradeable $gradeable) {
