@@ -308,6 +308,10 @@ if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
     popd
 else
     git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+    # remember to change this version in .setup/travis/autograder.sh too
+    git checkout v0.9
+    popd
 fi
 
 
@@ -395,7 +399,7 @@ if [[ ${VAGRANT} == 1 ]]; then
     chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
     # Call helper script that makes the courses and refreshes the database
-    ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py
+    ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
 
     #################################################################
     # SET CSV FIELDS (for classlist upload data)

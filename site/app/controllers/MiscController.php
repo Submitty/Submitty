@@ -24,58 +24,108 @@ class MiscController extends AbstractController {
         }
     }
 
-    private function displayFile() {
-        //Additional security
-        if (!($this->core->getUser()->accessGrading())) {
-            throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
+    // function to check that this is a valid access request
+    private function checkValidAccess($is_zip) {
+        // only allow zip if it's a grader
+        if ($is_zip) {
+            return ($this->core->getUser()->accessGrading());
         }
-        foreach (explode(DIRECTORY_SEPARATOR, $_REQUEST['path']) as $part) {
+        // from this point on, is not a zip
+        // do path and permissions checking
+        $dir = $_REQUEST['dir'];
+        $path = $_REQUEST['path'];
+
+        foreach (explode(DIRECTORY_SEPARATOR, $path) as $part) {
             if ($part == ".." || $part == ".") {
-                throw new \InvalidArgumentException("Cannot have a part of the path just be dots");
-            }
-        }
-        $path = $this->core->getConfig()->getCoursePath();
-        if ($_REQUEST['dir'] === "config_upload") {
-            $check = FileUtils::joinPaths($path, "config_upload");
-            if (!Utils::startsWith($_REQUEST['path'], $check)) {
-                throw new \InvalidArgumentException("Path must start with path to config_upload");
-            }
-            if (!file_exists($_REQUEST['path'])) {
-                throw new \InvalidArgumentException("File does not exist");
-            }
-        }
-        else if ($_REQUEST['dir'] === "submissions" || $_REQUEST['dir'] === "uploads") {
-            if (!file_exists($_REQUEST['path'])) {
-                throw new \InvalidArgumentException("File does not exist");
-            }
-        }
-        else {
-            throw new \InvalidArgumentException("Invalid dir used");
-        }
-        if (!FileUtils::isValidFileName($_REQUEST['path'])) {
-            throw new \InvalidArgumentException("Not a valid file name");
-        }
-        $gradeable_path = $this->core->getConfig()->getCoursePath();
-        $folder_names = array();
-        $folder_names[] = "submissions";
-        $folder_names[] = "results";
-        $folder_names[] = "checkout";
-        $folder_names[] = "uploads";
-        $path_anchors = array();
-        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[0]);
-        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[1]);
-        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[2]);
-        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[3]);
-        $arr_count = count($path_anchors);
-        $access = false;
-        for ($x = 0; $x < $arr_count; $x++) {
-            if(Utils::startsWith($_REQUEST['path'], $path_anchors[$x])){
-                $access = true;
+                return false;
             }
         }
 
-        if(!$access) {
-            throw new \InvalidArgumentException("You're not allowed access to that file");
+        if (!FileUtils::isValidFileName($path)) {
+            return false;
+        }
+
+        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout");
+        if (!in_array($dir, $possible_directories)) {
+            return false;
+        }
+
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $check = FileUtils::joinPaths($course_path, $dir);
+        if (!Utils::startsWith($path, $check)) {
+            return false;
+        }
+        if (!file_exists($path)) {
+            return false;
+        }
+
+        if ($dir === "config_upload" || $dir === "uploads") {
+            return ($this->core->getUser()->accessAdmin());
+        }
+        else if ($dir === "submissions" || $dir === "results") {
+            // if instructor or grader, then it's okay
+            if ($this->core->getUser()->accessGrading()) {
+                return true;
+            }
+
+            // FIXME: need to make this work for peer grading
+
+            $current_user_id = $this->core->getUser()->getId();
+            // get the gradeable_id
+            $path_folder = FileUtils::joinPaths($course_path, $dir);
+            $path_rest = substr($path, strlen($path_folder)+1);
+            $path_gradeable_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
+            $path_rest = substr($path_rest, strlen($path_gradeable_id)+1);
+            $path_user_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
+            $path_rest = substr($path_rest, strlen($path_user_id)+1);
+            $path_version = intval(substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR)));
+
+            $path_gradeable = $this->core->getQueries()->getGradeable($path_gradeable_id, $path_user_id);
+            if ($path_gradeable === null) {
+                return false;
+            }
+
+            // if gradeable student view or download false, don't allow anything
+            if (!$path_gradeable->getStudentView() || !$path_gradeable->getStudentDownload()) {
+                return false;
+            }
+
+            // make sure that version is active version if student any version is false
+            if (!$path_gradeable->getStudentAnyVersion() && $path_version !== $path_gradeable->getActiveVersion()) {
+                return false;
+            }
+
+            // if team assignment, check that team id matches the team of the current user
+            if ($path_gradeable->isTeamAssignment()) {
+                $path_team_id = $path_user_id;
+                $current_team = $this->core->getQueries()->getTeamByGradeableAndUser($path_gradeable_id,$current_user_id);
+                if ($current_team === null) {
+                    return false;
+                }
+                $current_team_id = $current_team->getId();
+                if ($path_team_id != $current_team_id) {
+                    return false;
+                }
+            }
+            // else, just check that the user ids match
+            else {
+                if ($current_user_id != $path_user_id) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private function displayFile() {
+        // security check
+        if (!$this->checkValidAccess(false)) {
+            $message = "You do not have access to that page.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $mime_type = FileUtils::getMimeType($_REQUEST['path']);
@@ -100,40 +150,12 @@ class MiscController extends AbstractController {
     }
 
     private function downloadFile() {
-        //Additional security
-        if (!($this->core->getUser()->accessGrading())) {
-            throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
-        }
-        if (!file_exists($_REQUEST['path'])) {
-            throw new \InvalidArgumentException("File does not exist");
-        }
-        foreach (explode(DIRECTORY_SEPARATOR, $_REQUEST['path']) as $part) {
-            if ($part == ".." || $part == ".") {
-                throw new \InvalidArgumentException("Cannot have a part of the path just be dots");
-            }
-        }
-        if (!FileUtils::isValidFileName($_REQUEST['path'])) {
-            throw new \InvalidArgumentException("Not a valid file name");
-        }
-        $gradeable_path = $this->core->getConfig()->getCoursePath();
-        $folder_names = array();
-        $folder_names[] = "submissions";
-        $folder_names[] = "results";
-        $folder_names[] = "checkout";
-        $path_anchors = array();
-        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[0]);
-        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[1]);
-        $path_anchors[] = FileUtils::joinPaths($gradeable_path, $folder_names[2]);
-        $arr_count = count($path_anchors);
-        $access = false;
-        for ($x = 0; $x < $arr_count; $x++) {
-            if(Utils::startsWith($_REQUEST['path'], $path_anchors[$x])){
-                $access = true;
-            }
-        }
-
-        if(!$access) {
-            throw new \InvalidArgumentException("You're not allowed access to that file");
+        
+        // security check
+        if (!$this->checkValidAccess(false)) {
+            $message = "You do not have access to that page.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
         
         $this->core->getOutput()->useHeader(false);
@@ -146,10 +168,13 @@ class MiscController extends AbstractController {
     }
 
     private function downloadZip() {
-        //Additional security
-        if (!($this->core->getUser()->accessGrading())) {
-            throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
+        // security check
+        if (!$this->checkValidAccess(true)) {
+            $message = "You do not have access to that page.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         $zip_file_name = $_REQUEST['gradeable_id'] . "_" . $_REQUEST['user_id'] . "_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -207,10 +232,13 @@ class MiscController extends AbstractController {
     }
 
     private function downloadAssignedZips() { 
-        //Additional security
+        // security check
         if (!($this->core->getUser()->accessGrading())) {
-            throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
+            $message = "You do not have access to that page.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         $zip_file_name = $_REQUEST['gradeable_id'] . "_section_students_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);

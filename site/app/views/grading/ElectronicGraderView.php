@@ -618,7 +618,7 @@ HTML;
 HTML;
 
         //Late day calculation
-        $ldu = new LateDaysCalculation($this->core);
+        $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
         $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
         $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
         $status = $late_days_data['status'];
@@ -647,9 +647,11 @@ HTML;
 <div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
     <span class="grading_label">Grading Rubric</span> <span style="float: right; position: relative; top: 10px; right: 1%;"> Overwrite Grader: <input type='checkbox' id="overwrite-id" name='overwrite' value='1' /> </span>
 HTML;
+        $break_onclick = "";
         $disabled = '';
         if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion() || $gradeable->getCurrentVersionNumber() == 0){
             $disabled='disabled';
+            $break_onclick = "return false; ";
             $return .= <<<HTML
     <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
@@ -668,6 +670,7 @@ HTML;
             $type = 0; //0 is common deductable, 1 is common additive
             $min = -1000;
             $max = 0;
+            $ungraded = false;
             foreach ($question->getMarks() as $mark) {
                 if($mark->getPoints() < 0) {
                     $min = -1000;
@@ -752,18 +755,23 @@ HTML;
                 </tr>
 HTML;
 
-            $min_val = (intval($question->getMaxValue()) > 0) ? 0 : intval($question->getMaxValue());
-            $max_val = (intval($question->getMaxValue()) > 0) ? intval($question->getMaxValue()) : 0;
-
-
             //gets the initial point value and text
             $initial_text = "";
             $first_text = true;
-            if ($type === 0) {
-                $question_points = $question->getMaxValue();
+            if ($question->getMaxValue() < 0) {
+                if ($type === 0) {
+                    $question_points = 0;
+                } else {
+                    $question_points = $question->getMaxValue();
+                }
             } else {
-                $question_points = 0;
+                if ($type === 0) {
+                    $question_points = $question->getMaxValue();
+                } else {
+                    $question_points = 0;
+                }
             }
+            
             foreach ($question->getMarks() as $mark) {
                 if($mark->getHasMark() === true) {
                     $question_points += $mark->getPoints();
@@ -788,13 +796,26 @@ HTML;
 
             if($initial_text == "") {
                 $initial_text = "Click me to grade!";
+                $ungraded = true;
             }
 
             $question_points += $question->getScore();
-            if ($type === 0) {
-                if ($question_points < 0) $question_points = 0;
+            if($question->getMaxValue() < 0) {
+                if ($type === 0) {
+                    if ($question_points < $question->getMaxValue()) $question_points = $question->getMaxValue();
+                } else {
+                    if ($question_points > 0) $question_points = 0;
+                }
             } else {
-                if ($question_points > $question->getMaxValue()) $question_points = $question->getMaxValue();
+                if ($type === 0) {
+                    if ($question_points < 0) $question_points = 0;
+                } else {
+                    if ($question_points > $question->getMaxValue()) $question_points = $question->getMaxValue();
+                }
+            }
+            
+            if($ungraded === true) {
+                $question_points = " ";
             }
 
             $background = "";
@@ -806,7 +827,7 @@ HTML;
             }
             
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
+                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
                         <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-max_points="{$question->getMaxValue()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
@@ -818,10 +839,13 @@ HTML;
                 </tr>
                 <tbody id="extra-{$c}" style="{$background}; display: none" colspan="4">
                 <tr id="mark_header_id={$c}" name="mark_header_{$c}">
-                    <td colspan="4", style="{$background}">
+                    <td colspan="4", style="{$background};">
                             Common Grade {$word}
-                        <span onclick="saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose({$c}, {$num_questions});" style="float: right; cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i>
-                        </span>
+                            <div style="float: right;">
+                                <span onclick="cancelMark({$c}, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose({$c}, {$num_questions});" style="cursor: pointer;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                                </span>
+                                <span onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose({$c}, {$num_questions});" style="cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                            </div>
                     </td>
                 </tr>
 HTML;
@@ -843,7 +867,7 @@ HTML;
                 $return .= <<<HTML
                 <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
                     <td colspan="1" style="{$background}; text-align: center; width: 12%;"> <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
-                        <span onclick="selectMark(this);"> <i class="fa {$icon_mark}" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                        <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}; width: 88%">
                         <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width: 95%; resize:none; float:left;" {$noChange}>{$mark_text}</textarea>
@@ -852,19 +876,27 @@ HTML;
 HTML;
             $d++;
             }
-
+                $has_mark = false;
+                if($question->getScore() == 0 && $question->getComment() == "") {
+                    $has_mark = false;
+                }
+                else {
+                    $has_mark = true;
+                }
+                $icon_mark = ($has_mark === true) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
                 <tr>
                     <td colspan="4" style="{$background};">
-                        <span style="cursor: pointer;" onclick="addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+                        <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
                         Add New {$word}</span>
                     </td>
                 </tr>
                 <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_custom_{$c}" type="number" step="{$precision}" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                    <td colspan="1" style="{$background}; text-align: center;"> <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this);" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                    <span onclick=""> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                     </td>
                     <td colspan="3" style="{$background}">
-                        <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event);" rows="1" placeholder="Custom message for student..." style="width:95%; resize:none; float:left;">{$question->getComment()}</textarea>
+                        <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this);" rows="1" placeholder="Custom message for student..." style="width:95%; resize:none; float:left;">{$question->getComment()}</textarea>
                     </td>
                 </tr>
                 </tbody>
@@ -877,14 +909,14 @@ HTML;
                     <b>General Comment</b> <span onclick=""> <i id="icon-general-comment" class="fa fa-window-maximize" style="visibility: visible;"></i>
                 </td>
             </tr>
-            <tr onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-2, {$num_questions});">
+            <tr onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-2, {$num_questions});">
                 <td colspan="4">
                     <textarea id="comment-general-id" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
                 </td>
             </tr>
             <tr id="done-general" style="display: none;">
                 <td colspan="4">
-                    <span onclick="saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-1, {$num_questions});" style=" cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                    <span onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-1, {$num_questions});" style=" cursor: pointer;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                 </td>
             </tr>
 HTML;
@@ -915,12 +947,15 @@ HTML;
         var iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open')) {
             var iframeId = "file_viewer_" + num + "_iframe";
+            directory = "";
+            if (url_file.includes("submissions")) directory = "submissions";
+            else if (url_file.includes("results")) directory = "results";  
             // handle pdf
             if(url_file.substring(url_file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=submissions&file=" + html_file + "&path=" + url_file + "' width='750px' height='600px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='750px' height='600px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=submissions&file=" + html_file + "&path=" + url_file + "' width='750px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='750px' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }
@@ -944,14 +979,20 @@ HTML;
     }
 
     function downloadFile(html_file, url_file) {
-        url_file = decodeURIComponent(url_file);        
-        window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': html_file, 'path': url_file});
+        url_file = decodeURIComponent(url_file);  
+        directory = "";
+        if (url_file.includes("submissions")) directory = "submissions";
+        else if (url_file.includes("results")) directory = "results";      
+        window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': directory, 'file': html_file, 'path': url_file});
         return false;
     }
 
     function openFile(html_file, url_file) {
         url_file = decodeURIComponent(url_file);
-        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=submissions&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        directory = "";
+        if (url_file.includes("submissions")) directory = "submissions";
+        else if (url_file.includes("results")) directory = "results";
+        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
 
@@ -980,6 +1021,32 @@ HTML;
         }
     }
 
+    //if type == 0 number input, type == 1 textarea
+    function checkIfSelected(me) {
+        var table_row = $(me.parentElement.parentElement);
+        var is_selected = false;
+        var icon = table_row.find("i");
+        var number_input = table_row.find("input");
+        var text_input = table_row.find("textarea");
+        var question_num = parseInt(icon.attr('name').split('_')[2]);
+
+        if(number_input.val() != 0 || text_input.val() != "") {
+            is_selected = true;
+        }
+
+        if (is_selected === true) {
+            if(icon[0].classList.contains('fa-square-o')) {
+                icon.toggleClass("fa-square-o fa-square");
+            }
+        } else {
+            if(icon[0].classList.contains('fa-square')) {
+                icon.toggleClass("fa-square-o fa-square");
+            }
+        }
+
+        checkMarks(question_num);
+    }
+
     function addMark(me, num, background, min, max, precision) {
         var last_num = -10;
         var current_row = $(me.parentElement.parentElement);
@@ -995,7 +1062,7 @@ HTML;
         current_row.before(' \
 <tr id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'"> \
     <td colspan="1" style="'+background+'; text-align: center;"> <input name="mark_points_'+num+'_'+new_num+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none;"> \
-                        <span onclick="selectMark(this);"> <i class="fa fa-square-o" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
+                        <span onclick="selectMark(this);"> <i class="fa fa-square-o mark" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
     </td> \
     <td colspan="3" style="'+background+'"> \
         <textarea name="mark_text_'+num+'_'+new_num+'" onkeyup="autoResizeComment(event);" rows="1" style="width:95%; resize:none; float:left;"></textarea> \
@@ -1016,6 +1083,8 @@ HTML;
         else {
             totalD = parseInt($('[name=mark_'+num+']').last().attr('id').split('-')[2]);
         }
+
+        //updates the remaining marks's info
         var current_num = parseInt(last_num);
         for (var i = current_num + 1; i <= totalD; i++) {
             var new_num = i-1;
@@ -1029,15 +1098,51 @@ HTML;
         }
     }
 
-    function selectMark(me) {
-        var icon = $(me).find("i");
-        icon.toggleClass("fa-square-o fa-square");
+    //check if the first mark (Full/no credit) should be selected
+    function checkMarks(question_num) {
+        question_num = parseInt(question_num);
+        var mark_table = $('#extra-'+question_num);
+        var first_mark = mark_table.find('i[name=mark_icon_'+question_num+'_0]');
+        var all_false = true;
+        mark_table.find('.mark').each(function() {
+            if($(this)[0].classList.contains('fa-square')) {
+                all_false = false;
+                return false;
+            }
+        });
+
+        if(all_false === true) {
+            first_mark.toggleClass("fa-square-o fa-square");
+        } else {
+            if (first_mark[0].classList.contains('fa-square')) {
+                first_mark.toggleClass("fa-square-o fa-square");
+            }
+        }
     }
 
+    function selectMark(me, first_override = false) {
+        var icon = $(me).find("i");
+        var skip = true; //if the table is all false initially, skip check marks.
+        var question_num = parseInt(icon.attr('name').split('_')[2]);
+        var mark_table = $('#extra-'+question_num);
+        mark_table.find('.mark').each(function() {
+            if($(this)[0].classList.contains('fa-square')) {
+                skip = false;
+                return false;
+            }
+        });
+
+        icon.toggleClass("fa-square-o fa-square");
+        if (skip === false) {
+            checkMarks(question_num);
+        }        
+    }
+
+    //closes all the questions except the one being opened
     function openClose(row_id, num_questions) {
         var row_num = parseInt(row_id);
         var total_num = parseInt(num_questions);
-        //-2 means general comment
+        //-2 means general comment, else open the row_id with the number
         general_comment = document.getElementById('done-general');
         if(row_num === -2) {
             general_comment.style.display = '';
@@ -1093,6 +1198,69 @@ HTML;
         }
     }
 
+    function cancelMark(num, gradeable_id, user_id, gc_id) {
+        //removes the new marks first
+        var arr_length = $('tr[name=mark_'+num+']').length;
+        for (var i = 0; i < arr_length; i++) {
+            var current_row = $('#mark_id-'+num+'-'+i);
+            var delete_mark = $('#mark_remove_id-'+num+'-'+i);
+            if (typeof delete_mark[0] !== 'undefined') {
+                current_row.remove();
+            }
+        }
+        //gets the data in the database and applys it back
+        var arr_length = $('tr[name=mark_'+num+']').length;
+        $.ajax({
+            type: "POST",
+            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
+            data: {
+                'gradeable_id' : gradeable_id,
+                'user_id' : user_id,
+                'gradeable_component_id' : gc_id
+            },
+            success: function(data) {
+                //if success reinput all the data back into the form
+                console.log("success");
+                data = JSON.parse(data);
+                for (var x = 0; x < arr_length; x++) {
+                    current_row = $('#mark_id-'+num+'-'+x);
+                    var is_selected = false;
+                    if (data['data'][x]['has_mark'] === true) {
+                        is_selected = true;
+                    } else {
+                        is_selected = false;
+                    }
+                    current_row.find('input[name=mark_points_'+num+'_'+x+']').val(data['data'][x]['score']);
+                    current_row.find('textarea[name=mark_text_'+num+'_'+x+']').val(data['data'][x]['note']);
+                    if (is_selected === true) {
+                        if (current_row.find('i[name=mark_icon_'+num+'_'+x+']')[0].classList.contains('fa-square-o')) {
+                            current_row.find('i[name=mark_icon_'+num+'_'+x+']').toggleClass("fa-square-o fa-square");
+                        }
+                    } else {
+                        if (current_row.find('i[name=mark_icon_'+num+'_'+x+']')[0].classList.contains('fa-square')) {
+                            current_row.find('i[name=mark_icon_'+num+'_'+x+']').toggleClass("fa-square-o fa-square");
+                        }
+                    }     
+                }
+                current_row = $('#mark_custom_id-'+num);
+                current_row.find('input[name=mark_points_custom_'+num+']').val(data['data'][x]['custom_score']);
+                current_row.find('textarea[name=mark_text_custom_'+num+']').val(data['data'][x]['custom_note']);
+                if (current_row.find('input[name=mark_points_custom_'+num+']').val() == 0 && current_row.find('textarea[name=mark_text_custom_'+num+']').val() == "") {
+                    if (current_row.find('i[name=mark_icon_'+num+'_custom]')[0].classList.contains('fa-square')) {
+                        current_row.find('i[name=mark_icon_'+num+'_custom]').toggleClass("fa-square-o fa-square");
+                    }
+                } else {
+                    if (current_row.find('i[name=mark_icon_'+num+'_custom]')[0].classList.contains('fa-square-o')) {
+                        current_row.find('i[name=mark_icon_'+num+'_custom]').toggleClass("fa-square-o fa-square");
+                    }
+                }
+            },
+            error: function() {
+                console.log("You make me sad. The cancel mark errored out.");
+            }
+        })
+    }
+
     //num === -3 means save gradeable comment
     //num === -2 means save last opened component
     //num === -1 means save all components, TO DO?
@@ -1133,11 +1301,10 @@ HTML;
                 }
                 index++;
             }
-            if (found === true) {
+            if (found === true) { //if nothing was found, assumes it needs to save the gradeable comment
                 var gradeable_component_id = parseInt($('#icon-' + index)[0].dataset.question_id);
                 saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id);
-            } else
-            {
+            } else {
                 saveMark(-3, gradeable_id, user_id, active_version);
             }
         } else if (num === -1) {
@@ -1185,8 +1352,13 @@ HTML;
             //updates the total number of points and text
             var current_question_num = $('#grade-' + num);
             var current_question_text = $('#rubric-textarea-' + num);
-            var max_points = current_question_num[0].dataset.max_points;
-            var current_points = (type === 0) ? max_points : 0;
+            var max_points = parseFloat(current_question_num[0].dataset.max_points);
+            var current_points = 0;
+            if (max_points < 0) { //is penalty
+                current_points = (type === 0) ? 0 : max_points;
+            } else {
+                current_points = (type === 0) ? max_points : 0;
+            }
             var new_text = "";
             var first_text = true;
             current_points = parseFloat(current_points);
@@ -1212,12 +1384,21 @@ HTML;
                 }
             }
             
-
-            if (type === 0) {
-                if (current_points < 0) current_points = 0;
-            } else {
-                if (current_points > max_points) current_points = max_points;
+            if (max_points < 0) { //is penalty
+                if (type === 0) {
+                    if (current_points < max_points) current_points = max_points;
+                } else {
+                    if (current_points > 0) current_points = 0;
+                }
             }
+            else {
+                if (type === 0) {
+                    if (current_points < 0) current_points = 0;
+                } else {
+                    if (current_points > max_points) current_points = max_points;
+                }
+            }
+            
             current_question_num[0].innerHTML = current_points;
             current_question_text[0].innerHTML = new_text;
 
@@ -1246,7 +1427,7 @@ HTML;
                 },
                 success: function(data) {
                     console.log("success");
-                    alert(data);
+                    console.log(data);
                     data = JSON.parse(data);
                     if (data['modified'] === 'true') {
                         if(($('#graded-by-' + num)[0].innerHTML === "Ungraded!") || (overwrite === "true")) {
