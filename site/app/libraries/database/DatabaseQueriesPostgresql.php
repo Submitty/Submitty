@@ -1205,6 +1205,7 @@ WHERE gcm_id=?", $params);
         $params = array($team_id, $g_id, $registration_section, $rotating_section);
         $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section) VALUES(?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
+        return $team_id;
     }
 
     public function leaveTeam($team_id, $user_id) {
