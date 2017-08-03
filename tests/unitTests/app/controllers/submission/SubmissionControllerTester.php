@@ -31,6 +31,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_POST['previous_files'] = "";
         $_POST['csrf_token'] = "";
         $_POST['user_id'] = "testUser";
+        $_POST['repo_id'] = "";
 
         $config['tmp_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $config['semester'] = "test";
