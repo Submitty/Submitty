@@ -88,6 +88,7 @@ class ElectronicGraderController extends AbstractController {
                 $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable_id, $sections);
             }
         }
+
         if (count($sections) > 0) {
             if ($gradeable->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
@@ -98,6 +99,12 @@ class ElectronicGraderController extends AbstractController {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                 $no_team_users = array();
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key);
+
+        $myvar = $this->core->getQueries()->getAverageComponentScoresByGradingSections($gradeable_id, $sections, $section_key);
+        var_dump($myvar);
+
+
+        
             }
         }
 
