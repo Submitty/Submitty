@@ -23,7 +23,7 @@ class TestNavigationPageStudent(BaseTestCase):
                                 .find_element_by_id('graded_tbody')
                                 .find_elements_by_class_name("gradeable_row")))
 
-        self.assertEqual(4, len(self.driver.find_element_by_class_name(
+        self.assertEqual(3, len(self.driver.find_element_by_class_name(
             'gradeable_row').find_elements_by_tag_name('td')))
 
 
