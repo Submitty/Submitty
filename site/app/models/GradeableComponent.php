@@ -32,7 +32,6 @@ use app\libraries\Core;
  * @method string getComment()
  * @method void setComment(string $comment)
  * @method User getGrader()
- * @method void setGrader(User $grader)
  * @method int getGradedVersion()
  * @method void setGradedVersion(int $graded_version)
  * @method \DateTime getGradeTime()
@@ -82,6 +81,9 @@ class GradeableComponent extends AbstractModel {
 
     /** @property @var \app\models\GradeableComponentMark[] */
     protected $marks = array();
+    
+    /** @property @var bool has the grader of this component been modified*/
+    protected $grader_modified = false;
 
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
@@ -164,6 +166,13 @@ class GradeableComponent extends AbstractModel {
         }
 
     }
+    
+    public function setGrader(User $user) {
+        if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
+            $this->grader_modified = true;
+        }
+        $this->grader = $user;
+    }
 
     /**
      * @raises \BadMethodCallException
@@ -174,7 +183,10 @@ class GradeableComponent extends AbstractModel {
 
     public function saveData($gd_id) {
         if ($this->modified) {
-            if ($this->has_grade || $this->has_marks) {
+            if($this->grader_modified) {
+                $this->core->getQueries()->replaceGradeableComponentData($gd_id, $this);
+            }
+            else if ($this->has_grade || $this->has_marks) {
                 $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
             }
             else {

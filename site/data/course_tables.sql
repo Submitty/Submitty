@@ -474,7 +474,15 @@ ALTER TABLE ONLY electronic_gradeable
 --
 
 ALTER TABLE ONLY gradeable_component_data
-    ADD CONSTRAINT gradeable_component_data_pkey PRIMARY KEY (gc_id, gd_id);
+    ADD CONSTRAINT gradeable_component_data_pkey PRIMARY KEY (gc_id, gd_id, gcd_grader_id);
+    
+
+--
+-- Name: gradeable_component_data_normal_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_data_no_grader_index
+ON gradeable_component_data (gc_id, gd_id);
 
 
 --

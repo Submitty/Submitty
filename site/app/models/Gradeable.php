@@ -382,14 +382,25 @@ class Gradeable extends AbstractModel {
                         }
                     }
                 }
+                
+                if($component_details['gc_is_peer'] && isset($this->components[$component_details['gc_order']])) {
+                    $this->components[$component_details['gc_order']][] = $this->core->loadModel(GradeableComponent::class, $component_details);
+                    $component_for_info = end($this->components[$component_details['gc_order']]);
+                }
+                else if($component_details['gc_is_peer']) {
+                    $this->components[$component_details['gc_order']] = array($this->core->loadModel(GradeableComponent::class, $component_details));
+                    $component_for_info = $this->components[$component_details['gc_order']][0];
+                }
+                else {
+                    $this->components[$component_details['gc_order']] = $this->core->loadModel(GradeableComponent::class, $component_details);
+                    $component_for_info = $this->components[$component_details['gc_order']];
+                }
 
-                $this->components[$component_details['gc_order']] = $this->core->loadModel(GradeableComponent::class, $component_details);
-
-                if (!$this->components[$component_details['gc_order']]->getIsText()) {
-                    $max_value = $this->components[$component_details['gc_order']]->getMaxValue();
+                if (!$component_for_info->getIsText()) {
+                    $max_value = $component_for_info->getMaxValue();
                     if ($max_value > 0) {
-                        if ($this->components[$component_details['gc_order']]->getIsPeer()) {
-                            if ($this->components[$component_details['gc_order']]->getIsExtraCredit()) {
+                        if ($component_for_info->getIsPeer()) {
+                            if ($component_for_info->getIsExtraCredit()) {
                                 $this->total_peer_grading_extra_credit += $max_value;
                             }
                             else {
@@ -397,7 +408,7 @@ class Gradeable extends AbstractModel {
                             }
                         }
                         else {
-                            if ($this->components[$component_details['gc_order']]->getIsExtraCredit()) {
+                            if ($component_for_info->getIsExtraCredit()) {
                                 $this->total_tagrading_extra_credit += $max_value;
                             }
                             else {
@@ -405,7 +416,7 @@ class Gradeable extends AbstractModel {
                             }
                         }
                     }
-                    $this->graded_tagrading += $this->components[$component_details['gc_order']]->getScore();
+                    $this->graded_tagrading += $component_for_info->getScore();
                 }
             }
 
@@ -928,10 +939,19 @@ class Gradeable extends AbstractModel {
     
     public function validateVersions($peer=false) {
         $active_check = $this->active_version;
-        if(is_string($peer) && $this->peer_grading) {
+        if(is_string($peer) || $this->peer_grading) {
             foreach($this->components as $cmpt) {
-                if($cmpt->getGrader()->getId() === $peer && $cmpt->getGradedVersion() !== $active_check) {
-                    return false;
+                if(is_array($cmpt)) {
+                    foreach($cmpt as $graded_by) {
+                        if($graded->getGrader()->getId() === $peer && $cmpt->getGradedVersion() !== $active_check) {
+                            return false;
+                        }
+                    }
+                }
+                else {
+                    if($cmpt->getGradedVersion() !== $active_check) {
+                        return false;
+                    }
                 }
             }
             return true;
@@ -956,7 +976,14 @@ class Gradeable extends AbstractModel {
             $this->core->getQueries()->updateGradeableData($this);
         }
         foreach ($this->components as $component) {
-            $component->saveData($this->gd_id);
+            if(is_array($component)) {
+                foreach($component as $peer_grade) {
+                    $peer_grade->saveData($this->gd_id);
+                }
+            }
+            else {
+                $component->saveData($this->gd_id);
+            }
         }
         $this->core->getCourseDB()->commit();
     }

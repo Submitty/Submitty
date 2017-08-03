@@ -1001,9 +1001,15 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
     public function updateGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
+        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
         $this->course_db->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?", $params);
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?", $params);
+    }
+    
+    public function replaceGradeableComponentData($gd_id, GradeableComponent $component) {
+        $params = array($component->getId(), $gd_id);
+        $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
+        $this->insertGradeableComponentData($gd_id, $component);
     }
 
     public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
