@@ -122,7 +122,7 @@ def untrusted_grant_read_access(which_untrusted,my_dir):
                      which_untrusted,
                      "-exec",
                      "/bin/chmod",
-                     "o+r",
+                     "o+rwx",   # FIXME: needed more permissions to get tutorial_10_java_coverage to work
                      "{}",
                      ";"])
 # give permissions to all created files to the hwcron user
@@ -237,8 +237,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # copy any instructor provided code files to tmp compilation directory
     copy_contents_into(provided_code_path,tmp_compilation)
 
-    subprocess.call(['ls', '-la', tmp_compilation], stdout=open(tmp_logs + "/overall.txt", 'a'))
-    
+    subprocess.call(['find', '.', '-exec', 'ls', '-la', '{}', ';'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
     # copy compile.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"compile.out"),os.path.join(tmp_compilation,"my_compile.out"))
 
@@ -299,8 +299,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # copy input files to tmp_work directory
     copy_contents_into(test_input_path,tmp_work)
 
-    subprocess.call(['ls', '-la', tmp_work], stdout=open(tmp_logs + "/overall.txt", 'a'))
-    
+    subprocess.call(['find', '.', '-exec', 'ls', '-la', '{}', ';'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
     # copy runner.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"run.out"),os.path.join(tmp_work,"my_runner.out"))
 
@@ -353,9 +353,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # copy any instructor provided code files to tmp compilation directory
     copy_contents_into(custom_validation_code_path,tmp_work)
-    
-    subprocess.call(['ls', '-la', tmp_work], stdout=open(tmp_logs + "/overall.txt", 'a'))
-        
+
+    subprocess.call(['find', '.', '-exec', 'ls', '-la', '{}', ';'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
     # copy validator.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"validate.out"),os.path.join(tmp_work,"my_validator.out"))
 
@@ -402,8 +402,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print ("====================================\nARCHIVING STARTS", file=f)
 
-    subprocess.call(['ls', '-la', tmp_work], stdout=open(tmp_logs + "/overall.txt", 'a'))
-        
+    subprocess.call(['find', '.', '-exec', 'ls', '-la', '{}', ';'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
     os.chdir(bin_path)
 
     # save the old results path!
