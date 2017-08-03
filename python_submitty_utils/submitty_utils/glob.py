@@ -7,10 +7,8 @@ is the normal python version for something like Debian Jessie. So if we're not o
 a 'new enough' python version, we use this shim, else we use the builtin glob library
 """
 if sys.version_info >= (3, 5,):
-    print('what')
     from glob import *
 else:
-    print('here')
     """Filename globbing utility."""
 
     import os
