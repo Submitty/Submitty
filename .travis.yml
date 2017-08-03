@@ -79,18 +79,15 @@ install:
   - pip2 install selenium
   - pip2 install nose2
   - pip2 install unittest2
-  - pip2 install pytz
   - pip2 install python-dateutil
-  - pip2 install tzlocal
   - pip3 install -U pip
   - pip3 install python-pam
   - pip3 install psycopg2
   - pip3 install PyYAML
   - pip3 install sqlalchemy
   - pip3 install pylint_runner
-  - pip3 install pytz
   - pip3 install python-dateutil
-  - pip3 install tzlocal
+  - python3 ${TRAVIS_BUILD_DIR}/python_submitty_utils/setup.py install
   - sudo chmod -R 555 /usr/local/lib/python*/
   - sudo chmod -R 555 /opt/python/${PY_VERSION_2}/lib/python${PY_VERSION_2:0:3}/*
   - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
