@@ -1115,7 +1115,7 @@ class Gradeable(object):
             assert self.ta_view_date < self.submission_open_date
             assert self.submission_open_date < self.submission_due_date
             assert self.submission_due_date < self.grade_start_date
-            if self.gradeable_config is not None:
+            if self.gradeable_config is not None and self.team_assignment is not True:
                 if self.sample_path is not None:
                     if os.path.isfile(os.path.join(self.sample_path, "submissions.yml")):
                         self.submissions = load_data_yaml(os.path.join(self.sample_path, "submissions.yml"))
