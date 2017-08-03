@@ -1006,6 +1006,8 @@ class Gradeable(object):
         self.grading_rotating = []
         self.submissions = []
         self.max_random_submissions = None
+        self.team_assignment = False
+        self.max_team_size = 1
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1070,8 +1072,6 @@ class Gradeable(object):
         if self.type == 0:
             self.submission_open_date = submitty_utils.parse_datetime(gradeable['eg_submission_open_date'])
             self.submission_due_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
-            self.team_assignment = False
-            self.max_team_size = 1
             self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
             self.student_view = True
             self.student_submit = True
@@ -1097,6 +1097,12 @@ class Gradeable(object):
                 self.late_days = max(0, int(gradeable['eg_late_days']))
             if 'eg_precision' in gradeable:
                 self.precision = float(gradeable['eg_precision'])
+            if 'eg_team_assignment' in gradeable:
+                self.team_assignment = gradeable['eg_team_assignment'] is True
+            if 'eg_max_team_size' in gradeable:
+                self.max_team_size = gradeable['eg_max_team_size']
+            if 'eg_team_lock_date' in gradeable:
+                self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_team_lock_date'])
             if self.config_path is None:
                 examples_path = os.path.join(MORE_EXAMPLES_DIR, self.id, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
