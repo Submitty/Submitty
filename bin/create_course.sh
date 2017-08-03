@@ -31,10 +31,17 @@ DATABASE_PASS='__INSTALL__FILLIN__DATABASE_PASSWORD__'
 ########################################################################################################################
 ########################################################################################################################
 
-# Check that Submitty master DB exists.
+# Check that Submitty Master DB exists.
 PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -lqt | cut -d \| -f 1 | grep -qw submitty
 if [[ $? -ne "0" ]] ; then
-    echo "ERROR: Submitty master database is invalid."
+    echo "ERROR: Submitty master database doesn't exist."
+    exit
+fi
+
+#Ensure that tables exist within Submitty Master DB.
+table_count=`PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -tAc "SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('courses','courses_users','sessions','users');"`
+if [[ $table_count -ne "4" ]] ; then
+    echo "ERROR: Submitty Master DB is invalid."
     exit
 fi
 
