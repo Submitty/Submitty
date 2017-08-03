@@ -9,6 +9,7 @@ use \app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
+use app\libraries\FileUtils;
 
 class ElectronicGraderController extends AbstractController {
     public function run() {
@@ -323,13 +324,35 @@ class ElectronicGraderController extends AbstractController {
                 $this->core->redirect($return_url);
             }
 
-            $this->core->getQueries()->createTeam($gradeable_id, $team_leader_id, $registration_section, $rotating_section);
-            $team_id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $team_leader_id)->getId();
+            $team_id = $this->core->getQueries()->createTeam($gradeable_id, $team_leader_id, $registration_section, $rotating_section);
             foreach($user_ids as $id) {
                 $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
                 if ($id !== $team_leader_id) $this->core->getQueries()->acceptTeamInvitation($team_id, $id);
             }
             $_SESSION['messages']['success'][] = "Created New Team {$team_id}";
+
+            $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
+            if (!FileUtils::createDir($gradeable_path)) {
+                $this->core->addErrorMEssage("Failed to make folder for this assignment");
+                $this->core->redirect($return_url);
+            }
+
+            $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
+            if (!FileUtils::createDir($user_path)) {
+                $this->core->addErrorMEssage("Failed to make folder for this assignment for the team");
+                $this->core->redirect($return_url);
+            }
+
+            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+            $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
+            $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
+                                                        "admin_user" => $this->core->getUser()->getId(), "first_user" => $team_leader_id)));
+            foreach($user_ids as $id) {
+                if ($id !== $team_leader_id) {
+                    $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
+                                                    "admin_user" => $this->core->getUser()->getId(), "added_user" => $id);
+                }
+            }
         }
         else {
             $team_id = $_POST['edit_team_team_id'];
@@ -372,6 +395,25 @@ class ElectronicGraderController extends AbstractController {
                 $this->core->getQueries()->leaveTeam($team_id, $id);
             }
             $_SESSION['messages']['success'][] = "Updated Team {$team_id}";
+
+            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team_id, "user_assignment_settings.json");
+            $json = FileUtils::readJsonFile($settings_file);
+            if ($json === false) {
+                $this->core->addErrorMEssage("Failed to open settings file");
+                $this->core->redirect($return_url);
+            }
+            foreach($add_user_ids as $id) {
+                $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
+                                                    "admin_user" => $this->core->getUser()->getId(), "added_user" => $id);
+            }
+            foreach($remove_user_ids as $id) {
+                $json["team_history"][] = array("action" => "admin_remove_user", "time" => $current_time,
+                                                    "admin_user" => $this->core->getUser()->getId(), "removed_user" => $id);
+            }
+        }
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $this->core->addErrorMEssage("Failed to write to team history to settings file");
         }
         $this->core->redirect($return_url);
     }

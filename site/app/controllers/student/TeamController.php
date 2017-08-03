@@ -62,7 +62,7 @@ class TeamController extends AbstractController {
 
         $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
         if (!FileUtils::createDir($user_path)) {
-            $this->core->addErrorMEssage("Failed to make folder for this assignment for the user");
+            $this->core->addErrorMEssage("Failed to make folder for this assignment for the team");
             $this->core->redirect($return_url);
         }
 
