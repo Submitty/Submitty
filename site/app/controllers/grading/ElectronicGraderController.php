@@ -16,6 +16,9 @@ class ElectronicGraderController extends AbstractController {
             case 'details':
                 $this->showDetails();
                 break;
+            case 'submit_team_form':
+                $this->adminTeamSubmit();
+                break;
             case 'grade':
                 $this->showGrading();
                 break;
@@ -174,6 +177,7 @@ class ElectronicGraderController extends AbstractController {
 
         $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
 
+        $empty_teams = array();
         if ($gradeable->isTeamAssignment()) {
             // Only give getGradeables one User ID per team
             $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
@@ -184,6 +188,9 @@ class ElectronicGraderController extends AbstractController {
                                             (isset($_GET['view']) && $_GET['view'] === "all") || 
                                             (count($sections) === 0 && $this->core->getUser()->accessAdmin()))) {
                     $student_ids[] = $team->getMembers()[0];
+                }
+                if ($team->getSize() === 0 && $this->core->getUser()->accessAdmin()) {
+                    $empty_teams[] = $team;
                 }
             }
         }
@@ -238,8 +245,135 @@ class ElectronicGraderController extends AbstractController {
                 $rows = array_merge($rows, $individual_rows[""]);
             }
         }
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $empty_teams);
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders);
+        if ($gradeable->isTeamAssignment() && $this->core->getUser()->accessAdmin()) {
+            if ($gradeable->isGradeByRegistration()) {
+                $all_sections = $this->core->getQueries()->getRegistrationSections();
+                $key = 'sections_registration_id';
+            }
+            else {
+                $all_sections = $this->core->getQueries()->getRotatingSections();
+                $key = 'sections_rotating_id';
+            }
+            foreach ($all_sections as $i => $section) {
+                $all_sections[$i] = $section[$key];
+            }
+            $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'adminTeamForm', $gradeable, $all_sections);
+        }
+    }
+
+    public function adminTeamSubmit() {
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
+            $_SESSION['messages']['error'][] = "Invalid CSRF Token";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
+        if (!$this->core->getUser()->accessAdmin()) {
+            $_SESSION['messages']['error'][] = "Only admins can edit teams";
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+
+        $return_url = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id));
+        if (isset($_POST['view'])) $return_url .= "&view={$_POST['view']}";
+
+        if (!$gradeable->isTeamAssignment()) {
+            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->redirect($return_url);
+        }
+
+        $num_users = intval($_POST['num_users']);
+        $user_ids = array();
+        for ($i = 0; $i < $num_users; $i++) {
+            $id = trim(htmlentities($_POST["user_id_{$i}"]));
+            if (($id !== "") && !in_array($id, $user_ids)) {
+                if ($this->core->getQueries()->getUserById($id) === null) {
+                    $_SESSION['messages']['error'][] = "ERROR: {$id} is not a valid User ID";
+                    $this->core->redirect($return_url);
+                }
+                $user_ids[] = $id;
+            }
+        }
+        $new_team = $_POST['new_team'] === 'true' ? true : false;
+
+        if ($new_team) {
+            $team_leader_id = null;
+            foreach($user_ids as $id) {
+                if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
+                    $_SESSION['messages']['error'][] = "ERROR: {$id} is already on a team";
+                    $this->core->redirect($return_url);
+                }
+                if ($id === $_POST['new_team_user_id']) {
+                    $team_leader_id = $id;
+                    if ($gradeable->isGradeByRegistration()) {
+                        $registration_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+                        $rotating_section = $this->core->getQueries()->getUserById($id)->getRotatingSection();
+                    }
+                    else {
+                        $registration_section = $this->core->getQueries()->getUserById($id)->getRegistrationSection();
+                        $rotating_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+                    }
+                }
+            }
+            if ($team_leader_id === null) {
+                $_SESSION['messages']['error'][] = "ERROR: {$_POST['new_team_user_id']} must be on the team";
+                $this->core->redirect($return_url);
+            }
+
+            $this->core->getQueries()->createTeam($gradeable_id, $team_leader_id, $registration_section, $rotating_section);
+            $team_id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $team_leader_id)->getId();
+            foreach($user_ids as $id) {
+                $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
+                if ($id !== $team_leader_id) $this->core->getQueries()->acceptTeamInvitation($team_id, $id);
+            }
+            $_SESSION['messages']['success'][] = "Created New Team {$team_id}";
+        }
+        else {
+            $team_id = $_POST['edit_team_team_id'];
+            $team = $this->core->getQueries()->getTeamById($team_id);
+            if ($team === null) {
+                $_SESSION['messages']['error'][] = "ERROR: {$team_id} is not a valid Team ID";
+                $this->core->redirect($return_url);
+            }
+
+            $team_members = $team->getMembers();
+            $add_user_ids = array();
+            foreach($user_ids as $id) {
+                if (!in_array($id, $team_members)) {
+                    if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
+                        $_SESSION['messages']['error'][] = "ERROR: {$id} is already on a team";
+                        $this->core->redirect($return_url);
+                    }
+                    $add_user_ids[] = $id;
+                }
+            }
+            $remove_user_ids = array();
+            foreach($team_members as $id) {
+                if (!in_array($id, $user_ids)) {
+                    $remove_user_ids[] = $id;
+                }
+            }
+
+            $section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+            if ($gradeable->isGradeByRegistration()) {
+                $this->core->getQueries()->updateTeamRegistrationSection($team_id, $section);
+            }
+            else {
+                $this->core->getQueries()->updateTeamRotatingSection($team_id, $section);
+            }
+            foreach($add_user_ids as $id) {
+                $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
+                $this->core->getQueries()->acceptTeamInvitation($team_id, $id);
+            }
+            foreach($remove_user_ids as $id) {
+                $this->core->getQueries()->leaveTeam($team_id, $id);
+            }
+            $_SESSION['messages']['success'][] = "Updated Team {$team_id}";
+        }
+        $this->core->redirect($return_url);
     }
 
     public function submitGrade() {

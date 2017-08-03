@@ -523,7 +523,6 @@ HTML;
 
                 // Team management button, only visible on team assignments
                 $gradeable_team_range = '';
-                $admin_team_list = '';
                 if (($g_data->isTeamAssignment()) ) {
                     if ($g_data->getTeam() === null) {
                         if ($date->format('Y-m-d H:i:s') < $g_data->getTeamLockDate()->format('Y-m-d H:i:s')) {
@@ -559,13 +558,6 @@ HTML;
                 <a class="btn {$button_type}" style="width:100%;"
                 href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable, 'page' => 'team'))}">
                 {$button_text}{$display_date}
-HTML;
-                }
-                    // View teams button, only visible to instructors on team assignments
-                if (($this->core->getUser()->accessAdmin()) && ($g_data->isTeamAssignment())) {
-                    $admin_team_list .= <<<HTML
-                <a class="btn btn-default" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'team_list', 'gradeable_id' => $gradeable))}"> View Teams
-                </a>
 HTML;
                 }
 
@@ -621,7 +613,6 @@ HTML;
             <tr class="gradeable_row">
                 <td>{$gradeable_title}</td>
                 <td style="padding: 20px;">{$gradeable_team_range}</td>
-                <td style="padding: 20px;">{$admin_team_list}</td>
                 <td style="padding: 20px;">{$gradeable_open_range}</td>
 HTML;
                 if ($this->core->getUser()->accessGrading() && ($this->core->getUser()->getGroup() <= $g_data->getMinimumGradingGroup())) {
