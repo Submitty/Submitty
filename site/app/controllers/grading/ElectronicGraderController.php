@@ -100,11 +100,7 @@ class ElectronicGraderController extends AbstractController {
                 $no_team_users = array();
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key);
 
-        $myvar = $this->core->getQueries()->getAverageComponentScoresByGradingSections($gradeable_id, $sections, $section_key);
-        var_dump($myvar);
-
-
-        
+                $average_scores = $this->core->getQueries()->getAverageComponentScores($gradeable_id);
             }
         }
 
@@ -129,7 +125,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $average_scores);
     }
 
     /**

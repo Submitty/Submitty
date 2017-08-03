@@ -11,8 +11,8 @@ use app\libraries\Core;
  * @method float getMaxValue()
  * @method int getOrder()
  * @method float getAverageScore()
+ * @method float getStandardDeviation()
  * @method int getSection()
- * @method string getSectionType()
  * @method bool getIsPeer()
 
  */
@@ -31,10 +31,10 @@ class SimpleStatsGradeableComponent extends AbstractModel {
     protected $order = 1;
     /** @property @var float Average grade of people with a grade for this component */
     protected $average_score = 0;
+    /** @property @var float Standard deviation of people with a grade for this component */
+    protected $standard_deviation = 0;
     /** @property @var int section that the average_score applies to */
     protected $section = null;
-    /** @property @var string rotating or registration section */
-    protected $section_type = null;
     /** @property @var bool Does this component use peer grading*/
     protected $is_peer = false;
 
@@ -49,8 +49,8 @@ class SimpleStatsGradeableComponent extends AbstractModel {
 //        $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
         $this->average_score = $details['avg_comp_score'];
-        $this->section = $details['section'];
-        $this->section = $details['section_type'];
+        $this->standard_deviation = $details['std_dev'];
+        $this->section = isset($details['section']) ? $details['section']: null;
         $this->is_peer = isset($details['gc_is_peer']) ? $details['gc_is_peer']: false;
     }
     

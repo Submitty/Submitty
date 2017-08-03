@@ -646,36 +646,59 @@ ORDER BY u.{$section_key}", $params);
         return $return;
     }
 
+// missing standard deviation and extra credit
+//     public function getAverageComponentScoresByGradingSections($g_id, $sections, $section_key) {
+//         $return = array();
+//         $params = array($g_id);
+//         $where = "";
+//         if (count($sections) > 0) {
+//           $where = "AND {$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).")";
+//           $params = array_merge($params, $sections);
+//         }
+//         $this->course_db->query("
+// SELECT CASE WHEN (AVG(mark_sum) + AVG(gcd_score)) < 0 THEN gc_max_value+(AVG(mark_sum) + AVG(gcd_score)) ELSE (AVG(mark_sum) + AVG(gcd_score)) END AS AVG_comp_score,
+//  gc_max_value, gc_order, gc_title, gc_id, {$section_key} AS section
+// FROM (
+//   SELECT sum(gcm_points) AS mark_sum, AVG(gcd_score) AS gcd_score, gc.gc_max_value, gc.gc_order, gc.gc_title, gcmd.gc_id, u.{$section_key} 
+//   FROM 
+//     gradeable_component_mark_data AS gcmd 
+//     LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id 
+//     LEFT JOIN gradeable_component_data AS gcd ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id 
+//     LEFT JOIN gradeable_data AS gd ON gcmd.gd_id=gd.gd_id 
+//     LEFT JOIN gradeable_component AS gc ON gc.gc_id=gcmd.gc_id AND gc.g_id=gd.g_id
+//     INNER JOIN users AS u ON u.user_id=gd.gd_user_id 
+//     WHERE gd.g_id=?
+//     {$where}
+//     GROUP BY u.{$section_key}, gcmd.gd_id, gcmd.gc_id, gc.gc_max_value, gc.gc_order, gc.gc_title
+// ) AS mark_sum 
+// GROUP BY {$section_key}, gc_id, gc_max_value, gc_order, gc_title
+// ORDER BY {$section_key}, gc_order
+//         ", $params);
+//         foreach ($this->course_db->rows() as $row) {
+//             $return[] = new SimpleStatsGradeableComponent($this->core, $row);
+//         }
+//         return $return;
+//     }
 
-    public function getAverageComponentScoresByGradingSections($g_id, $sections, $section_key) {
-        $return = array();
-        $params = array($g_id);
-        $where = "";
-        if (count($sections) > 0) {
-          $where = "AND {$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).")";
-          $params = array_merge($params, $sections);
-        }
-        $this->course_db->query("
-SELECT CASE WHEN (AVG(mark_sum) + AVG(gcd_score)) < 0 THEN gc_max_value+(AVG(mark_sum) + AVG(gcd_score)) ELSE (AVG(mark_sum) + AVG(gcd_score)) END AS AVG_comp_score,
- gc_max_value, gc_order, gc_title, gc_id, {$section_key} AS section
+    public function getAverageComponentScores($g_id) {
+      $return = array();
+      $this->course_db->query("
+SELECT CASE WHEN (AVG(mark_sum) + AVG(gcd_score)) < 0 THEN round(gc_max_value+(AVG(mark_sum) + AVG(gcd_score)),1) ELSE round(AVG(mark_sum) + AVG(gcd_score),1) END AS AVG_comp_score,
+ round(stddev_pop(mark_sum + gcd_score),1) AS std_dev, gc_max_value, gc_order, gc_title, gc_id
 FROM (
-  SELECT sum(gcm_points) AS mark_sum, AVG(gcd_score) AS gcd_score, gc.gc_max_value, gc.gc_order, gc.gc_title, gcmd.gc_id, u.{$section_key} 
+  SELECT sum(gcm_points) AS mark_sum, AVG(gcd_score) AS gcd_score, gc.gc_max_value, gc.gc_order, gc.gc_title, gcmd.gc_id
   FROM 
-    gradeable_component_mark_data AS gcmd 
+    gradeable_component_data AS gcd
+    LEFT JOIN gradeable_component_mark_data AS gcmd ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id 
     LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id 
-    LEFT JOIN gradeable_component_data AS gcd ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id 
-    LEFT JOIN gradeable_data AS gd ON gcmd.gd_id=gd.gd_id 
-    LEFT JOIN gradeable_component AS gc ON gc.gc_id=gcmd.gc_id AND gc.g_id=gd.g_id
-    INNER JOIN users AS u ON u.user_id=gd.gd_user_id 
-    WHERE gd.g_id=?
-    {$where}
-    GROUP BY u.{$section_key}, gcmd.gd_id, gcmd.gc_id, gc.gc_max_value, gc.gc_order, gc.gc_title
+    LEFT JOIN gradeable_component AS gc ON gc.gc_id=gcmd.gc_id
+    WHERE gc.g_id=?
+    GROUP BY gcmd.gd_id, gcmd.gc_id, gc.gc_max_value, gc.gc_order, gc.gc_title
 ) AS mark_sum 
-GROUP BY {$section_key}, gc_id, gc_max_value, gc_order, gc_title
-ORDER BY {$section_key}
-        ", $params);
+GROUP BY gc_id, gc_max_value, gc_order, gc_title
+ORDER BY gc_order
+        ", array($g_id));
         foreach ($this->course_db->rows() as $row) {
-            $row['section_type'] = $section_key;
             $return[] = new SimpleStatsGradeableComponent($this->core, $row);
         }
         return $return;
