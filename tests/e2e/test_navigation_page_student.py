@@ -7,7 +7,7 @@ class TestNavigationPageStudent(BaseTestCase):
         elements = self.driver.find_elements_by_class_name('nav-title-row')
         self.assertEqual(4, len(elements))
         self.assertEqual("open", elements[0].get_attribute('id'))
-        self.assertEqual(1, len(self.driver
+        self.assertEqual(2, len(self.driver
                                 .find_element_by_id('open_tbody')
                                 .find_elements_by_class_name("gradeable_row")))
         self.assertEqual("closed", elements[1].get_attribute('id'))
