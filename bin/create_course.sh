@@ -31,6 +31,14 @@ DATABASE_PASS='__INSTALL__FILLIN__DATABASE_PASSWORD__'
 ########################################################################################################################
 ########################################################################################################################
 
+# Check that Submitty master DB exists.
+PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -lqt | cut -d \| -f 1 | grep -qw submitty
+if [[ $? -ne "0" ]] ; then
+    echo "ERROR: Submitty master database is invalid."
+    exit
+fi
+
+# Check that there are exactly 4 command line arguments.
 if [[ $# -ne "4" ]] ; then
     echo "ERROR: Usage, wrong number of arguments"
     echo "   create_course.sh  <semester>  <course>  <instructor username>  <ta group>"
