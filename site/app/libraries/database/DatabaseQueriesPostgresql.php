@@ -1207,6 +1207,14 @@ WHERE gcm_id=?", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
     }
 
+    public function updateTeamRegistrationSection($team_id, $section) {
+        $this->course_db->query("UPDATE gradeable_teams SET registration_section=? WHERE team_id=?", array($section, $team_id));
+    }
+
+    public function updateTeamRotatingSection($team_id, $section) {
+        $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE team_id=?", array($section, $team_id));
+    }
+
     public function leaveTeam($team_id, $user_id) {
         $this->course_db->query("DELETE FROM teams AS t
           WHERE team_id=? AND user_id=? AND state=1", array($team_id, $user_id));
@@ -1231,60 +1239,59 @@ WHERE gcm_id=?", $params);
 
     public function getTeamById($team_id) {
         $this->course_db->query("
-          SELECT team_id, registration_section, rotating_section, user_id, state FROM gradeable_teams NATURAL JOIN teams WHERE team_id=? ORDER BY user_id", array($team_id));
-
+          SELECT team_id, registration_section, rotating_section
+          FROM gradeable_teams
+          WHERE team_id=?",
+          array($team_id));
         if (count($this->course_db->rows()) === 0) {
             return null;
         }
-        else {
-            $team = new Team($this->core, $this->course_db->rows());
-            return $team;
-        }
+        $details = $this->course_db->row();
+
+        $this->course_db->query("SELECT user_id, state FROM teams WHERE team_id=? ORDER BY user_id", array($team_id));
+        $details['users'] = $this->course_db->rows();
+        return new Team($this->core, $details);
     }
 
     public function getTeamByGradeableAndUser($g_id, $user_id) {
         $this->course_db->query("
-          SELECT team_id, registration_section, rotating_section, user_id, state
-          FROM gradeable_teams NATURAL JOIN teams
+          SELECT team_id, registration_section, rotating_section
+          FROM gradeable_teams
           WHERE g_id=? AND team_id IN (
             SELECT team_id
             FROM teams
-            WHERE user_id=? AND state=1)
-          ORDER BY user_id",
+            WHERE user_id=? AND state=1)",
           array($g_id, $user_id));
-
         if (count($this->course_db->rows()) === 0) {
             return null;
         }
-        else {
-            $team = new Team($this->core, $this->course_db->rows());
-            return $team;
-        }
+        $details = $this->course_db->row();
+
+        $this->course_db->query("SELECT user_id, state FROM teams WHERE team_id=? ORDER BY user_id", array($details['team_id']));
+        $details['users'] = $this->course_db->rows();
+        return new Team($this->core, $details);
     }
 
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query("
-          SELECT gt.team_id, gt.registration_section, gt.rotating_section, t.user_id, t.state
-          FROM gradeable_teams AS gt 
-          LEFT JOIN (
-            SELECT *
-            FROM teams
-          ) AS t ON gt.team_id=t.team_id
+          SELECT team_id, registration_section, rotating_section
+          FROM gradeable_teams
           WHERE g_id=?
-          ORDER BY user_id",
+          ORDER BY team_id",
           array($g_id));
 
-        $team_rows = array();
+        $all_teams_details = array();
         foreach($this->course_db->rows() as $row) {
-            if (!isset($team_rows[$row['team_id']])){
-                $team_rows[$row['team_id']] = array();
-            }
-            $team_rows[$row['team_id']][] = $row;
+            $all_teams_details[$row['team_id']] = $row;
         }
+
         $teams = array();
-        foreach($team_rows as $team_row) {
-            $teams[] = new Team($this->core, $team_row);
+        foreach($all_teams_details as $team_id => $details) {
+            $this->course_db->query("SELECT user_id, state FROM teams WHERE team_id=? ORDER BY user_id", array($team_id));
+            $details['users'] = $this->course_db->rows();
+            $teams[] = new Team($this->core, $details);
         }
+
         return $teams;
     }
 

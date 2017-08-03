@@ -21,9 +21,6 @@ class GradingController extends AbstractController {
             case 'electronic':
                 $controller = new ElectronicGraderController($this->core);
                 break;
-            case 'team_list':
-                $controller = new TeamListController($this->core);
-                break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
                 break;
