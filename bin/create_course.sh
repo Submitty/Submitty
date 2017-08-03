@@ -186,13 +186,15 @@ create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/config
 
 # NOTE: when homework is    installed, grading executables, code, & datafiles are placed here
 #               drwxr-s---       instructor   ta_www_group    bin/
-#               drwxr-s---       instructor   ta_www_group    test_code/
+#               drwxr-s---       instructor   ta_www_group    provided_code/
 #               drwxr-s---       instructor   ta_www_group    test_input/
 #               drwxr-s---       instructor   ta_www_group    test_output/
+#               drwxr-s---       instructor   ta_www_group    custom_validation_code/
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/bin
-create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_code
+create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/provided_code
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_input
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_output
+create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custom_validation_code
 
 
 # NOTE: on each student submission, files are written to these directories
