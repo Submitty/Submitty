@@ -599,7 +599,11 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
+
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
+        if ($vcs_checkout && !isset($_POST['repo_id'])) {
+            return $this->uploadResult("Invalid repo id.", false);
+        }
     
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         
@@ -616,6 +620,8 @@ class SubmissionController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
+        // repo_id for VCS use
+        $repo_id = $_POST['repo_id'];
 
         // make sure is admin if the two ids do not match
         if ($original_user_id !== $user_id && !$this->core->getUser()->accessAdmin()) {
@@ -881,6 +887,18 @@ class SubmissionController extends AbstractController {
             }
         }
         else {
+            $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
+            $vcs_path = $gradeable->getSubdirectory();
+            $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
+            $vcs_path = str_replace("{\$user_id}",$user_id,$vcs_path);
+            // if repo_id was null, default to user_id
+            if ($repo_id === "") {
+                $vcs_path = str_replace("{\$repo_id}",$user_id,$vcs_path);
+            }
+            else {
+                $vcs_path = str_replace("{\$repo_id}",$repo_id,$vcs_path);
+            }
+            $vcs_full_path = $vcs_base_url.$vcs_path;
             if (!@touch(FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT"))) {
                 return $this->uploadResult("Failed to touch file for vcs submission.", false);
             }

@@ -147,7 +147,6 @@ class Config extends AbstractModel {
     protected $vcs_base_url;
     /** @property @var string */
     protected $vcs_type;
-
     /** @property @var array */
     protected $hidden_details;
 

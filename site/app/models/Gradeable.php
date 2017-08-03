@@ -148,7 +148,7 @@ class Gradeable extends AbstractModel {
     /** @property @var \DateTime|null Due date for an electronic submission */
     protected $due_date = null;
 
-    /** @property @var bool Is the electronic submission a VCS repository or allow uploads */
+    /** @property @var bool Is the electronic submission via a VCS repository or by upload */
     protected $is_repository = false;
 
     /** @property @var string What is the subdirectory for VCS */

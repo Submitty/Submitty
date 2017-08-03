@@ -414,7 +414,7 @@ HTML;
                         <br />
                         VCS Base URL: <kbd>{$vcs_base_url}</kbd>
                         <br />
-                        The VCS Base URL is configured in Course Settings. Specify the rest of the path using some or all the following allowed string replacement variables: gradeable_id, user_id, repo_id in format $&#123;&hellip;&#125; (ex. <kbd>/$&#123;gradeable_id&#125;/$&#123;user_id&#125;/$&#123;repo_id&#125;</kbd>), or specify the entire path if the entire path changes for each assignment.
+                        The VCS Base URL is configured in Course Settings. Specify the rest of the path using some or all the following allowed string replacement variables: gradeable_id, user_id, repo_id in format $&#123;&hellip;&#125; (ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;/&#123;&#36;repo_id&#125;</kbd>), or specify the entire path if the entire path changes for each assignment.
                         <br />
                         <input style='width: 83%' type='text' name='subdirectory' value="" class="required" placeholder="(Required)"/>
                         <br />
@@ -2253,6 +2253,23 @@ $('#gradeable-form').on('submit', function(e){
                     alert("The VCS path should not be empty");
                     return false;
                 }
+                var subdirectory_parts = subdirectory.split("{");
+                var x=0;
+                // if this is a vcs path extension, make sure it starts with '/'
+                if ("{$vcs_base_url}" !== "None specified." && subdirectory_parts[0][0] !== "/") {
+                    alert("VCS path needs to start with '/'");
+                    return false;
+                }
+                // check that path is made up of valid variables
+                var allowed_variables = ["\$gradeable_id", "\$user_id", "\$repo_id"];
+                for (x = 1; x < subdirectory_parts.length; x++) {
+                    subdirectory_part = subdirectory_parts[x].substring(0, subdirectory_parts[x].lastIndexOf("}"));
+                    if (allowed_variables.indexOf(subdirectory_part) === -1) {
+                        alert("For the VCS path, '" + subdirectory_part + "' is not a valid variable name.")
+                        return false;
+                    }
+                }
+                
             }
             if(config_path == "" || config_path === null) {
                 alert("The config path should not be empty");
