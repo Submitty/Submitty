@@ -6,9 +6,11 @@ flag to glob.glob which is very useful, but unfortunately not avaiable on 3.4, w
 is the normal python version for something like Debian Jessie. So if we're not on
 a 'new enough' python version, we use this shim, else we use the builtin glob library
 """
-if sys.version_info >= (3, 4,):
+if sys.version_info >= (3, 5,):
+    print('what')
     from glob import *
 else:
+    print('here')
     """Filename globbing utility."""
 
     import os

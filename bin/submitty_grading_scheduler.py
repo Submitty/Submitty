@@ -3,7 +3,7 @@
 import os
 import grade_items_logging
 import grade_item
-import glob
+from submitty_utils import glob
 import multiprocessing
 from watchdog.observers import Observer
 from watchdog.events import FileCreatedEvent, FileSystemEventHandler

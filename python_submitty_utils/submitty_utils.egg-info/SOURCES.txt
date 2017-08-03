@@ -1,8 +1,0 @@
-setup.py
-submitty_utils/__init__.py
-submitty_utils/datetime.py
-submitty_utils/glob.py
-submitty_utils.egg-info/PKG-INFO
-submitty_utils.egg-info/SOURCES.txt
-submitty_utils.egg-info/dependency_links.txt
-submitty_utils.egg-info/top_level.txt

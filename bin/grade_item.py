@@ -2,7 +2,6 @@
 
 import argparse
 import json
-import glob
 import os
 import tempfile
 import shutil
@@ -12,7 +11,7 @@ import time
 import dateutil
 import dateutil.parser
 
-from submitty_utils import dateutils
+from submitty_utils import dateutils, glob
 import grade_items_logging
 import write_grade_history
 import insert_database_version_data
