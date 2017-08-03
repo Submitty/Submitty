@@ -71,5 +71,5 @@ echo -e "Compile and install the tutorial repository"
 git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
 # remember to change this version in .setup/install_system.sh too
-git checkout v0.9
+git checkout v0.91
 popd
