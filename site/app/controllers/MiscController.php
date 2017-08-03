@@ -71,7 +71,7 @@ class MiscController extends AbstractController {
             // FIXME: need to make this work for peer grading
 
             $current_user_id = $this->core->getUser()->getId();
-            // get the gradeable_id
+            // get the information from the path
             $path_folder = FileUtils::joinPaths($course_path, $dir);
             $path_rest = substr($path, strlen($path_folder)+1);
             $path_gradeable_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
@@ -80,6 +80,19 @@ class MiscController extends AbstractController {
             $path_rest = substr($path_rest, strlen($path_user_id)+1);
             $path_version = intval(substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR)));
 
+            // gradeable to get temporary info from
+            // if team, get one of the user ids via the team id
+            $current_gradeable = $this->core->getQueries()->getGradeable($path_gradeable_id, $current_user_id);
+            if ($current_gradeable->isTeamAssignment()) {
+                $path_team_id = $path_user_id;
+                $path_team_members = $this->core->getQueries()->getTeamById($path_team_id)->getMembers();
+                if (count($path_team_members) == 0) {
+                    return false;
+                }
+                $path_user_id = $path_team_members[0];
+            }
+
+            // use the current user id to get the gradeable specified in the path
             $path_gradeable = $this->core->getQueries()->getGradeable($path_gradeable_id, $path_user_id);
             if ($path_gradeable === null) {
                 return false;
@@ -97,7 +110,6 @@ class MiscController extends AbstractController {
 
             // if team assignment, check that team id matches the team of the current user
             if ($path_gradeable->isTeamAssignment()) {
-                $path_team_id = $path_user_id;
                 $current_team = $this->core->getQueries()->getTeamByGradeableAndUser($path_gradeable_id,$current_user_id);
                 if ($current_team === null) {
                     return false;
