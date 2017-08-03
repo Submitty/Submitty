@@ -188,7 +188,7 @@ HTML;
      * @param array       $graders
      * @return string
      */
-    public function detailsPage($gradeable, $rows, $graders) {
+    public function detailsPage($gradeable, $rows, $graders, $empty_teams) {
         $return = <<<HTML
 <div class="content">
     
@@ -229,12 +229,24 @@ HTML;
             <tr>
 HTML;
         if ($gradeable->isTeamAssignment()) {
-            $cols = 3;
-            $return .= <<<HTML
+            if ($this->core->getUser()->accessAdmin()) {
+                $cols = 5;
+                $return .= <<<HTML
+                <td width="3%"></td>
+                <td width="5%">Section</td>
+                <td width="6%">Edit Team</td>
+                <td width="12%">Team ID</td>
+                <td width="32%">Team Members</td>
+HTML;
+            }
+            else {
+                $cols = 3;
+                $return .= <<<HTML
                 <td width="3%"></td>
                 <td width="5%">Section</td>
                 <td width="50%">Team Members</td>
 HTML;
+            }
         }
         else {
             $cols = 5;
@@ -339,6 +351,15 @@ HTML;
             <tr id="user-row-{$row->getUser()->getId()}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
+HTML;
+                    if ($this->core->getUser()->accessAdmin()) {
+                        $return .= <<<HTML
+                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
+                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                <td></td>
+HTML;
+                    }
+                    $return .= <<<HTML
                 <td>{$row->getUser()->getId()}</td>
 HTML;
                     if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
@@ -361,6 +382,14 @@ HTML;
                 <td>{$display_section}</td>
 HTML;
                     if ($gradeable->isTeamAssignment()) {
+                        if ($this->core->getUser()->accessAdmin()) {
+                            $members_js = json_encode($row->getTeam()->getMembers());
+                            $return .= <<<HTML
+                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$members_js}, {$gradeable->getMaxTeamSize()});'>
+                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                <td>{$row->getTeam()->getId()}</td>
+HTML;
+                        }
                         $return .= <<<HTML
                 <td>{$row->getTeam()->getMemberList()}</td>
 HTML;
@@ -452,7 +481,85 @@ HTML;
             }
             $return .= <<<HTML
         </tbody>
+HTML;
+            if ($gradeable->isTeamAssignment() && count($empty_teams) > 0) {
+                $return .= <<<HTML
+        <tr class="info persist-header">
+            <td colspan="{$cols}" style="text-align: center">Empty Teams</td>
+        </tr>
+        <tbody>
+HTML;
+                $count = 1;
+                foreach($empty_teams as $team) {
+                    $display_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
+                    if ($display_section == null) $display_section = "NULL";
+                    $return .= <<<HTML
+            <tr id="{empty-team-row-{$team->getId()}}" {$style}>
+                <td>{$count}</td>
+                <td>{$display_section}</td>
+                <td><a onclick='adminTeamForm(false, "{$team->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
+                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                <td>{$team->getId()}</td>
+HTML;
+                    for ($i = 4; $i < $cols; $i++) {
+                        $return .= <<<HTML
+                <td></td>
+HTML;
+                    }
+                        $return .= <<<HTML
+            </tr>
+HTML;
+                    $count++;
+                }
+            $return .= <<<HTML
+        </tbody>
+HTML;
+            }
+            $return .= <<<HTML
     </table>
+</div>
+HTML;
+        return $return;
+    }
+
+    public function adminTeamForm($gradeable, $sections) {
+        $reg_or_rot = $gradeable->isGradeByRegistration() ? "Registration" : "Rotating";
+        $return = <<<HTML
+<div class="popup-form" id="admin-team-form" style="width:500px; margin-left:-250px;">
+    <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'submit_team_form', 'gradeable_id'=>$gradeable->getId()))}">
+    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+    <input type="hidden" name="new_team" />
+    <input type="hidden" name="new_team_user_id" />
+    <input type="hidden" name="edit_team_team_id" />
+    <input type="hidden" name="num_users" />
+HTML;
+    if (isset($_REQUEST['view'])) {
+        $return .= <<<HTML
+    <input type="hidden" name="view" value="{$_REQUEST['view']}" />
+HTML;
+    }
+    $return .= <<<HTML
+    <h2 id="admin-team-title"></h2>
+    <br />
+    <div id="admin-team-members" style="width:50%;"></div>
+    <div>
+        {$reg_or_rot} Section:<br />
+        <select name="section">
+HTML;
+        foreach ($sections as $section) {
+            $return .= <<<HTML
+            <option value="{$section}">Section {$section}</option>
+HTML;
+        }
+        $return .= <<<HTML
+            <option value="NULL">Section NULL</option>
+        </select>
+    </div>
+    <div style="float: right; width: auto; margin-top: 10px">
+        <a onclick="$('#admin-team-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+        <input class="btn btn-primary" type="submit" value="Submit" />
+    </div>
+    </form>
 </div>
 HTML;
         return $return;

@@ -114,8 +114,8 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if ($team->getSize() >= $gradeable->getMaxTeamSize()) {
-            $this->core->addErrorMessage("Maximum team size is {$gradeable->getMaxTeamSize()}");
+        if (($team->getSize() + count($team->getInvitations())) >= $gradeable->getMaxTeamSize()) {
+            $this->core->addErrorMessage("Cannot send invitation. Max team size is {$gradeable->getMaxTeamSize()}");
             $this->core->redirect($return_url);
         }
 
@@ -175,6 +175,11 @@ class TeamController extends AbstractController {
 
         if (!$accept_team->sentInvite($user_id)) {
             $this->core->addErrorMessage("No invitation from {$accept_team->getMemberList()}");
+            $this->core->redirect($return_url);
+        }
+
+        if ($accept_team->getSize() >= $gradeable->getMaxTeamSize()) {
+            $this->core->addErrorMessage("Cannot accept invitation. Max team size is {$gradeable->getMaxTeamSize()}");
             $this->core->redirect($return_url);
         }
 
