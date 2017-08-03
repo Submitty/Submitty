@@ -2,22 +2,17 @@
 
 import argparse
 import json
-import sys
 import glob
 import os
 import tempfile
 import shutil
 import subprocess
 import stat
-import filecmp
-import datetime
-import pytz
 import time
 import dateutil
 import dateutil.parser
-import tzlocal
 
-import submitty_utils
+from submitty_utils import dateutils
 import grade_items_logging
 import write_grade_history
 import insert_database_version_data
@@ -40,7 +35,7 @@ def parse_args():
 def get_queue_time(next_directory,next_to_grade):
     t = time.ctime(os.path.getctime(os.path.join(next_directory,next_to_grade)))
     t = dateutil.parser.parse(t)
-    t = submitty_utils.get_timezone().localize(t)
+    t = dateutils.get_timezone().localize(t)
     return t
 
 
@@ -162,8 +157,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
 
     queue_time = get_queue_time(next_directory,next_to_grade)
-    queue_time_longstring = submitty_utils.write_submitty_date(queue_time)
-    grading_began=submitty_utils.get_current_time()
+    queue_time_longstring = dateutils.write_submitty_date(queue_time)
+    grading_began=dateutils.get_current_time()
     waittime=int((grading_began-queue_time).total_seconds())
     grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"wait:",waittime,"")
 
@@ -200,7 +195,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
         submission_string=submission_time_file.read().rstrip()
     
-    submission_datetime=submitty_utils.read_submitty_date(submission_string)
+    submission_datetime=dateutils.read_submitty_date(submission_string)
     
     
     # --------------------------------------------------------------------
@@ -433,20 +428,20 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         os.chown(history_file,int(HWCRON_UID),ta_group_id)
         add_permissions(history_file,stat.S_IRGRP)
         
-    grading_finished=submitty_utils.get_current_time()
+    grading_finished=dateutils.get_current_time()
 
     # -------------------------------------------------------------
     # create/append to the results history
 
-    gradeable_deadline_datetime = submitty_utils.read_submitty_date(gradeable_deadline_string)
-    gradeable_deadline_longstring = submitty_utils.write_submitty_date(gradeable_deadline_datetime)
-    submission_longstring = submitty_utils.write_submitty_date(submission_datetime)
+    gradeable_deadline_datetime = dateutils.read_submitty_date(gradeable_deadline_string)
+    gradeable_deadline_longstring = dateutils.write_submitty_date(gradeable_deadline_datetime)
+    submission_longstring = dateutils.write_submitty_date(submission_datetime)
     
     seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
     # note: negative = not late
 
-    grading_began_longstring = submitty_utils.write_submitty_date(grading_began)
-    grading_finished_longstring = submitty_utils.write_submitty_date(grading_finished)
+    grading_began_longstring = dateutils.write_submitty_date(grading_began)
+    grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
 
 
     gradingtime=int((grading_finished-grading_began).total_seconds())

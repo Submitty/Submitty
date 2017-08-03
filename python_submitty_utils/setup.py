@@ -6,5 +6,8 @@ setup(
     version='0.1.0',
     packages=find_packages(),
     license='BSD',
-    description='Python Submitty Utils'
+    description='Python Submitty Utils',
+    install_requires=[
+        'tzlocal'
+    ]
 )
