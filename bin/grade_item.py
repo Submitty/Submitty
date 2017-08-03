@@ -473,7 +473,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         obj["user"],
         obj["team"],
         obj["who"],
-        "true" if obj["is_team"] else "false",
+        True if obj["is_team"] else False,
         str(obj["version"]))
 
     print ("pid",my_pid,"finished grading ", next_to_grade, " in ", gradingtime, " seconds")
