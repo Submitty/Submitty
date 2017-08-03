@@ -40,6 +40,14 @@ use app\libraries\Utils;
  * @method void setPeerGradeSet(int $assign)
  * @method bool getPeerGrading()
  * @method void setPeerGrading(bool $peer)
+ * @method bool getStudentView()
+ * @method void setStudentView(bool $student_view)
+ * @method bool getStudentSubmit()
+ * @method void setStudentSubmit(bool $student_submit)
+ * @method bool getStudentDownload()
+ * @method void setStudentDownload(bool $student_download)
+ * @method bool getStudentAnyVersion()
+ * @method void setStudentAnyVersion(bool $student_any_version)
  * @method setTaViewDate(\DateTime $datetime)
  * @method \DateTime getOpenDate(\DateTime $datetime)
  * @method setOpenDate(\DateTime $datetime)
@@ -162,6 +170,15 @@ class Gradeable extends AbstractModel {
 
     /** @property @var bool Is there any TA grading to be done for this gradeable (ie. any rubric questions) */
     protected $ta_grading = false;
+
+    /** @property @var bool Will students be able to view submissions? */
+    protected $student_view = true;
+    /** @property @var bool Will students be able to make submissions? */
+    protected $student_submit = true;
+    /** @property @var bool Will students be able to download submissions? */
+    protected $student_download = false;
+    /** @property @var bool Will students be able to view/download any version or just the active version? */
+    protected $student_any_version = true;
 
     /* Config variables for submission details for this gradeable */
     /** @property @var float Max size (in bytes) allowed for the submission */
@@ -303,6 +320,10 @@ class Gradeable extends AbstractModel {
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
+            $this->student_view = $details['eg_student_view'] === true;
+            $this->student_submit = $details['eg_student_submit'] === true;
+            $this->student_download = $details['eg_student_download'] === true;
+            $this->student_any_version = $details['eg_student_any_version'] === true;
             $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
@@ -338,7 +359,6 @@ class Gradeable extends AbstractModel {
                             'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
                             'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                             'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
-
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_is_peer',
                                       'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'anon_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
@@ -818,7 +838,61 @@ class Gradeable extends AbstractModel {
     }
 
     public function getGradedTAPoints() {
-        return $this->graded_tagrading;
+        $points = 0;
+        foreach($this->components as $component) {
+            $marks = $component->getMarks();
+            $type = 0; // 0 is deduction, 1 is addition
+            foreach ($marks as $mark) {
+                if ($mark->getPoints() > 0) {
+                    $type = 1;
+                    break;
+                }
+                if ($mark->getPoints() < 0) {
+                    $type = 0;
+                    break;
+                }
+            }
+            if ($component->getMaxValue() < 0) {
+                $temp_points = ($type === 0 ) ? 0 : $component->getMaxValue();
+            } else {
+                $temp_points = ($type === 0 ) ? $component->getMaxValue() : 0;
+            }
+            
+            foreach ($marks as $mark) {
+                if ($mark->getHasMark()) {
+                    $temp_points += $mark->getPoints();
+                }
+            }
+
+            $temp_points += $component->getScore();
+
+            if ($component->getMaxValue() < 0) {
+                if ($type === 0) {
+                    if ($temp_points < $component->getMaxValue()) {
+                        $temp_points = $component->getMaxValue();
+                    }
+                } else {
+                    if ($temp_points > 0) {
+                        $temp_points = 0;
+                    }
+                }
+            }
+            else {
+                if ($type === 0) {
+                    if ($temp_points < 0) {
+                        $temp_points = 0;
+                    }
+                } else {
+                    if ($temp_points > $component->getMaxValue()) {
+                        $temp_points = $component->getMaxValue();
+                    }
+                }
+            }
+            
+
+            $points += $temp_points;
+        }
+        return $points;
     }
 
     public function getTotalTANonExtraCreditPoints() {

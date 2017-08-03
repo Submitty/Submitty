@@ -28,6 +28,9 @@ class ElectronicGraderController extends AbstractController {
             case 'save_gradeable_comment':
                 $this->saveGradeableComment();
                 break;
+            case 'get_mark_data':
+                $this->getMarkDetails();
+                break;
             default:
                 $this->showStatus();
                 break;
@@ -608,6 +611,7 @@ class ElectronicGraderController extends AbstractController {
             $mark_modified = ($mark_modified === true) ? "true" : "false";
         }
 
+        //generates the HW Report each time a mark is saved
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
 
@@ -625,4 +629,36 @@ class ElectronicGraderController extends AbstractController {
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
     }
+
+    public function getMarkDetails() {
+        //gets all the details from the database of a mark to readd it to the view
+        $gradeable_id = $_POST['gradeable_id'];
+        $user_id = $_POST['user_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->getId() != $_POST['gradeable_component_id']) {
+                continue;
+            }
+            else {
+                $return_data = array();
+                foreach ($component->getMarks() as $mark) {
+                    $temp_array = array();
+                    $temp_array['score'] = $mark->getPoints();
+                    $temp_array['note'] = $mark->getNote();
+                    $temp_array['has_mark'] = $mark->getHasMark();
+                    $return_data[] = $temp_array;
+                }
+                $temp_array = array();
+                $temp_array['custom_score'] = $component->getScore();
+                $temp_array['custom_note'] = $component->getComment();
+                $return_data[] = $temp_array;
+            }
+        }
+
+        $response = array('status' => 'success', 'data' => $return_data);
+        $this->core->getOutput()->renderJson($response);
+        return $response;
+    }
+
+
 }
