@@ -24,8 +24,8 @@ class GradeableView extends AbstractView {
     <br><br>
     <p>
     Prepare your assignment configuration as a single <code>config.json</code> file.<br>
-    Or as a zip of the <code>config.json</code>, and the directories <code>test_input</code>,
-    <code>test_output</code>, and/or <code>test_code</code>.
+          Or as a zip of the <code>config.json</code>, and the directories <code>provided_code</code>,
+          <code>test_input</code>, <code>test_output</code>, and/or <code>custom_validation_code</code>.
     </p>
     
     <br><br>
