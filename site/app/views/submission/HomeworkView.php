@@ -183,8 +183,12 @@ HTML;
     </div>
 HTML;
             if($gradeable->useVcsCheckout()) {
-                $return .= <<<HTML
+                if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
+                    $return .= <<<HTML
     repo_id: <input type="text" id="repo_id"/><br /><br />
+HTML;
+                }
+                $return .= <<<HTML
     <input type="submit" id="submit" class="btn btn-primary" value="Grade Version Control System (VCS) Repository" />
 HTML;
             }
@@ -467,7 +471,7 @@ HTML;
                     num_pages = $("#num_pages").val();
                 };
                 // vcs upload
-                if ({$vcs_string}) {
+                if ({$vcs_string} && ("{$gradeable->getSubdirectory()}".indexOf("\$repo_id") !== -1)) {
                     repo_id = $("#repo_id").val();
                 }
                 // bulk upload

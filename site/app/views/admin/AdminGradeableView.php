@@ -410,12 +410,15 @@ HTML;
                      
                     <div class="upload_type upload_repo" id="repository">
                         <br />
-                        <b>Path for the Version Control System (VCS) repository:</b>
-                        <br />
-                        VCS Base URL: <kbd>{$vcs_base_url}</kbd>
-                        <br />
-                        The VCS Base URL is configured in Course Settings. Specify the rest of the path using some or all the following allowed string replacement variables: gradeable_id, user_id, repo_id in format $&#123;&hellip;&#125; (ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;/&#123;&#36;repo_id&#125;</kbd>), or specify the entire path if the entire path changes for each assignment.
-                        <br />
+                        <b>Path for the Version Control System (VCS) repository:</b><br />
+                        VCS base URL: <kbd>{$vcs_base_url}</kbd><br />
+                        The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below.<br />
+                        You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
+                        <ul style="list-style-position: inside;">
+                            <li>gradeable_id</li>
+                            <li>user_id OR repo_id, do not use both</li>
+                        </ul>
+                        ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
                         <input style='width: 83%' type='text' name='subdirectory' value="" class="required" placeholder="(Required)"/>
                         <br />
                     </div>
@@ -2262,10 +2265,18 @@ $('#gradeable-form').on('submit', function(e){
                 }
                 // check that path is made up of valid variables
                 var allowed_variables = ["\$gradeable_id", "\$user_id", "\$repo_id"];
+                var used_user_id = false;
                 for (x = 1; x < subdirectory_parts.length; x++) {
                     subdirectory_part = subdirectory_parts[x].substring(0, subdirectory_parts[x].lastIndexOf("}"));
                     if (allowed_variables.indexOf(subdirectory_part) === -1) {
                         alert("For the VCS path, '" + subdirectory_part + "' is not a valid variable name.")
+                        return false;
+                    }
+                    if (subdirectory_part === "\$user_id") {
+                        used_user_id = true;
+                    }
+                    if (used_user_id && subdirectory_part === "\$repo_id") {
+                        alert("You cannot use both \$user_id and \$repo_id");
                         return false;
                     }
                 }

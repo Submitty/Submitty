@@ -891,14 +891,9 @@ class SubmissionController extends AbstractController {
             $vcs_path = $gradeable->getSubdirectory();
             $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
             $vcs_path = str_replace("{\$user_id}",$user_id,$vcs_path);
-            // if repo_id was null, default to user_id
-            if ($repo_id === "") {
-                $vcs_path = str_replace("{\$repo_id}",$user_id,$vcs_path);
-            }
-            else {
-                $vcs_path = str_replace("{\$repo_id}",$repo_id,$vcs_path);
-            }
+            $vcs_path = str_replace("{\$repo_id}",$repo_id,$vcs_path);
             $vcs_full_path = $vcs_base_url.$vcs_path;
+            return $this->uploadResult("{$vcs_full_path}", false);
             if (!@touch(FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT"))) {
                 return $this->uploadResult("Failed to touch file for vcs submission.", false);
             }
