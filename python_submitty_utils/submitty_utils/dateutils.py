@@ -1,39 +1,56 @@
-#!/usr/bin/env python3
-
 import re
-import pytz
-import time
 import tzlocal
 from datetime import datetime, timedelta
 
 
-
-# grab the system timezone (should only used when we don't have any info about the timezone)
 def get_timezone():
+    """
+    Grab the system timezone, should generally only be used when we don't have any further
+    information on what timezone we should be using
+
+    :return:
+    """
     return tzlocal.get_localzone()
 
 
-# grab the current time
 def get_current_time():
+    """
+    Get the current time, in the timezone set on the server
+    :return:
+    """
     return datetime.now(get_timezone())
 
 
-# convert a datetime object (with or without the timezone) to a string with a timezone
 def write_submitty_date(d=get_current_time()):
+    """
+    Converts a datetime object to a string with a timezone. If the datetime object
+    does not have a timezone, it'll use the server's timezone.
+
+    :param d: datetime object you want to convert to string
+    :return:
+
+    FIXME: We should not be printing anything out here
+    """
     if not isinstance(d, datetime):
-        print ("ERROR:  ",d," is not a datetime object, it is of type ",type(d))
+        print("ERROR:  ", d, " is not a datetime object, it is of type ", type(d))
         return d
     my_timezone = d.tzinfo
     if my_timezone is None:
-        print ("ERROR: NO TIMEZONE ",d," assuming local timezone")
+        print("ERROR: NO TIMEZONE ", d, " assuming local timezone")
         my_timezone = get_timezone()
         d = my_timezone.localize(d)
     answer = d.strftime("%Y-%m-%d %H:%M:%S%z")
     return answer
 
 
-# convert a string (with the timezone) to a date time object with a timezone
 def read_submitty_date(s):
+    """
+    Convert a string (with a timezone) to a date time object with a timezone
+    :param s:
+    :return:
+
+    FIXME: We should not be raising a SystemExit within a utility function
+    """
     words = s.split()
     if len(words) < 2 or len(words) > 3:
         raise SystemExit("ERROR: unexpected date format %s" % s)
@@ -89,11 +106,11 @@ def parse_datetime(date_string):
         minu = int(m.group(3))
         sec = int(m.group(4))
         days = int(m.group(1))
-        return get_current_time().replace(hour=hour, minute=minu, second=sec) + timedelta(days=days)
+        return get_current_time().replace(hour=hour, minute=minu, second=sec, microsecond=0) + timedelta(days=days)
 
     m = re.search('([+|\-][0-9]+) (days|day)', date_string)
     if m is not None:
         days = int(m.group(1))
-        return get_current_time().replace(hour=23, minute=59, second=59) + timedelta(days=days)
+        return get_current_time().replace(hour=23, minute=59, second=59, microsecond=0) + timedelta(days=days)
 
     raise ValueError("Invalid string for date parsing: " + str(date_string))

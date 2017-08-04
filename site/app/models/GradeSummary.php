@@ -78,7 +78,12 @@ class GradeSummary extends AbstractModel {
         }
         else{
             $this_g['score'] = 0;
-            $this_g['note'] = 'SCORE IS SET TO 0 BECAUSE THERE ARE VERSION CONFLICTS.';
+            if($gradeable->validateVersions(-1)) {
+                $this_g['note'] = 'This has not been graded yet.';
+            }
+            else if($gradeable->getActiveVersion() !== 0) {
+                $this_g['note'] = 'Score is set to 0 because there are version conflicts.';
+            }
         }
         
         switch ($gradeable->getType()) {

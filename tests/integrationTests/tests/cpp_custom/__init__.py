@@ -27,7 +27,7 @@ def initialize(test):
     except OSError:
         pass
     try:
-        os.mkdir(os.path.join(test.testcase_path, "build/custom_grader_code"))
+        os.mkdir(os.path.join(test.testcase_path, "build/custom_validation_code"))
     except OSError:
         pass
     subprocess.call(["cp",
@@ -37,8 +37,8 @@ def initialize(test):
                      os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "instructor_CMakeLists.txt"),
                      os.path.join(test.testcase_path, "build")])
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "custom_grader_code", "grader.cpp"),
-                     os.path.join(test.testcase_path, "build/custom_grader_code")])
+                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "custom_validation_code", "grader.cpp"),
+                     os.path.join(test.testcase_path, "build/custom_validation_code")])
 
 
 ############################################################################

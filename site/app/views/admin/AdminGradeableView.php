@@ -548,7 +548,7 @@ HTML;
         </div>
 HTML;
     }
-    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0) {
+    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
         $type_deduct = 0;
         $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
         foreach ($marks as $mark) {
@@ -2081,106 +2081,6 @@ $('#gradeable-form').on('submit', function(e){
 <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <br> \
 </div>');
-    }
-
-    function deleteDeduct(me) {
-        var question_id = me.parentElement.id.split('-')[1];
-        var current_id = me.parentElement.id.split('-')[2];
-        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
-        current_row.remove();
-        var last_deduct = $('[name=deduct_'+question_id+']').last().attr('id');
-        if (last_deduct == null) {
-            totalD = -1;
-        } 
-        else {
-            totalD = parseInt($('[name=deduct_'+question_id+']').last().attr('id').split('-')[2]);
-        }
-        current_id = parseInt(current_id);
-        for(var i=current_id+1; i<= totalD; ++i){
-            updateDeduct(i,i-1, question_id);
-        }
-    }
-
-    function updateDeduct(old_num, new_num, question_num) {
-        var current_deduct = $('#deduct_id-'+question_num+'-'+old_num);
-        current_deduct.find('input[name=deduct_points_'+question_num+'_'+old_num+']').attr('name', 'deduct_points_'+question_num+'_'+new_num);
-        current_deduct.find('textarea[name=deduct_text_'+question_num+'_'+old_num+']').attr('name', 'deduct_text_'+question_num+'_'+new_num);
-        current_deduct.attr('id', 'deduct_id-'+question_num+'-'+new_num);
-    }
-
-    function moveDeductDown(me) {
-        var question_id = me.parentElement.id.split('-')[1];
-        var current_id = me.parentElement.id.split('-')[2];
-        current_id = parseInt(current_id);
-        //checks if the element exists
-        if (!($('#deduct_id-'+question_id+'-'+(current_id+1)).length)) {
-            return false;
-        }
-        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
-        var current_textarea_value = current_row.find("textarea").val();
-        var current_input_value = current_row.find("input").val();
-
-        var new_row = $('#deduct_id-'+question_id+'-'+(current_id+1));
-        var new_textarea_value = new_row.find("textarea").val();
-        var new_input_value = new_row.find("input").val();
-
-        var temp_textarea_value = new_textarea_value;
-        var temp_input_value = new_input_value;
-
-        new_row.find("textarea").val(current_textarea_value);
-        new_row.find("input").val(current_input_value);
-
-        current_row.find("textarea").val(temp_textarea_value);
-        current_row.find("input").val(temp_input_value);
-    }
-
-    function moveDeductUp(me) {
-        var question_id = me.parentElement.id.split('-')[1];
-        var current_id = me.parentElement.id.split('-')[2];
-        current_id = parseInt(current_id);
-        if (current_id == 0) {
-            return false;
-        }
-        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
-        var current_textarea_value = current_row.find("textarea").val();
-        var current_input_value = current_row.find("input").val();
-
-        var new_row = $('#deduct_id-'+question_id+'-'+(current_id-1));
-        var new_textarea_value = new_row.find("textarea").val();
-        var new_input_value = new_row.find("input").val();
-
-        var temp_textarea_value = new_textarea_value;
-        var temp_input_value = new_input_value;
-
-        new_row.find("textarea").val(current_textarea_value);
-        new_row.find("input").val(current_input_value);
-
-        current_row.find("textarea").val(temp_textarea_value);
-        current_row.find("input").val(temp_input_value);
-    }
-
-    function onDeduction(me) {
-        var current_row = $(me.parentElement.parentElement);
-        var current_question = parseInt(current_row.attr('id').split('-')[1]);
-        current_row.find('div[name=deduct_'+current_question+']').each(function () {
-            $(this).find("input").attr('min', -1000);
-            $(this).find("input").attr('max', 0);
-            if ($(this).find("input").val() > 0) {
-                $(this).find("input").val($(this).find("input").val() * -1);
-            }            
-        });
-    }
-
-    function onAddition(me) {
-        var current_row = $(me.parentElement.parentElement);
-        var current_question = parseInt(current_row.attr('id').split('-')[1]);
-        current_row.find('div[name=deduct_'+current_question+']').each(function () {
-            $(this).find("input").attr('min', 0);
-            $(this).find("input").attr('max', 1000);
-            if ($(this).find("input").val() < 0) {
-                $(this).find("input").val($(this).find("input").val() * -1);
-            }            
-        });
     }
 
     $('input:radio[name="gradeable_type"]').change(

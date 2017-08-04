@@ -64,6 +64,7 @@ class GradeableComponentMark extends AbstractModel {
         $this->note = urlencode($temp_note);
     }
 
+    //use this when inserting into the database
     public function getNoteNoDecode(){
         return ($this->note);
     }

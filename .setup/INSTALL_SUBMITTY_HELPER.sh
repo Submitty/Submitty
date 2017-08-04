@@ -276,7 +276,6 @@ replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
@@ -309,14 +308,12 @@ chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_da
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_utils.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
 
@@ -335,6 +332,17 @@ g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INST
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 
+
+###############################################
+# scripts used only by root for setup only
+mkdir -p ${SUBMITTY_INSTALL_DIR}/.setup/bin
+chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin
+chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin
+
+cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_old_assignments.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
+chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/*
+chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/*
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload_old_assignments.py
 
 
 ########################################################################################################################
