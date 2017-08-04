@@ -436,7 +436,6 @@ class ElectronicGraderController extends AbstractController {
                     }
                     if($temp_mark_selected !== $mark->getHasMark()) {
                         $mark_modified = true;
-                        break;
                     }
                     $index++;
                 }
@@ -519,7 +518,7 @@ class ElectronicGraderController extends AbstractController {
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
 
-        $response = array('status' => $debug, 'modified' => $mark_modified);
+        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false);
         $this->core->getOutput()->renderJson($response);
         return $response;
     }

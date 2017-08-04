@@ -49,8 +49,9 @@ function addMark(me, num, background, min, max, precision) {
     var new_num = last_num + 1;
     current_row.before(' \
 <tr id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'"> \
-<td colspan="1" style="'+background+'; text-align: center;"> <input name="mark_points_'+num+'_'+new_num+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none;"> \
-                    <span onclick="selectMark(this);"> <i class="fa fa-square-o mark" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
+<td colspan="1" style="'+background+'; text-align: center;"> \
+    <span onclick="selectMark(this);"> <i class="fa fa-square-o mark" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
+    <input name="mark_points_'+num+'_'+new_num+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none;"> \
 </td> \
 <td colspan="3" style="'+background+'"> \
     <textarea name="mark_text_'+num+'_'+new_num+'" onkeyup="autoResizeComment(event);" rows="1" style="width:95%; resize:none; float:left;"></textarea> \
@@ -524,7 +525,8 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
                     if (all_false === true) {
                         $('#graded-by-' + num)[0].innerHTML = "Ungraded by you!";
                     } else {
-                        if(($('#graded-by-' + num)[0].innerHTML === "Ungraded!") || (overwrite === "true")) {
+                        if(($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || 
+                            $('#graded-by-' + num)[0].innerHTML === "Ungraded by you!") || (overwrite === "true")) {
                             $('#graded-by-' + num)[0].innerHTML = "Graded by you!";
                         }
                     }
