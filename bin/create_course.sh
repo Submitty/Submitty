@@ -39,7 +39,8 @@ if [[ $? -ne "0" ]] ; then
 fi
 
 #Ensure that tables exist within Submitty Master DB.
-table_count=`PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -tAc "SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('courses','courses_users','sessions','users');"`
+sql="SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('courses','courses_users','sessions','users');"
+table_count=`PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -tAc "${sql}"`
 if [[ $table_count -ne "4" ]] ; then
     echo "ERROR: Submitty Master DB is invalid."
     exit
