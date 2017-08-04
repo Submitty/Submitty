@@ -134,6 +134,7 @@ pip3 install watchdog
 pip3 install xlsx2csv
 
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+python2 setup.py install
 python3 setup.py install
 popd
 

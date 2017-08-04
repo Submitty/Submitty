@@ -87,6 +87,7 @@ install:
   - pip3 install sqlalchemy
   - pip3 install pylint_runner
   - pip3 install python-dateutil
+  - python2 ${TRAVIS_BUILD_DIR}/python_submitty_utils/setup.py install
   - python3 ${TRAVIS_BUILD_DIR}/python_submitty_utils/setup.py install
   - sudo chmod -R 555 /usr/local/lib/python*/
   - sudo chmod -R 555 /opt/python/${PY_VERSION_2}/lib/python${PY_VERSION_2:0:3}/*
