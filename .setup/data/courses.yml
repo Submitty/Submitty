@@ -50,8 +50,6 @@
 #
 #     g_overall_ta_instructions: [optional] string for additional details to TA for grading. Defaults to .
 #
-#     g_team_assignment: [optional] boolean for if gradeable is a team assignment. Defaults to False (NOT CURRENTLY USED)
-#
 #     g_grade_by_registration: [optional] boolean on if gradeable is graded by registration (TRUE) or rotating (FALSE).
 #         Defaults to True.
 #
@@ -74,6 +72,12 @@
 #         grading start date and submission due date, but after the TA view date.
 #
 #     eg_submission_due_date: Timestamp when is the due date for the gradeable. Should be after submission open date.
+#
+#     eg_team_assignment: Boolean for if electronic gradeable is a team assignment. Defaults to False
+#
+#     eg_max_team_size: Integer for maximum team size (instructors can manually create larger teams). Defaults to 1
+#
+#     eg_team_lock_date: Timestamp on when teams lock (students can no longer leave their team or send invitations). Defaults to due date
 #
 #     eg_is_repository: [optional] Boolean for if this gradeable using version control (TRUE) or not (FALSE).
 #         Defaults to FALSE.
