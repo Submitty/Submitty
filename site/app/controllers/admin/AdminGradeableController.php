@@ -171,7 +171,7 @@ class AdminGradeableController extends AbstractController {
         }
         
         if ($edit_gradeable === 1) {
-            $old_components = $this->core->getQueries()->getGradeableComponents($_POST['gradeable_id']);
+            $old_components = $gradeable->getComponents();
             $num_old_components = count($old_components);
             $start_index = $num_old_components;
         }
@@ -287,6 +287,7 @@ class AdminGradeableController extends AbstractController {
                     }
                 }
             }
+
             if ($edit_gradeable === 1) {
                 $x = 0;
                 foreach ($old_components as $old_component) {
@@ -323,8 +324,11 @@ class AdminGradeableController extends AbstractController {
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }  
 
+            //remake the gradeable to update all the data
+            $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
+
             if ($edit_gradeable === 0) {
-                $components = $this->core->getQueries()->getGradeableComponents($_POST['gradeable_id']);
+                $components = $gradeable->getComponents();
                 $index = 1;
                 foreach ($components as $comp) {
                     $num_marks = 0;
@@ -346,7 +350,7 @@ class AdminGradeableController extends AbstractController {
                 }            
             }
             else if ($edit_gradeable === 1) {
-                $components = $this->core->getQueries()->getGradeableComponents($_POST['gradeable_id']);
+                $components = $gradeable->getComponents();
                 $index = 1;
                 foreach ($components as $comp) {
                     $num_marks = 0; //current number of marks
@@ -356,7 +360,7 @@ class AdminGradeableController extends AbstractController {
                         }
                     }
 
-                    $marks = $this->core->getQueries()->getGradeableComponentsMarks($comp->getId());
+                    $marks = $comp->getMarks();
                     $num_old_mark = count($marks); //old number of marks
                     //if old > new, delete old
                     //if old < new, create more
