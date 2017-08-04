@@ -25,6 +25,8 @@ def main():
     course_name = sys.argv[1].split('/')[-2]
     csv_name = course_name + ".csv"
 
+    print ("WRITING TO ",csv_name)
+    
     #make a list of students
     student_list = list()
     for student_name in os.listdir(args.archived_directory):
