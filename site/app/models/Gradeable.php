@@ -1017,7 +1017,7 @@ class Gradeable extends AbstractModel {
             foreach($this->components as $cmpt) {
                 if(is_array($cmpt)) {
                     foreach($cmpt as $graded_by) {
-                        if($graded->getGrader()->getId() === $peer && $cmpt->getGradedVersion() !== $active_check) {
+                        if($graded_by->getGrader() !== null && $graded_by->getGrader()->getId() === $peer && $graded_by->getGradedVersion() !== $active_check) {
                             return false;
                         }
                     }
@@ -1080,7 +1080,7 @@ class Gradeable extends AbstractModel {
     public function getNumPeerComponents() {
         $count = 0;
         foreach($this->components as $cmpt) {
-            if($cmpt->getIsPeer()) {
+            if(is_array($cmpt) || $cmpt->getIsPeer()) {
                 $count++;
             }
         }
@@ -1093,8 +1093,10 @@ class Gradeable extends AbstractModel {
         }
         $count = 0;
         foreach($this->components as $cmpt) {
-            if(!$cmpt->getIsPeer()) {
-                $count++;
+            if(!is_array($cmpt)) {
+                if(!$cmpt->getIsPeer()) {
+                    $count++;
+                }
             }
         }
         return $count;
@@ -1103,7 +1105,14 @@ class Gradeable extends AbstractModel {
     public function getComponentsGradedBy($grader_id) {
         $return = array();
         foreach($this->components as $cmpt) {
-            if($cmpt->getGrader() !== null && $cmpt->getGrader()->getId() == $grader_id) {
+            if(is_array($cmpt)) {
+                foreach($cmpt as $peer) {
+                    if($peer->getGrader() !== null && $cmpt->getGrader()->getId() == $grader_id) {
+                        $return[] = $cmpt;
+                    }
+                }
+            }
+            else if($cmpt->getGrader() !== null && $cmpt->getGrader()->getId() == $grader_id) {
                 $return[] = $cmpt;
             }
         }

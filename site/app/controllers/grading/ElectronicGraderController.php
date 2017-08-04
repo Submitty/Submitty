@@ -508,15 +508,6 @@ class ElectronicGraderController extends AbstractController {
                 if($which->getId() != $_POST['gradeable_component_id']) {
                     continue;
                 }
-                // doing this in case we need to add a new peer component
-                $component_basics['gc_title'] = $which->getTitle();
-                $component_basics['gc_ta_comment'] = $which->getTaComment();
-                $component_basics['gc_student_comment'] = $which->getStudentComment();
-                $component_basics['gc_max_value'] = $which->getMaxValue();
-                $component_basics['gc_is_text'] = $which->getIsText();
-                $component_basics['gc_is_peer'] = $which->getIsPeer();
-                $component_basics['gc_is_extra_credit'] = $which->getIsExtraCredit();
-                $component_basics['gc_order'] = $which->getOrder();
             }
             if(is_array($component)) {
                 if($component[0]->getId() != $_POST['gradeable_component_id']) {
@@ -536,7 +527,7 @@ class ElectronicGraderController extends AbstractController {
                     }
                 }
                 if(!found){
-                    $component = $this->core->loadModel(GradeableComponent::class, $component_basics);
+                    $component = $this->core->getQueries()->getGradeableComponents($component[0]->getId())[$component[0]->getOrder()];
                 }
             }
             else if ($component->getId() != $_POST['gradeable_component_id']) {

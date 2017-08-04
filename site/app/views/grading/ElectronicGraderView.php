@@ -780,12 +780,39 @@ HTML;
         $precision = floatval($gradeable->getPointPrecision());
         $num_questions = count($gradeable->getComponents());
 
-        foreach ($gradeable->getComponents() as $question) {
-            if($peer && !$question->getIsPeer()) continue;
+        foreach ($gradeable->getComponents() as $component) {
+            if($peer && !is_array($component)) continue;
+            $component_basics = array();
             $type = 0; //0 is common deductable, 1 is common additive
             $min = -1000;
             $max = 0;
             $ungraded = false;
+            $question = null;
+            if($peer) {
+                foreach($component as $cmpt) {
+                    if(count($component_basics) === 0) {
+                        $component_basics['gc_id'] = $cmpt->getId();
+                        $component_basics['gc_is_peer'] = $cmpt->getIsPeer();
+                        $component_basics['gc_is_text'] = $cmpt->getIsText();
+                        $component_basics['gc_is_extra_credit'] = $cmpt->getIsExtraCredit();
+                        $component_basics['gc_title'] = $cmpt->getTitle();
+                        $component_basics['gc_order'] = $cmpt->getOrder();
+                        $component_basics['gc_max_value'] = $cmpt->getMaxValue();
+                        $component_basics['gc_ta_comment'] = $cmpt->getTaComment();
+                        $component_basics['gc_student_comment'] = $cmpt->getStudentComment();
+                    }
+                    if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
+                        $question = $cmpt;
+                        break;
+                    }
+                }
+                if($question === null) {
+                    $question = $this->core->loadModel(GradeableComponent::class, $component_basics);
+                }
+            }
+            else {
+                $quesiton = $component;
+            }
             foreach ($question->getMarks() as $mark) {
                 if($mark->getPoints() < 0) {
                     $min = -1000;
