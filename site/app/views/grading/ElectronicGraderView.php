@@ -104,40 +104,38 @@ HTML;
                 Section {$key}: {$graders}<br />
 HTML;
         }
-        $return .= <<<HTML
+        if(!$gradeable->isTeamAssignment()) {
+            $return .= <<<HTML
             </div>
         </div>
         <div class="box half">
             Average Scores of Graded Components:
             <div style="margin-left: 20px">
 HTML;
-        $overall_score = 0;
-        $overall_max = 0;
-        foreach($average_scores as $comp) {
-            // if ($comp->getMaxValue() <= 0){
-            //     $percentage = -1;
-            // }
-            // else{
-            //     $percentage = round(($comp->getAverageScore() / $comp->getMaxValue()) * 100);
-            // }
-            $overall_score += $comp->getAverageScore();
-            $overall_max += $comp->getMaxValue();
-            $return .= <<<HTML
+            $overall_score = 0;
+            $overall_max = 0;
+            foreach($average_scores as $comp) {
+                $overall_score += $comp->getAverageScore();
+                $overall_max += $comp->getMaxValue();
+                $return .= <<<HTML
                 {$comp->getTitle()}:<br />
                 <div style="margin-left: 20px">
                     Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} <br />
                     Standard Deviation: {$comp->getStandardDeviation()}<br />
                 </div>
 HTML;
-        }
-        if($overall_max !=0){
-            $percentage = round($overall_score / $overall_max *100);
-        }
-        else {
-            $percentage = "ungraded";
+            }
+            if($overall_max !=0){
+                $percentage = round($overall_score / $overall_max *100);
+            }
+            else {
+                $percentage = "ungraded";
+            }
+            $return .= <<<HTML
+            <br />Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
+HTML;
         }
         $return .= <<<HTML
-            <br />Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
             </div>
         </div>
     </div>
