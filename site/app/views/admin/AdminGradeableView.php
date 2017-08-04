@@ -461,7 +461,7 @@ HTML;
 
                 </div>
 
-                Will this assignment be manually graded?
+          Will any or all of this assignment be manually graded (e.g., by TAs or the instructor)?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
                 if ($use_ta_grading===true) { $html_output .= ' checked="checked"'; }
