@@ -432,6 +432,7 @@ HTML;
     </p>
     <p>&emsp;</p>
     <p>
+        Registration section can be null.<br>
         Do not use a header row.<br>
     </p>
     <br />
