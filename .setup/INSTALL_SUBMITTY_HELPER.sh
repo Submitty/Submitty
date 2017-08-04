@@ -336,10 +336,16 @@ chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_chec
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 
 
-
+###############################################
 # scripts used only by root for setup only
 mkdir -p ${SUBMITTY_INSTALL_DIR}/.setup/bin
-chmod 5
+chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin
+chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin
+
+cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_old_assignments.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
+chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/*
+chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/*
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload_old_assignments.py
 
 
 ########################################################################################################################
