@@ -943,6 +943,51 @@ HTML;
 </div>
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading.js"></script>
 <script type="text/javascript">
+    function updateHandle(element) {
+        var padding = $(element).outerHeight() - $(element).innerHeight();
+        var height = $(element).prop('scrollHeight') - padding;
+        console.log("height " + height);
+        var clientHeight = $(element).prop('clientHeight');
+        // console.log("clientHeight " + clientHeight);
+        // var bottom = grading_rubric.scrollTop() + grading_rubric.outerHeight(true) - $( '.ui-resizable-handle').outerHeight(true);
+        var bottom = $(element).scrollTop() + clientHeight;
+        var bottom = Math.min(height, bottom);
+        var bottom_se = $(element).scrollTop() + clientHeight - 20;
+        var bottom_se = Math.min(height, bottom_se);
+        var scrolltop = $(element).scrollTop();
+        $(element).find('.ui-resizable-e').css('top', scrolltop + 'px');
+        $(element).find('.ui-resizable-s').css('top', bottom + 'px');
+        $(element).find('.ui-resizable-se').css('top', bottom_se + 'px');
+    }
+    $(document).ready(function() {
+        $( "#autograding_results" ).scroll(function() {
+            updateHandle("#autograding_results");
+        });
+        $( "#autograding_results" ).resize(function() {
+            updateHandle("#autograding_results");
+        });
+        $( "#grading_rubric" ).scroll(function() {
+            updateHandle("#grading_rubric");
+        });
+        $( "#grading_rubric" ).resize(function() {
+            updateHandle("#grading_rubric");
+        });
+        $( "#submission_browser" ).scroll(function() {
+            updateHandle("#submission_browser");
+        });
+        $( "#submission_browser" ).resize(function() {
+            updateHandle("#submission_browser");
+        });
+        $( "#student_info" ).scroll(function() {
+            updateHandle("#student_info");
+        });
+        $( "#student_info" ).resize(function() {
+            updateHandle("#student_info");
+        });
+
+    });
+</script>
+<script type="text/javascript">
     function openFrame(html_file, url_file, num) {
         var iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open')) {
