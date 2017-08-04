@@ -539,8 +539,8 @@ HTML;
     if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
         $html_output .= <<<HTML
             <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-            <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Sample Text</textarea> 
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+            <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
             <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
             <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
             <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -575,7 +575,7 @@ HTML;
             }
             $html_output .= <<<HTML
                 <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
-                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                 <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
                 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -1935,8 +1935,8 @@ $('#gradeable-form').on('submit', function(e){
         </tr>');
         $("#rubric_add_deduct_" + newQ).before(' \
             <div id="deduct_id-'+newQ+'-0" name="deduct_'+newQ+'" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;"> \
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points" name="deduct_points_'+newQ+'_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
-            <textarea rows="1" placeholder="Comment" name="deduct_text_'+newQ+'_0" style="resize: none; width: 81.5%;">Sample Text</textarea> \
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_'+newQ+'_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+            <textarea rows="1" placeholder="Comment" name="deduct_text_'+newQ+'_0" style="resize: none; width: 81.5%;">Full Credit</textarea> \
             <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
@@ -2025,6 +2025,7 @@ $('#gradeable-form').on('submit', function(e){
     function onDeduction(me) {
         var current_row = $(me.parentElement.parentElement);
         var current_question = parseInt(current_row.attr('id').split('-')[1]);
+        current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('Full Credit');
         current_row.find('div[name=deduct_'+current_question+']').each(function () {
             $(this).find("input").attr('min', -1000);
             $(this).find("input").attr('max', 0);
@@ -2037,6 +2038,7 @@ $('#gradeable-form').on('submit', function(e){
     function onAddition(me) {
         var current_row = $(me.parentElement.parentElement);
         var current_question = parseInt(current_row.attr('id').split('-')[1]);
+        current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('No Credit');
         current_row.find('div[name=deduct_'+current_question+']').each(function () {
             $(this).find("input").attr('min', 0);
             $(this).find("input").attr('max', 1000);
@@ -2074,7 +2076,7 @@ $('#gradeable-form').on('submit', function(e){
         var new_num = last_num + 1;
         $("#rubric_add_deduct_" + num).before('\
 <div id="deduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
-<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
 <textarea rows="1" placeholder="Comment" name="deduct_text_'+num+'_'+new_num+'" style="resize: none; width: 81.5%;"></textarea> \
 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
