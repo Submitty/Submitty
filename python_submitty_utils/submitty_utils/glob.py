@@ -2,9 +2,10 @@ import sys
 
 """
 This is a copy of the glob.py from Python 3.5.3. In 3.5, they added a 'recursive'
-flag to glob.glob which is very useful, but unfortunately not avaiable on 3.4, which
-is the normal python version for something like Debian Jessie. So if we're not on
-a 'new enough' python version, we use this shim, else we use the builtin glob library
+flag to glob.glob which is very useful, but unfortunately not available on 3.4, which
+is the normal python version for something like Debian Jessie or Ubuntu 14.04. So if 
+we're not on a 'new enough' python version, we use this shim, else we use the builtin 
+glob library.
 """
 if sys.version_info >= (3, 5,):
     from glob import *
