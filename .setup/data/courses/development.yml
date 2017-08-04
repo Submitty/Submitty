@@ -5,6 +5,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: upload_only
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -16,6 +21,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: cpp_simple_lab
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -27,6 +37,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: cpp_cats
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -38,6 +53,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: minimal_code_editing
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -49,6 +69,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: cpp_custom
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -60,6 +85,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: cpp_hidden_tests
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -71,6 +101,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: c_failure_messages
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -82,6 +117,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: python_simple_homework
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -93,6 +133,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: python_linehighlight
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -104,6 +149,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: python_multipart_static_analysis
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -115,6 +165,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: iclicker_upload
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -126,6 +181,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: paragraph_textboxes
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -137,6 +197,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: pdf_word_count
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -148,6 +213,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: choice_of_language
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
@@ -159,6 +229,11 @@ gradeables:
 - components:
   - gc_max_value: 5
     gc_title: Question 1
+    marks:
+      - gcm_note: Full Credit
+        gcm_points : 0
+      - gcm_note: Question 1 Mark 1
+        gcm_points : -5
   gradeable_config: cpp_provided_code
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days

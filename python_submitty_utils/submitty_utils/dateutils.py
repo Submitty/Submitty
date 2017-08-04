@@ -106,11 +106,11 @@ def parse_datetime(date_string):
         minu = int(m.group(3))
         sec = int(m.group(4))
         days = int(m.group(1))
-        return get_current_time().replace(hour=hour, minute=minu, second=sec) + timedelta(days=days)
+        return get_current_time().replace(hour=hour, minute=minu, second=sec, microsecond=0) + timedelta(days=days)
 
     m = re.search('([+|\-][0-9]+) (days|day)', date_string)
     if m is not None:
         days = int(m.group(1))
-        return get_current_time().replace(hour=23, minute=59, second=59) + timedelta(days=days)
+        return get_current_time().replace(hour=23, minute=59, second=59, microsecond=0) + timedelta(days=days)
 
     raise ValueError("Invalid string for date parsing: " + str(date_string))

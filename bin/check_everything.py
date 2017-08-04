@@ -131,9 +131,10 @@ for semester in os.listdir(SUBMITTY_DATA_DIR+"/courses"):
         global_success &= CheckItemBits(course_path+"/config/form",True,c_instructor,c_group,0o770)
 
         global_success &= CheckItemBits(course_path+"/bin",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/provided_code",True,c_instructor,c_group,0o770)
         global_success &= CheckItemBits(course_path+"/test_input",True,c_instructor,c_group,0o770)
         global_success &= CheckItemBits(course_path+"/test_output",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/test_code",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/custom_validation_code",True,c_instructor,c_group,0o770)
 
         global_success &= CheckItemBits(course_path+"/submissions",True,"hwphp",c_group,0o750)
         global_success &= CheckItemBits(course_path+"/config_upload",True,"hwphp",c_group,0o750)

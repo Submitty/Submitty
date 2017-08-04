@@ -116,7 +116,7 @@ def untrusted_grant_read_access(which_untrusted,my_dir):
                      which_untrusted,
                      "-exec",
                      "/bin/chmod",
-                     "o+r",
+                     "o+rwx",   # FIXME: needed more permissions to get tutorial_10_java_coverage to work
                      "{}",
                      ";"])
 # give permissions to all created files to the hwcron user
@@ -163,9 +163,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # --------------------------------------------------------
     # various paths
-    test_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_code",obj["gradeable"])
+    provided_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"provided_code",obj["gradeable"])
     test_input_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_input",obj["gradeable"])
     test_output_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_output",obj["gradeable"])
+    custom_validation_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"custom_validation_code",obj["gradeable"])
     bin_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"bin")
 
     #checkout_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/checkout/$gradeable/$who/$version"
@@ -228,10 +229,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
-    copy_contents_into(test_code_path,tmp_compilation)
+    copy_contents_into(provided_code_path,tmp_compilation)
 
-    subprocess.call(['ls', '-la', tmp_compilation], stdout=open(tmp_logs + "/overall.txt", 'a'))
-    
+    subprocess.call(['find', '.', '-exec', 'ls', '-la', '{}', ';'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
     # copy compile.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"compile.out"),os.path.join(tmp_compilation,"my_compile.out"))
 
@@ -292,8 +293,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # copy input files to tmp_work directory
     copy_contents_into(test_input_path,tmp_work)
 
-    subprocess.call(['ls', '-la', tmp_work], stdout=open(tmp_logs + "/overall.txt", 'a'))
-    
+    subprocess.call(['find', '.', '-exec', 'ls', '-la', '{}', ';'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
     # copy runner.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"run.out"),os.path.join(tmp_work,"my_runner.out"))
 
@@ -344,8 +345,11 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # copy output files to tmp_work directory
     copy_contents_into(test_output_path,tmp_work)
 
-    subprocess.call(['ls', '-la', tmp_work], stdout=open(tmp_logs + "/overall.txt", 'a'))
-        
+    # copy any instructor provided code files to tmp compilation directory
+    copy_contents_into(custom_validation_code_path,tmp_work)
+
+    subprocess.call(['find', '.', '-exec', 'ls', '-la', '{}', ';'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
     # copy validator.out to the current directory
     shutil.copy (os.path.join(bin_path,obj["gradeable"],"validate.out"),os.path.join(tmp_work,"my_validator.out"))
 
@@ -392,8 +396,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print ("====================================\nARCHIVING STARTS", file=f)
 
-    subprocess.call(['ls', '-la', tmp_work], stdout=open(tmp_logs + "/overall.txt", 'a'))
-        
+    subprocess.call(['find', '.', '-exec', 'ls', '-la', '{}', ';'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
     os.chdir(bin_path)
 
     # save the old results path!
@@ -467,7 +471,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         obj["user"],
         obj["team"],
         obj["who"],
-        "true" if obj["is_team"] else "false",
+        True if obj["is_team"] else False,
         str(obj["version"]))
 
     print ("pid",my_pid,"finished grading ", next_to_grade, " in ", gradingtime, " seconds")

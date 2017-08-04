@@ -32,7 +32,7 @@ def cleanup(test):
         pass
     os.mkdir(os.path.join(test.testcase_path, "data"))
     subprocess.call(["cp", "-r",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_code"),
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "provided_code"),
         os.path.join(test.testcase_path, "data")])
 
 
