@@ -36,7 +36,7 @@ def solution(test):
                 os.path.join(test.testcase_path, "data"))
     shutil.copy(os.path.join(SAMPLE_SUBMISSIONS, "student.cpp"),
                 os.path.join(test.testcase_path, "data"))
-    for f in glob.glob(os.path.join(test.testcase_path,"assignment_config","test_code","*")):
+    for f in glob.glob(os.path.join(test.testcase_path,"assignment_config","provided_code","*")):
         shutil.copy(f,os.path.join(test.testcase_path, "data"))
     test.run_compile()
     test.run_run()

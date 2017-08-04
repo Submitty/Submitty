@@ -4,8 +4,7 @@ namespace app\controllers\student;
 
 use app\controllers\AbstractController;
 use app\libraries\Core;
-use app\libraries\GradeableType;
-use app\models\GradeableList;
+use app\libraries\FileUtils;
 
 class TeamController extends AbstractController {
     public function run() {
@@ -52,8 +51,28 @@ class TeamController extends AbstractController {
         }
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
-        $this->core->getQueries()->createTeam($gradeable_id, $user_id, $this->core->getUser()->getRegistrationSection(), $this->core->getUser()->getRotatingSection());
+        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $user_id, $this->core->getUser()->getRegistrationSection(), $this->core->getUser()->getRotatingSection());
         $this->core->addSuccessMessage("Created a new team");
+
+        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
+        if (!FileUtils::createDir($gradeable_path)) {
+            $this->core->addErrorMEssage("Failed to make folder for this assignment");
+            $this->core->redirect($return_url);
+        }
+
+        $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
+        if (!FileUtils::createDir($user_path)) {
+            $this->core->addErrorMEssage("Failed to make folder for this assignment for the team");
+            $this->core->redirect($return_url);
+        }
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
+        $json = array("team_history" => array(array("action" => "create", "time" => $current_time, "user" => $user_id)));
+
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $this->core->addErrorMEssage("Failed to write to team history to settings file");
+        }
         $this->core->redirect($return_url);
     }
 
@@ -85,6 +104,19 @@ class TeamController extends AbstractController {
 
         $this->core->getQueries()->leaveTeam($team->getId(), $user_id);
         $this->core->addSuccessMessage("Left team");
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
+        $json = FileUtils::readJsonFile($settings_file);
+        if ($json === false) {
+            $this->core->addErrorMEssage("Failed to open settings file");
+            $this->core->redirect($return_url);
+        }
+        $json["team_history"][] = array("action" => "leave", "time" => $current_time, "user" => $user_id);
+
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $this->core->addErrorMEssage("Failed to write to team history to settings file");
+        }
         $this->core->redirect($return_url);
     }
 
@@ -114,8 +146,8 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if ($team->getSize() >= $gradeable->getMaxTeamSize()) {
-            $this->core->addErrorMessage("Maximum team size is {$gradeable->getMaxTeamSize()}");
+        if (($team->getSize() + count($team->getInvitations())) >= $gradeable->getMaxTeamSize()) {
+            $this->core->addErrorMessage("Cannot send invitation. Max team size is {$gradeable->getMaxTeamSize()}");
             $this->core->redirect($return_url);
         }
 
@@ -143,6 +175,19 @@ class TeamController extends AbstractController {
 
         $this->core->getQueries()->sendTeamInvitation($team->getId(), $invite_id);
         $this->core->addSuccessMessage("Invitation sent to {$invite_id}");
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
+        $json = FileUtils::readJsonFile($settings_file);
+        if ($json === false) {
+            $this->core->addErrorMEssage("Failed to open settings file");
+            $this->core->redirect($return_url);
+        }
+        $json["team_history"][] = array("action" => "send_invitation", "time" => $current_time, "sent_by_user" => $user_id, "sent_to_user" => $invite_id);
+
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $this->core->addErrorMEssage("Failed to write to team history to settings file");
+        }
         $this->core->redirect($return_url);
     }
 
@@ -178,9 +223,27 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        if ($accept_team->getSize() >= $gradeable->getMaxTeamSize()) {
+            $this->core->addErrorMessage("Cannot accept invitation. Max team size is {$gradeable->getMaxTeamSize()}");
+            $this->core->redirect($return_url);
+        }
+
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
         $this->core->getQueries()->acceptTeamInvitation($accept_team_id, $user_id);
         $this->core->addSuccessMessage("Accepted invitation from {$accept_team->getMemberList()}");
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $accept_team_id, "user_assignment_settings.json");
+        $json = FileUtils::readJsonFile($settings_file);
+        if ($json === false) {
+            $this->core->addErrorMEssage("Failed to open settings file");
+            $this->core->redirect($return_url);
+        }
+        $json["team_history"][] = array("action" => "accept_invitation", "time" => $current_time, "user" => $user_id);
+
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $this->core->addErrorMEssage("Failed to write to team history to settings file");
+        }
         $this->core->redirect($return_url);
     }
 
@@ -218,6 +281,19 @@ class TeamController extends AbstractController {
 
         $this->core->getQueries()->cancelTeamInvitation($team->getId(), $cancel_id);
         $this->core->addSuccessMessage("Cancelled invitation to {$cancel_id}");
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
+        $json = FileUtils::readJsonFile($settings_file);
+        if ($json === false) {
+            $this->core->addErrorMEssage("Failed to open settings file");
+            $this->core->redirect($return_url);
+        }
+        $json["team_history"][] = array("action" => "cancel_invitation", "time" => $current_time, "canceled_by_user" => $user_id, "canceled_user" => $cancel_id);
+
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $this->core->addErrorMEssage("Failed to write to team history to settings file");
+        }
         $this->core->redirect($return_url);
     }
 
