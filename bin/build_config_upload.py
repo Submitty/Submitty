@@ -9,7 +9,7 @@ import os
 import pwd
 import time
 import subprocess
-import glob
+from submitty_utils import glob
 import json
 
 

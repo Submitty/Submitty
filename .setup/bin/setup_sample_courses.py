@@ -27,17 +27,10 @@ import random
 import shutil
 import subprocess
 import uuid
-import pytz
-import time
-import tzlocal
 import os.path
-import sys
 import string
 
-
-# share a couple functions related to timezone
-sys.path.append("/usr/local/submitty/bin")
-import submitty_utils
+from submitty_utils import dateutils
 
 
 # TODO: Remove this and purely use shutil once we move totally to Python 3
@@ -61,7 +54,7 @@ DB_PASS = "hsdbu"
 
 DB_ONLY = False
 
-NOW = submitty_utils.get_current_time()
+NOW = dateutils.get_current_time()
 
 
 def main():
@@ -762,7 +755,7 @@ class Course(object):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
-                        current_time_string = submitty_utils.write_submitty_date()
+                        current_time_string = dateutils.write_submitty_date()
 
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time_string)
@@ -1066,13 +1059,13 @@ class Gradeable(object):
         if 'grading_rotating' in gradeable:
             self.grading_rotating = gradeable['grading_rotating']
 
-        self.ta_view_date = submitty_utils.parse_datetime(gradeable['g_ta_view_start_date'])
-        self.grade_start_date = submitty_utils.parse_datetime(gradeable['g_grade_start_date'])
-        self.grade_released_date = submitty_utils.parse_datetime(gradeable['g_grade_released_date'])
+        self.ta_view_date = dateutils.parse_datetime(gradeable['g_ta_view_start_date'])
+        self.grade_start_date = dateutils.parse_datetime(gradeable['g_grade_start_date'])
+        self.grade_released_date = dateutils.parse_datetime(gradeable['g_grade_released_date'])
         if self.type == 0:
-            self.submission_open_date = submitty_utils.parse_datetime(gradeable['eg_submission_open_date'])
-            self.submission_due_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
-            self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_submission_due_date'])
+            self.submission_open_date = dateutils.parse_datetime(gradeable['eg_submission_open_date'])
+            self.submission_due_date = dateutils.parse_datetime(gradeable['eg_submission_due_date'])
+            self.team_lock_date = dateutils.parse_datetime(gradeable['eg_submission_due_date'])
             self.student_view = True
             self.student_submit = True
             self.student_download = False
@@ -1185,12 +1178,12 @@ class Gradeable(object):
         form_json['gradeable_title'] = self.title
         form_json['gradeable_type'] = self.get_gradeable_type_text()
         form_json['instructions_url'] = self.instructions_url
-        form_json['ta_view_date'] = submitty_utils.write_submitty_date(self.ta_view_date)
+        form_json['ta_view_date'] = dateutils.write_submitty_date(self.ta_view_date)
         if self.type == 0:
-            form_json['date_submit'] = submitty_utils.write_submitty_date(self.submission_open_date)
-            form_json['date_due'] = submitty_utils.write_submitty_date(self.submission_due_date)
-        form_json['date_grade'] = submitty_utils.write_submitty_date(self.grade_start_date)
-        form_json['date_released'] = submitty_utils.write_submitty_date(self.grade_released_date)
+            form_json['date_submit'] = dateutils.write_submitty_date(self.submission_open_date)
+            form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
+        form_json['date_grade'] = dateutils.write_submitty_date(self.grade_start_date)
+        form_json['date_released'] = dateutils.write_submitty_date(self.grade_released_date)
 
         if self.type == 0:
             form_json['section_type'] = self.get_submission_type()
