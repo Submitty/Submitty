@@ -120,9 +120,7 @@ pip2 install python-pam
 pip2 install psycopg2
 pip2 install PyYAML
 pip2 install sqlalchemy
-pip2 install pytz
 pip2 install python-dateutil
-pip2 install tzlocal
 
 pip3 install -U pip
 pip3 install python-pam
@@ -131,11 +129,14 @@ pip3 install psycopg2
 pip3 install sqlalchemy
 pip3 install pylint
 pip3 install psutil
-pip3 install pytz
 pip3 install python-dateutil
-pip3 install tzlocal
 pip3 install watchdog
 pip3 install xlsx2csv
+
+pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+python2 setup.py install
+python3 setup.py install
+popd
 
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
