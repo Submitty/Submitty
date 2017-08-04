@@ -943,22 +943,6 @@ HTML;
 </div>
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading.js"></script>
 <script type="text/javascript">
-    function updateHandle(element) {
-        var padding = $(element).outerHeight() - $(element).innerHeight();
-        var height = $(element).prop('scrollHeight') - padding;
-        console.log("height " + height);
-        var clientHeight = $(element).prop('clientHeight');
-        // console.log("clientHeight " + clientHeight);
-        // var bottom = grading_rubric.scrollTop() + grading_rubric.outerHeight(true) - $( '.ui-resizable-handle').outerHeight(true);
-        var bottom = $(element).scrollTop() + clientHeight;
-        var bottom = Math.min(height, bottom);
-        var bottom_se = $(element).scrollTop() + clientHeight - 20;
-        var bottom_se = Math.min(height, bottom_se);
-        var scrolltop = $(element).scrollTop();
-        $(element).find('.ui-resizable-e').css('top', scrolltop + 'px');
-        $(element).find('.ui-resizable-s').css('top', bottom + 'px');
-        $(element).find('.ui-resizable-se').css('top', bottom_se + 'px');
-    }
     $(document).ready(function() {
         $( "#autograding_results" ).scroll(function() {
             updateHandle("#autograding_results");
@@ -984,7 +968,6 @@ HTML;
         $( "#student_info" ).resize(function() {
             updateHandle("#student_info");
         });
-
     });
 </script>
 <script type="text/javascript">
@@ -997,10 +980,10 @@ HTML;
             else if (url_file.includes("results")) directory = "results";  
             // handle pdf
             if(url_file.substring(url_file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='750px' height='600px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='100%' height='600px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='750px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='100%' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }
