@@ -337,6 +337,11 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 
 
 
+# scripts used only by root for setup only
+mkdir -p ${SUBMITTY_INSTALL_DIR}/.setup/bin
+chmod 5
+
+
 ########################################################################################################################
 ########################################################################################################################
 # PREPARE THE UNTRUSTED_EXEUCTE EXECUTABLE WITH SUID
