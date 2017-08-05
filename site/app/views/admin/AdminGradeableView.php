@@ -398,14 +398,14 @@ HTML;
 		<br />
                 <b>Full path to the directory containing the autograding config.json file:</b><br>
                 See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">Submitty GitHub sample assignment configurations</a><br>
-		<kbd>/usr/local/submitty/more_autograding_examples/no_autograding/config</kbd>  (for an upload only homework)<br>
+		<kbd>/usr/local/submitty/more_autograding_examples/upload_only/config</kbd>  (an assignment without autograding)<br>
 		<kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
 		<kbd>/var/local/submitty/courses/{$_GET['semester']}/{$_GET['course']}/config_upload/#</kbd> (for an web uploaded configuration)<br>
 
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
 
-                Will students be able to view submissions?
+                Should students be able to view submissions?
                 <input type="radio" id="yes_student_view" name="student_view" value="true" class="bool_val rubric_questions"
 HTML;
                 if ($student_view===true) { $html_output .= ' checked="checked"'; }
@@ -420,7 +420,7 @@ HTML;
 
                 <div id="student_submit_download_view">
 
-                    Will students be able to make submissions? (Select 'No' if this is an exam.)
+                    Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
                     <input type="radio" id="yes_student_submit" name="student_submit" value="true" class="bool_val rubric_questions"
 HTML;
                     if ($student_submit===true) { $html_output .= ' checked="checked"'; }
@@ -433,7 +433,7 @@ HTML;
                     /> No 
                     <br /> <br />
 
-                    Will students be able to download files? (Select 'Yes' if this is an exam.)
+                    Should students be able to download files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
                     <input type="radio" id="yes_student_download" name="student_download" value="true" class="bool_val rubric_questions"
 HTML;
                     if ($student_download===true) { $html_output .= ' checked="checked"'; }
@@ -446,7 +446,7 @@ HTML;
                     /> No
                     <br /> <br />
 
-                    Will students be view/download any or all versions? (Select 'Active version only' if this is an exam.)
+                    Should students be view/download any or all versions? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
                     <input type="radio" id="yes_student_any_version" name="student_any_version" value="true" class="bool_val rubric_questions"
 HTML;
                     if ($student_any_version===true) { $html_output .= ' checked="checked"'; }
@@ -461,7 +461,7 @@ HTML;
 
                 </div>
 
-                Will this assignment also be graded by the TAs?
+          Will any or all of this assignment be manually graded (e.g., by TAs or the instructor)?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
                 if ($use_ta_grading===true) { $html_output .= ' checked="checked"'; }
@@ -488,15 +488,15 @@ HTML;
         $html_output .= <<<HTML
  /> No 
                 <br /><br />
-                <div class="peer_input" style="display:none;">How many people should each person grade? <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' /></div>
-                Point precision (for TA grading): 
+                <div class="peer_input" style="display:none;">How many peers should each student grade? <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' /></div>
+                Point precision (for manual grading): 
                 <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{$precision}" class="float_val" />
                 <br /><br />
                 
                 <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
                         <tr>
-                            <th>TA Grading Rubric</th>
+                            <th>Manual/TA/Peer Grading Rubric</th>
                             <th style="width:120px;">Points</th>
                         </tr>
                     </thead>
@@ -781,7 +781,7 @@ HTML;
 </textarea>
             </div>
             <br />
-            <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
+            <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
             <br />
             <fieldset>
                 <input type="radio" name="section_type" value="reg_section" id="registration-section"
@@ -925,17 +925,17 @@ HTML;
 
     $html_output .= <<<HTML
             <!-- TODO default to the submission + late days for electronic -->
-            What is the <em style='color: orange;'><b>TA Grading Open Date</b></em>? (TAs may begin grading)
+            What is the <em style='color: orange;'><b>Manual Grading Open Date</b></em>? (graders may begin grading)
             <input name="date_grade" id="date_grade" class="date_picker" type="text" value="{$TA_grade_open_date}"
             style="cursor: auto; background-color: #FFF; width: 250px;">
-              <em style='color: orange;'>must be >= <span id="ta_grading_compare_date">initial_ta_grading_compare_date</span></em>
+              <em style='color: orange;'>must be >= <span id="ta_grading_compare_date">Due Date (+ max allowed late days)</span></em>
             <br />
             </div>
 
-            What is the <em style='color: orange;'><b>Grades Released Date</b></em>? (TA grades will be visible to students)
+            What is the <em style='color: orange;'><b>Grades Released Date</b></em>? (manual grades will be visible to students)
             <input name="date_released" id="date_released" class="date_picker" type="text" value="{$TA_grade_release_date}"
             style="cursor: auto; background-color: #FFF; width: 250px;">
-            <em style='color: orange;'>must be >= <span id="grades_released_compare_date">initial_grades_released_compare_date</span></em>
+            <em style='color: orange;'>must be >= <span id="grades_released_compare_date">Due Date (+ max allowed late days) and Manual Grading Open Date</span></em>
             <br />
             
             What <a target=_blank href="http://submitty.org/instructor/iris_rainbow_grades">syllabus category</a> does this item belong to?:
@@ -1220,9 +1220,9 @@ function createCrossBrowserJSDate(val){
                     $('#rubric_questions').show();
                     $('#grading_questions').show();
                     $('#ta_instructions_id').hide();
-                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                    $('#grades_released_compare_date').html('Manual Grading Open Date');
                 } else {
-                    $('#grades_released_compare_date').html('Due Date');
+                    $('#grades_released_compare_date').html('Due Date (+ max allowed late days)');
                 }
             }
         });
@@ -1246,9 +1246,9 @@ function createCrossBrowserJSDate(val){
                     $('#rubric_questions').show();
                     $('#grading_questions').show();
                     $('#ta_instructions_id').hide();
-                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                    $('#grades_released_compare_date').html('Manual Grading Open Date');
                 } else {
-                    $('#grades_released_compare_date').html('Due Date');
+                    $('#grades_released_compare_date').html('Due Date (+ max allowed late days)');
                 }
             }
         });
@@ -1366,9 +1366,9 @@ function createCrossBrowserJSDate(val){
 
                 $('#ta_grading_compare_date').html('Due Date (+ max allowed late days)');
                 if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
-                   $('#grades_released_compare_date').html('Due Date');
+                   $('#grades_released_compare_date').html('Due Date (+ max allowed late days)');
                 } else { 
-                   $('#grades_released_compare_date').html('TA Grading Open Date');
+                   $('#grades_released_compare_date').html('Manual Grading Open Date');
                 }
 
                 if($('#team_yes_radio').is(':checked')){
@@ -1385,14 +1385,14 @@ function createCrossBrowserJSDate(val){
                 $('#checkpoints').show();
                 $('#grading_questions').show();
                 $('#ta_grading_compare_date').html('TA Beta Testing Date');
-                $('#grades_released_compare_date').html('TA Grading Open Date');
+                $('#grades_released_compare_date').html('Manual Grading Open Date');
             }
             else if ($(this).val() == 'Numeric'){ 
                 $('#ta_instructions_id').show();
                 $('#numeric').show();
                 $('#grading_questions').show();
                 $('#ta_grading_compare_date').html('TA Beta Testing Date');
-                $('#grades_released_compare_date').html('TA Grading Open Date');
+                $('#grades_released_compare_date').html('Manual Grading Open Date');
             }
         }
     });
@@ -1911,9 +1911,9 @@ $('#gradeable-form').on('submit', function(e){
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
             <td style="overflow: hidden; border-top: 5px solid #dddddd;"> \
                 <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" placeholder="Rubric Item Title"></textarea> \
-                <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);" \
+                <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA/Grader (seen only by TAs/Graders)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
-                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs)"  onkeyup="autoResizeComment(event);" \
+                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and graders)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
                 <div id=deduction_questions_'+newQ+'> \
                 <div class="btn btn-xs btn-primary" id="rubric_add_deduct_'+newQ+'" onclick="addDeduct(this,'+newQ+')" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div> </div> \
@@ -2099,9 +2099,9 @@ $('#gradeable-form').on('submit', function(e){
 
                 $('#ta_grading_compare_date').html('Due Date (+ max allowed late days)');
                 if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
-                   $('#grades_released_compare_date').html('Due Date');
+                   $('#grades_released_compare_date').html('Due Date (+ max allowed late days)');
                 } else { 
-                   $('#grades_released_compare_date').html('TA Grading Open Date');
+                   $('#grades_released_compare_date').html('Manual Grading Open Date');
                 }
 
                 if($('#team_yes_radio').is(':checked')){
@@ -2117,13 +2117,13 @@ $('#gradeable-form').on('submit', function(e){
                 $('#checkpoints').show();
                 $('#grading_questions').show();
                 $('#ta_grading_compare_date').html('TA Beta Testing Date');
-                $('#grades_released_compare_date').html('TA Grading Open Date');
+                $('#grades_released_compare_date').html('Manual Grading Open Date');
             }
             else if ($(this).val() == 'Numeric'){ 
                 $('#numeric').show();
                 $('#grading_questions').show();
                 $('#ta_grading_compare_date').html('TA Beta Testing Date');
-                $('#grades_released_compare_date').html('TA Grading Open Date');
+                $('#grades_released_compare_date').html('Manual Grading Open Date');
             }
         }
     });
@@ -2176,7 +2176,7 @@ $('#gradeable-form').on('submit', function(e){
                 return false;
             }
             if (!found_reg_component) {
-                alert("At least one component must be for ta grading");
+                alert("At least one component must be for manual grading");
                 return false;
             }
         }
@@ -2222,29 +2222,29 @@ $('#gradeable-form').on('submit', function(e){
         }
         if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'true') {
             if(date_grade < date_due) {
-                alert("DATE CONSISTENCY:  TA Grading Open Date must be >= Due Date");
+                alert("DATE CONSISTENCY:  Manual Grading Open Date must be >= Due Date (+ max allowed late days)");
                 return false;
             }
             if(date_released < date_due) {
-                alert("DATE CONSISTENCY:  Grades Released Date must be >= TA Grading Open Date");
+                alert("DATE CONSISTENCY:  Grades Released Date must be >= Manual Grading Open Date");
                 return false;
             }
         }
         else {
             if(check1) {
                 if(date_released < date_due) {
-                    alert("DATE CONSISTENCY:  Grades Released Date must be >= Due Date");
+                    alert("DATE CONSISTENCY:  Grades Released Date must be >= Due Date (+ max allowed late days)");
                     return false;
                 }
             }
         }
         if($('input:radio[name="ta_grading"]:checked').attr('value') === 'true' || check2 || check3) {
             if(date_grade < date_ta_view) {
-                alert("DATE CONSISTENCY:  TA Grading Open Date must be >= TA Beta Testing Date");
+                alert("DATE CONSISTENCY:  Manual Grading Open Date must be >= TA Beta Testing Date");
                 return false;
             }
             if(date_released < date_grade) {
-                alert("DATE CONSISTENCY:  Grade Released Date must be >= TA Grading Open Date");
+                alert("DATE CONSISTENCY:  Grade Released Date must be >= Manual Grading Open Date");
                 return false;
             }
 
