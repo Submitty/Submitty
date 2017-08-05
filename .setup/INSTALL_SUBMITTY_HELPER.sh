@@ -507,6 +507,19 @@ echo -e "\nCompleted installation of the Submitty homework submission server\n"
 
 ################################################################################################################
 ################################################################################################################
+# INSTALL PYTHON SUBMITTY UTILS
+
+echo -e "Intall python_submitty_utils"
+
+pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+
+python2 setup.py -q install
+python3 setup.py -q install
+
+popd
+
+################################################################################################################
+################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.service   /etc/systemd/system/submitty_grading_scheduler.service
