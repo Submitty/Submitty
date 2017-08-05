@@ -15,7 +15,6 @@ DB_USER = "__INSTALL__FILLIN__DATABASE_USER__"
 DB_PASS = "__INSTALL__FILLIN__DATABASE_PASSWORD__"
 
 
-
 # This script was created to help professors re-upload an old semester's assignments for autograding.
 # To run it, please create a new assignment (hereafter called the CURRENT assignment) via the submitty interface 
 # to which you wish to upload your old assignment. Then, run this script and provide the following arguments:
@@ -139,7 +138,7 @@ def main():
                 open_file.write(current_time_string + "\n")
 
                 if args.grade:
-                    #Create a queue file for each submission            
+                    # Create a queue file for each submission
                     queue_file = "__".join([args.semester, args.course_name, args.assignment_name, user_name, submission])
                     print("Creating queue file:", queue_file)
                     queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
