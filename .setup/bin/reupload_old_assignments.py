@@ -4,13 +4,11 @@ import os
 import json
 import shutil
 import argparse
+from submitty_utils import dateutils
 from sqlalchemy import create_engine, Table, MetaData, bindparam, and_
 import grp
 
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
-
-sys.path.append("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"+"/bin")
-import submitty_utils
 
 DB_HOST = "__INSTALL__FILLIN__DATABASE_HOST__"
 DB_USER = "__INSTALL__FILLIN__DATABASE_USER__"
@@ -117,7 +115,7 @@ def main():
             #give the appropriate permissions
             os.system("chown -R hwphp:{} {}".format(course_group, CURRENT_submission_path))
             #add each submission to the database.
-            current_time_string = submitty_utils.write_submitty_date()
+            current_time_string = dateutils.write_submitty_date()
 
             conn.execute(electronic_gradeable_data.insert(), g_id=args.assignment_name, user_id=user_name,
                          g_version=submission, submission_time=current_time_string)

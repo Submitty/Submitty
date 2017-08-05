@@ -340,8 +340,9 @@ chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin
 chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin
 
 cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_old_assignments.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
-chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/*
-chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/*
+cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_generate_csv.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
+chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
+chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload_old_assignments.py
 
 
