@@ -43,7 +43,7 @@ def main():
             writer = csv.writer(out_file)
             for student in student_list:
                 #TODO: Do something clever with the name/last name/email/section.
-                writer.writerow((student, "a", "b", "c@email.com", str(1)))
+                writer.writerow((student, "a", "b", "c@email.com", "null")))
     finally:
         f.close()
 
