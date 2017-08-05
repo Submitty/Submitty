@@ -511,16 +511,10 @@ echo -e "\nCompleted installation of the Submitty homework submission server\n"
 
 echo -e "Intall python_submitty_utils"
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/python_submitty_utils
-chown root:root ${SUBMITTY_INSTALL_DIR}/bin
-chmod 700 ${SUBMITTY_INSTALL_DIR}/bin
+pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
 
-rsync -rtz ${SUBMITTY_REPOSITORY}/python_submitty_utils ${SUBMITTY_INSTALL_DIR}/python_submitty_utils
-
-pushd ${SUBMITTY_INSTALL_DIR}/python_submitty_utils
-
-python setup.py install
-python3 setup.py install
+python2 setup.py -q install
+python3 setup.py -q install
 
 popd
 
