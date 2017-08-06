@@ -413,12 +413,6 @@ if [[ ${VAGRANT} == 1 ]]; then
     ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
-# Deferred ownership change
-chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
-
-# With this line, subdirectories inherit the group by default and
-# blocks r/w access to the directory by others on the system.
-chmod 2771 ${SUBMITTY_INSTALL_DIR}
 
 #################################################################
 # RESTART SERVICES
