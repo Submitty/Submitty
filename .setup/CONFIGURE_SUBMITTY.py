@@ -7,7 +7,7 @@ import json
 import os
 import pwd
 import shutil
-
+import stat
 
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
@@ -103,8 +103,11 @@ NUM_GRADING_SCHEDULER_WORKERS = 5
 
 ##############################################################################
 
-CONFIGURATION_FILE = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'INSTALL_SUBMITTY.sh')
-CONFIGURATION_JSON = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'submitty_conf.json')
+SETUP_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, '.setup')
+SETUP_REPOSITORY_DIR = os.path.join(SUBMITTY_REPOSITORY, '.setup')
+
+CONFIGURATION_FILE = os.path.join(SETUP_INSTALL_DIR, 'INSTALL_SUBMITTY.sh')
+CONFIGURATION_JSON = os.path.join(SETUP_INSTALL_DIR, 'submitty_conf.json')
 
 ##############################################################################
 
@@ -168,12 +171,11 @@ CGI_URL = SUBMISSION_URL + '/cgi-bin'
 ##############################################################################
 # make the installation setup directory
 
-SETUP_DIR = os.path.join(SUBMITTY_INSTALL_DIR, '.setup')
-if os.path.isdir(SETUP_DIR):
-    shutil.rmtree(SETUP_DIR)
-os.makedirs(SETUP_DIR, exist_ok=True)
-shutil.chown(SETUP_DIR, 'root', 'root')
-os.chmod(SETUP_DIR, 700)
+if os.path.isdir(SETUP_INSTALL_DIR):
+    shutil.rmtree(SETUP_INSTALL_DIR)
+os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
+shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
+os.chmod(SETUP_INSTALL_DIR, 0o751)
 
 ##############################################################################
 # WRITE THE VARIABLES TO A FILE
@@ -215,7 +217,6 @@ obj['num_grading_scheduler_workers'] = NUM_GRADING_SCHEDULER_WORKERS
 
 obj['debugging_enabled'] = DEBUGGING_ENABLED
 
-CONFIGURATION_FILE = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'INSTALL_SUBMITTY.sh')
 with open(CONFIGURATION_FILE, 'w') as open_file:
     def write(x=''):
         print(x, file=open_file)
@@ -237,16 +238,15 @@ with open(CONFIGURATION_FILE, 'w') as open_file:
             write('{}={}'.format(key, value))
     write()
     write('# Now actually run the installation script')
-    write('source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER.sh  "$@"')
+    write('source '+SETUP_REPOSITORY_DIR+'/INSTALL_SUBMITTY_HELPER.sh  "$@"')
 
-os.chmod(CONFIGURATION_FILE, 700)
+os.chmod(CONFIGURATION_FILE, 0o700)
 
-CONFIGURATION_JSON = os.path.join(SUBMITTY_INSTALL_DIR, '.setup', 'submitty_conf.json')
 with open(CONFIGURATION_JSON, 'w') as json_file:
     json.dump(obj, json_file, indent=2)
     json_file.write('\n')
 
-os.chmod(CONFIGURATION_JSON, 700)
+os.chmod(CONFIGURATION_JSON, 0o500)
 
 ##############################################################################
 

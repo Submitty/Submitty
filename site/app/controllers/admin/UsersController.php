@@ -451,7 +451,14 @@ class UsersController extends AbstractController {
         foreach($contents as $content) {
             $row_num++;
             $vals = str_getcsv(trim($content));
-            if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
+            if (isset($vals[4])) {
+                if (is_numeric($vals[4])) {
+                    $vals[4] = intval($vals[4]);
+                }
+                else if (strtolower($vals[4]) === "null") {
+                    $vals[4] = null;
+                }
+            }
 
             //No check on user_id (computing login ID) -- different Univeristies have different formats.
 
@@ -463,7 +470,7 @@ class UsersController extends AbstractController {
             $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_num}: {$vals[3]}," . PHP_EOL;
 
             //Student section must be greater than zero (intval($str) returns zero when $str is not integer)
-            $error_message .= (($vals[4] > 0) && ($vals[4] <= $num_reg_sections)) ? "" : "Error in student section column, row #{$row_num}: {$vals[4]}," . PHP_EOL;
+            $error_message .= (($vals[4] > 0 && $vals[4] <= $num_reg_sections) || $vals[4] === null) ? "" : "Error in student section column, row #{$row_num}: {$vals[4]}," . PHP_EOL;
 
             $students_data[] = $vals;
         }

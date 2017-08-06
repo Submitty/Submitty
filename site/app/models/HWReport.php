@@ -126,8 +126,24 @@ class HWReport extends AbstractModel {
                     }
 
                     if(!($component->getScore() == 0 && $component->getComment() == "")) {
-                        $temp_score += $component->getScore();
-                        $temp_notes .= $component->getScore() . " : " . $component->getComment() . $nl;
+                        $wrong_number = false;
+                        if ($type === 0) {
+                            if ($component->getScore() > 0) {
+                                $wrong_number = true;
+                                $temp_notes .= "0" . " : " . $component->getComment() . $nl;
+                            }
+                        }
+                        else {
+                            if ($component->getScore() < 0) {
+                                $wrong_number = true;
+                                $temp_notes .= "0" . " : " . $component->getComment() . $nl;
+                            }
+                        }
+                        if ($wrong_number === false) {
+                            $temp_score += $component->getScore();
+                            $temp_notes .= $component->getScore() . " : " . $component->getComment() . $nl;
+                        }
+                        
                     }
 
                     if ($component->getMaxValue() < 0) {

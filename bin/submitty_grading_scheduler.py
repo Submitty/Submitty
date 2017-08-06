@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
 
-import sys
-from datetime import datetime
 import os
-import submitty_utils
 import grade_items_logging
 import grade_item
-import fcntl
-import glob
+from submitty_utils import glob
 import multiprocessing
-import time
-import random
-from queue import Empty
 from watchdog.observers import Observer
 from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
