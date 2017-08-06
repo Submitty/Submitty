@@ -25,10 +25,13 @@ HWCRON_USER="__INSTALL__FILLIN__HWCRON_USER__"
 COURSE_BUILDERS_GROUP="__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__"
 
 ###########################################################################
-def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits):
+def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits, must_exist=True):
     if not os.path.exists(my_path):
-        print("ERROR! "+my_path+" does not exist\n", file=sys.stderr)
-        return False
+        if must_exist:
+            print("ERROR! "+my_path+" does not exist\n", file=sys.stderr)
+            return False
+        else:
+            return True
     ret_val = True
     try:
         pwd.getpwnam(my_owner)
@@ -91,65 +94,68 @@ def CheckCourseInstructorAndGroup(my_instructor, my_group):
 
 
 ###########################################################################
+def main():
+
+    global_success = True
 
 
-global_success = True
+    # CHECK THE INSTALLATION DIRECTORY
+    global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR,True,"root","course_builders",0o751)
+    global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR+"/bin/untrusted_execute",False,"root","hwcron",0o550)
 
 
-# CHECK THE INSTALLATION DIRECTORY
-global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR,True,"root","course_builders",0o751)
-global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR+"/bin/untrusted_execute",False,"root","hwcron",0o550)
+    # CHECK THE DATA DIRECTORY
+    global_success &= CheckItemBits(SUBMITTY_DATA_DIR,True,"root","course_builders",0o751)
+    global_success &= CheckItemBits(SUBMITTY_DATA_DIR+"/courses",True,"root","course_builders",0o751)
 
 
-# CHECK THE DATA DIRECTORY
-global_success &= CheckItemBits(SUBMITTY_DATA_DIR,True,"root","course_builders",0o751)
-global_success &= CheckItemBits(SUBMITTY_DATA_DIR+"/courses",True,"root","course_builders",0o751)
-
-
-# CHECK EACH COURSE
-for semester in os.listdir(SUBMITTY_DATA_DIR+"/courses"):
-    semester_path=SUBMITTY_DATA_DIR+"/courses/"+semester
-    if not os.path.isdir(semester_path):
-        continue
-    for course in os.listdir(semester_path):
-        course_path=semester_path+"/"+course
-        if not os.path.isdir(course_path):
+    # CHECK EACH COURSE
+    for semester in os.listdir(SUBMITTY_DATA_DIR+"/courses"):
+        semester_path=SUBMITTY_DATA_DIR+"/courses/"+semester
+        if not os.path.isdir(semester_path):
             continue
-        c_instructor=pwd.getpwuid(os.stat(course_path).st_uid).pw_name
-        c_group=grp.getgrgid(os.stat(course_path).st_gid).gr_name
-        global_success &= CheckCourseInstructorAndGroup(c_instructor,c_group)
-        print ("check course=", course, " inst=", c_instructor, " group=",c_group)
-        global_success &= CheckItemBits(course_path,True,c_instructor,c_group,0o770)
+        for course in os.listdir(semester_path):
+            course_path=semester_path+"/"+course
+            if not os.path.isdir(course_path):
+                continue
+            c_instructor=pwd.getpwuid(os.stat(course_path).st_uid).pw_name
+            c_group=grp.getgrgid(os.stat(course_path).st_gid).gr_name
+            global_success &= CheckCourseInstructorAndGroup(c_instructor,c_group)
+            print ("check course=", course, " inst=", c_instructor, " group=",c_group)
+            global_success &= CheckItemBits(course_path,True,c_instructor,c_group,0o770)
 
-        global_success &= CheckItemBits(course_path+"/build",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/ASSIGNMENTS.txt",False,c_instructor,c_group,0o660)
+            global_success &= CheckItemBits(course_path+"/build",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/ASSIGNMENTS.txt",False,c_instructor,c_group,0o660)
 
-        global_success &= CheckItemBits(course_path+"/config",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/config/config.ini",False,"hwphp",c_group,0o660)
-        global_success &= CheckItemBits(course_path+"/config/build",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/config/complete_config",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/config/form",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/config",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/config/config.ini",False,"hwphp",c_group,0o660)
+            global_success &= CheckItemBits(course_path+"/config/build",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/config/complete_config",True,c_instructor,c_group,0o770,must_exist=False)
+            global_success &= CheckItemBits(course_path+"/config/form",True,c_instructor,c_group,0o770)
 
-        global_success &= CheckItemBits(course_path+"/bin",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/provided_code",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/test_input",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/test_output",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/custom_validation_code",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/bin",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/provided_code",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/test_input",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/test_output",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/custom_validation_code",True,c_instructor,c_group,0o770)
 
-        global_success &= CheckItemBits(course_path+"/submissions",True,"hwphp",c_group,0o750)
-        global_success &= CheckItemBits(course_path+"/config_upload",True,"hwphp",c_group,0o750)
-        global_success &= CheckItemBits(course_path+"/results",True,"hwcron",c_group,0o750)
-        global_success &= CheckItemBits(course_path+"/checkout",True,"hwcron",c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/submissions",True,"hwphp",c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/config_upload",True,"hwphp",c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/results",True,"hwcron",c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/checkout",True,"hwcron",c_group,0o750)
 
-        global_success &= CheckItemBits(course_path+"/reports",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/reports/summary_html",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/reports/all_grades",True,"hwphp",c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/reports",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/reports/summary_html",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/reports/all_grades",True,"hwphp",c_group,0o770)
+
+
+    if not global_success:
+        raise SystemExit("One or more errors need to be addressed in the configuration and/or " +
+                         "permissions of the Submitty installation or course data directories.")
+    else:
+        print ("Submitty installation and course data directory permissions look good.")
 
 
 ###########################################################################
-
-if not global_success:
-    raise SystemExit("One or more errors need to be addressed in the configuration and/or " +
-                     "permissions of the Submitty installation or course data directories.")
-else:
-    print ("Submitty installation and course data directory permissions look good.")
+if __name__ == "__main__":
+    main()
