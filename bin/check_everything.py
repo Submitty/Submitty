@@ -25,10 +25,13 @@ HWCRON_USER="__INSTALL__FILLIN__HWCRON_USER__"
 COURSE_BUILDERS_GROUP="__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__"
 
 ###########################################################################
-def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits):
+def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits, must_exist=True):
     if not os.path.exists(my_path):
-        print("ERROR! "+my_path+" does not exist\n", file=sys.stderr)
-        return False
+        if must_exist:
+            print("ERROR! "+my_path+" does not exist\n", file=sys.stderr)
+            return False
+        else:
+            return True
     ret_val = True
     try:
         pwd.getpwnam(my_owner)
@@ -127,7 +130,7 @@ for semester in os.listdir(SUBMITTY_DATA_DIR+"/courses"):
         global_success &= CheckItemBits(course_path+"/config",True,c_instructor,c_group,0o770)
         global_success &= CheckItemBits(course_path+"/config/config.ini",False,"hwphp",c_group,0o660)
         global_success &= CheckItemBits(course_path+"/config/build",True,c_instructor,c_group,0o770)
-        global_success &= CheckItemBits(course_path+"/config/complete_config",True,c_instructor,c_group,0o770)
+        global_success &= CheckItemBits(course_path+"/config/complete_config",True,c_instructor,c_group,0o770,must_exist=False)
         global_success &= CheckItemBits(course_path+"/config/form",True,c_instructor,c_group,0o770)
 
         global_success &= CheckItemBits(course_path+"/bin",True,c_instructor,c_group,0o770)

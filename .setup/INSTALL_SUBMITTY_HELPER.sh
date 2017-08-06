@@ -513,7 +513,7 @@ echo -e "Intall python_submitty_utils"
 
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
 
-python2 setup.py -q install
+#python2 setup.py -q install
 python3 setup.py -q install
 
 popd
