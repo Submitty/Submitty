@@ -16,7 +16,7 @@ just the ones used for testing.
 from __future__ import print_function, division
 import argparse
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, timedelta
 import glob
 import grp
 import hashlib
@@ -755,7 +755,7 @@ class Course(object):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
-                        current_time_string = dateutils.write_submitty_date()
+                        current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=1))
 
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time_string)
