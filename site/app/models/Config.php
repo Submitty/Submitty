@@ -143,7 +143,10 @@ class Config extends AbstractModel {
     protected $display_custom_message;
     /** @property @var string*/
     protected $course_email;
-
+    /** @property @var string */
+    protected $vcs_base_url;
+    /** @property @var string */
+    protected $vcs_type;
     /** @property @var array */
     protected $hidden_details;
 
@@ -221,7 +224,7 @@ class Config extends AbstractModel {
         $this->setConfigValues($course, 'hidden_details', array('database_name'));
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
-            'display_custom_message', 'course_email');
+            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type');
         $this->setConfigValues($course, 'course_details', $array);
 
         $this->hidden_details = $course['hidden_details'];
