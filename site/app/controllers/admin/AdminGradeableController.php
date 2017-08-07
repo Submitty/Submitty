@@ -331,6 +331,9 @@ class AdminGradeableController extends AbstractController {
                 $components = $gradeable->getComponents();
                 $index = 1;
                 foreach ($components as $comp) {
+                    if(is_array($comp)) {
+                        $comp = $comp[0];
+                    }
                     $num_marks = 0;
                     foreach($_POST as $k=>$v){
                         if(strpos($k,'deduct_points_' . $index) !== false){
@@ -353,6 +356,9 @@ class AdminGradeableController extends AbstractController {
                 $components = $gradeable->getComponents();
                 $index = 1;
                 foreach ($components as $comp) {
+                    if(is_array($comp)) {
+                        $comp = $comp[0];
+                    }
                     $num_marks = 0; //current number of marks
                     foreach($_POST as $k=>$v){
                         if(strpos($k,'deduct_points_' . $index) !== false){

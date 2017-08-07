@@ -92,7 +92,12 @@ HTML;
             <div style="margin-left: 20px">
 HTML;
             foreach ($sections as $key => $section) {
-                $percentage = round(($section['graded_components'] / $section['total_components']) * 100);
+                if($section['total_components'] == 0) {
+                    $percentage = 0;
+                }
+                else {
+                    $percentage = round(($section['graded_components'] / $section['total_components']) * 100);
+                }
                 $show_graded = $section['graded_components']/$change_value;
                 $show_total = $section['total_components']/$change_value;
                 $return .= <<<HTML
@@ -501,7 +506,13 @@ HTML;
                     $contents = "Grade";
                 }
             }
-            $return .= <<<HTML
+            if($row->isTeamAssignment() && $row->getTeam()===null) {
+                $return .= <<<HTML
+                <td><b><i>No Team</i></b></td>
+HTML;
+            }
+            else {
+                $return .= <<<HTML
 
                 <td>
                     <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getAnonId(), 'individual'=>'1'))}">
@@ -509,6 +520,8 @@ HTML;
                     </a>
                 </td>
 HTML;
+            }
+            
             if($row->validateVersions()) {
                 $return .= <<<HTML
 
@@ -547,8 +560,8 @@ HTML;
             $return .= <<<HTML
             </tr>
 HTML;
+            $count++;
         }
-        $count++;
         $return .= <<<HTML
         </tbody>
 HTML;
@@ -917,6 +930,10 @@ HTML;
                         $component_basics['gc_max_value'] = $cmpt->getMaxValue();
                         $component_basics['gc_ta_comment'] = $cmpt->getTaComment();
                         $component_basics['gc_student_comment'] = $cmpt->getStudentComment();
+                    }
+                    if($cmpt->getGrader() == null) {
+                        $question = $cmpt;
+                        break;
                     }
                     if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
                         $question = $cmpt;

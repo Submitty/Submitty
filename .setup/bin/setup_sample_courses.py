@@ -1303,6 +1303,9 @@ class Mark(object):
         self.note = mark['gcm_note']
         self.points = mark['gcm_points']
         self.order = order
+        self.grader = 'instructor'
+        if 'gcd_grader_id' in mark:
+            self.grader = mark['gcd_grader_id']
         self.key = None
 
     def create(self, gc_id, conn, table):
