@@ -889,10 +889,25 @@ class SubmissionController extends AbstractController {
         else {
             $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
             $vcs_path = $gradeable->getSubdirectory();
-            $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
-            $vcs_path = str_replace("{\$user_id}",$user_id,$vcs_path);
-            $vcs_path = str_replace("{\$repo_id}",$repo_id,$vcs_path);
-            $vcs_full_path = $vcs_base_url.$vcs_path;
+
+            // use entirely student input
+            if ($vcs_base_url == "" && $vcs_path == "") {
+                if ($repo_id == "") {
+                    return $this->uploadResult("repository url input cannot be blank.", false);
+                }
+                $vcs_full_path = $repo_id;
+            }
+            // use base url + path with variable string replacements
+            else {
+                if (strpos($vcs_path,"\$repo_id") !== false && $repo_id == "") {
+                    return $this->uploadResult("repository id input cannot be blank.", false);
+                }
+                $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
+                $vcs_path = str_replace("{\$user_id}",$user_id,$vcs_path);
+                $vcs_path = str_replace("{\$repo_id}",$repo_id,$vcs_path);
+                $vcs_full_path = $vcs_base_url.$vcs_path;
+            }
+
             if (!@touch(FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT"))) {
                 return $this->uploadResult("Failed to touch file for vcs submission.", false);
             }

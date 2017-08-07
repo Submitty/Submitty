@@ -185,7 +185,13 @@ HTML;
             if($gradeable->useVcsCheckout()) {
                 if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
                     $return .= <<<HTML
-    repo_id: <input type="text" id="repo_id"/><br /><br />
+    repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
+HTML;
+                }
+                else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
+                    $return .= <<<HTML
+    Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
+    repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
 HTML;
                 }
                 $return .= <<<HTML
@@ -471,7 +477,7 @@ HTML;
                     num_pages = $("#num_pages").val();
                 };
                 // vcs upload
-                if ({$vcs_string} && ("{$gradeable->getSubdirectory()}".indexOf("\$repo_id") !== -1)) {
+                if ({$vcs_string}) {
                     repo_id = $("#repo_id").val();
                 }
                 // bulk upload

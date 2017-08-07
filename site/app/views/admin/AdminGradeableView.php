@@ -258,11 +258,6 @@ class AdminGradeableView extends AbstractView {
         padding: 2px;  
         font-size: 12pt;
     }
-    
-    .required::-webkit-input-placeholder { color: red; }
-    .required:-moz-placeholder { color: red; }
-    .required::-moz-placeholder { color: red; }
-    .required:-ms-input-placeholder { color: red; }
         
 </style>
 <div id="container-rubric">
@@ -412,14 +407,14 @@ HTML;
                         <br />
                         <b>Path for the Version Control System (VCS) repository:</b><br />
                         VCS base URL: <kbd>{$vcs_base_url}</kbd><br />
-                        The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below.<br />
+                        The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below. If the entire URL is decided by the student, you can leave this input blank.<br />
                         You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
                         <ul style="list-style-position: inside;">
                             <li>gradeable_id</li>
                             <li>user_id OR repo_id, do not use both</li>
                         </ul>
                         ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
-                        <input style='width: 83%' type='text' name='subdirectory' value="" class="required" placeholder="(Required)"/>
+                        <input style='width: 83%' type='text' name='subdirectory' value="" placeholder="(Optional)"/>
                         <br />
                     </div>
                     
@@ -2254,10 +2249,6 @@ $('#gradeable-form').on('submit', function(e){
                 return false;
             }
             if ($('input:radio[name="upload_type"]:checked').attr('value') === 'repository') {
-                if(subdirectory == "" || subdirectory === null) {
-                    alert("The VCS path should not be empty");
-                    return false;
-                }
                 var subdirectory_parts = subdirectory.split("{");
                 var x=0;
                 // if this is a vcs path extension, make sure it starts with '/'
