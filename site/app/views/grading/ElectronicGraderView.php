@@ -691,6 +691,7 @@ HTML;
         }
         $return .= <<<HTML
             </div>
+        <div>
 HTML;
 
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
