@@ -1271,7 +1271,6 @@ HTML;
         else if (url_file.includes("results")) directory = "results";
         window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
->>>>>>> master
     }
 </script>
 HTML;
