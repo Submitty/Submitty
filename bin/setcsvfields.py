@@ -36,7 +36,7 @@ student_email      = {:d}
 student_section    = {:d}""".format(args.first_name, args.last_name, args.email, args.section))
 
     os.system("chown {}:{} {}".format(INI_OWNER, INI_OWNER, ini_file))
-    os.chmod(ini_file, 400)
+    os.chmod(ini_file, 0o400)
 
 if __name__ == "__main__":
     main()

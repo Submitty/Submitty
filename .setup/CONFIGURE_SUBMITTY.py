@@ -174,8 +174,8 @@ CGI_URL = SUBMISSION_URL + '/cgi-bin'
 if os.path.isdir(SETUP_INSTALL_DIR):
     shutil.rmtree(SETUP_INSTALL_DIR)
 os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
-shutil.chown(SETUP_INSTALL_DIR, 'root', 'root')
-os.chmod(SETUP_INSTALL_DIR, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
+os.chmod(SETUP_INSTALL_DIR, 0o751)
 
 ##############################################################################
 # WRITE THE VARIABLES TO A FILE
@@ -240,13 +240,13 @@ with open(CONFIGURATION_FILE, 'w') as open_file:
     write('# Now actually run the installation script')
     write('source '+SETUP_REPOSITORY_DIR+'/INSTALL_SUBMITTY_HELPER.sh  "$@"')
 
-os.chmod(CONFIGURATION_FILE, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+os.chmod(CONFIGURATION_FILE, 0o700)
 
 with open(CONFIGURATION_JSON, 'w') as json_file:
     json.dump(obj, json_file, indent=2)
     json_file.write('\n')
 
-os.chmod(CONFIGURATION_JSON, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+os.chmod(CONFIGURATION_JSON, 0o500)
 
 ##############################################################################
 

@@ -531,6 +531,24 @@ class AdminGradeableController extends AbstractController {
            echo "Could not open file";
         }
         file_put_contents ($fp ,  json_encode(json_decode(urldecode($_POST['gradeableJSON'])), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+
+        // --------------------------------------------------------------
+        // Write queue file to build this assignment...
+        $semester=$this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        // FIXME:  should use a variable intead of hardcoded top level path
+        $config_build_file = "/var/local/submitty/to_be_built/".$semester."__".$course."__".$_POST['gradeable_id'].".json";
+
+        $config_build_data = array("semester" => $semester,
+                                   "course" => $course,
+                                   "gradeable" =>  $_POST['gradeable_id']);
+
+        if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+          die("Failed to write file {$config_build_file}");
+        }
+
+
         $this->returnToNav();
     }
 

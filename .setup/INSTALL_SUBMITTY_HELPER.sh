@@ -340,8 +340,9 @@ chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin
 chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin
 
 cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_old_assignments.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
-chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/*
-chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/*
+cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_generate_csv.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
+chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
+chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload_old_assignments.py
 
 
@@ -504,6 +505,20 @@ chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/Submitt
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 echo -e "\nCompleted installation of the Submitty homework submission server\n"
+
+################################################################################################################
+################################################################################################################
+# INSTALL PYTHON SUBMITTY UTILS
+
+echo -e "Install python_submitty_utils"
+
+pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+
+#FIXME: python2 glob error...
+#python2 setup.py -q install
+python3 setup.py -q install
+
+popd
 
 ################################################################################################################
 ################################################################################################################
