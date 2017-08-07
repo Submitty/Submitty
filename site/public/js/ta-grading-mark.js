@@ -35,7 +35,11 @@ function checkIfSelected(me) {
     checkMarks(question_num);
 }
 
+<<<<<<< HEAD
 function addMark(me, num, background, min, max, precision, gradeable_id) {
+=======
+function addMark(me, num, background, min, max, precision) {
+>>>>>>> 0376a7e0b33befa9185dc936494168b06874c735
     var last_num = -10;
     var current_row = $(me.parentElement.parentElement);
     var current = $('[name=mark_'+num+']').last().attr('id');
@@ -133,7 +137,6 @@ function getMarkInfo(me, gradeable_id) {
         }
     })
 }
-
 
 //check if the first mark (Full/no credit) should be selected
 function checkMarks(question_num) {

@@ -9,7 +9,7 @@ import os
 import pwd
 import time
 import subprocess
-import glob
+from submitty_utils import glob
 import json
 
 
@@ -51,6 +51,9 @@ def main():
     username = pwd.getpwuid(os.getuid()).pw_name
     if username != "hwcron":
         raise SystemError("ERROR!  This script must be run by hwcron")
+
+    # ensure future pushd & popd commands don't complain
+    os.chdir("/var/local/submitty/to_be_built/")
 
     start = time.time()
     count = 0
