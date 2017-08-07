@@ -27,7 +27,7 @@ def initialize(test):
                      os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
                      os.path.join(test.testcase_path, "assignment_config")])
     subprocess.call(["cp",
-                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_code", "FactorialTest.java"),
+                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "provided_code", "FactorialTest.java"),
                      os.path.join(test.testcase_path, "data")])
 
 
