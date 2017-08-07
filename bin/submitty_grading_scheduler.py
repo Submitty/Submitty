@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+print("FOO")
+
 import os
 import grade_items_logging
 import grade_item

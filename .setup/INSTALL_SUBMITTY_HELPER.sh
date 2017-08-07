@@ -539,7 +539,7 @@ is_active_after=$?
 
 if [[ $is_active_before -ne 0 ]]; then
     echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   systemctl start submitty_grading_scheduler\n"
+    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_grading_scheduler\n"
 else
     if [[ $is_active_after -ne 0 ]]; then
         echo -e "\nERROR!  Failed to restart Submitty Grading Scheduler Daemon\n"
