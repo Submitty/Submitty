@@ -17,14 +17,12 @@ Vagrant.configure(2) do |config|
   # Our primary development target, this is what RPI runs Submitty on
   config.vm.define 'ubuntu', primary: true do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-16.04'
-    ubuntu.vm.network 'forwarded_port', guest: 80, host: 8080
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 15432
     ubuntu.vm.network 'private_network', ip: '192.168.56.101', auto_config: false
   end
 
   config.vm.define 'debian', autostart: false do |debian|
     debian.vm.box = 'debian/jessie64'
-    debian.vm.network 'forwarded_port', guest: 80, host: 8888
     debian.vm.network 'forwarded_port', guest: 5432, host: 25432
     debian.vm.network 'private_network', ip: '192.168.56.102', auto_config: false
   end
