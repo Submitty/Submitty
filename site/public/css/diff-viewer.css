@@ -40,7 +40,6 @@
 
 .line_number {
     color: gray;
-    display: inline-block;
     min-width: 20px;
     border-right: 1px solid lightgrey;
 }

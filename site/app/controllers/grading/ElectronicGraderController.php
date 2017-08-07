@@ -9,6 +9,7 @@ use \app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
+use app\libraries\FileUtils;
 
 class ElectronicGraderController extends AbstractController {
     public function run() {
@@ -33,6 +34,9 @@ class ElectronicGraderController extends AbstractController {
                 break;
             case 'get_mark_data':
                 $this->getMarkDetails();
+                break;
+            case 'get_gradeable_comment':
+                $this->getGradeableComment();
                 break;
             default:
                 $this->showStatus();
@@ -323,13 +327,35 @@ class ElectronicGraderController extends AbstractController {
                 $this->core->redirect($return_url);
             }
 
-            $this->core->getQueries()->createTeam($gradeable_id, $team_leader_id, $registration_section, $rotating_section);
-            $team_id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $team_leader_id)->getId();
+            $team_id = $this->core->getQueries()->createTeam($gradeable_id, $team_leader_id, $registration_section, $rotating_section);
             foreach($user_ids as $id) {
                 $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
                 if ($id !== $team_leader_id) $this->core->getQueries()->acceptTeamInvitation($team_id, $id);
             }
             $_SESSION['messages']['success'][] = "Created New Team {$team_id}";
+
+            $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
+            if (!FileUtils::createDir($gradeable_path)) {
+                $this->core->addErrorMEssage("Failed to make folder for this assignment");
+                $this->core->redirect($return_url);
+            }
+
+            $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
+            if (!FileUtils::createDir($user_path)) {
+                $this->core->addErrorMEssage("Failed to make folder for this assignment for the team");
+                $this->core->redirect($return_url);
+            }
+
+            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+            $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
+            $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
+                                                        "admin_user" => $this->core->getUser()->getId(), "first_user" => $team_leader_id)));
+            foreach($user_ids as $id) {
+                if ($id !== $team_leader_id) {
+                    $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
+                                                    "admin_user" => $this->core->getUser()->getId(), "added_user" => $id);
+                }
+            }
         }
         else {
             $team_id = $_POST['edit_team_team_id'];
@@ -372,6 +398,25 @@ class ElectronicGraderController extends AbstractController {
                 $this->core->getQueries()->leaveTeam($team_id, $id);
             }
             $_SESSION['messages']['success'][] = "Updated Team {$team_id}";
+
+            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team_id, "user_assignment_settings.json");
+            $json = FileUtils::readJsonFile($settings_file);
+            if ($json === false) {
+                $this->core->addErrorMEssage("Failed to open settings file");
+                $this->core->redirect($return_url);
+            }
+            foreach($add_user_ids as $id) {
+                $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
+                                                    "admin_user" => $this->core->getUser()->getId(), "added_user" => $id);
+            }
+            foreach($remove_user_ids as $id) {
+                $json["team_history"][] = array("action" => "admin_remove_user", "time" => $current_time,
+                                                    "admin_user" => $this->core->getUser()->getId(), "removed_user" => $id);
+            }
+        }
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $this->core->addErrorMEssage("Failed to write to team history to settings file");
         }
         $this->core->redirect($return_url);
     }
@@ -556,24 +601,34 @@ class ElectronicGraderController extends AbstractController {
             }
             else {
                 //checks if a component has changed, i.e. a mark has been selected or unselected since last time
+                //also checks if all the marks are false
                 $index = 0;
                 $temp_mark_selected = false;
+                $all_false = true;
                 foreach ($component->getMarks() as $mark) {
                     $temp_mark_selected = ($_POST['marks'][$index]['selected'] == 'true') ? true : false;
+                    if($all_false === true && $temp_mark_selected === true) {
+                        $all_false = false;
+                    }
                     if($temp_mark_selected !== $mark->getHasMark()) {
                         $mark_modified = true;
-                        break;
                     }
                     $index++;
                 }
-                if($mark_modified === false) {
-                    for ($i = $index; $i < $_POST['num_mark']; $i++) {
-                        if ($_POST['marks'][$index]['selected'] == 'true') {
-                            $mark_modified = true;
-                            break;
-                        }
+                for ($i = $index; $i < $_POST['num_mark']; $i++) {
+                    if ($_POST['marks'][$index]['selected'] == 'true') {
+                        $all_false = false;
+                        $mark_modified = true;
+                        break;
                     }
                 }
+
+                if($all_false === true) {
+                    if($_POST['custom_message'] != "" || floatval($_POST['custom_points']) != 0) {
+                        $all_false = false;
+                    }
+                }
+                
                 if($mark_modified === false) {
                     if ($component->getComment() != $_POST['custom_message']) {
                         $mark_modified = true;
@@ -587,16 +642,21 @@ class ElectronicGraderController extends AbstractController {
                 if($gradeable->getGdId() == null) {
                     $gradeable->saveData2();
                 }
-                if($mark_modified === true) { //only change the component information is the mark was modified
-                    if ($component->getGrader() === null || $_POST['overwrite'] === "true") {
-                        $component->setGrader($this->core->getUser());
-                    }     
-                    
-                    $component->setGradedVersion($_POST['active_version']);
-                    $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
-                    $component->setComment($_POST['custom_message']);
-                    $component->setScore($_POST['custom_points']);
-                    $debug = $component->saveData($gradeable->getGdId());
+
+                if($all_false === true) {
+                    $component->deleteData($gradeable->getGdId());
+                } else {
+                    if($mark_modified === true) { //only change the component information is the mark was modified
+                        if ($component->getGrader() === null || $_POST['overwrite'] === "true") {
+                            $component->setGrader($this->core->getUser());
+                        }     
+                        
+                        $component->setGradedVersion($_POST['active_version']);
+                        $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                        $component->setComment($_POST['custom_message']);
+                        $component->setScore($_POST['custom_points']);
+                        $debug = $component->saveData($gradeable->getGdId());
+                    }
                 }
                 
                 $index = 0;
@@ -607,7 +667,9 @@ class ElectronicGraderController extends AbstractController {
                     $mark->setOrder($_POST['marks'][$index]['order']);
                     $mark->save();
                     $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
-                    $mark->saveData($gradeable->getGdId(), $component->getId());
+                    if($all_false === false) {
+                        $mark->saveData($gradeable->getGdId(), $component->getId());
+                    }
                     $index++;
                 }
                 // create new marks
@@ -620,7 +682,9 @@ class ElectronicGraderController extends AbstractController {
                     $mark_id = $mark->save();
                     $mark->setId($mark_id);
                     $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
-                    $mark->saveData($gradeable->getGdId(), $component->getId());
+                    if($all_false === false) {
+                        $mark->saveData($gradeable->getGdId(), $component->getId());
+                    }
                 }
                 $mark_modified = ($mark_modified === true) ? "true" : "false";
             }
@@ -630,7 +694,7 @@ class ElectronicGraderController extends AbstractController {
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
 
-        $response = array('status' => $debug, 'modified' => $mark_modified);
+        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false);
         $this->core->getOutput()->renderJson($response);
         return $response;
     }
@@ -675,5 +739,13 @@ class ElectronicGraderController extends AbstractController {
         return $response;
     }
 
+    public function getGradeableComment() {
+        $gradeable_id = $_POST['gradeable_id'];
+        $user_id = $_POST['user_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        $response = array('status' => 'success', 'data' => $gradeable->getOverallComment());
+        $this->core->getOutput()->renderJson($response);
+        return $response;
+    }
 
 }
