@@ -445,7 +445,7 @@ class SubmissionController extends AbstractController {
 
         // copy over the uploaded file
         if (isset($uploaded_file)) {
-            if (!@copy($uploaded_file, FileUtils::joinPaths($version_path,basename($uploaded_file)))) {
+            if (!@copy($uploaded_file, FileUtils::joinPaths($version_path,"upload.pdf"))) {
                 return $this->uploadResult("Failed to copy uploaded file {$uploaded_file} to current submission.", false);
             }
             if (!@unlink($uploaded_file)) {
