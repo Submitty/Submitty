@@ -3,7 +3,7 @@
 import sys
 from datetime import datetime
 import os
-import submitty_utils
+from submitty_utils import dateutils
 import fcntl
 
 
@@ -13,10 +13,10 @@ SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
 
 def log_message(is_batch,which_untrusted,jobname,timelabel,elapsed_time,message):
-    now=submitty_utils.get_current_time()
+    now = dateutils.get_current_time()
     datefile=datetime.strftime(now,"%Y%m%d")+".txt"
     autograding_log_file=os.path.join(AUTOGRADING_LOG_PATH,datefile)
-    easy_to_read_date=submitty_utils.write_submitty_date(now)
+    easy_to_read_date=dateutils.write_submitty_date(now)
     my_pid = os.getpid()
     parent_pid = os.getppid()
     batch_string = "BATCH" if is_batch else ""

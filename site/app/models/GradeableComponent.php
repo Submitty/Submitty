@@ -163,6 +163,12 @@ class GradeableComponent extends AbstractModel {
         throw new \BadMethodCallException('Call to undefined method '.__CLASS__.'::setId()');
     }
 
+    public function deleteData($gd_id) {
+        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this) === true) {
+            $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this);
+        }
+    }
+
     public function saveData($gd_id) {
         if ($this->modified) {
             if($this->grader_modified) {

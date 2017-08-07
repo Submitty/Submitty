@@ -15,8 +15,7 @@ USAGE:
 import argparse
 import json
 import os
-import sys
-import glob
+from submitty_utils import glob
 
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
