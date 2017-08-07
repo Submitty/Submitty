@@ -130,6 +130,8 @@ CREATE TABLE electronic_gradeable (
     eg_student_download boolean NOT NULL,
     eg_student_any_version boolean NOT NULL,
     eg_peer_grading boolean NOT NULL,
+    eg_pdf_page boolean NOT NULL,
+    eg_pdf_page_student boolean NOT NULL,
     eg_submission_open_date timestamp(6) with time zone NOT NULL,
     eg_submission_due_date timestamp(6) with time zone NOT NULL,
     eg_late_days integer DEFAULT (-1) NOT NULL,
@@ -232,7 +234,8 @@ CREATE TABLE gradeable_component (
     gc_is_text boolean NOT NULL,
     gc_is_extra_credit boolean NOT NULL,
     gc_is_peer boolean NOT NULL,
-    gc_order integer NOT NULL
+    gc_order integer NOT NULL,
+    gc_page integer NOT NULL
 );
 
 

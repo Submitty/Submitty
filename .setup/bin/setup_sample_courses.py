@@ -1001,6 +1001,8 @@ class Gradeable(object):
         self.max_random_submissions = None
         self.team_assignment = False
         self.max_team_size = 1
+        self.pdf_page = False;
+        self.pdf_page_student = False;
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1096,6 +1098,10 @@ class Gradeable(object):
                 self.max_team_size = gradeable['eg_max_team_size']
             if 'eg_team_lock_date' in gradeable:
                 self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_team_lock_date'])
+            if 'eg_pdf_page' in gradeable:
+                self.eg_pdf_page = gradeable['eg_pdf_page'] is True
+            if 'eg_pdf_page_student' in gradeable:
+                self.eg_pdf_page = gradeable['eg_pdf_page_student'] is True
             if self.config_path is None:
                 examples_path = os.path.join(MORE_EXAMPLES_DIR, self.id, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
@@ -1164,6 +1170,7 @@ class Gradeable(object):
                          eg_use_ta_grading=self.use_ta_grading, 
                          eg_student_view=self.student_view, 
                          eg_student_submit=self.student_submit, eg_student_download=self.student_download,
+                         eg_pdf_page=self.pdf_page, eg_pdf_page_student=self.pdf_page_student,
                          eg_student_any_version=self.student_any_version, eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
 
@@ -1263,6 +1270,7 @@ class Component(object):
 
         self.is_text = False
         self.is_extra_credit = False
+        self.page = 0
         self.is_peer = False
         self.order = order
         self.marks = []
@@ -1291,7 +1299,8 @@ class Component(object):
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
                                     gc_max_value=self.max_value, gc_is_text=self.is_text,
-                                    gc_is_extra_credit=self.is_extra_credit, gc_is_peer=self.is_peer, gc_order=self.order)
+                                    gc_is_extra_credit=self.is_extra_credit, gc_is_peer=self.is_peer, 
+                                    gc_order=self.order, gc_page=self.page)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 

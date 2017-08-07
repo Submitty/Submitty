@@ -58,6 +58,8 @@ class AdminGradeableView extends AbstractView {
         $student_submit = true;
         $student_download = false;
         $student_any_version = true;
+        $pdf_page = false;
+        $pdf_page_student = false;
         $old_questions = array();
         $g_min_grading_group = 0;
         $g_overall_ta_instructions = "";
@@ -115,6 +117,8 @@ class AdminGradeableView extends AbstractView {
                 $student_submit = $data[3]['eg_student_submit'];
                 $student_download = $data[3]['eg_student_download'];
                 $student_any_version = $data[3]['eg_student_any_version'];
+                $pdf_page = $data[3]['eg_pdf_page'];
+                $pdf_page_student = $data[3]['eg_pdf_page_student'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
                 if(isset($data[3]['eg_peer_grade_set'])){
@@ -153,6 +157,8 @@ class AdminGradeableView extends AbstractView {
                 $student_submit = $data[3]['eg_student_submit'];
                 $student_download = $data[3]['eg_student_download'];
                 $student_any_version = $data[3]['eg_student_any_version'];
+                $pdf_page = $data[3]['eg_pdf_page'];
+                $pdf_page_student = $data[3]['eg_pdf_page_student'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
                 $peer_grade_set = $data[3]['eg_peer_grade_set'];
@@ -431,7 +437,7 @@ HTML;
                 <br /> <br />
 
                 Should students be able to view submissions?
-                <input type="radio" id="yes_student_view" name="student_view" value="true" class="bool_val rubric_questions"
+                <input type="radio" id="yes_student_view" name="student_view" value="true"
 HTML;
                 if ($student_view===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
@@ -446,7 +452,7 @@ HTML;
                 <div id="student_submit_download_view">
 
                     Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
-                    <input type="radio" id="yes_student_submit" name="student_submit" value="true" class="bool_val rubric_questions"
+                    <input type="radio" id="yes_student_submit" name="student_submit" value="true" 
 HTML;
                     if ($student_submit===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
@@ -459,7 +465,7 @@ HTML;
                     <br /> <br />
 
                     Should students be able to download files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
-                    <input type="radio" id="yes_student_download" name="student_download" value="true" class="bool_val rubric_questions"
+                    <input type="radio" id="yes_student_download" name="student_download" value="true"
 HTML;
                     if ($student_download===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
@@ -472,7 +478,7 @@ HTML;
                     <br /> <br />
 
                     Should students be view/download any or all versions? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
-                    <input type="radio" id="yes_student_any_version" name="student_any_version" value="true" class="bool_val rubric_questions"
+                    <input type="radio" id="yes_student_any_version" name="student_any_version" value="true"
 HTML;
                     if ($student_any_version===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
@@ -487,7 +493,7 @@ HTML;
                 </div>
 
           Will any or all of this assignment be manually graded (e.g., by TAs or the instructor)?
-                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
+                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true"
 HTML;
                 if ($use_ta_grading===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
@@ -514,6 +520,35 @@ HTML;
  /> No 
                 <br /><br />
                 <div class="peer_input" style="display:none;">How many peers should each student grade? <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' /></div>
+
+                Is this a PDF that has a page for each component?
+                <input type="radio" id="yes_pdf_page" name="pdf_page" value="true" 
+HTML;
+                if ($pdf_page===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                /> Yes
+                <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
+HTML;
+                if ($pdf_page===false) { $html_output .= ' checked="checked"'; }
+                $html_output .= <<<HTML
+                /> No 
+                <br /> <br />
+
+                <div id="pdf_page">
+                    Will students mark which page corresponds to each component?
+                    <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
+HTML;
+                    if ($pdf_page_student===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> Yes
+                    <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
+HTML;
+                    if ($pdf_page_student===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> No
+                </div>
+                <br /> <br />
+
                 Point precision (for manual grading): 
                 <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{$precision}" class="float_val" />
                 <br /><br />

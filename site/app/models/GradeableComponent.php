@@ -61,6 +61,8 @@ class GradeableComponent extends AbstractModel {
     protected $score = 0;
     /** @property @var string Comment that grader has put on the component while grading for student */
     protected $comment = "";
+    /** @property @var int for page number */
+    protected $page = 0;
 
     /** @property @var User */
     protected $grader = null;
@@ -97,6 +99,7 @@ class GradeableComponent extends AbstractModel {
         $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
         $this->is_peer = isset($details['gc_is_peer']) ? $details['gc_is_peer']: false;
+        $this->page = $details['gc_page'];
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = $details['gcd_grader'];
