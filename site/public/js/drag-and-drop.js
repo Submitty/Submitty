@@ -300,6 +300,37 @@ function handle_textbox_keypress() {
     setButtonStatus();
 }
 
+// BULK UPLOAD
+//========================================================================================
+function openFile(url_full) {
+    window.open(url_full,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+}
+
+// moving to next input for split item submissions
+// referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
+function moveNextInput(count) {
+    var next_count = count+1;
+    var next_input = "#bulk_user_id_" + next_count;
+    if ($(next_input).length) {
+        $(next_input).focus();
+        $(next_input).select(); 
+
+        var inputOffset = $(next_input).offset().top;
+        var inputHeight = $(next_input).height();
+        var windowHeight = $(window).height();
+        var offset;
+
+        if (inputHeight < windowHeight) {
+            offset = inputOffset - ((windowHeight / 2) - (inputHeight / 2));
+        }
+        else {
+            offset = inputOffset;
+        }
+        var speed = 500;
+        $('html, body').animate({scrollTop:offset}, speed); 
+    }
+}
+
 
 
 // HANDLE SUBMISSION
