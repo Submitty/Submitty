@@ -114,7 +114,7 @@ function getMarkInfo(me, gradeable_id) {
             }
 
             var elem_html = "";
-            elem_html += "# of student with mark: " + data['data'].length + "<br>";
+            elem_html += "# of students with mark: " + data['data'].length + "<br>";
             elem_html += "# of graded stduents: " + graded + "<br>";
             elem_html += "# of total students: " + total + "<br>";
             elem_html += "<h1> List of Students who got " + data['name_info']['question_name'] + "'s " 
