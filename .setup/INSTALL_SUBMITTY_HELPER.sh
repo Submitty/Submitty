@@ -518,6 +518,10 @@ pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
 #python2 setup.py -q install
 python3 setup.py -q install
 
+# fix permissions
+sudo chmod o+r /usr/local/lib/python*/dist-packages/submitty_utils*.egg
+sudo chmod o+r /usr/local/lib/python*/dist-packages/easy-install.pth
+
 popd
 
 ################################################################################################################
