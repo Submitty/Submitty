@@ -770,11 +770,7 @@ HTML;
         $num_questions = count($gradeable->getComponents());
         $return .= <<<HTML
     <div style="margin:3px;">
-<<<<<<< HEAD
-        <table class="ta-rubric-table" id="rubric-table">
-=======
-        <table class="rubric-table" id="rubric-table" data-num_questions="{$num_questions}">
->>>>>>> 24a7898601cbbd5dd2d31cb9dff1dcdc912172da
+        <table class="ta-rubric-table" id="rubric-table" data-num_questions="{$num_questions}">
             <tbody>
 HTML;
 
