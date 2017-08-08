@@ -130,8 +130,9 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setOpenDate(new \DateTime($_POST['date_submit'], $this->core->getConfig()->getTimezone()));
             $gradeable->setDueDate(new \DateTime($_POST['date_due'], $this->core->getConfig()->getTimezone()));
             $gradeable->setLateDays($_POST['eg_late_days']);
-            $gradeable->setIsRepository(false);
-            $gradeable->setSubdirectory("");
+            $is_repository = (isset($_POST['upload_type']) && $_POST['upload_type']=='repository') ? true : false;
+            $gradeable->setIsRepository($is_repository);
+            $gradeable->setSubdirectory($_POST['subdirectory']);
             $gradeable->setPointPrecision(floatval($_POST['point_precision']));
             $is_ta_grading = (isset($_POST['ta_grading']) && $_POST['ta_grading']=='true') ? true : false;
             $gradeable->setTaGrading($is_ta_grading);

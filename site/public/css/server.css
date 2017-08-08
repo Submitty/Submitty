@@ -828,3 +828,8 @@ table .instructor .two-options{
     visibility: visible;
     opacity: 1;
 }
+
+.required::-webkit-input-placeholder { color: red; }
+.required:-moz-placeholder { color: red; }
+.required::-moz-placeholder { color: red; }
+.required:-ms-input-placeholder { color: red; }
