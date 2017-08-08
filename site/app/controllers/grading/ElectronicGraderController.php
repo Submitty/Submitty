@@ -583,6 +583,10 @@ class ElectronicGraderController extends AbstractController {
         $mark_modified = false;
 
         //makes sure only the users a grader is assigned to can be graded
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            return;
+        }
         if ($this->core->getUser()->getGroup() === 3) {
             if ($gradeable->isGradeByRegistration()) {
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
