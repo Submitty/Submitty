@@ -422,7 +422,7 @@ HTML;
 
 		<br />
                 <b>Full path to the directory containing the autograding config.json file:</b><br>
-                See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">Submitty GitHub sample assignment configurations</a><br>
+                See samples here: <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty GitHub sample assignment configurations</a><br>
 		<kbd>/usr/local/submitty/more_autograding_examples/upload_only/config</kbd>  (an assignment without autograding)<br>
 		<kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
 		<kbd>/var/local/submitty/courses/{$_GET['semester']}/{$_GET['course']}/config_upload/#</kbd> (for an web uploaded configuration)<br>
@@ -471,7 +471,7 @@ HTML;
                     /> No
                     <br /> <br />
 
-                    Should students be view/download any or all versions? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
+                    Should students be able to view/download any or all versions? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
                     <input type="radio" id="yes_student_any_version" name="student_any_version" value="true" class="bool_val rubric_questions"
 HTML;
                     if ($student_any_version===true) { $html_output .= ' checked="checked"'; }

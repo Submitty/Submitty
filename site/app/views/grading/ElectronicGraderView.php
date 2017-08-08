@@ -694,6 +694,7 @@ HTML;
         }
         $return .= <<<HTML
             </div>
+        <div>
 HTML;
 
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
@@ -1067,7 +1068,34 @@ HTML;
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading.js"></script>
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading-mark.js"></script>
 <script type="text/javascript">
-
+    $(document).ready(function() {
+        $( "#autograding_results" ).scroll(function() {
+            updateHandle("#autograding_results");
+        });
+        $( "#autograding_results" ).resize(function() {
+            updateHandle("#autograding_results");
+        });
+        $( "#grading_rubric" ).scroll(function() {
+            updateHandle("#grading_rubric");
+        });
+        $( "#grading_rubric" ).resize(function() {
+            updateHandle("#grading_rubric");
+        });
+        $( "#submission_browser" ).scroll(function() {
+            updateHandle("#submission_browser");
+        });
+        $( "#submission_browser" ).resize(function() {
+            updateHandle("#submission_browser");
+        });
+        $( "#student_info" ).scroll(function() {
+            updateHandle("#student_info");
+        });
+        $( "#student_info" ).resize(function() {
+            updateHandle("#student_info");
+        });
+    });
+</script>
+<script type="text/javascript">
     function openFrame(html_file, url_file, num) {
         var iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open')) {
@@ -1077,10 +1105,10 @@ HTML;
             else if (url_file.includes("results")) directory = "results";  
             // handle pdf
             if(url_file.substring(url_file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='750px' height='600px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' height='600px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='750px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }

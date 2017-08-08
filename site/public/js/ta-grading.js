@@ -29,7 +29,8 @@ $(document).ready(function(){
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-    $('#header').css({'position':'fixed', 'z-index':'1099'});
+    $('#header').css({'position':'fixed', 'z-index':'1'});
+    $('#footer').css({'position':'fixed', 'z-index':'1'});
 
     calculatePercentageTotal();
     var progressbar = $(".progressbar"),
@@ -273,6 +274,10 @@ function handleKeyPress(key) {
             $("#submission_browser").attr("style", "left:15px; bottom:40px; width:48%; height:30%; display:block;");
             $('.fa-user').addClass('icon-selected');
             $("#student_info").attr("style", "right:15px; bottom:40px; width:48%; height:30%; display:block;");
+            updateHandle("#autograding_results");
+            updateHandle("#grading_rubric");
+            updateHandle("#submission_browser");
+            updateHandle("#student_info");
             deleteCookies();
             updateCookies();
             break;
@@ -383,6 +388,19 @@ function downloadFile(html_file, url_file) {
     else if (url_file.includes("results")) directory = "results";      
     window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': directory, 'file': html_file, 'path': url_file});
     return false;
+}
+
+function updateHandle(element) {
+    var bottom_e = $(element).scrollTop();
+    var padding = $(element).outerHeight() - $(element).innerHeight();
+    var height = $(element).prop('scrollHeight') - padding;
+    var bottom_s = $(element).scrollTop() + $(element).prop('clientHeight');
+    var bottom_s = Math.min(height, bottom_s);
+    var bottom_se = bottom_s - 20;
+    var bottom_se = Math.min(height, bottom_se);
+    $(element).find('.ui-resizable-e').css('top', bottom_e + 'px');
+    $(element).find('.ui-resizable-s').css('top', bottom_s + 'px');
+    $(element).find('.ui-resizable-se').css('top', bottom_se + 'px');
 }
 
 function findOpenTestcases() {
