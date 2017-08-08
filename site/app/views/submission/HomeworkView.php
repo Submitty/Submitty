@@ -732,13 +732,6 @@ HTML;
         </p>
     </div>
 HTML;
-                    if ($gradeable->hasConditionalMessage()) {
-                        $return .= <<<HTML
-    <div class="sub" id="conditional_message" style="display: none;">
-        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
-    </div>
-HTML;
-                    }
                 }
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
@@ -763,6 +756,14 @@ HTML;
      </div>
 HTML;
 	            }
+
+                if ($gradeable->hasConditionalMessage()) {
+                    $return .= <<<HTML
+    <div class="sub" id="conditional_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
+    </div>
+HTML;
+                }
 
                 $return .= <<<HTML
     <div class="sub">

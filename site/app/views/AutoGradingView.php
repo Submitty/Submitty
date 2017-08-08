@@ -80,16 +80,19 @@ HTML;
             }
         }
         if ($gradeable->hasConditionalMessage()) {
-            $return.= <<<HTML
+            foreach ($gradeable->getVersions() as $version) {
+                if ($version->getNonHiddenTotal() >= $gradeable->getMinimumPoints() && 
+                    $version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
+                        $return.= <<<HTML
 <script type="text/javascript">
     $(document).ready(function() {
-        if (({$gradeable->getGradedNonHiddenPoints()} >= {$gradeable->getMinimumPoints()}) &&
-                ({$gradeable->getDaysEarly()} > {$gradeable->getMinimumDaysEarly()})) {
-            $('#conditional_message').show();
-        }
+        $('#conditional_message').show();
     });
 </script>
 HTML;
+                    break;
+                }
+            }
         }
         $count = 0;
         $display_box = ($num_visible_testcases == 0) ? "block" : "none";
