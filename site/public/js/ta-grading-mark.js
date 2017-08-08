@@ -201,9 +201,14 @@ function selectMark(me, first_override = false) {
 }
 
 //closes all the questions except the one being opened
-function openClose(row_id, num_questions) {
+function openClose(row_id, num_questions = -1) {
     var row_num = parseInt(row_id);
-    var total_num = parseInt(num_questions);
+    var total_num = 0;
+    if (num_questions === -1) {
+        total_num = parseInt($('#rubric-table')[0].dataset.num_questions);
+    } else {
+        total_num = parseInt(num_questions);
+    }
     //-2 means general comment, else open the row_id with the number
     general_comment = document.getElementById('extra-general');
     general_comment_summary = document.getElementById('summary-general');
@@ -220,8 +225,7 @@ function openClose(row_id, num_questions) {
         general_comment_cancel_mark.style.display = 'none';
         general_comment_save_mark.style.display = 'none';
     }
-
-    for (var x = 1; x <= num_questions; x++) {
+    for (var x = 1; x <= total_num; x++) {
         var current = document.getElementById('extra-' + x);
         var current_summary = document.getElementById('summary-' + x);
         var ta_note = document.getElementById('ta_note-' + x);
@@ -229,7 +233,7 @@ function openClose(row_id, num_questions) {
         var progress_points = document.getElementById('progress_points-' + x);
         var cancel_mark = document.getElementById('cancel-mark-' + x);
         var save_mark = document.getElementById('save-mark-' + x);
-        if (x === row_num) {
+        if (x == row_num) {
             if (current.style.display === 'none') {
                 current.style.display = '';
                 current_summary.style.display = 'none';
@@ -258,6 +262,8 @@ function openClose(row_id, num_questions) {
             save_mark.style.display = 'none';
         }
     }
+
+    updateCookies();
 }
 
 function cancelMark(num, gradeable_id, user_id, gc_id) {
@@ -536,5 +542,33 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
                 console.log("Something went wront with saving marks...");
             }
         })
+    }
+}
+
+function findCurrentOpenedMark() {
+    var index = 1;
+    var found = false;
+    var doesExist = ($('#summary-' + index).length) ? true : false;
+    while(doesExist) {
+        if($('#summary-' + index).length) {
+            if ($('#summary-' + index)[0].style.display === 'none') {
+                found = true;
+                doesExist = false;
+                index--;
+            }
+        }
+        else{
+            doesExist = false;
+        }
+        index++;
+    }
+    if (found === true) {
+        return index;
+    } else {
+        if ($('#summary-general')[0].style.display === 'none') {
+            return -2;
+        } else {
+            return -1;
+        }
     }
 }
