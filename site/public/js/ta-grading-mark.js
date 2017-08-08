@@ -35,7 +35,7 @@ function checkIfSelected(me) {
     checkMarks(question_num);
 }
 
-function addMark(me, num, background, min, max, precision) {
+function addMark(me, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
     var last_num = -10;
     var current_row = $(me.parentElement.parentElement);
     var current = $('[name=mark_'+num+']').last().attr('id');
@@ -55,6 +55,7 @@ function addMark(me, num, background, min, max, precision) {
 </td> \
 <td colspan="3" style="'+background+'"> \
     <textarea name="mark_text_'+num+'_'+new_num+'" onkeyup="autoResizeComment(event);" rows="1" style="width:95%; resize:none; float:left;"></textarea> \
+    <span id="mark_info_id-'+num+'-'+new_num+'" style="display: none" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\'); getMarkInfo(this,\''+gradeable_id+'\');"> <i class="fa fa-users" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
     <span id="mark_remove_id-'+num+'-'+new_num+'" onclick="deleteMark(this,'+num+','+new_num+');"> <i class="fa fa-times" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
 </td> \
 </tr> \
@@ -82,9 +83,56 @@ function deleteMark(me, num, last_num) {
         current_mark.find('textarea[name=mark_text_'+num+'_'+i+']').attr('name', 'mark_text_'+num+'_'+new_num);
         current_mark.find('span[id=mark_remove_id-'+num+'-'+i+']').attr('onclick', 'deleteMark(this,'+num+','+new_num+');');
         current_mark.find('i[name=mark_icon_'+num+'_'+i+']').attr('name', 'mark_icon_'+num+'_'+new_num);
+        current_mark.find('span[id=mark_info_id-'+num+'-'+i+']').attr('id', 'mark_info_id-'+num+'-'+new_num);
         current_mark.find('span[id=mark_remove_id-'+num+'-'+i+']').attr('id', 'mark_remove_id-'+num+'-'+new_num);
         current_mark.attr('id', 'mark_id-'+num+'-'+new_num);
     }
+}
+
+function getMarkInfo(me, gradeable_id) {
+    var question_num = parseInt($(me).attr('id').split('-')[1]);
+    var order_num = parseInt($(me).attr('id').split('-')[2]);
+    var gradeable_component_id = $('#extra-' + question_num)[0].dataset.question_id;
+    $.ajax({
+        type: "POST",
+        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_marked_users'}),
+        data: {
+            'gradeable_id' : gradeable_id,
+            'gradeable_component_id' : gradeable_component_id,
+            'order_num' : order_num
+        },
+        success: function(data) {
+            console.log("success for getting the information on marks");
+            data = JSON.parse(data);
+
+            var graded = 0;
+            var total = 0;
+            
+            for (var x in data['sections']) {
+                graded += parseInt(data['sections'][x]['graded_components']);
+                total += parseInt(data['sections'][x]['total_components']);
+            }
+
+            var elem_html = "";
+            elem_html += "# of students with mark: " + data['data'].length + "<br>";
+            elem_html += "# of graded stduents: " + graded + "<br>";
+            elem_html += "# of total students: " + total + "<br>";
+            elem_html += "<h1> List of Students who got " + data['name_info']['question_name'] + "'s " 
+                + data['name_info']['mark_note'] + "</h1>";
+            for (var x = 0; x < data['data'].length; x++) {
+                elem_html += "" + data['data'][x]['gd_user_id'] + " <br>";
+            }
+            $('.popup-form').css('display', 'none');
+            var form = $("#student-marklist-popup");
+            form.css("display", "block");
+            form.css("width", "500px");
+            form.css("margin-left", "-250px");
+            $("#student-marklist-popup-content")[0].innerHTML = elem_html;
+        },
+        error: function() {
+            console.log("Couldn't get the information on marks");
+        }
+    })
 }
 
 //check if the first mark (Full/no credit) should be selected
@@ -201,9 +249,14 @@ function selectMark(me, first_override = false) {
 }
 
 //closes all the questions except the one being opened
-function openClose(row_id, num_questions) {
+function openClose(row_id, num_questions = -1) {
     var row_num = parseInt(row_id);
-    var total_num = parseInt(num_questions);
+    var total_num = 0;
+    if (num_questions === -1) {
+        total_num = parseInt($('#rubric-table')[0].dataset.num_questions);
+    } else {
+        total_num = parseInt(num_questions);
+    }
     //-2 means general comment, else open the row_id with the number
     general_comment = document.getElementById('extra-general');
     general_comment_summary = document.getElementById('summary-general');
@@ -220,8 +273,7 @@ function openClose(row_id, num_questions) {
         general_comment_cancel_mark.style.display = 'none';
         general_comment_save_mark.style.display = 'none';
     }
-
-    for (var x = 1; x <= num_questions; x++) {
+    for (var x = 1; x <= total_num; x++) {
         var current = document.getElementById('extra-' + x);
         var current_summary = document.getElementById('summary-' + x);
         var ta_note = document.getElementById('ta_note-' + x);
@@ -229,7 +281,7 @@ function openClose(row_id, num_questions) {
         var progress_points = document.getElementById('progress_points-' + x);
         var cancel_mark = document.getElementById('cancel-mark-' + x);
         var save_mark = document.getElementById('save-mark-' + x);
-        if (x === row_num) {
+        if (x == row_num) {
             if (current.style.display === 'none') {
                 current.style.display = '';
                 current_summary.style.display = 'none';
@@ -258,6 +310,8 @@ function openClose(row_id, num_questions) {
             save_mark.style.display = 'none';
         }
     }
+
+    updateCookies();
 }
 
 function cancelMark(num, gradeable_id, user_id, gc_id) {
@@ -347,12 +401,12 @@ function cancelMark(num, gradeable_id, user_id, gc_id) {
 //num === -3 means save gradeable comment
 //num === -2 means save last opened component
 //num === -1 means save all components, TO DO?
-function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
+function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "") {
     if (num === -3) {
         var comment_row = $('#comment-general-id');
         var gradeable_comment = comment_row.val();
         var current_question_text = $('#rubric-textarea-custom');
-        current_question_text[0].innerHTML = gradeable_comment;
+        current_question_text[0].innerHTML = '<pre>' + gradeable_comment + '</pre>';
 
         $.ajax({
             type: "POST",
@@ -389,7 +443,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
         }
         if (found === true) { //if nothing was found, assumes it needs to save the gradeable comment
             var gradeable_component_id = parseInt($('#extra-' + index)[0].dataset.question_id);
-            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id);
+            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id);
         } else {
             saveMark(-3, gradeable_id, user_id, active_version);
         }
@@ -402,6 +456,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
         var keep_checking = true;
         for (var i = 0; i < arr_length; i++) {
             var current_row = $('#mark_id-'+num+'-'+i);
+            var info_mark = $('#mark_info_id-'+num+'-'+i);
             var delete_mark = $('#mark_remove_id-'+num+'-'+i);
             var is_selected = false;
             var success = true;
@@ -429,6 +484,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
                 selected: is_selected
             };
             mark_data[i] = mark;
+            info_mark[0].style.display = '';
             delete_mark.remove();
         }
         current_row = $('#mark_custom_id-'+num);
@@ -463,7 +519,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
         }
 
         current_points += parseFloat(custom_points);
-        if (parseFloat(current_points) != 0) {
+        if (parseFloat(custom_points) != 0) {
             all_false = false;
         }
         if(custom_message != "") {
@@ -523,11 +579,10 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
                 data = JSON.parse(data);
                 if (data['modified'] === 'true') {
                     if (all_false === true) {
-                        $('#graded-by-' + num)[0].innerHTML = "Ungraded by you!";
+                        $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
                     } else {
-                        if(($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || 
-                            $('#graded-by-' + num)[0].innerHTML === "Ungraded by you!") || (overwrite === "true")) {
-                            $('#graded-by-' + num)[0].innerHTML = "Graded by you!";
+                        if($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || (overwrite === "true")) {
+                            $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
                         }
                     }
                 }
@@ -536,5 +591,33 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
                 console.log("Something went wront with saving marks...");
             }
         })
+    }
+}
+
+function findCurrentOpenedMark() {
+    var index = 1;
+    var found = false;
+    var doesExist = ($('#summary-' + index).length) ? true : false;
+    while(doesExist) {
+        if($('#summary-' + index).length) {
+            if ($('#summary-' + index)[0].style.display === 'none') {
+                found = true;
+                doesExist = false;
+                index--;
+            }
+        }
+        else{
+            doesExist = false;
+        }
+        index++;
+    }
+    if (found === true) {
+        return index;
+    } else {
+        if ($('#summary-general')[0].style.display === 'none') {
+            return -2;
+        } else {
+            return -1;
+        }
     }
 }

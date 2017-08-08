@@ -910,11 +910,4 @@ HTML;
 
         return $return;
     }
-
-    public function showPopUp($gradeable) {
-        $return = <<<HTML
-            <p>Banana</p>
-HTML;
-        return $return;
-    }
 }
