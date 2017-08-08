@@ -35,7 +35,7 @@ function checkIfSelected(me) {
     checkMarks(question_num);
 }
 
-function addMark(me, num, background, min, max, precision, gradeable_id) {
+function addMark(me, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
     var last_num = -10;
     var current_row = $(me.parentElement.parentElement);
     var current = $('[name=mark_'+num+']').last().attr('id');
@@ -55,7 +55,7 @@ function addMark(me, num, background, min, max, precision, gradeable_id) {
 </td> \
 <td colspan="3" style="'+background+'"> \
     <textarea name="mark_text_'+num+'_'+new_num+'" onkeyup="autoResizeComment(event);" rows="1" style="width:95%; resize:none; float:left;"></textarea> \
-    <span id="mark_info_id-'+num+'-'+new_num+'" style="display: none" onclick="getMarkInfo(this,'+gradeable_id+');"> <i class="fa fa-users" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
+    <span id="mark_info_id-'+num+'-'+new_num+'" style="display: none" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\'); getMarkInfo(this,\''+gradeable_id+'\');"> <i class="fa fa-users" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
     <span id="mark_remove_id-'+num+'-'+new_num+'" onclick="deleteMark(this,'+num+','+new_num+');"> <i class="fa fa-times" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
 </td> \
 </tr> \
@@ -122,11 +122,12 @@ function getMarkInfo(me, gradeable_id) {
             for (var x = 0; x < data['data'].length; x++) {
                 elem_html += "" + data['data'][x]['gd_user_id'] + " <br>";
             }
-            my_window = window.open("", "_blank", "status=1,width=750,height=500");
-            my_window.document.write(elem_html);
-            my_window.document.close(); 
-            my_window.focus();
-            
+            $('.popup-form').css('display', 'none');
+            var form = $("#student-marklist-popup");
+            form.css("display", "block");
+            form.css("width", "500px");
+            form.css("margin-left", "-250px");
+            $("#student-marklist-popup-content")[0].innerHTML = elem_html;
         },
         error: function() {
             console.log("Couldn't get the information on marks");

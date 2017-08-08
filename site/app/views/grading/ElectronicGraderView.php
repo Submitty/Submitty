@@ -978,7 +978,7 @@ HTML;
                     </td>
                     <td colspan="3" style="{$background}; width: 88%">
                         <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width: 95%; resize:none; float:left;" {$noChange}>{$mark_text}</textarea>
-                        <span id="mark_info_id-{$c}-{$d}" onclick="getMarkInfo(this, '{$gradeable->getId()}');"> <i class="fa fa-users" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span>
+                        <span id="mark_info_id-{$c}-{$d}" onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); getMarkInfo(this, '{$gradeable->getId()}');"> <i class="fa fa-users" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span>
                     </td>
                 </tr>
 HTML;
@@ -995,7 +995,7 @@ HTML;
                 $return .= <<<HTML
                 <tr>
                     <td colspan="4" style="{$background};">
-                        <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+                        <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
                         Add New Common {$word}</span>
                     </td>
                 </tr>
@@ -1120,4 +1120,18 @@ HTML;
 HTML;
         return $return;
     }
+
+    public function popupStudents() {
+        $return = <<<HTML
+        <div class="popup-form" id="student-marklist-popup">
+            <div style="width: auto;" id="student-marklist-popup-content"></div>
+            <div style="float: right; width: auto">
+                <a onclick="$('#student-marklist-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
+            </div>
+        </div>
+HTML;
+        return $return;
+    }
+
 }
+
