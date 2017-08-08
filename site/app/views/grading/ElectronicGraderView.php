@@ -643,7 +643,7 @@ HTML;
             }
         }
         $files = array();
-        add_files($files, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles(), $gradeable->getSvnFiles()), 'submissions');
+        add_files($files, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles(), $gradeable->getVcsFiles()), 'submissions');
         add_files($files, $gradeable->getResultsFiles(), 'results');
         $count = 1;
         display_files($files,$count,1,$return);
