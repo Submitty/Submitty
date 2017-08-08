@@ -302,6 +302,16 @@ class AdminGradeableController extends AbstractController {
                         $old_component->setIsExtraCredit($extra_credit);
                         $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
                         $old_component->setIsPeer($peer_grading_component);
+                        if ($this->isRadioButtonTrue('pdf_page_student')) {
+                            $page_component = -1;
+                        }
+                        else if ($this->isRadioButtonTrue('pdf_page')) {
+                            $page_component = 0;
+                        }
+                        else {
+                            $page_component = ($_POST['page_component_' . strval($x + 1)]);
+                        }
+                        $old_component->setPage($page_component);
                         $old_component->setOrder($x);
                         $this->core->getQueries()->updateGradeableComponent($old_component);
                     } else if ($num_old_components > $num_questions) {
@@ -321,6 +331,16 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setIsExtraCredit($extra_credit);
                 $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
                 $gradeable_component->setIsPeer($peer_grading_component);
+                if ($this->isRadioButtonTrue('pdf_page_student')) {
+                    $page_component = -1;
+                }
+                else if ($this->isRadioButtonTrue('pdf_page')) {
+                    $page_component = 0;
+                }
+                else {
+                    $page_component = ($_POST['page_component_' . strval($x + 1)]);
+                }
+                $gradeable_component->setPage($page_component);
                 $gradeable_component->setOrder($x);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }  

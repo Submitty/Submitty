@@ -179,12 +179,6 @@ class Gradeable extends AbstractModel {
     /** @property @var bool Will students be able to view/download any version or just the active version? */
     protected $student_any_version = true;
 
-    /** @property @var bool */
-    protected $pdf_page = false;
-    /** @property @var bool */
-    protected $pdf_page_student = false;
-
-
     /* Config variables for submission details for this gradeable */
     /** @property @var float Max size (in bytes) allowed for the submission */
     protected $max_size = 50000;
@@ -327,8 +321,6 @@ class Gradeable extends AbstractModel {
             $this->student_download = $details['eg_student_download'] === true;
             $this->student_any_version = $details['eg_student_any_version'] === true;
             $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
-            $this->pdf_page = isset($details['eg_pdf_page']) ? $details['eg_pdf_page'] === true: false;
-            $this->pdf_page_student = isset($details['eg_pdf_page_student']) ? $details['eg_pdf_page_student'] === true: false;
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
             $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;

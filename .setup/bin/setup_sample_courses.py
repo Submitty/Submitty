@@ -1001,8 +1001,6 @@ class Gradeable(object):
         self.max_random_submissions = None
         self.team_assignment = False
         self.max_team_size = 1
-        self.pdf_page = False;
-        self.pdf_page_student = False;
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1098,10 +1096,6 @@ class Gradeable(object):
                 self.max_team_size = gradeable['eg_max_team_size']
             if 'eg_team_lock_date' in gradeable:
                 self.team_lock_date = submitty_utils.parse_datetime(gradeable['eg_team_lock_date'])
-            if 'eg_pdf_page' in gradeable:
-                self.eg_pdf_page = gradeable['eg_pdf_page'] is True
-            if 'eg_pdf_page_student' in gradeable:
-                self.eg_pdf_page = gradeable['eg_pdf_page_student'] is True
             if self.config_path is None:
                 examples_path = os.path.join(MORE_EXAMPLES_DIR, self.id, "config")
                 tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
@@ -1170,7 +1164,6 @@ class Gradeable(object):
                          eg_use_ta_grading=self.use_ta_grading, 
                          eg_student_view=self.student_view, 
                          eg_student_submit=self.student_submit, eg_student_download=self.student_download,
-                         eg_pdf_page=self.pdf_page, eg_pdf_page_student=self.pdf_page_student,
                          eg_student_any_version=self.student_any_version, eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
 
