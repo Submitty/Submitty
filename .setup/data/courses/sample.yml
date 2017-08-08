@@ -11,7 +11,10 @@ gradeables:
   g_title: Future (No TAs) Homework
   gradeable_config: python_simple_homework
   components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -20,7 +23,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -31,7 +37,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -42,7 +51,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 
@@ -61,7 +73,10 @@ gradeables:
 
 - g_id: future_tas_homework
   components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -70,7 +85,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -81,7 +99,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -92,7 +113,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 
@@ -112,7 +136,10 @@ gradeables:
   g_bucket: homework
 
 - components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -121,7 +148,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -132,7 +162,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -143,7 +176,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 
@@ -164,7 +200,10 @@ gradeables:
   g_bucket: homework
 
 - components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -173,7 +212,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -184,7 +226,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -195,7 +240,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 
@@ -219,7 +267,10 @@ gradeables:
   g_bucket: homework
 
 - components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -228,7 +279,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -239,7 +293,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -250,7 +307,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 
@@ -271,7 +331,10 @@ gradeables:
   g_bucket: homework
 
 - components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -280,7 +343,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -291,7 +357,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -302,7 +371,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 
@@ -322,11 +394,17 @@ gradeables:
   gradeable_config: python_simple_homework
   g_bucket: homework
 
-#- components:
-#  - gc_max_value: 5
+# - components:
+#  - gc_lower_clamp: 0
+#   gc_default: 0
+#   gc_max_value: 5
+#   gc_upper_clamp: 5
 #    gc_title: Question 1
 #  - gc_is_extra_credit: true
-#    gc_max_value: 5
+#    gc_lower_clamp: 0
+#   gc_default: 0
+#   gc_max_value: 5
+#   gc_upper_clamp: 5
 #    gc_title: Question 2
 #  eg_submission_due_date: 1972-01-01 23:59:59
 #  eg_submission_open_date: 1971-01-01 23:59:59
@@ -387,10 +465,16 @@ gradeables:
   g_bucket: lab
 
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
   - gc_is_extra_credit: true
+    gc_lower_clamp: 0
+    gc_default: 0
     gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
@@ -403,10 +487,16 @@ gradeables:
   g_bucket: test
 
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
   - gc_is_extra_credit: true
+    gc_lower_clamp: 0
+    gc_default: 0
     gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
@@ -419,10 +509,16 @@ gradeables:
   g_bucket: test
 
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
   - gc_is_extra_credit: true
+    gc_lower_clamp: 0
+    gc_default: 0
     gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
@@ -435,10 +531,16 @@ gradeables:
   g_bucket: test
 
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
   - gc_is_extra_credit: true
+    gc_lower_clamp: 0
+    gc_default: 0
     gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
@@ -451,7 +553,10 @@ gradeables:
   g_bucket: test
 
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -468,7 +573,10 @@ gradeables:
 
 # For no autograding, still need components, but also ned eg_use_ta_grading flag
 - components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -477,7 +585,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -488,7 +599,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -499,7 +613,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 
@@ -521,7 +638,10 @@ gradeables:
   g_bucket: homework
 
 - components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -530,7 +650,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -541,7 +664,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -552,7 +678,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 
@@ -573,7 +702,10 @@ gradeables:
   g_bucket: homework
 
 - components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -582,7 +714,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -593,7 +728,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -604,7 +742,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 
@@ -625,7 +766,10 @@ gradeables:
   g_bucket: homework
 
 - components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -634,7 +778,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -645,7 +792,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -656,7 +806,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 
@@ -677,7 +830,10 @@ gradeables:
   g_bucket: homework
 
 - components:
-  - gc_max_value: 2
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 2
+    gc_upper_clamp: 5
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -686,7 +842,10 @@ gradeables:
         gcm_points: -1
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Coding Style
     marks:
       - gcm_note: Full Credit
@@ -697,7 +856,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Code is difficult to understand
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Documentation
     marks:
       - gcm_note: Full Credit
@@ -708,7 +870,10 @@ gradeables:
         gcm_points: -3
       - gcm_note: Way too much documentation and/or documentation makes no sense
         gcm_points: -1
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Extra Credit
     gc_is_extra_credit: true
     marks: 

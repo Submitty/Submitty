@@ -1133,7 +1133,10 @@ class Gradeable(object):
                 component['gc_student_comment'] = ""
 
             if self.type == 1:
+                component['gc_lower_clamp'] = 0
+                component['gc_default'] = 0
                 component['gc_max_value'] = 1
+                component['gc_upper_clamp'] = 1
             self.components.append(Component(component, i+1))
 
     def create(self, conn, gradeable_table, electronic_table, reg_table, component_table, mark_table):
@@ -1198,7 +1201,10 @@ class Gradeable(object):
             for i in range(len(self.components)):
                 component = self.components[i]
                 form_json['comment_title'].append(component.title)
+                # form_json['lower_clamp'].append(component.lower_clamp)
+                # form_json['default'].append(component.default)
                 form_json['points'].append(component.max_value)
+                # form_json['upper_clamp'].append(component.upper_clamp)
                 form_json['ta_comment'].append(component.ta_comment)
                 form_json['student_comment'].append(component.student_comment)
                 if component.is_extra_credit:
@@ -1214,7 +1220,10 @@ class Gradeable(object):
         else:
             form_json['num_numeric_items'] = 0
             form_json['numeric_labels'] = []
+            form_json['lower_clamp'] = []
+            form_json['default'] = []
             form_json['max_score'] = []
+            form_json['upper_clamp'] = []
             form_json['numeric_extra'] = []
             form_json['num_text_items'] = 0
             form_json['text_label'] = []
@@ -1226,7 +1235,10 @@ class Gradeable(object):
                 else:
                     form_json['num_numeric_items'] += 1
                     form_json['numeric_labels'].append(component.title)
+                    form_json['lower_clamp'].append(component.lower_clamp)
+                    form_json['default'].append(component.default)
                     form_json['max_score'].append(component.max_value)
+                    form_json['upper_clamp'].append(component.upper_clamp)
                     if component.is_extra_credit:
                         form_json['numeric_extra'].append(i+1)
         form_json['minimum_grading_group'] = self.min_grading_group
@@ -1281,16 +1293,23 @@ class Component(object):
             self.is_extra_credit = component['gc_is_extra_credit'] is True
 
         if self.is_text:
+            self.lower_clamp = 0
+            self.default = 0
             self.max_value = 0
+            self.upper_clamp = 0
         else:
+            self.lower_clamp = float(component['gc_lower_clamp'])
+            self.default = float(component['gc_default'])
             self.max_value = float(component['gc_max_value'])
+            self.upper_clamp = float(component['gc_upper_clamp'])
 
         self.key = None
 
     def create(self, g_id, conn, table, mark_table):
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
-                                    gc_max_value=self.max_value, gc_is_text=self.is_text,
+                                    gc_lower_clamp=self.lower_clamp, gc_default=self.default, gc_max_value=self.max_value, 
+                                    gc_upper_clamp=self.upper_clamp, gc_is_text=self.is_text,
                                     gc_is_extra_credit=self.is_extra_credit, gc_is_peer=self.is_peer, gc_order=self.order)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
