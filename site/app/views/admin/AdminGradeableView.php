@@ -616,9 +616,15 @@ HTML;
 
                 <td style="background-color:#EEE;">
 HTML;
-        $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
+        $old_lower_clamp = (isset($question['question_lower_clamp'])) ? $question['question_lower_clamp'] : 0;
+        $old_default = (isset($question['question_default'])) ? $question['question_default'] : 0;
+        $old_max = (isset($question['question_total'])) ? $question['question_total'] : 0;
+        $old_upper_clamp = (isset($question['question_upper_clamp'])) ? $question['question_upper_clamp'] : 0;
         $html_output .= <<<HTML
-        <input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_grade}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">
+        lowerClamp:<input type="number" class="points" name="lower_{$num}" value="{$old_lower_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;">
+        default:<input type="number" class="points" name="default_{$num}" value="{$old_default}" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none;">
+        max:<input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_max}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">
+        upperClamp:<input type="number" class="points" name="upper_{$num}" value="{$old_upper_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;">
 HTML;
         $checked = ($question['question_extra_credit']) ? "checked" : "";
         if ($type_deduct === 1) {

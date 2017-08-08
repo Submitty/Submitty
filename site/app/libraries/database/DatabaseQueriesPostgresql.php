@@ -234,7 +234,10 @@ SELECT";
   gc.array_gc_title,
   gc.array_gc_ta_comment,
   gc.array_gc_student_comment,
+  gc.array_gc_lower_clamp,
+  gc.array_gc_default,
   gc.array_gc_max_value,
+  gc.array_gc_upper_clamp,
   gc.array_gc_is_text,
   gc.array_gc_is_extra_credit,
   gc.array_gc_is_peer,
@@ -294,7 +297,10 @@ LEFT JOIN (
     array_agg(gc_title) AS array_gc_title,
     array_agg(gc_ta_comment) AS array_gc_ta_comment,
     array_agg(gc_student_comment) AS array_gc_student_comment,
+    array_agg(gc_lower_clamp) AS array_gc_lower_clamp,
+    array_agg(gc_default) AS array_gc_default,
     array_agg(gc_max_value) AS array_gc_max_value,
+    array_agg(gc_upper_clamp) AS array_gc_upper_clamp,
     array_agg(gc_is_text) AS array_gc_is_text,
     array_agg(gc_is_extra_credit) AS array_gc_is_extra_credit,
     array_agg(gc_order) AS array_gc_order,
@@ -1057,7 +1063,7 @@ eg_student_download=?, eg_student_any_version=?, eg_config_path=?, eg_late_days=
     }
 
     public function createNewGradeableComponent(GradeableComponent $component, Gradeable $gradeable) {
-        $params = array($gradeable->getId(), $component->getTitle(), $component->getTaComment(), $component->getStudentComment(), 0, 0, $component->getMaxValue(), $component->getMaxValue(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), var_export($component->getIsPeer(), true));
+        $params = array($gradeable->getId(), $component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getLowerClamp(), $component->getDefault(), $component->getMaxValue(), $component->getUpperClamp(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), var_export($component->getIsPeer(), true));
         $this->course_db->query("
 INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, 
 gc_is_text, gc_is_extra_credit, gc_order, gc_is_peer) 
@@ -1065,9 +1071,9 @@ VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
     }   
 
     public function updateGradeableComponent(GradeableComponent $component) {
-        $params = array($component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getMaxValue(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), var_export($component->getIsPeer(), true), $component->getId());
+        $params = array($component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getLowerClamp(), $compoennt->getDefault(), $component->getMaxValue(), $component->getUpperClamp(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), var_export($component->getIsPeer(), true), $component->getId());
         $this->course_db->query("
-UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?, gc_max_value=?, gc_is_text=?, gc_is_extra_credit=?, gc_order=?, gc_is_peer=? WHERE gc_id=?", $params);
+UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?, gc_lower_clamp=?, gc_default=?, gc_max_value=?, gc_upper_clamp=?, gc_is_text=?, gc_is_extra_credit=?, gc_order=?, gc_is_peer=? WHERE gc_id=?", $params);
     }
 
     public function deleteGradeableComponent(GradeableComponent $component) {
@@ -1130,7 +1136,7 @@ WHERE gcm_id=?", $params);
 
             $is_repository = $electronic_gradeable['eg_is_repository'];
             $late_days = $electronic_gradeable['eg_late_days'];
-            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_max_value, gc_is_extra_credit, gc_is_peer FROM gradeable_component 
+            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, gc_is_extra_credit, gc_is_peer FROM gradeable_component 
                         WHERE g_id=? GROUP BY gc_id ORDER BY gc_order ASC",array($gradeable_id));
             $tmp_questions = $this->course_db->rows();
             $old_questions = array();
@@ -1140,7 +1146,10 @@ WHERE gcm_id=?", $params);
                     array_push($old_questions, array('question_message' => $question['gc_title'],
                                                     'question_grading_note' => $question['gc_ta_comment'],
                                                     'student_grading_note'  => $question['gc_student_comment'],
+                                                    'question_lower_clamp'        => $question['gc_lower_clamp'],
+                                                    'question_default'        => $question['gc_default'],
                                                     'question_total'        => $question['gc_max_value'],
+                                                    'question_upper_clamp'        => $question['gc_upper_clamp'],
                                                     'question_extra_credit' => $question['gc_is_extra_credit'],
                                                     'peer_component'        => $question['gc_is_peer']));
                 }
