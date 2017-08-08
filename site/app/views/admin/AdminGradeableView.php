@@ -505,7 +505,7 @@ HTML;
                 <br />
 
           Will any or all of this assignment be manually graded (e.g., by TAs or the instructor)?
-                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true"
+                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
                 if ($use_ta_grading===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
@@ -529,6 +529,7 @@ HTML;
 HTML;
                 if ((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") {
                     $html_output .= ' checked="checked"';
+                    $display_peer_checkboxes = 'style="display:none"';
                 }
         $display_pdf_page_input = "";
         $html_output .= <<<HTML
@@ -1289,6 +1290,10 @@ function createCrossBrowserJSDate(val){
             $('#pdf_page').hide();
         }
 
+        if ($('input:radio[name="pdf_page_student"]:checked').attr('value') === 'false') {
+            $('.pdf_page_input').hide();
+        }
+
         $('.gradeable_type_options').hide();
         
         if ($('input[name="gradeable_type"]').is(':checked')){
@@ -1372,11 +1377,21 @@ function createCrossBrowserJSDate(val){
         });
 
         $('input:radio[name="pdf_page"]').change(function() {
+            $('.pdf_page_input').hide();
+            $('#pdf_page').hide();
             if ($(this).is(':checked')) {
                 if ($(this).val() == 'true') {
+                    $('.pdf_page_input').show();
                     $('#pdf_page').show();
-                } else {
-                    $('#pdf_page').hide();
+                }
+            }
+        });
+
+        $('input:radio[name="pdf_page_student"]').change(function() {
+            $('.pdf_page_input').hide();
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'false') {
+                    $('.pdf_page_input').show();
                 }
             }
         });
@@ -2026,7 +2041,7 @@ $('#gradeable-form').on('submit', function(e){
             display = 'style="display:none"';
         }
         if($('input[id=yes_pdf_page]').is(':checked')) {
-            display = 'style="display:none"';
+            displayPage = 'style="display:none"';
         }
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
             <td style="overflow: hidden; border-top: 5px solid #dddddd;"> \
@@ -2045,7 +2060,7 @@ $('#gradeable-form').on('submit', function(e){
                 <input type="radio" id="deduct_radio_add_id_'+newQ+'" name="deduct_radio_'+newQ+'" value="addition" onclick="onAddition(this);"> <i class="fa fa-plus-square" aria-hidden="true"> </i> \
                 <br /> \
                 <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
-                <br /> \
+                <div id="pdf_page_"'+newQ+'" class="pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_{$num}" value="0" class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <i class="fa fa-times" aria-hidden="true"></i></a> \
                 <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \
