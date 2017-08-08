@@ -192,7 +192,7 @@ class SimpleGraderController extends AbstractController  {
                                 $temp_array[$status_temp_str] = "OK";
                             }
                             else{
-                                if($component->getMaxValue() < $data_array[$j][$index2]){
+                                if($component->getUpperClamp() < $data_array[$j][$index2]){
                                     $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                     $temp_array[$status_temp_str] = "ERROR";
                                 } else {

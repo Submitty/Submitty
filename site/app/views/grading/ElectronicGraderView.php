@@ -774,25 +774,8 @@ HTML;
         $num_questions = count($gradeable->getComponents());
 
         foreach ($gradeable->getComponents() as $question) {
-            $type = 0; //0 is common deductable, 1 is common additive
-            $min = -1000;
-            $max = 0;
-            $ungraded = false;
-            foreach ($question->getMarks() as $mark) {
-                if($mark->getPoints() < 0) {
-                    $min = -1000;
-                    $max = 0;
-                    $type = 0;
-                    break;
-                }
-                else if ($mark->getPoints() > 0) {
-                    $min = 0;  
-                    $max = 1000;
-                    $type = 1;
-                    break;
-                }
-            }
-            $word = ($type === 1) ? "Addition" : "Deduction";
+            $min = $question->getLowerClamp();
+            $max = $question->getUpperClamp();
             // hide auto-grading if it has no value
             if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
@@ -873,19 +856,7 @@ HTML;
             //gets the initial point value and text
             $initial_text = "";
             $first_text = true;
-            if ($question->getMaxValue() < 0) {
-                if ($type === 0) {
-                    $question_points = 0;
-                } else {
-                    $question_points = $question->getMaxValue();
-                }
-            } else {
-                if ($type === 0) {
-                    $question_points = $question->getMaxValue();
-                } else {
-                    $question_points = 0;
-                }
-            }
+            $question_points = $question->getDefault();
             
             foreach ($question->getMarks() as $mark) {
                 if($mark->getHasMark() === true) {
@@ -915,31 +886,20 @@ HTML;
             }
 
             $question_points += $question->getScore();
-            if($question->getMaxValue() < 0) {
-                if ($type === 0) {
-                    if ($question_points < $question->getMaxValue()) $question_points = $question->getMaxValue();
-                } else {
-                    if ($question_points > 0) $question_points = 0;
-                }
-            } else {
-                if ($type === 0) {
-                    if ($question_points < 0) $question_points = 0;
-                } else {
-                    if ($question_points > $question->getMaxValue()) $question_points = $question->getMaxValue();
-                }
-            }
+            if($question_points < $question->getLowerClamp()) $question_points = $question->getLowerClamp();
+            if($question_points > $question->getUpperClamp()) $question_points = $question->getUpperClamp();
             
-            if($ungraded === true) {
+            if(!$question->getHasMarks() && !$question->getHasGrade()) {
                 $question_points = " ";
             }
 
             $background = "";
-            // if ($question->getIsExtraCredit()) {
-            //     $background = "background-color: #D8F2D8;";
-            // }
-            // else if ($penalty) {
-            //     $background = "background-color: #FAD5D3;";
-            // }
+            if ($question_points > $question->getMaxValue()) {
+                $background = "background-color: #D8F2D8;";
+            }
+            else if ($question_points < 0) {
+                $background = "background-color: #FAD5D3;";
+            }
             
             $return .= <<<HTML
                 <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
@@ -962,7 +922,8 @@ HTML;
                 if ($first === true) {
                     $first = false;
                     $noChange = "readonly";
-                    $mark_text = ($type === 1) ? "No Credit" : "Full Credit";
+                    // this might not always be right
+                    $mark_text = ($question->getMaxValue() == $question->getUpperClamp()) ? "Full Credit" : "No Credit";
                 }
                 else {
                     $noChange = "";
@@ -994,7 +955,7 @@ HTML;
                 <tr>
                     <td colspan="4" style="{$background};">
                         <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
-                        Add New Common {$word}</span>
+                        Add New Common Mark</span>
                     </td>
                 </tr>
                 <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
