@@ -775,6 +775,8 @@ HTML;
 
         $c = 1;
         $precision = floatval($gradeable->getPointPrecision());
+        $num_questions = count($gradeable->getComponents());
+        $your_user_id = $this->core->getUser()->getId();
 
         foreach ($gradeable->getComponents() as $question) {
             $type = 0; //0 is common deductable, 1 is common additive
@@ -856,8 +858,8 @@ HTML;
             $return .= <<<HTML
             <div style="float: right;">
                 <span id="graded-by-{$c}" style="font-style: italic;">{$grader_id}</span>
-                <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark(-2, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                <span id="save-mark-{$c}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
+                <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark({$c}, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                <span id="save-mark-{$c}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
             </div>
             </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
 HTML;
@@ -945,7 +947,7 @@ HTML;
             }
             
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
+                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
                         <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-max_points="{$question->getMaxValue()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
@@ -980,6 +982,7 @@ HTML;
                     </td>
                     <td colspan="3" style="{$background}; width: 88%">
                         <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width: 95%; resize:none; float:left;" {$noChange}>{$mark_text}</textarea>
+                        <span id="mark_info_id-{$c}-{$d}" onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); getMarkInfo(this, '{$gradeable->getId()}');"> <i class="fa fa-users" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span>
                     </td>
                 </tr>
 HTML;
@@ -996,7 +999,7 @@ HTML;
                 $return .= <<<HTML
                 <tr>
                     <td colspan="4" style="{$background};">
-                        <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+                        <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
                         Add New Common {$word}</span>
                     </td>
                 </tr>
@@ -1019,11 +1022,11 @@ HTML;
                     <b>General Comment</b>
                     <div style="float: right;">
                         <span id="cancel-mark-general"onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                        <span id="save-mark-general" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                        <span id="save-mark-general" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                     </div> 
                 </td>
             </tr>
-            <tr id="summary-general" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-2, {$num_questions});">
+            <tr id="summary-general" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
                 <td style="white-space:nowrap; vertical-align:middle; text-align:center" colspan="1">
                 </td>
                 <td style="width:98%;" colspan="3">
@@ -1121,4 +1124,18 @@ HTML;
 HTML;
         return $return;
     }
+
+    public function popupStudents() {
+        $return = <<<HTML
+        <div class="popup-form" id="student-marklist-popup">
+            <div style="width: auto;" id="student-marklist-popup-content"></div>
+            <div style="float: right; width: auto">
+                <a onclick="$('#student-marklist-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
+            </div>
+        </div>
+HTML;
+        return $return;
+    }
+
 }
+
