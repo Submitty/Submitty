@@ -233,7 +233,6 @@ CREATE TABLE gradeable_component (
     gc_max_value numeric NOT NULL,
     gc_upper_clamp integer NOT NULL,
     gc_is_text boolean NOT NULL,
-    gc_is_extra_credit boolean NOT NULL,
     gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL
 );

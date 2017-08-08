@@ -561,47 +561,11 @@ HTML;
                               display: block; height: auto;">{$question['student_grading_note']}</textarea>
                     <div id="deduction_questions_{$num}">
 HTML;
-    if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
-        $html_output .= <<<HTML
-            <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-            <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
-            <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <br> 
-        </div>
-HTML;
-    }
-    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
-        $type_deduct = 0;
-        $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
-        foreach ($marks as $mark) {
-            if ($mark->getPoints() > 0) {
-                $type_deduct = 1;
-            }
-        }
-        $first = true;
-        foreach ($marks as $mark) {
-            if($first === true) {
-                $first = false;
-                $hidden = "display: none;";
-            }
-            else {
-                $hidden = "";
-            }
-            if ($type_deduct === 1) {
-                $min = 0;
-                $max = 1000;
-            }
-            else {
-                $min = -1000;
-                $max = 0;
-            }
+        if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
             $html_output .= <<<HTML
-                <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
-                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
+                <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
+                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
                 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -609,7 +573,43 @@ HTML;
             </div>
 HTML;
         }
-    }
+        if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
+            $type_deduct = 0;
+            $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
+            foreach ($marks as $mark) {
+                if ($mark->getPoints() > 0) {
+                    $type_deduct = 1;
+                }
+            }
+            $first = true;
+            foreach ($marks as $mark) {
+                if($first === true) {
+                    $first = false;
+                    $hidden = "display: none;";
+                }
+                else {
+                    $hidden = "";
+                }
+                if ($type_deduct === 1) {
+                    $min = 0;
+                    $max = 1000;
+                }
+                else {
+                    $min = -1000;
+                    $max = 0;
+                }
+                $html_output .= <<<HTML
+                    <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
+                    <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                    <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
+                    <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <br> 
+                </div>
+HTML;
+            }
+        }
         $html_output .= <<<HTML
                     <div class="btn btn-xs btn-primary" id="rubric_add_deduct_{$num}" onclick="addDeduct(this,{$num});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div></div>
                 </td>
@@ -626,7 +626,8 @@ HTML;
         max:<input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_max}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">
         upperClamp:<input type="number" class="points" name="upper_{$num}" value="{$old_upper_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;">
 HTML;
-        $checked = ($question['question_extra_credit']) ? "checked" : "";
+        // $checked = ($question['question_extra_credit']) ? "checked" : "";                 Extra Credit:&nbsp;&nbsp;<input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
+
         if ($type_deduct === 1) {
             $ded_checked = "";
             $add_checked = "checked";
@@ -638,7 +639,6 @@ HTML;
         $peer_checked = ($question['peer_component']) ? ' checked="checked"' : "";
         $html_output .= <<<HTML
                 <br />
-                Extra Credit:&nbsp;&nbsp;<input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
                 Deduction/Addition:&nbsp;&nbsp;<input type="radio" id="deduct_radio_ded_id_{$num}" name="deduct_radio_{$num}" value="deduction" onclick="onDeduction(this);" {$ded_checked}> <i class="fa fa-minus-square" aria-hidden="true"> </i>
                 <input type="radio" id="deduct_radio_add_id_{$num}" name="deduct_radio_{$num}" value="addition" onclick="onAddition(this);" {$add_checked}> <i class="fa fa-plus-square" aria-hidden="true"> </i>
                 <br />
@@ -1360,7 +1360,9 @@ function createCrossBrowserJSDate(val){
             // remove the default checkpoint
             removeCheckpoint(); 
             $.each(components, function(i,elem){
-                addCheckpoint(elem.gc_title,elem.gc_is_extra_credit);
+                var extra_credit = false;
+                if (elem.gc_max_value == 0) extra_credit = true;
+                addCheckpoint(elem.gc_title, extra_credit);
             });
             $('#checkpoints').show();
             $('#grading_questions').show();
@@ -1369,7 +1371,13 @@ function createCrossBrowserJSDate(val){
             var components = {$old_components};
             $.each(components, function(i,elem){
                 if(i < {$num_numeric}){
-                    addNumeric(elem.gc_title,elem.gc_max_value,elem.gc_is_extra_credit);
+                    var extra_credit = false;
+                    if (elem.gc_upper_clamp > elem.gc_max_value){
+                        addNumeric(elem.gc_title,elem.gc_upper_clamp,true);
+                    }
+                    else{
+                        addNumeric(elem.gc_title,elem.gc_max_value,false);
+                    }
                 }
                 else{
                     addText(elem.gc_title);
