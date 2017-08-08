@@ -1145,7 +1145,7 @@ WHERE gcm_id=?", $params);
                                                     'question_total'        => $question['gc_max_value'],
                                                     'question_extra_credit' => $question['gc_is_extra_credit'],
                                                     'peer_component'        => $question['gc_is_peer'],
-                                                    'page'                  => $question['gc_page']));
+                                                    'page_component'        => $question['gc_page']));
                 }
             }
         } else {

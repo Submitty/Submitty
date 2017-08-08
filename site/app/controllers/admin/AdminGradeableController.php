@@ -306,11 +306,12 @@ class AdminGradeableController extends AbstractController {
                             $page_component = -1;
                         }
                         else if ($this->isRadioButtonTrue('pdf_page')) {
-                            $page_component = 0;
-                        }
-                        else {
                             $page_component = ($_POST['page_component_' . strval($x + 1)]);
                         }
+                        else {
+                            $page_component = 0;
+                        }
+                        echo $page_component;
                         $old_component->setPage($page_component);
                         $old_component->setOrder($x);
                         $this->core->getQueries()->updateGradeableComponent($old_component);
@@ -335,10 +336,10 @@ class AdminGradeableController extends AbstractController {
                     $page_component = -1;
                 }
                 else if ($this->isRadioButtonTrue('pdf_page')) {
-                    $page_component = 0;
+                    $page_component = ($_POST['page_component_' . strval($x + 1)]);
                 }
                 else {
-                    $page_component = ($_POST['page_component_' . strval($x + 1)]);
+                    $page_component = 0;
                 }
                 $gradeable_component->setPage($page_component);
                 $gradeable_component->setOrder($x);
@@ -421,6 +422,7 @@ class AdminGradeableController extends AbstractController {
                         $old_component->setMaxValue(1);
                         $old_component->setIsText(false);
                         $old_component->setIsPeer(false);
+                        $old_component->setPage(0);
                         $extra_credit = (isset($_POST['checkpoint_extra_'.strval($x+1)])) ? true : false;
                         $old_component->setIsExtraCredit($extra_credit);
                         $old_component->setOrder($x);
@@ -439,6 +441,7 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setMaxValue(1);
                 $gradeable_component->setIsText(false);
                 $gradeable_component->setIsPeer(false);
+                $gradeable_component->setPage(0);
                 $extra_credit = (isset($_POST['checkpoint_extra_'.strval($x+1)])) ? true : false;
                 $gradeable_component->setIsExtraCredit($extra_credit);
                 $gradeable_component->setOrder($x);
@@ -471,6 +474,7 @@ class AdminGradeableController extends AbstractController {
                         $old_numeric->setMaxValue($_POST['max_score_'. strval($x + 1)]);
                         $old_numeric->setIsText(false);
                         $old_numeric->setIsPeer(false);
+                        $old_numeric->setPage(0);
                         $extra_credit = (isset($_POST['numeric_extra_'.strval($x+1)])) ? true : false;
                         $old_numeric->setIsExtraCredit($extra_credit);
                         $old_numeric->setOrder($x);
@@ -491,6 +495,7 @@ class AdminGradeableController extends AbstractController {
                     $gradeable_component->setMaxValue($_POST['max_score_'. strval($x + 1)]);
                     $gradeable_component->setIsText(false);
                     $gradeable_component->setIsPeer(false);
+                    $gradeable_component->setPage(0);
                     $extra_credit = (isset($_POST['numeric_extra_'.strval($x+1)])) ? true : false;
                     $gradeable_component->setIsExtraCredit($extra_credit);
                     $gradeable_component->setOrder($x);
@@ -508,6 +513,7 @@ class AdminGradeableController extends AbstractController {
                         $old_text->setIsText(true);
                         $old_text->setIsExtraCredit(false);
                         $old_text->setIsPeer(false);
+                        $old_text->setPage(0);
                         $old_text->setOrder($z + $x);
                         $this->core->getQueries()->updateGradeableComponent($old_text);
                         $start_index_text++; 
@@ -528,6 +534,7 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setIsText(true);
                 $gradeable_component->setIsExtraCredit(false);
                 $gradeable_component->setIsPeer(false);
+                $gradeable_component->setPage(0);
                 $gradeable_component->setOrder($y + $z);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }

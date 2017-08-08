@@ -161,8 +161,6 @@ class AdminGradeableView extends AbstractView {
                 $student_submit = $data[3]['eg_student_submit'];
                 $student_download = $data[3]['eg_student_download'];
                 $student_any_version = $data[3]['eg_student_any_version'];
-                $pdf_page = $data[3]['eg_pdf_page'];
-                $pdf_page_student = $data[3]['eg_pdf_page_student'];
                 $peer_yes_checked = $data[3]['eg_peer_grading'];
                 $peer_no_checked = !$peer_yes_checked;
                 $peer_grade_set = $data[3]['eg_peer_grade_set'];
@@ -519,23 +517,29 @@ HTML;
                 
                 <div id="rubric_questions" class="bool_val rubric_questions">
                 Will this assignment have peer grading?: 
-                <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes"
+                <fieldset>
+                    <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes"
 HTML;
         $display_peer_checkboxes = "";
-                if(($type_of_action === "edit" || $type_of_action === "add_template") && $peer_yes_checked) { $html_output .= ' checked="checked"'; }
+                    if(($type_of_action === "edit" || $type_of_action === "add_template") && $peer_yes_checked) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
-                /> Yes
-                <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no"
+                    /> Yes
+                    <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no"
 HTML;
-                if ((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") {
-                    $html_output .= ' checked="checked"';
-                    $display_peer_checkboxes = 'style="display:none"';
-                }
+                    if ((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") {
+                        $html_output .= ' checked="checked"';
+                        $display_peer_checkboxes = 'style="display:none"';
+                    }
         $display_pdf_page_input = "";
         $html_output .= <<<HTML
-                /> No 
-                <br /><br />
-                <div class="peer_input" style="display:none;">How many peers should each student grade? <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' /></div>
+                    /> No
+                    <div class="peer_input" style="display:none;">
+                        <br />
+                        How many peers should each student grade?
+                        <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' />
+                    </div>
+                </fieldset>
+                <br />
 
                 Is this a PDF with a page assigned to each component?
                 <fieldset>
@@ -595,7 +599,7 @@ HTML;
                                   'question_total'        => 0,
                                   'question_extra_credit' => 0,
                                   'peer_component'        => 0,
-                                  'page_component'        => 0);
+                                  'page_component'        => 1);
     }
 
 
@@ -691,7 +695,7 @@ HTML;
             $add_checked = "";
         }
         $peer_checked = ($question['peer_component']) ? ' checked="checked"' : "";
-        $pdf_page = ($question['page']);
+        $pdf_page = (isset($question['page_component'])) ? $question['page_component'] : 1;
         $html_output .= <<<HTML
                 <br />
                 Extra Credit:&nbsp;&nbsp;<input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
@@ -1113,6 +1117,7 @@ function createCrossBrowserJSDate(val){
     }
 
     $(document).ready(function() {
+        console.log(":(");
 
         $(function() {
             $( ".date_picker" ).datetimepicker({
@@ -1290,7 +1295,7 @@ function createCrossBrowserJSDate(val){
             $('#pdf_page').hide();
         }
 
-        if ($('input:radio[name="pdf_page_student"]:checked').attr('value') === 'false') {
+        if ($('input:radio[name="pdf_page_student"]:checked').attr('value') === 'true') {
             $('.pdf_page_input').hide();
         }
 
@@ -1836,7 +1841,10 @@ $('#gradeable-form').on('submit', function(e){
         row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
         row.find('div[id=peer_checkbox_' + oldNum +']').attr('id', 'peer_checkbox_' + newNum);
         row.find('input[name=peer_component_'+ oldNum + ']').attr('name', 'peer_component_' + newNum);
-        row.find('input[name=page_component_'+ oldNum + ']').attr('name', 'page_component_' + newNum);
+
+        row.find('div[id=pdf_page_' + oldNum +']').attr('id', 'pdf_page_' + newNum);
+        row.find('input[name=page_component_' + oldNum + ']').attr('name', 'page_component_' + newNum);
+
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
         row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
@@ -1900,6 +1908,11 @@ $('#gradeable-form').on('submit', function(e){
         temp = currentRow.find('input[name=peer_component_' + question +']')[0].checked;
         currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + new_question +']')[0].checked;
         newRow.find('input[name=peer_component_' + new_question +']')[0].checked = temp;
+
+        //Move page
+        temp = currentRow.find('input[name=page_component_' + question + ']')[0].value;
+        currentRow.find('input[name=page_component_' + question +']')[0].value = newRow.find('intput[name=page_component_' + new_question + ']')[0].value;
+        newRow.find('intput[name=page_component_' + new_question + ']')[0].value = temp;
 
         //Move the radio button
         var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
@@ -1986,6 +1999,11 @@ $('#gradeable-form').on('submit', function(e){
         currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked;
         newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked = temp;
 
+        //Move page
+        temp = currentRow.find('input[name=page_component_' + question +']')[0].value;
+        currentRow.find('input[name=page_component_' + question +']')[0].value = newRow.find('input[name=page_component_' + (question-1) +']')[0].value;
+        newRow.find('input[name=page_component_' + (question-1) +']')[0].value = temp;
+
         //Move the radio button
         var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
         var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
@@ -2040,7 +2058,7 @@ $('#gradeable-form').on('submit', function(e){
         if($('input[id=peer_no_radio]').is(':checked')) {
             display = 'style="display:none"';
         }
-        if($('input[id=yes_pdf_page]').is(':checked')) {
+        if($('input[id=no_pdf_page]').is(':checked') || $('input[id=yes_pdf_page_student]').is(':checked')) {
             displayPage = 'style="display:none"';
         }
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
@@ -2060,7 +2078,7 @@ $('#gradeable-form').on('submit', function(e){
                 <input type="radio" id="deduct_radio_add_id_'+newQ+'" name="deduct_radio_'+newQ+'" value="addition" onclick="onAddition(this);"> <i class="fa fa-plus-square" aria-hidden="true"> </i> \
                 <br /> \
                 <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
-                <div id="pdf_page_"'+newQ+'" class="pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_{$num}" value="0" class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div> \
+                <div id="pdf_page_'+newQ+'" class="pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_'+newQ+'" value="1" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <i class="fa fa-times" aria-hidden="true"></i></a> \
                 <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \
@@ -2316,6 +2334,13 @@ $('#gradeable-form').on('submit', function(e){
                 alert("At least one component must be for manual grading");
                 return false;
             }
+        }
+        if($('#yes_pdf_page').is(':checked')) {
+            $("input[name^='page_component']").each(function() {
+                console.log(this);
+                console.log(this.value);
+            });
+            // return false;
         }
         if($('#team_yes_radio').is(':checked')) {
             if ($("input[name^='eg_max_team_size']").val() < 2) {
