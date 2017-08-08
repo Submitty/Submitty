@@ -543,12 +543,15 @@ HTML;
     <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="handleKeyPress('KeyG');"></i>
     <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="handleKeyPress('KeyO');"></i>
     <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="handleKeyPress('KeyS');"></i>
+    <div> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open questions? </div>
 </div>
 
 <div class="progress_bar">
     <progress class="progressbar" max="100" value="{$progress}" style="width:80%; height: 100%;"></progress>
     <div class="progress-value" style="display:inline;"></div>
 </div>
+
+
 
 <div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
     <span class="grading_label">Auto-Grading Testcases</span>
@@ -573,11 +576,11 @@ HTML;
 
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
     <span class="grading_label">Submissions and Results Browser</span>
-    <button class="btn btn-default" onclick="openAll()">Expand All</button>
-    <button class="btn btn-default" onclick="closeAll()">Close All</button>
+    <button class="btn btn-default" onclick="openAll(); updateCookies();">Expand All</button>
+    <button class="btn btn-default" onclick="closeAll(); updateCookies();">Close All</button>
     <button class="btn btn-default" onclick="downloadZip('{$gradeable->getId()}','{$gradeable->getUser()->getId()}')">Download Zip File</button>
     <br />
-    <div class="inner-container">
+    <div class="inner-container" id="file-container">
 HTML;
         function add_files(&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array(); 
@@ -605,13 +608,13 @@ HTML;
                     $return .= <<<HTML
                 <div>
                     <div class="file-viewer">
-                        <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count})'>
+                        <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count}); updateCookies();'>
                             <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
                         {$dir}</a> &nbsp;
                         <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
                         <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
                     </div><br/>
-                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px"></div>
+                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$contents}"></div>
                 </div>
 HTML;
                     $count++;
@@ -624,11 +627,11 @@ HTML;
                     $return .= <<<HTML
             <div>
                 <div class="div-viewer">
-                    <a class='openAllDiv' onclick='openDiv({$count});'>
+                    <a class='openAllDiv' onclick='openDiv({$count}); updateCookies();'>
                         <span class="fa fa-folder" style='vertical-align:text-top;'></span>
                     {$dir}</a> 
                 </div><br/>
-                <div id='div_viewer_{$count}' style='margin-left:15px; display: none'>
+                <div id='div_viewer_{$count}' style='margin-left:15px; display: none' data-file_name="{$dir}">
 HTML;
                     $count++;
                     display_files($contents, $count, $indent+1, $return);
@@ -691,6 +694,7 @@ HTML;
         }
         $return .= <<<HTML
             </div>
+        <div>
 HTML;
 
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
@@ -752,7 +756,7 @@ HTML;
 </div>
 
 <div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
-    <span class="grading_label">Grading Rubric</span> <span style="float: right; position: relative; top: 10px; right: 1%;"> Overwrite Grader: <input type='checkbox' id="overwrite-id" name='overwrite' value='1' /> </span>
+    <span class="grading_label">Grading Rubric</span> <span style="float: right; position: relative; top: 10px; right: 1%;"> Overwrite Grader: <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" checked/> </span>
 HTML;
         $break_onclick = "";
         $disabled = '';
@@ -763,9 +767,14 @@ HTML;
     <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
         }
+        $num_questions = count($gradeable->getComponents());
         $return .= <<<HTML
     <div style="margin:3px;">
+<<<<<<< HEAD
         <table class="ta-rubric-table" id="rubric-table">
+=======
+        <table class="rubric-table" id="rubric-table" data-num_questions="{$num_questions}">
+>>>>>>> 24a7898601cbbd5dd2d31cb9dff1dcdc912172da
             <tbody>
 HTML;
 
@@ -1063,7 +1072,34 @@ HTML;
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading.js"></script>
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading-mark.js"></script>
 <script type="text/javascript">
-
+    $(document).ready(function() {
+        $( "#autograding_results" ).scroll(function() {
+            updateHandle("#autograding_results");
+        });
+        $( "#autograding_results" ).resize(function() {
+            updateHandle("#autograding_results");
+        });
+        $( "#grading_rubric" ).scroll(function() {
+            updateHandle("#grading_rubric");
+        });
+        $( "#grading_rubric" ).resize(function() {
+            updateHandle("#grading_rubric");
+        });
+        $( "#submission_browser" ).scroll(function() {
+            updateHandle("#submission_browser");
+        });
+        $( "#submission_browser" ).resize(function() {
+            updateHandle("#submission_browser");
+        });
+        $( "#student_info" ).scroll(function() {
+            updateHandle("#student_info");
+        });
+        $( "#student_info" ).resize(function() {
+            updateHandle("#student_info");
+        });
+    });
+</script>
+<script type="text/javascript">
     function openFrame(html_file, url_file, num) {
         var iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open')) {
@@ -1073,10 +1109,10 @@ HTML;
             else if (url_file.includes("results")) directory = "results";  
             // handle pdf
             if(url_file.substring(url_file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='750px' height='600px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' height='600px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='750px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }

@@ -4,7 +4,7 @@
     left: 0px;
     height: 41px;
     width: 290px;
-    z-index: 1099;
+    z-index: 1;
     background-color: #edf6f6;
 }
 
@@ -101,7 +101,7 @@
     left: 290px;
     height: 31px;
     width: 250px;
-    z-index: 1099;
+    z-index: 1;
     background-color: #edf6f6;
     border: 5px solid #edf6f6;
 }
