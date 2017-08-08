@@ -61,7 +61,6 @@ public:
   bool isExecution() const { return _json.value("type","Execution") == "Execution"; }
 
   bool isSubmittyCount() const {
-    if (!isExecution()) return false;
     std::vector<std::string> commands = getCommands();
     for (int i = 0; i < commands.size(); i++) {
       const std::string command_name = "submitty_count";
