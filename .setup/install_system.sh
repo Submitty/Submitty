@@ -133,12 +133,6 @@ pip3 install python-dateutil
 pip3 install watchdog
 pip3 install xlsx2csv
 
-# FIXME: this happens in INSTALL_SUBMITTY.sh instead
-#pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-#python2 setup.py install
-#python3 setup.py install
-#popd
-
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
