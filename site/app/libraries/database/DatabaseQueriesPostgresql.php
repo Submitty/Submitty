@@ -1057,11 +1057,11 @@ eg_student_download=?, eg_student_any_version=?, eg_config_path=?, eg_late_days=
     }
 
     public function createNewGradeableComponent(GradeableComponent $component, Gradeable $gradeable) {
-        $params = array($gradeable->getId(), $component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getMaxValue(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), var_export($component->getIsPeer(), true));
+        $params = array($gradeable->getId(), $component->getTitle(), $component->getTaComment(), $component->getStudentComment(), 0, 0, $component->getMaxValue(), $component->getMaxValue(), var_export($component->getIsText(), true), var_export($component->getIsExtraCredit(), true), $component->getOrder(), var_export($component->getIsPeer(), true));
         $this->course_db->query("
-INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value, 
+INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, 
 gc_is_text, gc_is_extra_credit, gc_order, gc_is_peer) 
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
     }   
 
     public function updateGradeableComponent(GradeableComponent $component) {
