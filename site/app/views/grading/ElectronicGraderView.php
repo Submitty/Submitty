@@ -816,31 +816,31 @@ HTML;
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
 
-            //adds an icon depending on the question type (extra credit, normal, penalty)
-            //adds background color as well.
-            if($question->getIsExtraCredit()) {
-                $return .= <<<HTML
-                    <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-                        <i class="fa fa-plus-circle" aria-hidden="true"></i> 
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>$message</b>
-HTML;
-            }
-            else if($penalty) {
-                $return .= <<<HTML
-                    <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-                        <i class="fa fa-minus-circle" aria-hidden="true"></i> 
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>$message</b>
-HTML;
-            }
-            else {
+//             //adds an icon depending on the question type (extra credit, normal, penalty)
+//             //adds background color as well.
+//             if($question->getIsExtraCredit()) {
+//                 $return .= <<<HTML
+//                     <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
+//                         <i class="fa fa-plus-circle" aria-hidden="true"></i> 
+//                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
+//                         <b>$message</b>
+// HTML;
+//             }
+//             else if($penalty) {
+//                 $return .= <<<HTML
+//                     <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
+//                         <i class="fa fa-minus-circle" aria-hidden="true"></i> 
+//                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
+//                         <b>$message</b>
+// HTML;
+//             }
+//             else {
                 $return .= <<<HTML
                     <td style="font-size: 12px;" colspan="4">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         <b>{$message}</b>
 HTML;
-            }
+            // }
 
             //get the grader's id if it exists
             $grader_id = "";
@@ -934,12 +934,12 @@ HTML;
             }
 
             $background = "";
-            if ($question->getIsExtraCredit()) {
-                $background = "background-color: #D8F2D8;";
-            }
-            else if ($penalty) {
-                $background = "background-color: #FAD5D3;";
-            }
+            // if ($question->getIsExtraCredit()) {
+            //     $background = "background-color: #D8F2D8;";
+            // }
+            // else if ($penalty) {
+            //     $background = "background-color: #FAD5D3;";
+            // }
             
             $return .= <<<HTML
                 <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">

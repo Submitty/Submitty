@@ -126,8 +126,8 @@ class SimpleGraderController extends AbstractController  {
                     $component->setComment($_POST['scores'][$component->getId()]);
                 }
                 else {
-                    if($component->getMaxValue() < $_POST['scores'][$component->getId()] || !is_numeric($_POST['scores'][$component->getId()])){
-                        $response = array('status' => 'fail', 'message' => "Save error: score must be a number less than the max score");
+                    if($component->getUpperClamp() < $_POST['scores'][$component->getId()] || !is_numeric($_POST['scores'][$component->getId()])){
+                        $response = array('status' => 'fail', 'message' => "Save error: score must be a number less than the upper clamp");
                         $this->core->getOutput()->renderJson($response);
                         return $response;
                     }
