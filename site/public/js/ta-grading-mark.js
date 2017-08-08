@@ -262,13 +262,18 @@ function openClose(row_id, num_questions = -1) {
     general_comment_summary = document.getElementById('summary-general');
     general_comment_cancel_mark = document.getElementById('cancel-mark-general');
     general_comment_save_mark = document.getElementById('save-mark-general');
+    general_comment_title = document.getElementById('title-general');
     if(row_num === -2) {
         general_comment.style.display = '';
+        general_comment_title.style.backgroundColor = "#e6e6e6";
+        general_comment.style.backgroundColor = "#e6e6e6";
         general_comment_summary.style.display = 'none';
         general_comment_cancel_mark.style.display = '';
         general_comment_save_mark.style.display = '';
     } else {
         general_comment.style.display = 'none';
+        general_comment_title.style.backgroundColor = "initial";
+        general_comment.style.backgroundColor = "initial";
         general_comment_summary.style.display = '';
         general_comment_cancel_mark.style.display = 'none';
         general_comment_save_mark.style.display = 'none';
@@ -281,9 +286,12 @@ function openClose(row_id, num_questions = -1) {
         var progress_points = document.getElementById('progress_points-' + x);
         var cancel_mark = document.getElementById('cancel-mark-' + x);
         var save_mark = document.getElementById('save-mark-' + x);
+        var title = document.getElementById('title-' + x);
         if (x == row_num) {
             if (current.style.display === 'none') {
                 current.style.display = '';
+                current.style.backgroundColor = "#e6e6e6";
+                title.style.backgroundColor = "#e6e6e6";
                 current_summary.style.display = 'none';
                 ta_note.style.display = '';
                 student_note.style.display = '';
@@ -294,6 +302,8 @@ function openClose(row_id, num_questions = -1) {
             } else {
                 current.style.display = 'none';
                 current_summary.style.display = '';
+                current.style.backgroundColor = "initial";
+                title.style.backgroundColor = "initial";
                 ta_note.style.display = 'none';
                 student_note.style.display = 'none';
                 progress_points.style.display = 'none';
@@ -303,6 +313,8 @@ function openClose(row_id, num_questions = -1) {
         } else {
             current.style.display = 'none';
             current_summary.style.display = '';
+            current.style.backgroundColor = "initial";
+            title.style.backgroundColor = "initial";
             ta_note.style.display = 'none';
             student_note.style.display = 'none';
             progress_points.style.display = 'none';

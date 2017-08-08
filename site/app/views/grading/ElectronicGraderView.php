@@ -770,7 +770,7 @@ HTML;
         $num_questions = count($gradeable->getComponents());
         $return .= <<<HTML
     <div style="margin:3px;">
-        <table class="ta-rubric-table" id="rubric-table" data-num_questions="{$num_questions}">
+        <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-num_questions="{$num_questions}">
             <tbody>
 HTML;
 
@@ -826,7 +826,7 @@ HTML;
             //adds background color as well.
             if($question->getIsExtraCredit()) {
                 $return .= <<<HTML
-                    <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
+                    <td id="title-{$c}" style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
                         <i class="fa fa-plus-circle" aria-hidden="true"></i> 
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         <b>$message</b>
@@ -834,7 +834,7 @@ HTML;
             }
             else if($penalty) {
                 $return .= <<<HTML
-                    <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
+                    <td id="title-{$c}" style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
                         <i class="fa fa-minus-circle" aria-hidden="true"></i> 
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         <b>$message</b>
@@ -842,7 +842,7 @@ HTML;
             }
             else {
                 $return .= <<<HTML
-                    <td style="font-size: 12px;" colspan="4">
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="4">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         <b>{$message}</b>
 HTML;
@@ -1019,9 +1019,9 @@ HTML;
         }
         $return .= <<<HTML
             <tr>
-                <td colspan="4">
+                <td id="title-general" colspan="4">
                     <b>General Comment</b>
-                    <div style="float: right;">
+                    <div  style="float: right;">
                         <span id="cancel-mark-general"onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                         <span id="save-mark-general" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                     </div> 

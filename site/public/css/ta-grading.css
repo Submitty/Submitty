@@ -321,6 +321,10 @@ progress::-webkit-progress-value {
   border-top: 0;
 }
 
+.ta-rubric-table-background {
+    background-color: #b3b3b3;
+}
+
 .btn-large {
     width: 96%;
     margin-left: 2%;
