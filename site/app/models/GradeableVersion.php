@@ -14,6 +14,7 @@ use app\libraries\DateUtils;
  * @method float getHiddenNonExtraCredit()
  * @method float getHiddenExtraCredit()
  * @method integer getDaysLate()
+ * @method integer getDaysEarly()
  */
 class GradeableVersion extends AbstractModel {
     /** @property @var string */

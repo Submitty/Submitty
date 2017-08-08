@@ -883,10 +883,6 @@ class Gradeable extends AbstractModel {
         return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysLate() : 0;
     }
 
-    public function getDaysEarly() {
-        return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysEarly() : 0;
-    }
-
     public function getInstructionsURL(){
         return $this->instructions_url;
     }
