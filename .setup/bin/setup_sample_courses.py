@@ -1131,6 +1131,7 @@ class Gradeable(object):
             elif self.type > 0:
                 component['gc_ta_comment'] = ""
                 component['gc_student_comment'] = ""
+                component['gc_page'] = 0
 
             if self.type == 1:
                 component['gc_max_value'] = 1
@@ -1280,6 +1281,8 @@ class Component(object):
             self.is_text = component['gc_is_text'] is True
         if 'gc_is_extra_credit' in component:
             self.is_extra_credit = component['gc_is_extra_credit'] is True
+        if 'gc_page' in component:
+            self.page = int(component['gc_page'])
 
         if self.is_text:
             self.max_value = 0
