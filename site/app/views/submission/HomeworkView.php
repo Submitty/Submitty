@@ -108,7 +108,7 @@ HTML;
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
 HTML;
-                if ($gradeable->getNumParts() == 1) {
+                if ($gradeable->getNumParts() == 1 && !$gradeable->useVcsCheckout()) {
                     $return .= <<<HTML
             <input type='radio' id="radio_bulk" name="submission_type">
                 Bulk Upload
@@ -182,9 +182,20 @@ HTML;
             $return .= <<<HTML
     </div>
 HTML;
-            if($gradeable->useSvnCheckout()) {
+            if($gradeable->useVcsCheckout()) {
+                if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
+                    $return .= <<<HTML
+    repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
+HTML;
+                }
+                else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
+                    $return .= <<<HTML
+    Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
+    repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
+HTML;
+                }
                 $return .= <<<HTML
-    <input type="submit" id="submit" class="btn btn-primary" value="Grade SVN" />
+    <input type="submit" id="submit" class="btn btn-primary" value="Grade Version Control System (VCS) Repository" />
 HTML;
             }
             else {
@@ -389,34 +400,11 @@ HTML;
 HTML;
             }
 
-            $svn_string = ($gradeable->useSvnCheckout()) ? "true" : "false";
+            $vcs_string = ($gradeable->useVcsCheckout()) ? "true" : "false";
 
             $return .= <<<HTML
     <script type="text/javascript">
-        // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
-        function moveNextInput(count) {
-            var next_count = count+1;
-            var next_input = "#bulk_user_id_" + next_count;
-            if ($(next_input).length) {
-                $(next_input).focus();
-                $(next_input).select(); 
-
-                var inputOffset = $(next_input).offset().top;
-                var inputHeight = $(next_input).height();
-                var windowHeight = $(window).height();
-                var offset;
-
-                if (inputHeight < windowHeight) {
-                    offset = inputOffset - ((windowHeight / 2) - (inputHeight / 2));
-                }
-                else {
-                    offset = inputOffset;
-                }
-                var speed = 500;
-                $('html, body').animate({scrollTop:offset}, speed); 
-            }
-        }
-        function makeSubmission(user_id, highest_version, is_pdf, path, count) {
+        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id) {
             // submit the selected pdf
             if (is_pdf) {
                 submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count);
@@ -429,10 +417,11 @@ HTML;
                                 {$gradeable->getHighestVersion()},
                                 {$gradeable->getMaxSubmissions()},
                                 "{$this->core->getCsrfToken()}",
-                                {$svn_string},
+                                {$vcs_string},
                                 {$gradeable->getNumTextBoxes()},
                                 "{$gradeable->getId()}",
-                                "{$gradeable->getUser()->getId()}");
+                                "{$gradeable->getUser()->getId()}",
+                                repo_id);
             }
             else {
                 handleSubmission({$late_days_use},
@@ -440,15 +429,17 @@ HTML;
                                 highest_version,
                                 {$gradeable->getMaxSubmissions()},
                                 "{$this->core->getCsrfToken()}",
-                                {$svn_string},
+                                {$vcs_string},
                                 {$gradeable->getNumTextBoxes()},
                                 "{$gradeable->getId()}",
-                                user_id);
+                                user_id,
+                                repo_id);
             }
         }
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
                 var user_id = "";
+                var repo_id = "";
                 var num_pages = 0;
                 // depending on which is checked, update cookie
                 if ($('#radio_normal').is(':checked')) {
@@ -462,17 +453,21 @@ HTML;
                     document.cookie="student_checked="+2;
                     num_pages = $("#num_pages").val();
                 };
+                // vcs upload
+                if ({$vcs_string}) {
+                    repo_id = $("#repo_id").val();
+                }
                 // bulk upload
                 if ($("#radio_bulk").is(":checked")) {
                     handleBulk("{$gradeable->getId()}", num_pages);
                 }
                 // no user id entered, upload for whoever is logged in
                 else if (user_id == ""){
-                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "")
+                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "", repo_id)
                 }
                 // user id entered, need to validate first
                 else {
-                    validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, false, "", "", makeSubmission);
+                    validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, false, "", "", repo_id, makeSubmission);
                 }
                 e.stopPropagation();
             });
@@ -554,9 +549,6 @@ HTML;
                 }
                 $return .= <<<HTML
 <script type="text/javascript">
-    function openFile(url_full) {
-        window.open(url_full,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
-    }
     $(document).ready(function() {
         $("#bulkForm input").autocomplete({
             source: student_without_ids
@@ -577,7 +569,7 @@ HTML;
                 moveNextInput(count);
             }
             else {
-                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, "", makeSubmission);
             }
             e.preventDefault();
             e.stopPropagation();
@@ -590,7 +582,7 @@ HTML;
                 var user_id = $(document.activeElement).val();
                 var js_count_array = $count_array_json;
                 var path = js_count_array[count];
-                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, makeSubmission);
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, "", makeSubmission);
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -751,7 +743,7 @@ HTML;
         <h4>Submitted Files</h4>
         <div class="box half">
 HTML;
-                $array = ($gradeable->useSvnCheckout()) ? $gradeable->getSvnFiles() : $gradeable->getSubmittedFiles();
+                $array = ($gradeable->useVcsCheckout()) ? $gradeable->getVcsFiles() : $gradeable->getSubmittedFiles();
                 foreach ($array as $file) {
                     if (isset($file['size'])) {
                         $size = number_format($file['size'] / 1024, 2);
@@ -761,7 +753,7 @@ HTML;
                     }
                     $return .= "{$file['relative_name']} ({$size}kb)";
                     // download icon if student can download files
-                    if (!$gradeable->useSvnCheckout() && $gradeable->getStudentDownload()) {
+                    if (!$gradeable->useVcsCheckout() && $gradeable->getStudentDownload()) {
                         // if not active version and student cannot see any more than active version
                         if ($gradeable->getCurrentVersionNumber() !== $gradeable->getActiveVersion() && !$gradeable->getStudentAnyVersion()) {
                             $return .= "<br />";
@@ -916,13 +908,6 @@ HTML;
 HTML;
         }
 
-        return $return;
-    }
-
-    public function showPopUp($gradeable) {
-        $return = <<<HTML
-            <p>Banana</p>
-HTML;
         return $return;
     }
 }
