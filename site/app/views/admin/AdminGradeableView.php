@@ -1117,8 +1117,6 @@ function createCrossBrowserJSDate(val){
     }
 
     $(document).ready(function() {
-        console.log(":(");
-
         $(function() {
             $( ".date_picker" ).datetimepicker({
                 dateFormat: 'yy-mm-dd',
@@ -1292,10 +1290,20 @@ function createCrossBrowserJSDate(val){
         }
 
         if ($('input:radio[name="pdf_page"]:checked').attr('value') === 'false') {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < 0) {
+                    this.value = 0;
+                }
+            });
             $('#pdf_page').hide();
         }
 
         if ($('input:radio[name="pdf_page_student"]:checked').attr('value') === 'true') {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < -1) {
+                    this.value = -1;
+                }
+            });
             $('.pdf_page_input').hide();
         }
 
@@ -1382,10 +1390,20 @@ function createCrossBrowserJSDate(val){
         });
 
         $('input:radio[name="pdf_page"]').change(function() {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < 0) {
+                    this.value = 0;
+                }
+            });
             $('.pdf_page_input').hide();
             $('#pdf_page').hide();
             if ($(this).is(':checked')) {
                 if ($(this).val() == 'true') {
+                    $("input[name^='page_component']").each(function() {
+                        if (this.value < 1) {
+                            this.value = 1;
+                        }
+                    });
                     $('.pdf_page_input').show();
                     $('#pdf_page').show();
                 }
@@ -1393,9 +1411,19 @@ function createCrossBrowserJSDate(val){
         });
 
         $('input:radio[name="pdf_page_student"]').change(function() {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < -1) {
+                    this.value = -1;
+                }
+            });
             $('.pdf_page_input').hide();
             if ($(this).is(':checked')) {
                 if ($(this).val() == 'false') {
+                    $("input[name^='page_component']").each(function() {
+                        if (this.value < 1) {
+                            this.value = 1;
+                        }
+                    });
                     $('.pdf_page_input').show();
                 }
             }
@@ -2335,12 +2363,21 @@ $('#gradeable-form').on('submit', function(e){
                 return false;
             }
         }
-        if($('#yes_pdf_page').is(':checked')) {
+        if($('#yes_pdf_page').is(':checked') && $('#no_pdf_page_student').is(':checked')) {
             $("input[name^='page_component']").each(function() {
-                console.log(this);
-                console.log(this.value);
+                if (this.value < 1) {
+                    alert("Page number for component cannot be less than 1");
+                    return false;
+                }
             });
-            // return false;
+        }
+        else {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < -1) {
+                    alert("Page number for component cannot be less than -1");
+                    return false;
+                }
+            });
         }
         if($('#team_yes_radio').is(':checked')) {
             if ($("input[name^='eg_max_team_size']").val() < 2) {

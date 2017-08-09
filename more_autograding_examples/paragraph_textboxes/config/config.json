@@ -35,7 +35,8 @@
                     "image_height" : 200,
                     "image_width" : 200
                 }
-            ]
+            ],
+            "filename" : "haiku.txt"
         },
         { 
             "label": "Number of hours spent on this assignment:",
