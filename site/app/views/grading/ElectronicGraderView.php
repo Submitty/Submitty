@@ -904,7 +904,7 @@ HTML;
             $return .= <<<HTML
                 <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
-                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-max_points="{$question->getMaxValue()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
+                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
@@ -922,7 +922,6 @@ HTML;
                 if ($first === true) {
                     $first = false;
                     $noChange = "readonly";
-                    // this might not always be right
                     $mark_text = ($question->getMaxValue() == $question->getUpperClamp()) ? "Full Credit" : "No Credit";
                 }
                 else {
