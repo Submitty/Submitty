@@ -291,6 +291,9 @@ class AdminGradeableController extends AbstractController {
             if ($edit_gradeable === 1) {
                 $x = 0;
                 foreach ($old_components as $old_component) {
+                    if(is_array($old_component)) {
+                        $old_component = $old_component[0];
+                    }
                     if ($x < $num_questions && $x < $num_old_components) {
                         $old_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                         $old_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);

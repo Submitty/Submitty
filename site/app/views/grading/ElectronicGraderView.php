@@ -945,7 +945,7 @@ HTML;
                 }
             }
             else {
-                $quesiton = $component;
+                $question = $component;
             }
             foreach ($question->getMarks() as $mark) {
                 if($mark->getPoints() < 0) {
