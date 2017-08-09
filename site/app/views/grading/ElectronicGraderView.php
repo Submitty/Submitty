@@ -960,13 +960,8 @@ HTML;
                 $return .= <<<HTML
                 <tr>
                     <td colspan="4" style="{$background};">
-<<<<<<< HEAD
-                        <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
-                        Add New Common Mark</span>
-=======
                         <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
-                        Add New Common {$word}</span>
->>>>>>> 24a7898601cbbd5dd2d31cb9dff1dcdc912172da
+                        Add New Common Mark</span>
                     </td>
                 </tr>
                 <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
