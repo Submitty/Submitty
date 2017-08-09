@@ -912,8 +912,6 @@ class Course(object):
                 # For non-electronic gradeables, or electronic gradeables with TA grading, read through components
                 if use_ta_grading or g_type != 0:
                     for component in components:
-                        # if component.is_extra_credit:
-                        #     continue
                         if component.max_value >0:
                             max_ta += component.max_value
 
@@ -1268,7 +1266,6 @@ class Component(object):
         self.student_comment = ""
 
         self.is_text = False
-        # self.is_extra_credit = False
         self.is_peer = False
         self.order = order
         self.marks = []
