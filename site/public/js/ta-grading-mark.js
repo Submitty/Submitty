@@ -89,6 +89,7 @@ function deleteMark(me, num, last_num) {
     }
 }
 
+//gets all the information from the database to return some stats and a list of students with that mark
 function getMarkInfo(me, gradeable_id) {
     var question_num = parseInt($(me).attr('id').split('-')[1]);
     var order_num = parseInt($(me).attr('id').split('-')[2]);
@@ -159,6 +160,7 @@ function checkMarks(question_num) {
     } 
 }
 
+//calculate the number of points a component has with the given selected marks
 function calculateMarksPoints(question_num) {
     question_num = parseInt(question_num);
     var current_question_num = $('#grade-' + question_num);
@@ -240,15 +242,18 @@ function selectMark(me, first_override = false) {
         }
     });
 
+    //actually checks the mark then checks if the first mark is still valid
     icon.toggleClass("fa-square-o fa-square");
     if (skip === false) {
         checkMarks(question_num);
     }
 
+    //updates the progress points in the title
     updateProgressPoints(question_num);        
 }
 
 //closes all the questions except the one being opened
+//openClose toggles alot of listed elements in order to work
 function openClose(row_id, num_questions = -1) {
     var row_num = parseInt(row_id);
     var total_num = 0;
@@ -262,21 +267,30 @@ function openClose(row_id, num_questions = -1) {
     general_comment_summary = document.getElementById('summary-general');
     general_comment_cancel_mark = document.getElementById('cancel-mark-general');
     general_comment_save_mark = document.getElementById('save-mark-general');
-    general_comment_title = document.getElementById('title-general');
-    if(row_num === -2) {
+    general_comment_title = $('#title-general');
+    general_comment_title_cancel = $('#title-general-cancel');
+    if(row_num === -2 && general_comment.style.display === 'none') {
         general_comment.style.display = '';
-        general_comment_title.style.backgroundColor = "#e6e6e6";
+        general_comment_title[0].style.backgroundColor = "#e6e6e6";
         general_comment.style.backgroundColor = "#e6e6e6";
+        general_comment_title_cancel[0].style.backgroundColor = "#e6e6e6";
         general_comment_summary.style.display = 'none';
         general_comment_cancel_mark.style.display = '';
         general_comment_save_mark.style.display = '';
+        general_comment_title.attr('colspan', 3);
+        general_comment_title_cancel[0].style.display = '';
+        general_comment_title_cancel.attr('colspan', 1);
     } else {
         general_comment.style.display = 'none';
-        general_comment_title.style.backgroundColor = "initial";
+        general_comment_title[0].style.backgroundColor = "initial";
         general_comment.style.backgroundColor = "initial";
+        general_comment_title_cancel[0].style.backgroundColor = "initial";
         general_comment_summary.style.display = '';
         general_comment_cancel_mark.style.display = 'none';
         general_comment_save_mark.style.display = 'none';
+        general_comment_title.attr('colspan', 4);
+        general_comment_title_cancel[0].style.display = 'none';
+        general_comment_title_cancel.attr('colspan', 0);
     }
     for (var x = 1; x <= total_num; x++) {
         var current = document.getElementById('extra-' + x);
@@ -286,12 +300,14 @@ function openClose(row_id, num_questions = -1) {
         var progress_points = document.getElementById('progress_points-' + x);
         var cancel_mark = document.getElementById('cancel-mark-' + x);
         var save_mark = document.getElementById('save-mark-' + x);
-        var title = document.getElementById('title-' + x);
+        var title = $('#title-' + x);
+        var title_cancel = $('#title-cancel-' + x);
         if (x == row_num) {
             if (current.style.display === 'none') {
                 current.style.display = '';
                 current.style.backgroundColor = "#e6e6e6";
-                title.style.backgroundColor = "#e6e6e6";
+                title[0].style.backgroundColor = "#e6e6e6";
+                title_cancel[0].style.backgroundColor = "#e6e6e6";
                 current_summary.style.display = 'none';
                 ta_note.style.display = '';
                 student_note.style.display = '';
@@ -299,33 +315,45 @@ function openClose(row_id, num_questions = -1) {
                 progress_points.style.display = '';
                 cancel_mark.style.display = '';
                 save_mark.style.display = '';
+                title.attr('colspan', 3);
+                title_cancel[0].style.display = '';
+                title_cancel.attr('colspan', 1);
             } else {
                 current.style.display = 'none';
                 current_summary.style.display = '';
                 current.style.backgroundColor = "initial";
-                title.style.backgroundColor = "initial";
+                title[0].style.backgroundColor = "initial";
+                title_cancel[0].style.backgroundColor = "initial";
                 ta_note.style.display = 'none';
                 student_note.style.display = 'none';
                 progress_points.style.display = 'none';
                 cancel_mark.style.display = 'none';
                 save_mark.style.display = 'none';
+                title.attr('colspan', 4);
+                title_cancel[0].style.display = 'none';
+                title_cancel.attr('colspan', 0);
             }
         } else {
             current.style.display = 'none';
             current_summary.style.display = '';
             current.style.backgroundColor = "initial";
-            title.style.backgroundColor = "initial";
+            title[0].style.backgroundColor = "initial";
+            title_cancel[0].style.backgroundColor = "initial";
             ta_note.style.display = 'none';
             student_note.style.display = 'none';
             progress_points.style.display = 'none';
             cancel_mark.style.display = 'none';
             save_mark.style.display = 'none';
+            title.attr('colspan', 4);
+            title_cancel[0].style.display = 'none';
+            title_cancel.attr('colspan', 0);
         }
     }
 
     updateCookies();
 }
 
+//cancelMark gets the data from the database and reinsert its without saving
 function cancelMark(num, gradeable_id, user_id, gc_id) {
     //-3 means gradeable comment
     if (num === -3) {
@@ -623,6 +651,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
     }
 }
 
+//finds what mark is currently open
 function findCurrentOpenedMark() {
     var index = 1;
     var found = false;

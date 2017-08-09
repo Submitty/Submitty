@@ -543,7 +543,6 @@ HTML;
     <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="handleKeyPress('KeyG');"></i>
     <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="handleKeyPress('KeyO');"></i>
     <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="handleKeyPress('KeyS');"></i>
-    <div> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open questions? </div>
 </div>
 
 <div class="progress_bar">
@@ -756,7 +755,11 @@ HTML;
 </div>
 
 <div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
-    <span class="grading_label">Grading Rubric</span> <span style="float: right; position: relative; top: 10px; right: 1%;"> Overwrite Grader: <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" checked/> </span>
+    <span class="grading_label">Grading Rubric</span>
+    <div style="float: right; float: right; position: relative; top: 10px; right: 1%;">
+        <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
+        <span> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" checked/> Overwrite Grader </span>
+    </div>
 HTML;
         $break_onclick = "";
         $disabled = '';
@@ -824,30 +827,21 @@ HTML;
 
             //adds an icon depending on the question type (extra credit, normal, penalty)
             //adds background color as well.
+            $extra_background_color = "";
             if($question->getIsExtraCredit()) {
-                $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-                        <i class="fa fa-plus-circle" aria-hidden="true"></i> 
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>$message</b>
-HTML;
+                $extra_background_color = "background-color: #D8F2D8;";
             }
             else if($penalty) {
-                $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-                        <i class="fa fa-minus-circle" aria-hidden="true"></i> 
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>$message</b>
-HTML;
+                $extra_background_color = "background-color: #FAD5D3;";
             }
             else {
-                $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px;" colspan="4">
+                $extra_background_color = "";
+            }
+            $return .= <<<HTML
+                    <td id="title-{$c}" style="font-size: 12px; {$extra_background_color}" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         <b>{$message}</b>
 HTML;
-            }
-
             //get the grader's id if it exists
             $grader_id = "";
             if($question->getGrader() === null) {
@@ -859,8 +853,7 @@ HTML;
             $return .= <<<HTML
             <div style="float: right;">
                 <span id="graded-by-{$c}" style="font-style: italic;">{$grader_id}</span>
-                <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark({$c}, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                <span id="save-mark-{$c}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
+                <span id="save-mark-{$c}" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
             </div>
             </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
 HTML;
@@ -872,6 +865,11 @@ HTML;
             }
             $return .= <<<HTML
                         <span id="student_note-{$c}" style="display: none;">{$student_note}</span>
+                    </td>
+                    <td id="title-cancel-{$c}" style="font-size: 12px; display: none" colspan="0">
+                        <div>
+                            <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark({$c}, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                        </div>
                     </td>
                 </tr>
 HTML;
@@ -1035,12 +1033,14 @@ HTML;
         }
         $return .= <<<HTML
             <tr>
-                <td id="title-general" colspan="4">
+                <td id="title-general" colspan="4" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
                     <b>General Comment</b>
-                    <div  style="float: right;">
-                        <span id="cancel-mark-general"onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                        <span id="save-mark-general" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                    <div style="float: right;">                        
+                        <span id="save-mark-general" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                     </div> 
+                </td>
+                <td id="title-general-cancel" style="font-size: 12px; display: none" colspan="0">
+                    <span id="cancel-mark-general" onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                 </td>
             </tr>
             <tr id="summary-general" style="" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
@@ -1067,6 +1067,8 @@ HTML;
                     <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></td>
                     <td style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total">0 / {$total_points}&emsp;&emsp;&emsp;
                         AUTO-GRADING {$gradeable->getGradedAutograderPoints()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</strong>
+                    </td>
+                    <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="2">
                     </td>
                 </tr>
             </tbody>

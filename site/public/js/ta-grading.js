@@ -258,7 +258,7 @@ function handleKeyPress(key) {
             $("#grading_rubric").toggle();
             break;
         case "KeyO":
-            $('.fa-folder-open').toggleClass('icon-selected');
+            $('.fa-folder-open.icon-header').toggleClass('icon-selected');
             $("#submission_browser").toggle();
             break;
         case "KeyS":
