@@ -560,11 +560,37 @@ HTML;
                               display: block; height: auto;">{$question['student_grading_note']}</textarea>
                     <div id="deduction_questions_{$num}">
 HTML;
-        if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
+
+    if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
+        $html_output .= <<<HTML
+            <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+            <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
+            <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+            <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+            <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+            <br> 
+        </div>
+HTML;
+    }
+    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
+        $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
+
+        $first = true;
+        foreach ($marks as $mark) {
+            if($first === true) {
+                $first = false;
+                $hidden = "display: none;";
+            }
+            else {
+                $hidden = "";
+            }
+            $min = $question['question_lower_clamp'];
+            $max = $question['question_upper_clamp'];
             $html_output .= <<<HTML
-                <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
-                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
+                <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
+                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
                 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -583,8 +609,6 @@ HTML;
                 else {
                     $hidden = "";
                 }
-                $min = $question['question_lower_clamp'];
-                $max = $question['question_upper_clamp'];
                 $html_output .= <<<HTML
                     <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
                     <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
@@ -1660,10 +1684,17 @@ $('#gradeable-form').on('submit', function(e){
         var index = 1;
         var exists = true;
         while(exists){
-            if($("#grade-"+index).length){
+            if($("#grade-"+index).length) {
                 $("#grade-"+index).attr('step', step);
+                var exists2 = ($('#deduct_id-'+index+'-0').length) ? true : false;
+                var index2 = 0;
+                while (exists2) {
+                    $('#deduct_id-'+index+'-'+index2).find('input[name=deduct_points_'+index+'_'+index2+']').attr('step', step);
+                    index2++;
+                    exists2 = ($('#deduct_id-'+index+'-'+index2).length) ? true : false;
+                }
             }
-            else{
+            else {
                 exists = false;
             }
             index++;
@@ -2078,11 +2109,11 @@ $('#gradeable-form').on('submit', function(e){
         var last_num = -10;
         var current_row = $(me.parentElement.parentElement.parentElement);
         var lower_clamp = current_row.find('input[name=lower_'+num+']').val();
-        //default is a keyword
-        var mydefault = current_row.find('input[name=default_'+num+']').val();
+        var mydefault = current_row.find('input[name=default_'+num+']').val(); //default is a keyword
         var upper_clamp = current_row.find('input[name=upper_'+num+']').val();
         var max = upper_clamp - mydefault;
         var min = lower_clamp - mydefault;
+        var precision = $('#point_precision_id').val();
 
         var current = $('[name=deduct_'+num+']').last().attr('id');
         if (current == null) {
@@ -2094,7 +2125,7 @@ $('#gradeable-form').on('submit', function(e){
         var new_num = last_num + 1;
         $("#rubric_add_deduct_" + num).before('\
 <div id="deduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
-<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="'+precision+'" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
 <textarea rows="1" placeholder="Comment" name="deduct_text_'+num+'_'+new_num+'" style="resize: none; width: 81.5%;"></textarea> \
 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \

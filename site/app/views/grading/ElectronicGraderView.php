@@ -739,7 +739,7 @@ HTML;
             $color = "red";
             $return .= <<<HTML
         <script>
-            $('body').css('background-color', 'red');
+            $('body').css('background', 'red');
             $("#rubric_form").submit(function(event){
                 var confirm = window.confirm("This submission has a bad status. Are you sure you want to submit a grade for it?");
                 if(!confirm){
