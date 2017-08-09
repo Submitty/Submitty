@@ -12,9 +12,9 @@ gradeables:
   gradeable_config: python_simple_homework
   components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -73,9 +73,9 @@ gradeables:
 - g_id: future_tas_homework
   components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -135,9 +135,9 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -198,9 +198,9 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -264,9 +264,9 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -327,9 +327,9 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -592,9 +592,9 @@ gradeables:
 # For no autograding, still need components, but also ned eg_use_ta_grading flag
 - components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -656,9 +656,9 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -719,9 +719,9 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -782,9 +782,9 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit
@@ -845,9 +845,9 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 5
+    gc_default: 2
     gc_max_value: 2
-    gc_upper_clamp: 5
+    gc_upper_clamp: 2
     gc_title: Read Me
     marks:
       - gcm_note: Full Credit

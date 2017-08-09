@@ -199,8 +199,6 @@ function updateProgressPoints(question_num) {
     var current_question_num = $('#grade-' + question_num);
     var current_points = calculateMarksPoints(question_num);
     var max_points = parseFloat(current_question_num[0].dataset.max_points);
-    console.log("max_points");
-    console.log(max_points);
     current_progress[0].innerHTML = current_points + " / " + max_points; 
 }
 
@@ -431,8 +429,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
     } else {
         var arr_length = $('tr[name=mark_'+num+']').length;
         var mark_data = new Array(arr_length);
-        var type = 0; //0 is deducation, 1 is addition
-        var keep_checking = true;
+
         for (var i = 0; i < arr_length; i++) {
             var current_row = $('#mark_id-'+num+'-'+i);
             var info_mark = $('#mark_info_id-'+num+'-'+i);
@@ -441,19 +438,6 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             var success = true;
             if (current_row.find('i[name=mark_icon_'+num+'_'+i+']')[0].classList.contains('fa-square')) {
                 is_selected = true;
-            }
-
-            if (keep_checking) {
-                if(parseFloat(current_row.find('input[name=mark_points_'+num+'_'+i+']').val()) !== 0) {
-                    if(parseFloat(current_row.find('input[name=mark_points_'+num+'_'+i+']').val()) > 0) {
-                        type = 1;
-                    }
-                    else
-                    {
-                        type = 0;
-                    }
-                    keep_checking = false;
-                }
             }
 
             var mark = {
@@ -473,17 +457,13 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         //updates the total number of points and text
         var current_question_num = $('#grade-' + num);
         var current_question_text = $('#rubric-textarea-' + num);
-        var max_points = parseFloat(current_question_num[0].dataset.max_points);
-        var current_points = 0;
-        if (max_points < 0) { //is penalty
-            current_points = (type === 0) ? 0 : max_points;
-        } else {
-            current_points = (type === 0) ? max_points : 0;
-        }
+        var lower_clamp = parseFloat(current_question_num[0].dataset.lower_clamp);
+        var current_points = parseFloat(current_question_num[0].dataset.default);
+        var upper_clamp = parseFloat(current_question_num[0].dataset.upper_clamp);
+
         var new_text = "";
         var first_text = true;
         var all_false = true;
-        current_points = parseFloat(current_points);
         for (var i = 0; i < arr_length; i++) {
             if(mark_data[i].selected === true) {
                 all_false = false;
@@ -511,19 +491,11 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             all_false = false;
         }
         
-        if (max_points < 0) { //is penalty
-            if (type === 0) {
-                if (current_points < max_points) current_points = max_points;
-            } else {
-                if (current_points > 0) current_points = 0;
-            }
+        if(current_points < lower_clamp) {
+            current_points = lower_clamp;
         }
-        else {
-            if (type === 0) {
-                if (current_points < 0) current_points = 0;
-            } else {
-                if (current_points > max_points) current_points = max_points;
-            }
+        if(current_points > upper_clamp) {
+            current_points = upper_clamp;
         }
         
         current_question_num[0].innerHTML = (all_false === false) ? current_points : "";
