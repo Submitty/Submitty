@@ -805,6 +805,8 @@ HTML;
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
 
+// This is for the color of the row with the question title...
+// since there are no longer explicit extra credit problems for now, this row color will not change
 //             //adds an icon depending on the question type (extra credit, normal, penalty)
 //             //adds background color as well.
 //             if($question->getIsExtraCredit()) {

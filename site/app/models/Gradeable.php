@@ -275,7 +275,6 @@ class Gradeable extends AbstractModel {
     protected $been_tagraded = false;
 
     protected $total_tagrading_non_extra_credit = 0;
-    // protected $total_tagrading_extra_credit = 0;
 
     /** @property @var \app\models\User|null */
     protected $user = null;
@@ -403,18 +402,6 @@ class Gradeable extends AbstractModel {
                 if (!$this->components[$component_details['gc_order']]->getIsText()) {
                     $max_value = $this->components[$component_details['gc_order']]->getMaxValue();
                     $this->total_tagrading_non_extra_credit += $max_value;
-                    // $upper_clamp = $this->components[$component_details['gc_order']]->getUpperClamp();
-                    // $this->total_tagrading_extra_credit += $upper_clamp-$max_value;
-
-                    // $max_value = $this->components[$component_details['gc_order']]->getMaxValue();
-                    // if ($max_value > 0) {
-                    //     if ($this->components[$component_details['gc_order']]->getIsExtraCredit()) {
-                    //         $this->total_tagrading_extra_credit += $max_value;
-                    //     }
-                    //     else {
-                    //         $this->total_tagrading_non_extra_credit += $max_value;
-                    //     }
-                    // }
                 }
             }
 

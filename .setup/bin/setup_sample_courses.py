@@ -1207,16 +1207,12 @@ class Gradeable(object):
                 # form_json['upper_clamp'].append(component.upper_clamp)
                 form_json['ta_comment'].append(component.ta_comment)
                 form_json['student_comment'].append(component.student_comment)
-                # if component.is_extra_credit:
-                #     form_json['eg_extra'].append(i+1)
         elif self.type == 1:
             form_json['checkpoint_label'] = []
             form_json['checkpoint_extra'] = []
             for i in range(len(self.components)):
                 component = self.components[i]
                 form_json['checkpoint_label'].append(component.title)
-                # if component.is_extra_credit:
-                #     form_json['checkpoint_extra'].append(i+1)
         else:
             form_json['num_numeric_items'] = 0
             form_json['numeric_labels'] = []
@@ -1239,8 +1235,6 @@ class Gradeable(object):
                     form_json['default'].append(component.default)
                     form_json['max_score'].append(component.max_value)
                     form_json['upper_clamp'].append(component.upper_clamp)
-                    # if component.is_extra_credit:
-                    #     form_json['numeric_extra'].append(i+1)
         form_json['minimum_grading_group'] = self.min_grading_group
         form_json['gradeable_buckets'] = self.syllabus_bucket
 
@@ -1289,8 +1283,6 @@ class Component(object):
             self.student_comment = component['gc_student_comment']
         if 'gc_is_text' in component:
             self.is_text = component['gc_is_text'] is True
-        # if 'gc_is_extra_credit' in component:
-        #     self.is_extra_credit = component['gc_is_extra_credit'] is True
 
         if self.is_text:
             self.lower_clamp = 0
@@ -1310,7 +1302,6 @@ class Component(object):
                                     gc_student_comment=self.student_comment,
                                     gc_lower_clamp=self.lower_clamp, gc_default=self.default, gc_max_value=self.max_value, 
                                     gc_upper_clamp=self.upper_clamp, gc_is_text=self.is_text,
-                                    # gc_is_extra_credit=self.is_extra_credit, 
                                     gc_is_peer=self.is_peer, gc_order=self.order)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
