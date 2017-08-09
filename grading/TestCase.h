@@ -82,7 +82,7 @@ public:
   // COMMANDS
   std::vector<std::string> getCommands() const {
     std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
-    assert (commands.size() > 0);
+    //assert (commands.size() > 0);
     return commands;
   }
 
