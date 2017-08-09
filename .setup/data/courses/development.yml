@@ -4,7 +4,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -23,7 +23,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -42,7 +42,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -61,7 +61,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -80,7 +80,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -99,7 +99,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -118,7 +118,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -137,7 +137,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -156,7 +156,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -175,7 +175,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -194,7 +194,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -213,7 +213,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -232,7 +232,7 @@ gradeables:
   
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -251,7 +251,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -270,7 +270,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1

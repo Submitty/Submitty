@@ -12,7 +12,7 @@ gradeables:
   gradeable_config: python_simple_homework
   components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -24,7 +24,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -38,7 +38,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -53,10 +53,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
@@ -74,7 +73,7 @@ gradeables:
 - g_id: future_tas_homework
   components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -86,7 +85,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -100,7 +99,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -115,10 +114,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
@@ -137,7 +135,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -149,7 +147,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -163,7 +161,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -178,10 +176,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
@@ -201,7 +198,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -213,7 +210,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -227,7 +224,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -242,10 +239,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
@@ -268,7 +264,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -280,7 +276,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -294,7 +290,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -309,10 +305,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
@@ -332,7 +327,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -344,7 +339,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -358,7 +353,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -373,10 +368,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
@@ -396,13 +390,13 @@ gradeables:
 
 # - components:
 #  - gc_lower_clamp: 0
-#   gc_default: 0
+#   gc_default: 5
 #   gc_max_value: 5
 #   gc_upper_clamp: 5
 #    gc_title: Question 1
 #  - gc_is_extra_credit: true
 #    gc_lower_clamp: 0
-#   gc_default: 0
+#   gc_default: 5
 #   gc_max_value: 5
 #   gc_upper_clamp: 5
 #    gc_title: Question 2
@@ -418,8 +412,15 @@ gradeables:
 
 - components:
   - gc_title: Question 1
-  - gc_is_extra_credit: true
-    gc_title: Question 2
+    gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 1
+    gc_upper_clamp: 1
+  - gc_title: Question 2
+    gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 0
+    gc_upper_clamp: 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_id: future_no_tas_lab
@@ -430,8 +431,15 @@ gradeables:
 
 - components:
   - gc_title: Question 1
-  - gc_is_extra_credit: true
-    gc_title: Question 2
+    gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 1
+    gc_upper_clamp: 1
+  - gc_title: Question 2
+    gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 0
+    gc_upper_clamp: 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_id: future_tas_lab
@@ -442,8 +450,15 @@ gradeables:
 
 - components:
   - gc_title: Question 1
-  - gc_is_extra_credit: true
-    gc_title: Question 2
+    gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 1
+    gc_upper_clamp: 1
+  - gc_title: Question 2
+    gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 0
+    gc_upper_clamp: 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_id: grading_lab
@@ -454,8 +469,15 @@ gradeables:
 
 - components:
   - gc_title: Question 1
-  - gc_is_extra_credit: true
-    gc_title: Question 2
+    gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 1
+    gc_upper_clamp: 1
+  - gc_title: Question 2
+    gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 0
+    gc_upper_clamp: 1
   g_grade_released_date: 1972-01-01 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_id: grades_released_lab
@@ -467,12 +489,11 @@ gradeables:
 - components:
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Question 1
-  - gc_is_extra_credit: true
-    gc_lower_clamp: 0
-    gc_default: 0
+  - gc_lower_clamp: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 2
@@ -489,12 +510,11 @@ gradeables:
 - components:
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Question 1
-  - gc_is_extra_credit: true
-    gc_lower_clamp: 0
-    gc_default: 0
+  - gc_lower_clamp: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 2
@@ -511,12 +531,11 @@ gradeables:
 - components:
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Question 1
-  - gc_is_extra_credit: true
-    gc_lower_clamp: 0
-    gc_default: 0
+  - gc_lower_clamp: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 2
@@ -533,12 +552,11 @@ gradeables:
 - components:
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Question 1
-  - gc_is_extra_credit: true
-    gc_lower_clamp: 0
-    gc_default: 0
+  - gc_lower_clamp: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 2
@@ -554,7 +572,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Question 1
@@ -574,7 +592,7 @@ gradeables:
 # For no autograding, still need components, but also ned eg_use_ta_grading flag
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -586,7 +604,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -600,7 +618,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -615,10 +633,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
@@ -639,7 +656,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -651,7 +668,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -665,7 +682,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -680,10 +697,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
@@ -703,7 +719,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -715,7 +731,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -729,7 +745,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -744,10 +760,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
@@ -767,7 +782,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -779,7 +794,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -793,7 +808,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -808,10 +823,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
@@ -831,7 +845,7 @@ gradeables:
 
 - components:
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 2
     gc_upper_clamp: 5
     gc_title: Read Me
@@ -843,7 +857,7 @@ gradeables:
       - gcm_note: Major errors in Read Me or Read Me missing
         gcm_points: -2
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Coding Style
@@ -857,7 +871,7 @@ gradeables:
       - gcm_note: Code is difficult to understand
         gcm_points: -1
   - gc_lower_clamp: 0
-    gc_default: 0
+    gc_default: 5
     gc_max_value: 5
     gc_upper_clamp: 5
     gc_title: Documentation
@@ -872,10 +886,9 @@ gradeables:
         gcm_points: -1
   - gc_lower_clamp: 0
     gc_default: 0
-    gc_max_value: 5
+    gc_max_value: 0
     gc_upper_clamp: 5
     gc_title: Extra Credit
-    gc_is_extra_credit: true
     marks: 
       - gcm_note: No Credit
         gcm_points: 0
