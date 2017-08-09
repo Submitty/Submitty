@@ -527,6 +527,8 @@ class ElectronicGraderController extends AbstractController {
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByRotatingSections($gradeable_id, $sections));
         }
 
+        //multiplies users and the number of components a gradeable has together
+        $total = $total * count($gradeable->getComponents());
         if($total == 0) {
             $progress = 100;
         }

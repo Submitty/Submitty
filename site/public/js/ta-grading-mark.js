@@ -116,8 +116,8 @@ function getMarkInfo(me, gradeable_id) {
 
             var elem_html = "";
             elem_html += "# of students with mark: " + data['data'].length + "<br>";
-            elem_html += "# of graded stduents: " + graded + "<br>";
-            elem_html += "# of total students: " + total + "<br>";
+            elem_html += "# of graded components: " + graded + "<br>";
+            elem_html += "# of total components: " + total + "<br>";
             elem_html += "<h1> List of Students who got " + data['name_info']['question_name'] + "'s " 
                 + data['name_info']['mark_note'] + "</h1>";
             for (var x = 0; x < data['data'].length; x++) {
@@ -201,7 +201,11 @@ function calculateMarksPoints(question_num) {
 
     current_row = $('#mark_custom_id-'+question_num);
     var custom_points = parseFloat(current_row.find('input[name=mark_points_custom_'+question_num+']').val());
-    current_points += custom_points;
+    if (isNaN(custom_points)) {
+        current_points += 0;
+    } else {
+        current_points += custom_points;
+    }
 
     if (max_points < 0) { //is penalty
         if (type === 0) {
@@ -566,8 +570,12 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                 }
             }                
         }
-
-        current_points += parseFloat(custom_points);
+        if (isNaN(parseFloat(custom_points))) {
+            current_points += 0;
+        } else {
+            current_points += parseFloat(custom_points);
+        }
+        
         if (parseFloat(custom_points) != 0) {
             all_false = false;
         }

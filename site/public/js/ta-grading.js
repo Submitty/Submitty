@@ -103,6 +103,7 @@ function readCookies(){
 
     var autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var opened_mark = document.cookie.replace(/(?:(?:^|.*;\s*)opened_mark\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var scroll_pixel = document.cookie.replace(/(?:(?:^|.*;\s*)scroll_pixel\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var testcases = document.cookie.replace(/(?:(?:^|.*;\s*)testcases\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
@@ -142,6 +143,10 @@ function readCookies(){
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
     if (autoscroll == "on") {
         openClose(parseInt(opened_mark));
+        if (scroll_pixel > 0) {
+
+            document.getElementById('grading_rubric').scrollTop = scroll_pixel;
+        }
     }
 
     if (autoscroll == "on") {
@@ -225,6 +230,18 @@ function updateCookies(){
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
     document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
+
+    if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() == -2) {
+        if (findCurrentOpenedMark() == -2) {
+            var current_mark = document.getElementById('title-general');
+        } else {
+            var current_mark = document.getElementById('title-' + findCurrentOpenedMark());
+        }
+        var top_pos = current_mark.offsetTop;
+        document.cookie = "scroll_pixel=" + top_pos + "; path=/;";
+    } else {
+        document.cookie = "scroll_pixel=" + 0 + "; path=/;";
+    }
 
     var testcases = findOpenTestcases();
     testcases = JSON.stringify(testcases); 
