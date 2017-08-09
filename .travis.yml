@@ -79,18 +79,18 @@ install:
   - pip2 install selenium
   - pip2 install nose2
   - pip2 install unittest2
-  - pip2 install pytz
   - pip2 install python-dateutil
-  - pip2 install tzlocal
   - pip3 install -U pip
   - pip3 install python-pam
   - pip3 install psycopg2
   - pip3 install PyYAML
   - pip3 install sqlalchemy
   - pip3 install pylint_runner
-  - pip3 install pytz
   - pip3 install python-dateutil
-  - pip3 install tzlocal
+  - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
+  - python2 setup.py install
+  - python3 setup.py install
+  - popd
   - sudo chmod -R 555 /usr/local/lib/python*/
   - sudo chmod -R 555 /opt/python/${PY_VERSION_2}/lib/python${PY_VERSION_2:0:3}/*
   - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
@@ -104,6 +104,7 @@ before_script:
   - PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${TRAVIS_BUILD_DIR}/site/data/submitty_db.sql
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
+  - sudo python --version
   - if [ ${INTEGRATION_SUITE} = false ]; then sudo python /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample; fi
   - sudo ./.setup/travis/setup_test_suite.sh
   - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars

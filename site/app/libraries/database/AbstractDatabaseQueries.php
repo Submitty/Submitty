@@ -374,6 +374,7 @@ abstract class AbstractDatabaseQueries {
      * @param string $user_id
      * @param integer $registration_section
      * @param integer $rotating_section
+     * @return string $team_id
      */
     abstract public function createTeam($g_id, $user_id, $registration_section, $rotating_section);
 

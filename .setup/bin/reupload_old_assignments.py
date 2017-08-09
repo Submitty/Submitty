@@ -4,17 +4,15 @@ import os
 import json
 import shutil
 import argparse
+from submitty_utils import dateutils
 from sqlalchemy import create_engine, Table, MetaData, bindparam, and_
+import grp
 
-SUBMITTY_DATA_DIR = "/var/local/submitty"
+SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
-sys.path.append("/usr/local/submitty/bin")
-import submitty_utils
-
-DB_HOST = "localhost"
-DB_USER = "hsdbu"
-DB_PASS = "hsdbu"
-
+DB_HOST = "__INSTALL__FILLIN__DATABASE_HOST__"
+DB_USER = "__INSTALL__FILLIN__DATABASE_USER__"
+DB_PASS = "__INSTALL__FILLIN__DATABASE_PASSWORD__"
 
 
 # This script was created to help professors re-upload an old semester's assignments for autograding.
@@ -72,6 +70,8 @@ def main():
     electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload=True)
     electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload=True)
 
+    course_group = grp.getgrgid(os.stat(os.path.join(SUBMITTY_DATA_DIR,"courses",args.semester,args.course_name)).st_gid)[0]
+
     #For every user folder in our directory, for every submission folder inside of it, copy over that user/submission, add it to 
     #the database, and create a queue file. 
     for user_folder in os.listdir(args.ARCHIVED_directory):
@@ -105,16 +105,16 @@ def main():
                 continue
             #This permission also sets the underlying submission paths recursively.g
             print("Set permissions on the submission")
-            os.system("chown -R hwphp:{}_tas_www {}".format(args.course_name, CURRENT_user_path))
+            os.system("chown -R hwphp:{} {}".format(course_group, CURRENT_user_path))
 
             #TODO: Sort the submissions so that they are guaranteed to be given in chronological (1,2,3,etc) order.
             #copy in the submission directory.
             print("Copied from\n\tSOURCE: " + ARCHIVED_submission_path +"\n\t" + "DESTINATION: " + CURRENT_submission_path)
             shutil.copytree(ARCHIVED_submission_path, CURRENT_submission_path)
             #give the appropriate permissions
-            os.system("chown -R hwphp:{}_tas_www {}".format(args.course_name, CURRENT_submission_path))
+            os.system("chown -R hwphp:{} {}".format(course_group, CURRENT_submission_path))
             #add each submission to the database.
-            current_time_string = submitty_utils.write_submitty_date()
+            current_time_string = dateutils.write_submitty_date()
 
             conn.execute(electronic_gradeable_data.insert(), g_id=args.assignment_name, user_id=user_name,
                          g_version=submission, submission_time=current_time_string)
@@ -138,7 +138,7 @@ def main():
                 open_file.write(current_time_string + "\n")
 
                 if args.grade:
-                    #Create a queue file for each submission            
+                    # Create a queue file for each submission
                     queue_file = "__".join([args.semester, args.course_name, args.assignment_name, user_name, submission])
                     print("Creating queue file:", queue_file)
                     queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
@@ -152,7 +152,7 @@ def main():
                                    "who": user_name,
                                    "is_team": False,
                                    "team": ""}, open_file)
-            os.system("chown -R hwphp:{}_tas_www {}".format(args.course_name, timestamp_path))
+            os.system("chown -R hwphp:{} {}".format(course_group, timestamp_path))
 
     conn.close()
 

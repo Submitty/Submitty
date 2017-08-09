@@ -975,10 +975,42 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
 UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?", $params);
     }
 
+    public function deleteGradeableComponentData($gd_id, GradeableComponent $component) {
+        $params = array($component->getId(), $gd_id);
+        $this->course_db->query("
+DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
+    }
+
+    public function checkGradeableComponentData($gd_id, GradeableComponent $component) {
+        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", 
+          array($component->getId(), $gd_id));
+        if ($this->course_db->row()['cnt'] == 0) {
+          return false;
+        }
+        return true;
+    }
+
     public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
         $params = array($gc_id, $gd_id, $mark->getId());
         $this->course_db->query("
 DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
+    }
+
+    public function getDataFromGCMD($gc_id, GradeableComponentMark $mark) {
+        $return_data = array();
+        $params = array($gc_id, $mark->getId());
+        $this->course_db->query("
+SELECT gd_id FROM gradeable_component_mark_data WHERE gc_id=? AND gcm_id=?", $params);
+        $rows = $this->course_db->rows();
+        foreach ($rows as $row) {
+            $this->course_db->query("
+SELECT gd_user_id FROM gradeable_data WHERE gd_id=?", array($row['gd_id']));
+            $temp_array = array();
+            $temp_array['gd_user_id'] = $this->course_db->row()['gd_user_id'];
+            $return_data[] = $temp_array;
+        }
+
+        return $return_data;
     }
 
     public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
@@ -1182,6 +1214,7 @@ WHERE gcm_id=?", $params);
         $params = array($team_id, $g_id, $registration_section, $rotating_section);
         $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section) VALUES(?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
+        return $team_id;
     }
 
     public function updateTeamRegistrationSection($team_id, $section) {
