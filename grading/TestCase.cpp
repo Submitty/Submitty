@@ -671,6 +671,15 @@ const nlohmann::json TestCase::get_test_case_limits() const {
     adjust_test_case_limits(_test_case_limits,RLIMIT_RSS,1000*1000*1000);  // 1 GB
   }
 
+  if (isSubmittyCount()) {
+    // necessary for the analysis tools count program
+    adjust_test_case_limits(_test_case_limits,RLIMIT_NPROC,100);
+    adjust_test_case_limits(_test_case_limits,RLIMIT_NOFILE,1000);
+    adjust_test_case_limits(_test_case_limits,RLIMIT_CPU,60);
+    adjust_test_case_limits(_test_case_limits,RLIMIT_AS,RLIM_INFINITY);
+    adjust_test_case_limits(_test_case_limits,RLIMIT_SIGPENDING,100);
+  }
+  
   return _test_case_limits;
 }
 
