@@ -1960,7 +1960,10 @@ $('#gradeable-form').on('submit', function(e){
             </td> \
             <td style="background-color:#EEE; border-top: 5px solid #dddddd;">' + sBox + ' \
                 <br /> \
-                Extra Credit:&nbsp;&nbsp;<input onclick="calculatePercentageTotal();" name="eg_extra_'+newQ+'" type="checkbox" class="eg_extra extra" value="on"/> \
+        lowerClamp:<input type="number" class="points" name="lower_{$num}" value="{$old_lower_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;"> \
+        default:<input type="number" class="points" name="default_{$num}" value="{$old_default}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;"> \
+        max:<input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_max}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;"> \
+        upperClamp:<input type="number" class="points" name="upper_{$num}" value="{$old_upper_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;"> \
                 <br /> \
                 <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
