@@ -1023,6 +1023,23 @@ DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
 DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
     }
 
+    public function getDataFromGCMD($gc_id, GradeableComponentMark $mark) {
+        $return_data = array();
+        $params = array($gc_id, $mark->getId());
+        $this->course_db->query("
+SELECT gd_id FROM gradeable_component_mark_data WHERE gc_id=? AND gcm_id=?", $params);
+        $rows = $this->course_db->rows();
+        foreach ($rows as $row) {
+            $this->course_db->query("
+SELECT gd_user_id FROM gradeable_data WHERE gd_id=?", array($row['gd_id']));
+            $temp_array = array();
+            $temp_array['gd_user_id'] = $this->course_db->row()['gd_user_id'];
+            $return_data[] = $temp_array;
+        }
+
+        return $return_data;
+    }
+
     public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
         $params = array($gc_id, $gd_id, $mark->getId());
         $this->course_db->query("
