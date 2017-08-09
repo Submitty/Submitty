@@ -561,36 +561,11 @@ HTML;
                     <div id="deduction_questions_{$num}">
 HTML;
 
-    if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
-        $html_output .= <<<HTML
-            <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-            <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
-            <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <br> 
-        </div>
-HTML;
-    }
-    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
-        $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
-
-        $first = true;
-        foreach ($marks as $mark) {
-            if($first === true) {
-                $first = false;
-                $hidden = "display: none;";
-            }
-            else {
-                $hidden = "";
-            }
-            $min = $question['question_lower_clamp'];
-            $max = $question['question_upper_clamp'];
+        if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
             $html_output .= <<<HTML
-                <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
-                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
+                <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
+                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
                 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -600,6 +575,7 @@ HTML;
         }
         if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
             $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
+
             $first = true;
             foreach ($marks as $mark) {
                 if($first === true) {
@@ -609,9 +585,11 @@ HTML;
                 else {
                     $hidden = "";
                 }
+                $min = $question['question_lower_clamp'];
+                $max = $question['question_upper_clamp'];
                 $html_output .= <<<HTML
                     <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
-                    <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                    <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                     <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
                     <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                     <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -620,6 +598,7 @@ HTML;
                 </div>
 HTML;
             }
+
         }
         $html_output .= <<<HTML
                     <div class="btn btn-xs btn-primary" id="rubric_add_deduct_{$num}" onclick="addDeduct(this,{$num});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div></div>
