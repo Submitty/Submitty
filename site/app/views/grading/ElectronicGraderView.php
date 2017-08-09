@@ -897,21 +897,37 @@ HTML;
                 if($mark->getHasMark() === true) {
                     $question_points += $mark->getPoints();
                     if ($first_text === true) {
-                        $initial_text .= "* " . $mark->getNote();
+                        if (floatval($mark->getPoints()) == 0) {
+                            $initial_text .= "* " . $mark->getNote();
+                        } else {
+                            $initial_text .= "* (" . $mark->getPoints() . ") " . $mark->getNote();
+                        }
                         $first_text = false;
                     }
                     else {
-                        $initial_text .= "<br>* " . $mark->getNote();
+                        if (floatval($mark->getPoints()) == 0) {
+                            $initial_text .= "<br>* " . $mark->getNote();
+                        } else {
+                            $initial_text .= "<br>* (" . $mark->getPoints() . ") " . $mark->getNote();
+                        }
                     }
                 }
             }
             if($question->getComment() != "") {
                 if ($first_text === true) {
-                    $initial_text .= "* " . $question->getComment();
+                    if (floatval($question->getScore()) == 0) {
+                        $initial_text .= "* " . $question->getComment();
+                    } else {
+                        $initial_text .= "* (" . $question->getScore() . ") ". $question->getComment();
+                    }
                     $first_text = false;
                 }
                 else {
-                    $initial_text .= "<br>* " . $question->getComment();
+                    if (floatval($question->getScore()) == 0) {
+                        $initial_text .= "<br>* " . $question->getComment();
+                    } else {
+                        $initial_text .= "<br>* (" . $question->getScore() . ") " . $question->getComment();
+                    }
                 }
             }
 

@@ -522,10 +522,19 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                 all_false = false;
                 current_points += parseFloat(mark_data[i].points);
                 if(first_text === true) {
-                    new_text += "* " + mark_data[i].note;
+                    if (parseFloat(mark_data[i].points) == 0) {
+                        new_text += "* " + mark_data[i].note;
+                    } else {
+                        new_text += "* (" + mark_data[i].points + ") " + mark_data[i].note;
+                    }
                     first_text = false;
                 } else {
-                    new_text += "\<br>* " + mark_data[i].note;
+                    if (parseFloat(mark_data[i].points) == 0) {
+                        new_text += "\<br>* " + mark_data[i].note;
+                    } else {
+                        new_text += "\<br>* (" + mark_data[i].points + ") "+ mark_data[i].note;
+                    }
+                    
                 }
             }                
         }
@@ -536,10 +545,18 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         }
         if(custom_message != "") {
             if(first_text === true) {
-                new_text += "* " + custom_message;
+                if (parseFloat(custom_points) == 0) {
+                    new_text += "* " + custom_message;
+                } else {
+                    new_text += "* (" + custom_points + ") " + custom_message;
+                } 
                 first_text = false;
             } else {
-                new_text += "\<br>* " + custom_message;
+                if (parseFloat(custom_points) == 0) {
+                    new_text += "\<br>* " + custom_message;
+                } else {
+                    new_text += "\<br>* (" + custom_points + ") " + custom_message;
+                }
             }
             all_false = false;
         }
