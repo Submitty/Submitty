@@ -545,6 +545,11 @@ HTML;
     $index_question = 0;
     foreach ($old_questions as $num => $question) {
         if($num == 0) continue;
+        $lower_clamp = $question['question_lower_clamp'];
+        $default = $question['question_default'];
+        $upper_clamp = $question['question_upper_clamp'];
+        $min = $lower_clamp - $default;
+        $max = $upper_clamp - $default;
         $html_output .= <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;
@@ -585,8 +590,6 @@ HTML;
                 else {
                     $hidden = "";
                 }
-                $min = $question['question_lower_clamp'];
-                $max = $question['question_upper_clamp'];
                 $html_output .= <<<HTML
                     <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
                     <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
@@ -2092,6 +2095,7 @@ $('#gradeable-form').on('submit', function(e){
         var upper_clamp = current_row.find('input[name=upper_'+num+']').val();
         var max = upper_clamp - mydefault;
         var min = lower_clamp - mydefault;
+
         var precision = $('#point_precision_id').val();
 
         var current = $('[name=deduct_'+num+']').last().attr('id');
