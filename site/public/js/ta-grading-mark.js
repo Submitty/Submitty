@@ -277,6 +277,9 @@ function openClose(row_id, num_questions = -1) {
         var current = document.getElementById('extra-' + x);
         var current_summary = document.getElementById('summary-' + x);
         var ta_note = document.getElementById('ta_note-' + x);
+        var page = document.getElementById('page-' + x);
+        var page_num = document.getElementById('page-num-' + x);
+        page_num = page_num.innerHTML;
         var student_note = document.getElementById('student_note-' + x);
         var progress_points = document.getElementById('progress_points-' + x);
         var cancel_mark = document.getElementById('cancel-mark-' + x);
@@ -286,15 +289,50 @@ function openClose(row_id, num_questions = -1) {
                 current.style.display = '';
                 current_summary.style.display = 'none';
                 ta_note.style.display = '';
+                page.style.display = '';
                 student_note.style.display = '';
                 updateProgressPoints(x);
                 progress_points.style.display = '';
                 cancel_mark.style.display = '';
                 save_mark.style.display = '';
+                // if the component has a page saved
+                // only open if their submissions folder has items inside
+                var elem = $('#div_viewer_1');
+                if (page_num > 0 && elem.children().length > 0) {
+                    elem.show();
+                    elem.addClass('open');
+                    $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+
+                    var iframe = $('#file_viewer_3');
+                    if (!iframe.hasClass('open')) {
+                        var file_url = iframe.attr("data-file_url");
+                        var file_name = iframe.attr("data-file_name");
+                        openFrame(file_name,file_url,3);
+                    }
+                    var iframeId = "file_viewer_3_iframe";
+                    directory = "submissions"; 
+                    src = $('#file_viewer_3_iframe').prop('src');
+                    if (src.indexOf("#page=") === -1) {
+                        src = src + "#page=" + page_num;
+                    }
+                    else {
+                        src = src.slice(0,src.indexOf("#page=")) + "#page=" + page_num;
+                    }
+                    iframe.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='600px' style='border: 0'></iframe>");
+
+                    if (!iframe.hasClass('open')) {
+                        iframe.addClass('open');
+                    }
+                    if (!iframe.hasClass('shown')) {
+                        iframe.show();
+                        iframe.addClass('shown');
+                    }
+                }
             } else {
                 current.style.display = 'none';
                 current_summary.style.display = '';
                 ta_note.style.display = 'none';
+                page.style.display = 'none';
                 student_note.style.display = 'none';
                 progress_points.style.display = 'none';
                 cancel_mark.style.display = 'none';
@@ -304,6 +342,7 @@ function openClose(row_id, num_questions = -1) {
             current.style.display = 'none';
             current_summary.style.display = '';
             ta_note.style.display = 'none';
+            page.style.display = 'none';
             student_note.style.display = 'none';
             progress_points.style.display = 'none';
             cancel_mark.style.display = 'none';

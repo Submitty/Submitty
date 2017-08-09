@@ -821,6 +821,13 @@ HTML;
             if ($note != "") {
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
+            $page_num = htmlentities($question->getPage());
+            if ($page_num > 0) {
+                $page = "<div style='margin-bottom:5px; color:#777;'><i><b>Page #: </b>" . $page_num . "</i></div>";
+            }
+            else {
+                $page = "";
+            }
 
             //adds an icon depending on the question type (extra credit, normal, penalty)
             //adds background color as well.
@@ -862,7 +869,8 @@ HTML;
                 <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark({$c}, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                 <span id="save-mark-{$c}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
             </div>
-            </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
+            </span> <span id="ta_note-{$c}" style="display: none;"> {$note}</span> <span id="page-{$c}" style="display: none;">{$page}</span> 
+            <span id="page-num-{$c}" style="display: none;">{$page_num}</span>
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());
