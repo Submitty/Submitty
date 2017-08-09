@@ -780,8 +780,11 @@ HTML;
         $your_user_id = $this->core->getUser()->getId();
 
         foreach ($gradeable->getComponents() as $question) {
-            $min = $question->getLowerClamp();
-            $max = $question->getUpperClamp();
+            $lower_clamp = $question->getLowerClamp();
+            $default = $question->getDefault();
+            $upper_clamp = $question->getUpperClamp();
+            $max = $upper_clamp - $default;
+            $min = $lower_clamp - $default;
             // hide auto-grading if it has no value
             if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
