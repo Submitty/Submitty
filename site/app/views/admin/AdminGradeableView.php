@@ -545,11 +545,6 @@ HTML;
     $index_question = 0;
     foreach ($old_questions as $num => $question) {
         if($num == 0) continue;
-        $lower_clamp = $question['question_lower_clamp'];
-        $default = $question['question_default'];
-        $upper_clamp = $question['question_upper_clamp'];
-        $min = $lower_clamp - $default;
-        $max = $upper_clamp - $default;
         $html_output .= <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;
@@ -580,7 +575,11 @@ HTML;
         }
         if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
             $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
-
+            $lower_clamp = $question['question_lower_clamp'];
+            $default = $question['question_default'];
+            $upper_clamp = $question['question_upper_clamp'];
+            $min = $lower_clamp - $default;
+            $max = $upper_clamp - $default;
             $first = true;
             foreach ($marks as $mark) {
                 if($first === true) {
