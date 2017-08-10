@@ -11,7 +11,7 @@ use app\models\GradeableVersion;
 use app\models\User;
 use app\models\SimpleLateUser;
 use app\models\Team;
-use app\models\SimpleStatsGradeableComponent;
+use app\models\SimpleStat;
 
 class DatabaseQueriesPostgresql extends AbstractDatabaseQueries{
 
@@ -653,23 +653,26 @@ ORDER BY u.{$section_key}", $params);
     public function getAverageComponentScores($g_id) {
       $return = array();
       $this->course_db->query("
-SELECT CASE WHEN (AVG(mark_sum) + AVG(gcd_score)) < 0 THEN round(gc_max_value+(AVG(mark_sum) + AVG(gcd_score)),1) ELSE round(AVG(mark_sum) + AVG(gcd_score),1) END AS AVG_comp_score,
- round(stddev_pop(mark_sum + gcd_score),1) AS std_dev, gc_max_value, gc_order, gc_title, gc_id
-FROM (
-  SELECT sum(gcm_points) AS mark_sum, AVG(gcd_score) AS gcd_score, gc.gc_max_value, gc.gc_order, gc.gc_title, gcmd.gc_id
-  FROM 
-    gradeable_component_data AS gcd
-    LEFT JOIN gradeable_component_mark_data AS gcmd ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id 
-    LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id 
-    LEFT JOIN gradeable_component AS gc ON gc.gc_id=gcmd.gc_id
-    WHERE gc.g_id=?
-    GROUP BY gcmd.gd_id, gcmd.gc_id, gc.gc_max_value, gc.gc_order, gc.gc_title
-) AS mark_sum 
-GROUP BY gc_id, gc_max_value, gc_order, gc_title
+SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev FROM(
+  SELECT gcd.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, 
+  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp 
+  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp ELSE (gc_default + sum_points + gcd_score) END AS comp_score 
+  FROM gradeable_component_data AS gcd
+  LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
+  LEFT JOIN(
+    SELECT sum(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id 
+    FROM gradeable_component_mark_data AS gcmd
+    LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
+    GROUP BY gcmd.gc_id, gcmd.gd_id
+    )AS marks
+  ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
+  WHERE g_id=?
+)AS comp
+GROUP BY gc_id, gc_title, gc_max_value, gc_is_peer, gc_order
 ORDER BY gc_order
         ", array($g_id));
         foreach ($this->course_db->rows() as $row) {
-            $return[] = new SimpleStatsGradeableComponent($this->core, $row);
+            $return[] = new SimpleStat($this->core, $row);
         }
         return $return;
     }

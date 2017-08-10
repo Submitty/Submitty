@@ -68,6 +68,7 @@ class ElectronicGraderController extends AbstractController {
         $no_team_users = array();
         $graded_components = array();
         $graders = array();
+        $average_scores = array();
         if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getUser()->accessFullGrading()){
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
@@ -77,6 +78,7 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($sections as $i => $section) {
                     $sections[$i] = $section['sections_registration_id'];
                 }
+                $average_scores = $this->core->getQueries()->getAverageComponentScores($gradeable_id);
             }
             $section_key='registration_section';
             if (count($sections) > 0) {
@@ -92,6 +94,7 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($sections as $i => $section) {
                     $sections[$i] = $section['sections_rotating_id'];
                 }
+                $average_scores = $this->core->getQueries()->getAverageComponentScores($gradeable_id);
             }
             $section_key='rotating_section';
             if (count($sections) > 0) {
@@ -104,13 +107,11 @@ class ElectronicGraderController extends AbstractController {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
                 $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key);
-                $average_scores = "todo...";
             }
             else {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                 $no_team_users = array();
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key);
-                $average_scores = $this->core->getQueries()->getAverageComponentScores($gradeable_id);
             }
         }
 

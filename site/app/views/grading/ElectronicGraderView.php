@@ -127,13 +127,10 @@ HTML;
             }
             if($overall_max !=0){
                 $percentage = round($overall_score / $overall_max *100);
-            }
-            else {
-                $percentage = "ungraded";
-            }
-            $return .= <<<HTML
-            <br />Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
+                $return .= <<<HTML
+                <br />Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
 HTML;
+            }
         }
         $return .= <<<HTML
             </div>
