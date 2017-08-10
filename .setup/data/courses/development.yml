@@ -3,7 +3,10 @@ instructor: instructor
 gradeables:
 
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -19,7 +22,10 @@ gradeables:
   eg_max_random_submissions: 0
 
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -35,7 +41,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -51,7 +60,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -67,7 +79,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -83,7 +98,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -99,7 +117,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -115,7 +136,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -131,7 +155,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -147,7 +174,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -163,7 +193,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -179,7 +212,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -195,7 +231,10 @@ gradeables:
   eg_max_random_submissions: 0
   
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -211,7 +250,10 @@ gradeables:
   eg_max_random_submissions: 0
 
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit
@@ -227,7 +269,10 @@ gradeables:
   eg_max_random_submissions: 0
 
 - components:
-  - gc_max_value: 5
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
     gc_title: Question 1
     marks:
       - gcm_note: Full Credit

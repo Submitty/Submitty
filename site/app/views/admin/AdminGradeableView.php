@@ -610,7 +610,6 @@ HTML;
     $index_question = 0;
     foreach ($old_questions as $num => $question) {
         if($num == 0) continue;
-        $type_deduct = 0;
         $html_output .= <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;
@@ -626,47 +625,12 @@ HTML;
                               display: block; height: auto;">{$question['student_grading_note']}</textarea>
                     <div id="deduction_questions_{$num}">
 HTML;
-    if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
-        $html_output .= <<<HTML
-            <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-            <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
-            <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <br> 
-        </div>
-HTML;
-    }
-    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
-        $type_deduct = 0;
-        $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
-        foreach ($marks as $mark) {
-            if ($mark->getPoints() > 0) {
-                $type_deduct = 1;
-            }
-        }
-        $first = true;
-        foreach ($marks as $mark) {
-            if($first === true) {
-                $first = false;
-                $hidden = "display: none;";
-            }
-            else {
-                $hidden = "";
-            }
-            if ($type_deduct === 1) {
-                $min = 0;
-                $max = 1000;
-            }
-            else {
-                $min = -1000;
-                $max = 0;
-            }
+
+        if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
             $html_output .= <<<HTML
-                <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
-                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
+                <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
+                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
                 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -674,34 +638,56 @@ HTML;
             </div>
 HTML;
         }
-    }
+        if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
+            $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
+            $lower_clamp = $question['question_lower_clamp'];
+            $default = $question['question_default'];
+            $upper_clamp = $question['question_upper_clamp'];
+            $min = $lower_clamp - $default;
+            $max = $upper_clamp - $default;
+            $first = true;
+            foreach ($marks as $mark) {
+                if($first === true) {
+                    $first = false;
+                    $hidden = "display: none;";
+                }
+                else {
+                    $hidden = "";
+                }
+                $html_output .= <<<HTML
+                    <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
+                    <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                    <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
+                    <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <br> 
+                </div>
+HTML;
+            }
+
+        }
         $html_output .= <<<HTML
                     <div class="btn btn-xs btn-primary" id="rubric_add_deduct_{$num}" onclick="addDeduct(this,{$num});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div></div>
                 </td>
 
                 <td style="background-color:#EEE;">
 HTML;
-        $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
+        $old_lower_clamp = (isset($question['question_lower_clamp'])) ? $question['question_lower_clamp'] : 0;
+        $old_default = (isset($question['question_default'])) ? $question['question_default'] : 0;
+        $old_max = (isset($question['question_total'])) ? $question['question_total'] : 0;
+        $old_upper_clamp = (isset($question['question_upper_clamp'])) ? $question['question_upper_clamp'] : 0;
         $html_output .= <<<HTML
-        <input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_grade}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">
+        lowerClamp:<input type="number" class="points" name="lower_{$num}" value="{$old_lower_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;">
+        default:<input type="number" class="points" name="default_{$num}" value="{$old_default}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;">
+        max:<input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_max}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
+        upperClamp:<input type="number" class="points" name="upper_{$num}" value="{$old_upper_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;">
 HTML;
-        $checked = ($question['question_extra_credit']) ? "checked" : "";
-        if ($type_deduct === 1) {
-            $ded_checked = "";
-            $add_checked = "checked";
-        }
-        else {
-            $ded_checked = "checked";
-            $add_checked = "";
-        }
+        // $checked = ($question['question_extra_credit']) ? "checked" : "";                 Extra Credit:&nbsp;&nbsp;<input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
+
         $peer_checked = ($question['peer_component']) ? ' checked="checked"' : "";
         $pdf_page = (isset($question['page_component'])) ? $question['page_component'] : 1;
         $html_output .= <<<HTML
-                <br />
-                Extra Credit:&nbsp;&nbsp;<input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
-                Deduction/Addition:&nbsp;&nbsp;<input type="radio" id="deduct_radio_ded_id_{$num}" name="deduct_radio_{$num}" value="deduction" onclick="onDeduction(this);" {$ded_checked}> <i class="fa fa-minus-square" aria-hidden="true"> </i>
-                <input type="radio" id="deduct_radio_add_id_{$num}" name="deduct_radio_{$num}" value="addition" onclick="onAddition(this);" {$add_checked}> <i class="fa fa-plus-square" aria-hidden="true"> </i>
-                <br />
                 <div id="peer_checkbox_{$num}" class="peer_input" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
                 <div id="pdf_page_{$num}" class="pdf_page_input" {$display_pdf_page_input}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{$num}" value={$pdf_page} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
 HTML;
@@ -1478,7 +1464,9 @@ function createCrossBrowserJSDate(val){
             // remove the default checkpoint
             removeCheckpoint(); 
             $.each(components, function(i,elem){
-                addCheckpoint(elem.gc_title,elem.gc_is_extra_credit);
+                var extra_credit = false;
+                if (elem.gc_max_value == 0) extra_credit = true;
+                addCheckpoint(elem.gc_title, extra_credit);
             });
             $('#checkpoints').show();
             $('#grading_questions').show();
@@ -1487,7 +1475,13 @@ function createCrossBrowserJSDate(val){
             var components = {$old_components};
             $.each(components, function(i,elem){
                 if(i < {$num_numeric}){
-                    addNumeric(elem.gc_title,elem.gc_max_value,elem.gc_is_extra_credit);
+                    var extra_credit = false;
+                    if (elem.gc_upper_clamp > elem.gc_max_value){
+                        addNumeric(elem.gc_title,elem.gc_upper_clamp,true);
+                    }
+                    else{
+                        addNumeric(elem.gc_title,elem.gc_max_value,false);
+                    }
                 }
                 else{
                     addText(elem.gc_title);
@@ -1795,10 +1789,17 @@ $('#gradeable-form').on('submit', function(e){
         var index = 1;
         var exists = true;
         while(exists){
-            if($("#grade-"+index).length){
+            if($("#grade-"+index).length) {
                 $("#grade-"+index).attr('step', step);
+                var exists2 = ($('#deduct_id-'+index+'-0').length) ? true : false;
+                var index2 = 0;
+                while (exists2) {
+                    $('#deduct_id-'+index+'-'+index2).find('input[name=deduct_points_'+index+'_'+index2+']').attr('step', step);
+                    index2++;
+                    exists2 = ($('#deduct_id-'+index+'-'+index2).length) ? true : false;
+                }
             }
-            else{
+            else {
                 exists = false;
             }
             index++;
@@ -1876,9 +1877,9 @@ $('#gradeable-form').on('submit', function(e){
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
         row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
-        row.find('input[name=deduct_radio_'+ oldNum +']').attr('name', 'deduct_radio_' + newNum);
-        row.find('input[id=deduct_radio_ded_id_' + oldNum +']').attr('id', 'deduct_radio_ded_id_' + newNum);
-        row.find('input[id=deduct_radio_add_id_' + oldNum +']').attr('id', 'deduct_radio_add_id_' + newNum);
+        // row.find('input[name=deduct_radio_'+ oldNum +']').attr('name', 'deduct_radio_' + newNum);
+        // row.find('input[id=deduct_radio_ded_id_' + oldNum +']').attr('id', 'deduct_radio_ded_id_' + newNum);
+        // row.find('input[id=deduct_radio_add_id_' + oldNum +']').attr('id', 'deduct_radio_add_id_' + newNum);
         row.find('div[id=deduction_questions_'+oldNum+']').attr('id', 'deduction_questions_'+newNum);
         row.find('div[id=rubric_add_deduct_' + oldNum + ']').attr('id','rubric_add_deduct_' + newNum).attr('onclick', 'addDeduct(this,' + newNum + ')'); 
         updateDeductIds(row,oldNum,newNum);
@@ -1937,18 +1938,13 @@ $('#gradeable-form').on('submit', function(e){
         currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + new_question +']')[0].checked;
         newRow.find('input[name=peer_component_' + new_question +']')[0].checked = temp;
 
-        //Move page
-        temp = currentRow.find('input[name=page_component_' + question + ']')[0].value;
-        currentRow.find('input[name=page_component_' + question +']')[0].value = newRow.find('intput[name=page_component_' + new_question + ']')[0].value;
-        newRow.find('intput[name=page_component_' + new_question + ']')[0].value = temp;
-
-        //Move the radio button
-        var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
-        var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
-        document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + new_question).checked;
-        document.getElementById("deduct_radio_add_id_" + question).checked = document.getElementById("deduct_radio_add_id_" + new_question).checked;
-        document.getElementById("deduct_radio_ded_id_" + new_question).checked = ded_temp;
-        document.getElementById("deduct_radio_add_id_" + new_question).checked = add_temp;
+        // //Move the radio button
+        // var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
+        // var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
+        // document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + new_question).checked;
+        // document.getElementById("deduct_radio_add_id_" + question).checked = document.getElementById("deduct_radio_add_id_" + new_question).checked;
+        // document.getElementById("deduct_radio_ded_id_" + new_question).checked = ded_temp;
+        // document.getElementById("deduct_radio_add_id_" + new_question).checked = add_temp;
 
         //stores the point and text data so it can readded; the html earses it once moved
         var current_deduct_points = [];
@@ -2027,18 +2023,13 @@ $('#gradeable-form').on('submit', function(e){
         currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked;
         newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked = temp;
 
-        //Move page
-        temp = currentRow.find('input[name=page_component_' + question +']')[0].value;
-        currentRow.find('input[name=page_component_' + question +']')[0].value = newRow.find('input[name=page_component_' + (question-1) +']')[0].value;
-        newRow.find('input[name=page_component_' + (question-1) +']')[0].value = temp;
-
-        //Move the radio button
-        var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
-        var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
-        document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + (question-1)).checked;
-        document.getElementById("deduct_radio_add_id_" + question).checked = document.getElementById("deduct_radio_add_id_" + (question-1)).checked;
-        document.getElementById("deduct_radio_ded_id_" + (question-1)).checked = ded_temp;
-        document.getElementById("deduct_radio_add_id_" + (question-1)).checked = add_temp;
+        // //Move the radio button
+        // var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
+        // var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
+        // document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + (question-1)).checked;
+        // document.getElementById("deduct_radio_add_id_" + question).checked = document.getElementById("deduct_radio_add_id_" + (question-1)).checked;
+        // document.getElementById("deduct_radio_ded_id_" + (question-1)).checked = ded_temp;
+        // document.getElementById("deduct_radio_add_id_" + (question-1)).checked = add_temp;
 
         //stores the point and text data so it can readded; the html earses it once moved
         var current_deduct_points = [];
@@ -2101,9 +2092,10 @@ $('#gradeable-form').on('submit', function(e){
             </td> \
             <td style="background-color:#EEE; border-top: 5px solid #dddddd;">' + sBox + ' \
                 <br /> \
-                Extra Credit:&nbsp;&nbsp;<input onclick="calculatePercentageTotal();" name="eg_extra_'+newQ+'" type="checkbox" class="eg_extra extra" value="on"/> \
-                Deduction/Addition:&nbsp;&nbsp;<input type="radio" id="deduct_radio_ded_id_'+newQ+'" name="deduct_radio_'+newQ+'" value="deduction" onclick="onDeduction(this);" checked> <i class="fa fa-minus-square" aria-hidden="true"> </i> \
-                <input type="radio" id="deduct_radio_add_id_'+newQ+'" name="deduct_radio_'+newQ+'" value="addition" onclick="onAddition(this);"> <i class="fa fa-plus-square" aria-hidden="true"> </i> \
+        lowerClamp:<input type="number" class="points" name="lower_{$num}" value="{$old_lower_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;"> \
+        default:<input type="number" class="points" name="default_{$num}" value="{$old_default}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;"> \
+        max:<input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_max}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;"> \
+        upperClamp:<input type="number" class="points" name="upper_{$num}" value="{$old_upper_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;"> \
                 <br /> \
                 <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
                 <div id="pdf_page_'+newQ+'" class="pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_'+newQ+'" value="1" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div> \
@@ -2204,50 +2196,43 @@ $('#gradeable-form').on('submit', function(e){
         current_row.find("input").val(temp_input_value);
     }
 
-    function onDeduction(me) {
-        var current_row = $(me.parentElement.parentElement);
-        var current_question = parseInt(current_row.attr('id').split('-')[1]);
-        current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('Full Credit');
-        current_row.find('div[name=deduct_'+current_question+']').each(function () {
-            $(this).find("input").attr('min', -1000);
-            $(this).find("input").attr('max', 0);
-            if ($(this).find("input").val() > 0) {
-                $(this).find("input").val($(this).find("input").val() * -1);
-            }            
-        });
-    }
+    // function onDeduction(me) {
+    //     var current_row = $(me.parentElement.parentElement);
+    //     var current_question = parseInt(current_row.attr('id').split('-')[1]);
+    //     current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('Full Credit');
+    //     current_row.find('div[name=deduct_'+current_question+']').each(function () {
+    //         $(this).find("input").attr('min', -1000);
+    //         $(this).find("input").attr('max', 0);
+    //         if ($(this).find("input").val() > 0) {
+    //             $(this).find("input").val($(this).find("input").val() * -1);
+    //         }            
+    //     });
+    // }
 
-    function onAddition(me) {
-        var current_row = $(me.parentElement.parentElement);
-        var current_question = parseInt(current_row.attr('id').split('-')[1]);
-        current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('No Credit');
-        current_row.find('div[name=deduct_'+current_question+']').each(function () {
-            $(this).find("input").attr('min', 0);
-            $(this).find("input").attr('max', 1000);
-            if ($(this).find("input").val() < 0) {
-                $(this).find("input").val($(this).find("input").val() * -1);
-            }            
-        });
-    }
+    // function onAddition(me) {
+    //     var current_row = $(me.parentElement.parentElement);
+    //     var current_question = parseInt(current_row.attr('id').split('-')[1]);
+    //     current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('No Credit');
+    //     current_row.find('div[name=deduct_'+current_question+']').each(function () {
+    //         $(this).find("input").attr('min', 0);
+    //         $(this).find("input").attr('max', 1000);
+    //         if ($(this).find("input").val() < 0) {
+    //             $(this).find("input").val($(this).find("input").val() * -1);
+    //         }            
+    //     });
+    // }
 
     function addDeduct(me, num){
         var last_num = -10;
-        var min = 0;
-        var max = 0;
         var current_row = $(me.parentElement.parentElement.parentElement);
-        var radio_value = current_row.find('input[name=deduct_radio_'+num+']:checked').val();
-        if(radio_value == "deduction") {
-            min = -1000;
-            max = 0;
-        }
-        else if(radio_value == "addition") {
-            min = 0;
-            max = 1000;
-        }
-        else {
-            min = 0;
-            max = 0;
-        }
+        var lower_clamp = current_row.find('input[name=lower_'+num+']').val();
+        var mydefault = current_row.find('input[name=default_'+num+']').val(); //default is a keyword
+        var upper_clamp = current_row.find('input[name=upper_'+num+']').val();
+        var max = upper_clamp - mydefault;
+        var min = lower_clamp - mydefault;
+
+        var precision = $('#point_precision_id').val();
+
         var current = $('[name=deduct_'+num+']').last().attr('id');
         if (current == null) {
             last_num = -1;
@@ -2258,11 +2243,11 @@ $('#gradeable-form').on('submit', function(e){
         var new_num = last_num + 1;
         $("#rubric_add_deduct_" + num).before('\
 <div id="deduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
-<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="'+precision+'" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
 <textarea rows="1" placeholder="Comment" name="deduct_text_'+num+'_'+new_num+'" style="resize: none; width: 81.5%;"></textarea> \
 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up"  aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <br> \
 </div>');
     }

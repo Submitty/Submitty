@@ -228,9 +228,11 @@ CREATE TABLE gradeable_component (
     gc_title character varying(255) NOT NULL,
     gc_ta_comment character varying NOT NULL,
     gc_student_comment character varying NOT NULL,
+    gc_lower_clamp integer NOT NULL,
+    gc_default integer NOT NULL,
     gc_max_value numeric NOT NULL,
+    gc_upper_clamp integer NOT NULL,
     gc_is_text boolean NOT NULL,
-    gc_is_extra_credit boolean NOT NULL,
     gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL,
     gc_page integer NOT NULL

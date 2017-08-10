@@ -21,7 +21,14 @@ use app\libraries\Core;
  * @method string getTitle()
  * @method string getTaComment()
  * @method string getStudentComment()
+ * @method float getLowerClamp()
+ * @method void setLowerClamp(float $lower_clamp)
+ * @method float getDefault()
+ * @method void setDefault(float $default)
  * @method float getMaxValue()
+ * @method void setMaxValue(float $max_value)
+ * @method float getUpperClamp()
+ * @method void setUpperClamp(float$upper_clamp)
  * @method bool getIsText();
  * @method bool getIsExtraCredit()
  * @method bool getIsPeer()
@@ -49,12 +56,16 @@ class GradeableComponent extends AbstractModel {
     protected $ta_comment = "";
     /** @property @var string Comment shown to both graders and students giving more information about the component */
     protected $student_comment = "";
-    /** @property @var float Maximum value that the component can have */
+    /** @property @var float Minimum value that the component can have */
+    protected $lower_clamp = 0;
+    /** @property @var float Value that the component starts grading at */
+    protected $default = 0;
+    /** @property @var float Value that the component is worth */
     protected $max_value = 0;
-    /** @property @var bool Is the component just used for text fields (ignore max_value and is_extra_credit and score) */
+    /** @property @var float Maximum value that the component can have */
+    protected $upper_clamp = 0;
+    /** @property @var bool Is the component just used for text fields (ignore lower_clamp, default, max_value, upper_clamp and score) */
     protected $is_text = false;
-    /** @property @var bool Is the component extra credit for this gradeable */
-    protected $is_extra_credit = false;
     /** @property @var int Order for components to be shown in */
     protected $order = 1;
     /** @property @var float Given grade that someone has given this component */
@@ -94,9 +105,11 @@ class GradeableComponent extends AbstractModel {
         $this->title = $details['gc_title'];
         $this->ta_comment = $details['gc_ta_comment'];
         $this->student_comment = $details['gc_student_comment'];
+        $this->lower_clamp = $details['gc_lower_clamp'];
+        $this->default = $details['gc_default'];
         $this->max_value = $details['gc_max_value'];
+        $this->upper_clamp = $details['gc_upper_clamp'];
         $this->is_text = $details['gc_is_text'];
-        $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
         $this->is_peer = isset($details['gc_is_peer']) ? $details['gc_is_peer']: false;
         $this->page = $details['gc_page'];
