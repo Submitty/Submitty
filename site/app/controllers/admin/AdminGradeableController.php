@@ -296,10 +296,11 @@ class AdminGradeableController extends AbstractController {
                         $old_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                         $old_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
                         $old_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
+                        $old_component->setLowerClamp($_POST['lower_' . strval($x + 1)]);
+                        $old_component->setDefault($_POST['default_' . strval($x + 1)]);
                         $old_component->setMaxValue($_POST['points_' . strval($x + 1)]);
+                        $old_component->setUpperClamp($_POST['upper_' . strval($x + 1)]);
                         $old_component->setIsText(false);
-                        $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
-                        $old_component->setIsExtraCredit($extra_credit);
                         $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
                         $old_component->setIsPeer($peer_grading_component);
                         $old_component->setOrder($x);
@@ -315,10 +316,11 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                 $gradeable_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
                 $gradeable_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
+                $gradeable_component->setLowerClamp($_POST['lower_' . strval($x + 1)]);
+                $gradeable_component->setDefault($_POST['default_' . strval($x + 1)]);
                 $gradeable_component->setMaxValue($_POST['points_' . strval($x + 1)]);
+                $gradeable_component->setUpperClamp($_POST['upper_' . strval($x + 1)]);
                 $gradeable_component->setIsText(false);
-                $extra_credit = (isset($_POST['eg_extra_'.strval($x+1)]) && $_POST['eg_extra_'.strval($x+1)]=='on')? true : false;
-                $gradeable_component->setIsExtraCredit($extra_credit);
                 $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
                 $gradeable_component->setIsPeer($peer_grading_component);
                 $gradeable_component->setOrder($x);
@@ -398,11 +400,14 @@ class AdminGradeableController extends AbstractController {
                         $old_component->setTitle($_POST['checkpoint_label_' . strval($x + 1)]);
                         $old_component->setTaComment("");
                         $old_component->setStudentComment("");
-                        $old_component->setMaxValue(1);
+                        $old_component->setLowerClamp(0);
+                        $old_component->setDefault(0);
+                        // if it is extra credit then it woull be out of 0 points otherwise 1
+                        $max_value = (isset($_POST['checkpoint_extra_'.strval($x+1)])) ? 0 : 1;
+                        $old_component->setMaxValue($max_value);
+                        $old_component->setUpperClamp(1);
                         $old_component->setIsText(false);
                         $old_component->setIsPeer(false);
-                        $extra_credit = (isset($_POST['checkpoint_extra_'.strval($x+1)])) ? true : false;
-                        $old_component->setIsExtraCredit($extra_credit);
                         $old_component->setOrder($x);
                         $this->core->getQueries()->updateGradeableComponent($old_component);
                     } else if ($num_old_components > $num_checkpoints) {
@@ -416,11 +421,14 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setTitle($_POST['checkpoint_label_' . strval($x + 1)]);
                 $gradeable_component->setTaComment("");
                 $gradeable_component->setStudentComment("");
-                $gradeable_component->setMaxValue(1);
+                $gradeable_component->setLowerClamp(0);
+                $gradeable_component->setDefault(0);
+                // if it is extra credit then it woull be out of 0 points otherwise 1
+                $max_value = (isset($_POST['checkpoint_extra_'.strval($x+1)])) ? 0 : 1;
+                $gradeable_component->setMaxValue($max_value);
+                $gradeable_component->setUpperClamp(1);
                 $gradeable_component->setIsText(false);
                 $gradeable_component->setIsPeer(false);
-                $extra_credit = (isset($_POST['checkpoint_extra_'.strval($x+1)])) ? true : false;
-                $gradeable_component->setIsExtraCredit($extra_credit);
                 $gradeable_component->setOrder($x);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }
@@ -448,11 +456,13 @@ class AdminGradeableController extends AbstractController {
                         $old_numeric->setTitle($_POST['numeric_label_'. strval($x + 1)]);
                         $old_numeric->setTaComment("");
                         $old_numeric->setStudentComment("");
-                        $old_numeric->setMaxValue($_POST['max_score_'. strval($x + 1)]);
+                        $old_numeric->setLowerClamp(0);
+                        $old_numeric->setDefault(0);
+                        $max_value = (isset($_POST['numeric_extra_'.strval($x+1)])) ? 0 : $_POST['max_score_'. strval($x + 1)];
+                        $old_numeric->setMaxValue($max_value);
+                        $old_numeric->setUpperClamp($_POST['max_score_'. strval($x + 1)]);
                         $old_numeric->setIsText(false);
                         $old_numeric->setIsPeer(false);
-                        $extra_credit = (isset($_POST['numeric_extra_'.strval($x+1)])) ? true : false;
-                        $old_numeric->setIsExtraCredit($extra_credit);
                         $old_numeric->setOrder($x);
                         $this->core->getQueries()->updateGradeableComponent($old_numeric);
                         $start_index_numeric++; 
@@ -468,11 +478,13 @@ class AdminGradeableController extends AbstractController {
                     $gradeable_component->setTitle($_POST['numeric_label_'. strval($x + 1)]);
                     $gradeable_component->setTaComment("");
                     $gradeable_component->setStudentComment("");
-                    $gradeable_component->setMaxValue($_POST['max_score_'. strval($x + 1)]);
+                    $gradeable_component->setLowerClamp(0);
+                    $gradeable_component->setDefault(0);
+                    $max_value = (isset($_POST['numeric_extra_'.strval($x+1)])) ? 0 : $_POST['max_score_'. strval($x + 1)];
+                    $gradeable_component->setMaxValue($max_value);
+                    $gradeable_component->setUpperClamp($_POST['max_score_'. strval($x + 1)]);
                     $gradeable_component->setIsText(false);
                     $gradeable_component->setIsPeer(false);
-                    $extra_credit = (isset($_POST['numeric_extra_'.strval($x+1)])) ? true : false;
-                    $gradeable_component->setIsExtraCredit($extra_credit);
                     $gradeable_component->setOrder($x);
                     $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
                 }
@@ -484,9 +496,11 @@ class AdminGradeableController extends AbstractController {
                         $old_text->setTitle($_POST['text_label_'. strval($x + 1)]);
                         $old_text->setTaComment("");
                         $old_text->setStudentComment("");
+                        $old_text->setLowerClamp(0);
+                        $old_text->setDefault(0);
                         $old_text->setMaxValue(0);
+                        $old_text->setUpperClamp(0);
                         $old_text->setIsText(true);
-                        $old_text->setIsExtraCredit(false);
                         $old_text->setIsPeer(false);
                         $old_text->setOrder($z + $x);
                         $this->core->getQueries()->updateGradeableComponent($old_text);
@@ -504,9 +518,11 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setTitle($_POST['text_label_'. strval($y + 1)]);
                 $gradeable_component->setTaComment("");
                 $gradeable_component->setStudentComment("");
+                $gradeable_component->setLowerClamp(0);
+                $gradeable_component->setDefault(0);
                 $gradeable_component->setMaxValue(0);
+                $gradeable_component->setUpperClamp(0);
                 $gradeable_component->setIsText(true);
-                $gradeable_component->setIsExtraCredit(false);
                 $gradeable_component->setIsPeer(false);
                 $gradeable_component->setOrder($y + $z);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 

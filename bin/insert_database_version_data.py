@@ -73,15 +73,12 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
 
     # wrapping a try catch around this statement to catch exception:
     # sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) FATAL:  sorry, too many clients already
-    while True:
-      try:
-        data_table = Table('electronic_gradeable_data', metadata, autoload=True)
-        break
-      except:
-        grade_items_logging.log_message(False,"","","",0,"Exception which trying to insert_database_version_data.py")
-        print ("\nEXCEPTION WHEN TRYING TO INSERT DB\n")
-        # pause and try again
-        time.sleep(1)
+    try:
+      data_table = Table('electronic_gradeable_data', metadata, autoload=True)
+    except:
+      grade_items_logging.log_message(False,"","","",0,"Exception which trying to insert_database_version_data.py")
+      print ("\nEXCEPTION WHEN TRYING TO INSERT DB\n")
+      print ("\nkilling this grader (daemon will restart when all die)\n")
 
 
     """

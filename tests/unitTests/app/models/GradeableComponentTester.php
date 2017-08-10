@@ -26,9 +26,11 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_title' => 'Test Component',
             'gc_ta_comment' => 'Comment to TA',
             'gc_student_comment' => 'Comment to Student',
+            'gc_lower_clamp' => 0,
+            'gc_default' => 0,
             'gc_max_value' => 100,
+            'gc_upper_clamp' => 100,
             'gc_is_text' => false,
-            'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => 10,
             'gcd_component_comment' => 'Comment about gradeable',
@@ -43,9 +45,11 @@ class GradeableComponentTester extends BaseUnitTest {
             'title' => 'Test Component',
             'ta_comment' => 'Comment to TA',
             'student_comment' => 'Comment to Student',
+            'lower_clamp' => 0,
+            'default' => 0,
             'max_value' => 100,
+            'upper_clamp' => 100,
             'is_text' => false,
-            'is_extra_credit' => false,
             'order' => 1,
             'score' => 10.0,
             'comment' => 'Comment about gradeable',
@@ -64,9 +68,11 @@ class GradeableComponentTester extends BaseUnitTest {
         $this->assertEquals($expected['title'], $component->getTitle());
         $this->assertEquals($expected['ta_comment'], $component->getTaComment());
         $this->assertEquals($expected['student_comment'], $component->getStudentComment());
+        $this->assertEquals($expected['lower_clamp'], $component->getLowerClamp());
+        $this->assertEquals($expected['default'], $component->getDefault());
         $this->assertEquals($expected['max_value'], $component->getMaxValue());
+        $this->assertEquals($expected['upper_clamp'], $component->getUpperClamp());
         $this->assertFalse($component->getIsText());
-        $this->assertFalse($component->getIsExtraCredit());
         $this->assertTrue($component->getHasGrade());
         $this->assertEquals($expected['order'], $component->getOrder());
         $this->assertEquals($expected['score'], $component->getScore());
@@ -84,9 +90,11 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_title' => 'Test Component',
             'gc_ta_comment' => 'Comment to TA',
             'gc_student_comment' => 'Comment to Student',
+            'gc_lower_clamp' => 0,
+            'gc_default' => 0,
             'gc_max_value' => 100,
+            'gc_upper_clamp' => 100,
             'gc_is_text' => false,
-            'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => 1000,
             'gcd_grader' => $this->createMockUser('ta'),
@@ -96,7 +104,8 @@ class GradeableComponentTester extends BaseUnitTest {
 
 
         $component = new GradeableComponent($this->core, $details);
-        //$this->assertEquals(100, $component->getScore());
+        // it no longer makes sense for clamping to be done in the gradeable component
+        // $this->assertEquals(100, $component->getScore());
         $this->assertEquals(100, $component->getMaxValue());
     }
 
@@ -106,9 +115,11 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_title' => 'Test Component',
             'gc_ta_comment' => 'Comment to TA',
             'gc_student_comment' => 'Comment to Student',
+            'gc_lower_clamp' => 0,
+            'gc_default' => 0,
             'gc_max_value' => 100,
+            'gc_upper_clamp' => 100,
             'gc_is_text' => false,
-            'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => -100,
             'gcd_grader' => $this->createMockUser('ta'),
@@ -116,7 +127,8 @@ class GradeableComponentTester extends BaseUnitTest {
             'gcd_component_comment' => 'Comment about gradeable'
         );
         $component = new GradeableComponent($this->core, $details);
-        //$this->assertEquals(0, $component->getScore());
+        // it no longer makes sense for clamping to be done in the gradeable component
+        // $this->assertEquals(0, $component->getScore());
         $this->assertEquals(100, $component->getMaxValue());
     }
 
@@ -126,9 +138,11 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_title' => 'Test Component',
             'gc_ta_comment' => 'Comment to TA',
             'gc_student_comment' => 'Comment to Student',
+            'gc_lower_clamp' => 0,
+            'gc_default' => 0,
             'gc_max_value' => 100,
+            'gc_upper_clamp' => 100,
             'gc_is_text' => false,
-            'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => null,
             'gcd_grader' => $this->createMockUser('ta'),
@@ -148,9 +162,11 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_title' => 'Test Component',
             'gc_ta_comment' => 'Comment to TA',
             'gc_student_comment' => 'Comment to Student',
-            'gc_max_value' => -100,
+            'gc_lower_clamp' => -100,
+            'gc_default' => 0,
+            'gc_max_value' => 0,
+            'gc_upper_clamp' => 0,
             'gc_is_text' => false,
-            'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => -50,
             'gcd_grader' => $this->createMockUser('ta'),
@@ -160,7 +176,7 @@ class GradeableComponentTester extends BaseUnitTest {
 
 
         $component = new GradeableComponent($this->core, $details);
-        $this->assertEquals(-100, $component->getMaxValue());
+        $this->assertEquals(-100, $component->getLowerClamp());
         $this->assertEquals(-50, $component->getScore());
     }
 
@@ -170,9 +186,11 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_title' => 'Test Component',
             'gc_ta_comment' => 'Comment to TA',
             'gc_student_comment' => 'Comment to Student',
-            'gc_max_value' => -100,
+            'gc_lower_clamp' => -100,
+            'gc_default' => -100,
+            'gc_max_value' => 0,
+            'gc_upper_clamp' => 0,
             'gc_is_text' => false,
-            'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => -150,
             'gcd_grader' => $this->createMockUser('ta'),
@@ -182,8 +200,9 @@ class GradeableComponentTester extends BaseUnitTest {
 
 
         $component = new GradeableComponent($this->core, $details);
-        $this->assertEquals(-100, $component->getMaxValue());
-        //$this->assertEquals(-100, $component->getScore());
+        $this->assertEquals(-100, $component->getLowerClamp());
+        // it no longer makes sense for clamping to be done in the gradeable component
+        // $this->assertEquals(-100, $component->getScore());
     }
 
     public function testScoreMoreThanZeroNegativeMax() {
@@ -192,9 +211,11 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_title' => 'Test Component',
             'gc_ta_comment' => 'Comment to TA',
             'gc_student_comment' => 'Comment to Student',
-            'gc_max_value' => -100,
+            'gc_lower_clamp' => -100,
+            'gc_default' => -100,
+            'gc_max_value' => 0,
+            'gc_upper_clamp' => 0,
             'gc_is_text' => false,
-            'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => 100,
             'gcd_grader' => $this->createMockUser('ta'),
@@ -204,8 +225,9 @@ class GradeableComponentTester extends BaseUnitTest {
 
 
         $component = new GradeableComponent($this->core, $details);
-        $this->assertEquals(-100, $component->getMaxValue());
-        //$this->assertEquals(0, $component->getScore());
+        $this->assertEquals(-100, $component->getLowerClamp());
+        // it no longer makes sense for clamping to be done in the gradeable component
+        // $this->assertEquals(0, $component->getScore());
     }
 
     public function testGradedNullComment() {
@@ -214,9 +236,11 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_title' => 'Test Component',
             'gc_ta_comment' => 'Comment to TA',
             'gc_student_comment' => 'Comment to Student',
+            'gc_lower_clamp' => 0,
+            'gc_default' => 0,
             'gc_max_value' => 100,
+            'gc_upper_clamp' => 100,
             'gc_is_text' => false,
-            'gc_is_extra_credit' => false,
             'gc_order' => 1,
             'gcd_score' => 50,
             'gcd_grader' => $this->createMockUser('ta'),

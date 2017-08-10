@@ -531,19 +531,20 @@ HTML;
     }
 
     public function hwGradingPage($gradeable, $progress, $prev_id, $next_id, $individual) {
+        $user = $gradeable->getUser();
+        $your_user_id = $this->core->getUser()->getId();
         $prev_href = $prev_id == '' ? '' : "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id, 'individual'=>$individual))}\"";
         $next_href = $next_id == '' ? '' : "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual))}\"";
         $return = <<<HTML
 <div class="grading_toolbar">
-    <a {$prev_href}><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
-    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
-    <a {$next_href}><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
+    <a onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}');" {$prev_href}><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
+    <a onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}');" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
+    <a onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}');" {$next_href}><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
     <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="handleKeyPress('KeyR');"></i>
     <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="handleKeyPress('KeyA');"></i>
     <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="handleKeyPress('KeyG');"></i>
     <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="handleKeyPress('KeyO');"></i>
     <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="handleKeyPress('KeyS');"></i>
-    <div> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open questions? </div>
 </div>
 
 <div class="progress_bar">
@@ -756,7 +757,11 @@ HTML;
 </div>
 
 <div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
-    <span class="grading_label">Grading Rubric</span> <span style="float: right; position: relative; top: 10px; right: 1%;"> Overwrite Grader: <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" checked/> </span>
+    <span class="grading_label">Grading Rubric</span>
+    <div style="float: right; float: right; position: relative; top: 10px; right: 1%;">
+        <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
+        <span> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" checked/> Overwrite Grader </span>
+    </div>
 HTML;
         $break_onclick = "";
         $disabled = '';
@@ -770,7 +775,7 @@ HTML;
         $num_questions = count($gradeable->getComponents());
         $return .= <<<HTML
     <div style="margin:3px;">
-        <table class="rubric-table" id="rubric-table" data-num_questions="{$num_questions}">
+        <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-num_questions="{$num_questions}">
             <tbody>
 HTML;
 
@@ -780,25 +785,11 @@ HTML;
         $your_user_id = $this->core->getUser()->getId();
 
         foreach ($gradeable->getComponents() as $question) {
-            $type = 0; //0 is common deductable, 1 is common additive
-            $min = -1000;
-            $max = 0;
-            $ungraded = false;
-            foreach ($question->getMarks() as $mark) {
-                if($mark->getPoints() < 0) {
-                    $min = -1000;
-                    $max = 0;
-                    $type = 0;
-                    break;
-                }
-                else if ($mark->getPoints() > 0) {
-                    $min = 0;  
-                    $max = 1000;
-                    $type = 1;
-                    break;
-                }
-            }
-            $word = ($type === 1) ? "Addition" : "Deduction";
+            $lower_clamp = $question->getLowerClamp();
+            $default = $question->getDefault();
+            $upper_clamp = $question->getUpperClamp();
+            $max = $upper_clamp - $default;
+            $min = $lower_clamp - $default;
             // hide auto-grading if it has no value
             if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
@@ -822,32 +813,11 @@ HTML;
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
 
-            //adds an icon depending on the question type (extra credit, normal, penalty)
-            //adds background color as well.
-            if($question->getIsExtraCredit()) {
-                $return .= <<<HTML
-                    <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-                        <i class="fa fa-plus-circle" aria-hidden="true"></i> 
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>$message</b>
-HTML;
-            }
-            else if($penalty) {
-                $return .= <<<HTML
-                    <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-                        <i class="fa fa-minus-circle" aria-hidden="true"></i> 
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>$message</b>
-HTML;
-            }
-            else {
-                $return .= <<<HTML
-                    <td style="font-size: 12px;" colspan="4">
+            $return .= <<<HTML
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         <b>{$message}</b>
 HTML;
-            }
-
             //get the grader's id if it exists
             $grader_id = "";
             if($question->getGrader() === null) {
@@ -858,9 +828,8 @@ HTML;
 
             $return .= <<<HTML
             <div style="float: right;">
-                <span id="graded-by-{$c}" style="font-style: italic;">{$grader_id}</span>
-                <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark({$c}, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                <span id="save-mark-{$c}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
+                <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
+                <span id="save-mark-{$c}" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
             </div>
             </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
 HTML;
@@ -873,45 +842,54 @@ HTML;
             $return .= <<<HTML
                         <span id="student_note-{$c}" style="display: none;">{$student_note}</span>
                     </td>
+                    <td id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0">
+                        <div>
+                            <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark({$c}, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                        </div>
+                    </td>
                 </tr>
 HTML;
 
             //gets the initial point value and text
             $initial_text = "";
             $first_text = true;
-            if ($question->getMaxValue() < 0) {
-                if ($type === 0) {
-                    $question_points = 0;
-                } else {
-                    $question_points = $question->getMaxValue();
-                }
-            } else {
-                if ($type === 0) {
-                    $question_points = $question->getMaxValue();
-                } else {
-                    $question_points = 0;
-                }
-            }
+            $question_points = $question->getDefault();
             
             foreach ($question->getMarks() as $mark) {
                 if($mark->getHasMark() === true) {
                     $question_points += $mark->getPoints();
                     if ($first_text === true) {
-                        $initial_text .= "* " . $mark->getNote();
+                        if (floatval($mark->getPoints()) == 0) {
+                            $initial_text .= "* " . $mark->getNote();
+                        } else {
+                            $initial_text .= "* (" . $mark->getPoints() . ") " . $mark->getNote();
+                        }
                         $first_text = false;
                     }
                     else {
-                        $initial_text .= "<br>* " . $mark->getNote();
+                        if (floatval($mark->getPoints()) == 0) {
+                            $initial_text .= "<br>* " . $mark->getNote();
+                        } else {
+                            $initial_text .= "<br>* (" . $mark->getPoints() . ") " . $mark->getNote();
+                        }
                     }
                 }
             }
             if($question->getComment() != "") {
                 if ($first_text === true) {
-                    $initial_text .= "* " . $question->getComment();
+                    if (floatval($question->getScore()) == 0) {
+                        $initial_text .= "* " . $question->getComment();
+                    } else {
+                        $initial_text .= "* (" . $question->getScore() . ") ". $question->getComment();
+                    }
                     $first_text = false;
                 }
                 else {
-                    $initial_text .= "<br>* " . $question->getComment();
+                    if (floatval($question->getScore()) == 0) {
+                        $initial_text .= "<br>* " . $question->getComment();
+                    } else {
+                        $initial_text .= "<br>* (" . $question->getScore() . ") " . $question->getComment();
+                    }
                 }
             }
 
@@ -921,36 +899,25 @@ HTML;
             }
 
             $question_points += $question->getScore();
-            if($question->getMaxValue() < 0) {
-                if ($type === 0) {
-                    if ($question_points < $question->getMaxValue()) $question_points = $question->getMaxValue();
-                } else {
-                    if ($question_points > 0) $question_points = 0;
-                }
-            } else {
-                if ($type === 0) {
-                    if ($question_points < 0) $question_points = 0;
-                } else {
-                    if ($question_points > $question->getMaxValue()) $question_points = $question->getMaxValue();
-                }
-            }
+            if($question_points < $question->getLowerClamp()) $question_points = $question->getLowerClamp();
+            if($question_points > $question->getUpperClamp()) $question_points = $question->getUpperClamp();
             
-            if($ungraded === true) {
+            if(!$question->getHasMarks() && !$question->getHasGrade()) {
                 $question_points = " ";
             }
 
             $background = "";
-            if ($question->getIsExtraCredit()) {
+            if ($question_points > $question->getMaxValue()) {
                 $background = "background-color: #D8F2D8;";
             }
-            else if ($penalty) {
+            else if ($question_points < 0) {
                 $background = "background-color: #FAD5D3;";
             }
             
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
+                <tr id="summary-{$c}" style="" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
-                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-max_points="{$question->getMaxValue()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
+                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
@@ -968,7 +935,7 @@ HTML;
                 if ($first === true) {
                     $first = false;
                     $noChange = "readonly";
-                    $mark_text = ($type === 1) ? "No Credit" : "Full Credit";
+                    $mark_text = ($question->getMaxValue() == $question->getUpperClamp()) ? "Full Credit" : "No Credit";
                 }
                 else {
                     $noChange = "";
@@ -977,13 +944,13 @@ HTML;
                 $icon_mark = ($mark->getHasMark() === true) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
                 <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
-                    <td colspan="1" style="{$background}; text-align: center; width: 12%;"> 
+                    <td colspan="1" style="{$background}; text-align: center; width: 12%; white-space: nowrap;"> 
                         <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
-                        <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
+                        <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none; min-width: 50px;" {$noChange}>
                     </td>
-                    <td colspan="3" style="{$background}; width: 88%">
-                        <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width: 95%; resize:none; float:left;" {$noChange}>{$mark_text}</textarea>
-                        <span id="mark_info_id-{$c}-{$d}" onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); getMarkInfo(this, '{$gradeable->getId()}');"> <i class="fa fa-users" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span>
+                    <td colspan="3" style="{$background}; white-space: nowrap;">
+                            <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width: 90%; resize:none;" {$noChange}>{$mark_text}</textarea>
+                            <span id="mark_info_id-{$c}-{$d}" onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); getMarkInfo(this, '{$gradeable->getId()}');"> <i class="fa fa-users icon-got-this-mark"></i> </span>
                     </td>
                 </tr>
 HTML;
@@ -1001,16 +968,16 @@ HTML;
                 <tr>
                     <td colspan="4" style="{$background};">
                         <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
-                        Add New Common {$word}</span>
+                        Add New Common Mark</span>
                     </td>
                 </tr>
                 <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                    <td colspan="1" style="text-align: center; {$background}"> 
+                    <td colspan="1" style="text-align: center; {$background}; white-space: nowrap;"> 
                     <span onclick=""> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
-                    <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
+                    <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px;">
                     </td>
-                    <td colspan="3" style="{$background};">
-                        Custom: <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" rows="1" placeholder="Custom message for student..." style="width:85.6%; resize:none;">{$question->getComment()}</textarea>
+                    <td colspan="3" style="{$background}; white-space: nowrap;">
+                        Custom: <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
                     </td>
                 </tr>
                 </tbody>
@@ -1019,15 +986,17 @@ HTML;
         }
         $return .= <<<HTML
             <tr>
-                <td colspan="4">
+                <td id="title-general" colspan="4" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
                     <b>General Comment</b>
-                    <div style="float: right;">
-                        <span id="cancel-mark-general"onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                        <span id="save-mark-general" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                    <div style="float: right;">                        
+                        <span id="save-mark-general" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                     </div> 
                 </td>
+                <td id="title-general-cancel" style="font-size: 12px; display: none; width: 5%" colspan="0">
+                    <span id="cancel-mark-general" onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                </td>
             </tr>
-            <tr id="summary-general" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
+            <tr id="summary-general" style="" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
                 <td style="white-space:nowrap; vertical-align:middle; text-align:center" colspan="1">
                 </td>
                 <td style="width:98%;" colspan="3">
@@ -1051,6 +1020,8 @@ HTML;
                     <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></td>
                     <td style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total">0 / {$total_points}&emsp;&emsp;&emsp;
                         AUTO-GRADING {$gradeable->getGradedAutograderPoints()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</strong>
+                    </td>
+                    <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="2">
                     </td>
                 </tr>
             </tbody>
