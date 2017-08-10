@@ -281,7 +281,6 @@ function openClose(row_id, num_questions = -1) {
         var title = $('#title-' + x);
         var title_cancel = $('#title-cancel-' + x);
         var page = (document.getElementById('page-' + x)).innerHTML;
-        console.log(page);
         if (x == row_num) {
             if (current.style.display === 'none') {
                 current.style.display = '';
@@ -312,7 +311,6 @@ function openClose(row_id, num_questions = -1) {
                     for (var i=0; i<divs.length; i++) {
                         if ($(divs[i]).is('[data-file_url]')) {
                             file_url = $(divs[i]).attr("data-file_url");
-                            console.log(file_url);
                             if(file_url.substring(file_url.length - 3) == "pdf") {
                                 pdf_div = $($(divs[i]));
                                 break;
@@ -322,8 +320,6 @@ function openClose(row_id, num_questions = -1) {
                     
                     // only open submissions folder + PDF is a PDF file exists within the submissions folder
                     if (pdf_div != "") {
-                        console.log(pdf_div.attr("id"));
-                        console.log(pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
                         submissions.show();
                         submissions.addClass('open');
                         $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
