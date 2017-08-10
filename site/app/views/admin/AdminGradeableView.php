@@ -586,7 +586,7 @@ HTML;
                     <thead style="background: #E1E1E1;">
                         <tr>
                             <th>Manual/TA/Peer Grading Rubric</th>
-                            <th style="width:120px;">Points</th>
+                            <th style="width:175px;">Points</th>
                         </tr>
                     </thead>
                     <tbody style="background: #f9f9f9;">
