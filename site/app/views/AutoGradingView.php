@@ -79,14 +79,14 @@ HTML;
 HTML;
             }
         }
-        if ($gradeable->hasConditionalMessage()) {
+        if ($gradeable->hasIncentiveMessage()) {
             foreach ($gradeable->getVersions() as $version) {
                 if ($version->getNonHiddenTotal() >= $gradeable->getMinimumPoints() && 
                     $version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
                         $return.= <<<HTML
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#conditional_message').show();
+        $('#incentive_message').show();
     });
 </script>
 HTML;

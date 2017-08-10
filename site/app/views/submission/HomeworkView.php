@@ -731,10 +731,10 @@ HTML;
 HTML;
 	            }
 
-                if ($gradeable->hasConditionalMessage()) {
+                if ($gradeable->hasIncentiveMessage()) {
                     $return .= <<<HTML
-    <div class="sub" id="conditional_message" style="display: none;">
-        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
+    <div class="sub" id="incentive_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getIncentiveMessage()}</p>    
     </div>
 HTML;
                 }
