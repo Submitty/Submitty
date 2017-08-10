@@ -824,8 +824,21 @@ HTML;
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
             $page = intval($question->getPage());
-            if ($page == -1 && array_key_exists($question->getOrder(), $student_pages)) {
-                $page = intval($student_pages[$question->getOrder()]);
+            // if the page is determined by the student json
+            if ($page == -1) {
+                // usually the order matches the json
+                if ($student_pages[intval($question->getOrder())]["order"] == intval($question->getOrder())) {
+                    $page = intval($student_pages[intval($question->getOrder())]["page #"]);
+                }
+                // otherwise, iterate through until the order matches
+                else {
+                    foreach ($student_pages as $student_page) {
+                        if ($student_page["order"] == intval($question->getOrder())) {
+                            $page = intval($student_page["page #"]);
+                            break;
+                        }
+                    }
+                }
             }
             if ($page > 0) {
                 $message .= "<i> Page #: " . $page . "</i>";

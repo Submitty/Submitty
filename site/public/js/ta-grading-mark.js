@@ -280,6 +280,8 @@ function openClose(row_id, num_questions = -1) {
         var save_mark = document.getElementById('save-mark-' + x);
         var title = $('#title-' + x);
         var title_cancel = $('#title-cancel-' + x);
+        var page = (document.getElementById('page-' + x)).innerHTML;
+        console.log(page);
         if (x == row_num) {
             if (current.style.display === 'none') {
                 current.style.display = '';
@@ -299,7 +301,6 @@ function openClose(row_id, num_questions = -1) {
 
                 // if the component has a page saved, open the PDF to that page
                 // opening directories/frames based off of code in openDiv and openFrame functions
-                var page = (document.getElementById('page-' + x)).innerHTML;
 
                 // make sure submissions folder has files
                 var submissions = $('#div_viewer_1');
@@ -321,6 +322,8 @@ function openClose(row_id, num_questions = -1) {
                     
                     // only open submissions folder + PDF is a PDF file exists within the submissions folder
                     if (pdf_div != "") {
+                        console.log(pdf_div.attr("id"));
+                        console.log(pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
                         submissions.show();
                         submissions.addClass('open');
                         $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
@@ -328,11 +331,11 @@ function openClose(row_id, num_questions = -1) {
                         var file_url = pdf_div.attr("data-file_url");
                         var file_name = pdf_div.attr("data-file_name");
                         if (!pdf_div.hasClass('open')) {
-                            openFrame(file_name,file_url,3);
+                            openFrame(file_name,file_url,pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
                         }
                         var iframeId = pdf_div.attr("id") + "_iframe";
                         directory = "submissions"; 
-                        src = $('#file_viewer_3_iframe').prop('src');
+                        src = $("#"+iframeId).prop('src');
                         if (src.indexOf("#page=") === -1) {
                             src = src + "#page=" + page;
                         }

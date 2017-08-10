@@ -933,9 +933,10 @@ class SubmissionController extends AbstractController {
                 $order = intval($question->getOrder());
                 $title = $question->getTitle();
                 $page_val = intval($pages_array[$i]);   
-                $json[$order] = array("order" => $order,
+                $json[] = array("order" => $order,
                                 "title" => $title,
                                 "page #" => $page_val);
+                $i++;
             }
             if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
                 return $this->uploadResult("Failed to write to pages file.", false);
