@@ -813,25 +813,11 @@ HTML;
         $your_user_id = $this->core->getUser()->getId();
 
         foreach ($gradeable->getComponents() as $question) {
-            $type = 0; //0 is common deductable, 1 is common additive
-            $min = -1000;
-            $max = 0;
-            $ungraded = false;
-            foreach ($question->getMarks() as $mark) {
-                if($mark->getPoints() < 0) {
-                    $min = -1000;
-                    $max = 0;
-                    $type = 0;
-                    break;
-                }
-                else if ($mark->getPoints() > 0) {
-                    $min = 0;  
-                    $max = 1000;
-                    $type = 1;
-                    break;
-                }
-            }
-            $word = ($type === 1) ? "Addition" : "Deduction";
+            $lower_clamp = $question->getLowerClamp();
+            $default = $question->getDefault();
+            $upper_clamp = $question->getUpperClamp();
+            $max = $upper_clamp - $default;
+            $min = $lower_clamp - $default;
             // hide auto-grading if it has no value
             if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
@@ -855,31 +841,33 @@ HTML;
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
 
-            //adds an icon depending on the question type (extra credit, normal, penalty)
-            //adds background color as well.
-            if($question->getIsExtraCredit()) {
-                $return .= <<<HTML
-                    <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-                        <i class="fa fa-plus-circle" aria-hidden="true"></i> 
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>$message</b>
-HTML;
-            }
-            else if($penalty) {
-                $return .= <<<HTML
-                    <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-                        <i class="fa fa-minus-circle" aria-hidden="true"></i> 
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>$message</b>
-HTML;
-            }
-            else {
+// This is for the color of the row with the question title...
+// since there are no longer explicit extra credit problems for now, this row color will not change
+//             //adds an icon depending on the question type (extra credit, normal, penalty)
+//             //adds background color as well.
+//             if($question->getIsExtraCredit()) {
+//                 $return .= <<<HTML
+//                     <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
+//                         <i class="fa fa-plus-circle" aria-hidden="true"></i> 
+//                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
+//                         <b>$message</b>
+// HTML;
+//             }
+//             else if($penalty) {
+//                 $return .= <<<HTML
+//                     <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
+//                         <i class="fa fa-minus-circle" aria-hidden="true"></i> 
+//                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
+//                         <b>$message</b>
+// HTML;
+//             }
+//             else {
                 $return .= <<<HTML
                     <td style="font-size: 12px;" colspan="4">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         <b>{$message}</b>
 HTML;
-            }
+            // }
 
             //get the grader's id if it exists
             $grader_id = "";
@@ -912,19 +900,7 @@ HTML;
             //gets the initial point value and text
             $initial_text = "";
             $first_text = true;
-            if ($question->getMaxValue() < 0) {
-                if ($type === 0) {
-                    $question_points = 0;
-                } else {
-                    $question_points = $question->getMaxValue();
-                }
-            } else {
-                if ($type === 0) {
-                    $question_points = $question->getMaxValue();
-                } else {
-                    $question_points = 0;
-                }
-            }
+            $question_points = $question->getDefault();
             
             foreach ($question->getMarks() as $mark) {
                 if($mark->getHasMark() === true) {
@@ -954,36 +930,25 @@ HTML;
             }
 
             $question_points += $question->getScore();
-            if($question->getMaxValue() < 0) {
-                if ($type === 0) {
-                    if ($question_points < $question->getMaxValue()) $question_points = $question->getMaxValue();
-                } else {
-                    if ($question_points > 0) $question_points = 0;
-                }
-            } else {
-                if ($type === 0) {
-                    if ($question_points < 0) $question_points = 0;
-                } else {
-                    if ($question_points > $question->getMaxValue()) $question_points = $question->getMaxValue();
-                }
-            }
+            if($question_points < $question->getLowerClamp()) $question_points = $question->getLowerClamp();
+            if($question_points > $question->getUpperClamp()) $question_points = $question->getUpperClamp();
             
-            if($ungraded === true) {
+            if(!$question->getHasMarks() && !$question->getHasGrade()) {
                 $question_points = " ";
             }
 
             $background = "";
-            if ($question->getIsExtraCredit()) {
+            if ($question_points > $question->getMaxValue()) {
                 $background = "background-color: #D8F2D8;";
             }
-            else if ($penalty) {
+            else if ($question_points < 0) {
                 $background = "background-color: #FAD5D3;";
             }
             
             $return .= <<<HTML
                 <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
-                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-max_points="{$question->getMaxValue()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
+                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
                     <td style="width:98%; {$background}" colspan="3">
                         <div id="rubric-{$c}">
@@ -1001,7 +966,7 @@ HTML;
                 if ($first === true) {
                     $first = false;
                     $noChange = "readonly";
-                    $mark_text = ($type === 1) ? "No Credit" : "Full Credit";
+                    $mark_text = ($question->getMaxValue() == $question->getUpperClamp()) ? "Full Credit" : "No Credit";
                 }
                 else {
                     $noChange = "";
@@ -1034,7 +999,7 @@ HTML;
                 <tr>
                     <td colspan="4" style="{$background};">
                         <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
-                        Add New Common {$word}</span>
+                        Add New Common Mark</span>
                     </td>
                 </tr>
                 <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
