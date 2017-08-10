@@ -297,6 +297,7 @@ function openClose(row_id, num_questions = -1) {
                 save_mark.style.display = '';
                 // if the component has a page saved
                 // only open if their submissions folder has items inside
+                // based off of code in openDiv and openFrame functions
                 var elem = $('#div_viewer_1');
                 if (page_num > 0 && elem.children().length > 0) {
                     elem.show();
@@ -304,21 +305,24 @@ function openClose(row_id, num_questions = -1) {
                     $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
 
                     var iframe = $('#file_viewer_3');
+                    var file_url = iframe.attr("data-file_url");
+                    var file_name = iframe.attr("data-file_name");
                     if (!iframe.hasClass('open')) {
-                        var file_url = iframe.attr("data-file_url");
-                        var file_name = iframe.attr("data-file_name");
                         openFrame(file_name,file_url,3);
                     }
-                    var iframeId = "file_viewer_3_iframe";
-                    directory = "submissions"; 
-                    src = $('#file_viewer_3_iframe').prop('src');
-                    if (src.indexOf("#page=") === -1) {
-                        src = src + "#page=" + page_num;
+                    // only open to specific page if it is a pdf 
+                    if(file_url.substring(file_url.length - 3) == "pdf") {
+                        var iframeId = "file_viewer_3_iframe";
+                        directory = "submissions"; 
+                        src = $('#file_viewer_3_iframe').prop('src');
+                        if (src.indexOf("#page=") === -1) {
+                            src = src + "#page=" + page_num;
+                        }
+                        else {
+                            src = src.slice(0,src.indexOf("#page=")) + "#page=" + page_num;
+                        }
+                        iframe.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='600px' style='border: 0'></iframe>");
                     }
-                    else {
-                        src = src.slice(0,src.indexOf("#page=")) + "#page=" + page_num;
-                    }
-                    iframe.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='600px' style='border: 0'></iframe>");
 
                     if (!iframe.hasClass('open')) {
                         iframe.addClass('open');

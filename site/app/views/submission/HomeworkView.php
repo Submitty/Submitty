@@ -70,6 +70,8 @@ HTML;
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
+        $use_student_page = false;
+        $num_components = count($gradeable->getComponents());
         $return .= <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 HTML;
@@ -306,10 +308,37 @@ HTML;
         </div>
 HTML;
                 }
-
                 $return .= <<<HTML
-
     </div>
+HTML;
+                // does this gradeable have parts assigned by students
+                foreach ($gradeable->getComponents() as $question) {
+                    $page_num = $question->getPage();
+                    if ($page_num === -1) {
+                        $use_student_page = true;
+                        break;
+                    }
+                }
+                if ($use_student_page) {                
+                    $return .= <<<HTML
+    <form id="pdfPageStudent">
+        <div class="sub">
+        <div>Enter the page number for each component. </div>
+HTML;
+                    $count = 0;
+                    foreach ($gradeable->getComponents() as $question) {
+                        $title = $question->getTitle();
+                        $return .= <<<HTML
+        <div>{$title}: <input type="number" id="page_{$count}" min="1"></div><br />
+HTML;
+                        $count++;
+                    }
+                    $return .= <<<HTML
+        </div>
+    </form>
+HTML;
+                }
+                $return .= <<<HTML
     <div>
         {$upload_message}
 	<br>
@@ -421,7 +450,9 @@ HTML;
                                 {$gradeable->getNumTextBoxes()},
                                 "{$gradeable->getId()}",
                                 "{$gradeable->getUser()->getId()}",
-                                repo_id);
+                                repo_id,
+                                {$use_student_page},
+                                {$num_components});
             }
             else {
                 handleSubmission({$late_days_use},
@@ -433,7 +464,9 @@ HTML;
                                 {$gradeable->getNumTextBoxes()},
                                 "{$gradeable->getId()}",
                                 user_id,
-                                repo_id);
+                                repo_id,
+                                {$use_student_page},
+                                {$num_components});
             }
         }
         $(document).ready(function() {

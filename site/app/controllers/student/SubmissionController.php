@@ -604,6 +604,11 @@ class SubmissionController extends AbstractController {
         if ($vcs_checkout && !isset($_POST['repo_id'])) {
             return $this->uploadResult("Invalid repo id.", false);
         }
+
+        $student_page = isset($_REQUEST['student_page']) ? $_REQUEST['student_page'] === "true" : false;
+        if ($student_page && !isset($_POST['pages'])) {
+            return $this->uploadResult("Invalid pages.", false);
+        }
     
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         
@@ -753,6 +758,24 @@ class SubmissionController extends AbstractController {
                     fwrite($file, $textbox_answer_val);
                     fclose($file);
                 }
+            }
+
+            // save the contents of the page number inputs to files
+            $empty_pages = true;
+            if (isset($_POST['pages'])) {
+                $pages_array = json_decode($_POST['pages']);
+                $total = count($gradeable->getComponents());
+                $filename = "student_pages.json";
+                $dst = FileUtils::joinPaths($version_path, $filename);
+                $json = array();
+                for ($i = 0; $i < $total; $i++) {
+                    $page_val = $pages_array[$i];   
+                    $json[] = $page_val; 
+                }
+                if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
+                    return $this->uploadResult("Failed to write to pages file.", false);
+                }
+
             }
     
             $previous_files = array();

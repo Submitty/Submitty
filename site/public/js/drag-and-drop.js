@@ -607,8 +607,10 @@ function handleBulk(gradeable_id, num_pages) {
  * @param num_textboxes
  * @param user_id
  * @param repo_id
+ * @param student_page
+ * @param num_components
  */
-function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id) {
+function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components) {
     $("#submit").prop("disabled", true);
 
     submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id});
@@ -642,6 +644,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
     formData.append('vcs_checkout', vcs_checkout);
     formData.append('user_id', user_id);
     formData.append('repo_id', repo_id);
+    formData.append('student_page', student_page)
 
     if (!vcs_checkout) {
         // Check if new submission
@@ -681,6 +684,25 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         textbox_answers[i] = $("#textbox_"+i).val();
     }
     formData.append('textbox_answers', JSON.stringify(textbox_answers));
+
+    if (student_page) {
+        var pages = [];
+        for (var i = 0; i < num_components; i++) {
+            pages[i] = $("#page_"+i).val();
+            if (pages[i] == "") {
+                alert("You cannot leave a page textbox empty.");
+                $("#submit").prop("disabled", false);
+                return;
+            }
+            if (parseInt(pages[i]) < 1) {
+                alert("Page numbers cannot be less than 1.");
+                $("#submit").prop("disabled", false);
+                return;
+            }
+        }
+        formData.append('pages', JSON.stringify(pages));
+    }
+
 
     $.ajax({
         url: submit_url,

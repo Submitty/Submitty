@@ -2364,21 +2364,30 @@ $('#gradeable-form').on('submit', function(e){
             }
         }
         if($('#yes_pdf_page').is(':checked') && $('#no_pdf_page_student').is(':checked')) {
+            var invalid = false;
             $("input[name^='page_component']").each(function() {
                 if (this.value < 1) {
                     alert("Page number for component cannot be less than 1");
-                    return false;
+                    invalid = true;
                 }
             });
+            if (invalid) {
+                return false;
+            }
         }
         else {
+            var invalid = false;
             $("input[name^='page_component']").each(function() {
                 if (this.value < -1) {
                     alert("Page number for component cannot be less than -1");
-                    return false;
+                    invalid = true;
                 }
             });
+            if (invalid) {
+                return false;
+            }
         }
+        // return false;
         if($('#team_yes_radio').is(':checked')) {
             if ($("input[name^='eg_max_team_size']").val() < 2) {
                 alert("Maximum team size must be at least 2");
