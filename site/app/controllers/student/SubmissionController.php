@@ -759,23 +759,6 @@ class SubmissionController extends AbstractController {
                     fclose($file);
                 }
             }
-
-            // save the contents of the page number inputs to files
-            $empty_pages = true;
-            if (isset($_POST['pages'])) {
-                $pages_array = json_decode($_POST['pages']);
-                $total = count($gradeable->getComponents());
-                $filename = "student_pages.json";
-                $dst = FileUtils::joinPaths($version_path, $filename);
-                $json = array();
-                for ($i = 0; $i < $total; $i++) {
-                    $page_val = $pages_array[$i];   
-                    $json[] = $page_val; 
-                }
-                if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
-                    return $this->uploadResult("Failed to write to pages file.", false);
-                }
-            }
     
             $previous_files = array();
             $previous_part_path = array();
@@ -934,6 +917,26 @@ class SubmissionController extends AbstractController {
 
             if (!@touch(FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT"))) {
                 return $this->uploadResult("Failed to touch file for vcs submission.", false);
+            }
+        }
+
+        // save the contents of the page number inputs to files
+        $empty_pages = true;
+        if (isset($_POST['pages'])) {
+            $pages_array = json_decode($_POST['pages']);
+            $total = count($gradeable->getComponents());
+            $filename = "student_pages.json";
+            $dst = FileUtils::joinPaths($version_path, $filename);
+            $json = array();
+            $i = 0;
+            foreach ($gradeable->getComponents() as $question) {
+                $title = $question->getTitle();
+                $page_val = $pages_array[$i];   
+                $json[$title] = $page_val;
+                $i++;
+            }
+            if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
+                return $this->uploadResult("Failed to write to pages file.", false);
             }
         }
     

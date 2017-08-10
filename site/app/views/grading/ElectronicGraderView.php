@@ -773,6 +773,17 @@ HTML;
 HTML;
         }
         $num_questions = count($gradeable->getComponents());
+
+        // if use student components, get the values for pages from the student's submissions
+        $files = $gradeable->getSubmittedFiles();
+        $student_pages = array();
+        foreach ($files as $filename => $content) {
+            if ($filename == "student_pages.json") {
+                $path = $content["path"];
+                $student_pages = FileUtils::readJsonFile($content["path"]);
+            }
+        }
+
         $return .= <<<HTML
     <div style="margin:3px;">
         <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-num_questions="{$num_questions}">
@@ -812,7 +823,10 @@ HTML;
             if ($note != "") {
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
-            $page_num = htmlentities($question->getPage());
+            $page_num = intval($question->getPage());
+            if ($page_num == -1 && array_key_exists($question->getTitle(), $student_pages)) {
+                $page_num = intval($student_pages[$question->getTitle()]);
+            }
             if ($page_num > 0) {
                 $page = "<div style='margin-bottom:5px; color:#777;'><i><b>Page #: </b>" . $page_num . "</i></div>";
             }
