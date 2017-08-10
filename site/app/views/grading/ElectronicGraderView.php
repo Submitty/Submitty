@@ -120,12 +120,13 @@ HTML;
             <b>Statistics for Completely Graded Assignments: </b><br/>
             <div style="margin-left: 20px">
                 Average: {$overall_average->getAverageScore()} / {$overall_average->getMaxValue()} <br/>
-                Standard Deviation: {$overall_average->getStandardDeviation()} <br/><br/>
+                Standard Deviation: {$overall_average->getStandardDeviation()} <br/>
+                Count: {$overall_average->getCount()} <br/><br/>
             </div>
 HTML;
         }
         $return .= <<<HTML
-            <b>Average Scores of Graded Components: </b><br/>
+            <b>Statistics of Graded Components: </b><br/>
             <div style="margin-left: 20px">
 HTML;
             $overall_score = 0;
@@ -137,7 +138,8 @@ HTML;
                 {$comp->getTitle()}:<br/>
                 <div style="margin-left: 40px">
                     Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} <br/>
-                    Standard Deviation: {$comp->getStandardDeviation()}<br/>
+                    Standard Deviation: {$comp->getStandardDeviation()} <br/>
+                    Count: {$comp->getCount()} <br/>
                 </div>
 HTML;
             }

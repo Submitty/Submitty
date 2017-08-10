@@ -653,7 +653,7 @@ ORDER BY u.{$section_key}", $params);
     public function getAverageComponentScores($g_id) {
         $return = array();
         $this->course_db->query("
-SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev FROM(
+SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
   SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, 
   CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp 
   WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp 
@@ -687,7 +687,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
           ", array($g_id));
         $count = $this->course_db->rows()[0][0];
         $this->course_db->query("
-SELECT round(AVG(g_score),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, g_id FROM(
+SELECT round(AVG(g_score),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, g_id, COUNT(*) FROM(
   SELECT * FROM(
     SELECT gd_id, SUM(comp_score) AS g_score, SUM(gc_max_value) AS max, COUNT(comp.*), g_id FROM(
       SELECT  gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, g_id,

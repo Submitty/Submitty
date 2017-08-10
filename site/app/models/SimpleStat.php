@@ -11,6 +11,7 @@ use app\libraries\Core;
  * @method int getOrder()
  * @method float getAverageScore()
  * @method float getStandardDeviation()
+ * @method int getCount()
  * @method bool getIsPeer()
 
  */
@@ -27,6 +28,8 @@ class SimpleStat extends AbstractModel {
     protected $average_score = 0;
     /** @property @var float Standard deviation*/
     protected $standard_deviation = 0;
+    /** @property @var int number of people graded(completely graded)*/
+    protected $count = 0;
     /** @property @var bool Does this component use peer grading*/
     protected $is_peer = null;
 
@@ -39,7 +42,8 @@ class SimpleStat extends AbstractModel {
             $this->average_score = $details['avg_comp_score'];
             $this->standard_deviation = $details['std_dev'];
             $this->order = $details['gc_order'];
-            $this->is_peer = $details['gc_is_peer'];            
+            $this->is_peer = $details['gc_is_peer'];
+            $this->count = $details['count'];
         }
         else {
             $this->component = false;
@@ -47,6 +51,7 @@ class SimpleStat extends AbstractModel {
             $this->max_value = $details['max'];
             $this->average_score = $details['avg_score'];
             $this->standard_deviation = $details['std_dev'];
+            $this->count = $details['count'];
         }
     }
 }
