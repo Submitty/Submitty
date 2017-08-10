@@ -1,0 +1,25 @@
+{
+    // This is for assignments where students who reached x amounts of points y days before the submission deadline receive some kind of reward
+    // such as another late day.
+    "early_submission_incentive" : {
+        "message" : "Successfully reached the point minimum by the due date. You get another late day.",
+        "minimum_days_early" : 7,
+        "minimum_points" : 2
+    },
+
+    "testcases" : 
+    [
+        {
+            "type" : "FileCheck",
+            "title" : "README",
+            "actual_file" : "README.txt",
+            "points" : 2
+        },
+        {
+            "type" : "FileCheck",
+            "title" : ".cpp",
+            "actual_file" : "*.cpp",
+            "points" : 2
+        },
+    ]
+}
