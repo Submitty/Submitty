@@ -70,7 +70,7 @@ HTML;
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
-        $use_student_page = false;
+        $student_page = false;
         $num_components = count($gradeable->getComponents());
         $return .= <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
@@ -315,11 +315,11 @@ HTML;
                 foreach ($gradeable->getComponents() as $question) {
                     $page_num = $question->getPage();
                     if ($page_num === -1) {
-                        $use_student_page = true;
+                        $student_page = true;
                         break;
                     }
                 }
-                if ($use_student_page) {                
+                if ($student_page) {                
                     $return .= <<<HTML
     <form id="pdfPageStudent">
         <div class="sub">
@@ -430,6 +430,7 @@ HTML;
             }
 
             $vcs_string = ($gradeable->useVcsCheckout()) ? "true" : "false";
+            $student_page_string = ($student_page) ? "true" : "false";
 
             $return .= <<<HTML
     <script type="text/javascript">
@@ -451,7 +452,7 @@ HTML;
                                 "{$gradeable->getId()}",
                                 "{$gradeable->getUser()->getId()}",
                                 repo_id,
-                                {$use_student_page},
+                                {$student_page_string},
                                 {$num_components});
             }
             else {
@@ -465,7 +466,7 @@ HTML;
                                 "{$gradeable->getId()}",
                                 user_id,
                                 repo_id,
-                                {$use_student_page},
+                                {$student_page_string},
                                 {$num_components});
             }
         }
