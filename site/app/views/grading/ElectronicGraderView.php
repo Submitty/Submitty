@@ -823,21 +823,18 @@ HTML;
             if ($note != "") {
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
-            $page_num = intval($question->getPage());
-            if ($page_num == -1 && array_key_exists($question->getTitle(), $student_pages)) {
-                $page_num = intval($student_pages[$question->getTitle()]);
+            $page = intval($question->getPage());
+            if ($page == -1 && array_key_exists($question->getOrder(), $student_pages)) {
+                $page = intval($student_pages[$question->getOrder()]);
             }
-            if ($page_num > 0) {
-                $page = "<div style='margin-bottom:5px; color:#777;'><i><b>Page #: </b>" . $page_num . "</i></div>";
-            }
-            else {
-                $page = "";
+            if ($page > 0) {
+                $message .= "<i> Page #: " . $page . "</i>";
             }
 
             $return .= <<<HTML
                     <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>{$message}</b>
+                        {$message}
 HTML;
             //get the grader's id if it exists
             $grader_id = "";
@@ -852,8 +849,8 @@ HTML;
                 <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
                 <span id="save-mark-{$c}" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
             </div>
-            </span> <span id="ta_note-{$c}" style="display: none;"> {$note}</span> <span id="page-{$c}" style="display: none;">{$page}</span> 
-            <span id="page-num-{$c}" style="display: none;">{$page_num}</span>
+            </span> <span id="ta_note-{$c}" style="display: none;"> {$note}</span> 
+            <span id="page-{$c}" style="display: none;">{$page}</span>
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());

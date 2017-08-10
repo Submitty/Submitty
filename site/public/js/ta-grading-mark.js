@@ -274,9 +274,6 @@ function openClose(row_id, num_questions = -1) {
         var current = document.getElementById('extra-' + x);
         var current_summary = document.getElementById('summary-' + x);
         var ta_note = document.getElementById('ta_note-' + x);
-        var page = document.getElementById('page-' + x);
-        var page_num = document.getElementById('page-num-' + x);
-        page_num = page_num.innerHTML;
         var student_note = document.getElementById('student_note-' + x);
         var progress_points = document.getElementById('progress_points-' + x);
         var cancel_mark = document.getElementById('cancel-mark-' + x);
@@ -291,7 +288,6 @@ function openClose(row_id, num_questions = -1) {
                 title_cancel[0].style.backgroundColor = "#e6e6e6";
                 current_summary.style.display = 'none';
                 ta_note.style.display = '';
-                page.style.display = '';
                 student_note.style.display = '';
                 updateProgressPoints(x);
                 progress_points.style.display = '';
@@ -300,41 +296,58 @@ function openClose(row_id, num_questions = -1) {
                 title.attr('colspan', 3);
                 title_cancel[0].style.display = '';
                 title_cancel.attr('colspan', 1);
-                // if the component has a page saved
-                // only open if their submissions folder has items inside
-                // based off of code in openDiv and openFrame functions
-                var elem = $('#div_viewer_1');
-                if (page_num > 0 && elem.children().length > 0) {
-                    elem.show();
-                    elem.addClass('open');
-                    $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
 
-                    var iframe = $('#file_viewer_3');
-                    var file_url = iframe.attr("data-file_url");
-                    var file_name = iframe.attr("data-file_name");
-                    if (!iframe.hasClass('open')) {
-                        openFrame(file_name,file_url,3);
+                // if the component has a page saved, open the PDF to that page
+                // opening directories/frames based off of code in openDiv and openFrame functions
+                var page = (document.getElementById('page-' + x)).innerHTML;
+
+                // make sure submissions folder has files
+                var submissions = $('#div_viewer_1');
+                if (page > 0 && submissions.children().length > 0) {
+
+                    // find the first file that is a PDF
+                    var divs = $('#div_viewer_1 > div > div');
+                    var pdf_div = "";
+                    for (var i=0; i<divs.length; i++) {
+                        if ($(divs[i]).is('[data-file_url]')) {
+                            file_url = $(divs[i]).attr("data-file_url");
+                            console.log(file_url);
+                            if(file_url.substring(file_url.length - 3) == "pdf") {
+                                pdf_div = $($(divs[i]));
+                                break;
+                            }
+                        }
                     }
-                    // only open to specific page if it is a pdf 
-                    if(file_url.substring(file_url.length - 3) == "pdf") {
-                        var iframeId = "file_viewer_3_iframe";
+                    
+                    // only open submissions folder + PDF is a PDF file exists within the submissions folder
+                    if (pdf_div != "") {
+                        submissions.show();
+                        submissions.addClass('open');
+                        $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+
+                        var file_url = pdf_div.attr("data-file_url");
+                        var file_name = pdf_div.attr("data-file_name");
+                        if (!pdf_div.hasClass('open')) {
+                            openFrame(file_name,file_url,3);
+                        }
+                        var iframeId = pdf_div.attr("id") + "_iframe";
                         directory = "submissions"; 
                         src = $('#file_viewer_3_iframe').prop('src');
                         if (src.indexOf("#page=") === -1) {
-                            src = src + "#page=" + page_num;
+                            src = src + "#page=" + page;
                         }
                         else {
-                            src = src.slice(0,src.indexOf("#page=")) + "#page=" + page_num;
+                            src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
                         }
-                        iframe.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='600px' style='border: 0'></iframe>");
-                    }
+                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='600px' style='border: 0'></iframe>");
 
-                    if (!iframe.hasClass('open')) {
-                        iframe.addClass('open');
-                    }
-                    if (!iframe.hasClass('shown')) {
-                        iframe.show();
-                        iframe.addClass('shown');
+                        if (!pdf_div.hasClass('open')) {
+                            pdf_div.addClass('open');
+                        }
+                        if (!pdf_div.hasClass('shown')) {
+                            pdf_div.show();
+                            pdf_div.addClass('shown');
+                        }
                     }
                 }
             } else {
@@ -344,7 +357,6 @@ function openClose(row_id, num_questions = -1) {
                 title[0].style.backgroundColor = "initial";
                 title_cancel[0].style.backgroundColor = "initial";
                 ta_note.style.display = 'none';
-                page.style.display = 'none';
                 student_note.style.display = 'none';
                 progress_points.style.display = 'none';
                 cancel_mark.style.display = 'none';
@@ -360,7 +372,6 @@ function openClose(row_id, num_questions = -1) {
             title[0].style.backgroundColor = "initial";
             title_cancel[0].style.backgroundColor = "initial";
             ta_note.style.display = 'none';
-            page.style.display = 'none';
             student_note.style.display = 'none';
             progress_points.style.display = 'none';
             cancel_mark.style.display = 'none';
