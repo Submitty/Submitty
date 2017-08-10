@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\libraries\DatabaseUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
+use app\libraries\Logger;
 
 class GradeSummary extends AbstractModel {
     /**/
@@ -20,6 +21,7 @@ class GradeSummary extends AbstractModel {
             Each index contains an array indexed by syllabus 
             bucket which contain all assignments in the respective syllabus bucket 
         */
+        Logger::debug("Called generateSummariesFromQueryResults");
         $student_output_json = array();
         $buckets = array();
         foreach ($summary_data as $gradeable) {
@@ -50,6 +52,8 @@ class GradeSummary extends AbstractModel {
             }
             $student = $student_output_json[$student_id];
 
+            Logger::debug("User: ". $gradeable->getUser()->getId() . " GradeableID: ". $gradeable->getId());
+
             $student_output_json[$student_id] = $this->generateSummary($gradeable, $ldu, $student);
         }
         
@@ -62,8 +66,55 @@ class GradeSummary extends AbstractModel {
 
         }
     }
+
+    public function generateSummariesFromQueryResultsBuster(&$student_output_json, &$buckets, $summary_data, $ldu) {
+        /* Array of Students, indexed by user_id
+            Each index contains an array indexed by syllabus
+            bucket which contain all assignments in the respective syllabus bucket
+        */
+        Logger::debug("Called generateSummariesFromQueryResults");
+        //$student_output_json = array();
+        //$buckets = array();
+        foreach ($summary_data as $gradeable) {
+            $student_id = $gradeable->getUser()->getId();
+            if(!isset($buckets[ucwords($gradeable->getSyllabusBucket())])) {
+                $buckets[ucwords($gradeable->getSyllabusBucket())] = true;
+            }
+            if(!array_key_exists($student_id, $student_output_json)) {
+                $student_output_json[$student_id] = array();
+
+                // CREATE HEADER FOR JSON
+                $student_output_json[$student_id]["user_id"] = $student_id;
+                $student_output_json[$student_id]["legal_first_name"] = $gradeable->getUser()->getFirstName();
+                $student_output_json[$student_id]["preferred_first_name"] = $gradeable->getUser()->getPreferredFirstName();
+                $student_output_json[$student_id]["last_name"] = $gradeable->getUser()->getLastName();
+                $student_output_json[$student_id]["registration_section"] = $gradeable->getUser()->getRegistrationSection();
+
+                $student_output_json[$student_id]["default_allowed_late_days"] = $this->core->getConfig()->getDefaultStudentLateDays();
+                //$student_output_json["allowed_late_days"] = $late_days_allowed;
+
+                $student_output_json[$student_id]["last_update"] = date("l, F j, Y");
+                foreach($buckets as $category => $bucket) {
+                    $student_output_json[$student_id][ucwords($category)] = array();
+                }
+            }
+            if(!isset($student_output_json[$student_id][ucwords($gradeable->getSyllabusBucket())])) {
+                $student_output_json[$student_id][ucwords($gradeable->getSyllabusBucket())] = array();
+            }
+            $student = $student_output_json[$student_id];
+
+            Logger::debug("User: ". $gradeable->getUser()->getId() . " GradeableID: ". $gradeable->getId());
+
+            $student_output_json[$student_id] = $this->generateSummary($gradeable, $ldu, $student);
+        }
+
+
+    }
+
+
     
     private function generateSummary($gradeable, $ldu, $student) {
+        Logger::debug("Called generateSummary");
         $this_g = array();
         
         $autograding_score = $gradeable->getGradedAutoGraderPoints();
@@ -148,12 +199,51 @@ class GradeSummary extends AbstractModel {
     }
     
     public function generateAllSummaries() {
+        //ini_set("memory_limit","512M");
+        Logger::debug("Called generateAllSummaries");
+        Logger::debug("Here's a second message");
         $users = $this->core->getQueries()->getAllUsers();
+        Logger::debug("Got All users");
         $ids = array_map(function($user) {return $user->getId();}, $users);
+        Logger::debug("array_map called");
+        $gradeable_ids = $this->core->getQueries()->getAllGradeablesIds();
+        $gradeable_ids = array_map(function($g_id) { return $g_id["g_id"];}, $gradeable_ids);
+        //$gradeable_ids = array_map(function($g_id) { return print_r($g_id["g_id"],true);}, $gradeable_ids);
+        Logger::debug("got gradeable IDS");
+        //Logger::debug("They are:".implode(",",$gradeable_ids));
+        $n_users = count($ids);
+        $n_gradeable_ids = count($gradeable_ids);
+        Logger::debug("There are {$n_users} users and {$n_gradeable_ids} gradeable IDs");
+
+/*
         $summary_data = $this->core->getQueries()->getGradeables(null, $ids);
+        Logger::debug("Got gradeables");
         $ldu = new LateDaysCalculation($this->core);
+        Logger::debug("Made LDU");
 
         $this->generateSummariesFromQueryResults($summary_data, $ldu);
+*/
+
+        $ldu = new LateDaysCalculation($this->core);
+        $student_output_json = array();
+        $buckets = array();
+        Logger::debug("Made LDU");
+        foreach($gradeable_ids as $g_id){
+            $summary_data = $this->core->getQueries()->getGradeables($g_id,$ids);
+            Logger::debug("Got gradeable {$g_id}");
+            $this->generateSummariesFromQueryResultsBuster($student_output_json,$buckets,$summary_data,$ldu);
+            //$ldu = new LateDaysCalculation($this->core); //Do we need a new one each time? Not sure.
+        }
+
+        Logger::debug("Writing reports");
+        // WRITE THE JSON FILE
+        foreach($student_output_json as $student) {
+            $student_id = $student['user_id'];
+            $student_output_json_name = $student_id . "_summary.json";
+
+            file_put_contents(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports","all_grades", $student_output_json_name)), json_encode($student,JSON_PRETTY_PRINT));
+
+        }
     }
     
     public function generateAllSummariesForStudent($student_id) {
