@@ -78,7 +78,6 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($sections as $i => $section) {
                     $sections[$i] = $section['sections_registration_id'];
                 }
-                $average_scores = $this->core->getQueries()->getAverageComponentScores($gradeable_id);
             }
             $section_key='registration_section';
             if (count($sections) > 0) {
@@ -94,7 +93,6 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($sections as $i => $section) {
                     $sections[$i] = $section['sections_rotating_id'];
                 }
-                $average_scores = $this->core->getQueries()->getAverageComponentScores($gradeable_id);
             }
             $section_key='rotating_section';
             if (count($sections) > 0) {
@@ -112,6 +110,8 @@ class ElectronicGraderController extends AbstractController {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                 $no_team_users = array();
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key);
+                $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id);
+                $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id);
             }
         }
 
@@ -136,7 +136,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $average_scores);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $overall_average);
     }
 
     /**

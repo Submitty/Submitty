@@ -14,7 +14,7 @@ class ElectronicGraderView extends AbstractView {
      * @param array     $sections
      * @return string
      */
-    public function statusPage($gradeable, $sections, $average_scores) {
+    public function statusPage($gradeable, $sections, $component_averages, $overall_average) {
         $course = $this->core->getConfig()->getCourse();
         $semester = $this->core->getConfig()->getSemester();
         $graded = 0;
@@ -109,26 +109,42 @@ HTML;
             </div>
         </div>
         <div class="box half">
-            Average Scores of Graded Components:
+HTML;
+        if($overall_average->getMaxValue() == 0) {
+            $return .= <<<HTML
+            There are no students completely graded yet.
+HTML;
+        }
+        else {
+            $return .= <<< HTML
+            <b>Statistics for Completely Graded Assignments: </b><br/>
+            <div style="margin-left: 20px">
+                Average: {$overall_average->getAverageScore()} / {$overall_average->getMaxValue()} <br/>
+                Standard Deviation: {$overall_average->getStandardDeviation()} <br/><br/>
+            </div>
+HTML;
+        }
+        $return .= <<<HTML
+            <b>Average Scores of Graded Components: </b><br/>
             <div style="margin-left: 20px">
 HTML;
             $overall_score = 0;
             $overall_max = 0;
-            foreach($average_scores as $comp) {
+            foreach($component_averages as $comp) {
                 $overall_score += $comp->getAverageScore();
                 $overall_max += $comp->getMaxValue();
                 $return .= <<<HTML
-                {$comp->getTitle()}:<br />
-                <div style="margin-left: 20px">
-                    Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} <br />
-                    Standard Deviation: {$comp->getStandardDeviation()}<br />
+                {$comp->getTitle()}:<br/>
+                <div style="margin-left: 40px">
+                    Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} <br/>
+                    Standard Deviation: {$comp->getStandardDeviation()}<br/>
                 </div>
 HTML;
             }
             if($overall_max !=0){
                 $percentage = round($overall_score / $overall_max *100);
                 $return .= <<<HTML
-                <br />Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
+                <br/>Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
 HTML;
             }
         }
