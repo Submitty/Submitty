@@ -236,6 +236,14 @@ progress::-webkit-progress-value {
     width: 14px;
 }
 
+.icon-got-this-mark {
+    visibility: visible; 
+    cursor: pointer; 
+    position: relative; 
+    top: 2px; 
+    left: 1%;
+}
+
 .rubric-title {
     width: 100%;
     margin-left: 0;
