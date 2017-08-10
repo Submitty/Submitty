@@ -323,7 +323,7 @@ HTML;
                     $return .= <<<HTML
     <form id="pdfPageStudent">
         <div class="sub">
-        <div>Enter the page number for each component. </div>
+        <div>Enter the page number that corresponds to each question. If the answer spans multiple pages, enter the page the answer starts on.</div>
 HTML;
                     $count = 0;
                     foreach ($gradeable->getComponents() as $question) {
