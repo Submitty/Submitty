@@ -47,7 +47,6 @@ class SimpleStat extends AbstractModel {
         }
         else {
             $this->component = false;
-            $this->title = $details['g_id'];
             $this->max_value = $details['max'];
             $this->average_score = $details['avg_score'];
             $this->standard_deviation = $details['std_dev'];

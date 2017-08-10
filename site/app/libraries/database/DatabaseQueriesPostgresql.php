@@ -687,15 +687,15 @@ SELECT COUNT(*) from gradeable_component where g_id=?
           ", array($g_id));
         $count = $this->course_db->rows()[0][0];
         $this->course_db->query("
-SELECT round(AVG(g_score),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, g_id, COUNT(*) FROM(
+SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
   SELECT * FROM(
-    SELECT gd_id, SUM(comp_score) AS g_score, SUM(gc_max_value) AS max, COUNT(comp.*), g_id FROM(
-      SELECT  gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, g_id,
+    SELECT gd_id, SUM(comp_score) AS g_score, SUM(gc_max_value) AS max, COUNT(comp.*), autograding FROM(
+      SELECT  gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, autograding,
       CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp 
       WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp 
       ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
-        SELECT gcd.gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, g_id, gc_lower_clamp, gc_default, gc_upper_clamp,
-        CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score 
+        SELECT gcd.gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
+        CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score, CASE WHEN autograding IS NULL THEN 0 ELSE autograding END AS autograding
         FROM gradeable_component_data AS gcd
         LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
         LEFT JOIN(
@@ -705,14 +705,24 @@ SELECT round(AVG(g_score),2) AS avg_score, round(stddev_pop(g_score),2) AS std_d
           GROUP BY gcmd.gc_id, gcmd.gd_id
           )AS marks
         ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
-        WHERE g_id=?
+        LEFT JOIN gradeable_data AS gd ON gd.gd_id=marks.gd_id
+        LEFT JOIN (
+          SELECT egd.g_id, egd.user_id, (autograding_non_hidden_non_extra_credit + autograding_non_hidden_extra_credit + autograding_hidden_non_extra_credit + autograding_hidden_extra_credit) AS autograding 
+          FROM electronic_gradeable_version AS egv 
+          LEFT JOIN electronic_gradeable_data AS egd ON egv.g_id=egd.g_id AND egv.user_id=egd.user_id AND active_version=g_version
+          )AS auto
+        ON gd.g_id=auto.g_id AND gd_user_id=user_id
+        WHERE gc.g_id=?
       )AS parts_of_comp
     )AS comp 
-    GROUP BY gd_id, g_id
+    GROUP BY gd_id, autograding
   )g WHERE count=?
 )AS individual
-GROUP BY g_id
           ", array($g_id, $count));
+        if(count($this->course_db->rows()) == 0){
+          echo("why");
+          return;
+        }
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 

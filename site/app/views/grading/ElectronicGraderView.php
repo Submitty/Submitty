@@ -109,32 +109,45 @@ HTML;
             </div>
         </div>
         <div class="box half">
-HTML;
-        if($overall_average->getMaxValue() == 0) {
-            $return .= <<<HTML
-            There are no students completely graded yet.
-HTML;
-        }
-        else {
-            $return .= <<< HTML
             <b>Statistics for Completely Graded Assignments: </b><br/>
             <div style="margin-left: 20px">
-                Average: {$overall_average->getAverageScore()} / {$overall_average->getMaxValue()} <br/>
-                Standard Deviation: {$overall_average->getStandardDeviation()} <br/>
-                Count: {$overall_average->getCount()} <br/><br/>
+HTML;
+            if($overall_average == null) {
+                $return .= <<<HTML
+                There are no students completely graded yet.
             </div>
 HTML;
-        }
-        $return .= <<<HTML
-            <b>Statistics of Graded Components: </b><br/>
+            }
+            else {
+                if($gradeable->getTotalAutograderNonExtraCreditPoints() == null) {
+                    $total = $overall_average->getMaxValue();
+                }
+                else {
+                    $total = $overall_average->getMaxValue() + $gradeable->getTotalAutograderNonExtraCreditPoints();                    
+                }
+                $return .= <<< HTML
+                Average: {$overall_average->getAverageScore()} / {$total} <br/>
+                Standard Deviation: {$overall_average->getStandardDeviation()} <br/>
+                Count: {$overall_average->getCount()} <br/>
+            </div>
+HTML;
+            }
+            $return .= <<<HTML
+            <br/><b>Statistics of Graded Components: </b><br/>
             <div style="margin-left: 20px">
 HTML;
-            $overall_score = 0;
-            $overall_max = 0;
-            foreach($component_averages as $comp) {
-                $overall_score += $comp->getAverageScore();
-                $overall_max += $comp->getMaxValue();
+            if(count($component_averages) == 0) {
                 $return .= <<<HTML
+            No components have been graded yet.
+HTML;
+            }
+            else {
+                $overall_score = 0;
+                $overall_max = 0;
+                foreach($component_averages as $comp) {
+                    $overall_score += $comp->getAverageScore();
+                    $overall_max += $comp->getMaxValue();
+                    $return .= <<<HTML
                 {$comp->getTitle()}:<br/>
                 <div style="margin-left: 40px">
                     Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} <br/>
@@ -142,12 +155,13 @@ HTML;
                     Count: {$comp->getCount()} <br/>
                 </div>
 HTML;
-            }
-            if($overall_max !=0){
-                $percentage = round($overall_score / $overall_max *100);
-                $return .= <<<HTML
+                }
+                if($overall_max !=0){
+                    $percentage = round($overall_score / $overall_max *100);
+                    $return .= <<<HTML
                 <br/>Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
 HTML;
+                }
             }
         }
         $return .= <<<HTML
