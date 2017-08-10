@@ -9,5 +9,6 @@ setup(
     description='Python Submitty Utils',
     install_requires=[
         'tzlocal'
-    ]
+    ],
+    zip_safe=True
 )

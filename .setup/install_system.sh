@@ -133,11 +133,6 @@ pip3 install python-dateutil
 pip3 install watchdog
 pip3 install xlsx2csv
 
-pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-python2 setup.py install
-python3 setup.py install
-popd
-
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
@@ -311,7 +306,7 @@ else
     git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     # remember to change this version in .setup/travis/autograder.sh too
-    git checkout v0.91
+    git checkout v0.92
     popd
 fi
 

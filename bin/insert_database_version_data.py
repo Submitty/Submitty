@@ -21,6 +21,8 @@ will explain how to do that.
 """
 import json
 import os
+import time
+import grade_items_logging
 from submitty_utils import dateutils
 
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
@@ -63,9 +65,21 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
         conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD, db_name, DB_HOST)
     else:
         conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name)
+
+
     db = create_engine(conn_string)
     metadata = MetaData(bind=db)
-    data_table = Table('electronic_gradeable_data', metadata, autoload=True)
+
+
+    # wrapping a try catch around this statement to catch exception:
+    # sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) FATAL:  sorry, too many clients already
+    try:
+      data_table = Table('electronic_gradeable_data', metadata, autoload=True)
+    except:
+      grade_items_logging.log_message(False,"","","",0,"Exception which trying to insert_database_version_data.py")
+      print ("\nEXCEPTION WHEN TRYING TO INSERT DB\n")
+      print ("\nkilling this grader (daemon will restart when all die)\n")
+
 
     """
     The data row should have been inserted by PHP when the student uploads the submission, requiring
