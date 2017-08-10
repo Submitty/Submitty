@@ -705,7 +705,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
           GROUP BY gcmd.gc_id, gcmd.gd_id
           )AS marks
         ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
-        LEFT JOIN gradeable_data AS gd ON gd.gd_id=marks.gd_id
+        LEFT JOIN gradeable_data AS gd ON gd.gd_id=gcd.gd_id
         LEFT JOIN (
           SELECT egd.g_id, egd.user_id, (autograding_non_hidden_non_extra_credit + autograding_non_hidden_extra_credit + autograding_hidden_non_extra_credit + autograding_hidden_extra_credit) AS autograding 
           FROM electronic_gradeable_version AS egv 
