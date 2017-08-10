@@ -6,7 +6,7 @@ use app\libraries\Core;
 use app\libraries\DatabaseUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
-use app\libraries\Logger;
+//use app\libraries\Logger;
 
 class GradeSummary extends AbstractModel {
     /**/
@@ -140,32 +140,36 @@ class GradeSummary extends AbstractModel {
     
     public function generateAllSummaries() {
         $users = $this->core->getQueries()->getAllUsers();
-        $ids = array_map(function($user) {return $user->getId();}, $users);
+        $user_ids = array_map(function($user) {return $user->getId();}, $users);
         //XXX: This grabs the gradeables in alphabetical order
         $gradeable_ids = $this->core->getQueries()->getAllGradeablesIds();
         $gradeable_ids = array_map(function($g_id) { return $g_id["g_id"];}, $gradeable_ids);
 
-        /*
-        $n_users = count($ids);
-        $n_gradeable_ids = count($gradeable_ids);
-        Logger::debug("There are {$n_users} users and {$n_gradeable_ids} gradeable IDs");
-        */
+        /* This is the default behavior at the moment, grab all users for a gradeable chunk.
+         * There isn't any memory advantage right now to doing smaller chunks of users, but
+         * that isn't to say that there might not be a benefit in the future to user chunking.
+         */
+        $size_of_user_id_chunks = count($user_ids);
+        $size_of_gradeable_id_chunks = 5;
 
         $ldu = new LateDaysCalculation($this->core);
         $student_output_json = array();
         $buckets = array();
-        foreach($gradeable_ids as $g_id){
-            $summary_data = $this->core->getQueries()->getGradeables($g_id,$ids);
-            Logger::debug("Got gradeable {$g_id}");
-            $this->generateSummariesFromQueryResults($student_output_json,$buckets,$summary_data,$ldu);
+        $gradeable_id_chunks = array_chunk($gradeable_ids,$size_of_gradeable_id_chunks);
+        $user_id_chunks = array_chunk($user_ids,$size_of_user_id_chunks);
+        foreach($user_id_chunks as $user_id_chunk) {
+            foreach ($gradeable_id_chunks as $gradeable_id_chunk) {
+                $summary_data = $this->core->getQueries()->getGradeables($gradeable_id_chunk, $user_id_chunk);
+                //Logger::debug("Got gradeables " . implode(",", $gradeable_id_chunk) . " for users " . implode(",",$user_id_chunk));
+                $this->generateSummariesFromQueryResults($student_output_json, $buckets, $summary_data, $ldu);
+                //Logger::debug("Current memory usage: " . memory_get_usage(false) . " True memory usage: " . memory_get_usage(true));
+            }
         }
 
-        Logger::debug("Writing reports");
         // WRITE THE JSON FILE
         foreach($student_output_json as $student) {
             $student_id = $student['user_id'];
             $student_output_json_name = $student_id . "_summary.json";
-
             file_put_contents(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports","all_grades", $student_output_json_name)), json_encode($student,JSON_PRETTY_PRINT));
 
         }
