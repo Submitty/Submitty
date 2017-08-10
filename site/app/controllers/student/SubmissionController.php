@@ -775,7 +775,6 @@ class SubmissionController extends AbstractController {
                 if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
                     return $this->uploadResult("Failed to write to pages file.", false);
                 }
-
             }
     
             $previous_files = array();

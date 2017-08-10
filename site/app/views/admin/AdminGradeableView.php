@@ -586,7 +586,7 @@ HTML;
                     <thead style="background: #E1E1E1;">
                         <tr>
                             <th>Manual/TA/Peer Grading Rubric</th>
-                            <th style="width:175px;">Points</th>
+                            <th style="width:120px;">Points</th>
                         </tr>
                     </thead>
                     <tbody style="background: #f9f9f9;">
@@ -601,9 +601,6 @@ HTML;
                                   'peer_component'        => 0,
                                   'page_component'        => 1);
     }
-
-
-    
 
     //this is a hack
     array_unshift($old_questions, "tmp");
@@ -1870,10 +1867,8 @@ $('#gradeable-form').on('submit', function(e){
         row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
         row.find('div[id=peer_checkbox_' + oldNum +']').attr('id', 'peer_checkbox_' + newNum);
         row.find('input[name=peer_component_'+ oldNum + ']').attr('name', 'peer_component_' + newNum);
-
         row.find('div[id=pdf_page_' + oldNum +']').attr('id', 'pdf_page_' + newNum);
         row.find('input[name=page_component_' + oldNum + ']').attr('name', 'page_component_' + newNum);
-
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
         row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');

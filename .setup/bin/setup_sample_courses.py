@@ -1265,9 +1265,7 @@ class Component(object):
         self.title = component['gc_title']
         self.ta_comment = ""
         self.student_comment = ""
-
         self.is_text = False
-
         self.is_peer = False
         self.page = 0
         self.order = order
