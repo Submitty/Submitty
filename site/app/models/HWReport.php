@@ -42,6 +42,14 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             $name_and_emails = array();
             foreach($gradeable->getComponents() as $component){
+                if(is_array($component)) {
+                    foreach($component as $cmpt) {
+                        if(!$cmpt->getGrader() == null) {
+                            $name_and_emails[] = "Student";
+                        }
+                    }
+                    continue;
+                }
                 if($component->getGrader() === null) {
                     //nothing happens
                 } 
@@ -99,7 +107,25 @@ class HWReport extends AbstractModel {
                     $student_output_text .= $nl.$gradefilecontents.$nl;
                 }
 
-                foreach($gradeable->getComponents() as $component) {
+                foreach($gradeable->getComponents() as $question) {
+                    if(is_array($question)) {
+                        $student_output_text .= "PEER GRADED COMPONENT".$nl;
+                        $count = 1;
+                        foreach($question as $peer) {
+                            $temp_score = ($type === 0)? 0: $component->getMaxValue();
+                            $temp_note = "";
+                            foreach($peer->getMarks() as $mark) {
+                                $temp_note .= "    ".$mark->getNote(). $nl;
+                                $temp_score += $mark->getPoints();
+                            }
+                            $student_output_text .= "  Student ".$count." : [" .$temp_score . "/" .$peer->getMaxValue(). "]".$nl;
+                            $student_output_text .= "  Notes: " .$nl .$temp_note;
+                        }
+                        continue;
+                    }
+                    else {
+                        $component = $question;
+                    }
                     $temp_notes = "";
                     $type = 0; // 0 is deduct, 1 is addition
                     foreach($component->getMarks() as $mark) {
@@ -117,13 +143,12 @@ class HWReport extends AbstractModel {
                     } else {
                         $temp_score = ($type === 0) ? $component->getMaxValue() : 0;
                     }
-                    
                     foreach($component->getMarks() as $mark) {
                         if($mark->getHasMark()) {
                             $temp_score += $mark->getPoints();
                             $temp_notes .= $mark->getPoints() . " : " . $mark->getNote() . $nl;
                         }
-                    }
+                    }                    
 
                     if(!($component->getScore() == 0 && $component->getComment() == "")) {
                         $wrong_number = false;
@@ -167,7 +192,6 @@ class HWReport extends AbstractModel {
                             }
                         }
                     }
-                    
                     $student_output_text .= $component->getTitle() . "[" . $temp_score . "/" . $component->getMaxValue() . "] ";
                     if ($component->getGrader() === null) {
                         $student_output_text .= $nl;

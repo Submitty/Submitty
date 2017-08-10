@@ -269,7 +269,7 @@ function cancelMark(num, gradeable_id, user_id, gc_id) {
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_gradeable_comment'}),
             data: {
                 'gradeable_id' : gradeable_id,
-                'user_id' : user_id
+                'anon_id' : user_id
             },
             success: function(data) {
                 console.log("success for canceling gradeable comment");
@@ -297,7 +297,7 @@ function cancelMark(num, gradeable_id, user_id, gc_id) {
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
             data: {
                 'gradeable_id' : gradeable_id,
-                'user_id' : user_id,
+                'anon_id' : user_id,
                 'gradeable_component_id' : gc_id
             },
             success: function(data) {
@@ -359,7 +359,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_gradeable_comment'}),
             data: {
                 'gradeable_id' : gradeable_id,
-                'user_id' : user_id,
+                'anon_id' : user_id,
                 'active_version' : active_version,
                 'gradeable_comment' : gradeable_comment
             },
@@ -502,20 +502,20 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1) {
         } else {
             overwrite = "false";
         }
-
+        console.log(mark_data);
         $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
             data: {
                 'gradeable_id' : gradeable_id,
-                'user_id' : user_id,
+                'anon_id' : user_id,
                 'gradeable_component_id' : gc_id,
                 'num_mark' : arr_length,
                 'active_version' : active_version,
                 'custom_points' : custom_points,
                 'custom_message' : custom_message,
                 'overwrite' : overwrite,
-                marks : mark_data
+                'marks' : mark_data
             },
             success: function(data) {
                 console.log("success for saving a mark");

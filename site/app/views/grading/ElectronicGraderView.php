@@ -181,7 +181,7 @@ HTML;
      * @param array       $graders
      * @return string
      */
-    public function detailsPage($gradeable, $rows, $graders, $empty_teams, $peer=false) {
+    public function detailsPage($gradeable, $rows, $graders, $empty_teams) {
         $return = <<<HTML
 <div class="content">
     
@@ -196,6 +196,10 @@ HTML;
         else{
             $text = 'View Your Sections';
             $view = null;
+        }
+        $peer = false;
+        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup()==4) {
+            $peer = true;
         }
         if($peer) {
             $grading_count = $gradeable->getPeerGradeSet();
@@ -912,25 +916,14 @@ HTML;
 
         foreach ($gradeable->getComponents() as $component) {
             if($peer && !is_array($component)) continue;
-            $component_basics = array();
             $type = 0; //0 is common deductable, 1 is common additive
             $min = -1000;
             $max = 0;
             $ungraded = false;
             $question = null;
-            if($peer) {
+            $show_graded_info = true;
+            if(is_array($component)) {
                 foreach($component as $cmpt) {
-                    if(count($component_basics) === 0) {
-                        $component_basics['gc_id'] = $cmpt->getId();
-                        $component_basics['gc_is_peer'] = $cmpt->getIsPeer();
-                        $component_basics['gc_is_text'] = $cmpt->getIsText();
-                        $component_basics['gc_is_extra_credit'] = $cmpt->getIsExtraCredit();
-                        $component_basics['gc_title'] = $cmpt->getTitle();
-                        $component_basics['gc_order'] = $cmpt->getOrder();
-                        $component_basics['gc_max_value'] = $cmpt->getMaxValue();
-                        $component_basics['gc_ta_comment'] = $cmpt->getTaComment();
-                        $component_basics['gc_student_comment'] = $cmpt->getStudentComment();
-                    }
                     if($cmpt->getGrader() == null) {
                         $question = $cmpt;
                         break;
@@ -941,7 +934,8 @@ HTML;
                     }
                 }
                 if($question === null) {
-                    $question = $this->core->loadModel(GradeableComponent::class, $component_basics);
+                    $show_graded_info = false;
+                    $question = $component[0];
                 }
             }
             else {
@@ -1013,7 +1007,7 @@ HTML;
 
             //get the grader's id if it exists
             $grader_id = "";
-            if($question->getGrader() === null) {
+            if($question->getGrader() === null || !$show_graded_info) {
                 $grader_id = "Ungraded!";
             } else {
                 $grader_id = "Graded by " . $question->getGrader()->getId();
@@ -1022,8 +1016,8 @@ HTML;
             $return .= <<<HTML
             <div style="float: right;">
                 <span id="graded-by-{$c}" style="font-style: italic;">{$grader_id}</span>
-                <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark(-2, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                <span id="save-mark-{$c}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
+                <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark(-2, '{$gradeable->getId()}', '{$user->getAnonId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                <span id="save-mark-{$c}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
             </div>
             </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
 HTML;
@@ -1055,35 +1049,34 @@ HTML;
                     $question_points = 0;
                 }
             }
-            
-            foreach ($question->getMarks() as $mark) {
-                if($mark->getHasMark() === true) {
-                    $question_points += $mark->getPoints();
+            if($show_graded_info) {
+                foreach ($question->getMarks() as $mark) {
+                    if($mark->getHasMark() === true) {
+                        $question_points += $mark->getPoints();
+                        if ($first_text === true) {
+                            $initial_text .= "* " . $mark->getNote();
+                            $first_text = false;
+                        }
+                        else {
+                            $initial_text .= "<br>* " . $mark->getNote();
+                        }
+                    }
+                }
+                if($question->getComment() != "") {
                     if ($first_text === true) {
-                        $initial_text .= "* " . $mark->getNote();
+                        $initial_text .= "* " . $question->getComment();
                         $first_text = false;
                     }
                     else {
-                        $initial_text .= "<br>* " . $mark->getNote();
+                        $initial_text .= "<br>* " . $question->getComment();
                     }
                 }
             }
-            if($question->getComment() != "") {
-                if ($first_text === true) {
-                    $initial_text .= "* " . $question->getComment();
-                    $first_text = false;
-                }
-                else {
-                    $initial_text .= "<br>* " . $question->getComment();
-                }
-            }
-
+            
             if($initial_text == "") {
                 $initial_text = "Click me to grade!";
                 $ungraded = true;
             }
-
-            $question_points += $question->getScore();
             if($question->getMaxValue() < 0) {
                 if ($type === 0) {
                     if ($question_points < $question->getMaxValue()) $question_points = $question->getMaxValue();
@@ -1132,12 +1125,11 @@ HTML;
                     $first = false;
                     $noChange = "readonly";
                     $mark_text = ($type === 1) ? "No Credit" : "Full Credit";
-                }
-                else {
+                } else {
                     $noChange = "";
                     $mark_text = $mark->getNote();
                 }
-                $icon_mark = ($mark->getHasMark() === true) ? "fa-square" : "fa-square-o";
+                $icon_mark = ($mark->getHasMark() === true && $show_graded_info) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
                 <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
                     <td colspan="1" style="{$background}; text-align: center; width: 12%;"> 
@@ -1149,16 +1141,17 @@ HTML;
                     </td>
                 </tr>
 HTML;
-            $d++;
+                $d++;
             }
+            $has_mark = false;
+            if(($question->getScore() == 0 && $question->getComment() == "") || !$show_graded_info) {
                 $has_mark = false;
-                if($question->getScore() == 0 && $question->getComment() == "") {
-                    $has_mark = false;
-                }
-                else {
-                    $has_mark = true;
-                }
-                $icon_mark = ($has_mark === true) ? "fa-square" : "fa-square-o";
+            }
+            else {
+                $has_mark = true;
+            }
+            $icon_mark = ($has_mark === true) ? "fa-square" : "fa-square-o";
+            if(!$peer) {
                 $return .= <<<HTML
                 <tr>
                     <td colspan="4" style="{$background};">
@@ -1166,6 +1159,10 @@ HTML;
                         Add New Common {$word}</span>
                     </td>
                 </tr>
+
+HTML;
+            }
+            $return .= <<<HTML
                 <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
                     <td colspan="1" style="text-align: center; {$background}"> 
                     <span onclick=""> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
@@ -1179,14 +1176,17 @@ HTML;
 HTML;
             $c++;
         }
-        if(!$peer) {
-            $return .= <<<HTML
+        if($peer) {
+            $break_onclick = 'return false;';
+            $disabled = 'disabled';
+        }
+        $return .= <<<HTML
             <tr>
                 <td colspan="4">
                     <b>General Comment</b>
                     <div style="float: right;">
-                        <span id="cancel-mark-general"onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                        <span id="save-mark-general" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                        <span id="cancel-mark-general"onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getAnonId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                        <span id="save-mark-general" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                     </div> 
                 </td>
             </tr>
@@ -1207,7 +1207,7 @@ HTML;
                 </tr>
             </tbody>
 HTML;
-        }
+        
         if($peer) {
             $total_points = $gradeable->getTotalNonHiddenNonExtraCreditPoints() + $gradeable->getTotalPeerGradingNonExtraCredit();
         }

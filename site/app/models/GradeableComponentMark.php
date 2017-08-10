@@ -48,13 +48,13 @@ class GradeableComponentMark extends AbstractModel {
         }
     }
 
-    public function saveData($gd_id, $gc_id) {
+    public function saveData($gd_id, $gc_id, $gcd_grader_id) {
         if($this->modified){
             if($this->has_mark != $this->original_has_mark) {
             	if ($this->has_mark) {
-                    $this->core->getQueries()->insertGradeableComponentMarkData($gd_id, $gc_id, $this);
+                    $this->core->getQueries()->insertGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, $this);
             	} else {
-            		$this->core->getQueries()->deleteGradeableComponentMarkData($gd_id, $gc_id, $this);
+            		$this->core->getQueries()->deleteGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, $this);
             	}
             }
         }

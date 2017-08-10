@@ -164,22 +164,36 @@ class GradeableComponent extends AbstractModel {
     }
 
     public function deleteData($gd_id) {
-        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this) === true) {
-            $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this);
+        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this) === true) {
+            $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
+            return true;
         }
+        return false;
     }
 
     public function saveData($gd_id) {
         if ($this->modified) {
-            if($this->grader_modified) {
-                $this->core->getQueries()->replaceGradeableComponentData($gd_id, $this);
-            }
-            else if ($this->has_grade || $this->has_marks) {
-                $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
+            $action = $this->core->getQueries()->checkGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
+            if($action) {
+                if($this->grader->modified) {
+                    $this->core->getQueries()->replaceGradeableComponentData($gd_id, $this);
+                    return "replace";
+                }
+                else {
+                    $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
+                    return "update";
+                }
             }
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
+                return "insert";
             }
+        }
+    }
+    
+    public function setMarks($marks) {
+        if(count($this->marks) == 0) {
+            $this->marks = $marks;
         }
     }
 }

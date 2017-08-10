@@ -437,16 +437,26 @@ ORDER BY u.{$section_key}, {$sort_key}";
     }
 
     public function getGradeableComponents($g_id, $gd_id=null) {
-        $this->course_db->query("
-SELECT gcd.*, gc.*
-FROM gradeable_component AS gc
-LEFT JOIN (
+        $left_join = "";
+        $gcd = "";
+
+        $params = array();
+        if($gd_id != null) {
+            $params[] = $gd_id;
+            $left_join = "LEFT JOIN (
   SELECT *
   FROM gradeable_component_data
   WHERE gd_id = ?
-) as gcd ON gc.gc_id = gcd.gc_id
+) as gcd ON gc.gc_id = gcd.gc_id";
+        $gcd = ', gcd.*';
+        }
+        $params[] = $g_id;
+        $this->course_db->query("
+SELECT gc.*{$gcd}
+FROM gradeable_component AS gc
+{$left_join}
 WHERE gc.g_id=?
-", array($gd_id, $g_id));
+", $params);
 
         $return = array();
         foreach ($this->course_db->rows() as $row) {
@@ -1016,32 +1026,32 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
         $this->insertGradeableComponentData($gd_id, $component);
     }
 
-    public function deleteGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getId(), $gd_id);
+    public function deleteGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
+        $params = array($component->getId(), $gd_id, $grader_id);
         $this->course_db->query("
-DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
+DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
     }
 
-    public function checkGradeableComponentData($gd_id, GradeableComponent $component) {
-        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", 
-          array($component->getId(), $gd_id));
+    public function checkGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
+        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", 
+          array($component->getId(), $gd_id, $grader_id));
         if ($this->course_db->row()['cnt'] == 0) {
           return false;
         }
         return true;
     }
 
-    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
-        $params = array($gc_id, $gd_id, $mark->getId());
+    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $mark->getId(), $gcd_grader_id);
         $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=? AND gcd_grader_id=?", $params);
     }
 
-    public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
-        $params = array($gc_id, $gd_id, $mark->getId());
+    public function insertGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $gcd_grader_id, $mark->getId());
         $this->course_db->query("
-INSERT INTO gradeable_component_mark_data (gc_id, gd_id, gcm_id)
-VALUES (?, ?, ?)", $params);
+INSERT INTO gradeable_component_mark_data (gc_id, gd_id, gcd_grader_id, gcm_id)
+VALUES (?, ?, ?, ?)", $params);
     }
 
     public function createNewGradeable(Gradeable $gradeable) {

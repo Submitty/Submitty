@@ -380,40 +380,50 @@ class Gradeable extends AbstractModel {
                 }
 
 
-
+                $grade_details = array();
+                $keys = array();
                 if (isset($details['array_gcd_gc_id'])) {
                     for ($j = 0; $j < count($details['array_gcd_gc_id']); $j++) {
                         if ($details['array_gcd_gc_id'][$j] === $component_details['gc_id']) {
-                            $component_details['array_gcm_mark'] = $details['array_array_gcm_mark'][$j];
-                            $component_details['gcd_score'] = $details['array_gcd_score'][$j];
-                            $component_details['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
-                            $component_details['gcd_graded_version'] = $details['array_gcd_graded_version'][$j];                            
-                            $component_details['gcd_grade_time'] = $details['array_gcd_grade_time'][$j];
+                            $keys[] = $j;
+                            $grade_details[$j] = array();
+                            $grade_details[$j]['array_gcm_mark'] = $details['array_array_gcm_mark'][$j];
+                            $grade_details[$j]['gcd_score'] = $details['array_gcd_score'][$j];
+                            $grade_details[$j]['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
+                            $grade_details[$j]['gcd_graded_version'] = $details['array_gcd_graded_version'][$j];                            
+                            $grade_details[$j]['gcd_grade_time'] = $details['array_gcd_grade_time'][$j];
 
                             if (isset($details['array_gcd_user_id'][$j])) {
                                 $user_details = array();
                                 foreach ($user_fields as $key) {
                                     $user_details[$key] = $details["array_gcd_{$key}"][$j];
                                 }
-                                $component_details['gcd_grader'] = $this->core->loadModel(User::class, $user_details);
+                                $grade_details[$j]['gcd_grader'] = $this->core->loadModel(User::class, $user_details);
                             }
-
-                            break;
                         }
                     }
                 }
                 
-                if($component_details['gc_is_peer'] && isset($this->components[$component_details['gc_order']])) {
-                    $this->components[$component_details['gc_order']][] = $this->core->loadModel(GradeableComponent::class, $component_details);
-                    $component_for_info = end($this->components[$component_details['gc_order']]);
-                }
-                else if($component_details['gc_is_peer']) {
-                    $this->components[$component_details['gc_order']] = array($this->core->loadModel(GradeableComponent::class, $component_details));
-                    $component_for_info = $this->components[$component_details['gc_order']][0];
+                if(count($grade_details) <= 1) {
+                    if(count($grade_details) == 1) {
+                        $component_details = array_merge($component_details, $grade_details[$keys[0]]);
+                    }
+                    if($component_details['gc_is_peer']) {
+                        $this->components[$component_details['gc_order']] = array($this->core->loadModel(GradeableComponent::class, $component_details));
+                        $component_for_info = $this->components[$component_details['gc_order']][0];
+                    }
+                    else {
+                        $this->components[$component_details['gc_order']] = $this->core->loadModel(GradeableComponent::class, $component_details);
+                        $component_for_info = $this->components[$component_details['gc_order']];
+                    }
                 }
                 else {
-                    $this->components[$component_details['gc_order']] = $this->core->loadModel(GradeableComponent::class, $component_details);
-                    $component_for_info = $this->components[$component_details['gc_order']];
+                    $this->components[$component_details['gc_order']] = array();
+                    foreach($keys as $key) {
+                        $use_this = array_merge($component_details, $grade_details[$key]);
+                        $this->components[$component_details['gc_order']][] = $this->core->loadModel(GradeableComponent::class, $use_this);
+                    }
+                    $component_for_info = $this->components[$component_details['gc_order']][0];
                 }
 
                 if (!$component_for_info->getIsText()) {
@@ -1107,8 +1117,8 @@ class Gradeable extends AbstractModel {
         foreach($this->components as $cmpt) {
             if(is_array($cmpt)) {
                 foreach($cmpt as $peer) {
-                    if($peer->getGrader() !== null && $cmpt->getGrader()->getId() == $grader_id) {
-                        $return[] = $cmpt;
+                    if($peer->getGrader() !== null && $peer->getGrader()->getId() == $grader_id) {
+                        $return[] = $peer;
                     }
                 }
             }
