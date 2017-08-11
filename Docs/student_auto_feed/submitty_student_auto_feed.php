@@ -1,8 +1,9 @@
+#!/usr/bin/env php
 <?php
 
 /* HEADING ---------------------------------------------------------------------
  *
- * config.php script used by submitty_student_auto_feed
+ * submitty_student_auto_feed.php
  * By Peter Bailie, Systems Programmer (RPI dept of computer science)
  *
  * Requires minimum PHP version 5.4 with pgsql and iconv extensions.
@@ -25,9 +26,10 @@
  * (1) include "config.php" so that constants are defined.
  * (2) instantiate this class to process a data feed.
  *
- * q.v. driver.php
- *
  * -------------------------------------------------------------------------- */
+
+require "config.php";
+new submitty_student_auto_feed();
 
 class submitty_student_auto_feed {
     private static $semester;
@@ -59,6 +61,7 @@ class submitty_student_auto_feed {
         //if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
         self::$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
 
+
         //Connect to submitty_db
         $db_host     = DB_HOST;
         $db_user     = DB_LOGIN;
@@ -66,7 +69,7 @@ class submitty_student_auto_feed {
         self::$db = pg_connect("host={$db_host} dbname=submitty user={$db_user} password={$db_password}");
 
         //Make sure there's a DB connection to Submitty.
-        if (!$this->test_db_conn()) {
+        if (pg_connection_status(self::$db) === PGSQL_CONNECTION_BAD) {
             $this->log_it("Error: Cannot connect to submitty DB");
         } else {
             //$psql_version will determine which upsert method is used.
@@ -94,13 +97,15 @@ class submitty_student_auto_feed {
                 break;
             }
         }
+
         //END EXECUTION
+        exit(0);
     }
 
     public function __destruct() {
 
         //Close DB connection, if it exists.
-        if ($this->test_db_conn()) {
+        if (pg_connection_status(self::$db) === PGSQL_CONNECTION_OK) {
         	pg_close(self::$db);
         }
 
@@ -108,6 +113,7 @@ class submitty_student_auto_feed {
         if (!empty(self::$log_msg_queue)) {
             error_log(self::$log_msg_queue, 1, ERROR_E_MAIL);    //to email
             error_log(self::$log_msg_queue, 3, ERROR_LOG_FILE);  //to file
+
         }
     }
 
@@ -185,12 +191,17 @@ class submitty_student_auto_feed {
                                                    'user_lastname'      => $row[COLUMN_LASTNAME],
                                                    'user_preferredname' => $row[COLUMN_PREFERREDNAME],
                                                    'user_email'         => $row[COLUMN_EMAIL]);
-                    self::$data['courses_users'][] = array('semester'             => self::$semester,
-                                                           'course'               => strtolower($row[COLUMN_COURSE_PREFIX] . $row[COLUMN_COURSE_NUMBER]),
-                                                           'user_id'              => $row[COLUMN_USER_ID],
-                                                           'user_group'           => 4,
-                                                           'registration_section' => $row[COLUMN_SECTION],
-                                                           'manual_registration'  => 'FALSE');
+
+					//Group 'courses_users' data by individual courses, so
+					//upserts can be transacted per course.  This helps prevent
+					//FK violations blocking upserts for other courses.
+                    $course = strtolower($row[COLUMN_COURSE_PREFIX] . $row[COLUMN_COURSE_NUMBER]);
+                    self::$data['courses_users'][$course][] = array('semester'             => self::$semester,
+                                                                    'course'               => $course,
+                                                                    'user_id'              => $row[COLUMN_USER_ID],
+                                                                    'user_group'           => 4,
+                                                                    'registration_section' => $row[COLUMN_SECTION],
+                                                                    'manual_registration'  => 'FALSE');
                 }
             }
         } unset($row);
@@ -212,7 +223,7 @@ class submitty_student_auto_feed {
 
     private function get_participating_course_list() {
         //EXPECTED: self::$db has an active/open Postgres connection.
-        if (!$this->test_db_conn()) {
+        if (pg_connection_status(self::$db) === PGSQL_CONNECTION_BAD) {
             $this->log_it("Error: not connected to submitty DB when retrieving active course list.");
             return false;
         }
@@ -232,15 +243,6 @@ SQL;
         }
 
         return pg_fetch_all_columns($result, 0);
-    }
-
-    private function test_db_conn() {
-        //Make sure $db connection is good.
-        if (!is_resource(self::$db) || get_resource_type(self::$db) !== 'pgsql link') {
-            return false;
-        }
-
-        return true;
     }
 
     private function upsert_psql94() {
@@ -285,18 +287,13 @@ SQL;
 
         //INSERT new data into temporary table -- prepares all data to be
         //upserted in a single DB transaction.
-        foreach(self::$data['users'] as $i => $row) {
-            $sql['users']['data'][$i] = <<<SQL
+        $sql['users']['data'] = <<<SQL
 INSERT INTO upsert_users VALUES ($1,$2,$3,$4,$5);
 SQL;
-		}
 
-        foreach(self::$data['courses_users'] as $i => $row) {
-
-            $sql['courses_users']['data'][$i] = <<<SQL
+        $sql['courses_users']['data'] = <<<SQL
 INSERT INTO upsert_courses_users VALUES ($1,$2,$3,$4,$5,$6);
 SQL;
-        }
 
         //LOCK will prevent sharing collisions while upsert is in process.
         $sql['users']['lock'] = <<<SQL
@@ -394,24 +391,40 @@ AND courses_users.user_group=$1
 AND courses_users.manual_registration=$2
 SQL;
 
+		//Transactions
+		//'users' table
+		pg_query(self::$db, $sql['users']['begin']);
+		pg_query(self::$db, $sql['users']['temp_table']);
+		//fills temp table with batch upsert data.
+		foreach(self::$data['users'] as $row) {
+			pg_query_params(self::$db, $sql['users']['data'], $row);
+		}
+		pg_query(self::$db, $sql['users']['lock']);
+		if (pg_query(self::$db, $sql['users']['update']) === false) {
+			$this->log_it("USERS (UPDATE) : " . pg_last_error(self::$db));
+		}
+		if (pg_query(self::$db, $sql['users']['insert']) === false) {
+			$this->log_it("USERS (INSERT) : " . pg_last_error(self::$db));
+		}
+		$this->log_it(pg_last_error(self::$db));
+		pg_query(self::$db, $sql['users']['commit']);
 
-		foreach ($sql as $table_name => $table) {
-
-			pg_query(self::$db, $table['begin']);
-			pg_query(self::$db, $table['temp_table']);
-
+		//'courses_users' table (per course)
+		foreach(self::$data['courses_users'] as $course_name => $course_data) {
+			pg_query(self::$db, $sql['courses_users']['begin']);
+			pg_query(self::$db, $sql['courses_users']['temp_table']);
 			//fills temp table with batch upsert data.
-			foreach(self::$data[$table_name] as $i => $row) {
-				pg_query_params(self::$db, $table['data'][$i], $row);
+			foreach($course_data as $row) {
+				pg_query_params(self::$db, $sql['courses_users']['data'], $row);
 			}
-
-			pg_query(self::$db, $table['lock']);
-			pg_query(self::$db, $table['update']);
-			pg_query(self::$db, $table['insert']);
-			if (!is_null($table['dropped_students'])) {
-				pg_query_params(self::$db, $table['dropped_students'], array(4, 'FALSE'));
+			pg_query(self::$db, $sql['courses_users']['lock']);
+			if (pg_query(self::$db, $sql['courses_users']['update']) === false) {
+				$this->log_it(strtoupper($course_name) . " (UPDATE) : " . pg_last_error(self::$db));
 			}
-			pg_query(self::$db, $table['commit']);
+			if (pg_query(self::$db, $sql['courses_users']['insert']) === false) {
+				$this->log_it(strtoupper($course_name) . " (INSERT) : " . pg_last_error(self::$db));
+			}
+			pg_query(self::$db, $sql['courses_users']['commit']);
 		}
 
         //indicate success.
@@ -439,7 +452,9 @@ SQL;
     //OUT: No return, although log ms queue is updated.
     //PURPOSE: log msg queue holds messages intended for email and text logs.
 
-        self::$log_msg_queue .= date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
+		if (!empty($msg)) {
+	        self::$log_msg_queue .= date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
+	    }
     }
 }
 
