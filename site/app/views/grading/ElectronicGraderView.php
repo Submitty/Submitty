@@ -14,7 +14,11 @@ class ElectronicGraderView extends AbstractView {
      * @param array     $sections
      * @return string
      */
-    public function statusPage($gradeable, $sections, $peer) {
+    public function statusPage($gradeable, $sections, $component_averages, $overall_average) {
+        $peer = false;
+        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
+            $peer = true; 
+        }
         $course = $this->core->getConfig()->getCourse();
         $semester = $this->core->getConfig()->getSemester();
         $graded = 0;
@@ -63,16 +67,17 @@ HTML;
             }
             $return .= <<<HTML
     <div class="sub">
-        Current percentage of grading done: {$percentage}% ({$show_graded}/{$show_total})
+        <div class="box half">
+            Current percentage of grading done: {$percentage}% ({$show_graded}/{$show_total})
 HTML;
-            if ($gradeable->isTeamAssignment() && $no_team_total > 0) {
-                $return .= <<<HTML
-         - {$no_team_total} students with no team
-HTML;
-            }
+        if ($gradeable->isTeamAssignment() && $no_team_total > 0) {
             $return .= <<<HTML
-        <br />
-        <br />
+             - {$no_team_total} students with no team
+HTML;
+        }
+        $return .= <<<HTML
+            <br />
+            <br />
 HTML;
             if ($peer) {
                 $show_total = floor($sections['stu_grad']['total_components']/$gradeable->getNumPeerComponents());
@@ -133,11 +138,75 @@ HTML;
             </div>
         </div>
 HTML;
-        
+        }
+        if(!$gradeable->isTeamAssignment()) {
+            $return .= <<<HTML
+        <div class="box half">
+            <b>Statistics for Completely Graded Assignments: </b><br/>
+            <div style="margin-left: 20px">
+HTML;
+            if($overall_average == null) {
+                $return .= <<<HTML
+                There are no students completely graded yet.
+            </div>
+HTML;
+            }
+            else {
+                if($gradeable->getTotalAutograderNonExtraCreditPoints() == null) {
+                    $total = $overall_average->getMaxValue();
+                }
+                else {
+                    $total = $overall_average->getMaxValue() + $gradeable->getTotalAutograderNonExtraCreditPoints();                    
+                }
+                $return .= <<< HTML
+                Average: {$overall_average->getAverageScore()} / {$total} <br/>
+                Standard Deviation: {$overall_average->getStandardDeviation()} <br/>
+                Count: {$overall_average->getCount()} <br/>
+            </div>
+HTML;
+            }
+            $return .= <<<HTML
+            <br/><b>Statistics of Graded Components: </b><br/>
+            <div style="margin-left: 20px">
+HTML;
+            if(count($component_averages) == 0) {
+                $return .= <<<HTML
+            No components have been graded yet.
+HTML;
+            }
+            else {
+                $overall_score = 0;
+                $overall_max = 0;
+                foreach($component_averages as $comp) {
+                    $overall_score += $comp->getAverageScore();
+                    $overall_max += $comp->getMaxValue();
+                    $return .= <<<HTML
+                {$comp->getTitle()}:<br/>
+                <div style="margin-left: 40px">
+                    Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} <br/>
+                    Standard Deviation: {$comp->getStandardDeviation()} <br/>
+                    Count: {$comp->getCount()} <br/>
+                </div>
+HTML;
+                }
+                if($overall_max !=0){
+                    $percentage = round($overall_score / $overall_max *100);
+                    $return .= <<<HTML
+                <br/>Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
+HTML;
+                }
+            }
         }
         //{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
         $return .= <<<HTML
-    <div style="margin-top: 20px">
+            </div>
+        </div>
+    </div>
+HTML;
+    }
+    //{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
+    $return .= <<<HTML
+    <div style="margin-top: 20px; vertical-align:bottom;">
 HTML;
         if($percentage !== -1 || $this->core->getUser()->accessFullGrading() || $peer){
             $return .= <<<HTML
@@ -914,6 +983,17 @@ HTML;
 HTML;
         }
         $num_questions = count($gradeable->getComponents());
+
+        // if use student components, get the values for pages from the student's submissions
+        $files = $gradeable->getSubmittedFiles();
+        $student_pages = array();
+        foreach ($files as $filename => $content) {
+            if ($filename == "student_pages.json") {
+                $path = $content["path"];
+                $student_pages = FileUtils::readJsonFile($content["path"]);
+            }
+        }
+
         $return .= <<<HTML
     <div style="margin:3px;">
         <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-num_questions="{$num_questions}">
@@ -978,11 +1058,31 @@ HTML;
             if ($note != "") {
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
+            $page = intval($question->getPage());
+            // if the page is determined by the student json
+            if ($page == -1) {
+                // usually the order matches the json
+                if ($student_pages[intval($question->getOrder())]["order"] == intval($question->getOrder())) {
+                    $page = intval($student_pages[intval($question->getOrder())]["page #"]);
+                }
+                // otherwise, iterate through until the order matches
+                else {
+                    foreach ($student_pages as $student_page) {
+                        if ($student_page["order"] == intval($question->getOrder())) {
+                            $page = intval($student_page["page #"]);
+                            break;
+                        }
+                    }
+                }
+            }
+            if ($page > 0) {
+                $message .= "<i> Page #: " . $page . "</i>";
+            }
 
             $return .= <<<HTML
                     <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>{$message}</b>
+                        {$message}
 HTML;
             //get the grader's id if it exists
             $grader_id = "";
@@ -997,7 +1097,8 @@ HTML;
                 <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
                 <span id="save-mark-{$c}" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
             </div>
-            </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
+            </span> <span id="ta_note-{$c}" style="display: none;"> {$note}</span> 
+            <span id="page-{$c}" style="display: none;">{$page}</span>
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());

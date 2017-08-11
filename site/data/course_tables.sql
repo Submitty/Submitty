@@ -235,7 +235,8 @@ CREATE TABLE gradeable_component (
     gc_upper_clamp integer NOT NULL,
     gc_is_text boolean NOT NULL,
     gc_is_peer boolean NOT NULL,
-    gc_order integer NOT NULL
+    gc_order integer NOT NULL,
+    gc_page integer NOT NULL
 );
 
 

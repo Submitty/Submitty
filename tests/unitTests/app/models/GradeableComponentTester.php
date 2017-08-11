@@ -32,6 +32,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_upper_clamp' => 100,
             'gc_is_text' => false,
             'gc_order' => 1,
+            'gc_page' => 0,
             'gcd_score' => 10,
             'gcd_component_comment' => 'Comment about gradeable',
             'gcd_grader' => $this->createMockUser('instructor'),
@@ -51,6 +52,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'upper_clamp' => 100,
             'is_text' => false,
             'order' => 1,
+            'page' => 0,
             'score' => 10.0,
             'comment' => 'Comment about gradeable',
             'has_grade' => true,
@@ -75,6 +77,7 @@ class GradeableComponentTester extends BaseUnitTest {
         $this->assertFalse($component->getIsText());
         $this->assertTrue($component->getHasGrade());
         $this->assertEquals($expected['order'], $component->getOrder());
+        $this->assertEquals($expected['page'], $component->getPage());
         $this->assertEquals($expected['score'], $component->getScore());
         $this->assertEquals($expected['comment'], $component->getComment());
         //$this->assertEquals($expected['grader'], $component->getGrader());
@@ -96,6 +99,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_upper_clamp' => 100,
             'gc_is_text' => false,
             'gc_order' => 1,
+            'gc_page' => 0,
             'gcd_score' => 1000,
             'gcd_grader' => $this->createMockUser('ta'),
             'gcd_graded_version' => 1,
@@ -121,6 +125,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_upper_clamp' => 100,
             'gc_is_text' => false,
             'gc_order' => 1,
+            'gc_page' => 0,
             'gcd_score' => -100,
             'gcd_grader' => $this->createMockUser('ta'),
             'gcd_graded_version' => 1,
@@ -144,6 +149,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_upper_clamp' => 100,
             'gc_is_text' => false,
             'gc_order' => 1,
+            'gc_page' => 0,
             'gcd_score' => null,
             'gcd_grader' => $this->createMockUser('ta'),
             'gcd_graded_version' => 1,
@@ -168,6 +174,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_upper_clamp' => 0,
             'gc_is_text' => false,
             'gc_order' => 1,
+            'gc_page' => 0,
             'gcd_score' => -50,
             'gcd_grader' => $this->createMockUser('ta'),
             'gcd_graded_version' => 1,
@@ -192,6 +199,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_upper_clamp' => 0,
             'gc_is_text' => false,
             'gc_order' => 1,
+            'gc_page' => 0,
             'gcd_score' => -150,
             'gcd_grader' => $this->createMockUser('ta'),
             'gcd_graded_version' => 1,
@@ -217,6 +225,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_upper_clamp' => 0,
             'gc_is_text' => false,
             'gc_order' => 1,
+            'gc_page' => 0,
             'gcd_score' => 100,
             'gcd_grader' => $this->createMockUser('ta'),
             'gcd_graded_version' => 1,
@@ -242,6 +251,7 @@ class GradeableComponentTester extends BaseUnitTest {
             'gc_upper_clamp' => 100,
             'gc_is_text' => false,
             'gc_order' => 1,
+            'gc_page' => 0,
             'gcd_score' => 50,
             'gcd_grader' => $this->createMockUser('ta'),
             'gcd_graded_version' => 1,

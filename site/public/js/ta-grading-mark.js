@@ -280,6 +280,7 @@ function openClose(row_id, num_questions = -1) {
         var save_mark = document.getElementById('save-mark-' + x);
         var title = $('#title-' + x);
         var title_cancel = $('#title-cancel-' + x);
+        var page = (document.getElementById('page-' + x)).innerHTML;
         if (x == row_num) {
             if (current.style.display === 'none') {
                 current.style.display = '';
@@ -296,6 +297,58 @@ function openClose(row_id, num_questions = -1) {
                 title.attr('colspan', 3);
                 title_cancel[0].style.display = '';
                 title_cancel.attr('colspan', 1);
+
+                // if the component has a page saved, open the PDF to that page
+                // opening directories/frames based off of code in openDiv and openFrame functions
+
+                // make sure submissions folder has files
+                var submissions = $('#div_viewer_1');
+                if (page > 0 && submissions.children().length > 0) {
+
+                    // find the first file that is a PDF
+                    var divs = $('#div_viewer_1 > div > div');
+                    var pdf_div = "";
+                    for (var i=0; i<divs.length; i++) {
+                        if ($(divs[i]).is('[data-file_url]')) {
+                            file_url = $(divs[i]).attr("data-file_url");
+                            if(file_url.substring(file_url.length - 3) == "pdf") {
+                                pdf_div = $($(divs[i]));
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // only open submissions folder + PDF is a PDF file exists within the submissions folder
+                    if (pdf_div != "") {
+                        submissions.show();
+                        submissions.addClass('open');
+                        $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+
+                        var file_url = pdf_div.attr("data-file_url");
+                        var file_name = pdf_div.attr("data-file_name");
+                        if (!pdf_div.hasClass('open')) {
+                            openFrame(file_name,file_url,pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
+                        }
+                        var iframeId = pdf_div.attr("id") + "_iframe";
+                        directory = "submissions"; 
+                        src = $("#"+iframeId).prop('src');
+                        if (src.indexOf("#page=") === -1) {
+                            src = src + "#page=" + page;
+                        }
+                        else {
+                            src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
+                        }
+                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='600px' style='border: 0'></iframe>");
+
+                        if (!pdf_div.hasClass('open')) {
+                            pdf_div.addClass('open');
+                        }
+                        if (!pdf_div.hasClass('shown')) {
+                            pdf_div.show();
+                            pdf_div.addClass('shown');
+                        }
+                    }
+                }
             } else {
                 current.style.display = 'none';
                 current_summary.style.display = '';

@@ -1129,6 +1129,7 @@ class Gradeable(object):
             elif self.type > 0:
                 component['gc_ta_comment'] = ""
                 component['gc_student_comment'] = ""
+                component['gc_page'] = 0
 
             if self.type == 1:
                 component['gc_lower_clamp'] = 0
@@ -1264,9 +1265,9 @@ class Component(object):
         self.title = component['gc_title']
         self.ta_comment = ""
         self.student_comment = ""
-
         self.is_text = False
         self.is_peer = False
+        self.page = 0
         self.order = order
         self.marks = []
         if 'marks' in component:
@@ -1280,6 +1281,8 @@ class Component(object):
             self.student_comment = component['gc_student_comment']
         if 'gc_is_text' in component:
             self.is_text = component['gc_is_text'] is True
+        if 'gc_page' in component:
+            self.page = int(component['gc_page'])
 
         if self.is_text:
             self.lower_clamp = 0
@@ -1299,7 +1302,7 @@ class Component(object):
                                     gc_student_comment=self.student_comment,
                                     gc_lower_clamp=self.lower_clamp, gc_default=self.default, gc_max_value=self.max_value, 
                                     gc_upper_clamp=self.upper_clamp, gc_is_text=self.is_text,
-                                    gc_is_peer=self.is_peer, gc_order=self.order)
+                                    gc_is_peer=self.is_peer, gc_order=self.order, gc_page=self.page)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 
