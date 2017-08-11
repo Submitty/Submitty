@@ -1889,7 +1889,7 @@ $('#gradeable-form').on('submit', function(e){
         });
         row.find('div[id=mark_questions_'+oldNum+']').attr('id', 'mark_questions_'+newNum);
         row.find('div[id=rubric_add_mark_' + oldNum + ']').attr('id','rubric_add_mark_' + newNum).attr('onclick', 'addMark(this,' + newNum + ')'); 
-        updateDeductIds(row,oldNum,newNum);
+        updateMarkIds(row,oldNum,newNum);
     }
 
     function moveQuestionDown(question) {
