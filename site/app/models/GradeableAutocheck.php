@@ -41,6 +41,7 @@ class GradeableAutocheck extends AbstractModel {
      */
     public function __construct(Core $core, $details, $course_path, $result_path, $idx) {
         parent::__construct($core);
+        $this->index = $idx;
 
         if (isset($details['description'])) {
             $this->description = Utils::prepareHtmlString($details['description']);
