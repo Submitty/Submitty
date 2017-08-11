@@ -242,6 +242,7 @@ SELECT";
   gc.array_gc_is_text,
   gc.array_gc_is_peer,
   gc.array_gc_order,
+  gc.array_gc_page,
   gc.array_array_gcm_id,
   gc.array_array_gc_id,
   gc.array_array_gcm_points,
@@ -303,6 +304,7 @@ LEFT JOIN (
     array_agg(gc_upper_clamp) AS array_gc_upper_clamp,
     array_agg(gc_is_text) AS array_gc_is_text,
     array_agg(gc_order) AS array_gc_order,
+    array_agg(gc_page) AS array_gc_page,
     array_agg(array_gcm_id) AS array_array_gcm_id,
     array_agg(array_gc_id) AS array_array_gc_id,
     array_agg(array_gcm_points) AS array_array_gcm_points,
@@ -1107,17 +1109,17 @@ eg_student_download=?, eg_student_any_version=?, eg_config_path=?, eg_late_days=
     }
 
     public function createNewGradeableComponent(GradeableComponent $component, Gradeable $gradeable) {
-        $params = array($gradeable->getId(), $component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getLowerClamp(), $component->getDefault(), $component->getMaxValue(), $component->getUpperClamp(), var_export($component->getIsText(), true), $component->getOrder(), var_export($component->getIsPeer(), true));
+        $params = array($gradeable->getId(), $component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getLowerClamp(), $component->getDefault(), $component->getMaxValue(), $component->getUpperClamp(), var_export($component->getIsText(), true), $component->getOrder(), var_export($component->getIsPeer(), true), $component->getPage());
         $this->course_db->query("
 INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, 
-gc_is_text, gc_order, gc_is_peer) 
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+gc_is_text, gc_order, gc_is_peer, gc_page) 
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
     }   
 
     public function updateGradeableComponent(GradeableComponent $component) {
-        $params = array($component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getLowerClamp(), $component->getDefault(), $component->getMaxValue(), $component->getUpperClamp(), var_export($component->getIsText(), true), $component->getOrder(), var_export($component->getIsPeer(), true), $component->getId());
+        $params = array($component->getTitle(), $component->getTaComment(), $component->getStudentComment(), $component->getLowerClamp(), $component->getDefault(), $component->getMaxValue(), $component->getUpperClamp(), var_export($component->getIsText(), true), $component->getOrder(), var_export($component->getIsPeer(), true), $component->getPage(), $component->getId());
         $this->course_db->query("
-UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?, gc_lower_clamp=?, gc_default=?, gc_max_value=?, gc_upper_clamp=?, gc_is_text=?, gc_order=?, gc_is_peer=? WHERE gc_id=?", $params);
+UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?, gc_lower_clamp=?, gc_default=?, gc_max_value=?, gc_upper_clamp=?, gc_is_text=?, gc_order=?, gc_is_peer=?, gc_page=? WHERE gc_id=?", $params);
     }
 
     public function deleteGradeableComponent(GradeableComponent $component) {
@@ -1180,7 +1182,7 @@ WHERE gcm_id=?", $params);
 
             $is_repository = $electronic_gradeable['eg_is_repository'];
             $late_days = $electronic_gradeable['eg_late_days'];
-            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, gc_is_peer FROM gradeable_component 
+            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, gc_is_peer, gc_page FROM gradeable_component 
                         WHERE g_id=? GROUP BY gc_id ORDER BY gc_order ASC",array($gradeable_id));
             $tmp_questions = $this->course_db->rows();
             $old_questions = array();
@@ -1194,7 +1196,8 @@ WHERE gcm_id=?", $params);
                                                     'question_default'        => $question['gc_default'],
                                                     'question_total'        => $question['gc_max_value'],
                                                     'question_upper_clamp'        => $question['gc_upper_clamp'],
-                                                    'peer_component'        => $question['gc_is_peer']));
+                                                    'peer_component'        => $question['gc_is_peer'],
+                                                    'page_component'        => $question['gc_page']));
                 }
             }
         } else {

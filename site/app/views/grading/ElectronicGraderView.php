@@ -835,6 +835,17 @@ HTML;
 HTML;
         }
         $num_questions = count($gradeable->getComponents());
+
+        // if use student components, get the values for pages from the student's submissions
+        $files = $gradeable->getSubmittedFiles();
+        $student_pages = array();
+        foreach ($files as $filename => $content) {
+            if ($filename == "student_pages.json") {
+                $path = $content["path"];
+                $student_pages = FileUtils::readJsonFile($content["path"]);
+            }
+        }
+
         $return .= <<<HTML
     <div style="margin:3px;">
         <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-num_questions="{$num_questions}">
@@ -874,11 +885,31 @@ HTML;
             if ($note != "") {
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
+            $page = intval($question->getPage());
+            // if the page is determined by the student json
+            if ($page == -1) {
+                // usually the order matches the json
+                if ($student_pages[intval($question->getOrder())]["order"] == intval($question->getOrder())) {
+                    $page = intval($student_pages[intval($question->getOrder())]["page #"]);
+                }
+                // otherwise, iterate through until the order matches
+                else {
+                    foreach ($student_pages as $student_page) {
+                        if ($student_page["order"] == intval($question->getOrder())) {
+                            $page = intval($student_page["page #"]);
+                            break;
+                        }
+                    }
+                }
+            }
+            if ($page > 0) {
+                $message .= "<i> Page #: " . $page . "</i>";
+            }
 
             $return .= <<<HTML
                     <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>{$message}</b>
+                        {$message}
 HTML;
             //get the grader's id if it exists
             $grader_id = "";
@@ -893,7 +924,8 @@ HTML;
                 <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
                 <span id="save-mark-{$c}" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
             </div>
-            </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
+            </span> <span id="ta_note-{$c}" style="display: none;"> {$note}</span> 
+            <span id="page-{$c}" style="display: none;">{$page}</span>
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());
