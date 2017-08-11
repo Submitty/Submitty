@@ -28,7 +28,7 @@ class AdminGradeableView extends AbstractView {
         $TA_beta_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
         $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
         $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
-        $electronic_gradeable['eg_subdirectory'] = "temp";
+        $electronic_gradeable['eg_subdirectory'] = "";
         $electronic_gradeable['eg_config_path'] = "";
         $electronic_gradeable['eg_late_days'] = 2;
         $electronic_gradeable['eg_precision'] = 0.5;
@@ -42,6 +42,7 @@ class AdminGradeableView extends AbstractView {
         $TA_grade_open_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
         $TA_grade_release_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
+        $vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
         $BASE_URL = "http:/localhost/hwgrading";
         $action = "upload_new_gradeable"; //decides how the page's data is displayed
         $string = "Add"; //Add or Edit
@@ -100,6 +101,7 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_open_date']));
                 $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_due_date']));
                 $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
+                $electronic_gradeable['eg_subdirectory'] = $data[3]['eg_subdirectory'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $precision = $data[3]['eg_precision'];
                 $electronic_gradeable['eg_precision'] = $precision;
@@ -107,6 +109,7 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_team_lock_date']));
                 $team_yes_checked = $data[3]['eg_team_assignment'];
                 $team_no_checked = !$team_yes_checked;
+                $is_repository = $data[3]['eg_is_repository'];
                 $use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $student_view = $data[3]['eg_student_view'];
                 $student_submit = $data[3]['eg_student_submit'];
@@ -140,6 +143,7 @@ class AdminGradeableView extends AbstractView {
             $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
             $g_grade_by_registration = $data[0]['g_grade_by_registration'];
             if ($data[0]['g_gradeable_type'] === 0) {
+                $electronic_gradeable['eg_subdirectory'] = $data[3]['eg_subdirectory'];
                 $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
                 $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
                 $team_yes_checked = $data[3]['eg_team_assignment'];
@@ -254,11 +258,6 @@ class AdminGradeableView extends AbstractView {
         padding: 2px;  
         font-size: 12pt;
     }
-    
-    .required::-webkit-input-placeholder { color: red; }
-    .required:-moz-placeholder { color: red; }
-    .required::-moz-placeholder { color: red; }
-    .required:-ms-input-placeholder { color: red; }
         
 </style>
 <div id="container-rubric">
@@ -386,18 +385,44 @@ HTML;
                                                                          type="text"/>
                 <br /> <br />
 
-                Are students uploading files or commiting code to an SVN repository?<br />
+                Are students uploading files or submitting to a Version Control System (VCS) repository?<br />
                 <fieldset>
-                    <input type="radio" class="upload_file" name="upload_type" value="Upload File" checked> Upload File(s)
-                    
-                    <div class="upload_type upload_file" id="upload_file">
+
+                    <input type="radio" id="upload_file_radio" class="upload_file" name="upload_type" value="upload_file"
+HTML;
+                    if ($is_repository === false) { $html_output .= ' checked="checked"'; }
+
+                $html_output .= <<<HTML
+                    > Upload File(s)
+
+                    <input type="radio" id="repository_radio" class="upload_repo" name="upload_type" value="repository"
+HTML;
+                    if ($is_repository === true) { $html_output .= ' checked="checked"'; }
+                $html_output .= <<<HTML
+                    > Version Control System (VCS) Repository
+                      
+                    <div class="upload_type upload_file" id="upload_file"></div>
+                     
+                    <div class="upload_type upload_repo" id="repository">
+                        <br />
+                        <b>Path for the Version Control System (VCS) repository:</b><br />
+                        VCS base URL: <kbd>{$vcs_base_url}</kbd><br />
+                        The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below. If the entire URL is decided by the student, you can leave this input blank.<br />
+                        You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
+                        <ul style="list-style-position: inside;">
+                            <li>gradeable_id</li>
+                            <li>user_id OR repo_id, do not use both</li>
+                        </ul>
+                        ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
+                        <input style='width: 83%' type='text' name='subdirectory' value="" placeholder="(Optional)"/>
+                        <br />
                     </div>
                     
                 </fieldset>
 
 		<br />
                 <b>Full path to the directory containing the autograding config.json file:</b><br>
-                See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">Submitty GitHub sample assignment configurations</a><br>
+                See samples here: <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty GitHub sample assignment configurations</a><br>
 		<kbd>/usr/local/submitty/more_autograding_examples/upload_only/config</kbd>  (an assignment without autograding)<br>
 		<kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
 		<kbd>/var/local/submitty/courses/{$_GET['semester']}/{$_GET['course']}/config_upload/#</kbd> (for an web uploaded configuration)<br>
@@ -446,7 +471,7 @@ HTML;
                     /> No
                     <br /> <br />
 
-                    Should students be view/download any or all versions? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
+                    Should students be able to view/download any or all versions? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
                     <input type="radio" id="yes_student_any_version" name="student_any_version" value="true" class="bool_val rubric_questions"
 HTML;
                     if ($student_any_version===true) { $html_output .= ' checked="checked"'; }
@@ -520,7 +545,6 @@ HTML;
     $index_question = 0;
     foreach ($old_questions as $num => $question) {
         if($num == 0) continue;
-        $type_deduct = 0;
         $html_output .= <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;
@@ -536,47 +560,12 @@ HTML;
                               display: block; height: auto;">{$question['student_grading_note']}</textarea>
                     <div id="deduction_questions_{$num}">
 HTML;
-    if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
-        $html_output .= <<<HTML
-            <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-            <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
-            <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-            <br> 
-        </div>
-HTML;
-    }
-    if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
-        $type_deduct = 0;
-        $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
-        foreach ($marks as $mark) {
-            if ($mark->getPoints() > 0) {
-                $type_deduct = 1;
-            }
-        }
-        $first = true;
-        foreach ($marks as $mark) {
-            if($first === true) {
-                $first = false;
-                $hidden = "display: none;";
-            }
-            else {
-                $hidden = "";
-            }
-            if ($type_deduct === 1) {
-                $min = 0;
-                $max = 1000;
-            }
-            else {
-                $min = -1000;
-                $max = 0;
-            }
+
+        if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
             $html_output .= <<<HTML
-                <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
-                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
+                <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
+                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 81.5%;">Full Credit</textarea> 
                 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -584,33 +573,55 @@ HTML;
             </div>
 HTML;
         }
-    }
+        if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
+            $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
+            $lower_clamp = $question['question_lower_clamp'];
+            $default = $question['question_default'];
+            $upper_clamp = $question['question_upper_clamp'];
+            $min = $lower_clamp - $default;
+            $max = $upper_clamp - $default;
+            $first = true;
+            foreach ($marks as $mark) {
+                if($first === true) {
+                    $first = false;
+                    $hidden = "display: none;";
+                }
+                else {
+                    $hidden = "";
+                }
+                $html_output .= <<<HTML
+                    <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
+                    <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" min="{$min}" max="{$max}" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                    <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 81.5%;">{$mark->getNote()}</textarea> 
+                    <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <br> 
+                </div>
+HTML;
+            }
+
+        }
         $html_output .= <<<HTML
                     <div class="btn btn-xs btn-primary" id="rubric_add_deduct_{$num}" onclick="addDeduct(this,{$num});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div></div>
                 </td>
 
                 <td style="background-color:#EEE;">
 HTML;
-        $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
+        $old_lower_clamp = (isset($question['question_lower_clamp'])) ? $question['question_lower_clamp'] : 0;
+        $old_default = (isset($question['question_default'])) ? $question['question_default'] : 0;
+        $old_max = (isset($question['question_total'])) ? $question['question_total'] : 0;
+        $old_upper_clamp = (isset($question['question_upper_clamp'])) ? $question['question_upper_clamp'] : 0;
         $html_output .= <<<HTML
-        <input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_grade}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">
+        lowerClamp:<input type="number" class="points" name="lower_{$num}" value="{$old_lower_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;">
+        default:<input type="number" class="points" name="default_{$num}" value="{$old_default}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;">
+        max:<input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_max}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
+        upperClamp:<input type="number" class="points" name="upper_{$num}" value="{$old_upper_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;">
 HTML;
-        $checked = ($question['question_extra_credit']) ? "checked" : "";
-        if ($type_deduct === 1) {
-            $ded_checked = "";
-            $add_checked = "checked";
-        }
-        else {
-            $ded_checked = "checked";
-            $add_checked = "";
-        }
+        // $checked = ($question['question_extra_credit']) ? "checked" : "";                 Extra Credit:&nbsp;&nbsp;<input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
+
         $peer_checked = ($question['peer_component']) ? ' checked="checked"' : "";
         $html_output .= <<<HTML
-                <br />
-                Extra Credit:&nbsp;&nbsp;<input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
-                Deduction/Addition:&nbsp;&nbsp;<input type="radio" id="deduct_radio_ded_id_{$num}" name="deduct_radio_{$num}" value="deduction" onclick="onDeduction(this);" {$ded_checked}> <i class="fa fa-minus-square" aria-hidden="true"> </i>
-                <input type="radio" id="deduct_radio_add_id_{$num}" name="deduct_radio_{$num}" value="addition" onclick="onAddition(this);" {$add_checked}> <i class="fa fa-plus-square" aria-hidden="true"> </i>
-                <br />
                 <div id="peer_checkbox_{$num}" class="peer_input" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
 HTML;
         if ($num > 1){
@@ -1194,6 +1205,10 @@ function createCrossBrowserJSDate(val){
             $('#student_submit_download_view').hide();
         }
 
+        if ($('input:radio[name="upload_type"]:checked').attr('value') === 'upload_file') {
+            $('#repository').hide();
+        }
+
         $('.gradeable_type_options').hide();
         
         if ($('input[name="gradeable_type"]').is(':checked')){
@@ -1265,6 +1280,16 @@ function createCrossBrowserJSDate(val){
                 }
             }
         });
+
+        $('input:radio[name="upload_type"]').change(function() {
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'repository') {
+                    $('#repository').show();
+                } else {
+                    $('#repository').hide();
+                }
+            }
+        });
         
         $('[name="gradeable_template"]').change(
         function(){
@@ -1315,7 +1340,9 @@ function createCrossBrowserJSDate(val){
             // remove the default checkpoint
             removeCheckpoint(); 
             $.each(components, function(i,elem){
-                addCheckpoint(elem.gc_title,elem.gc_is_extra_credit);
+                var extra_credit = false;
+                if (elem.gc_max_value == 0) extra_credit = true;
+                addCheckpoint(elem.gc_title, extra_credit);
             });
             $('#checkpoints').show();
             $('#grading_questions').show();
@@ -1324,7 +1351,13 @@ function createCrossBrowserJSDate(val){
             var components = {$old_components};
             $.each(components, function(i,elem){
                 if(i < {$num_numeric}){
-                    addNumeric(elem.gc_title,elem.gc_max_value,elem.gc_is_extra_credit);
+                    var extra_credit = false;
+                    if (elem.gc_upper_clamp > elem.gc_max_value){
+                        addNumeric(elem.gc_title,elem.gc_upper_clamp,true);
+                    }
+                    else{
+                        addNumeric(elem.gc_title,elem.gc_max_value,false);
+                    }
                 }
                 else{
                     addText(elem.gc_title);
@@ -1632,10 +1665,17 @@ $('#gradeable-form').on('submit', function(e){
         var index = 1;
         var exists = true;
         while(exists){
-            if($("#grade-"+index).length){
+            if($("#grade-"+index).length) {
                 $("#grade-"+index).attr('step', step);
+                var exists2 = ($('#deduct_id-'+index+'-0').length) ? true : false;
+                var index2 = 0;
+                while (exists2) {
+                    $('#deduct_id-'+index+'-'+index2).find('input[name=deduct_points_'+index+'_'+index2+']').attr('step', step);
+                    index2++;
+                    exists2 = ($('#deduct_id-'+index+'-'+index2).length) ? true : false;
+                }
             }
-            else{
+            else {
                 exists = false;
             }
             index++;
@@ -1709,9 +1749,9 @@ $('#gradeable-form').on('submit', function(e){
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
         row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
-        row.find('input[name=deduct_radio_'+ oldNum +']').attr('name', 'deduct_radio_' + newNum);
-        row.find('input[id=deduct_radio_ded_id_' + oldNum +']').attr('id', 'deduct_radio_ded_id_' + newNum);
-        row.find('input[id=deduct_radio_add_id_' + oldNum +']').attr('id', 'deduct_radio_add_id_' + newNum);
+        // row.find('input[name=deduct_radio_'+ oldNum +']').attr('name', 'deduct_radio_' + newNum);
+        // row.find('input[id=deduct_radio_ded_id_' + oldNum +']').attr('id', 'deduct_radio_ded_id_' + newNum);
+        // row.find('input[id=deduct_radio_add_id_' + oldNum +']').attr('id', 'deduct_radio_add_id_' + newNum);
         row.find('div[id=deduction_questions_'+oldNum+']').attr('id', 'deduction_questions_'+newNum);
         row.find('div[id=rubric_add_deduct_' + oldNum + ']').attr('id','rubric_add_deduct_' + newNum).attr('onclick', 'addDeduct(this,' + newNum + ')'); 
         updateDeductIds(row,oldNum,newNum);
@@ -1770,13 +1810,13 @@ $('#gradeable-form').on('submit', function(e){
         currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + new_question +']')[0].checked;
         newRow.find('input[name=peer_component_' + new_question +']')[0].checked = temp;
 
-        //Move the radio button
-        var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
-        var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
-        document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + new_question).checked;
-        document.getElementById("deduct_radio_add_id_" + question).checked = document.getElementById("deduct_radio_add_id_" + new_question).checked;
-        document.getElementById("deduct_radio_ded_id_" + new_question).checked = ded_temp;
-        document.getElementById("deduct_radio_add_id_" + new_question).checked = add_temp;
+        // //Move the radio button
+        // var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
+        // var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
+        // document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + new_question).checked;
+        // document.getElementById("deduct_radio_add_id_" + question).checked = document.getElementById("deduct_radio_add_id_" + new_question).checked;
+        // document.getElementById("deduct_radio_ded_id_" + new_question).checked = ded_temp;
+        // document.getElementById("deduct_radio_add_id_" + new_question).checked = add_temp;
 
         //stores the point and text data so it can readded; the html earses it once moved
         var current_deduct_points = [];
@@ -1855,13 +1895,13 @@ $('#gradeable-form').on('submit', function(e){
         currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked;
         newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked = temp;
 
-        //Move the radio button
-        var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
-        var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
-        document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + (question-1)).checked;
-        document.getElementById("deduct_radio_add_id_" + question).checked = document.getElementById("deduct_radio_add_id_" + (question-1)).checked;
-        document.getElementById("deduct_radio_ded_id_" + (question-1)).checked = ded_temp;
-        document.getElementById("deduct_radio_add_id_" + (question-1)).checked = add_temp;
+        // //Move the radio button
+        // var ded_temp = document.getElementById("deduct_radio_ded_id_" + question).checked;
+        // var add_temp = document.getElementById("deduct_radio_add_id_" + question).checked;
+        // document.getElementById("deduct_radio_ded_id_" + question).checked = document.getElementById("deduct_radio_ded_id_" + (question-1)).checked;
+        // document.getElementById("deduct_radio_add_id_" + question).checked = document.getElementById("deduct_radio_add_id_" + (question-1)).checked;
+        // document.getElementById("deduct_radio_ded_id_" + (question-1)).checked = ded_temp;
+        // document.getElementById("deduct_radio_add_id_" + (question-1)).checked = add_temp;
 
         //stores the point and text data so it can readded; the html earses it once moved
         var current_deduct_points = [];
@@ -1920,9 +1960,10 @@ $('#gradeable-form').on('submit', function(e){
             </td> \
             <td style="background-color:#EEE; border-top: 5px solid #dddddd;">' + sBox + ' \
                 <br /> \
-                Extra Credit:&nbsp;&nbsp;<input onclick="calculatePercentageTotal();" name="eg_extra_'+newQ+'" type="checkbox" class="eg_extra extra" value="on"/> \
-                Deduction/Addition:&nbsp;&nbsp;<input type="radio" id="deduct_radio_ded_id_'+newQ+'" name="deduct_radio_'+newQ+'" value="deduction" onclick="onDeduction(this);" checked> <i class="fa fa-minus-square" aria-hidden="true"> </i> \
-                <input type="radio" id="deduct_radio_add_id_'+newQ+'" name="deduct_radio_'+newQ+'" value="addition" onclick="onAddition(this);"> <i class="fa fa-plus-square" aria-hidden="true"> </i> \
+        lowerClamp:<input type="number" class="points" name="lower_{$num}" value="{$old_lower_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;"> \
+        default:<input type="number" class="points" name="default_{$num}" value="{$old_default}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;"> \
+        max:<input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_max}" max="1000" step="{$precision}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;"> \
+        upperClamp:<input type="number" class="points" name="upper_{$num}" value="{$old_upper_clamp}" step="{$precision}" placeholder="±0.5" style="width:40px; resize:none;"> \
                 <br /> \
                 <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
@@ -2022,50 +2063,43 @@ $('#gradeable-form').on('submit', function(e){
         current_row.find("input").val(temp_input_value);
     }
 
-    function onDeduction(me) {
-        var current_row = $(me.parentElement.parentElement);
-        var current_question = parseInt(current_row.attr('id').split('-')[1]);
-        current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('Full Credit');
-        current_row.find('div[name=deduct_'+current_question+']').each(function () {
-            $(this).find("input").attr('min', -1000);
-            $(this).find("input").attr('max', 0);
-            if ($(this).find("input").val() > 0) {
-                $(this).find("input").val($(this).find("input").val() * -1);
-            }            
-        });
-    }
+    // function onDeduction(me) {
+    //     var current_row = $(me.parentElement.parentElement);
+    //     var current_question = parseInt(current_row.attr('id').split('-')[1]);
+    //     current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('Full Credit');
+    //     current_row.find('div[name=deduct_'+current_question+']').each(function () {
+    //         $(this).find("input").attr('min', -1000);
+    //         $(this).find("input").attr('max', 0);
+    //         if ($(this).find("input").val() > 0) {
+    //             $(this).find("input").val($(this).find("input").val() * -1);
+    //         }            
+    //     });
+    // }
 
-    function onAddition(me) {
-        var current_row = $(me.parentElement.parentElement);
-        var current_question = parseInt(current_row.attr('id').split('-')[1]);
-        current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('No Credit');
-        current_row.find('div[name=deduct_'+current_question+']').each(function () {
-            $(this).find("input").attr('min', 0);
-            $(this).find("input").attr('max', 1000);
-            if ($(this).find("input").val() < 0) {
-                $(this).find("input").val($(this).find("input").val() * -1);
-            }            
-        });
-    }
+    // function onAddition(me) {
+    //     var current_row = $(me.parentElement.parentElement);
+    //     var current_question = parseInt(current_row.attr('id').split('-')[1]);
+    //     current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('No Credit');
+    //     current_row.find('div[name=deduct_'+current_question+']').each(function () {
+    //         $(this).find("input").attr('min', 0);
+    //         $(this).find("input").attr('max', 1000);
+    //         if ($(this).find("input").val() < 0) {
+    //             $(this).find("input").val($(this).find("input").val() * -1);
+    //         }            
+    //     });
+    // }
 
     function addDeduct(me, num){
         var last_num = -10;
-        var min = 0;
-        var max = 0;
         var current_row = $(me.parentElement.parentElement.parentElement);
-        var radio_value = current_row.find('input[name=deduct_radio_'+num+']:checked').val();
-        if(radio_value == "deduction") {
-            min = -1000;
-            max = 0;
-        }
-        else if(radio_value == "addition") {
-            min = 0;
-            max = 1000;
-        }
-        else {
-            min = 0;
-            max = 0;
-        }
+        var lower_clamp = current_row.find('input[name=lower_'+num+']').val();
+        var mydefault = current_row.find('input[name=default_'+num+']').val(); //default is a keyword
+        var upper_clamp = current_row.find('input[name=upper_'+num+']').val();
+        var max = upper_clamp - mydefault;
+        var min = lower_clamp - mydefault;
+
+        var precision = $('#point_precision_id').val();
+
         var current = $('[name=deduct_'+num+']').last().attr('id');
         if (current == null) {
             last_num = -1;
@@ -2076,11 +2110,11 @@ $('#gradeable-form').on('submit', function(e){
         var new_num = last_num + 1;
         $("#rubric_add_deduct_" + num).before('\
 <div id="deduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
-<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="deduct_points_'+num+'_'+new_num+'" value="0" min="'+min+'" max="'+max+'" step="'+precision+'" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
 <textarea rows="1" placeholder="Comment" name="deduct_text_'+num+'_'+new_num+'" style="resize: none; width: 81.5%;"></textarea> \
 <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up"  aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <br> \
 </div>');
     }
@@ -2148,6 +2182,7 @@ $('#gradeable-form').on('submit', function(e){
         var date_ta_view = Date.parse($('#date_ta_view').val());
         var date_grade = Date.parse($('#date_grade').val());
         var date_released = Date.parse($('#date_released').val());
+        var subdirectory = $('input[name="subdirectory"]').val();
         var config_path = $('input[name=config_path]').val();
         var has_space = gradeable_id.includes(" ");
         var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
@@ -2207,6 +2242,33 @@ $('#gradeable-form').on('submit', function(e){
             if(date_due < date_submit) {
                 alert("DATE CONSISTENCY:  Due Date must be >= Submission Open Date");
                 return false;
+            }
+            if ($('input:radio[name="upload_type"]:checked').attr('value') === 'repository') {
+                var subdirectory_parts = subdirectory.split("{");
+                var x=0;
+                // if this is a vcs path extension, make sure it starts with '/'
+                if ("{$vcs_base_url}" !== "None specified." && subdirectory_parts[0][0] !== "/") {
+                    alert("VCS path needs to start with '/'");
+                    return false;
+                }
+                // check that path is made up of valid variables
+                var allowed_variables = ["\$gradeable_id", "\$user_id", "\$repo_id"];
+                var used_user_id = false;
+                for (x = 1; x < subdirectory_parts.length; x++) {
+                    subdirectory_part = subdirectory_parts[x].substring(0, subdirectory_parts[x].lastIndexOf("}"));
+                    if (allowed_variables.indexOf(subdirectory_part) === -1) {
+                        alert("For the VCS path, '" + subdirectory_part + "' is not a valid variable name.")
+                        return false;
+                    }
+                    if (subdirectory_part === "\$user_id") {
+                        used_user_id = true;
+                    }
+                    if (used_user_id && subdirectory_part === "\$repo_id") {
+                        alert("You cannot use both \$user_id and \$repo_id");
+                        return false;
+                    }
+                }
+                
             }
             if(config_path == "" || config_path === null) {
                 alert("The config path should not be empty");
