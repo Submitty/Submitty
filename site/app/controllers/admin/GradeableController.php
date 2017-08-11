@@ -25,20 +25,20 @@ class GradeableController extends AbstractController {
 
     public function process_config_upload() {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $_SESSION['messages']['error'][] = "Upload failed: Invalid CSRF token";
+            $core->addErrorMessage("Upload failed: Invalid CSRF token");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
                 'action' => 'upload_config')));
         }
 
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
-            $_SESSION['messages']['error'][] = "Upload failed: No file to upload";
+            $core->addErrorMessage("Upload failed: No file to upload");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
                 'action' => 'upload_config')));
         }
 
         $upload = $_FILES['config_upload'];
         if (!isset($upload['tmp_name']) || $upload['tmp_name'] === "") {
-            $_SESSION['messages']['error'][] = "Upload failed: Empty tmp name for file";
+            $core->addErrorMessage("Upload failed: Empty tmp name for file");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
                 'action' => 'upload_config')));
         }
@@ -57,7 +57,7 @@ class GradeableController extends AbstractController {
             else {
                 FileUtils::recursiveRmdir($target_dir);
                 $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
-                $_SESSION['messages']['error'][] = "Upload failed: {$error_message}";
+                $core->addErrorMessage("Upload failed: {$error_message}");
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
                     'action' => 'upload_config')));
             }
@@ -65,12 +65,12 @@ class GradeableController extends AbstractController {
         else {
             if (!@copy($upload['tmp_name'], FileUtils::joinPaths($target_dir, $upload['name']))) {
                 FileUtils::recursiveRmdir($target_dir);
-                $_SESSION['messages']['error'][] = "Upload failed: Could not copy file";
+                $core->addErrorMessage("Upload failed: Could not copy file");
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
                     'action' => 'upload_config')));
             }
         }
-        $_SESSION['messages']['success'][] = "Gradeable config uploaded";
+        $core->addSuccessMessage("Gradeable config uploaded");
         $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
             'action' => 'upload_config')));
     }
