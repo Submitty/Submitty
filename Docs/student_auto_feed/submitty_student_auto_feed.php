@@ -45,7 +45,8 @@ class submitty_student_auto_feed {
         }
 
         //Make sure CSV data array is empty on start.
-        self::$data = array();
+        self::$data = array('users'         => array(),
+                            'courses_users' => array());
 
         //Make sure log msg queue string is empty on start.
         self::$log_msg_queue = "";
@@ -57,9 +58,6 @@ class submitty_student_auto_feed {
         //(s)pring is month <= 5, (f)all is month >= 8, su(m)mer are months 6 and 7.
         //if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
         self::$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
-
-        //Get course list, mapped to all lowercase
-        self::$course_list = array_map('strtolower', get_participating_courses());
 
         //Connect to submitty_db
         $db_host     = DB_HOST;
@@ -73,7 +71,10 @@ class submitty_student_auto_feed {
         } else {
             //$psql_version will determine which upsert method is used.
             //Version >= 9.5 permits update on conflict.  Version <= 9.4 uses batch transaction.
-            self::$psql_version = floatval(pg_parameter_status($db, 'server_version'));
+            self::$psql_version = floatval(pg_parameter_status(self::$db, 'server_version'));
+
+			//Get course list, mapped to all lowercase
+			self::$course_list = array_map('strtolower', $this->get_participating_course_list());
 
             //Auto-run class processes by executing them in constructor.
             //Halts when FALSE is returned by a method.
@@ -85,7 +86,10 @@ class submitty_student_auto_feed {
             //Chooses which data upsert function to run based on psql version.
             //(upsert v9.4 with batch upsert or v9.5 with CONFLICT resloution upsert)
             //Case condition is resolved by function return value
-            case (($psql_version >= 9.5) ? $this->upsert_psql95() : $this->upsert_psql94()):
+            //
+            //upsert_psql95 not yet ready.
+            //case ((self::$psql_version >= 9.5) ? $this->upsert_psql95() : $this->upsert_psql94()):
+            case $this->upsert_psql94():
                 $this->log_it("Error during upsert of data.");
                 break;
             }
@@ -100,9 +104,8 @@ class submitty_student_auto_feed {
         	pg_close(self::$db);
         }
 
-
         //Output logs, if any.
-        if (!empty($log_msg_queue)) {
+        if (!empty(self::$log_msg_queue)) {
             error_log(self::$log_msg_queue, 1, ERROR_E_MAIL);    //to email
             error_log(self::$log_msg_queue, 3, ERROR_LOG_FILE);  //to file
         }
@@ -155,12 +158,16 @@ class submitty_student_auto_feed {
             default:
                 //Column validation filters.  If any prove false, the entire row is discarded.
                 switch(false) {
+                //Check term code (skips when set to null).
+                case ((is_null(EXPECTED_TERM_CODE)) ? true : ($row[COLUMN_TERM_CODE] === EXPECTED_TERM_CODE)):
+                	$this->log_it("Row {$index} failed validation for mismatched term code.  Row discarded");
+                	break;
                 //First name must be alpha characters, white-space, or certain punctuation.
-                case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_FNAME])):
+                case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_FIRSTNAME])):
                     $this->log_it("Row {$index} failed validation for student first name ({$row[COLUMN_FNAME]}).  Row discarded.");
                     break;
                 //Last name must be alpha characters white-space, or certain punctuation.
-                case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_LNAME])):
+                case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_LASTNAME])):
                     $this->log_it("Row {$index} failed validation for student last name ({$row[COLUMN_LNAME]}).  Row discarded.");
                     break;
                 //Student section must be greater than zero.  intval($str) returns zero when $str is not integer.
@@ -173,14 +180,34 @@ class submitty_student_auto_feed {
 
                 default:
                     //Validation passed. Include row in data set.
-                    self::$data[] = $row;
+                    self::$data['users'][] = array('user_id'            => $row[COLUMN_USER_ID],
+                                                   'user_firstname'     => $row[COLUMN_FIRSTNAME],
+                                                   'user_lastname'      => $row[COLUMN_LASTNAME],
+                                                   'user_preferredname' => $row[COLUMN_PREFERREDNAME],
+                                                   'user_email'         => $row[COLUMN_EMAIL]);
+                    self::$data['courses_users'][] = array('semester'             => self::$semester,
+                                                           'course'               => strtolower($row[COLUMN_COURSE_PREFIX] . $row[COLUMN_COURSE_NUMBER]),
+                                                           'user_id'              => $row[COLUMN_USER_ID],
+                                                           'user_group'           => 4,
+                                                           'registration_section' => $row[COLUMN_SECTION],
+                                                           'manual_registration'  => 'FALSE');
                 }
             }
         } unset($row);
 
-        //TRUE:  validated data set will have at least 1 row.
-        //FALSE: an empty set that shouldn't be processed.
-        return (count(self::$data) > 0);
+		/* ---------------------------------------------------------------------
+		 * Individual students can be listed on multiple rows if they are
+		 * enrolled in two mor more courses.  'users' table needs to be
+		 * deduplicated.  Deduplication will be keyed by 'user_id' since that is
+		 * also the table's primary key.  Note that 'courses_users' should NOT
+		 * be deduplicated.
+		 * ------------------------------------------------------------------ */
+
+        deduplicate::deduplicate_data(self::$data['users'], 'user_id');
+
+        //TRUE:  Validated data set will have at least 1 row per table.
+        //FALSE: Empty sets shouldn't be processed.
+        return (count(self::$data['users']) > 0 && count(self::$data['courses_users']) > 0);
     }
 
     private function get_participating_course_list() {
@@ -235,7 +262,7 @@ SQL;
                                               'commit' => 'COMMIT'));
 
         //TEMPORARY table to hold all new values that will be "upserted"
-        $sql['users']['temp_tables'] = <<<SQL
+        $sql['users']['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE upsert_users (
     user_id                  VARCHAR,
     user_firstname           VARCHAR,
@@ -245,7 +272,7 @@ CREATE TEMPORARY TABLE upsert_users (
 ) ON COMMIT DROP;
 SQL;
 
-        $sql['courses_users']['temp_tables'] = <<<SQL
+        $sql['courses_users']['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE upsert_courses_users (
     semester             VARCHAR,
     course               VARCHAR,
@@ -258,10 +285,13 @@ SQL;
 
         //INSERT new data into temporary table -- prepares all data to be
         //upserted in a single DB transaction.
-        foreach(self::$data as $i => $row) {
+        foreach(self::$data['users'] as $i => $row) {
             $sql['users']['data'][$i] = <<<SQL
 INSERT INTO upsert_users VALUES ($1,$2,$3,$4,$5);
 SQL;
+		}
+
+        foreach(self::$data['courses_users'] as $i => $row) {
 
             $sql['courses_users']['data'][$i] = <<<SQL
 INSERT INTO upsert_courses_users VALUES ($1,$2,$3,$4,$5,$6);
@@ -363,41 +393,26 @@ WHERE courses_users.user_id=dropped.user_id
 AND courses_users.user_group=$1
 AND courses_users.manual_registration=$2
 SQL;
-        foreach ($sql as $table_name => $table) {
 
-            pg_query(self::$db, $table['begin']);
-            pg_query(self::$db, $table['temp_tables']);
 
-            //fills temp table with batch upsert data.
-            foreach(self::$data as $i => $row) {
-                switch ($table_name) {
-                case 'users':
-                    pg_query_params(self::$db, $table['data'][$i], array($row[COLUMN_USER_ID],
-                                                                         $row[COLUMN_FIRSTNAME],
-                                                                         $row[COLUMN_LASTNAME],
-                                                                         $row[COLUMN_PREFERREDNAME],
-                                                                         $row[COLUMN_EMAIL]));
-                    break;
-                case 'courses_users':
+		foreach ($sql as $table_name => $table) {
 
-                    pg_query_params(self::$db, $table['data'][$i], array(self::$semester,
-                                                                         strtolower($row[COLUMN_COURSE_PREFIX] . $row[COLUMN_COURSE_NUMBER]),
-                                                                         $row[COLUMN_USER_ID],
-                                                                         4,
-                                                                         $row[COLUMN_SECTION],
-                                                                         'FALSE'));
-                    break;
-                }
-            }
+			pg_query(self::$db, $table['begin']);
+			pg_query(self::$db, $table['temp_table']);
 
-            pg_query(self::$db, $table['lock']);
-            pg_query(self::$db, $table['update']);
-            pg_query(self::$db, $table['insert']);
-            if (!is_null($table['dropped_students'])) {
-                pg_query_params(self::$db, $table['dropped_students'], array(4, 'FALSE'));
-            }
-            pg_query(self::$db, $table['commit']);
-        }
+			//fills temp table with batch upsert data.
+			foreach(self::$data[$table_name] as $i => $row) {
+				pg_query_params(self::$db, $table['data'][$i], $row);
+			}
+
+			pg_query(self::$db, $table['lock']);
+			pg_query(self::$db, $table['update']);
+			pg_query(self::$db, $table['insert']);
+			if (!is_null($table['dropped_students'])) {
+				pg_query_params(self::$db, $table['dropped_students'], array(4, 'FALSE'));
+			}
+			pg_query(self::$db, $table['commit']);
+		}
 
         //indicate success.
         return true;
@@ -415,6 +430,8 @@ SQL;
  * q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
  * -------------------------------------------------------------------------- */
 
+	//To do at a later time.  upsert_psql94() will work with postgresql v9.5+.
+
     }
 
     private function log_it($msg) {
@@ -424,7 +441,71 @@ SQL;
 
         self::$log_msg_queue .= date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
     }
+}
 
+class deduplicate {
+
+	public static function deduplicate_data(&$arr, $key='user_id') {
+
+		self::merge_sort($arr, $key);
+		self::dedup($arr, $key);
+	}
+
+	private static function merge_sort(&$arr, $key) {
+    //NOTE: PHP's sort() function is unstable and does not sort by column.
+
+		//Arrays of size < 2 require no action.
+		if (count($arr) < 2) {
+			return;
+		}
+
+		//Split the array in half
+		$halfway = count($arr) / 2;
+		$arr1 = array_slice($arr, 0, $halfway);
+		$arr2 = array_slice($arr, $halfway);
+
+		//Recurse to sort the two halves
+		self::merge_sort($arr1, $key);
+		self::merge_sort($arr2, $key);
+
+		//If all of $array1 is <= all of $array2, just append them.
+		if (strcasecmp(end($arr1)[$key], $arr2[0][$key]) < 1) {
+			$arr = array_merge($arr1, $arr2);
+			return;
+		}
+
+		//Merge the two sorted arrays into a single sorted array
+		$arr = array();
+		$i = 0;
+		$j = 0;
+		while ($i < count($arr1) && $j < count($arr2)) {
+			if (strcasecmp($arr1[$i][$key], $arr2[$j][$key]) < 1) {
+				$arr[] = $arr1[$i];
+				$i++;
+			} else {
+				$arr[] = $arr2[$j];
+				$j++;
+			}
+		}
+
+		//Merge the remainder
+		for (/* no var init */; $i < count($arr1); $i++) {
+			$arr[] = $arr1[$i];
+		}
+
+		for (/* no var init */; $j < count($arr2); $j++) {
+			$arr[] = $arr2[$j];
+		}
+	}
+
+	private static function dedup(&$arr, $key) {
+
+		for ($i = 1; $i < count($arr); $i++) {
+			if ($arr[$i][$key] === $arr[$i-1][$key]) {
+				unset($arr[$i-1]);
+			}
+		}
+	}
 }
 
 /* EOF ====================================================================== */
