@@ -797,14 +797,17 @@ class Course(object):
                             for component in gradeable.components:
                                 if status == 0:
                                     score = 0
-                                elif component.max_value > 0:
-                                    score = random.randint(0, component.max_value * 2) / 2
+                                elif random.random() < 0.9:
+                                    score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
                                 else:
-                                    score = random.randint(component.max_value * 2, 0) / 2
+                                    score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                 conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                              gcd_score=score, gcd_component_comment="lorem ipsum",
                                              gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=1)
+                                for mark in component.marks:
+                                    if random.random() < 0.5:
+                                        conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key)
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
