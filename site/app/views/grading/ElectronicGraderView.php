@@ -935,7 +935,7 @@ HTML;
                 if ($first === true) {
                     $first = false;
                     $noChange = "readonly";
-                    $mark_text = ($question->getMaxValue() == $question->getUpperClamp()) ? "Full Credit" : "No Credit";
+                    $mark_text = ($question->getDefault() == 0) ? "No Credit" : "Full Credit";
                 }
                 else {
                     $noChange = "";
