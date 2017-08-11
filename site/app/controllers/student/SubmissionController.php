@@ -445,7 +445,7 @@ class SubmissionController extends AbstractController {
 
         // copy over the uploaded file
         if (isset($uploaded_file)) {
-            if (!@copy($uploaded_file, FileUtils::joinPaths($version_path,basename($uploaded_file)))) {
+            if (!@copy($uploaded_file, FileUtils::joinPaths($version_path,"upload.pdf"))) {
                 return $this->uploadResult("Failed to copy uploaded file {$uploaded_file} to current submission.", false);
             }
             if (!@unlink($uploaded_file)) {
@@ -603,6 +603,11 @@ class SubmissionController extends AbstractController {
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
         if ($vcs_checkout && !isset($_POST['repo_id'])) {
             return $this->uploadResult("Invalid repo id.", false);
+        }
+
+        $student_page = isset($_REQUEST['student_page']) ? $_REQUEST['student_page'] === "true" : false;
+        if ($student_page && !isset($_POST['pages'])) {
+            return $this->uploadResult("Invalid pages.", false);
         }
     
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
@@ -912,6 +917,29 @@ class SubmissionController extends AbstractController {
 
             if (!@touch(FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT"))) {
                 return $this->uploadResult("Failed to touch file for vcs submission.", false);
+            }
+        }
+
+        // save the contents of the page number inputs to files
+        $empty_pages = true;
+        if (isset($_POST['pages'])) {
+            $pages_array = json_decode($_POST['pages']);
+            $total = count($gradeable->getComponents());
+            $filename = "student_pages.json";
+            $dst = FileUtils::joinPaths($version_path, $filename);
+            $json = array();
+            $i = 0;
+            foreach ($gradeable->getComponents() as $question) {
+                $order = intval($question->getOrder());
+                $title = $question->getTitle();
+                $page_val = intval($pages_array[$i]);   
+                $json[] = array("order" => $order,
+                                "title" => $title,
+                                "page #" => $page_val);
+                $i++;
+            }
+            if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
+                return $this->uploadResult("Failed to write to pages file.", false);
             }
         }
     
