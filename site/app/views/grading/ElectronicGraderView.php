@@ -242,7 +242,6 @@ HTML;
 HTML;
             return $return;
         }
-    }
 
     /**
      * @param Gradeable   $gradeable

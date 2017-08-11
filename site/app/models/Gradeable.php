@@ -354,12 +354,12 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp', 'gc_default', 'gc_max_value', 'gc_upper_clamp', 
-                'gc_is_text', 'gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 
+                'gc_is_text', 'gc_is_peer','gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 
                 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version','gcd_grade_time', 
                 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname', 'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp',
-                                      'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_text', 'gc_is_text', 'gc_order', 'gc_page', 'array_gcm_id', 
+                                      'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_peer', 'gc_is_text', 'gc_order', 'gc_page', 'array_gcm_id', 
                                       'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'anon_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
@@ -370,7 +370,6 @@ class Gradeable extends AbstractModel {
                     $details['array_'.$key] = DatabaseUtils::fromPGToPHPArray($details['array_'.$key], in_array($key, $bools));
                 }
             }
-
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {
                 $component_details = array();
                 foreach ($component_fields as $key) {
@@ -403,7 +402,6 @@ class Gradeable extends AbstractModel {
                         }
                     }
                 }
-                
                 if(count($grade_details) <= 1) {
                     if(count($grade_details) == 1) {
                         $component_details = array_merge($component_details, $grade_details[$keys[0]]);
@@ -428,28 +426,9 @@ class Gradeable extends AbstractModel {
 
                 if (!$component_for_info->getIsText()) {
                     $max_value = $component_for_info->getMaxValue();
-                    if ($max_value > 0) {
-                        if ($component_for_info->getIsPeer()) {
-                            if ($component_for_info->getIsExtraCredit()) {
-                                $this->total_peer_grading_extra_credit += $max_value;
-                            }
-                            else {
-                                $this->total_peer_grading_non_extra_credit += $max_value;
-                            }
-                        }
-                        else {
-                            if ($component_for_info->getIsExtraCredit()) {
-                                $this->total_tagrading_extra_credit += $max_value;
-                            }
-                            else {
-                                $this->total_tagrading_non_extra_credit += $max_value;
-                            }
-                        }
-                    }
-                    $this->graded_tagrading += $component_for_info->getScore();
+                    $this->total_tagrading_non_extra_credit += $max_value;
                 }
             }
-
             // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
             // either write an inner JOIN on that aggregation to order stuff, and then have it aggregated, or we can
             // just order it here, which is simpler in the long run and not really a performance problem.
