@@ -559,7 +559,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
         if ($who_id === "") {
-            $core->addErrorMessage("Finished grading for {$gradeable->getName()}");
+            $core->addSuccessMessage("Finished grading for {$gradeable->getName()}");
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
