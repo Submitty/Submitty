@@ -1095,7 +1095,7 @@ SELECT gd_user_id FROM gradeable_data WHERE gd_id=?", array($row['gd_id']));
     }
 
     public function insertGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark) {
-        $params = array($gc_id, $gd_id, $mark->getId());
+        $params = array($gc_id, $gd_id, $gcd_grader_id, $mark->getId());
         $this->course_db->query("
 INSERT INTO gradeable_component_mark_data (gc_id, gd_id, gcd_grader_id, gcm_id)
 VALUES (?, ?, ?, ?)", $params);

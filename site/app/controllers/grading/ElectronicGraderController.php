@@ -78,10 +78,12 @@ class ElectronicGraderController extends AbstractController {
         $total_users = array();
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
-            $total_users = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
+            $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
             $num_components = $gradeable->getNumPeerComponents();
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
             $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
+            $component_averages = array();
+            $overall_average = array();
         }
         else if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getUser()->accessFullGrading()){
