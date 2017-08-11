@@ -58,6 +58,8 @@ class AdminGradeableView extends AbstractView {
         $student_submit = true;
         $student_download = false;
         $student_any_version = true;
+        $pdf_page = false;
+        $pdf_page_student = false;
         $old_questions = array();
         $g_min_grading_group = 0;
         $g_overall_ta_instructions = "";
@@ -126,6 +128,12 @@ class AdminGradeableView extends AbstractView {
                 for ($i = 0; $i < $num_old_questions; $i++) {
                     $json = json_decode($data[1]);
                     $component_ids[] = $json[$i]->gc_id;
+                    if (($json[$i]->gc_page) !== 0) {
+                        $pdf_page = true;
+                        if (($json[$i]->gc_page) === -1) {
+                            $pdf_page_student = true;
+                        }
+                    }
                 }
             }
             if ($data[0]['g_gradeable_type'] === 2) { //if the gradeable edited is num/text gradeable
@@ -164,6 +172,12 @@ class AdminGradeableView extends AbstractView {
                 for ($i = 0; $i < $num_old_questions; $i++) {
                     $json = json_decode($data[1]);
                     $component_ids[] = $json[$i]->gc_id;
+                    if (($json[$i]->gc_page) !== 0) {
+                        $pdf_page = true;
+                        if (($json[$i]->gc_page) === -1) {
+                            $pdf_page_student = true;
+                        }
+                    }
                 }
             }
             if ($data[0]['g_gradeable_type'] === 2) {
@@ -431,60 +445,62 @@ HTML;
                 <br /> <br />
 
                 Should students be able to view submissions?
-                <input type="radio" id="yes_student_view" name="student_view" value="true" class="bool_val rubric_questions"
+                <fieldset>
+                    <input type="radio" id="yes_student_view" name="student_view" value="true"
 HTML;
-                if ($student_view===true) { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-                /> Yes
-                <input type="radio" id="no_student_view" name="student_view" value="false"
-HTML;
-                if ($student_view===false) { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-                /> No 
-                <br /> <br />
-
-                <div id="student_submit_download_view">
-
-                    Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
-                    <input type="radio" id="yes_student_submit" name="student_submit" value="true" class="bool_val rubric_questions"
-HTML;
-                    if ($student_submit===true) { $html_output .= ' checked="checked"'; }
+                    if ($student_view===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                     /> Yes
-                    <input type="radio" id="no_student_submit" name="student_submit" value="false"
+                    <input type="radio" id="no_student_view" name="student_view" value="false"
 HTML;
-                    if ($student_submit===false) { $html_output .= ' checked="checked"'; }
+                    if ($student_view===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                     /> No 
-                    <br /> <br />
 
-                    Should students be able to download files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
-                    <input type="radio" id="yes_student_download" name="student_download" value="true" class="bool_val rubric_questions"
-HTML;
-                    if ($student_download===true) { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-                    /> Yes
-                    <input type="radio" id="no_student_download" name="student_download" value="false"
-HTML;
-                    if ($student_download===false) { $html_output .= ' checked="checked"'; }
-        $html_output .= <<<HTML
-                    /> No
-                    <br /> <br />
+                    <div id="student_submit_download_view">
 
-                    Should students be able to view/download any or all versions? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
-                    <input type="radio" id="yes_student_any_version" name="student_any_version" value="true" class="bool_val rubric_questions"
+                        <br />
+                        Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
+                        <input type="radio" id="yes_student_submit" name="student_submit" value="true" 
 HTML;
-                    if ($student_any_version===true) { $html_output .= ' checked="checked"'; }
+                        if ($student_submit===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
-                    /> Any version
-                    <input type="radio" id="no_student_any_version" name="student_any_version" value="false"
+                        /> Yes
+                        <input type="radio" id="no_student_submit" name="student_submit" value="false"
 HTML;
-                    if ($student_any_version===false) { $html_output .= ' checked="checked"'; }
+                        if ($student_submit===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
-                    /> Active version only
-                    <br /> <br />
+                        /> No 
+                        <br /> <br />
 
-                </div>
+                        Should students be able to download files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
+                        <input type="radio" id="yes_student_download" name="student_download" value="true"
+HTML;
+                        if ($student_download===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                        /> Yes
+                        <input type="radio" id="no_student_download" name="student_download" value="false"
+HTML;
+                        if ($student_download===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                        /> No
+                        <br /> <br />
+
+                        Should students be view/download any or all versions? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
+                        <input type="radio" id="yes_student_any_version" name="student_any_version" value="true"
+HTML;
+                        if ($student_any_version===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                        /> Any version
+                        <input type="radio" id="no_student_any_version" name="student_any_version" value="false"
+HTML;
+                        if ($student_any_version===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                        /> Active version only
+
+                    </div>
+                </fieldset>
+                <br />
 
           Will any or all of this assignment be manually graded (e.g., by TAs or the instructor)?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
@@ -501,19 +517,67 @@ HTML;
                 
                 <div id="rubric_questions" class="bool_val rubric_questions">
                 Will this assignment have peer grading?: 
-                <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes"
+                <fieldset>
+                    <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes"
 HTML;
         $display_peer_checkboxes = "";
-                if(($type_of_action === "edit" || $type_of_action === "add_template") && $peer_yes_checked) { $html_output .= ' checked="checked"'; }
+                    if(($type_of_action === "edit" || $type_of_action === "add_template") && $peer_yes_checked) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
- /> Yes
-                <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no"
+                    /> Yes
+                    <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no"
 HTML;
-                if ((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; $display_peer_checkboxes='style="display:none"'; }
+                    if ((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") {
+                        $html_output .= ' checked="checked"';
+                        $display_peer_checkboxes = 'style="display:none"';
+                    }
+        $display_pdf_page_input = "";
         $html_output .= <<<HTML
- /> No 
-                <br /><br />
-                <div class="peer_input" style="display:none;">How many peers should each student grade? <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' /></div>
+                    /> No
+                    <div class="peer_input" style="display:none;">
+                        <br />
+                        How many peers should each student grade?
+                        <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' />
+                    </div>
+                </fieldset>
+                <br />
+
+                Is this a PDF with a page assigned to each component?
+                <fieldset>
+                    <input type="radio" id="yes_pdf_page" name="pdf_page" value="true" 
+HTML;
+                    if ($pdf_page===true) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                    /> Yes
+                    <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
+HTML;
+                    if ($pdf_page===false) { 
+                        $html_output .= ' checked="checked"';
+                        $display_pdf_page_input = 'style="display:none"';
+                    }
+        $html_output .= <<<HTML
+                    /> No 
+
+                    <div id="pdf_page">
+                        <br />
+                        Who will assign pages to components?
+                        <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
+HTML;
+                        if ($pdf_page_student===false) { $html_output .= ' checked="checked"'; }
+        $html_output .= <<<HTML
+                        /> Instructor
+                        <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
+HTML;
+                        if ($pdf_page_student===true) {
+                            $html_output .= ' checked="checked"';
+                            $display_pdf_page_input = 'style="display:none"';
+                        }
+        $html_output .= <<<HTML
+                        /> Student
+                    </div>
+
+                </fieldset>
+                <br />
+
                 Point precision (for manual grading): 
                 <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{$precision}" class="float_val" />
                 <br /><br />
@@ -534,11 +598,9 @@ HTML;
                                   'student_grading_note'  => "",
                                   'question_total'        => 0,
                                   'question_extra_credit' => 0,
-                                  'peer_component'        => 0);
+                                  'peer_component'        => 0,
+                                  'page_component'        => 1);
     }
-
-
-    
 
     //this is a hack
     array_unshift($old_questions, "tmp");
@@ -683,8 +745,10 @@ HTML;
 HTML;
 
         $peer_checked = ($question['peer_component']) ? ' checked="checked"' : "";
+        $pdf_page = (isset($question['page_component'])) ? $question['page_component'] : 1;
         $html_output .= <<<HTML
                 <div id="peer_checkbox_{$num}" class="peer_input" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
+                <div id="pdf_page_{$num}" class="pdf_page_input" {$display_pdf_page_input}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{$num}" value={$pdf_page} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
 HTML;
         if ($num > 1){
         $html_output .= <<<HTML
@@ -1098,7 +1162,6 @@ function createCrossBrowserJSDate(val){
     }
 
     $(document).ready(function() {
-
         $(function() {
             $( ".date_picker" ).datetimepicker({
                 dateFormat: 'yy-mm-dd',
@@ -1271,6 +1334,24 @@ function createCrossBrowserJSDate(val){
             $('#repository').hide();
         }
 
+        if ($('input:radio[name="pdf_page"]:checked').attr('value') === 'false') {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < 0) {
+                    this.value = 0;
+                }
+            });
+            $('#pdf_page').hide();
+        }
+
+        if ($('input:radio[name="pdf_page_student"]:checked').attr('value') === 'true') {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < -1) {
+                    this.value = -1;
+                }
+            });
+            $('.pdf_page_input').hide();
+        }
+
         $('.gradeable_type_options').hide();
         
         if ($('input[name="gradeable_type"]').is(':checked')){
@@ -1368,7 +1449,45 @@ function createCrossBrowserJSDate(val){
             }
         });
 
+        $('input:radio[name="pdf_page"]').change(function() {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < 0) {
+                    this.value = 0;
+                }
+            });
+            $('.pdf_page_input').hide();
+            $('#pdf_page').hide();
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'true') {
+                    $("input[name^='page_component']").each(function() {
+                        if (this.value < 1) {
+                            this.value = 1;
+                        }
+                    });
+                    $('.pdf_page_input').show();
+                    $('#pdf_page').show();
+                }
+            }
+        });
 
+        $('input:radio[name="pdf_page_student"]').change(function() {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < -1) {
+                    this.value = -1;
+                }
+            });
+            $('.pdf_page_input').hide();
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'false') {
+                    $("input[name^='page_component']").each(function() {
+                        if (this.value < 1) {
+                            this.value = 1;
+                        }
+                    });
+                    $('.pdf_page_input').show();
+                }
+            }
+        });
         
         $('[name="gradeable_template"]').change(
         function(){
@@ -1850,6 +1969,8 @@ $('#gradeable-form').on('submit', function(e){
         row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
         row.find('div[id=peer_checkbox_' + oldNum +']').attr('id', 'peer_checkbox_' + newNum);
         row.find('input[name=peer_component_'+ oldNum + ']').attr('name', 'peer_component_' + newNum);
+        row.find('div[id=pdf_page_' + oldNum +']').attr('id', 'pdf_page_' + newNum);
+        row.find('input[name=page_component_' + oldNum + ']').attr('name', 'page_component_' + newNum);
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
         row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
@@ -2180,6 +2301,13 @@ $('#gradeable-form').on('submit', function(e){
             display = 'style="display:none"';
         }
         //Please do not add any characters after the \ including spaces!
+        var displayPage = "";
+        if($('input[id=peer_no_radio]').is(':checked')) {
+            display = 'style="display:none"';
+        }
+        if($('input[id=no_pdf_page]').is(':checked') || $('input[id=yes_pdf_page_student]').is(':checked')) {
+            displayPage = 'style="display:none"';
+        }
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
             <td style="overflow: hidden; border-top: 5px solid #dddddd;"> \
                 <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" placeholder="Rubric Item Title"></textarea> \
@@ -2211,6 +2339,7 @@ $('#gradeable-form').on('submit', function(e){
             <input type="radio" id="id_grade_by_down-'+newQ+'" name="grade_by-'+newQ+'" value="count_down" data-question_num="'+newQ+'" onclick="onDeduction(this);"> Grade by count down \
                 <br /> \
                 <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
+                <div id="pdf_page_'+newQ+'" class="pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_'+newQ+'" value="1" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <i class="fa fa-times" aria-hidden="true"></i></a> \
                 <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \
@@ -2444,6 +2573,31 @@ $('#gradeable-form').on('submit', function(e){
                 return false;
             }
         }
+        if($('#yes_pdf_page').is(':checked') && $('#no_pdf_page_student').is(':checked')) {
+            var invalid = false;
+            $("input[name^='page_component']").each(function() {
+                if (this.value < 1) {
+                    alert("Page number for component cannot be less than 1");
+                    invalid = true;
+                }
+            });
+            if (invalid) {
+                return false;
+            }
+        }
+        else {
+            var invalid = false;
+            $("input[name^='page_component']").each(function() {
+                if (this.value < -1) {
+                    alert("Page number for component cannot be less than -1");
+                    invalid = true;
+                }
+            });
+            if (invalid) {
+                return false;
+            }
+        }
+        // return false;
         if($('#team_yes_radio').is(':checked')) {
             if ($("input[name^='eg_max_team_size']").val() < 2) {
                 alert("Maximum team size must be at least 2");
