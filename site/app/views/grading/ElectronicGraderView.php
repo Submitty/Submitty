@@ -14,7 +14,7 @@ class ElectronicGraderView extends AbstractView {
      * @param array     $sections
      * @return string
      */
-    public function statusPage($gradeable, $sections) {
+    public function statusPage($gradeable, $sections, $component_averages, $overall_average) {
         $course = $this->core->getConfig()->getCourse();
         $semester = $this->core->getConfig()->getSemester();
         $graded = 0;
@@ -56,38 +56,39 @@ HTML;
         $view = null;
         $return .= <<<HTML
     <div class="sub">
-        Current percentage of grading done: {$percentage}% ({$graded}/{$total})
+        <div class="box half">
+            Current percentage of grading done: {$percentage}% ({$graded} questions graded out of {$total} total)
 HTML;
         if ($gradeable->isTeamAssignment() && $no_team_total > 0) {
             $return .= <<<HTML
-         - {$no_team_total} students with no team
+             - {$no_team_total} students with no team
 HTML;
         }
         $return .= <<<HTML
-        <br />
-        <br />
-        By Grading Sections:
-        <div style="margin-left: 20px">
+            <br />
+            <br />
+            By Grading Sections:
+            <div style="margin-left: 20px">
 HTML;
         foreach ($sections as $key => $section) {
             $percentage = $section['total_components'] !== 0 ? round(($section['graded_components'] / $section['total_components']) * 100) : 0;
             $return .= <<<HTML
-            Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})
+                Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})
 HTML;
             if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
                 $return .= <<<HTML
-             - {$section['no_team']} students with no team
+                 - {$section['no_team']} students with no team
 HTML;
             }
             $return .= <<<HTML
-            <br />
+                <br />
 HTML;
         }
         $return .= <<<HTML
-        </div>
-        <br />
-        Graders:
-        <div style="margin-left: 20px">
+            </div>
+            <br />
+            Graders:
+            <div style="margin-left: 20px">
 HTML;
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
@@ -100,17 +101,78 @@ HTML;
                 $graders = "Nobody";
             }
             $return .= <<<HTML
-            Section {$key}: {$graders}<br />
+                Section {$key}: {$graders}<br />
 HTML;
         }
+        if(!$gradeable->isTeamAssignment()) {
+            $return .= <<<HTML
+            </div>
+        </div>
+        <div class="box half">
+            <b>Statistics for Completely Graded Assignments: </b><br/>
+            <div style="margin-left: 20px">
+HTML;
+            if($overall_average == null) {
+                $return .= <<<HTML
+                There are no students completely graded yet.
+            </div>
+HTML;
+            }
+            else {
+                if($gradeable->getTotalAutograderNonExtraCreditPoints() == null) {
+                    $total = $overall_average->getMaxValue();
+                }
+                else {
+                    $total = $overall_average->getMaxValue() + $gradeable->getTotalAutograderNonExtraCreditPoints();                    
+                }
+                $return .= <<< HTML
+                Average: {$overall_average->getAverageScore()} / {$total} <br/>
+                Standard Deviation: {$overall_average->getStandardDeviation()} <br/>
+                Count: {$overall_average->getCount()} <br/>
+            </div>
+HTML;
+            }
+            $return .= <<<HTML
+            <br/><b>Statistics of Graded Components: </b><br/>
+            <div style="margin-left: 20px">
+HTML;
+            if(count($component_averages) == 0) {
+                $return .= <<<HTML
+            No components have been graded yet.
+HTML;
+            }
+            else {
+                $overall_score = 0;
+                $overall_max = 0;
+                foreach($component_averages as $comp) {
+                    $overall_score += $comp->getAverageScore();
+                    $overall_max += $comp->getMaxValue();
+                    $return .= <<<HTML
+                {$comp->getTitle()}:<br/>
+                <div style="margin-left: 40px">
+                    Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} <br/>
+                    Standard Deviation: {$comp->getStandardDeviation()} <br/>
+                    Count: {$comp->getCount()} <br/>
+                </div>
+HTML;
+                }
+                if($overall_max !=0){
+                    $percentage = round($overall_score / $overall_max *100);
+                    $return .= <<<HTML
+                <br/>Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
+HTML;
+                }
+            }
+        }
         $return .= <<<HTML
+            </div>
         </div>
     </div>
 HTML;
     }
     //{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
     $return .= <<<HTML
-    <div style="margin-top: 20px">
+    <div style="margin-top: 20px; vertical-align:bottom;">
 HTML;
         if($percentage !== -1 || $this->core->getUser()->accessFullGrading()){
             $return .= <<<HTML
