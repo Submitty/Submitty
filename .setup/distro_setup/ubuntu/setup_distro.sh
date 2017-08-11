@@ -128,7 +128,7 @@ apt-get install -qqy php7.0-zip
 # DOCUMENTATION FIXME: Go through this list and categorize purpose of
 # these packages (as appropriate.. )
 
-apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
+apt-get install -qqy clang autoconf automake autotools-dev diffstat finger gdb git git-man \
 hardening-includes p7zip-full patchutils \
 libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
 javascript-common  \

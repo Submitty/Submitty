@@ -1,11 +1,18 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# If you want to install extra packages (such as rpi or matlab), you need to have the environment
+# variable EXTRA set. The easiest way to do this is doing:
+#
+# EXTRA=rpi vagrant up
+#   or
+# EXTRA=rpi,matlab vagrant up
+
 $script = <<SCRIPT
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT_Submitty
-DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g")
+DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g" | tr '[:upper:]' '[:lower:]')
 mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/logs
-${GIT_PATH}/.setup/vagrant.sh 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/logs/vagrant.log
+${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV['EXTRA']} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/logs/vagrant.log
 SCRIPT
 
 Vagrant.configure(2) do |config|
@@ -22,7 +29,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define 'debian', autostart: false do |debian|
-    debian.vm.box = 'debian/jessie64'
+    debian.vm.box = 'bento/debian-8.8'
     debian.vm.network 'forwarded_port', guest: 5432, host: 25432
     debian.vm.network 'private_network', ip: '192.168.56.102', auto_config: false
   end
@@ -43,5 +50,5 @@ Vagrant.configure(2) do |config|
 
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
 
-  config.vm.provision 'shell', inline: $script
+  config.vm.provision 'shell', run: 'always', inline: $script
 end
