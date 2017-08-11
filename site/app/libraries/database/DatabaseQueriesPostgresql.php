@@ -11,6 +11,7 @@ use app\models\GradeableVersion;
 use app\models\User;
 use app\models\SimpleLateUser;
 use app\models\Team;
+use app\models\SimpleStat;
 
 class DatabaseQueriesPostgresql extends AbstractDatabaseQueries{
 
@@ -597,25 +598,25 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         return $return;
     }
 
-    public function getTotalUserCountByRegistrationSections($sections) {
+    public function getTotalUserCountByGradingSections($sections, $section_key) {
         $return = array();
         $params = array();
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE registration_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $where = "WHERE {$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).")";
             $params = $sections;
         }
         $this->course_db->query("
-SELECT count(*) as cnt, registration_section 
+SELECT count(*) as cnt, {$section_key}
 FROM users 
 {$where}
-GROUP BY registration_section 
-ORDER BY registration_section", $params);
+GROUP BY {$section_key} 
+ORDER BY {$section_key}", $params);
         foreach ($this->course_db->rows() as $row) {
-            if ($row['registration_section'] === null) {
-                $row['registration_section'] = "NULL";
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
             }
-            $return[$row['registration_section']] = intval($row['cnt']);
+            $return[$row[$section_key]] = intval($row['cnt']);
         }
         return $return;
     }
@@ -625,31 +626,108 @@ ORDER BY registration_section", $params);
         return intval($this->course_db->row()['cnt']);
     }
 
-    public function getGradedComponentsCountByRegistrationSections($g_id, $sections) {
+    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key) {
         $return = array();
         $params = array($g_id);
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE registration_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $where = "WHERE {$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).")";
             $params = array_merge($params, $sections);
         }
         $this->course_db->query("
-SELECT count(u.*) as cnt, u.registration_section
-FROM users AS u
-INNER JOIN (
-  SELECT * FROM gradeable_data AS gd LEFT JOIN gradeable_component_data AS gcd ON gcd.gd_id = gd.gd_id WHERE g_id=?
-) AS gd ON u.user_id = gd.gd_user_id
+SELECT count(u.*) as cnt, u.{$section_key}
+FROM(
+  SELECT * FROM gradeable_component_data AS gcd LEFT JOIN gradeable_data AS gd ON gcd.gd_id = gd.gd_id WHERE g_id=?
+) AS gd 
+INNER JOIN users AS u ON u.user_id = gd.gd_user_id
 {$where}
-GROUP BY u.registration_section
-ORDER BY u.registration_section", $params);
+GROUP BY u.{$section_key}
+ORDER BY u.{$section_key}", $params);
         foreach ($this->course_db->rows() as $row) {
-            if ($row['registration_section'] === null) {
-                $row['registration_section'] = "NULL";
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
             }
-            $return[$row['registration_section']] = intval($row['cnt']);
+            $return[$row[$section_key]] = intval($row['cnt']);
         }
         return $return;
     }
+
+    public function getAverageComponentScores($g_id) {
+        $return = array();
+        $this->course_db->query("
+SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
+  SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, 
+  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp 
+  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp 
+  ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
+    SELECT gcd.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
+    CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
+    FROM gradeable_component_data AS gcd
+    LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
+    LEFT JOIN(
+      SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id 
+      FROM gradeable_component_mark_data AS gcmd
+      LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
+      GROUP BY gcmd.gc_id, gcmd.gd_id
+      )AS marks
+    ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
+    WHERE g_id=?
+  )AS parts_of_comp
+)AS comp
+GROUP BY gc_id, gc_title, gc_max_value, gc_is_peer, gc_order
+ORDER BY gc_order
+        ", array($g_id));
+        foreach ($this->course_db->rows() as $row) {
+            $return[] = new SimpleStat($this->core, $row);
+        }
+        return $return;
+    }
+
+    public function getAverageForGradeable($g_id) {
+        $this->course_db->query("
+SELECT COUNT(*) from gradeable_component where g_id=?
+          ", array($g_id));
+        $count = $this->course_db->rows()[0][0];
+        $this->course_db->query("
+SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
+  SELECT * FROM(
+    SELECT gd_id, SUM(comp_score) AS g_score, SUM(gc_max_value) AS max, COUNT(comp.*), autograding FROM(
+      SELECT  gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, autograding,
+      CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp 
+      WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp 
+      ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
+        SELECT gcd.gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
+        CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score, CASE WHEN autograding IS NULL THEN 0 ELSE autograding END AS autograding
+        FROM gradeable_component_data AS gcd
+        LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
+        LEFT JOIN(
+          SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id 
+          FROM gradeable_component_mark_data AS gcmd
+          LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
+          GROUP BY gcmd.gc_id, gcmd.gd_id
+          )AS marks
+        ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
+        LEFT JOIN gradeable_data AS gd ON gd.gd_id=gcd.gd_id
+        LEFT JOIN (
+          SELECT egd.g_id, egd.user_id, (autograding_non_hidden_non_extra_credit + autograding_non_hidden_extra_credit + autograding_hidden_non_extra_credit + autograding_hidden_extra_credit) AS autograding 
+          FROM electronic_gradeable_version AS egv 
+          LEFT JOIN electronic_gradeable_data AS egd ON egv.g_id=egd.g_id AND egv.user_id=egd.user_id AND active_version=g_version
+          )AS auto
+        ON gd.g_id=auto.g_id AND gd_user_id=user_id
+        WHERE gc.g_id=?
+      )AS parts_of_comp
+    )AS comp 
+    GROUP BY gd_id, autograding
+  )g WHERE count=?
+)AS individual
+          ", array($g_id, $count));
+        if(count($this->course_db->rows()) == 0){
+          echo("why");
+          return;
+        }
+        return new SimpleStat($this->core, $this->course_db->rows()[0]);
+    }
+
 
     public function getGradersForRegistrationSections($sections) {
         $return = array();
@@ -684,76 +762,6 @@ ORDER BY g.sections_registration_id, g.user_id", $params);
         return $return;
     }
 
-    public function getRotatingSectionsForGradeableAndUser($g_id, $user) {
-        $this->course_db->query("SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
-        $return = array();
-        foreach ($this->course_db->rows() as $row) {
-            $return[] = $row['sections_rotating_id'];
-        }
-        return $return;
-    }
-
-    public function getUsersByRotatingSections($sections) {
-        $return = array();
-        if (count($sections) > 0) {
-            $query = implode(",", array_fill(0, count($sections), "?"));
-            $this->course_db->query("SELECT * FROM users WHERE rotating_section IN ({$query}) ORDER BY rotating_section", $sections);
-            foreach ($this->course_db->rows() as $row) {
-                $return[] = new User($this->core, $row);
-            }
-        }
-        return $return;
-    }
-
-    public function getTotalUserCountByRotatingSections($sections) {
-        $return = array();
-        $where = "";
-        $params = array();
-        if (count($sections) > 0) {
-            $where = "WHERE rotating_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
-            $params = $sections;
-        }
-        $this->course_db->query("
-SELECT count(*) as cnt, rotating_section 
-FROM users 
-{$where}
-GROUP BY rotating_section 
-ORDER BY rotating_section", $params);
-        foreach ($this->course_db->rows() as $row) {
-            if ($row['rotating_section'] === null) {
-                $row['rotating_section'] = "NULL";
-            }
-            $return[$row['rotating_section']] = intval($row['cnt']);
-        }
-        return $return;
-    }
-
-    public function getGradedComponentsCountByRotatingSections($g_id, $sections) {
-        $return = array();
-        $params = array($g_id);
-        $where = "";
-        if (count($sections) > 0) {
-            $where = "WHERE rotating_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
-            $params = array_merge($params, $sections);
-        }
-        $this->course_db->query("
-SELECT count(u.*) as cnt, u.rotating_section
-FROM users AS u
-INNER JOIN (
-    SELECT * FROM gradeable_data AS gd LEFT JOIN gradeable_component_data AS gcd ON gcd.gd_id = gd.gd_id WHERE g_id=?
-) AS gd ON u.user_id = gd.gd_user_id
-{$where}
-GROUP BY u.rotating_section
-ORDER BY u.rotating_section", $params);
-        foreach ($this->course_db->rows() as $row) {
-            if ($row['rotating_section'] === null) {
-                $row['rotating_section'] = "NULL";
-            }
-            $return[$row['rotating_section']] = intval($row['cnt']);
-        }
-        return $return;
-    }
-
     public function getGradersForRotatingSections($g_id, $sections) {
         $return = array();
         $params = array($g_id);
@@ -783,6 +791,27 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
                 $user_store[$row['user_id']] = new User($this->core, $row);
             }
             $return[$row['sections_rotating_id']][] = $user_store[$row['user_id']];
+        }
+        return $return;
+    }
+
+    public function getRotatingSectionsForGradeableAndUser($g_id, $user) {
+        $this->course_db->query("SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
+        $return = array();
+        foreach ($this->course_db->rows() as $row) {
+            $return[] = $row['sections_rotating_id'];
+        }
+        return $return;
+    }
+
+    public function getUsersByRotatingSections($sections) {
+        $return = array();
+        if (count($sections) > 0) {
+            $query = implode(",", array_fill(0, count($sections), "?"));
+            $this->course_db->query("SELECT * FROM users WHERE rotating_section IN ({$query}) ORDER BY rotating_section", $sections);
+            foreach ($this->course_db->rows() as $row) {
+                $return[] = new User($this->core, $row);
+            }
         }
         return $return;
     }
