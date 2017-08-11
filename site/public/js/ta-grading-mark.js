@@ -290,7 +290,7 @@ function openClose(row_id, num_questions = -1) {
         var save_mark = $('#save-mark-' + x);
         var title = $('#title-' + x);
         var title_cancel = $('#title-cancel-' + x);
-        var page = (document.getElementById('page-' + x)).innerHTML;
+        var page = ($('#page-' + x)[0]).innerHTML;
 
         // update the color if it is penalty or extra credit
         var current_question_num = $('#grade-' + x);
