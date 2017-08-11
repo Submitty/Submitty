@@ -251,59 +251,71 @@ function openClose(row_id, num_questions = -1) {
         total_num = parseInt(num_questions);
     }
     //-2 means general comment, else open the row_id with the number
-    general_comment = $('#extra-general')[0];
-    general_comment_summary = $('#summary-general')[0];
-    general_comment_cancel_mark = $('#cancel-mark-general')[0];
-    general_comment_save_mark = $('#save-mark-general')[0];
+    general_comment = $('#extra-general');
+    general_comment_summary = $('#summary-general');
+    general_comment_cancel_mark = $('#cancel-mark-general');
+    general_comment_save_mark = $('#save-mark-general');
     general_comment_title = $('#title-general');
     general_comment_title_cancel = $('#title-general-cancel');
-    if(row_num === -2 && general_comment.style.display === 'none') {
-        general_comment.style.display = '';
+    if(row_num === -2 && general_comment[0].style.display === 'none') {
+        general_comment[0].style.display = '';
         general_comment_title[0].style.backgroundColor = "#e6e6e6";
-        general_comment.style.backgroundColor = "#e6e6e6";
+        general_comment[0].style.backgroundColor = "#e6e6e6";
         general_comment_title_cancel[0].style.backgroundColor = "#e6e6e6";
-        general_comment_summary.style.display = 'none';
-        general_comment_cancel_mark.style.display = '';
-        general_comment_save_mark.style.display = '';
+        general_comment_summary[0].style.display = 'none';
+        general_comment_cancel_mark[0].style.display = '';
+        general_comment_save_mark[0].style.display = '';
         general_comment_title.attr('colspan', 3);
         general_comment_title_cancel[0].style.display = '';
         general_comment_title_cancel.attr('colspan', 1);
     } else {
-        general_comment.style.display = 'none';
+        general_comment[0].style.display = 'none';
         general_comment_title[0].style.backgroundColor = "initial";
-        general_comment.style.backgroundColor = "initial";
+        general_comment[0].style.backgroundColor = "initial";
         general_comment_title_cancel[0].style.backgroundColor = "initial";
-        general_comment_summary.style.display = '';
-        general_comment_cancel_mark.style.display = 'none';
-        general_comment_save_mark.style.display = 'none';
+        general_comment_summary[0].style.display = '';
+        general_comment_cancel_mark[0].style.display = 'none';
+        general_comment_save_mark[0].style.display = 'none';
         general_comment_title.attr('colspan', 4);
         general_comment_title_cancel[0].style.display = 'none';
         general_comment_title_cancel.attr('colspan', 0);
     }
     for (var x = 1; x <= total_num; x++) {
-        var current = $('#extra-' + x)[0];
-        var current_summary = $('#summary-' + x)[0];
-        var ta_note = $('#ta_note-' + x)[0];
-        var student_note = $('#student_note-' + x)[0];
-        var progress_points = $('#progress_points-' + x)[0];
-        var cancel_mark = $('#cancel-mark-' + x)[0];
-        var save_mark = $('#save-mark-' + x)[0];
+        var current = $('#extra-' + x);
+        var current_summary = $('#summary-' + x);
+        var ta_note = $('#ta_note-' + x);
+        var student_note = $('#student_note-' + x);
+        var progress_points = $('#progress_points-' + x);
+        var cancel_mark = $('#cancel-mark-' + x);
+        var save_mark = $('#save-mark-' + x);
         var title = $('#title-' + x);
         var title_cancel = $('#title-cancel-' + x);
         var page = (document.getElementById('page-' + x)).innerHTML;
+
+        // update the color if it is penalty or extra credit
+        var current_question_num = $('#grade-' + x);
+        var question_points = parseFloat(current_question_num[0].innerHTML);
+        if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
+            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#D8F2D8";
+        } else if (question_points < 0) {
+            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#FAD5D3";
+        } else {
+            current_summary.children("td:first-of-type")[0].style.backgroundColor = "initial";
+        }
+
         if (x == row_num) {
-            if (current.style.display === 'none') {
-                current.style.display = '';
-                current.style.backgroundColor = "#e6e6e6";
+            if (current[0].style.display === 'none') {
+                current[0].style.display = '';
+                current[0].style.backgroundColor = "#e6e6e6";
                 title[0].style.backgroundColor = "#e6e6e6";
                 title_cancel[0].style.backgroundColor = "#e6e6e6";
-                current_summary.style.display = 'none';
-                ta_note.style.display = '';
-                student_note.style.display = '';
+                current_summary[0].style.display = 'none';
+                ta_note[0].style.display = '';
+                student_note[0].style.display = '';
                 updateProgressPoints(x);
-                progress_points.style.display = '';
-                cancel_mark.style.display = '';
-                save_mark.style.display = '';
+                progress_points[0].style.display = '';
+                cancel_mark[0].style.display = '';
+                save_mark[0].style.display = '';
                 title.attr('colspan', 3);
                 title_cancel[0].style.display = '';
                 title_cancel.attr('colspan', 1);
@@ -360,31 +372,31 @@ function openClose(row_id, num_questions = -1) {
                     }
                 }
             } else {
-                current.style.display = 'none';
-                current_summary.style.display = '';
-                current.style.backgroundColor = "initial";
+                current[0].style.display = 'none';
+                current_summary[0].style.display = '';
+                current[0].style.backgroundColor = "initial";
                 title[0].style.backgroundColor = "initial";
                 title_cancel[0].style.backgroundColor = "initial";
-                ta_note.style.display = 'none';
-                student_note.style.display = 'none';
-                progress_points.style.display = 'none';
-                cancel_mark.style.display = 'none';
-                save_mark.style.display = 'none';
+                ta_note[0].style.display = 'none';
+                student_note[0].style.display = 'none';
+                progress_points[0].style.display = 'none';
+                cancel_mark[0].style.display = 'none';
+                save_mark[0].style.display = 'none';
                 title.attr('colspan', 4);
                 title_cancel[0].style.display = 'none';
                 title_cancel.attr('colspan', 0);
             }
         } else {
-            current.style.display = 'none';
-            current_summary.style.display = '';
-            current.style.backgroundColor = "initial";
+            current[0].style.display = 'none';
+            current_summary[0].style.display = '';
+            current[0].style.backgroundColor = "initial";
             title[0].style.backgroundColor = "initial";
             title_cancel[0].style.backgroundColor = "initial";
-            ta_note.style.display = 'none';
-            student_note.style.display = 'none';
-            progress_points.style.display = 'none';
-            cancel_mark.style.display = 'none';
-            save_mark.style.display = 'none';
+            ta_note[0].style.display = 'none';
+            student_note[0].style.display = 'none';
+            progress_points[0].style.display = 'none';
+            cancel_mark[0].style.display = 'none';
+            save_mark[0].style.display = 'none';
             title.attr('colspan', 4);
             title_cancel[0].style.display = 'none';
             title_cancel.attr('colspan', 0);
@@ -484,7 +496,7 @@ function cancelMark(num, gradeable_id, user_id, gc_id) {
 //num === -3 means save gradeable comment
 //num === -2 means save last opened component
 //num === -1 means save all components, TO DO?
-function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "") {
+function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "", sync = true) {
     if (num === -3) {
         var comment_row = $('#comment-general-id');
         var gradeable_comment = comment_row.val();
@@ -494,6 +506,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_gradeable_comment'}),
+            async: sync,
             data: {
                 'gradeable_id' : gradeable_id,
                 'user_id' : user_id,
@@ -527,9 +540,9 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         }
         if (found === true) { //if nothing was found, assumes it needs to save the gradeable comment
             var gradeable_component_id = parseInt($('#extra-' + index)[0].dataset.question_id);
-            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id);
+            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id, sync);
         } else {
-            saveMark(-3, gradeable_id, user_id, active_version);
+            saveMark(-3, gradeable_id, user_id, active_version, -1, your_user_id, sync);
         }
     } else if (num === -1) {
 
@@ -641,6 +654,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
+            async: sync,
             data: {
                 'gradeable_id' : gradeable_id,
                 'user_id' : user_id,
