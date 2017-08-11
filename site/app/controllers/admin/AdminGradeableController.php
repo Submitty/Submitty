@@ -348,7 +348,7 @@ class AdminGradeableController extends AbstractController {
                 foreach ($components as $comp) {
                     $num_marks = 0;
                     foreach($_POST as $k=>$v){
-                        if(strpos($k,'deduct_points_' . $index) !== false){
+                        if(strpos($k,'mark_points_' . $index) !== false){
                             $num_marks++;
                         }
                     }
@@ -356,8 +356,8 @@ class AdminGradeableController extends AbstractController {
                     for ($y = 0; $y < $num_marks; $y++) {
                         $mark = new GradeableComponentMark($this->core);
                         $mark->setGcId($comp->getId());
-                        $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                        $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                        $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
+                        $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                         $mark->setOrder($y);
                         $this->core->getQueries()->createGradeableComponentMark($mark);
                     }                    
@@ -370,7 +370,7 @@ class AdminGradeableController extends AbstractController {
                 foreach ($components as $comp) {
                     $num_marks = 0; //current number of marks
                     foreach($_POST as $k=>$v){
-                        if(strpos($k,'deduct_points_' . $index) !== false){
+                        if(strpos($k,'mark_points_' . $index) !== false){
                             $num_marks++;
                         }
                     }
@@ -384,8 +384,8 @@ class AdminGradeableController extends AbstractController {
                     foreach($marks as $mark) {
                         if($y < $num_marks && $y < $num_old_mark) {
                             $mark->setGcId($comp->getId());
-                            $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                            $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                            $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
+                            $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                             $mark->setOrder($y);
                             $this->core->getQueries()->updateGradeableComponentMark($mark);
                         } else if($num_old_mark > $num_marks) {
@@ -396,8 +396,8 @@ class AdminGradeableController extends AbstractController {
                     for($y = $num_old_mark; $y < $num_marks; $y++) {
                         $mark = new GradeableComponentMark($this->core);
                         $mark->setGcId($comp->getId());
-                        $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                        $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                        $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
+                        $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                         $mark->setOrder($y);
                         $this->core->getQueries()->createGradeableComponentMark($mark);
                     }             

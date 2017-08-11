@@ -120,8 +120,18 @@ function getMarkInfo(me, gradeable_id) {
             elem_html += "# of total components: " + total + "<br>";
             elem_html += "<h1> List of Students who got " + data['name_info']['question_name'] + "'s " 
                 + data['name_info']['mark_note'] + "</h1>";
+            var y = 1;
             for (var x = 0; x < data['data'].length; x++) {
-                elem_html += "" + data['data'][x]['gd_user_id'] + " <br>";
+
+                elem_html += "" + data['data'][x]['gd_user_id'];
+                if (x != data['data'].length - 1) {
+                    elem_html += ", ";
+                }
+                if(y == 5) {
+                    elem_html += "<br>";
+                    y = 0;
+                }
+                y++;
             }
             $('.popup-form').css('display', 'none');
             var form = $("#student-marklist-popup");
@@ -241,10 +251,10 @@ function openClose(row_id, num_questions = -1) {
         total_num = parseInt(num_questions);
     }
     //-2 means general comment, else open the row_id with the number
-    general_comment = document.getElementById('extra-general');
-    general_comment_summary = document.getElementById('summary-general');
-    general_comment_cancel_mark = document.getElementById('cancel-mark-general');
-    general_comment_save_mark = document.getElementById('save-mark-general');
+    general_comment = $('#extra-general')[0];
+    general_comment_summary = $('#summary-general')[0];
+    general_comment_cancel_mark = $('#cancel-mark-general')[0];
+    general_comment_save_mark = $('#save-mark-general')[0];
     general_comment_title = $('#title-general');
     general_comment_title_cancel = $('#title-general-cancel');
     if(row_num === -2 && general_comment.style.display === 'none') {
@@ -271,13 +281,13 @@ function openClose(row_id, num_questions = -1) {
         general_comment_title_cancel.attr('colspan', 0);
     }
     for (var x = 1; x <= total_num; x++) {
-        var current = document.getElementById('extra-' + x);
-        var current_summary = document.getElementById('summary-' + x);
-        var ta_note = document.getElementById('ta_note-' + x);
-        var student_note = document.getElementById('student_note-' + x);
-        var progress_points = document.getElementById('progress_points-' + x);
-        var cancel_mark = document.getElementById('cancel-mark-' + x);
-        var save_mark = document.getElementById('save-mark-' + x);
+        var current = $('#extra-' + x)[0];
+        var current_summary = $('#summary-' + x)[0];
+        var ta_note = $('#ta_note-' + x)[0];
+        var student_note = $('#student_note-' + x)[0];
+        var progress_points = $('#progress_points-' + x)[0];
+        var cancel_mark = $('#cancel-mark-' + x)[0];
+        var save_mark = $('#save-mark-' + x)[0];
         var title = $('#title-' + x);
         var title_cancel = $('#title-cancel-' + x);
         if (x == row_num) {

@@ -563,12 +563,12 @@ HTML;
 
         if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
             $html_output .= <<<HTML
-                <div id="deduct_id-{$num}-0" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
-                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_{$num}_0" value="0" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-                <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_0" style="resize: none; width: 80.5%;">Full Credit</textarea> 
-                <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-                <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-                <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                <div id="mark_id-{$num}-0" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
+                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{$num}_0" value="0" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_0" style="resize: none; width: 80.5%;">Full Credit</textarea> 
+                <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <br> 
             </div>
 HTML;
@@ -588,12 +588,12 @@ HTML;
                     $hidden = "";
                 }
                 $html_output .= <<<HTML
-                    <div id="deduct_id-{$num}-{$mark->getOrder()}" name="deduct_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
-                    <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="deduct_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-                    <textarea rows="1" placeholder="Comment" name="deduct_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 80.5%;">{$mark->getNote()}</textarea> 
-                    <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-                    <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
-                    <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
+                    <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                    <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 80.5%;">{$mark->getNote()}</textarea> 
+                    <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                     <br> 
                 </div>
 HTML;
@@ -601,7 +601,7 @@ HTML;
 
         }
         $html_output .= <<<HTML
-                    <div class="btn btn-xs btn-primary" id="rubric_add_deduct_{$num}" onclick="addDeduct(this,{$num});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div></div>
+                    <div class="btn btn-xs btn-primary" id="rubric_add_mark_{$num}" onclick="addMark(this,{$num});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div></div>
                 </td>
 
                 <td style="background-color:#EEE;">
@@ -1766,12 +1766,12 @@ $('#gradeable-form').on('submit', function(e){
                 $("#grade-"+index).attr('step', step);
                 $("#extra_credit_"+index).find('input[name=upper_'+index+']').attr('step', step);
                 $("#penalty_"+index).find('input[name=lower_'+index+']').attr('step', step);
-                var exists2 = ($('#deduct_id-'+index+'-0').length) ? true : false;
+                var exists2 = ($('#mark_id-'+index+'-0').length) ? true : false;
                 var index2 = 0;
                 while (exists2) {
-                    $('#deduct_id-'+index+'-'+index2).find('input[name=deduct_points_'+index+'_'+index2+']').attr('step', step);
+                    $('#mark_id-'+index+'-'+index2).find('input[name=mark_points_'+index+'_'+index2+']').attr('step', step);
                     index2++;
-                    exists2 = ($('#deduct_id-'+index+'-'+index2).length) ? true : false;
+                    exists2 = ($('#mark_id-'+index+'-'+index2).length) ? true : false;
                 }
             }
             else {
@@ -1811,15 +1811,15 @@ $('#gradeable-form').on('submit', function(e){
         document.getElementById("totalCalculation").innerHTML = total + " (" + ec + ")";
     }
 
-    function updateDeductIds(elem, old_id, new_id) {
-        elem.find('div[name=deduct_'+old_id+']').each(function () {
-            var deduct_id = $(this).attr('id');
-            var question_id = deduct_id.split('-')[1];
-            var current_id = deduct_id.split('-')[2];
-            $(this).attr('name', 'deduct_' + new_id);
-            $(this).attr('id', 'deduct_id-'+new_id+'-'+current_id+'');
-            $(this).find('input[name=deduct_points_'+old_id+'_'+current_id+']').attr('name', 'deduct_points_'+new_id+'_'+current_id);
-            $(this).find('textarea[name=deduct_text_'+old_id+'_'+current_id+']').attr('name', 'deduct_text_'+new_id+'_'+current_id);
+    function updateMarkIds(elem, old_id, new_id) {
+        elem.find('div[name=mark_'+old_id+']').each(function () {
+            var mark_id = $(this).attr('id');
+            var question_id = mark_id.split('-')[1];
+            var current_id = mark_id.split('-')[2];
+            $(this).attr('name', 'mark_' + new_id);
+            $(this).attr('id', 'mark_id-'+new_id+'-'+current_id+'');
+            $(this).find('input[name=mark_points_'+old_id+'_'+current_id+']').attr('name', 'mark_points_'+new_id+'_'+current_id);
+            $(this).find('textarea[name=mark_text_'+old_id+'_'+current_id+']').attr('name', 'mark_text_'+new_id+'_'+current_id);
         });
     }
 
@@ -1888,7 +1888,7 @@ $('#gradeable-form').on('submit', function(e){
             'data-question_num': newNum
         });
         row.find('div[id=mark_questions_'+oldNum+']').attr('id', 'mark_questions_'+newNum);
-        row.find('div[id=rubric_add_deduct_' + oldNum + ']').attr('id','rubric_add_deduct_' + newNum).attr('onclick', 'addDeduct(this,' + newNum + ')'); 
+        row.find('div[id=rubric_add_mark_' + oldNum + ']').attr('id','rubric_add_mark_' + newNum).attr('onclick', 'addMark(this,' + newNum + ')'); 
         updateDeductIds(row,oldNum,newNum);
     }
 
@@ -1999,17 +1999,17 @@ $('#gradeable-form').on('submit', function(e){
         }
 
         //stores the point and text data so it can readded; the html earses it once moved
-        var current_deduct_points = [];
-        var current_deduct_texts = [];
-        currentRow.find('div[name=deduct_'+question+']').each(function () {
-            current_deduct_points.push($(this).find("input").val());
-            current_deduct_texts.push($(this).find("textarea").val());
+        var current_mark_points = [];
+        var current_mark_texts = [];
+        currentRow.find('div[name=mark_'+question+']').each(function () {
+            current_mark_points.push($(this).find("input").val());
+            current_mark_texts.push($(this).find("textarea").val());
         });
-        var new_deduct_points = [];
-        var new_deduct_texts = [];
-        newRow.find('div[name=deduct_'+new_question+']').each(function () {
-            new_deduct_points.push($(this).find("input").val());
-            new_deduct_texts.push($(this).find("textarea").val());
+        var new_mark_points = [];
+        var new_mark_texts = [];
+        newRow.find('div[name=mark_'+new_question+']').each(function () {
+            new_mark_points.push($(this).find("input").val());
+            new_mark_texts.push($(this).find("textarea").val());
         });
 
         //switchs the html between the table rows
@@ -2018,19 +2018,19 @@ $('#gradeable-form').on('submit', function(e){
         newRow.find('div[id=mark_questions_'+new_question+']').html(temp_html);
 
         //fixes the ids once switched
-        currentRow.find('div[id=rubric_add_deduct_' + new_question + ']').attr('id','rubric_add_deduct_' + question).attr('onclick', 'addDeduct(this,' + question + ')'); 
-        updateDeductIds(currentRow,new_question,question);
-        newRow.find('div[id=rubric_add_deduct_' + question + ']').attr('id','rubric_add_deduct_' + new_question).attr('onclick', 'addDeduct(this,' + new_question + ')'); 
-        updateDeductIds(newRow,question,new_question);
+        currentRow.find('div[id=rubric_add_mark_' + new_question + ']').attr('id','rubric_add_mark_' + question).attr('onclick', 'addMark(this,' + question + ')'); 
+        updateMarkIds(currentRow,new_question,question);
+        newRow.find('div[id=rubric_add_mark_' + question + ']').attr('id','rubric_add_mark_' + new_question).attr('onclick', 'addMark(this,' + new_question + ')'); 
+        updateMarkIds(newRow,question,new_question);
 
         //readds the data
-        currentRow.find('div[name=deduct_'+question+']').each(function (index) {
-            $(this).find("input").val(new_deduct_points[index]);
-            $(this).find("textarea").val(new_deduct_texts[index]);
+        currentRow.find('div[name=mark_'+question+']').each(function (index) {
+            $(this).find("input").val(new_mark_points[index]);
+            $(this).find("textarea").val(new_mark_texts[index]);
         });
-        newRow.find('div[name=deduct_'+new_question+']').each(function (index) {
-            $(this).find("input").val(current_deduct_points[index]);
-            $(this).find("textarea").val(current_deduct_texts[index]);
+        newRow.find('div[name=mark_'+new_question+']').each(function (index) {
+            $(this).find("input").val(current_mark_points[index]);
+            $(this).find("textarea").val(current_mark_texts[index]);
         });
     }
 
@@ -2134,17 +2134,17 @@ $('#gradeable-form').on('submit', function(e){
         }
 
         //stores the point and text data so it can readded; the html earses it once moved
-        var current_deduct_points = [];
-        var current_deduct_texts = [];
-        currentRow.find('div[name=deduct_'+question+']').each(function () {
-            current_deduct_points.push($(this).find("input").val());
-            current_deduct_texts.push($(this).find("textarea").val());
+        var current_mark_points = [];
+        var current_mark_texts = [];
+        currentRow.find('div[name=mark_'+question+']').each(function () {
+            current_mark_points.push($(this).find("input").val());
+            current_mark_texts.push($(this).find("textarea").val());
         });
-        var new_deduct_points = [];
-        var new_deduct_texts = [];
-        newRow.find('div[name=deduct_'+(question-1)+']').each(function () {
-            new_deduct_points.push($(this).find("input").val());
-            new_deduct_texts.push($(this).find("textarea").val());
+        var new_mark_points = [];
+        var new_mark_texts = [];
+        newRow.find('div[name=mark_'+(question-1)+']').each(function () {
+            new_mark_points.push($(this).find("input").val());
+            new_mark_texts.push($(this).find("textarea").val());
         });
 
         //switchs the html between the table rows
@@ -2153,19 +2153,19 @@ $('#gradeable-form').on('submit', function(e){
         newRow.find('div[id=mark_questions_'+(question-1)+']').html(temp_html);
 
         //fixes the ids once switched
-        currentRow.find('div[id=rubric_add_deduct_' + (question-1) + ']').attr('id','rubric_add_deduct_' + question).attr('onclick', 'addDeduct(this,' + question + ')'); 
-        updateDeductIds(currentRow,(question-1),question);
-        newRow.find('div[id=rubric_add_deduct_' + question + ']').attr('id','rubric_add_deduct_' + (question-1)).attr('onclick', 'addDeduct(this,' + (question-1) + ')'); 
-        updateDeductIds(newRow,question,(question-1));
+        currentRow.find('div[id=rubric_add_mark_' + (question-1) + ']').attr('id','rubric_add_mark_' + question).attr('onclick', 'addMark(this,' + question + ')'); 
+        updateMarkIds(currentRow,(question-1),question);
+        newRow.find('div[id=rubric_add_mark_' + question + ']').attr('id','rubric_add_mark_' + (question-1)).attr('onclick', 'addMark(this,' + (question-1) + ')'); 
+        updateMarkIds(newRow,question,(question-1));
 
         //readds the data
-        currentRow.find('div[name=deduct_'+question+']').each(function (index) {
-            $(this).find("input").val(new_deduct_points[index]);
-            $(this).find("textarea").val(new_deduct_texts[index]);
+        currentRow.find('div[name=mark_'+question+']').each(function (index) {
+            $(this).find("input").val(new_mark_points[index]);
+            $(this).find("textarea").val(new_mark_texts[index]);
         });
-        newRow.find('div[name=deduct_'+(question-1)+']').each(function (index) {
-            $(this).find("input").val(current_deduct_points[index]);
-            $(this).find("textarea").val(current_deduct_texts[index]);
+        newRow.find('div[name=mark_'+(question-1)+']').each(function (index) {
+            $(this).find("input").val(current_mark_points[index]);
+            $(this).find("textarea").val(current_mark_texts[index]);
         });
     }
 
@@ -2188,7 +2188,7 @@ $('#gradeable-form').on('submit', function(e){
                 <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and graders)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
                 <div id=mark_questions_'+newQ+'> \
-                <div class="btn btn-xs btn-primary" id="rubric_add_deduct_'+newQ+'" onclick="addDeduct(this,'+newQ+')" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div> </div> \
+                <div class="btn btn-xs btn-primary" id="rubric_add_mark_'+newQ+'" onclick="addMark(this,'+newQ+')" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div> </div> \
             </td> \
             <td style="background-color:#EEE; border-top: 5px solid #dddddd;"> \
             Points: <input type="number" id="grade-'+newQ+'" class="points" name="points_'+newQ+'" value="0" min="0" step="'+step+'" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;"> \
@@ -2219,57 +2219,57 @@ $('#gradeable-form').on('submit', function(e){
                     <i class="fa fa-arrow-up" aria-hidden="true"></i></a> \
             </td> \
         </tr>');
-        $("#rubric_add_deduct_" + newQ).before(' \
-            <div id="deduct_id-'+newQ+'-0" name="deduct_'+newQ+'" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;"> \
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="deduct_points_'+newQ+'_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
-            <textarea rows="1" placeholder="Comment" name="deduct_text_'+newQ+'_0" style="resize: none; width: 80.5%;">No Credit</textarea> \
-            <a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-            <a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-            <a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+        $("#rubric_add_mark_" + newQ).before(' \
+            <div id="mark_id-'+newQ+'-0" name="mark_'+newQ+'" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;"> \
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+            <textarea rows="1" placeholder="Comment" name="mark_text_'+newQ+'_0" style="resize: none; width: 80.5%;">No Credit</textarea> \
+            <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <br> \
         </div> \
             ');
     }
 
-    function deleteDeduct(me) {
+    function deleteMark(me) {
         var question_id = me.parentElement.id.split('-')[1];
         var current_id = me.parentElement.id.split('-')[2];
-        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
+        var current_row = $('#mark_id-'+question_id+'-'+current_id);
         current_row.remove();
-        var last_deduct = $('[name=deduct_'+question_id+']').last().attr('id');
+        var last_mark = $('[name=mark_'+question_id+']').last().attr('id');
         var totalD = -1;
-        if (last_deduct == null) {
+        if (last_mark == null) {
             totalD = -1;
         } 
         else {
-            totalD = parseInt($('[name=deduct_'+question_id+']').last().attr('id').split('-')[2]);
+            totalD = parseInt($('[name=mark_'+question_id+']').last().attr('id').split('-')[2]);
         }
         current_id = parseInt(current_id);
         for(var i=current_id+1; i<= totalD; ++i){
-            updateDeduct(i,i-1, question_id);
+            updateMark(i,i-1, question_id);
         }
     }
 
-    function updateDeduct(old_num, new_num, question_num) {
-        var current_deduct = $('#deduct_id-'+question_num+'-'+old_num);
-        current_deduct.find('input[name=deduct_points_'+question_num+'_'+old_num+']').attr('name', 'deduct_points_'+question_num+'_'+new_num);
-        current_deduct.find('textarea[name=deduct_text_'+question_num+'_'+old_num+']').attr('name', 'deduct_text_'+question_num+'_'+new_num);
-        current_deduct.attr('id', 'deduct_id-'+question_num+'-'+new_num);
+    function updateMark(old_num, new_num, question_num) {
+        var current_mark = $('#mark_id-'+question_num+'-'+old_num);
+        current_mark.find('input[name=mark_points_'+question_num+'_'+old_num+']').attr('name', 'mark_points_'+question_num+'_'+new_num);
+        current_mark.find('textarea[name=mark_text_'+question_num+'_'+old_num+']').attr('name', 'mark_text_'+question_num+'_'+new_num);
+        current_mark.attr('id', 'mark_id-'+question_num+'-'+new_num);
     }
 
-    function moveDeductDown(me) {
+    function moveMarkDown(me) {
         var question_id = me.parentElement.id.split('-')[1];
         var current_id = me.parentElement.id.split('-')[2];
         current_id = parseInt(current_id);
         //checks if the element exists
-        if (!($('#deduct_id-'+question_id+'-'+(current_id+1)).length)) {
+        if (!($('#mark_id-'+question_id+'-'+(current_id+1)).length)) {
             return false;
         }
-        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
+        var current_row = $('#mark_id-'+question_id+'-'+current_id);
         var current_textarea_value = current_row.find("textarea").val();
         var current_input_value = current_row.find("input").val();
 
-        var new_row = $('#deduct_id-'+question_id+'-'+(current_id+1));
+        var new_row = $('#mark_id-'+question_id+'-'+(current_id+1));
         var new_textarea_value = new_row.find("textarea").val();
         var new_input_value = new_row.find("input").val();
 
@@ -2283,18 +2283,18 @@ $('#gradeable-form').on('submit', function(e){
         current_row.find("input").val(temp_input_value);
     }
 
-    function moveDeductUp(me) {
+    function moveMarkUp(me) {
         var question_id = me.parentElement.id.split('-')[1];
         var current_id = me.parentElement.id.split('-')[2];
         current_id = parseInt(current_id);
         if (current_id == 0 || current_id == 1) {
             return false;
         }
-        var current_row = $('#deduct_id-'+question_id+'-'+current_id);
+        var current_row = $('#mark_id-'+question_id+'-'+current_id);
         var current_textarea_value = current_row.find("textarea").val();
         var current_input_value = current_row.find("input").val();
 
-        var new_row = $('#deduct_id-'+question_id+'-'+(current_id-1));
+        var new_row = $('#mark_id-'+question_id+'-'+(current_id-1));
         var new_textarea_value = new_row.find("textarea").val();
         var new_input_value = new_row.find("input").val();
 
@@ -2311,16 +2311,16 @@ $('#gradeable-form').on('submit', function(e){
      function onDeduction(me) {
         var current_row = $(me.parentElement.parentElement);
         var current_question = parseInt(current_row.attr('id').split('-')[1]);
-        current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('Full Credit');
+        current_row.find('textarea[name=mark_text_'+current_question+'_0]').val('Full Credit');
     }
 
     function onAddition(me) {
         var current_row = $(me.parentElement.parentElement);
         var current_question = parseInt(current_row.attr('id').split('-')[1]);
-        current_row.find('textarea[name=deduct_text_'+current_question+'_0]').val('No Credit');
+        current_row.find('textarea[name=mark_text_'+current_question+'_0]').val('No Credit');
     }
 
-    function addDeduct(me, num){
+    function addMark(me, num){
         var last_num = -10;
         var current_row = $(me.parentElement.parentElement.parentElement);
         var lower_clamp = current_row.find('input[name=lower_'+num+']').val();
@@ -2329,21 +2329,21 @@ $('#gradeable-form').on('submit', function(e){
 
         var precision = $('#point_precision_id').val();
 
-        var current = $('[name=deduct_'+num+']').last().attr('id');
+        var current = $('[name=mark_'+num+']').last().attr('id');
         if (current == null) {
             last_num = -1;
         } 
         else {
-            last_num = parseInt($('[name=deduct_'+num+']').last().attr('id').split('-')[2]);
+            last_num = parseInt($('[name=mark_'+num+']').last().attr('id').split('-')[2]);
         }
         var new_num = last_num + 1;
-        $("#rubric_add_deduct_" + num).before('\
-<div id="deduct_id-'+num+'-'+new_num+'" name="deduct_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
-<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="deduct_points_'+num+'_'+new_num+'" value="0" step="'+precision+'" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
-<textarea rows="1" placeholder="Comment" name="deduct_text_'+num+'_'+new_num+'" style="resize: none; width: 80.5%;"></textarea> \
-<a onclick="deleteDeduct(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<a onclick="moveDeductDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
-<a onclick="moveDeductUp(this)"> <i class="fa fa-arrow-up"  aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+        $("#rubric_add_mark_" + num).before('\
+<div id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
+<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="mark_points_'+num+'_'+new_num+'" value="0" step="'+precision+'" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+<textarea rows="1" placeholder="Comment" name="mark_text_'+num+'_'+new_num+'" style="resize: none; width: 80.5%;"></textarea> \
+<a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up"  aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <br> \
 </div>');
     }
@@ -2578,10 +2578,10 @@ $('#gradeable-form').on('submit', function(e){
                     var points = parseFloat($("#grade-"+index).val());
                     var temp_points = 0;
                     var temp_num = -1;
-                    var exists2 = ($('#deduct_id-'+index+'-0').length) ? true : false;
+                    var exists2 = ($('#mark_id-'+index+'-0').length) ? true : false;
                     var index2 = 0;
                     while (exists2) {
-                        temp_num = parseFloat($('#deduct_id-'+index+'-'+index2).find('input[name=deduct_points_'+index+'_'+index2+']').val());
+                        temp_num = parseFloat($('#mark_id-'+index+'-'+index2).find('input[name=mark_points_'+index+'_'+index2+']').val());
                         if (type === 1) {
                             if (temp_num > 0) {
                                 temp_points += temp_num;
@@ -2592,7 +2592,7 @@ $('#gradeable-form').on('submit', function(e){
                             }
                         }
                         index2++;
-                        exists2 = ($('#deduct_id-'+index+'-'+index2).length) ? true : false;
+                        exists2 = ($('#mark_id-'+index+'-'+index2).length) ? true : false;
                     }
 
                     if (temp_points < points) {
