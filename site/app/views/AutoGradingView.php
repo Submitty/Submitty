@@ -79,21 +79,6 @@ HTML;
 HTML;
             }
         }
-        if ($gradeable->hasIncentiveMessage()) {
-            foreach ($gradeable->getVersions() as $version) {
-                if ($version->getNonHiddenTotal() >= $gradeable->getMinimumPoints() && 
-                    $version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
-                        $return.= <<<HTML
-<script type="text/javascript">
-    $(document).ready(function() {
-        $('#incentive_message').show();
-    });
-</script>
-HTML;
-                    break;
-                }
-            }
-        }
         $count = 0;
         $display_box = ($num_visible_testcases == 0) ? "block" : "none";
         foreach ($gradeable->getTestcases() as $testcase) {

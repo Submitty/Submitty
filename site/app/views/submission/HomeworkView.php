@@ -913,6 +913,21 @@ HTML;
 HTML;
                 }
                 else {
+                    if ($gradeable->hasIncentiveMessage() && $gradeable->getActiveVersion() > 0) {
+                        foreach ($gradeable->getVersions() as $version) {
+                            if ($version->getNonHiddenTotal() >= $gradeable->getMinimumPoints() && 
+                                    $version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
+                                $return.= <<<HTML
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    $('#incentive_message').show();
+                });
+            </script>
+HTML;
+                                break;
+                            }
+                        }
+                    }
                     $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable);
                 }
                 $return .= <<<HTML
