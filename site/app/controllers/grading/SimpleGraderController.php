@@ -40,7 +40,7 @@ class SimpleGraderController extends AbstractController  {
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getName()}");
 
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -94,7 +94,7 @@ class SimpleGraderController extends AbstractController  {
         $gradeable = $this->core->getQueries()->getGradeable($g_id, $user_id);
 
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -152,7 +152,7 @@ class SimpleGraderController extends AbstractController  {
         $g_id = $_POST['g_id'];
         $gradeable = $this->core->getQueries()->getGradeable($g_id, $username);
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 

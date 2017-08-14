@@ -97,14 +97,14 @@ class ReportController extends AbstractController {
     public function generateGradeSummaries() {
         $grade_summary = new GradeSummary($this->core);
         $grade_summary->generateAllSummaries();
-        $core->addSuccessMessage("Successfully Generated GradeSummaries");
+        $this->core->addSuccessMessage("Successfully Generated GradeSummaries");
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
     
     public function generateHWReports() {
         $hw_report = new HWReport($this->core);
         $hw_report->generateAllReports();
-        $core->addSuccessMessage("Successfully Generated HWReports");
+        $this->core->addSuccessMessage("Successfully Generated HWReports");
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 }

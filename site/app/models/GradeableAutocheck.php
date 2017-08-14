@@ -66,8 +66,8 @@ class GradeableAutocheck extends AbstractModel {
             file_exists($course_path . "/" . $details["expected_file"])) {
             $expected_file = $course_path . "/" . $details["expected_file"];
         }else if(isset($details["expected_file"]) &&
-           ! file_exists($course_path . "/" . $details["expected_file"])) {
-            $core->addErrorMessage("Expected file not found.");
+            !file_exists($course_path . "/" . $details["expected_file"])) {
+            $this->core->addErrorMessage("Expected file not found.");
         }
         if(isset($details["difference_file"]) && file_exists($result_path . "/details/" . $details["difference_file"])) {
             $difference_file = $result_path . "/details/" . $details["difference_file"];

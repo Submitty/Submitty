@@ -87,7 +87,7 @@ class AuthenticationController extends AbstractController {
         $redirect = array();
         $_POST['stay_logged_in'] = (isset($_POST['stay_logged_in']));
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
-            $core->addErrorMessage("Cannot leave user id or password blank");
+            $this->core->addErrorMessage("Cannot leave user id or password blank");
             foreach ($_REQUEST as $key => $value) {
                 if (substr($key, 0, 4) == "old_") {
                     $redirect[$key] = $_REQUEST['old'][$value];
@@ -104,12 +104,12 @@ class AuthenticationController extends AbstractController {
                     $redirect[substr($key, 4)] = $value;
                 }
             }
-            $core->addSuccessMessage("Successfully logged in as ".htmlentities($_POST['user_id']));
+            $this->core->addSuccessMessage("Successfully logged in as ".htmlentities($_POST['user_id']));
             $redirect['success_login'] = "true";
             $this->core->redirect($this->core->buildUrl($redirect));
         }
         else {
-            $core->addErrorMessage("Could not login using that user id or password");
+            $this->core->addErrorMessage("Could not login using that user id or password");
             foreach ($_REQUEST as $key => $value) {
                 if (substr($key, 0, 4) == "old_") {
                     $redirect[$key] = $_REQUEST['old'][$value];
