@@ -153,7 +153,9 @@ function readCookies(){
         var testcases_array = JSON.parse(testcases);
         testcases_array.forEach(function(element) {
             var id = 'testcase_' + element;
-            toggleDiv(id);
+            if ($("#" + id).attr("style") == "display: none;") {
+                toggleDiv(id);
+            }
         });
     }
 
@@ -166,12 +168,12 @@ function readCookies(){
                 current.children().each(function() {
                     if (x == file_path.length - 1) {
                         $(this).children('div[id^=file_viewer_]').each(function() {
-                            if ($(this)[0].dataset.file_name == file_path[x]) {
+                            if ($(this)[0].dataset.file_name == file_path[x] && !$($(this)[0]).hasClass('open')) {
                                 openFrame($(this)[0].dataset.file_name, $(this)[0].dataset.file_url, $(this).attr('id').split('_')[2]);
                             }
                         });
                         $(this).children('div[id^=div_viewer_]').each(function() {
-                            if ($(this)[0].dataset.file_name == file_path[x]) {
+                            if ($(this)[0].dataset.file_name == file_path[x] && !$($(this)[0]).hasClass('open')) {
                                 openDiv($(this).attr('id').split('_')[2]);
                             }
                         });

@@ -51,7 +51,7 @@ function addMark(me, num, background, min, max, precision, gradeable_id, user_id
 <tr id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'"> \
 <td colspan="1" style="'+background+'; text-align: center;"> \
     <span onclick="selectMark(this);"> <i class="fa fa-square-o mark" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
-    <input name="mark_points_'+num+'_'+new_num+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none;"> \
+    <input name="mark_points_'+num+'_'+new_num+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
 </td> \
 <td colspan="3" style="'+background+'"> \
     <textarea name="mark_text_'+num+'_'+new_num+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;"></textarea> \
@@ -120,8 +120,18 @@ function getMarkInfo(me, gradeable_id) {
             elem_html += "# of total components: " + total + "<br>";
             elem_html += "<h1> List of Students who got " + data['name_info']['question_name'] + "'s " 
                 + data['name_info']['mark_note'] + "</h1>";
+            var y = 1;
             for (var x = 0; x < data['data'].length; x++) {
-                elem_html += "" + data['data'][x]['gd_user_id'] + " <br>";
+
+                elem_html += "" + data['data'][x]['gd_user_id'];
+                if (x != data['data'].length - 1) {
+                    elem_html += ", ";
+                }
+                if(y == 5) {
+                    elem_html += "<br>";
+                    y = 0;
+                }
+                y++;
             }
             $('.popup-form').css('display', 'none');
             var form = $("#student-marklist-popup");
@@ -241,87 +251,152 @@ function openClose(row_id, num_questions = -1) {
         total_num = parseInt(num_questions);
     }
     //-2 means general comment, else open the row_id with the number
-    general_comment = document.getElementById('extra-general');
-    general_comment_summary = document.getElementById('summary-general');
-    general_comment_cancel_mark = document.getElementById('cancel-mark-general');
-    general_comment_save_mark = document.getElementById('save-mark-general');
+    general_comment = $('#extra-general');
+    general_comment_summary = $('#summary-general');
+    general_comment_cancel_mark = $('#cancel-mark-general');
+    general_comment_save_mark = $('#save-mark-general');
     general_comment_title = $('#title-general');
     general_comment_title_cancel = $('#title-general-cancel');
-    if(row_num === -2 && general_comment.style.display === 'none') {
-        general_comment.style.display = '';
+    if(row_num === -2 && general_comment[0].style.display === 'none') {
+        general_comment[0].style.display = '';
         general_comment_title[0].style.backgroundColor = "#e6e6e6";
-        general_comment.style.backgroundColor = "#e6e6e6";
+        general_comment[0].style.backgroundColor = "#e6e6e6";
         general_comment_title_cancel[0].style.backgroundColor = "#e6e6e6";
-        general_comment_summary.style.display = 'none';
-        general_comment_cancel_mark.style.display = '';
-        general_comment_save_mark.style.display = '';
+        general_comment_summary[0].style.display = 'none';
+        general_comment_cancel_mark[0].style.display = '';
+        general_comment_save_mark[0].style.display = '';
         general_comment_title.attr('colspan', 3);
         general_comment_title_cancel[0].style.display = '';
         general_comment_title_cancel.attr('colspan', 1);
     } else {
-        general_comment.style.display = 'none';
+        general_comment[0].style.display = 'none';
         general_comment_title[0].style.backgroundColor = "initial";
-        general_comment.style.backgroundColor = "initial";
+        general_comment[0].style.backgroundColor = "initial";
         general_comment_title_cancel[0].style.backgroundColor = "initial";
-        general_comment_summary.style.display = '';
-        general_comment_cancel_mark.style.display = 'none';
-        general_comment_save_mark.style.display = 'none';
+        general_comment_summary[0].style.display = '';
+        general_comment_cancel_mark[0].style.display = 'none';
+        general_comment_save_mark[0].style.display = 'none';
         general_comment_title.attr('colspan', 4);
         general_comment_title_cancel[0].style.display = 'none';
         general_comment_title_cancel.attr('colspan', 0);
     }
     for (var x = 1; x <= total_num; x++) {
-        var current = document.getElementById('extra-' + x);
-        var current_summary = document.getElementById('summary-' + x);
-        var ta_note = document.getElementById('ta_note-' + x);
-        var student_note = document.getElementById('student_note-' + x);
-        var progress_points = document.getElementById('progress_points-' + x);
-        var cancel_mark = document.getElementById('cancel-mark-' + x);
-        var save_mark = document.getElementById('save-mark-' + x);
+        var current = $('#extra-' + x);
+        var current_summary = $('#summary-' + x);
+        var ta_note = $('#ta_note-' + x);
+        var student_note = $('#student_note-' + x);
+        var progress_points = $('#progress_points-' + x);
+        var cancel_mark = $('#cancel-mark-' + x);
+        var save_mark = $('#save-mark-' + x);
         var title = $('#title-' + x);
         var title_cancel = $('#title-cancel-' + x);
+        var page = ($('#page-' + x)[0]).innerHTML;
+
+        // update the color if it is penalty or extra credit
+        var current_question_num = $('#grade-' + x);
+        var question_points = parseFloat(current_question_num[0].innerHTML);
+        if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
+            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#D8F2D8";
+        } else if (question_points < 0) {
+            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#FAD5D3";
+        } else {
+            current_summary.children("td:first-of-type")[0].style.backgroundColor = "initial";
+        }
+
         if (x == row_num) {
-            if (current.style.display === 'none') {
-                current.style.display = '';
-                current.style.backgroundColor = "#e6e6e6";
+            if (current[0].style.display === 'none') {
+                current[0].style.display = '';
+                current[0].style.backgroundColor = "#e6e6e6";
                 title[0].style.backgroundColor = "#e6e6e6";
                 title_cancel[0].style.backgroundColor = "#e6e6e6";
-                current_summary.style.display = 'none';
-                ta_note.style.display = '';
-                student_note.style.display = '';
+                current_summary[0].style.display = 'none';
+                ta_note[0].style.display = '';
+                student_note[0].style.display = '';
                 updateProgressPoints(x);
-                progress_points.style.display = '';
-                cancel_mark.style.display = '';
-                save_mark.style.display = '';
+                progress_points[0].style.display = '';
+                cancel_mark[0].style.display = '';
+                save_mark[0].style.display = '';
                 title.attr('colspan', 3);
                 title_cancel[0].style.display = '';
                 title_cancel.attr('colspan', 1);
+
+                // if the component has a page saved, open the PDF to that page
+                // opening directories/frames based off of code in openDiv and openFrame functions
+
+                // make sure submissions folder has files
+                var submissions = $('#div_viewer_1');
+                if (page > 0 && submissions.children().length > 0) {
+
+                    // find the first file that is a PDF
+                    var divs = $('#div_viewer_1 > div > div');
+                    var pdf_div = "";
+                    for (var i=0; i<divs.length; i++) {
+                        if ($(divs[i]).is('[data-file_url]')) {
+                            file_url = $(divs[i]).attr("data-file_url");
+                            if(file_url.substring(file_url.length - 3) == "pdf") {
+                                pdf_div = $($(divs[i]));
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // only open submissions folder + PDF is a PDF file exists within the submissions folder
+                    if (pdf_div != "") {
+                        submissions.show();
+                        submissions.addClass('open');
+                        $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+
+                        var file_url = pdf_div.attr("data-file_url");
+                        var file_name = pdf_div.attr("data-file_name");
+                        if (!pdf_div.hasClass('open')) {
+                            openFrame(file_name,file_url,pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
+                        }
+                        var iframeId = pdf_div.attr("id") + "_iframe";
+                        directory = "submissions"; 
+                        src = $("#"+iframeId).prop('src');
+                        if (src.indexOf("#page=") === -1) {
+                            src = src + "#page=" + page;
+                        }
+                        else {
+                            src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
+                        }
+                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='600px' style='border: 0'></iframe>");
+
+                        if (!pdf_div.hasClass('open')) {
+                            pdf_div.addClass('open');
+                        }
+                        if (!pdf_div.hasClass('shown')) {
+                            pdf_div.show();
+                            pdf_div.addClass('shown');
+                        }
+                    }
+                }
             } else {
-                current.style.display = 'none';
-                current_summary.style.display = '';
-                current.style.backgroundColor = "initial";
+                current[0].style.display = 'none';
+                current_summary[0].style.display = '';
+                current[0].style.backgroundColor = "initial";
                 title[0].style.backgroundColor = "initial";
                 title_cancel[0].style.backgroundColor = "initial";
-                ta_note.style.display = 'none';
-                student_note.style.display = 'none';
-                progress_points.style.display = 'none';
-                cancel_mark.style.display = 'none';
-                save_mark.style.display = 'none';
+                ta_note[0].style.display = 'none';
+                student_note[0].style.display = 'none';
+                progress_points[0].style.display = 'none';
+                cancel_mark[0].style.display = 'none';
+                save_mark[0].style.display = 'none';
                 title.attr('colspan', 4);
                 title_cancel[0].style.display = 'none';
                 title_cancel.attr('colspan', 0);
             }
         } else {
-            current.style.display = 'none';
-            current_summary.style.display = '';
-            current.style.backgroundColor = "initial";
+            current[0].style.display = 'none';
+            current_summary[0].style.display = '';
+            current[0].style.backgroundColor = "initial";
             title[0].style.backgroundColor = "initial";
             title_cancel[0].style.backgroundColor = "initial";
-            ta_note.style.display = 'none';
-            student_note.style.display = 'none';
-            progress_points.style.display = 'none';
-            cancel_mark.style.display = 'none';
-            save_mark.style.display = 'none';
+            ta_note[0].style.display = 'none';
+            student_note[0].style.display = 'none';
+            progress_points[0].style.display = 'none';
+            cancel_mark[0].style.display = 'none';
+            save_mark[0].style.display = 'none';
             title.attr('colspan', 4);
             title_cancel[0].style.display = 'none';
             title_cancel.attr('colspan', 0);
@@ -421,7 +496,7 @@ function cancelMark(num, gradeable_id, user_id, gc_id) {
 //num === -3 means save gradeable comment
 //num === -2 means save last opened component
 //num === -1 means save all components, TO DO?
-function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "") {
+function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "", sync = true) {
     if (num === -3) {
         var comment_row = $('#comment-general-id');
         var gradeable_comment = comment_row.val();
@@ -431,6 +506,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_gradeable_comment'}),
+            async: sync,
             data: {
                 'gradeable_id' : gradeable_id,
                 'user_id' : user_id,
@@ -464,9 +540,9 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         }
         if (found === true) { //if nothing was found, assumes it needs to save the gradeable comment
             var gradeable_component_id = parseInt($('#extra-' + index)[0].dataset.question_id);
-            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id);
+            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id, sync);
         } else {
-            saveMark(-3, gradeable_id, user_id, active_version);
+            saveMark(-3, gradeable_id, user_id, active_version, -1, your_user_id, sync);
         }
     } else if (num === -1) {
 
@@ -578,6 +654,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
+            async: sync,
             data: {
                 'gradeable_id' : gradeable_id,
                 'user_id' : user_id,

@@ -70,6 +70,8 @@ HTML;
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
+        $student_page = false;
+        $num_components = count($gradeable->getComponents());
         $return .= <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 HTML;
@@ -306,10 +308,37 @@ HTML;
         </div>
 HTML;
                 }
-
                 $return .= <<<HTML
-
     </div>
+HTML;
+                // does this gradeable have parts assigned by students
+                foreach ($gradeable->getComponents() as $question) {
+                    $page_num = $question->getPage();
+                    if ($page_num === -1) {
+                        $student_page = true;
+                        break;
+                    }
+                }
+                if ($student_page) {                
+                    $return .= <<<HTML
+    <form id="pdfPageStudent">
+        <div class="sub">
+        <div>Enter the page number that corresponds to each question. If the answer spans multiple pages, enter the page the answer starts on.</div>
+HTML;
+                    $count = 0;
+                    foreach ($gradeable->getComponents() as $question) {
+                        $title = $question->getTitle();
+                        $return .= <<<HTML
+        <div>{$title}: <input type="number" id="page_{$count}" min="1"></div><br />
+HTML;
+                        $count++;
+                    }
+                    $return .= <<<HTML
+        </div>
+    </form>
+HTML;
+                }
+                $return .= <<<HTML
     <div>
         {$upload_message}
 	<br>
@@ -401,6 +430,7 @@ HTML;
             }
 
             $vcs_string = ($gradeable->useVcsCheckout()) ? "true" : "false";
+            $student_page_string = ($student_page) ? "true" : "false";
 
             $return .= <<<HTML
     <script type="text/javascript">
@@ -421,7 +451,9 @@ HTML;
                                 {$gradeable->getNumTextBoxes()},
                                 "{$gradeable->getId()}",
                                 "{$gradeable->getUser()->getId()}",
-                                repo_id);
+                                repo_id,
+                                {$student_page_string},
+                                {$num_components});
             }
             else {
                 handleSubmission({$late_days_use},
@@ -433,7 +465,9 @@ HTML;
                                 {$gradeable->getNumTextBoxes()},
                                 "{$gradeable->getId()}",
                                 user_id,
-                                repo_id);
+                                repo_id,
+                                {$student_page_string},
+                                {$num_components});
             }
         }
         $(document).ready(function() {
@@ -706,13 +740,6 @@ HTML;
         </p>
     </div>
 HTML;
-                    if ($gradeable->hasConditionalMessage()) {
-                        $return .= <<<HTML
-    <div class="sub" id="conditional_message" style="display: none;">
-        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
-    </div>
-HTML;
-                    }
                 }
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
@@ -737,6 +764,14 @@ HTML;
      </div>
 HTML;
 	            }
+
+                if ($gradeable->hasIncentiveMessage()) {
+                    $return .= <<<HTML
+    <div class="sub" id="incentive_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getIncentiveMessage()}</p>    
+    </div>
+HTML;
+                }
 
                 $return .= <<<HTML
     <div class="sub">
@@ -878,6 +913,21 @@ HTML;
 HTML;
                 }
                 else {
+                    if ($gradeable->hasIncentiveMessage() && $gradeable->getActiveVersion() > 0) {
+                        foreach ($gradeable->getVersions() as $version) {
+                            if ($version->getNonHiddenTotal() >= $gradeable->getMinimumPoints() && 
+                                    $version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
+                                $return.= <<<HTML
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    $('#incentive_message').show();
+                });
+            </script>
+HTML;
+                                break;
+                            }
+                        }
+                    }
                     $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable);
                 }
                 $return .= <<<HTML
