@@ -58,7 +58,12 @@ def read_submitty_date(s):
     try:
         with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
     except ValueError:
-        raise SystemExit("ERROR:  invalid date format %s" % s)
+        try:
+            without_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S')
+            my_timezone = get_timezone()
+            with_timezone = my_timezone.localize(without_timezone)
+        except ValueError:
+            raise SystemExit("ERROR:  invalid date format %s" % s)
     return with_timezone
 
 

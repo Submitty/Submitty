@@ -101,22 +101,7 @@ class HWReport extends AbstractModel {
 
                 foreach($gradeable->getComponents() as $component) {
                     $temp_notes = "";
-                    $type = 0; // 0 is deduct, 1 is addition
-                    foreach($component->getMarks() as $mark) {
-                        if($mark->getPoints() < 0) {
-                            $type = 0;
-                            break;
-                        }
-                        if($mark->getPoints() > 0) {
-                            $type = 1;
-                            break;
-                        }
-                    }
-                    if ($component->getMaxValue() < 0) {
-                        $temp_score = ($type === 0) ? 0 : $component->getMaxValue();
-                    } else {
-                        $temp_score = ($type === 0) ? $component->getMaxValue() : 0;
-                    }
+                    $temp_score = $component->getDefault();
                     
                     foreach($component->getMarks() as $mark) {
                         if($mark->getHasMark()) {
@@ -126,46 +111,15 @@ class HWReport extends AbstractModel {
                     }
 
                     if(!($component->getScore() == 0 && $component->getComment() == "")) {
-                        $wrong_number = false;
-                        if ($type === 0) {
-                            if ($component->getScore() > 0) {
-                                $wrong_number = true;
-                                $temp_notes .= "0" . " : " . $component->getComment() . $nl;
-                            }
-                        }
-                        else {
-                            if ($component->getScore() < 0) {
-                                $wrong_number = true;
-                                $temp_notes .= "0" . " : " . $component->getComment() . $nl;
-                            }
-                        }
-                        if ($wrong_number === false) {
-                            $temp_score += $component->getScore();
-                            $temp_notes .= $component->getScore() . " : " . $component->getComment() . $nl;
-                        }
-                        
+                        $temp_score += $component->getScore();
+                        $temp_notes .= $component->getScore() . " : " . $component->getComment() . $nl;                        
                     }
 
-                    if ($component->getMaxValue() < 0) {
-                        if ($type === 0) {
-                            if ($temp_score < $component->getMaxValue()) {
-                                $temp_score = $component->getMaxValue();
-                            }
-                        } else {
-                            if ($temp_score > 0) {
-                                $temp_score = 0;
-                            }
-                        }
-                    } else {
-                        if($type === 0) {
-                            if($temp_score < 0) {
-                                $temp_score = 0;
-                            }
-                        } else {
-                            if($temp_score > $component->getMaxValue()) {
-                                $temp_score = $component->getMaxValue();
-                            }
-                        }
+                    if($temp_score < $component->getLowerClamp()) {
+                        $temp_score = $component->getLowerClamp();
+                    }
+                    if($temp_score > $component->getUpperClamp()) {
+                        $temp_score = $component->getUpperClamp();
                     }
                     
                     $student_output_text .= $component->getTitle() . "[" . $temp_score . "/" . $component->getMaxValue() . "] ";
@@ -190,10 +144,10 @@ class HWReport extends AbstractModel {
                     
                     //$student_grade += $component->getScore();
                     $student_grade += $temp_score;
-                    if(!$component->getIsExtraCredit() && $component->getMaxValue() > 0) {
-                        $rubric_total += $component->getMaxValue();
-                        $ta_max_score += $component->getMaxValue();
-                    }
+                    //if(!$component->getIsExtraCredit() && $component->getMaxValue() > 0) {
+                    $rubric_total += $component->getMaxValue();
+                    $ta_max_score += $component->getMaxValue();
+                    //}
                 }
                 $student_output_text .= "TA GRADING TOTAL [ " . $student_grade . " / " . $ta_max_score . " ]". $nl;
                 $student_output_text .= "----------------------------------------------------------------------" . $nl;
