@@ -1221,7 +1221,7 @@ HTML;
     public function popupStudents() {
         $return = <<<HTML
         <div class="popup-form" id="student-marklist-popup">
-            <div style="width: auto;" id="student-marklist-popup-content"></div>
+            <div style="width: auto; height: 450px; overflow-y: auto;" id="student-marklist-popup-content"></div>
             <div style="float: right; width: auto">
                 <a onclick="$('#student-marklist-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
             </div>
@@ -1231,4 +1231,5 @@ HTML;
     }
 
 }
+
 
