@@ -575,7 +575,7 @@ if [[ "$#" -ge 1 && $1 == "test" ]]; then
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
-    python ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
+    ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
 
     echo -e "\nCompleted Autograding Test Suite\n"
 fi
@@ -605,7 +605,7 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     shift
     # pass any additional command line arguments to the run test suite
     rainbow_total=$((rainbow_total+1))
-    python ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+    ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
     
     if [[ $? -ne 0 ]]; then
         echo -e "\n[ FAILED ] sample test\n"

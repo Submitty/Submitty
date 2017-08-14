@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Setup script that reads in the users.yml and courses.yml files in the ../data directory and then
 creates the users and courses for the system. This is primarily used by Vagrant and Travis to
@@ -602,8 +602,8 @@ class Course(object):
 
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
-        m.update(self.code)
-        random.seed(int(m.hexdigest(),16))
+        m.update(bytes(self.code, 'utf-8'))
+        random.seed(int(m.hexdigest(), 16))
 
         course_group = self.code + "_tas_www"
         archive_group = self.code + "_archive"
@@ -840,7 +840,7 @@ class Course(object):
 
         # Reseed to minimize the situations under which customization.json changes
         m = hashlib.md5()
-        m.update(course_id)
+        m.update(bytes(course_id, "utf-8"))
         random.seed(int(m.hexdigest(), 16))
 
         customization_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup")
@@ -859,7 +859,7 @@ class Course(object):
         gradeables_percentages = []
         gradeable_percentage_left = 100 - len(gradeables)
         for i in range(len(gradeables)):
-            gradeables_percentages.append(random.randint(1, gradeable_percentage_left) + 1)
+            gradeables_percentages.append(random.randint(1, max(1, gradeable_percentage_left)) + 1)
             gradeable_percentage_left -= (gradeables_percentages[-1] - 1)
         if gradeable_percentage_left > 0:
             gradeables_percentages[-1] += gradeable_percentage_left
