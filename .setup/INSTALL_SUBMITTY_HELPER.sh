@@ -513,12 +513,6 @@ echo -e "\nCompleted installation of the Submitty homework submission server\n"
 echo -e "Install python_submitty_utils"
 
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-
-# FIXME: There is an error with glob installation on python2.  This
-# can go away when we have all submitty scripts ported to python3.
-python2 setup.py -q install
-echo -e "NOTE: There is an error with glob installation on python2."
-echo -e "      This error can safely be ignored (we are only using glob recursive in python3).\n" 
 python3 setup.py -q install
 
 # fix permissions
