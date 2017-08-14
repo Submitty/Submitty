@@ -41,6 +41,7 @@ class GradeableAutocheck extends AbstractModel {
      */
     public function __construct(Core $core, $details, $course_path, $result_path, $idx) {
         parent::__construct($core);
+        $this->index = $idx;
 
         if (isset($details['description'])) {
             $this->description = Utils::prepareHtmlString($details['description']);
@@ -65,8 +66,8 @@ class GradeableAutocheck extends AbstractModel {
             file_exists($course_path . "/" . $details["expected_file"])) {
             $expected_file = $course_path . "/" . $details["expected_file"];
         }else if(isset($details["expected_file"]) &&
-           ! file_exists($course_path . "/" . $details["expected_file"])) {
-            $_SESSION['messages']['error'][] = "Expected file not found.";
+            !file_exists($course_path . "/" . $details["expected_file"])) {
+            $this->core->addErrorMessage("Expected file not found.");
         }
         if(isset($details["difference_file"]) && file_exists($result_path . "/details/" . $details["difference_file"])) {
             $difference_file = $result_path . "/details/" . $details["difference_file"];

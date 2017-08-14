@@ -70,6 +70,8 @@ HTML;
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
+        $student_page = false;
+        $num_components = count($gradeable->getComponents());
         $return .= <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 HTML;
@@ -306,10 +308,37 @@ HTML;
         </div>
 HTML;
                 }
-
                 $return .= <<<HTML
-
     </div>
+HTML;
+                // does this gradeable have parts assigned by students
+                foreach ($gradeable->getComponents() as $question) {
+                    $page_num = $question->getPage();
+                    if ($page_num === -1) {
+                        $student_page = true;
+                        break;
+                    }
+                }
+                if ($student_page) {                
+                    $return .= <<<HTML
+    <form id="pdfPageStudent">
+        <div class="sub">
+        <div>Enter the page number that corresponds to each question. If the answer spans multiple pages, enter the page the answer starts on.</div>
+HTML;
+                    $count = 0;
+                    foreach ($gradeable->getComponents() as $question) {
+                        $title = $question->getTitle();
+                        $return .= <<<HTML
+        <div>{$title}: <input type="number" id="page_{$count}" min="1"></div><br />
+HTML;
+                        $count++;
+                    }
+                    $return .= <<<HTML
+        </div>
+    </form>
+HTML;
+                }
+                $return .= <<<HTML
     <div>
         {$upload_message}
 	<br>
@@ -401,32 +430,10 @@ HTML;
             }
 
             $vcs_string = ($gradeable->useVcsCheckout()) ? "true" : "false";
+            $student_page_string = ($student_page) ? "true" : "false";
 
             $return .= <<<HTML
     <script type="text/javascript">
-        // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
-        function moveNextInput(count) {
-            var next_count = count+1;
-            var next_input = "#bulk_user_id_" + next_count;
-            if ($(next_input).length) {
-                $(next_input).focus();
-                $(next_input).select(); 
-
-                var inputOffset = $(next_input).offset().top;
-                var inputHeight = $(next_input).height();
-                var windowHeight = $(window).height();
-                var offset;
-
-                if (inputHeight < windowHeight) {
-                    offset = inputOffset - ((windowHeight / 2) - (inputHeight / 2));
-                }
-                else {
-                    offset = inputOffset;
-                }
-                var speed = 500;
-                $('html, body').animate({scrollTop:offset}, speed); 
-            }
-        }
         function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id) {
             // submit the selected pdf
             if (is_pdf) {
@@ -444,7 +451,9 @@ HTML;
                                 {$gradeable->getNumTextBoxes()},
                                 "{$gradeable->getId()}",
                                 "{$gradeable->getUser()->getId()}",
-                                repo_id);
+                                repo_id,
+                                {$student_page_string},
+                                {$num_components});
             }
             else {
                 handleSubmission({$late_days_use},
@@ -456,7 +465,9 @@ HTML;
                                 {$gradeable->getNumTextBoxes()},
                                 "{$gradeable->getId()}",
                                 user_id,
-                                repo_id);
+                                repo_id,
+                                {$student_page_string},
+                                {$num_components});
             }
         }
         $(document).ready(function() {
@@ -572,9 +583,6 @@ HTML;
                 }
                 $return .= <<<HTML
 <script type="text/javascript">
-    function openFile(url_full) {
-        window.open(url_full,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
-    }
     $(document).ready(function() {
         $("#bulkForm input").autocomplete({
             source: student_without_ids
@@ -732,13 +740,6 @@ HTML;
         </p>
     </div>
 HTML;
-                    if ($gradeable->hasConditionalMessage()) {
-                        $return .= <<<HTML
-    <div class="sub" id="conditional_message" style="display: none;">
-        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
-    </div>
-HTML;
-                    }
                 }
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
@@ -763,6 +764,14 @@ HTML;
      </div>
 HTML;
 	            }
+
+                if ($gradeable->hasIncentiveMessage()) {
+                    $return .= <<<HTML
+    <div class="sub" id="incentive_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getIncentiveMessage()}</p>    
+    </div>
+HTML;
+                }
 
                 $return .= <<<HTML
     <div class="sub">
@@ -904,6 +913,21 @@ HTML;
 HTML;
                 }
                 else {
+                    if ($gradeable->hasIncentiveMessage() && $gradeable->getActiveVersion() > 0) {
+                        foreach ($gradeable->getVersions() as $version) {
+                            if ($version->getNonHiddenTotal() >= $gradeable->getMinimumPoints() && 
+                                    $version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
+                                $return.= <<<HTML
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    $('#incentive_message').show();
+                });
+            </script>
+HTML;
+                                break;
+                            }
+                        }
+                    }
                     $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable);
                 }
                 $return .= <<<HTML
@@ -934,13 +958,6 @@ HTML;
 HTML;
         }
 
-        return $return;
-    }
-
-    public function showPopUp($gradeable) {
-        $return = <<<HTML
-            <p>Banana</p>
-HTML;
         return $return;
     }
 }

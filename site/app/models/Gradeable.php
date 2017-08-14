@@ -199,10 +199,10 @@ class Gradeable extends AbstractModel {
     protected $message = "";
 
     /** @property @var string Message to show when conditions are met */
-    protected $conditional_message = "";
-    /** @property @var int Minimum days before deadline that a submission must be made by to get the conditional message */
+    protected $incentive_message = "";
+    /** @property @var int Minimum days before deadline that a submission must be made by to get the incentive message */
     protected $minimum_days_early = 0;
-    /** @property @var int Minimum points that a submission must have to get the conditional message */
+    /** @property @var int Minimum points that a submission must have to get the incentive message */
     protected $minimum_points = 0;
 
     /** @property @var string[] */
@@ -274,10 +274,7 @@ class Gradeable extends AbstractModel {
 
     protected $been_tagraded = false;
 
-    protected $graded_tagrading = 0;
-
     protected $total_tagrading_non_extra_credit = 0;
-    protected $total_tagrading_extra_credit = 0;
 
     /** @property @var \app\models\User|null */
     protected $user = null;
@@ -351,17 +348,18 @@ class Gradeable extends AbstractModel {
         }
 
         if (isset($details['array_gc_id'])) {
-            $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
-                            'gc_is_extra_credit', 'gc_order', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version',
-                            'gcd_grade_time', 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
-                            'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
+            $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp', 'gc_default', 'gc_max_value', 'gc_upper_clamp', 
+                'gc_is_text', 'gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 
+                'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version','gcd_grade_time', 
+                'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname', 'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
-            $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
-                                      'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
+            $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp',
+                                      'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_text', 'gc_is_text', 'gc_order', 'gc_page', 'array_gcm_id', 
+                                      'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
             $user_fields = array('user_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
-            $bools = array('gc_is_text', 'gc_is_extra_credit');
+            $bools = array('gc_is_text');
             foreach ($fields as $key) {
                 if (isset($details['array_'.$key])) {
                     $details['array_'.$key] = DatabaseUtils::fromPGToPHPArray($details['array_'.$key], in_array($key, $bools));
@@ -404,15 +402,7 @@ class Gradeable extends AbstractModel {
 
                 if (!$this->components[$component_details['gc_order']]->getIsText()) {
                     $max_value = $this->components[$component_details['gc_order']]->getMaxValue();
-                    if ($max_value > 0) {
-                        if ($this->components[$component_details['gc_order']]->getIsExtraCredit()) {
-                            $this->total_tagrading_extra_credit += $max_value;
-                        }
-                        else {
-                            $this->total_tagrading_non_extra_credit += $max_value;
-                        }
-                    }
-                    $this->graded_tagrading += $this->components[$component_details['gc_order']]->getScore();
+                    $this->total_tagrading_non_extra_credit += $max_value;
                 }
             }
 
@@ -462,10 +452,10 @@ class Gradeable extends AbstractModel {
             $this->message = Utils::prepareHtmlString($details['assignment_message']);
         }
 
-        if (isset($details['conditional_message'])) {
-            $this->conditional_message = Utils::prepareHtmlString($details['conditional_message']['message']);
-            $this->minimum_days_early = intval($details['conditional_message']['minimum_days_early']);
-            $this->minimum_points = intval($details['conditional_message']['minimum_points']);
+        if (isset($details['early_submission_incentive'])) {
+            $this->incentive_message = Utils::prepareHtmlString($details['early_submission_incentive']['message']);
+            $this->minimum_days_early = intval($details['early_submission_incentive']['minimum_days_early']);
+            $this->minimum_points = intval($details['early_submission_incentive']['minimum_points']);
         }
 
         $num_parts = 1;
@@ -817,22 +807,7 @@ class Gradeable extends AbstractModel {
         $points = 0;
         foreach($this->components as $component) {
             $marks = $component->getMarks();
-            $type = 0; // 0 is deduction, 1 is addition
-            foreach ($marks as $mark) {
-                if ($mark->getPoints() > 0) {
-                    $type = 1;
-                    break;
-                }
-                if ($mark->getPoints() < 0) {
-                    $type = 0;
-                    break;
-                }
-            }
-            if ($component->getMaxValue() < 0) {
-                $temp_points = ($type === 0 ) ? 0 : $component->getMaxValue();
-            } else {
-                $temp_points = ($type === 0 ) ? $component->getMaxValue() : 0;
-            }
+            $temp_points = $component->getDefault();
             
             foreach ($marks as $mark) {
                 if ($mark->getHasMark()) {
@@ -842,30 +817,13 @@ class Gradeable extends AbstractModel {
 
             $temp_points += $component->getScore();
 
-            if ($component->getMaxValue() < 0) {
-                if ($type === 0) {
-                    if ($temp_points < $component->getMaxValue()) {
-                        $temp_points = $component->getMaxValue();
-                    }
-                } else {
-                    if ($temp_points > 0) {
-                        $temp_points = 0;
-                    }
-                }
+            if($temp_points < $component->getLowerClamp()) {
+                $temp_points = $component->getLowerClamp();
             }
-            else {
-                if ($type === 0) {
-                    if ($temp_points < 0) {
-                        $temp_points = 0;
-                    }
-                } else {
-                    if ($temp_points > $component->getMaxValue()) {
-                        $temp_points = $component->getMaxValue();
-                    }
-                }
+            if($temp_points > $component->getUpperClamp()) {
+                $temp_points = $component->getUpperClamp();
             }
             
-
             $points += $temp_points;
         }
         return $points;
@@ -881,10 +839,6 @@ class Gradeable extends AbstractModel {
 
     public function getDaysLate() {
         return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysLate() : 0;
-    }
-
-    public function getDaysEarly() {
-        return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysEarly() : 0;
     }
 
     public function getInstructionsURL(){
@@ -914,8 +868,8 @@ class Gradeable extends AbstractModel {
         return $this->message;
     }
 
-    public function hasConditionalMessage() {
-        return trim($this->conditional_message) !== "";
+    public function hasIncentiveMessage() {
+        return trim($this->incentive_message) !== "";
     }
 
     public function useVcsCheckout() {

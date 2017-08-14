@@ -170,7 +170,7 @@ HTML;
     <div id="push"></div>
 </div>
 <div id="footer">
-    <span id="copyright">&copy; 2016 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
+    <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
     <span id="github">
         <a href="https://github.com/Submitty/Submitty" target="blank" title="Fork us on Github">
             <i class="fa fa-github fa-lg"></i>

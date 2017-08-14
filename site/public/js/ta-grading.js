@@ -25,10 +25,12 @@ $(document).ready(function(){
     }
     else{
         readCookies();
+        updateCookies();
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-    $('#header').css({'position':'fixed', 'z-index':'1099'});
+    $('#header').css({'position':'fixed', 'z-index':'1'});
+    $('#footer').css({'position':'fixed', 'z-index':'1'});
 
     calculatePercentageTotal();
     var progressbar = $(".progressbar"),
@@ -97,6 +99,16 @@ function readCookies(){
     var status_height = document.cookie.replace(/(?:(?:^|.*;\s*)status_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var status_visible = document.cookie.replace(/(?:(?:^|.*;\s*)status_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
+    var overwrite = document.cookie.replace(/(?:(?:^|.*;\s*)overwrite\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
+    var autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var opened_mark = document.cookie.replace(/(?:(?:^|.*;\s*)opened_mark\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var scroll_pixel = document.cookie.replace(/(?:(?:^|.*;\s*)scroll_pixel\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
+    var testcases = document.cookie.replace(/(?:(?:^|.*;\s*)testcases\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
+    var files = document.cookie.replace(/(?:(?:^|.*;\s*)files\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
     (output_top) ? $("#autograding_results").css("top", output_top):{};
     (output_left) ? $("#autograding_results").css("left", output_left):{};
     (output_width) ? $("#autograding_results").css("width", output_width):{};
@@ -125,6 +137,58 @@ function readCookies(){
     (files_visible) ? ((files_visible) == "none" ? $(".fa-folder-open").removeClass("icon-selected") : $(".fa-folder-open").addClass("icon-selected")) : {};
     (rubric_visible) ? ((rubric_visible) == "none" ? $(".fa-pencil-square-o").removeClass("icon-selected") : $(".fa-pencil-square-o").addClass("icon-selected")) : {};
     (status_visible) ? ((status_visible) == "none" ? $(".fa-user").removeClass("icon-selected") : $(".fa-user").addClass("icon-selected")) : {};
+
+    (overwrite) ? ((overwrite) == "on" ? $('#overwrite-id').prop('checked', true) : $('#overwrite-id').prop('checked', false)) : {};
+
+    (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
+    if (autoscroll == "on") {
+        openClose(parseInt(opened_mark));
+        if (scroll_pixel > 0) {
+
+            document.getElementById('grading_rubric').scrollTop = scroll_pixel;
+        }
+    }
+
+    if (autoscroll == "on") {
+        var testcases_array = JSON.parse(testcases);
+        testcases_array.forEach(function(element) {
+            var id = 'testcase_' + element;
+            if ($("#" + id).attr("style") == "display: none;") {
+                toggleDiv(id);
+            }
+        });
+    }
+
+    if (autoscroll == "on") {
+        var files_array = JSON.parse(files);
+        files_array.forEach(function(element) {
+            var file_path = element.split('#$SPLIT#$');
+            var current = $('#file-container');
+            for (var x = 0; x < file_path.length; x++) {
+                current.children().each(function() {
+                    if (x == file_path.length - 1) {
+                        $(this).children('div[id^=file_viewer_]').each(function() {
+                            if ($(this)[0].dataset.file_name == file_path[x] && !$($(this)[0]).hasClass('open')) {
+                                openFrame($(this)[0].dataset.file_name, $(this)[0].dataset.file_url, $(this).attr('id').split('_')[2]);
+                            }
+                        });
+                        $(this).children('div[id^=div_viewer_]').each(function() {
+                            if ($(this)[0].dataset.file_name == file_path[x] && !$($(this)[0]).hasClass('open')) {
+                                openDiv($(this).attr('id').split('_')[2]);
+                            }
+                        });
+                    } else {
+                        $(this).children('div[id^=div_viewer_]').each(function() {
+                            if ($(this)[0].dataset.file_name == file_path[x]) {
+                                current = $(this);
+                                return false;
+                            }
+                        });                        
+                    }
+                });
+            }
+        });
+    }
 }
 
 function updateCookies(){
@@ -152,6 +216,51 @@ function updateCookies(){
     document.cookie = "status_height=" + $("#student_info").css("height") + "; path=/;";
     document.cookie = "status_visible=" + $("#student_info").css("display") + "; path=/;";
 
+    var overwrite = "on";
+    if ($('#overwrite-id').is(":checked")) {
+        overwrite = "on";
+    } else {
+        overwrite = "off";
+    }
+    document.cookie = "overwrite=" + overwrite + "; path=/;";
+
+    var autoscroll = "on";
+    if ($('#autoscroll_id').is(":checked")) {
+        autoscroll = "on";
+    } else {
+        autoscroll = "off";
+    }
+    document.cookie = "autoscroll=" + autoscroll + "; path=/;";
+    document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
+
+    if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() == -2) {
+        if (findCurrentOpenedMark() == -2) {
+            var current_mark = document.getElementById('title-general');
+        } else {
+            var current_mark = document.getElementById('title-' + findCurrentOpenedMark());
+        }
+        var top_pos = current_mark.offsetTop;
+        var rubric_table = document.getElementById('rubric-table');
+        rubric_table = rubric_table.parentElement;
+        top_pos += rubric_table.offsetTop;
+        document.cookie = "scroll_pixel=" + top_pos + "; path=/;";
+    } else {
+        document.cookie = "scroll_pixel=" + 0 + "; path=/;";
+    }
+
+    var testcases = findOpenTestcases();
+    testcases = JSON.stringify(testcases); 
+    document.cookie = "testcases=" + testcases + "; path=/;";
+
+    var files = [];
+    $('#file-container').children().each(function() {
+        $(this).children('div[id^=div_viewer_]').each(function() {
+            files = files.concat(findAllOpenedFiles($(this), "", $(this)[0].dataset.file_name, [], true));
+        });
+    });
+    files = JSON.stringify(files); 
+    document.cookie = "files=" + files + "; path=/;"
+
     document.cookie = "cookie_version=" + cookie_version + "; path=/;";
 }
 
@@ -171,7 +280,7 @@ function handleKeyPress(key) {
             $("#grading_rubric").toggle();
             break;
         case "KeyO":
-            $('.fa-folder-open').toggleClass('icon-selected');
+            $('.fa-folder-open.icon-header').toggleClass('icon-selected');
             $("#submission_browser").toggle();
             break;
         case "KeyS":
@@ -187,6 +296,10 @@ function handleKeyPress(key) {
             $("#submission_browser").attr("style", "left:15px; bottom:40px; width:48%; height:30%; display:block;");
             $('.fa-user').addClass('icon-selected');
             $("#student_info").attr("style", "right:15px; bottom:40px; width:48%; height:30%; display:block;");
+            updateHandle("#autograding_results");
+            updateHandle("#grading_rubric");
+            updateHandle("#submission_browser");
+            updateHandle("#student_info");
             deleteCookies();
             updateCookies();
             break;
@@ -297,4 +410,66 @@ function downloadFile(html_file, url_file) {
     else if (url_file.includes("results")) directory = "results";      
     window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': directory, 'file': html_file, 'path': url_file});
     return false;
+}
+
+function updateHandle(element) {
+    var bottom_e = $(element).scrollTop();
+    var padding = $(element).outerHeight() - $(element).innerHeight();
+    var height = $(element).prop('scrollHeight') - padding;
+    var bottom_s = $(element).scrollTop() + $(element).prop('clientHeight');
+    var bottom_s = Math.min(height, bottom_s);
+    var bottom_se = bottom_s - 20;
+    var bottom_se = Math.min(height, bottom_se);
+    $(element).find('.ui-resizable-e').css('top', bottom_e + 'px');
+    $(element).find('.ui-resizable-s').css('top', bottom_s + 'px');
+    $(element).find('.ui-resizable-se').css('top', bottom_se + 'px');
+}
+
+function findOpenTestcases() {
+    var testcase_num = [];
+    var current_testcase;
+    $(".box").each(function() {
+        current_testcase = $(this).find('div[id^=testcase_]');
+        if (typeof current_testcase[0] !== 'undefined'){
+            if (current_testcase[0].style.display != 'none' ) {
+                testcase_num.push(parseInt(current_testcase.attr('id').split('_')[1]));
+            }         
+        }
+    });
+    return testcase_num;
+}
+
+//finds all the open files and folder and stores them in stored_paths
+function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
+    if (first === true) {
+        current_path += path;
+        if ($(elem)[0].classList.contains('open')) {       
+            stored_paths.push(path);
+        }  
+        else {
+            return [];
+        }
+    } else {
+        current_path += "#$SPLIT#$" + path;
+    }
+
+    $(elem).children().each(function() {
+        $(this).children('div[id^=file_viewer_]').each(function() {
+            if ($(this)[0].classList.contains('shown')) {
+                stored_paths.push((current_path + "#$SPLIT#$" + $(this)[0].dataset.file_name));
+            }
+        });
+        
+    });
+
+    $(elem).children().each(function() {
+        $(this).children('div[id^=div_viewer_]').each(function() {
+            if ($(this)[0].classList.contains('open')) {
+                stored_paths.push((current_path + "#$SPLIT#$" + $(this)[0].dataset.file_name));
+                stored_paths = findAllOpenedFiles($(this), current_path, $(this)[0].dataset.file_name, stored_paths, false);
+            }
+        });
+    });
+
+    return stored_paths;
 }

@@ -3,7 +3,10 @@ instructor: instructor
 gradeables:
   - gradeable_config:  01_simple_python
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -17,7 +20,10 @@ gradeables:
 
   - gradeable_config:  02_simple_cpp
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -31,7 +37,10 @@ gradeables:
   
   - gradeable_config:  03_multipart
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -45,7 +54,10 @@ gradeables:
   
   - gradeable_config:  04_python_static_analysis
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -59,7 +71,10 @@ gradeables:
   
   - gradeable_config:  05_cpp_static_analysis
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -73,7 +88,10 @@ gradeables:
 
   - gradeable_config:  06_loop_types
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -87,7 +105,10 @@ gradeables:
 
   - gradeable_config:  07_loop_depth
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -101,7 +122,10 @@ gradeables:
 
   - gradeable_config:  08_memory_debugging
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -115,7 +139,10 @@ gradeables:
 
   - gradeable_config:  09_java_testing
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -129,7 +156,10 @@ gradeables:
 
   - gradeable_config:  10_java_coverage
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -143,7 +173,10 @@ gradeables:
 
   - gradeable_config:  11_resources
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -157,7 +190,10 @@ gradeables:
 
   - gradeable_config:  12_system_calls
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -171,7 +207,10 @@ gradeables:
 
   - gradeable_config:  13_cmake_compilation
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -185,7 +224,10 @@ gradeables:
 
   - gradeable_config:  14_tkinter
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit
@@ -199,7 +241,10 @@ gradeables:
 
   - gradeable_config:  15_GLFW
     components:
-    - gc_max_value: 5
+    - gc_lower_clamp: 0
+      gc_default: 5
+      gc_max_value: 5
+      gc_upper_clamp: 5
       gc_title: Question 1
       marks:
       - gcm_note: Full Credit

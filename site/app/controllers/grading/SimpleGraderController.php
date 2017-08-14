@@ -40,7 +40,7 @@ class SimpleGraderController extends AbstractController  {
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getName()}");
 
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -94,7 +94,7 @@ class SimpleGraderController extends AbstractController  {
         $gradeable = $this->core->getQueries()->getGradeable($g_id, $user_id);
 
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -126,8 +126,8 @@ class SimpleGraderController extends AbstractController  {
                     $component->setComment($_POST['scores'][$component->getId()]);
                 }
                 else {
-                    if($component->getMaxValue() < $_POST['scores'][$component->getId()] || !is_numeric($_POST['scores'][$component->getId()])){
-                        $response = array('status' => 'fail', 'message' => "Save error: score must be a number less than the max score");
+                    if($component->getUpperClamp() < $_POST['scores'][$component->getId()] || !is_numeric($_POST['scores'][$component->getId()])){
+                        $response = array('status' => 'fail', 'message' => "Save error: score must be a number less than the upper clamp");
                         $this->core->getOutput()->renderJson($response);
                         return $response;
                     }
@@ -152,7 +152,7 @@ class SimpleGraderController extends AbstractController  {
         $g_id = $_POST['g_id'];
         $gradeable = $this->core->getQueries()->getGradeable($g_id, $username);
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -192,7 +192,7 @@ class SimpleGraderController extends AbstractController  {
                                 $temp_array[$status_temp_str] = "OK";
                             }
                             else{
-                                if($component->getMaxValue() < $data_array[$j][$index2]){
+                                if($component->getUpperClamp() < $data_array[$j][$index2]){
                                     $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                     $temp_array[$status_temp_str] = "ERROR";
                                 } else {
