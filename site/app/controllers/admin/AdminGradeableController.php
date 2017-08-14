@@ -296,13 +296,30 @@ class AdminGradeableController extends AbstractController {
                         $old_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                         $old_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
                         $old_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
-                        $old_component->setLowerClamp($_POST['lower_' . strval($x + 1)]);
-                        $old_component->setDefault($_POST['default_' . strval($x + 1)]);
+                        $is_penalty = (isset($_POST['rad_penalty-'.strval($x+1)]) && $_POST['rad_penalty-'.strval($x+1)]=='yes') ? true : false;
+                        $lower_clamp = ($is_penalty === true) ? floatval($_POST['lower_'.strval($x+1)]) : 0;
+                        $old_component->setLowerClamp($lower_clamp);
+                        $is_deduction = (isset($_POST['grade_by-'.strval($x+1)]) && $_POST['grade_by-'.strval($x+1)]=='count_down') ? true : false;
+                        $temp_num = ($is_deduction === true) ? floatval($_POST['points_' . strval($x + 1)]) : 0;
+                        $old_component->setDefault($temp_num);
                         $old_component->setMaxValue($_POST['points_' . strval($x + 1)]);
-                        $old_component->setUpperClamp($_POST['upper_' . strval($x + 1)]);
+                        $is_extra = (isset($_POST['rad_extra_credit-'.strval($x+1)]) && $_POST['rad_extra_credit-'.strval($x+1)]=='yes') ? true : false;
+                        $upper_clamp = ($is_extra === true) ? (floatval($_POST['points_' . strval($x+1)]) + floatval($_POST['upper_' . strval($x + 1)])) : floatval($_POST['points_' . strval($x+1)]);
+                        $old_component->setUpperClamp($upper_clamp);
                         $old_component->setIsText(false);
                         $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
                         $old_component->setIsPeer($peer_grading_component);
+                        if ($this->isRadioButtonTrue('pdf_page_student')) {
+                            $page_component = -1;
+                        }
+                        else if ($this->isRadioButtonTrue('pdf_page')) {
+                            $page_component = ($_POST['page_component_' . strval($x + 1)]);
+                        }
+                        else {
+                            $page_component = 0;
+                        }
+                        echo $page_component;
+                        $old_component->setPage($page_component);
                         $old_component->setOrder($x);
                         $this->core->getQueries()->updateGradeableComponent($old_component);
                     } else if ($num_old_components > $num_questions) {
@@ -316,13 +333,29 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                 $gradeable_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
                 $gradeable_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
-                $gradeable_component->setLowerClamp($_POST['lower_' . strval($x + 1)]);
-                $gradeable_component->setDefault($_POST['default_' . strval($x + 1)]);
+                $is_penalty = (isset($_POST['rad_penalty-'.strval($x+1)]) && $_POST['rad_penalty-'.strval($x+1)]=='yes') ? true : false;
+                $lower_clamp = ($is_penalty === true) ? floatval($_POST['lower_'.strval($x+1)]) : 0;
+                $gradeable_component->setLowerClamp($lower_clamp);
+                $is_deduction = (isset($_POST['grade_by-'.strval($x+1)]) && $_POST['grade_by-'.strval($x+1)]=='count_down') ? true : false;
+                $temp_num = ($is_deduction === true) ? floatval($_POST['points_' . strval($x + 1)]) : 0;
+                $gradeable_component->setDefault($temp_num);
                 $gradeable_component->setMaxValue($_POST['points_' . strval($x + 1)]);
-                $gradeable_component->setUpperClamp($_POST['upper_' . strval($x + 1)]);
+                $is_extra = (isset($_POST['rad_extra_credit-'.strval($x+1)]) && $_POST['rad_extra_credit-'.strval($x+1)]=='yes') ? true : false;
+                $upper_clamp = ($is_extra === true) ? (floatval($_POST['points_' . strval($x+1)]) + floatval($_POST['upper_' . strval($x + 1)])) : floatval($_POST['points_' . strval($x+1)]);
+                $gradeable_component->setUpperClamp($upper_clamp);
                 $gradeable_component->setIsText(false);
                 $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
                 $gradeable_component->setIsPeer($peer_grading_component);
+                if ($this->isRadioButtonTrue('pdf_page_student')) {
+                    $page_component = -1;
+                }
+                else if ($this->isRadioButtonTrue('pdf_page')) {
+                    $page_component = ($_POST['page_component_' . strval($x + 1)]);
+                }
+                else {
+                    $page_component = 0;
+                }
+                $gradeable_component->setPage($page_component);
                 $gradeable_component->setOrder($x);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }  
@@ -336,7 +369,7 @@ class AdminGradeableController extends AbstractController {
                 foreach ($components as $comp) {
                     $num_marks = 0;
                     foreach($_POST as $k=>$v){
-                        if(strpos($k,'deduct_points_' . $index) !== false){
+                        if(strpos($k,'mark_points_' . $index) !== false){
                             $num_marks++;
                         }
                     }
@@ -344,8 +377,8 @@ class AdminGradeableController extends AbstractController {
                     for ($y = 0; $y < $num_marks; $y++) {
                         $mark = new GradeableComponentMark($this->core);
                         $mark->setGcId($comp->getId());
-                        $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                        $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                        $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
+                        $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                         $mark->setOrder($y);
                         $this->core->getQueries()->createGradeableComponentMark($mark);
                     }                    
@@ -358,7 +391,7 @@ class AdminGradeableController extends AbstractController {
                 foreach ($components as $comp) {
                     $num_marks = 0; //current number of marks
                     foreach($_POST as $k=>$v){
-                        if(strpos($k,'deduct_points_' . $index) !== false){
+                        if(strpos($k,'mark_points_' . $index) !== false){
                             $num_marks++;
                         }
                     }
@@ -372,8 +405,8 @@ class AdminGradeableController extends AbstractController {
                     foreach($marks as $mark) {
                         if($y < $num_marks && $y < $num_old_mark) {
                             $mark->setGcId($comp->getId());
-                            $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                            $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                            $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
+                            $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                             $mark->setOrder($y);
                             $this->core->getQueries()->updateGradeableComponentMark($mark);
                         } else if($num_old_mark > $num_marks) {
@@ -384,8 +417,8 @@ class AdminGradeableController extends AbstractController {
                     for($y = $num_old_mark; $y < $num_marks; $y++) {
                         $mark = new GradeableComponentMark($this->core);
                         $mark->setGcId($comp->getId());
-                        $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                        $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                        $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
+                        $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                         $mark->setOrder($y);
                         $this->core->getQueries()->createGradeableComponentMark($mark);
                     }             
@@ -409,6 +442,7 @@ class AdminGradeableController extends AbstractController {
                         $old_component->setIsText(false);
                         $old_component->setIsPeer(false);
                         $old_component->setOrder($x);
+                        $old_component->setPage(0);
                         $this->core->getQueries()->updateGradeableComponent($old_component);
                     } else if ($num_old_components > $num_checkpoints) {
                         $this->core->getQueries()->deleteGradeableComponent($old_component);
@@ -430,6 +464,7 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setIsText(false);
                 $gradeable_component->setIsPeer(false);
                 $gradeable_component->setOrder($x);
+                $gradeable_component->setPage(0);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }
         } else if($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
@@ -464,6 +499,7 @@ class AdminGradeableController extends AbstractController {
                         $old_numeric->setIsText(false);
                         $old_numeric->setIsPeer(false);
                         $old_numeric->setOrder($x);
+                        $old_numeric->setPage(0);
                         $this->core->getQueries()->updateGradeableComponent($old_numeric);
                         $start_index_numeric++; 
                     }
@@ -486,6 +522,7 @@ class AdminGradeableController extends AbstractController {
                     $gradeable_component->setIsText(false);
                     $gradeable_component->setIsPeer(false);
                     $gradeable_component->setOrder($x);
+                    $gradeable_component->setPage(0);
                     $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
                 }
                 $z = $x;
@@ -502,6 +539,7 @@ class AdminGradeableController extends AbstractController {
                         $old_text->setUpperClamp(0);
                         $old_text->setIsText(true);
                         $old_text->setIsPeer(false);
+                        $old_text->setPage(0);
                         $old_text->setOrder($z + $x);
                         $this->core->getQueries()->updateGradeableComponent($old_text);
                         $start_index_text++; 
@@ -524,6 +562,7 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setUpperClamp(0);
                 $gradeable_component->setIsText(true);
                 $gradeable_component->setIsPeer(false);
+                $gradeable_component->setPage(0);
                 $gradeable_component->setOrder($y + $z);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
             }
