@@ -23,7 +23,7 @@ def main(a,b):
 
     good = 0
     bad = 0
-
+    error_sum = 0
     
     for user in os.listdir(a):
         for version in os.listdir(os.path.join(a,user)):
@@ -31,16 +31,20 @@ def main(a,b):
                 continue
 
             file_a = os.path.join(a,user,version,"grade.txt")
-            file_b = os.path.join(b,user,version,"results_grade.txt")
+            file_b = os.path.join(b,user,version,"grade.txt")
 
             if not os.path.isfile(file_a):
-                print ("ERROR! ",file_a," is not a file")
-                continue
+                file_a = os.path.join(a,user,version,"results_grade.txt")
+                if not os.path.isfile(file_a):
+                    print ("ERROR! ",file_a," is not a file")
+                    continue
 
             if not os.path.isfile(file_b):
-                print ("ERROR! comparison file ",file_b," does not exist")
-                continue
-            
+                file_b = os.path.join(b,user,version,"results_grade.txt")
+                if not os.path.isfile(file_b):
+                    print ("ERROR! ",file_b," is not a file")
+                    continue
+
             with open(file_a, 'r') as foo:
                    fa = foo.read()
             with open(file_b, 'r') as foo:
@@ -52,11 +56,15 @@ def main(a,b):
                 bad = bad+1
                 ag = getGrade(file_a)
                 bg = getGrade(file_b)
-                print("MISMATCH",file_a,ag,"vs",bg,"    ",str(ag[0]-bg[0]))
-
+                error = ag[0]-bg[0]
+                if (abs(error)>5):
+                    print("MISMATCH",file_a,ag,"vs",bg,"    ",str(error))
+                error_sum += abs(error)
+                
     print ("good = ",good)
     print ("bad = ",bad)
-                
+
+    print ("avg error =",error_sum/bad)
                 
 if __name__ == "__main__":
     print (sys.argv)
