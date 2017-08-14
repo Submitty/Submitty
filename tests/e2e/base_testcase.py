@@ -73,7 +73,7 @@ class BaseTestCase(unittest2.TestCase):
         if user_name is None:
             user_name = self.user_name
         self.get(url)
-        # print(self.driver.page_source)
+        print(self.driver.page_source)
         self.assertIn("SAMPLE", self.driver.title)
         self.driver.find_element_by_name('user_id').send_keys(user_id)
         self.driver.find_element_by_name('password').send_keys(user_password)
