@@ -65,7 +65,7 @@ class ConfigurationController extends AbstractController {
 
     public function updateConfiguration() {
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $_SESSION['messages']['error'][] = "Invalid CSRF token. Try again.";
+            $this->core->addErrorMessage("Invalid CSRF token. Try again.");
             $_SESSION['request'] = $_POST;
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
                                                               'page' => 'configuration',
@@ -73,7 +73,7 @@ class ConfigurationController extends AbstractController {
         }
 
         if (!isset($_POST['course_name']) || $_POST['course_name'] == "") {
-            $_SESSION['messages']['error'][] = "Course name can not be blank";
+            $this->core->addErrorMessage("Course name can not be blank");
             $_SESSION['request'] = $_POST;
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
                                                               'page' => 'configuration',
@@ -104,9 +104,15 @@ class ConfigurationController extends AbstractController {
                 'vcs_type'                  => $_POST['vcs_type']
             )
         );
+<<<<<<< HEAD
 
         $this->core->getConfig()->saveCourseIni($save_array);
         $_SESSION['messages']['success'][] = "Site configuration updated";
+=======
+        
+        IniParser::writeFile($this->core->getConfig()->getCourseIniPath(), $save_array);
+        $this->core->addSuccessMessage("Site configuration updated");
+>>>>>>> master
         $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
                                                           'page' => 'configuration',
                                                           'action' => 'view')));
