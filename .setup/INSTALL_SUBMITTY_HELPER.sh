@@ -535,23 +535,48 @@ popd
 ################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 
+
+# stop the scheduler (if it's running)
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_before=$?
+if [[ $is_active_before -ne 0 ]]; then
+    systemctl stop submitty_grading_scheduler
+fi
+#killall submitty_grading_scheduler.py
+
+# update the scheduler daemon
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.service   /etc/systemd/system/submitty_grading_scheduler.service
 chown -R hwcron:hwcron /etc/systemd/system/submitty_grading_scheduler.service
 chmod 444 /etc/systemd/system/submitty_grading_scheduler.service
 
-systemctl is-active --quiet submitty_grading_scheduler
-is_active_before=$?
 
-# if the daemon is currently running, restart it now
-systemctl try-restart submitty_grading_scheduler
+# delete the autograding tmp directories
+rm -rf /var/local/submitty/autograding_tmp
 
-systemctl is-active --quiet submitty_grading_scheduler
-is_active_after=$?
+# recreate the top level autograding tmp directory
+mkdir /var/local/submitty/autograding_tmp
+chown root:root /var/local/submitty/autograding_tmp
+chmod 511 /var/local/submitty/autograding_tmp
 
+# recreate the per untrusted directories
+for ((i=0;i<$NUM_UNTRUSTED;i++));
+do
+    myuser=`printf "untrusted%02d" $i`
+    mydir=`printf "/var/local/submitty/autograding_tmp/untrusted%02d" $i`
+    mkdir $mydir
+    chown hwcron:$myuser $mydir
+    chmod 770 $mydir
+done
+
+
+# start the scheduler (if it was running)
 if [[ $is_active_before -ne 0 ]]; then
     echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
     echo -e "To start the daemon, run:\n   sudo systemctl start submitty_grading_scheduler\n"
 else
+    systemctl start submitty_grading_scheduler
+    systemctl is-active --quiet submitty_grading_scheduler
+    is_active_after=$?
     if [[ $is_active_after -ne 0 ]]; then
         echo -e "\nERROR!  Failed to restart Submitty Grading Scheduler Daemon\n"
     fi

@@ -107,20 +107,7 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
             
 
 # give permissions to all created files to the hwcron user
-def untrusted_grant_read_access(which_untrusted,my_dir):
-    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                     which_untrusted,
-                     "/usr/bin/find",
-                     my_dir,
-                     "-user",
-                     which_untrusted,
-                     "-exec",
-                     "/bin/chmod",
-                     "o+rwx",   # FIXME: needed more permissions to get tutorial_10_java_coverage to work
-                     "{}",
-                     ";"])
-# give permissions to all created files to the hwcron user
-def untrusted_grant_write_access(which_untrusted,my_dir):
+def untrusted_grant_rwx_access(which_untrusted,my_dir):
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
                      which_untrusted,
                      "/usr/bin/find",
@@ -132,6 +119,7 @@ def untrusted_grant_write_access(which_untrusted,my_dir):
                      "o+rwx",
                      "{}",
                      ";"])
+
 
 # ==================================================================================
 # ==================================================================================
@@ -182,8 +170,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
-    tmp=tempfile.mkdtemp()
-
+    tmp=os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
+    shutil.rmtree(tmp,ignore_errors=True)
+    os.makedirs(tmp)
+    
     # switch to tmp directory
     os.chdir(tmp)
 
@@ -240,7 +230,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     add_permissions_recursive(tmp_compilation,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IXOTH)
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH)
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
@@ -262,7 +252,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
 
 
-    untrusted_grant_read_access(which_untrusted,tmp_compilation)
+    untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
         
     # remove the compilation program
     os.remove(os.path.join(tmp_compilation,"my_compile.out"))
@@ -302,7 +292,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     add_permissions_recursive(tmp_work,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IXOTH)
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     # run the run.out as the untrusted user
     with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
@@ -324,8 +314,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         print ("pid",my_pid,"RUNNER FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","RUNNER FAILURE")
 
-    untrusted_grant_read_access(which_untrusted,tmp_work)
-    untrusted_grant_write_access(which_untrusted,tmp_compilation)
+    untrusted_grant_rwx_access(which_untrusted,tmp_work)
+    untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
@@ -357,7 +347,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     add_permissions_recursive(tmp_work,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH)
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     add_permissions(os.path.join(tmp_work,"my_validator.out"),stat.S_IROTH | stat.S_IXOTH)
 
@@ -378,8 +368,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         print ("pid",my_pid,"VALIDATOR FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","VALIDATION FAILURE")
 
-    untrusted_grant_read_access(which_untrusted,tmp_work)
-    untrusted_grant_write_access(which_untrusted, tmp_work) #FIXME
+    untrusted_grant_rwx_access(which_untrusted,tmp_work)
 
     # grab the result of autograding
     grade_result = ""
