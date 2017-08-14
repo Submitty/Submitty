@@ -82,6 +82,7 @@ class Core {
      *
      * @param $semester
      * @param $course
+     * @param $master_ini_path
      * @throws \Exception
      */
     public function loadConfig($semester, $course, $master_ini_path) {

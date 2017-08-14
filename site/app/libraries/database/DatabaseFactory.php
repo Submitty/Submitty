@@ -2,7 +2,6 @@
 
 namespace app\libraries\database;
 
-
 use app\exceptions\DatabaseException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
@@ -36,11 +35,8 @@ class DatabaseFactory {
             case 'postgresql':
                 return new PostgresqlDatabaseQueries($core);
                 break;
-            case 'sqlite':
-                return new SqliteDatabaseQueries($core);
-                break;
             default:
-                throw new NotImplementedException("Driver not implemented: {$this->driver}");
+                return new DatabaseQueries($core);
         }
 
     }

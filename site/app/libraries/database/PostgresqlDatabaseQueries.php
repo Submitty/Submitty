@@ -30,7 +30,7 @@ WHERE u.user_id=?", array($user_id));
             if (isset($user['grading_registration_sections'])) {
                 $user['grading_registration_sections'] = $this->course_db->fromDatabaseArrayToPHP($user['grading_registration_sections']);
             }
-            return new User($this->core, $this->course_db->row());
+            return new User($this->core, $user);
         }
         else {
             return null;
