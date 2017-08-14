@@ -57,7 +57,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb("Status {$gradeable->getName()}");
 
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -80,7 +80,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb("Details {$gradeable->getName()}");
 
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -200,12 +200,12 @@ class ElectronicGraderController extends AbstractController {
 
     public function adminTeamSubmit() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
-            $_SESSION['messages']['error'][] = "Invalid CSRF Token";
+            $this->core->addErrorMessage("Invalid CSRF Token");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         if (!$this->core->getUser()->accessAdmin()) {
-            $_SESSION['messages']['error'][] = "Only admins can edit teams";
+            $this->core->addErrorMessage("Only admins can edit teams");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -226,7 +226,7 @@ class ElectronicGraderController extends AbstractController {
             $id = trim(htmlentities($_POST["user_id_{$i}"]));
             if (($id !== "") && !in_array($id, $user_ids)) {
                 if ($this->core->getQueries()->getUserById($id) === null) {
-                    $_SESSION['messages']['error'][] = "ERROR: {$id} is not a valid User ID";
+                    $this->core->addErrorMessage("ERROR: {$id} is not a valid User ID");
                     $this->core->redirect($return_url);
                 }
                 $user_ids[] = $id;
@@ -238,7 +238,7 @@ class ElectronicGraderController extends AbstractController {
             $team_leader_id = null;
             foreach($user_ids as $id) {
                 if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
-                    $_SESSION['messages']['error'][] = "ERROR: {$id} is already on a team";
+                    $this->core->addErrorMessage("ERROR: {$id} is already on a team");
                     $this->core->redirect($return_url);
                 }
                 if ($id === $_POST['new_team_user_id']) {
@@ -254,7 +254,7 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
             if ($team_leader_id === null) {
-                $_SESSION['messages']['error'][] = "ERROR: {$_POST['new_team_user_id']} must be on the team";
+                $this->core->addErrorMessage("ERROR: {$_POST['new_team_user_id']} must be on the team");
                 $this->core->redirect($return_url);
             }
 
@@ -263,7 +263,7 @@ class ElectronicGraderController extends AbstractController {
                 $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
                 if ($id !== $team_leader_id) $this->core->getQueries()->acceptTeamInvitation($team_id, $id);
             }
-            $_SESSION['messages']['success'][] = "Created New Team {$team_id}";
+            $this->core->addSuccessMessage("Created New Team {$team_id}");
 
             $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
             if (!FileUtils::createDir($gradeable_path)) {
@@ -292,7 +292,7 @@ class ElectronicGraderController extends AbstractController {
             $team_id = $_POST['edit_team_team_id'];
             $team = $this->core->getQueries()->getTeamById($team_id);
             if ($team === null) {
-                $_SESSION['messages']['error'][] = "ERROR: {$team_id} is not a valid Team ID";
+                $this->core->addErrorMessage("ERROR: {$team_id} is not a valid Team ID");
                 $this->core->redirect($return_url);
             }
 
@@ -301,7 +301,7 @@ class ElectronicGraderController extends AbstractController {
             foreach($user_ids as $id) {
                 if (!in_array($id, $team_members)) {
                     if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
-                        $_SESSION['messages']['error'][] = "ERROR: {$id} is already on a team";
+                        $this->core->addErrorMessage("ERROR: {$id} is already on a team");
                         $this->core->redirect($return_url);
                     }
                     $add_user_ids[] = $id;
@@ -328,7 +328,7 @@ class ElectronicGraderController extends AbstractController {
             foreach($remove_user_ids as $id) {
                 $this->core->getQueries()->leaveTeam($team_id, $id);
             }
-            $_SESSION['messages']['success'][] = "Updated Team {$team_id}";
+            $this->core->addSuccessMessage("Updated Team {$team_id}");
 
             $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
             $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team_id, "user_assignment_settings.json");
@@ -354,7 +354,7 @@ class ElectronicGraderController extends AbstractController {
 
     public function submitGrade() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
-            $_SESSION['messages']['error'][] = "Invalid CSRF Token";
+            $this->core->addErrorMessage("Invalid CSRF Token");
             $this->core->redirect($this->core->buildUrl(array()));
         }
 
@@ -363,7 +363,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
 
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -378,7 +378,7 @@ class ElectronicGraderController extends AbstractController {
             }
             $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
             if (!in_array($who_id, $user_ids_to_grade)) {
-                $_SESSION['messages']['error'][] = "You do not have permission to grade {$who_id}";
+                $this->core->addErrorMessage("You do not have permission to grade {$who_id}");
                 $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
             }
         }
@@ -386,7 +386,7 @@ class ElectronicGraderController extends AbstractController {
         $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
         $homeworkDate = $gradeable->getGradeStartDate();
         if ($now < $homeworkDate) {
-            $_SESSION['messages']['error'][] = "Grading is not open yet for {$gradeable->getName()}";
+            $this->core->addErrorMessage("Grading is not open yet for {$gradeable->getName()}");
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
@@ -407,7 +407,7 @@ class ElectronicGraderController extends AbstractController {
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($who_id, $gradeable_id);
 
-        $_SESSION['messages']['success'][] = "Successfully uploaded grade for {$who_id}";
+        $this->core->addSuccessMessage("Successfully uploaded grade for {$who_id}");
         $individual = intval($_POST['individual']);
         if ($individual == 1) {
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id)));
@@ -422,7 +422,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
 
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -469,7 +469,7 @@ class ElectronicGraderController extends AbstractController {
 
         $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
         if (($who_id !== "") && ($this->core->getUser()->getGroup() === 3) && !in_array($who_id, $user_ids_to_grade)) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$who_id}";
+            $this->core->addErrorMessage("You do not have permission to grade {$who_id}");
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
@@ -491,7 +491,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
         if ($who_id === "") {
-            $_SESSION['messages']['success'][] = "Finished grading for {$gradeable->getName()}";
+            $this->core->addSuccessMessage("Finished grading for {$gradeable->getName()}");
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
@@ -514,7 +514,7 @@ class ElectronicGraderController extends AbstractController {
 
         //makes sure only the users a grader is assigned to can be graded
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             return;
         }
         if ($this->core->getUser()->getGroup() === 3) {
@@ -528,7 +528,7 @@ class ElectronicGraderController extends AbstractController {
             }
             $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
             if (!in_array($user_id, $user_ids_to_grade)) {
-                $_SESSION['messages']['error'][] = "You do not have permission to grade {$user_id}";
+                $this->core->addErrorMessage("You do not have permission to grade {$user_id}");
                 return;
             }
         }
