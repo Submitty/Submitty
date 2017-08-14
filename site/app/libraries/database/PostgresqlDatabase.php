@@ -11,19 +11,21 @@ class PostgresqlDatabase extends AbstractDatabase {
 
     /**
      * @inheritdoc
+     *
+     * Connection parameters for the PostgreSQL driver are:
+     * username
+     * password
+     * host
+     * port
+     * dbname
      */
     public function __construct($connection_params) {
         parent::__construct($connection_params);
-        if (isset($connection_params['unix_socket'])) {
-            $this->unix_socket = $connection_params['unix_socket'];
+        if (isset($connection_params['host'])) {
+            $this->host = $connection_params['host'];
         }
-        else {
-            if (isset($connection_params['host'])) {
-                $this->host = $connection_params['host'];
-            }
-            if (isset($connection_params['port'])) {
-                $this->port = $connection_params['port'];
-            }
+        if (isset($connection_params['port'])) {
+            $this->port = $connection_params['port'];
         }
         if (isset($connection_params['dbname'])) {
             $this->dbname = $connection_params['dbname'];
@@ -32,16 +34,11 @@ class PostgresqlDatabase extends AbstractDatabase {
 
     protected function getDSN() {
         $params = array();
-        if (isset($this->unix_socket)) {
-            $params[] = "host={$this->unix_socket}";
+        if ($this->host !== null) {
+            $params[] = "host={$this->host}";
         }
-        else {
-            if ($this->host !== null) {
-                $params[] = "host={$this->host}";
-            }
-            if ($this->port !== null) {
-                $params[] = "port={$this->port}";
-            }
+        if ($this->port !== null) {
+            $params[] = "port={$this->port}";
         }
 
         if (isset($this->dbname)) {
