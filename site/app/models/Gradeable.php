@@ -48,7 +48,7 @@ use app\libraries\Utils;
  * @method bool getStudentAnyVersion()
  * @method void setStudentAnyVersion(bool $student_any_version)
  * @method setTaViewDate(\DateTime $datetime)
- * @method \DateTime getOpenDate(\DateTime $datetime)
+ * @method \DateTime getOpenDate()
  * @method setOpenDate(\DateTime $datetime)
  * @method \DateTime getDueDate()
  * @method \DateTime getGradeStartDate()
