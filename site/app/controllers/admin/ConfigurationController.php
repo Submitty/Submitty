@@ -104,15 +104,10 @@ class ConfigurationController extends AbstractController {
                 'vcs_type'                  => $_POST['vcs_type']
             )
         );
-<<<<<<< HEAD
 
         $this->core->getConfig()->saveCourseIni($save_array);
-        $_SESSION['messages']['success'][] = "Site configuration updated";
-=======
-        
-        IniParser::writeFile($this->core->getConfig()->getCourseIniPath(), $save_array);
+
         $this->core->addSuccessMessage("Site configuration updated");
->>>>>>> master
         $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
                                                           'page' => 'configuration',
                                                           'action' => 'view')));
