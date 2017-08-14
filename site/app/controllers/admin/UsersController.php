@@ -2,6 +2,7 @@
 
 namespace app\controllers\admin;
 
+use app\authentication\DatabaseAuthentication;
 use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\Output;
@@ -62,7 +63,8 @@ class UsersController extends AbstractController {
     private function renderUserForm($action) {
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'userForm', $reg_sections, $rot_sections, $action);
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'userForm', $reg_sections, $rot_sections, $action, $use_database);
     }
 
     public function ajaxGetUserDetails() {
