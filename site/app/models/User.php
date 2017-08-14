@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\DatabaseUtils;
 
 /**
  * Class User
@@ -110,7 +109,7 @@ class User extends AbstractModel {
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
-            $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
+            $this->setGradingRegistrationSections($details['grading_registration_sections']);
         }
     }
     

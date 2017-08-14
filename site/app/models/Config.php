@@ -37,6 +37,7 @@ use app\libraries\Utils;
  * @method \DateTimeZone getTimezone()
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
+ * @method string getCourseIniPath()
  */
 
 class Config extends AbstractModel {
@@ -146,7 +147,11 @@ class Config extends AbstractModel {
         $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
 
         if (!isset($master['database_details']) || !is_array($master['database_details'])) {
-            throw new ConfigException("Missing config section 'database_details' in ini file");
+            throw new ConfigException("Missing config section database_details in ini file");
+        }
+
+        if (!isset($master['submitty_database_details']) || !is_array($master['submitty_database_details'])) {
+            throw new ConfigException("Missing config section submitty_database_details in ini file");
         }
 
         $this->database_params = $master['database_details'];
@@ -164,8 +169,8 @@ class Config extends AbstractModel {
         }
         $this->timezone = new \DateTimeZone($this->timezone);
 
-        if (isset($master['database_details']['database_type'])) {
-            $this->database_driver = $master['database_details']['database_type'];
+        if (isset($master['database_details']['driver'])) {
+            $this->database_driver = $master['database_details']['driver'];
         }
 
         $this->base_url = rtrim($this->base_url, "/")."/";

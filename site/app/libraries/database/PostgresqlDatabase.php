@@ -60,10 +60,7 @@ class PostgresqlDatabase extends AbstractDatabase {
      *
      * ex: "{1, 2, 3, 4}" => array(1, 2, 3, 4)
      *
-     * @param string $text        the text representation of the postgres array
-     * @param bool   $parse_bools set to true to convert "true"/"false" to booleans instead of strings
-     * @param int    $start       index to start looking through $text at
-     * @param int    $end         index of $text where we exist current pgArrayToPhp call
+
      *
      * @return array PHP array representation
      */
@@ -174,7 +171,7 @@ class PostgresqlDatabase extends AbstractDatabase {
                 $elements[] = "null";
             }
             else if (is_array($e)) {
-                $elements[] = DatabaseUtils::fromPHPToPGArray($e);
+                $elements[] = $this->fromPHPArrayToDatabase($e);
             }
             else if (is_string($e)) {
                 $elements[] .= '"'. str_replace('"', '\"', $e) .'"';

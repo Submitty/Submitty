@@ -3,18 +3,18 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\DatabaseUtils;
-use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 
 class GradeSummary extends AbstractModel {
-    /**/
-    protected $core;
-    
-    public function __construct(Core $main_core) {
-        $this->core = $main_core;
+
+    public function __construct(Core $core) {
+        parent::__construct($core);
     }
 
+    /**
+     * @param Gradeable[] $summary_data
+     * @param $ldu
+     */
     public function generateSummariesFromQueryResults($summary_data, $ldu) {
         /* Array of Students, indexed by user_id
             Each index contains an array indexed by syllabus 
@@ -62,7 +62,14 @@ class GradeSummary extends AbstractModel {
 
         }
     }
-    
+
+    /**
+     * @param Gradeable $gradeable
+     * @param $ldu
+     * @param $student
+     *
+     * @return mixed
+     */
     private function generateSummary($gradeable, $ldu, $student) {
         $this_g = array();
         
@@ -103,7 +110,12 @@ class GradeSummary extends AbstractModel {
 
         return $student;
     }
-    
+
+    /**
+     * @param $this_g
+     * @param \app\models\LateDaysCalculation $ldu
+     * @param Gradeable $gradeable
+     */
     private function addLateDays(&$this_g, $ldu, $gradeable) {
         $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
 
@@ -127,7 +139,11 @@ class GradeSummary extends AbstractModel {
             $this_g['days_late'] = 0;
         }
     }
-    
+
+    /**
+     * @param $this_g
+     * @param Gradeable $gradeable
+     */
     private function addText(&$this_g, $gradeable) {
         $text_items = array();
         foreach($gradeable->getComponents() as $component) {
@@ -138,7 +154,11 @@ class GradeSummary extends AbstractModel {
             $this_g["text"] = $text_items;
         }
     }
-    
+
+    /**
+     * @param $this_g
+     * @param Gradeable $gradeable
+     */
     private function addProblemScores(&$this_g, $gradeable) {
         $component_scores = array();
         foreach($gradeable->getComponents() as $component) {

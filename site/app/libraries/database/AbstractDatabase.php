@@ -63,11 +63,15 @@ abstract class AbstractDatabase {
     /**
      * Given a string representation of an array from the database, convert it to a PHP
      * array.
-     * @param string $array
+     *
+     * @param string $text        the text representation of the postgres array
+     * @param bool   $parse_bools set to true to convert "true"/"false" to booleans instead of strings
+     * @param int    $start       index to start looking through $text at
+     * @param int    $end         index of $text where we exist current pgArrayToPhp call
      *
      * @return array
      */
-    abstract public function fromDatabaseArrayToPHP($array);
+    abstract public function fromDatabaseArrayToPHP($text, $parse_bools = false, $start=0, &$end=null);
     abstract public function fromPHPArrayToDatabase($array);
 
     /**

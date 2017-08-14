@@ -30,7 +30,16 @@ LEFT JOIN (
 	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_id=?", array($user_id));
-        return ($this->course_db->rowCount() > 0) ? new User($this->core, $this->course_db->row()) : null;
+        if (count($this->course_db->rows()) > 0) {
+            $user = $this->course_db->row();
+            if (isset($user['grading_registration_sections'])) {
+                $user['grading_registration_sections'] = $this->course_db->fromDatabaseArrayToPHP($user['grading_registration_sections']);
+            }
+            return new User($this->core, $this->course_db->row());
+        }
+        else {
+            return null;
+        }
     }
 
     public function getGradingSectionsByUserId($user_id) {
@@ -755,9 +764,11 @@ ORDER BY g.sections_registration_id, g.user_id", $params);
             if ($row['sections_registration_id'] === null) {
                 $row['sections_registration_id'] = "NULL";
             }
+
             if (!isset($return[$row['sections_registration_id']])) {
                 $return[$row['sections_registration_id']] = array();
             }
+
             if (!isset($user_store[$row['user_id']])) {
                 $user_store[$row['user_id']] = new User($this->core, $row);
             }

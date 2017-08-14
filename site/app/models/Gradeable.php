@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\DatabaseUtils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
@@ -362,7 +361,8 @@ class Gradeable extends AbstractModel {
             $bools = array('gc_is_text');
             foreach ($fields as $key) {
                 if (isset($details['array_'.$key])) {
-                    $details['array_'.$key] = DatabaseUtils::fromPGToPHPArray($details['array_'.$key], in_array($key, $bools));
+                    // TODO: We should parse this array at the DatabaseQueries level and not here
+                    $details['array_'.$key] = $this->core->getCourseDB()->fromDatabaseArrayToPHP($details['array_'.$key], in_array($key, $bools));
                 }
             }
 

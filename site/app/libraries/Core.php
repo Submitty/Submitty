@@ -4,9 +4,8 @@ namespace app\libraries;
 
 use app\authentication\AbstractAuthentication;
 use app\exceptions\AuthenticationException;
-use app\exceptions\DatabaseException;
 use app\libraries\database\DatabaseFactory;
-use app\libraries\database\PostgresqlDatabaseQueries;
+use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
 use app\models\Config;
 use app\models\User;
@@ -23,10 +22,10 @@ class Core {
      */
     private $config = null;
 
-    /** @var Database */
+    /** @var AbstractDatabase */
     private $submitty_db = null;
 
-    /** @var Database */
+    /** @var AbstractDatabase */
     private $course_db = null;
 
     /** @var AbstractAuthentication */
@@ -166,14 +165,14 @@ class Core {
     }
 
     /**
-     * @return Database
+     * @return AbstractDatabase
      */
     public function getSubmittyDB() {
         return $this->submitty_db;
     }
 
     /**
-     * @return Database
+     * @return AbstractDatabase
      */
     public function getCourseDB() {
         return $this->course_db;

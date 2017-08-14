@@ -62,9 +62,12 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
                 'log_exceptions' => true,
             ),
             'database_details' => array(
-                'database_host' => 'db_host',
-                'database_user' => 'db_user',
-                'database_password' => 'db_pass'
+                'host' => 'db_host',
+                'username' => 'db_user',
+                'password' => 'db_pass'
+            ),
+            'submitty_database_details' => array(
+                'dbname' => 'submitty'
             )
         );
 
@@ -72,8 +75,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         IniParser::writeFile($this->master, $config);
 
         $config = array(
-            'hidden_details' => array(
-                'database_name' => 'submitty_s17_csci0000'
+            'database_details' => array(
+                'dbname' => 'submitty_s17_csci0000'
             ),
             'course_details' => array(
                 'course_name' => 'Test Course',
@@ -111,11 +114,15 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
         $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
         $this->assertTrue($config->shouldLogExceptions());
-        $this->assertEquals("pgsql", $config->getDatabaseType());
-        $this->assertEquals("db_host", $config->getDatabaseHost());
-        $this->assertEquals("submitty_s17_csci0000", $config->getDatabaseName());
-        $this->assertEquals("db_user", $config->getDatabaseUser());
-        $this->assertEquals("db_pass", $config->getDatabasePassword());
+        $this->assertEquals("pgsql", $config->getDatabaseDriver());
+        $db_params = array(
+            'host' => 'db_host',
+            'username' => 'db_user',
+            'password' => 'db_pass'
+        );
+        $this->assertEquals($db_params, $config->getDatabaseParams());
+        $this->assertEquals(array_merge($db_params, array('dbname' => 'submitty')), $config->getSubmittyDatabaseParams());
+        $this->assertEquals(array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')), $config->getCourseDatabaseParams());
         $this->assertEquals("Test Course", $config->getCourseName());
         $this->assertEquals("", $config->getCourseHomeUrl());
         $this->assertEquals(2, $config->getDefaultHwLateDays());
@@ -143,14 +150,13 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'course_path' => $this->temp_dir.'/courses/s17/csci0000',
             'submitty_log_path' => $this->temp_dir.'/logs',
             'log_exceptions' => true,
-            'database_type' => 'pgsql',
-            'database_host' => 'db_host',
-            'database_name' => 'submitty_s17_csci0000',
-            'database_user' => 'db_user',
-            'database_password' => 'db_pass',
+            'database_driver' => 'pgsql',
+            'database_params' => $db_params,
+            'submitty_database_params' => array_merge($db_params, array('dbname' => 'submitty')),
+            'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),
             'course_name' => 'Test Course',
             'config_path' => $this->temp_dir,
-            'course_ini' => $this->temp_dir.'/courses/s17/csci0000/config/config.ini',
+            'course_ini_path' => $this->temp_dir.'/courses/s17/csci0000/config/config.ini',
             'authentication' => 'PamAuthentication',
             'timezone' => 'DateTimeZone',
             'course_home_url' => '',
@@ -164,10 +170,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'course_email' => 'Please contact your TA or instructor for a regrade request.',
             'vcs_base_url' => '',
             'vcs_type' => 'git',
-            'hidden_details' => array(
-                'database_name' => 'submitty_s17_csci0000'
-            ),
-            'modified' => false
+            'modified' => false,
+            'hidden_details' => null
         );
         $actual = $config->toArray();
 
@@ -209,12 +213,12 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $this->assertTrue($config->isDebug());
     }
 
-    public function testDatabaseType() {
-        $extra = array('database_details' => array('database_type' => 'mysql'));
+    public function testDatabaseDriver() {
+        $extra = array('database_details' => array('driver' => 'sqlite'));
         $this->createConfigFile($extra);
 
         $config = new Config($this->core, "s17", "csci0000", $this->master);
-        $this->assertEquals("mysql", $config->getDatabaseType());
+        $this->assertEquals("sqlite", $config->getDatabaseDriver());
     }
 
     public function getRequiredSections() {
@@ -222,7 +226,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             array('site_details'),
             array('logging_details'),
             array('database_details'),
-            array('hidden_details'),
+            array('submitty_database_details'),
             array('course_details')
         );
     }
@@ -252,12 +256,6 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             ),
             'logging_details' => array(
                 'submitty_log_path', 'log_exceptions'
-            ),
-            'database_details' => array(
-                'database_host', 'database_user', 'database_password'
-            ),
-            'hidden_details' => array(
-                'database_name'
             ),
             'course_details' => array(
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
