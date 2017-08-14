@@ -486,7 +486,7 @@ HTML;
                         /> No
                         <br /> <br />
 
-                        Should students be view/download any or all versions? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
+                        Should students be able to view/download any version or just the active version ? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
                         <input type="radio" id="yes_student_any_version" name="student_any_version" value="true"
 HTML;
                         if ($student_any_version===true) { $html_output .= ' checked="checked"'; }
