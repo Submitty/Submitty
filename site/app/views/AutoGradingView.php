@@ -79,18 +79,6 @@ HTML;
 HTML;
             }
         }
-        if ($gradeable->hasConditionalMessage()) {
-            $return.= <<<HTML
-<script type="text/javascript">
-    $(document).ready(function() {
-        if (({$gradeable->getGradedNonHiddenPoints()} >= {$gradeable->getMinimumPoints()}) &&
-                ({$gradeable->getDaysEarly()} > {$gradeable->getMinimumDaysEarly()})) {
-            $('#conditional_message').show();
-        }
-    });
-</script>
-HTML;
-        }
         $count = 0;
         $display_box = ($num_visible_testcases == 0) ? "block" : "none";
         foreach ($gradeable->getTestcases() as $testcase) {
