@@ -3,7 +3,7 @@
 # This .sh file contains
 echo "Installing RPI specific packages"
 
-sudo apt-get install clisp emacs
+sudo apt-get install -qqy clisp emacs
 
 # Install Racket and Swi-prolog for Programming Languages
 echo "installing Racket and Swi-prolog"
@@ -18,6 +18,12 @@ apt-get install -qqy libssl-dev
 echo "installing graphics libraries"
 apt-get install -qqy glew-utils libglew-dev libglm-dev
 apt-get install -qqy libxrandr-dev xorg-dev
+
+#CMAKE permissions
+#These permissions are necessary so that untrusted user can use pkgconfig with cmake.
+#Note that pkgconfig does not appear until after graphics installs (Section above)
+chmod -R o+rx /usr/local/lib/pkgconfig
+chmod -R o+rx /usr/local/lib/cmake
 
 #GLFW
 echo "installing GLFW"

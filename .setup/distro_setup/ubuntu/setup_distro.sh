@@ -139,12 +139,6 @@ g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler
 echo "installing cmake"
 apt-get install -qqy cmake
 
-#CMAKE permissions
-#These permissions are necessary so that untrusted user can use pkgconfig with cmake.
-#Note that pkgconfig does not appear until after graphics installs (Section above)
-chmod -R o+rx /usr/local/lib/pkgconfig
-chmod -R o+rx /usr/local/lib/cmake
-
 # Install Oracle 8 Non-Interactively
 echo "installing java8"
 apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
