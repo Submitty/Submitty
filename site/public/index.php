@@ -15,7 +15,6 @@ use app\libraries\Utils;
 umask (0027);
 
 session_start();
-
 /*
  * Show any notices, warnings, or errors as any of these appearing in a bootup
  * class (AutoLoader, Config, etc.) could indicate a more serious issue down the
@@ -31,9 +30,7 @@ ini_set('display_errors', 1);
  */
 require_once(__DIR__ . "/../app/libraries/AutoLoader.php");
 AutoLoader::registerDirectory(__DIR__ . "/../app", true, "app");
-
 $core = new Core();
-
 /**
  * Register custom expection and error handlers that will get run anytime our application
  * throws something or suffers a fatal error. This allows us to print a very generic error
@@ -63,19 +60,26 @@ function error_handler() {
         " . $error['file'] . " on line " . $error['line']));
     }
 }
+
 register_shutdown_function("error_handler");
+
 /*
  * Check that we have a semester and a course specified by the user and then that there's no
  * potential for path trickery by using basename which will return only the last part of a
  * given path (such that /../../test would become just test)
  */
 if (!isset($_REQUEST['semester'])) {
-    // @todo: should check for a default semester if one is not specified, opposed to throwing an exception
-    $core->getOutput()->showError("Need to specify a semester in the URL");
+    // @todo: should check for a default semester if one is not specified, rather than leaving empty.
+    $_REQUEST['semester'] = "";
 }
 if (!isset($_REQUEST['course'])) {
-    $core->getOutput()->showError("Need to specify a course in the URL");
+    $_REQUEST['course'] = "";
 }
+//For now, if either semester or course is blank, we will assume both to be. @todo Handle this more elegantly.
+if($_REQUEST['semester'] == "" || $_REQUEST['course'] == ""){
+    $_REQUEST['semester'] = $_REQUEST['course'] = "";
+}
+
 
 // Sanitize the inputted semester & course to prevent directory attacks
 $semester = basename($_REQUEST['semester']);
@@ -88,7 +92,6 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
     header("Location: {$url}");
     exit();
 }
-
 /*
  * This sets up our Core (which in turn loads the config, database, etc.) for the application
  * and then we initialize our Output engine (as it requires Core to run) and then set the
@@ -96,16 +99,17 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
  */
 $master_ini_path = \app\libraries\FileUtils::joinPaths("..", "config", "master.ini");
 $core->loadConfig($semester, $course, $master_ini_path);
-$core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()->getCourseHomeUrl(),true);
-$core->getOutput()->addBreadcrumb("Submitty", $core->buildUrl());
 
+if($semester !== "" && $course !== ""){
+    $core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()->getCourseHomeUrl(),true);
+    $core->getOutput()->addBreadcrumb("Submitty", $core->buildUrl());
+}
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 $core->loadDatabases();
-
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
 if($core->getConfig()->isDebug()) {
@@ -163,7 +167,6 @@ elseif ($core->getUser() === null) {
         $_REQUEST['page'] = 'no_access';
     }
 }
-
 // Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
     $log = false;
@@ -186,6 +189,24 @@ if ($core->getUser() !== null) {
     }
 }
 
+if($course === "" || $semester === "")
+{
+    if($logged_in){
+        if(isset($_REQUEST['page']) && $_REQUEST['page'] === 'logout'){
+            $_REQUEST['component'] = 'authentication';
+        }
+        else{
+            $_REQUEST['component'] = 'home';
+        }
+    }
+    else{
+        $_REQUEST['component'] = 'authentication';
+    }
+}
+
+/********************************************
+* END LOGIN CODE
+*********************************************/
 switch($_REQUEST['component']) {
     case 'admin':
         $control = new app\controllers\AdminController($core);
@@ -199,6 +220,14 @@ switch($_REQUEST['component']) {
         $control = new app\controllers\GradingController($core);
         $control->run();
         break;
+    case 'home':
+        $control = new app\controllers\HomePageController($core);
+        $control->run();
+        break;
+    case 'misc':
+        $control = new app\controllers\MiscController($core);
+        $control->run();
+        break;
     case 'student':
         $control = new app\controllers\StudentController($core);
         $control->run();
@@ -207,13 +236,14 @@ switch($_REQUEST['component']) {
         $control = new app\controllers\StudentController($core);
         $control->run();
         break;
-    case 'misc':
-        $control = new app\controllers\MiscController($core);
-        $control->run();
-        break;
-    default:
+    case 'navigation':
         $control = new app\controllers\NavigationController($core);
         $control->run();
         break;
+    default:
+        $control = new app\controllers\AuthenticationController($core, $logged_in);
+        $control->run();
+        break;
 }
+
 $core->getOutput()->displayOutput();

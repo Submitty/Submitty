@@ -106,15 +106,16 @@ class Core {
         if ($this->config === null) {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
-
         $this->submitty_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
             $this->config->getDatabasePassword(), "submitty", $this->config->getDatabaseType());
         $this->submitty_db->connect();
-
-        $this->course_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
-            $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
-        $this->course_db->connect();
-
+        if ($this->config->getDatabaseName() !== null)
+        {
+            $this->course_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
+                $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
+            $this->course_db->connect();
+        }
+        
         switch ($this->config->getDatabaseType()) {
             case 'pgsql':
                 $this->database_queries = new DatabaseQueriesPostgresql($this);
@@ -197,7 +198,12 @@ class Core {
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
-        $this->user = $this->database_queries->getUserById($user_id);
+        if($this->getConfig()->getCourse() === "" || $this->getConfig()->getCourse() === ""){
+           $this->loadSubmittyUser();
+        }
+        else{
+            $this->user = $this->database_queries->getUserById($user_id);
+        }
     }
 
     /**
@@ -258,7 +264,6 @@ class Core {
         if ($user_id === false) {
             return false;
         }
-
         $this->loadUser($user_id);
         return true;
     }
@@ -334,7 +339,7 @@ class Core {
      * @return string
      */
     public function buildUrl($parts=array(), $hash = null) {
-        $url = $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+        $url = $this->getConfig()->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
         if ($hash !== null) {
             $url .= "#".$hash;
         }

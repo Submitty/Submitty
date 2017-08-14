@@ -51,8 +51,17 @@ class AuthenticationController extends AbstractController {
     public function isLoggedIn() {
         if ($this->logged_in) {
             $redirect = array();
-            foreach ($_REQUEST['old'] as $key => $value) {
-                $redirect[$key] = $value;
+            if(isset($REQUEST['old']))
+            {
+                foreach ($_REQUEST['old'] as $key => $value) {
+                    $redirect[$key] = $value;
+                }
+            }
+            if($this->core->getConfig()->getCourse() === "" || $this->core->getConfig()->getSemester() === ""){
+                $redirect['component'] = "home";
+            }
+            else {
+                $redirect['component'] = "navigation";
             }
             $this->core->redirect($this->core->buildUrl($redirect));
         }
@@ -66,8 +75,10 @@ class AuthenticationController extends AbstractController {
     public function logout() {
         $cookie_id = 'submitty_session_id';
         Utils::setCookie($cookie_id, '', time() - 3600);
+        $redirect = array();
+        $redirect['page'] = 'login';
         $this->core->removeCurrentSession();
-        $this->core->redirect($this->core->buildUrl());
+        $this->core->redirect($this->core->buildUrl($redirect));
     }
     
     /**
@@ -95,7 +106,6 @@ class AuthenticationController extends AbstractController {
             }
             $this->core->redirect($this->core->buildUrl($redirect));
         }
-
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
@@ -106,6 +116,14 @@ class AuthenticationController extends AbstractController {
             }
             $_SESSION['messages']['success'][] = "Successfully logged in as ".htmlentities($_POST['user_id']);
             $redirect['success_login'] = "true";
+            if($this->core->getConfig()->getCourse() === "" || $this->core->getConfig()->getSemester() === "")
+            {
+                $redirect['component'] = "home";
+            }
+            else{
+                $redirect['component'] = 'navigation';
+            }
+
             $this->core->redirect($this->core->buildUrl($redirect));
         }
         else {
