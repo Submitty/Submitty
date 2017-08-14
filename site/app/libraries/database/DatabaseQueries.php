@@ -3,7 +3,6 @@
 namespace app\libraries\database;
 
 use app\libraries\Core;
-use app\libraries\Database;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
@@ -11,21 +10,27 @@ use app\models\GradeableVersion;
 use app\models\User;
 
 /**
- * Interface DatabaseQueries
+ * DatabaseQueries
  *
- * Database Query Interface which specifies all available queries in the system and by extension
- * all queries that any implemented database type must also support for full system operation.
- * The "get" queries should return models if possible.
+ * This class contains all database functions that the Submitty application will run against either
+ * of the two connected databases (the main submitty one and the course specific one). Each query in
+ * each function is defined by the general SQL specification so we could reasonably expect it possible
+ * to run each function against a wide-range of database providers that Submitty can target. However,
+ * some database providers can provide their own extended class of Queries to overwrite some functions
+ * to take advantage of DB specific functions (like DB array functions) that give a good performance
+ * boost for that particular provider.
+ *
+ * @TODO: Make this not actually Abstract anymore
  */
-abstract class AbstractDatabaseQueries {
+abstract class DatabaseQueries {
 
     /** @var Core */
     protected $core;
 
-    /** @var Database */
+    /** @var AbstractDatabase */
     protected $submitty_db;
 
-    /** @var Database */
+    /** @var AbstractDatabase */
     protected $course_db;
 
     public function __construct(Core $core) {

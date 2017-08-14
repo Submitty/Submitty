@@ -5,8 +5,9 @@ namespace app\libraries;
 use app\authentication\AbstractAuthentication;
 use app\exceptions\AuthenticationException;
 use app\exceptions\DatabaseException;
-use app\libraries\database\DatabaseQueriesPostgresql;
-use app\libraries\database\AbstractDatabaseQueries;
+use app\libraries\database\DatabaseFactory;
+use app\libraries\database\PostgresqlDatabaseQueries;
+use app\libraries\database\DatabaseQueries;
 use app\models\Config;
 use app\models\User;
 
@@ -34,7 +35,7 @@ class Core {
     /** @var SessionManager */
     private $session_manager;
 
-    /** @var AbstractDatabaseQueries */
+    /** @var DatabaseQueries */
     private $database_queries;
 
     /** @var User */
@@ -107,21 +108,15 @@ class Core {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
 
-        $this->submitty_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
-            $this->config->getDatabasePassword(), "submitty", $this->config->getDatabaseType());
+        $database_factory = new DatabaseFactory($this->config->getDatabaseDriver());
+
+        $this->submitty_db = $database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
         $this->submitty_db->connect();
 
-        $this->course_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
-            $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
+        $this->course_db = $database_factory->getDatabase($this->config->getCourseDatabaseParams());
         $this->course_db->connect();
 
-        switch ($this->config->getDatabaseType()) {
-            case 'pgsql':
-                $this->database_queries = new DatabaseQueriesPostgresql($this);
-                break;
-            default:
-                throw new DatabaseException("Unrecognized database type");
-        }
+        $this->database_queries = $database_factory->getQueries($this);
     }
 
     /**
@@ -185,7 +180,7 @@ class Core {
     }
 
     /**
-     * @return AbstractDatabaseQueries
+     * @return DatabaseQueries
      */
     public function getQueries() {
         return $this->database_queries;

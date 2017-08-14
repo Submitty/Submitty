@@ -1,79 +1,100 @@
 <?php
 
-namespace app\libraries;
+namespace app\libraries\database;
 
 use \PDO;
 use \PDOException;
-use app\exceptions\DatabaseException;
 
-/**
- * Class Database
- */
-class Database {
+use app\exceptions\DatabaseException;
+use app\libraries\Utils;
+
+abstract class AbstractDatabase {
 
     /**
      * @var PDO
      */
-    private $link = null;
+    protected $link = null;
 
     /**
      * @var array
      */
-    private $results = array();
+    protected $results = array();
 
-    private $row_count = 0;
+    protected $row_count = 0;
 
     /**
      * @var int
      */
-    private $query_count = 0;
+    protected $query_count = 0;
 
     /**
      * @var array
      */
-    private $all_queries = array();
+    protected $all_queries = array();
 
     /**
      * @var bool
      */
-    private $transaction = false;
+    protected $transaction = false;
 
-    private $host = null;
-    private $user = null;
-    private $password = null;
-    private $name = null;
-    private $type = null;
+    protected $username = null;
+    protected $password = null;
 
     /**
-     * Database constructor.
+     * Database constructor. This function (overridden in all children) sets our
+     * connection parameters for when we connect. Due to the sensitive nature of the
+     * parameters of this function and that we never want to leak these either to the
+     * user or in the logs, this should never throw an exception, and we'll just let
+     * PDO throw an exception when we attempt to connect with a broken DSN.
      *
-     * @param string $host
-     * @param string $user
-     * @param string $password
-     * @param string $name
-     * @param string $type
+     * @param array $connection_params
      */
-    public function __construct($host, $user, $password, $name, $type='pgsql') {
-        $this->host = $host;
-        $this->user = $user;
-        $this->password = $password;
-        $this->name = $name;
-        $this->type = $type;
+    public function __construct($connection_params) {
+        if (isset($connection_params['username'])) {
+            $this->username = $connection_params['username'];
+        }
+        if (isset($connection_params['password'])) {
+            $this->password = $connection_params['password'];
+        }
     }
 
+    abstract protected function getDSN();
+
     /**
-     * Connect to a database via PDO
+     * Given a string representation of an array from the database, convert it to a PHP
+     * array.
+     * @param string $array
+     *
+     * @return array
+     */
+    abstract public function fromDatabaseArrayToPHP($array);
+    abstract public function fromPHPArrayToDatabase($array);
+
+    /**
+     * Connects to a database through the PDO extension (@link http://php.net/manual/en/book.pdo.php).
+     * We wrap the potential exception that would get thrown by the PDO constructor so that we can
+     * bubble up the message, without exposing any of the parameters used by the connect function
+     * as we don't wany anyone to get the DB details.
      *
      * @throws DatabaseException
      */
     public function connect() {
         // Only start a new connection if we're not already connected to a DB
-        if ($this->link == null) {
+        if ($this->link === null) {
             $this->query_count = 0;
             $this->all_queries = array();
 
             try {
-                $this->link = new PDO("{$this->type}:host={$this->host};dbname={$this->name}", $this->user, $this->password);
+                if (isset($this->username) && isset($this->password)) {
+                    $this->link = new PDO($this->getDSN(), $this->username, $this->password);
+                }
+                else if (isset($this->username)) {
+                    $this->link = new PDO($this->getDSN(), $this->username);
+                }
+                else {
+                    $this->link = new PDO($this->getDSN());
+                }
+
 
                 $this->link->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
                 $this->link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -117,6 +138,28 @@ class Database {
         }
 
         return true;
+    }
+
+    public function queryIterator($query, $parameters, $callback) {
+        try {
+            $statement = $this->link->prepare($query, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
+            $statement->execute($parameters);
+            $lower = strtolower($query);
+            $this->query_count++;
+            $this->all_queries[] = array($query, $parameters);
+            if (Utils::startsWith($lower, "update") || Utils::startsWith($lower, "delete")
+                || Utils::startsWith($lower, "insert")) {
+                $this->row_count = $statement->rowCount();
+                return null;
+            }
+            else {
+                $this->row_count = null;
+                return new DatabaseRowIterator($statement, $callback);
+            }
+        }
+        catch (PDOException $exception) {
+            throw new DatabaseException($exception->getMessage(), $query, $parameters);
+        }
     }
 
     /**
@@ -163,7 +206,7 @@ class Database {
      * @return array
      */
     public function rows() {
-        if($this->results != NULL && count($this->results) > 0) {
+        if($this->results !== null && count($this->results) > 0) {
             return $this->results;
         }
         else {
@@ -217,11 +260,9 @@ class Database {
      */
     public function disconnect() {
         if ($this->transaction) {
-            Database::commit();
+            $this->commit();
         }
         $this->link = null;
-        $this->query_count = 0;
-        $this->all_queries = array();
     }
 
     /**

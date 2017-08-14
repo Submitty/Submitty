@@ -24,11 +24,10 @@ use app\libraries\Utils;
  * @method string getSiteUrl()
  * @method string getSubmittyPath()
  * @method string getCoursePath()
- * @method string getDatabaseType()
- * @method string getDatabaseHost()
- * @method string getDatabaseUser()
- * @method string getDatabasePassword()
- * @method string getDatabaseName()
+ * @method string getDatabaseDriver()
+ * @method array getSubmittyDatabaseParams()
+ * @method array getCourseDatabaseParams()
+ * @method array getDatabaseParams()
  * @method string getCourseName()
  * @method string getCourseHomeUrl()
  * @method integer getDefaultHwLateDays()
@@ -59,7 +58,7 @@ class Config extends AbstractModel {
     /** @property @var string path on the filesystem that points to the course data directory */
     protected $config_path;
     /** @property @var string path to the ini file that contains all the course specific settings */
-    protected $course_ini;
+    protected $course_ini_path;
 
     /*** MASTER CONFIG ***/
     /** @property @var string */
@@ -83,45 +82,21 @@ class Config extends AbstractModel {
     /** @property @var bool */
     protected $log_exceptions;
 
-    /**
-     * Database host for PDO. The user does not need to set this
-     * explicitly in the config files, in which case we'll just default
-     * to PostgreSQL.
-     * @var string
-     * @property
-     */
-    protected $database_type = "pgsql";
+    /** @property @var string */
+    protected $database_driver = "pgsql";
 
-    /**
-     * Database host for PDO
-     * @var string
-     * @property
-     */
-    protected $database_host;
+    /** @property @var array */
+    protected $database_params = array();
 
-    /**
-     * Database user for PDO
-     * @var string
-     * @property
-     */
-    protected $database_user;
+    /** @property @var array */
+    protected $submitty_database_params = array();
 
-    /**
-     * Database password for PDO
-     * @var string
-     * @property
-     */
-    protected $database_password;
+    /** @property @var array */
+    protected $course_database_params = array();
 
     /*** COURSE SPECIFIC CONFIG ***/
-    /**
-     * Database name for PDO
-     * @var string
-     * @property
-     */
-    protected $database_name;
+    protected $course_ini;
 
-    /*** COURSE DATABASE CONFIG ***/
     /** @property @var string */
     protected $course_name;
     /** @property @var string */
@@ -169,7 +144,13 @@ class Config extends AbstractModel {
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
         $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
-        $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
+
+        if (!isset($master['database_details']) || !is_array($master['database_details'])) {
+            throw new ConfigException("Missing config section 'database_details' in ini file");
+        }
+
+        $this->database_params = $master['database_details'];
+        $this->submitty_database_params = array_merge($master['database_details'], $master['submitty_database_details']);
 
         if (isset($master['site_details']['debug'])) {
            $this->debug = $master['site_details']['debug'] === true;
@@ -184,7 +165,7 @@ class Config extends AbstractModel {
         $this->timezone = new \DateTimeZone($this->timezone);
 
         if (isset($master['database_details']['database_type'])) {
-            $this->database_type = $master['database_details']['database_type'];
+            $this->database_driver = $master['database_details']['database_type'];
         }
 
         $this->base_url = rtrim($this->base_url, "/")."/";
@@ -214,26 +195,34 @@ class Config extends AbstractModel {
             throw new ConfigException("Invalid course: ".$this->course, true);
         }
 
-        $this->course_ini = implode(DIRECTORY_SEPARATOR, array($this->course_path, "config", "config.ini"));
+        $this->course_ini_path = implode(DIRECTORY_SEPARATOR, array($this->course_path, "config", "config.ini"));
 
-        if (!file_exists($this->course_ini)) {
-            throw new ConfigException("Could not find course config file: ".$this->course_ini, true);
+        if (!file_exists($this->course_ini_path)) {
+            throw new ConfigException("Could not find course config file: ".$this->course_ini_path, true);
         }
-        $course = IniParser::readFile($this->course_ini);
 
-        $this->setConfigValues($course, 'hidden_details', array('database_name'));
+        $this->course_ini = IniParser::readFile($this->course_ini_path);
+
+        if (!isset($this->course_ini['database_details']) || !is_array($this->course_ini['database_details'])) {
+            throw new ConfigException("Missing config section 'database_details' in ini file");
+        }
+
+        $this->course_database_params = array_merge($this->database_params, $this->course_ini['database_details']);
+
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
             'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type');
-        $this->setConfigValues($course, 'course_details', $array);
+        $this->setConfigValues($this->course_ini, 'course_details', $array);
 
-        $this->hidden_details = $course['hidden_details'];
-        if (isset($course['hidden_details']['course_url'])) {
-            $this->base_url = rtrim($course['hidden_details']['course_url'], "/")."/";;
-        }
+        if (isset($this->course_ini['hidden_details'])) {
+            $this->hidden_details = $this->course_ini['hidden_details'];
+            if (isset($this->course_ini['hidden_details']['course_url'])) {
+                $this->base_url = rtrim($this->course_ini['hidden_details']['course_url'], "/")."/";;
+            }
 
-        if (isset($course['hidden_details']['ta_base_url'])) {
-            $this->ta_base_url = rtrim($course['hidden_details']['ta_base_url'], "/")."/";
+            if (isset($this->course_ini['hidden_details']['ta_base_url'])) {
+                $this->ta_base_url = rtrim($this->course_ini['hidden_details']['ta_base_url'], "/")."/";
+            }
         }
         
         $this->upload_message = Utils::prepareHtmlString($this->upload_message);
@@ -310,10 +299,7 @@ class Config extends AbstractModel {
         return $this->submitty_log_path;
     }
 
-    /**
-     * @return string
-     */
-    public function getCourseIniPath() {
-        return $this->course_ini;
+    public function saveCourseIni($save) {
+        IniParser::writeFile($this->course_ini_path, array_merge($this->course_ini, $save));
     }
 }

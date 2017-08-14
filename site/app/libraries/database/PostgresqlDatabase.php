@@ -1,14 +1,56 @@
 <?php
 
-namespace app\libraries;
+namespace app\libraries\database;
 
-/**
- * Class DatabaseUtils
- *
- * Contains utility functions for interacting between a database and PHP. Generally, this means
- * translating a field returned from a database into a specific type within PHP.
- */
-class DatabaseUtils {
+
+class PostgresqlDatabase extends AbstractDatabase {
+    protected $host;
+    protected $port;
+    protected $dbname;
+    protected $unix_socket;
+
+    /**
+     * @inheritdoc
+     */
+    public function __construct($connection_params) {
+        parent::__construct($connection_params);
+        if (isset($connection_params['unix_socket'])) {
+            $this->unix_socket = $connection_params['unix_socket'];
+        }
+        else {
+            if (isset($connection_params['host'])) {
+                $this->host = $connection_params['host'];
+            }
+            if (isset($connection_params['port'])) {
+                $this->port = $connection_params['port'];
+            }
+        }
+        if (isset($connection_params['dbname'])) {
+            $this->dbname = $connection_params['dbname'];
+        }
+    }
+
+    protected function getDSN() {
+        $params = array();
+        if (isset($this->unix_socket)) {
+            $params[] = "host={$this->unix_socket}";
+        }
+        else {
+            if ($this->host !== null) {
+                $params[] = "host={$this->host}";
+            }
+            if ($this->port !== null) {
+                $params[] = "port={$this->port}";
+            }
+        }
+
+        if (isset($this->dbname)) {
+            $params[] = "dbname={$this->dbname}";
+        }
+
+        return 'pgsql:'.implode(';', $params);
+    }
+
     /**
      * Converts a Postgres style array to a PHP array
      *
@@ -25,7 +67,7 @@ class DatabaseUtils {
      *
      * @return array PHP array representation
      */
-    public static function fromPGToPHPArray($text, $parse_bools = false, $start=0, &$end=null) {
+    public function fromDatabaseArrayToPHP($text, $parse_bools = false, $start=0, &$end=null) {
         $text = trim($text);
 
         if(empty($text) || $text[0] != "{") {
@@ -43,10 +85,10 @@ class DatabaseUtils {
                     $in_array = true;
                 }
                 else if (!$in_string && $ch == "{") {
-                    $return[] = DatabaseUtils::fromPGToPHPArray($text, $parse_bools, $i, $i);
+                    $return[] = $this->fromDatabaseArrayToPHP($text, $parse_bools, $i, $i);
                 }
                 else if (!$in_string && $ch == "}") {
-                    self::parsePGValue($element, $have_string, $parse_bools, $return);
+                    $this->parsePGArrayValue($element, $have_string, $parse_bools, $return);
                     $end = $i;
                     return $return;
                 }
@@ -65,7 +107,7 @@ class DatabaseUtils {
                     continue;
                 }
                 else if (!$in_string && $ch == ",") {
-                    self::parsePGValue($element, $have_string, $parse_bools, $return);
+                    $this->parsePGArrayValue($element, $have_string, $parse_bools, $return);
                     $have_string = false;
                     $element = "";
                 }
@@ -87,7 +129,7 @@ class DatabaseUtils {
      * @param bool   $parse_bools set to true to convert "true"/"false" to booleans instead of strings
      * @param array  &$return     this is the array being built to contain the parsed PG array
      */
-    private static function parsePGValue($element, $have_string, $parse_bools, &$return) {
+    private function parsePGArrayValue($element, $have_string, $parse_bools, &$return) {
         if ($have_string) {
             $return[] = $element;
         }
@@ -122,7 +164,7 @@ class DatabaseUtils {
      *
      * @return string Postgres text representation of array
      */
-    public static function fromPHPToPGArray($array) {
+    public function fromPHPArrayToDatabase($array) {
         if (!is_array($array)) {
             return '{}';
         }

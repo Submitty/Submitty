@@ -13,7 +13,7 @@ use app\models\SimpleLateUser;
 use app\models\Team;
 use app\models\SimpleStat;
 
-class DatabaseQueriesPostgresql extends AbstractDatabaseQueries{
+class PostgresqlDatabaseQueries extends DatabaseQueries{
 
     public function getSubmittyUser($user_id) {
         $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
@@ -138,15 +138,7 @@ WHERE semester=? AND course=? AND user_id=?", $params);
         return $this->getGradeables($g_id, $user_id)[0];
     }
 
-    /*
-     * TODO:
-     * This should take in for:
-     *  gradeable: [string] or [array] which then maps that into a where clause (g_id = string) OR (g_id IN (?, ?))
-     *  users: [string] or [array] which then maps that into a where clause as well as adding in additional
-     *      components for the SELECT cause and in the FROM clause (don't need gradeable_data if this is null, etc.)
-     *  section_key:
-     */
-    public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
+    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
         $return = array();
         $g_ids_query = "";
         $users_query = "";
@@ -424,16 +416,28 @@ LEFT JOIN (
 WHERE ".implode(" AND ", $where);
         }
         if ($user_ids !== null) {
-          $query .= "
+            $query .= "
 ORDER BY u.{$section_key}, {$sort_key}";
         }
 
-
-        $this->course_db->query($query, $params);
-
-        foreach ($this->course_db->rows() as $row) {
+        return $this->course_db->queryIterator($query, $params, function($row) {
             $user = (isset($row['user_id']) && $row['user_id'] !== null) ? new User($this->core, $row) : null;
-            $return[] = new Gradeable($this->core, $row, $user);
+            return new Gradeable($this->core, $row, $user);
+        });
+    }
+
+    /*
+     * TODO:
+     * This should take in for:
+     *  gradeable: [string] or [array] which then maps that into a where clause (g_id = string) OR (g_id IN (?, ?))
+     *  users: [string] or [array] which then maps that into a where clause as well as adding in additional
+     *      components for the SELECT cause and in the FROM clause (don't need gradeable_data if this is null, etc.)
+     *  section_key:
+     */
+    public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
+        $return = array();
+        foreach ($this->getGradeablesIterator($g_ids, $user_ids, $section_key, $sort_key, $g_type) as $key => $row) {
+            $return[] = $row;
         }
 
         return $return;
