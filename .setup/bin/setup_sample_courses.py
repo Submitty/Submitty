@@ -1330,7 +1330,7 @@ class Mark(object):
 
     def create(self, gc_id, conn, table):
         ins = table.insert().values(gc_id=gc_id, gcm_points=self.points, gcm_note=self.note,
-                                    gcm_order=self.order, gcd_grader_id=self.grader)
+                                    gcm_order=self.order)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
         
