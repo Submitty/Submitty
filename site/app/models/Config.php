@@ -162,28 +162,14 @@ class Config extends AbstractModel {
      * Config constructor.
      *
      * @param Core   $core
-     * @param string $semester
-     * @param string $course
-     * @param string $master_ini_path
      */
-    public function __construct(Core $core, $semester, $course, $master_ini_path) {
+    public function __construct(Core $core, $semester, $course) {
         parent::__construct($core);
         $this->semester = $semester;
         $this->course = $course;
-        $this->loadMasterIni($master_ini_path);
-
-        $this->course_path = implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester, $this->course));
-        if (!is_dir($this->course_path)) {
-            throw new ConfigException("Invalid course: ".$this->course, true);
-        }
-
-        $course_ini = implode(DIRECTORY_SEPARATOR, array($this->course_path, "config", "config.ini"));
-         if (file_exists($course_ini)) {
-            $this->loadCourseIni($course_ini);
-        }
     }
 
-    public function loadMasterIni($master_ini_path){
+    public function loadMasterIni($master_ini_path) {
         if (!file_exists($master_ini_path)) {
             throw new ConfigException("Could not find master ini file: ". $master_ini_path, true);
         }
@@ -228,10 +214,13 @@ class Config extends AbstractModel {
             }
         }
         $this->site_url = $this->base_url."index.php?";
+
+        if (!empty($this->semester) && !empty($this->course)) {
+            $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
+        }
     }
 
-    public function loadCourseIni($course_ini)
-    {
+    public function loadCourseIni($course_ini) {
         if (!file_exists($course_ini)) {
             throw new ConfigException("Could not find course config file: ".$course_ini, true);
         }

@@ -51,17 +51,10 @@ class AuthenticationController extends AbstractController {
     public function isLoggedIn() {
         if ($this->logged_in) {
             $redirect = array();
-            if(isset($_REQUEST['old']))
-            {
+            if(isset($_REQUEST['old'])) {
                 foreach ($_REQUEST['old'] as $key => $value) {
                     $redirect[$key] = $value;
                 }
-            }
-            if(!$this->core->getConfig()->isCourseLoaded()){
-                $redirect['component'] = "home";
-            }
-            else {
-                $redirect['component'] = "navigation";
             }
             $this->core->redirect($this->core->buildUrl($redirect));
         }
@@ -116,13 +109,6 @@ class AuthenticationController extends AbstractController {
             }
             $this->core->addSuccessMessage("Successfully logged in as ".htmlentities($_POST['user_id']));
             $redirect['success_login'] = "true";
-            if(!$this->core->getConfig()->isCourseLoaded())
-            {
-                $redirect['component'] = "home";
-            }
-            else{
-                $redirect['component'] = 'navigation';
-            }
 
             $this->core->redirect($this->core->buildUrl($redirect));
         }

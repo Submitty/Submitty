@@ -89,18 +89,21 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
  * and then we initialize our Output engine (as it requires Core to run) and then set the
  * paths for the Logger and ExceptionHandler
  */
-$master_ini_path = \app\libraries\FileUtils::joinPaths("..", "config", "master.ini");
-$core->loadConfig($semester, $course, $master_ini_path);
+$core->loadConfig($semester, $course);
+$core->loadAuthentication();
 
 if($core->getConfig()->isCourseLoaded()){
     $core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()->getCourseHomeUrl(),true);
     $core->getOutput()->addBreadcrumb("Submitty", $core->buildUrl());
 }
+
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
+
 $core->loadDatabases();
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
 if($core->getConfig()->isDebug()) {
@@ -180,17 +183,26 @@ if ($core->getUser() !== null) {
     }
 }
 
-if(!$core->getConfig()->isCourseLoaded()){
-    if($logged_in){
-        if(isset($_REQUEST['page']) && $_REQUEST['page'] === 'logout'){
+if(!$core->getConfig()->isCourseLoaded()) {
+    if ($logged_in){
+        if (isset($_REQUEST['page']) && $_REQUEST['page'] === 'logout'){
             $_REQUEST['component'] = 'authentication';
         }
-        else{
+        else {
             $_REQUEST['component'] = 'home';
         }
     }
-    else{
+    else {
         $_REQUEST['component'] = 'authentication';
+    }
+}
+
+if (empty($_REQUEST['component']) && $core->getUser() !== null) {
+    if ($core->getConfig()->isCourseLoaded()) {
+        $_REQUEST['component'] = 'navigation';
+    }
+    else {
+        $_REQUEST['component'] = 'home';
     }
 }
 

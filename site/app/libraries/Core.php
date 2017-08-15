@@ -85,8 +85,21 @@ class Core {
      * @param $course
      * @throws \Exception
      */
-    public function loadConfig($semester, $course, $master_ini_path) {
-        $this->config = new Config($this, $semester, $course, $master_ini_path);
+    public function loadConfig($semester, $course) {
+        $master_ini_path = FileUtils::joinPaths(__DIR__, "..", "..", "config", "master.ini");
+
+        $this->config = new Config($this, $semester, $course);
+        $this->config->loadMasterIni($master_ini_path);
+
+        if (!empty($semester) && !empty($course)) {
+            $course_ini_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.ini");
+            if (file_exists($course_ini_path)) {
+                $this->config->loadCourseIni($course_ini_path);
+            }
+        }
+    }
+
+    public function loadAuthentication() {
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
