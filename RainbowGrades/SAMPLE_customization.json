@@ -75,15 +75,15 @@
     ],
 
     // move to inside a gradeable
-    "use": {
+    /*"use": {
   //move to test
   "test_improvement_averaging_adjustment": true,
 
   "quiz_normalize_and_drop_two": true,
   "lowest_test_counts_half": true,
   "late_day_penalty": 0.10
-    }
-/*,
+    },*/
+/*
    //"final_cutoff": {
     //  "A": 93.0,
     //  "A-": 90.0,
@@ -97,7 +97,6 @@
     //  "D": 60.0
     //},
 */
-,
     "section": {
   "1": "TA_name_1",
   "2": "TA_name_2",
@@ -108,13 +107,13 @@
   "7": "TA_name_3",
   "8": "TA_name_4"
     }/*,
-    "messages": {
+    "messages": [
   "<b>My Favorite CS Class</b>",
   "Note: Please be patient with data entry/grade corrections for the most recent lab, homework, and test.",
   "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week."
   //"<em>Note: All grades for lab & hw are uploaded.</em>",
   //"<em>Note: All regrade requests have been processed.</em>"
-    }
+    ],
 */
     ////////////////////////////////////////////////////////////////////////////////
     // ICLICKER LECTURE
