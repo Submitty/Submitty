@@ -39,7 +39,6 @@ use app\libraries\Core;
  * @method string getComment()
  * @method void setComment(string $comment)
  * @method User getGrader()
- * @method void setGrader(User $grader)
  * @method int getGradedVersion()
  * @method void setGradedVersion(int $graded_version)
  * @method \DateTime getGradeTime()
@@ -95,6 +94,9 @@ class GradeableComponent extends AbstractModel {
 
     /** @property @var \app\models\GradeableComponentMark[] */
     protected $marks = array();
+    
+    /** @property @var bool has the grader of this component been modified*/
+    protected $grader_modified = false;
 
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
@@ -162,6 +164,13 @@ class GradeableComponent extends AbstractModel {
         }
 
     }
+    
+    public function setGrader(User $user) {
+        if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
+            $this->grader_modified = true;
+        }
+        $this->grader = $user;
+    }
 
     /**
      * @raises \BadMethodCallException
@@ -171,19 +180,36 @@ class GradeableComponent extends AbstractModel {
     }
 
     public function deleteData($gd_id) {
-        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this) === true) {
-            $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this);
+        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this) === true) {
+            $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
+            return true;
         }
+        return false;
     }
 
-    public function saveData($gd_id) {
+    public function saveData($gd_id, $overwrite=false) {
         if ($this->modified) {
-            if ($this->has_grade || $this->has_marks) {
-                $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
+            $action = $this->core->getQueries()->checkGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
+            if($action) {
+                if($overwrite) {
+                    $this->core->getQueries()->replaceGradeableComponentData($gd_id, $this);
+                    return "replace";
+                }
+                else {
+                    $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
+                    return "update";
+                }
             }
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
+                return "insert";
             }
+        }
+    }
+    
+    public function setMarks($marks) {
+        if(count($this->marks) == 0) {
+            $this->marks = $marks;
         }
     }
 }

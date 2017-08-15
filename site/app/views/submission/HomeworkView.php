@@ -313,7 +313,12 @@ HTML;
 HTML;
                 // does this gradeable have parts assigned by students
                 foreach ($gradeable->getComponents() as $question) {
-                    $page_num = $question->getPage();
+                    if(is_array($question)) {
+                        $page_num = $question[0]->getPage();
+                    }
+                    else {
+                        $page_num = $question->getPage();
+                    }
                     if ($page_num === -1) {
                         $student_page = true;
                         break;
