@@ -1124,7 +1124,7 @@ HTML;
                     </td>
                     <td id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0">
                         <div>
-                            <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark({$c}, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                            <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark({$c}, '{$gradeable->getId()}', '{$user->getAnonId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                         </div>
                     </td>
                 </tr>
@@ -1288,7 +1288,7 @@ HTML;
                     </div> 
                 </td>
                 <td id="title-general-cancel" style="font-size: 12px; display: none; width: 5%" colspan="0">
-                    <span id="cancel-mark-general" onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                    <span id="cancel-mark-general" onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getAnonId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                 </td>
             </tr>
             <tr id="summary-general" style="" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose(-2, {$num_questions});">

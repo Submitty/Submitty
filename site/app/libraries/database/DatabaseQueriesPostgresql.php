@@ -370,11 +370,11 @@ LEFT JOIN (
         SELECT gcd.* , gcmd.array_gcm_mark
         FROM gradeable_component_data AS gcd 
         LEFT JOIN (
-          SELECT gc_id, gd_id, array_to_string(array_agg(gcm_id), ',') as array_gcm_mark
+          SELECT gc_id, gd_id, gcd_grader_id, array_to_string(array_agg(gcm_id), ',') as array_gcm_mark
           FROM gradeable_component_mark_data AS gcmd
-          GROUP BY gc_id, gd_id, gd_id
+          GROUP BY gc_id, gd_id, gd_id, gcd_grader_id
         ) as gcmd
-    ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id
+    ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id AND gcmd.gcd_grader_id=gcd.gcd_grader_id
     ) AS gcd
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id 
     GROUP BY gcd.gd_id
