@@ -46,6 +46,7 @@ class Core {
     /** @var Output */
     private $output = null;
 
+
     /**
      * Core constructor.
      *
@@ -198,7 +199,7 @@ class Core {
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
-        if($this->getConfig()->getCourse() === "" || $this->getConfig()->getCourse() === ""){
+        if(!$this->getConfig()->isCourseLoaded()){
            $this->loadSubmittyUser();
         }
         else{

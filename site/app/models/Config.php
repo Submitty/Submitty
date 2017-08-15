@@ -38,8 +38,7 @@ use app\libraries\Utils;
  * @method \DateTimeZone getTimezone()
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
- * @method void loadMasterIni()
- * @method void loadCourseIni()
+ * @method bool isCourseLoaded()
  */
 
 class Config extends AbstractModel {
@@ -62,6 +61,13 @@ class Config extends AbstractModel {
     protected $config_path;
     /** @property @var string path to the ini file that contains all the course specific settings */
     protected $course_ini;
+
+    /**
+    * Indicates whether a course config has been successfully loaded.
+    * @var bool
+    * @property
+    */
+    protected $course_loaded = false;
 
     /*** MASTER CONFIG ***/
     /** @property @var string */
@@ -164,7 +170,6 @@ class Config extends AbstractModel {
         parent::__construct($core);
         $this->semester = $semester;
         $this->course = $course;
-
         $this->loadMasterIni($master_ini_path);
 
         $this->course_path = implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester, $this->course));
@@ -259,6 +264,7 @@ class Config extends AbstractModel {
         }
     
         $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
+        $this->course_loaded = true;
    }
 
     private function setConfigValues($config, $section, $keys) {

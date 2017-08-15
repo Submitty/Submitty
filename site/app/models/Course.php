@@ -6,6 +6,8 @@ use app\libraries\Core;
 /**
  * Class Course
  * Holds basic information about courses. Used on homepage.
+ * @method string getSemester()
+ * @method string getTitle()
   */
 class Course extends AbstractModel {
      
@@ -24,21 +26,5 @@ class Course extends AbstractModel {
 
         $this->semester = $details['semester'];
         $this->title = $details['course'];
-    }
-
-    /**
-     * Returns the course's semester.
-     * @return string
-    */
-    public function getSemester() {
-        return $this->semester;
-    }
-
-    /**
-     * Returns the course's title.
-     * @return string
-    */
-    public function getTitle() {
-        return $this->title;
     }
 }

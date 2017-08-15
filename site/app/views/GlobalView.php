@@ -31,7 +31,7 @@ HTML;
 HTML;
 
         $override_css = '';
-        if ($this->core->getConfig()->getCourse() !== "" && file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
+        if ($this->core->getConfig()->isCourseLoaded() && file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
             $override_css = "<style type='text/css'>".file_get_contents($this->core->getConfig()->getCoursePath()."/config/override.css")."</style>";
         }
 
@@ -40,7 +40,7 @@ HTML;
 <html lang="en">
 <head>
 HTML;
-    if($this->core->getConfig()->getCourse() !== "")
+    if($this->core->getConfig()->isCourseLoaded())
     {
         $return .= <<<HTML
     <title>{$this->core->getFullCourseName()}</title>
@@ -82,7 +82,7 @@ HTML;
 
 HTML;
 
-        if ($this->core->getConfig()->getCourse() !== "" && $this->core->userLoaded()) {
+        if ($this->core->getConfig()->isCourseLoaded() && $this->core->userLoaded()) {
             if($this->core->getUser()->accessGrading()) {
                 $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
                 $semester = $this->core->getConfig()->getSemester();

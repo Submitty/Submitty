@@ -60,7 +60,6 @@ function error_handler() {
         " . $error['file'] . " on line " . $error['line']));
     }
 }
-
 register_shutdown_function("error_handler");
 
 /*
@@ -68,15 +67,8 @@ register_shutdown_function("error_handler");
  * potential for path trickery by using basename which will return only the last part of a
  * given path (such that /../../test would become just test)
  */
-if (!isset($_REQUEST['semester'])) {
-    // @todo: should check for a default semester if one is not specified, rather than leaving empty.
-    $_REQUEST['semester'] = "";
-}
-if (!isset($_REQUEST['course'])) {
-    $_REQUEST['course'] = "";
-}
-//For now, if either semester or course is blank, we will assume both to be. @todo Handle this more elegantly.
-if($_REQUEST['semester'] == "" || $_REQUEST['course'] == ""){
+
+if(empty($_REQUEST['semester']) || empty($_REQUEST['course'])){
     $_REQUEST['semester'] = $_REQUEST['course'] = "";
 }
 
@@ -100,11 +92,10 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
 $master_ini_path = \app\libraries\FileUtils::joinPaths("..", "config", "master.ini");
 $core->loadConfig($semester, $course, $master_ini_path);
 
-if($semester !== "" && $course !== ""){
+if($core->getConfig()->isCourseLoaded()){
     $core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()->getCourseHomeUrl(),true);
     $core->getOutput()->addBreadcrumb("Submitty", $core->buildUrl());
 }
-
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
@@ -189,8 +180,7 @@ if ($core->getUser() !== null) {
     }
 }
 
-if($course === "" || $semester === "")
-{
+if(!$core->getConfig()->isCourseLoaded()){
     if($logged_in){
         if(isset($_REQUEST['page']) && $_REQUEST['page'] === 'logout'){
             $_REQUEST['component'] = 'authentication';
