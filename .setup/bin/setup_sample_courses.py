@@ -50,7 +50,9 @@ TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial", "exam
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
-DB_PASS = "hsdbu"
+with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
+    submitty_config_json = json.load(submitty_config)
+    DB_PASS = submitty_config_json["database_password"]
 
 DB_ONLY = False
 
@@ -795,16 +797,24 @@ class Course(object):
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:
                             for component in gradeable.components:
-                                if status == 0:
+                                if status == 0 or random.random() < 0.5:
                                     score = 0
-                                elif component.max_value > 0:
-                                    score = random.randint(0, component.max_value * 2) / 2
+                                elif random.random() < 0.9:
+                                    score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
                                 else:
-                                    score = random.randint(component.max_value * 2, 0) / 2
+                                    score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                 conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                              gcd_score=score, gcd_component_comment="lorem ipsum",
                                              gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=1)
+                                first = True
+                                first_set = False
+                                for mark in component.marks:
+                                    if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
+                                        conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key)
+                                        if(first):
+                                            first_set = True
+                                    first = False
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
@@ -1136,6 +1146,7 @@ class Gradeable(object):
                 component['gc_default'] = 0
                 component['gc_max_value'] = 1
                 component['gc_upper_clamp'] = 1
+            i-=1;
             self.components.append(Component(component, i+1))
 
     def create(self, conn, gradeable_table, electronic_table, reg_table, component_table, mark_table):
