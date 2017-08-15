@@ -46,6 +46,7 @@ class Core {
     /** @var Output */
     private $output = null;
 
+
     /**
      * Core constructor.
      *
@@ -84,8 +85,21 @@ class Core {
      * @param $course
      * @throws \Exception
      */
-    public function loadConfig($semester, $course, $master_ini_path) {
-        $this->config = new Config($this, $semester, $course, $master_ini_path);
+    public function loadConfig($semester, $course) {
+        $master_ini_path = FileUtils::joinPaths(__DIR__, "..", "..", "config", "master.ini");
+
+        $this->config = new Config($this, $semester, $course);
+        $this->config->loadMasterIni($master_ini_path);
+
+        if (!empty($semester) && !empty($course)) {
+            $course_ini_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.ini");
+            if (file_exists($course_ini_path)) {
+                $this->config->loadCourseIni($course_ini_path);
+            }
+        }
+    }
+
+    public function loadAuthentication() {
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
@@ -106,15 +120,16 @@ class Core {
         if ($this->config === null) {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
-
         $this->submitty_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
             $this->config->getDatabasePassword(), "submitty", $this->config->getDatabaseType());
         $this->submitty_db->connect();
-
-        $this->course_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
-            $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
-        $this->course_db->connect();
-
+        if ($this->config->getDatabaseName() !== null)
+        {
+            $this->course_db = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
+                $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
+            $this->course_db->connect();
+        }
+        
         switch ($this->config->getDatabaseType()) {
             case 'pgsql':
                 $this->database_queries = new DatabaseQueriesPostgresql($this);
@@ -197,7 +212,12 @@ class Core {
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
-        $this->user = $this->database_queries->getUserById($user_id);
+        if(!$this->getConfig()->isCourseLoaded()){
+           $this->loadSubmittyUser();
+        }
+        else{
+            $this->user = $this->database_queries->getUserById($user_id);
+        }
     }
 
     /**
@@ -258,7 +278,6 @@ class Core {
         if ($user_id === false) {
             return false;
         }
-
         $this->loadUser($user_id);
         return true;
     }
@@ -334,7 +353,7 @@ class Core {
      * @return string
      */
     public function buildUrl($parts=array(), $hash = null) {
-        $url = $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+        $url = $this->getConfig()->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
         if ($hash !== null) {
             $url .= "#".$hash;
         }

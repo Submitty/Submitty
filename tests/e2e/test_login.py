@@ -17,7 +17,7 @@ class TestLogin(BaseTestCase):
         taken to that original page you had requested.
         """
         url = "/index.php?semester=" + self.semester + \
-              "&course=sample&component=cpp_cats&success_login=true"
+              "&course=sample&component=student&gradeable_id=open_homework&success_login=true"
         self.log_in(url)
         self.assertEqual(self.test_url + url, self.driver.current_url)
 
