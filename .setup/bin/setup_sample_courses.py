@@ -50,7 +50,9 @@ TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial", "exam
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
-DB_PASS = "hsdbu"
+with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
+    submitty_config_json = json.load(submitty_config)
+    DB_PASS = submitty_config_json["database_password"]
 
 DB_ONLY = False
 
