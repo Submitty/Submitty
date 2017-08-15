@@ -186,12 +186,13 @@ HTML;
 
     /**
      * Creates the user form box to be displayed when creating or editing a user on the students/graders pages
-     * @param array $reg_sections associative array representing registration sections in the system
-     * @param array $rot_sections associative array representing rotating sections in the system
+     * @param array  $reg_sections associative array representing registration sections in the system
+     * @param array  $rot_sections associative array representing rotating sections in the system
      * @param string $action what action to go to after hitting the submit button (different for student vs grader page)
+     * @param bool   $use_database
      * @return string
      */
-    public function userForm($reg_sections, $rot_sections, $action) {
+    public function userForm($reg_sections, $rot_sections, $action, $use_database=false) {
         $url = array('component' => 'admin', 'page' => 'users', 'action' => $action);
 
         $reg_select_html = "";
@@ -273,10 +274,17 @@ HTML;
         }
         $return .= <<<HTML
     </div>
+HTML;
+        if ($use_database) {
+            $return .= <<<HTML
     <div style="width: 60%">
         Password:<br />
-        <input type="text" name="password" placeholder="New Password" />    
+        <input type="password" name="user_password" placeholder="New Password" />    
     </div>
+HTML;
+        }
+
+        $return .= <<<HTML
     <div style="float: right; width: auto; margin-top: 10px">
         <a onclick="$('#edit-user-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
         <input class="btn btn-primary" type="submit" value="Submit" />

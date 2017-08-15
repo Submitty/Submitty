@@ -745,13 +745,6 @@ HTML;
         </p>
     </div>
 HTML;
-                    if ($gradeable->hasConditionalMessage()) {
-                        $return .= <<<HTML
-    <div class="sub" id="conditional_message" style="display: none;">
-        <p class='green-message'>{$gradeable->getConditionalMessage()}</p>    
-    </div>
-HTML;
-                    }
                 }
                 else {
 		            if($gradeable->getActiveVersion() > 0) {
@@ -776,6 +769,14 @@ HTML;
      </div>
 HTML;
 	            }
+
+                if ($gradeable->hasIncentiveMessage()) {
+                    $return .= <<<HTML
+    <div class="sub" id="incentive_message" style="display: none;">
+        <p class='green-message'>{$gradeable->getIncentiveMessage()}</p>    
+    </div>
+HTML;
+                }
 
                 $return .= <<<HTML
     <div class="sub">
@@ -917,6 +918,21 @@ HTML;
 HTML;
                 }
                 else {
+                    if ($gradeable->hasIncentiveMessage() && $gradeable->getActiveVersion() > 0) {
+                        foreach ($gradeable->getVersions() as $version) {
+                            if ($version->getNonHiddenTotal() >= $gradeable->getMinimumPoints() && 
+                                    $version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
+                                $return.= <<<HTML
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    $('#incentive_message').show();
+                });
+            </script>
+HTML;
+                                break;
+                            }
+                        }
+                    }
                     $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable);
                 }
                 $return .= <<<HTML
