@@ -1071,10 +1071,17 @@ DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id
         return true;
     }
 
-    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark) {
-        $params = array($gc_id, $gd_id, $mark->getId(), $gcd_grader_id);
+    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark, $gcd_grader_id="") {
+        if($gcd_grader_id === "") {
+            $params = array($gc_id, $gd_id, $mark->getId());
+            $and = "";
+        }
+        else {
+            $params = array($gc_id, $gd_id, $mark->getId(), $gcd_grader_id);
+            $and = " AND gcd_grader_id=?";
+        }
         $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=? AND gcd_grader_id=?", $params);
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?{$and}", $params);
     }
 
     public function getDataFromGCMD($gc_id, GradeableComponentMark $mark) {

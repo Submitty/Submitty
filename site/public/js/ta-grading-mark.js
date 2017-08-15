@@ -501,6 +501,8 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         var comment_row = $('#comment-general-id');
         var gradeable_comment = comment_row.val();
         var current_question_text = $('#rubric-textarea-custom');
+        var overwrite = $('#overwrite-id').is(":checked");
+        console.log(overwrite);
         current_question_text[0].innerHTML = '<pre>' + gradeable_comment + '</pre>';
 
         $.ajax({
