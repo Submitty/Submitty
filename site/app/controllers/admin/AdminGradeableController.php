@@ -207,9 +207,9 @@ class AdminGradeableController extends AbstractController {
                 $user_number = count($user_ids);
                 shuffle($user_ids);
                 for($i = 0; $i<$user_number; $i++) {
-                    $grading[$user_ids[$i]][] = $user_ids[($i+1)%$user_number];
-                    $grading[$user_ids[$i]][] = $user_ids[($i+2)%$user_number];
-                    $grading[$user_ids[$i]][] = $user_ids[($i+3)%$user_number];
+                    for($j = 1; $j <=$peer_grade_set; $j++) {
+                        $grading[$user_ids[$i]][] = $user_ids[($i+$j)%$user_number];
+                    }
                 }
                 
                 foreach($grading as $grader=> $assignment) {

@@ -1015,7 +1015,9 @@ HTML;
             $ungraded = false;
             $question = null;
             $show_graded_info = true;
+            $num_peer_components = 0;
             if(is_array($component)) {
+                $num_peer_components = count($component);
                 foreach($component as $cmpt) {
                     if($cmpt->getGrader() == null) {
                         $question = $cmpt;
@@ -1053,7 +1055,7 @@ HTML;
 HTML;
             $penalty = !(intval($question->getMaxValue()) >= 0);
             $message = htmlentities($question->getTitle());
-            $message = "<b>{$message}</b>";
+            $message = "<b>{$message} {$num_peer_components}</b>";
             if ($question->getGradedVersion() != -1 && $gradeable->getActiveVersion() != $question->getGradedVersion()) {
                 $message .= "  " . "Before submitting regrade, please edit or ensure that comments from version " . $question->getGradedVersion() . " still apply.";
             }

@@ -112,7 +112,7 @@ class HWReport extends AbstractModel {
                         $student_output_text .= "PEER GRADED COMPONENT".$nl;
                         $count = 1;
                         foreach($question as $peer) {
-                            $temp_score = ($type === 0)? 0: $component->getMaxValue();
+                            $temp_score = $peer->getDefault();
                             $temp_note = "";
                             foreach($peer->getMarks() as $mark) {
                                 $temp_note .= "    ".$mark->getNote(). $nl;

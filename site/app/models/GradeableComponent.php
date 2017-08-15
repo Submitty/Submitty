@@ -191,7 +191,7 @@ class GradeableComponent extends AbstractModel {
         if ($this->modified) {
             $action = $this->core->getQueries()->checkGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
             if($action) {
-                if($this->grader->modified) {
+                if($this->grader_modified) {
                     $this->core->getQueries()->replaceGradeableComponentData($gd_id, $this);
                     return "replace";
                 }

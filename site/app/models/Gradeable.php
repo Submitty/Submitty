@@ -829,25 +829,44 @@ class Gradeable extends AbstractModel {
     public function getGradedTAPoints() {
         $points = 0;
         foreach($this->components as $component) {
-            $marks = $component->getMarks();
-            $temp_points = $component->getDefault();
-            
-            foreach ($marks as $mark) {
-                if ($mark->getHasMark()) {
-                    $temp_points += $mark->getPoints();
+            $marks = null;
+            $temp_score = null;
+            if(is_array($component)) {
+                foreach($component as $cmpt) {
+                    if($cmpt->getGrader() == null) {
+                        $marks = $cmpt->getMarks();
+                        break;
+                    }
+                    if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
+                        $marks = $cmpt->getMarks();
+                        break;
+                    }
+                }
+                if($marks === null) {
+                    $points += $component[0]->getDefault();
                 }
             }
+            else {
+                $marks = $component->getMarks();
+                $temp_points = $component->getDefault();
+                
+                foreach ($marks as $mark) {
+                    if ($mark->getHasMark()) {
+                        $temp_points += $mark->getPoints();
+                    }
+                }
 
-            $temp_points += $component->getScore();
+                $temp_points += $component->getScore();
 
-            if($temp_points < $component->getLowerClamp()) {
-                $temp_points = $component->getLowerClamp();
+                if($temp_points < $component->getLowerClamp()) {
+                    $temp_points = $component->getLowerClamp();
+                }
+                if($temp_points > $component->getUpperClamp()) {
+                    $temp_points = $component->getUpperClamp();
+                }
+                
+                $points += $temp_points;
             }
-            if($temp_points > $component->getUpperClamp()) {
-                $temp_points = $component->getUpperClamp();
-            }
-            
-            $points += $temp_points;
         }
         return $points;
     }
