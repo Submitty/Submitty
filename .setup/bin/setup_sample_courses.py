@@ -811,7 +811,7 @@ class Course(object):
                                 first_set = False
                                 for mark in component.marks:
                                     if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
-                                        conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key)
+                                        conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key, gcd_grader_id=self.instructor.id)
                                         if(first):
                                             first_set = True
                                     first = False
