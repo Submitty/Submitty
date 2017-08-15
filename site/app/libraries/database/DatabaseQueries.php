@@ -20,6 +20,15 @@ use app\models\User;
  * some database providers can provide their own extended class of Queries to overwrite some functions
  * to take advantage of DB specific functions (like DB array functions) that give a good performance
  * boost for that particular provider.
+ *
+ * Generally, when adding new queries to the system, you should first add them here, and then
+ * only after that should you add them to the dataprovider specific implementation assuming you can
+ * achieve some level of speed-up via native DB functions. If it's hard to go that direction initially,
+ * (you're using array aggregation heavily), then you'd want to at least create a stub here that just
+ * raises a NotImplementedException. All documentation for functions should also reside here with at the
+ * minimum an understanding of the contract of the function (parameter types and return type).
+ *
+ * @see \app\exceptions\NotImplementedException
  */
 class DatabaseQueries {
 

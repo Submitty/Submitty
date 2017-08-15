@@ -58,7 +58,7 @@ abstract class AbstractDatabase {
         }
     }
 
-    abstract protected function getDSN();
+    abstract public function getDSN();
 
     /**
      * Given a string representation of an array from the database, convert it to a PHP

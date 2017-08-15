@@ -32,7 +32,7 @@ class PostgresqlDatabase extends AbstractDatabase {
         }
     }
 
-    protected function getDSN() {
+    public function getDSN() {
         $params = array();
         if ($this->host !== null) {
             $params[] = "host={$this->host}";

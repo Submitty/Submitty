@@ -32,7 +32,7 @@ class SqliteDatabase extends AbstractDatabase {
         return "sqlite:{$param}";
     }
 
-    public function fromDatabaseArrayToPHP($array) {
+    public function fromDatabaseArrayToPHP($text, $parse_bools = false, $start=0, &$end=null) {
         throw new NotImplementedException();
     }
 
