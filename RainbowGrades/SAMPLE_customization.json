@@ -1,184 +1,150 @@
-{
-    "display": [
-        "instructor_notes",
-        "grade_summary",
-        "grade_details"
-        //"exam_seating",
-        //"moss_details",
-        //"final_grade",
-        //"iclicker"
-    ],
-    "display_benchmark": [
-        "average",
-        "stddev",
-        "perfect",
-        "lowest_a-",
-        "lowest_b-",
-        "lowest_c-",
-        "lowest_d"
-    ],
-    // These are the default curves applied to each benchmark
-    // (can be overridden per item below)
-    "benchmark_percent": {
-    "lowest_a-": 0.9,
-    "lowest_b-": 0.8,
-    "lowest_c-": 0.7,
-    "lowest_d": 0.6
-    },
-    "gradeables": [
-  { "type" : "lab",
-    "count": 14,
-    "percent": 0.15,
-    "ids": [
-        { "id":"lab01", "max": 3 }
-    ]
-  },
-  { "type" : "hw",
-      "count": 10,
-      "percent": 0.35,
-      "ids": [
-    { "id":"hw01", "max": 50, "curve": [45.0, 40.0, 35.0, 30.0]},
-    { "id":"hw02", "max": 50, "curve": [45.0, 40.0, 35.0, 30.0]},
-    { "id":"hw03", "max": 50, "curve": [45.0, 40.0, 35.0, 30.0], "released":false },
-    { "id":"hw04", "max": 50, "curve": [45.0, 40.0, 35.0, 30.0], "released":false }
-      ]
-  },
-  { "type": "test",
-    "count": 3,
-    "percent": 0.30,
-    "ids": [
-        { "id":"test01", "max": 100, "curve": [90.0, 80.0, 70.0, 60.0]},
-        { "id":"test02", "max": 100, "curve": [90.0, 80.0, 70.0, 60.0], "released":false },
-        { "id":"test03", "max": 100, "curve": [90.0, 80.0, 70.0, 60.0], "released":false }
-          ]
-  },
-  { "type": "exam",
-    "count": 1,
-    "percent": 0.20,
-    "ids" : [
-              { "id":"exam01","max":150,"curve": [135.0, 130.0, 115.0, 100.0]
-    //seating
-    //"title": "My Favorite CS Class, Test 1",
-    //"date": "Monday April 1st",
-    //"time": "6-7:50pm",
-    // Don't assign a zone if the student doesn't have at least this many points overall (probably dropped)
-    //"min_overall_for_zone_assignment": 1.0,
-    // Where should students go if they do not have a room assignment?
-    //"default_room": "DCC 308",
-    //"exam_seating": ["exam1_zone_counts.txt", "exam1_seating.txt"]
-    //exam_seating exam2_zone_counts.txt exam2_seating.txt
-    //exam_seating exam3_zone_counts.txt exam3_seating.txt
-    //exam_seating exam4_zone_counts.txt exam4_seating.txt
-        }
-    ]
-        }
-    ],
-
-    // move to inside a gradeable
-    /*"use": {
-  //move to test
-  "test_improvement_averaging_adjustment": true,
-
-  "quiz_normalize_and_drop_two": true,
-  "lowest_test_counts_half": true,
-  "late_day_penalty": 0.10
-    },*/
 /*
-   //"final_cutoff": {
-    //  "A": 93.0,
-    //  "A-": 90.0,
-    //  "B+": 87.0,
-    //  "B": 83.0,
-    //  "B-": 80.0,
-    //  "C+": 77.0,
-    //  "C": 73.0,
-    //  "C-": 70.0,
-    //  "D+": 65.0,
-    //  "D": 60.0
-    //},
+This JSON is based on the automatically generated customization for 
+the development course "sample" as of August 15, 2017.
+It is intended as a simple example, with additional documentation online.
+Going forward we expect more users to use a web interface to generate this file.
 */
-    "section": {
-  "1": "TA_name_1",
-  "2": "TA_name_2",
-  "3": "TA_name_3",
-  "4": "TA_name_4",
-  "5": "TA_name_1",
-  "6": "TA_name_2",
-  "7": "TA_name_3",
-  "8": "TA_name_4"
-    }/*,
-    "messages": [
-  "<b>My Favorite CS Class</b>",
-  "Note: Please be patient with data entry/grade corrections for the most recent lab, homework, and test.",
-  "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week."
-  //"<em>Note: All grades for lab & hw are uploaded.</em>",
-  //"<em>Note: All regrade requests have been processed.</em>"
-    ],
-*/
-    ////////////////////////////////////////////////////////////////////////////////
-    // ICLICKER LECTURE
-    //
-    //"iclicker_ids": "<CSV_FILE>",
-    //
-    //"iclicker": {
-    //  "<WHICH_LECTURE>": {
-    //    "file": "<CSV_FILE>",
-    //    "column": "<COLUMN>",
-    //    "answer": "<CORRECT_ANSWER(S)"
-    //  }
-    //},
-    //
-    ////////////////////////////////////////////////////////////////////////////////
-    // ACADEMIC INTEGRITY VIOLATION
-    //
-    //"moss": [
-    //  "<USERNAME>": {
-    //    "hw": "<WHICH_HOMEWORK>",
-    //    "penalty": "<GRADE_LETTER_PENALTY>"
-    //  },
-    //  "smithj": {
-    //    "hw": 5,
-    //    "penalty": 1.0
-    //  }
-    //],
-    //
-    //
-    ////////////////////////////////////////////////////////////////////////////////
-    // EWS
-    /*
-    "warning": [
-      {
-            "msg": "EWS: TEST 1",
-          "ids" : [ "test01" ],
-            "value" : 47
-        },
-      {
-            "msg": "EWS: HW 1&2",
-          "ids" : [ "hw01", "hw02" ],
-            "value" : 34
+{
+  "display_benchmark": [
+    "average", 
+    "stddev", 
+    "perfect", 
+    "lowest_a-", 
+    "lowest_b-", 
+    "lowest_c-", 
+    "lowest_d"
+  ], 
+  "section": {
+    "1": "ta2, ta3", 
+    "2": "manne", 
+    "3": "manne, ta3", 
+    "4": "manne", 
+    "5": "manne", 
+    "6": "manne", 
+    "7": "manne", 
+    "8": "manne", 
+    "9": "TBA", 
+    "10": "TBA"
+  }, 
+  "messages": [
+    "<b>sample Course</b>", 
+    "Note: Please be patient with data entry/grade corrections for the most recent lab, homework, and test.", 
+    "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week."
+  ], 
+  "display": [
+    "instructor_notes", 
+    "grade_summary", 
+    "grade_details"
+  ], 
+  "benchmark_percent": {
+    "lowest_c-": 0.7, 
+    "lowest_d": 0.6, 
+    "lowest_b-": 0.8, 
+    "lowest_a-": 0.9
+  }, 
+  "gradeables": [
+    {
+      "count": 4, 
+      "percent": 0.75, 
+      "type": "test", 
+      "ids": [
+        {
+          "max": 5.0, 
+          "id": "future_no_tas_test", 
+          "released": false
+        }, 
+        {
+          "max": 5.0, 
+          "id": "future_tas_test", 
+          "released": false
+        }, 
+        {
+          "max": 5.0, 
+          "id": "grading_test", 
+          "released": false
+        }, 
+        {
+          "max": 5.0, 
+          "id": "grades_released_test"
         }
-    ],
-    */
-    ////////////////////////////////////////////////////////////////////////////////
-    // OTHER NOTES
-    //
-    //"note": [
-    //  {
-    //    "user": "<USERNAME>",
-    //    "date": "<DATE>",
-    //    "msg": "<MESSAGE>",
-    //  },
-    //],
-    //
-    ////////////////////////////////////////////////////////////////////////////////
-    // MANUAL FINAL GRADES
-    //
-    //"manual_grade": {
-    //  "<USERNAME>": {
-    //    "grade": "<GRADE>",
-    //    "note": "<NOTE>"
-    //  }
-    //}
-    //
+      ]
+    }, 
+    {
+      "count": 4, 
+      "percent": 0.11, 
+      "type": "lab", 
+      "ids": [
+        {
+          "max": 2.0, 
+          "id": "future_no_tas_lab", 
+          "released": false
+        }, 
+        {
+          "max": 2.0, 
+          "id": "future_tas_lab", 
+          "released": false
+        }, 
+        {
+          "max": 2.0, 
+          "id": "grading_lab", 
+          "released": false
+        }, 
+        {
+          "max": 2.0, 
+          "id": "grades_released_lab"
+        }
+      ]
+    }, 
+    {
+      "count": 12, 
+      "percent": 0.14, 
+      "type": "homework", 
+      "ids": [
+        {
+          "max": 12.0, 
+          "id": "open_homework", 
+          "released": false
+        }, 
+        {
+          "max": 12.0, 
+          "id": "open_team_homework", 
+          "released": false
+        }, 
+        {
+          "max": 12.0, 
+          "id": "closed_homework", 
+          "released": false
+        }, 
+        {
+          "max": 12.0, 
+          "id": "grading_homework", 
+          "released": false
+        }, 
+        {
+          "max": 5.0, 
+          "id": "grades_released_homework_onlyta"
+        }, 
+        {
+          "max": 10, 
+          "id": "grades_released_homework_onlyauto"
+        }, 
+        {
+          "max": 22.0, 
+          "id": "grades_released_homework_autota"
+        }, 
+        {
+          "max": 26.0, 
+          "id": "grades_released_homework_autohiddenEC"
+        }, 
+        {
+          "max": 12.0, 
+          "id": "grades_released_homework_onlytaEC"
+        }, 
+        {
+          "max": 12.0, 
+          "id": "grades_released_homework_onlytaPenalty"
+        }
+      ]
+    }
+  ]
 }
-
