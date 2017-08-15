@@ -217,7 +217,7 @@ class SubmissionController extends AbstractController {
         // make sure is admin
         if (!$this->core->getUser()->accessAdmin()) {
             $msg = "You do not have access to that page.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
         }
 
@@ -379,7 +379,7 @@ class SubmissionController extends AbstractController {
         // make sure is admin
         if (!$this->core->getUser()->accessAdmin()) {
             $msg = "You do not have access to that page.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
         }
 
@@ -631,7 +631,7 @@ class SubmissionController extends AbstractController {
         // make sure is admin if the two ids do not match
         if ($original_user_id !== $user_id && !$this->core->getUser()->accessAdmin()) {
             $msg = "You do not have access to that page.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
         }
 
@@ -646,7 +646,7 @@ class SubmissionController extends AbstractController {
         // if student submission, make sure that gradeable allows submissions
         if (!$this->core->getUser()->accessGrading() && $original_user_id == $user_id && !$gradeable->getStudentSubmit()) {
             $msg = "You do not have access to that page.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
         }
 
@@ -1011,9 +1011,9 @@ class SubmissionController extends AbstractController {
         }
 
         if ($user_id == $original_user_id)
-            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
+            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getName()}");
         else
-            $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}";
+            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}");
             
 
         return $this->uploadResult("Successfully uploaded files");
@@ -1065,7 +1065,7 @@ class SubmissionController extends AbstractController {
         }
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
             $msg = "Invalid gradeable id.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             $this->core->redirect($this->core->buildUrl(array('component' => 'student')));
             return array('error' => true, 'message' => $msg);
         }
@@ -1075,7 +1075,7 @@ class SubmissionController extends AbstractController {
         $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);
         }
@@ -1090,21 +1090,21 @@ class SubmissionController extends AbstractController {
         $new_version = intval($_REQUEST['new_version']);
         if ($new_version < 0) {
             $msg = "Cannot set the version below 0.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);
         }
         
         if ($new_version > $gradeable->getHighestVersion()) {
             $msg = "Cannot set the version past {$gradeable->getHighestVersion()}.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);
         }
 
         if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentSubmit()) {
             $msg = "Cannot submit for this assignment.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);
         }
@@ -1123,7 +1123,7 @@ class SubmissionController extends AbstractController {
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
             $msg = "Failed to open settings file.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);
         }
@@ -1135,7 +1135,7 @@ class SubmissionController extends AbstractController {
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $msg = "Could not write to settings file.";
-            $_SESSION['messages']['error'][] = $msg;
+            $this->core->addErrorMessage($msg);
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                               'gradeable_id' => $gradeable->getId())));
             return array('error' => true, 'message' => $msg);
@@ -1153,11 +1153,11 @@ class SubmissionController extends AbstractController {
 
         if ($new_version == 0) {
             $msg = "Cancelled submission for gradeable.";
-            $_SESSION['messages']['success'][] = $msg;
+            $this->core->addSuccessMessage($msg);
         }
         else {
             $msg = "Updated version of gradeable to version #{$new_version}.";
-            $_SESSION['messages']['success'][] = $msg;
+            $this->core->addSuccessMessage($msg);
         }
         if($ta) {
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic',
