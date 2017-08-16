@@ -1,4 +1,4 @@
-Submitty Student Auto Feed PHP Scripts Readme, April 13 2017
+Submitty Student Auto Feed PHP Scripts Readme, August 16 2017
 
 These are code examples for any University to use as a basis to have student
 enrollment data inserted or updated into any or every course's database.  Users
@@ -15,21 +15,15 @@ WITH YOUR UNIVERSITY'S AND/OR DEPARTMENT'S INFORMATION SYSTEMS.
 
 AUTO INSERT/UPDATE *************************************************************
 
-driver.php
-This is executed from the command line to run the users table data backup and
-insert/update classes.
-
-
 config.php
-A series of define statements that is used to configure the auto feed, backup,
-and restore tools.  Code comments will help explain usage.  This code file must
-be "required" before the others, in order for the tools work.
+A series of define statements that is used to configure the auto feed script.
+Code comments will help explain usage.
 
 
 submitty_student_auto_feed.php
-Invoked by driver.php.  This is a code class to read a student enrollment data
-form in CSV format and "upsert" (update/insert) student enrollment for all
-registered courses in Submitty.
+A command line executabke script that is a code class to read a student
+enrollment data form in CSV format and "upsert" (update/insert) student
+enrollment for all registered courses in Submitty.
 
 This code assumes that all student enrollments for all courses are in a single
 CSV file.  Extra courses can exist in the data (such as a department wide CSV),
@@ -46,12 +40,10 @@ will need access to the Submitty course databases and the CSV data dump file.
 
 accounts.php
 This is a command line script that will auto-create user authentication accounts
-for all Submitty users.  It should be noted that Submitty authentication is not
-tied to the databases' users table.  Instead, authentication requires local
-Linux user accounts, which can also work with other campus authentication
-mechanisms like PAM and Kerberos.  Therefore, submitty_student_auto_feed.php
-will not create authentication access for new students upserted into any course
-database.
+for all Submitty users.  Authentication requires local Linux user accounts,
+which can also work with other campus authentication mechanisms like PAM and
+Kerberos.  Therefore, submitty_student_auto_feed.php will not create
+authentication access for new students upserted into any course database.
 
 accounts.php is also intended to be run as a cron job, but the requirements are
 more stringent.
@@ -66,6 +58,12 @@ more stringent.
 
 
 BACKUP/RECOVERY ****************************************************************
+
+********************************************************************************
+  THESE TOOLS WERE WRITTEN FOR AN EARLIER VERSION OF SUBMITTY AND HAVE NOT YET
+       BEEN UPDATED TO BE COMPATIBLE WITH MORE RECENT DATABASE CHANGES.
+                 USE OF THESE TOOLS IS CURRENTLY NOT ADVISED.
+********************************************************************************
 
 submitty_student_auto_feed.php has data validation checks to help preserve the
 integrity of the courses' database users table from a bad feed.  Should a feed
@@ -82,17 +80,6 @@ protected by FERPA, an optional AES encryption feature is also provided
 (using /dev/urandom) when a key is not found.  It is vital that this key is
 given very strict access permissions.  If the key is ever leaked, all encrypted
 backups become vulnerable.
-
-
-restore_backup.php
-A command line script to (optionally) backup the users table data of all
-Submitty courses.  This needs to be run BEFORE submitty_student_auto_feed.php.
-The number of days of backups needs to be defined (recommended: 7).  As users
-data contains data protected by FERPA, an optional AES encryption feature is
-also provided.  IMPORTANT:  This script will generate an encryption key (using
-/dev/urandom) when a key is not found.  It is vital that this key is given the
-utmost access protection.  If the key is ever leaked, your encrypted backups
-are vulnerable.
 
 
 restore_backup.php
