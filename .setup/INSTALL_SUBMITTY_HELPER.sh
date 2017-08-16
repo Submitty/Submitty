@@ -12,7 +12,7 @@
 
 if [ -z ${SUBMITTY_REPOSITORY+x} ]; then
     echo "ERROR! Configuration variables not initialized"
-    exit
+    exit 1
 fi
 
 
@@ -21,7 +21,7 @@ fi
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
-    exit
+    exit 1
 fi
 
 # check optional argument
@@ -36,7 +36,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1>"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test_rainbow"
-    exit
+    exit 1
 fi
 
 echo -e "\nBeginning installation of the Submitty homework submission server\n"
@@ -539,10 +539,18 @@ popd
 # stop the scheduler (if it's running)
 systemctl is-active --quiet submitty_grading_scheduler
 is_active_before=$?
-if [[ $is_active_before -ne 0 ]]; then
+if [[ "$is_active_before" == "0" ]]; then
     systemctl stop submitty_grading_scheduler
+    echo -e "Stopped Submitty Grading Scheduler Daemon\n"
 fi
-#killall submitty_grading_scheduler.py
+
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_tmp=$?
+if [[ "$is_active_tmp" == "0" ]]; then
+    echo -e "ERROR: did not successfully stop submitty grading scheduler daemon\n"
+    exit 1
+fi
+
 
 # update the scheduler daemon
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.service   /etc/systemd/system/submitty_grading_scheduler.service
@@ -570,17 +578,17 @@ done
 
 
 # start the scheduler (if it was running)
-if [[ $is_active_before -ne 0 ]]; then
-    echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_grading_scheduler\n"
-else
+if [[ "$is_active_before" == "0" ]]; then
     systemctl start submitty_grading_scheduler
     systemctl is-active --quiet submitty_grading_scheduler
     is_active_after=$?
-    if [[ $is_active_after -ne 0 ]]; then
+    if [[ "$is_active_after" != "0" ]]; then
         echo -e "\nERROR!  Failed to restart Submitty Grading Scheduler Daemon\n"
     fi
     echo -e "Restarted Submitty Grading Scheduler Daemon\n"
+else
+    echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_grading_scheduler\n"
 fi
 
 

@@ -72,12 +72,24 @@ def grade_queue_file(queue_file,which_untrusted):
 
     open(os.path.join(grading_file), "w").close()
     #untrusted = multiprocessing.current_process().untrusted
-    grade_item.just_grade_item(my_dir, queue_file, which_untrusted)
+    try:
+        grade_item.just_grade_item(my_dir, queue_file, which_untrusted)
+    except:
+        print ("ERROR attempting to grade item: ", queue_file)
+        grade_items_logging.log_message(False,"","","","","ERROR attempting to grade item: " + queue_file)
 
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
-    os.remove(queue_file)
-    os.remove(grading_file)
+    try:
+        os.remove(queue_file)
+    except:
+        print ("ERROR attempting to remove queue file: ", queue_file)
+        grade_items_logging.log_message(False,"","","","","ERROR attempting to remove queue file: " + queue_file)
+    try:
+        os.remove(grading_file)
+    except:
+        print ("ERROR attempting to remove grading file: ", grading_file)
+        grade_items_logging.log_message(False,"","","","","ERROR attempting to remove grading file: " + grading_file)
 
 
 def populate_queue(queue, folder):
