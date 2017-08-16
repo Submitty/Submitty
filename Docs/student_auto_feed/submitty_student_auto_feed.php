@@ -34,6 +34,7 @@ new submitty_student_auto_feed();
 class submitty_student_auto_feed {
     private static $semester;
     private static $course_list;
+    private static $course_mappings;
     private static $db;
     private static $psql_version;
     private static $data;
@@ -61,7 +62,6 @@ class submitty_student_auto_feed {
         //if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
         self::$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
 
-
         //Connect to submitty_db
         $db_host     = DB_HOST;
         $db_user     = DB_LOGIN;
@@ -76,8 +76,11 @@ class submitty_student_auto_feed {
             //Version >= 9.5 permits update on conflict.  Version <= 9.4 uses batch transaction.
             self::$psql_version = floatval(pg_parameter_status(self::$db, 'server_version'));
 
-			//Get course list, mapped to all lowercase
-			self::$course_list = array_map('strtolower', $this->get_participating_course_list());
+			//Get course list
+			self::$course_list = $this->get_participating_course_list();
+
+			//Get mapped_courses list (when one class is merged into another)
+			self::$course_mappings = $this->get_course_mappings();
 
             //Auto-run class processes by executing them in constructor.
             //Halts when FALSE is returned by a method.
@@ -113,7 +116,6 @@ class submitty_student_auto_feed {
         if (!empty(self::$log_msg_queue)) {
             error_log(self::$log_msg_queue, 1, ERROR_E_MAIL);    //to email
             error_log(self::$log_msg_queue, 3, ERROR_LOG_FILE);  //to file
-
         }
     }
 
@@ -138,19 +140,20 @@ class submitty_student_auto_feed {
 
         //Validate CSV
         $validate_num_fields = VALIDATE_NUM_FIELDS;
-        foreach($loaded_data as $index => &$row) {
+        foreach($loaded_data as $index => $row) {
             //Trim any extraneous whitespaces from end of each row.
             //Split each row by delim character so that individual fields are indexed.
             $row = explode(CSV_DELIM_CHAR, trim($row, ' '));
 
             //BEGIN VALIDATION
             $course = strtolower($row[COLUMN_COURSE_PREFIX]) . $row[COLUMN_COURSE_NUMBER];
+            $section = $row[COLUMN_SECTION];
             $num_fields = count($row);
 
             //Row validation filters.  If any prove false, row is discarded.
             switch(false) {
-            //Check to see if course is participating in Submitty
-            case (in_array($course, self::$course_list)):
+            //Check to see if course is participating in Submitty (or a mapped course)
+            case (in_array($course, self::$course_list) || array_key_exists($course, self::$course_mappings)):
                 break;
             //Check that row shows student is registered.
             case (in_array($row[COLUMN_REGISTRATION], unserialize(STUDENT_REGISTERED_CODES))):
@@ -185,26 +188,37 @@ class submitty_student_auto_feed {
                     $this->log_it("Row {$index} failed validation for student email ({$row[COLUMN_EMAIL]}).  Row discarded.");
 
                 default:
+                	//Check for mapped (merged) course.
+                	if (array_key_exists($course, self::$course_mappings)) {
+                		if (array_key_exists($section, self::$course_mappings[$course])) {
+                			$tmp_course  = $course;
+                			$tmp_section = $section;
+							$course = self::$course_mappings[$tmp_course][$tmp_section]['mapped_course'];
+							$section = self::$course_mappings[$tmp_course][$tmp_section]['mapped_section'];
+						} else {
+							$this->log_it("{$course} has been mapped, but section {$section} is in feed, but not mapped.");
+						}
+                	}
+
                     //Validation passed. Include row in data set.
                     self::$data['users'][] = array('user_id'            => $row[COLUMN_USER_ID],
                                                    'user_firstname'     => $row[COLUMN_FIRSTNAME],
-                                                   'user_lastname'      => $row[COLUMN_LASTNAME],
                                                    'user_preferredname' => $row[COLUMN_PREFERREDNAME],
+                                                   'user_lastname'      => $row[COLUMN_LASTNAME],
                                                    'user_email'         => $row[COLUMN_EMAIL]);
 
 					//Group 'courses_users' data by individual courses, so
 					//upserts can be transacted per course.  This helps prevent
 					//FK violations blocking upserts for other courses.
-                    $course = strtolower($row[COLUMN_COURSE_PREFIX] . $row[COLUMN_COURSE_NUMBER]);
                     self::$data['courses_users'][$course][] = array('semester'             => self::$semester,
                                                                     'course'               => $course,
                                                                     'user_id'              => $row[COLUMN_USER_ID],
                                                                     'user_group'           => 4,
-                                                                    'registration_section' => $row[COLUMN_SECTION],
+                                                                    'registration_section' => $section,
                                                                     'manual_registration'  => 'FALSE');
                 }
             }
-        } unset($row);
+        }
 
 		/* ---------------------------------------------------------------------
 		 * Individual students can be listed on multiple rows if they are
@@ -235,14 +249,50 @@ WHERE semester = $1
 AND status = 1
 SQL;
 
-        $result = pg_query_params(self::$db, $sql, array(self::$semester));
+        $res = pg_query_params(self::$db, $sql, array(self::$semester));
 
-        if ($result === false) {
-            $this->log_it("Error: DB query failed to retrieve course list.");
+        if ($res === false) {
+            $this->log_it("RETRIEVE PARTICIPATING COURSES : " . pg_last_error(self::$db));
             return false;
         }
 
-        return pg_fetch_all_columns($result, 0);
+        return pg_fetch_all_columns($res, 0);
+    }
+
+    private function get_course_mappings() {
+        //EXPECTED: self::$db has an active/open Postgres connection.
+
+        if (pg_connection_status(self::$db) === PGSQL_CONNECTION_BAD) {
+            $this->log_it("Error: not connected to submitty DB when retrieving active course list.");
+            return false;
+        }
+
+        $sql = <<<SQL
+SELECT course, registration_section, mapped_course, mapped_section
+FROM mapped_courses
+WHERE semester = $1
+SQL;
+
+	    $res = pg_query_params(self::$db, $sql, array(self::$semester));
+
+        if ($res === false) {
+            $this->log_it("RETRIEVE MAPPED COURSES : " . pg_last_error(self::$db));
+            return false;
+        }
+
+        $results = pg_fetch_all($res);
+
+        $mappings = array();
+        foreach ($results as $row) {
+        	$course = $row['course'];
+        	$registration_section = $row['registration_section'];
+        	$mapped_course = $row['mapped_course'];
+        	$mapped_section = $row['mapped_section'];
+        	$mappings[$course][$registration_section] = array('mapped_course'  => $mapped_course,
+        	                                                  'mapped_section' => $mapped_section);
+        }
+
+        return $mappings;
     }
 
     private function upsert_psql94() {
@@ -382,9 +432,11 @@ UPDATE courses_users
 SET registration_section=NULL
 FROM (SELECT courses_users.user_id
     FROM courses_users
-    LEFT OUTER JOIN temp
+    JOIN upsert_courses_users
         ON courses_users.user_id=upsert_courses_users.user_id
-    WHERE upsert_courses_users.user_id IS NULL)
+    WHERE upsert_courses_users.user_id IS NULL
+    AND courses_users.course=upsert_courses_users.course
+    AND courses_users.semester=upsert_courses_users.semester)
 AS dropped
 WHERE courses_users.user_id=dropped.user_id
 AND courses_users.user_group=$1
@@ -424,6 +476,8 @@ SQL;
 			if (pg_query(self::$db, $sql['courses_users']['insert']) === false) {
 				$this->log_it(strtoupper($course_name) . " (INSERT) : " . pg_last_error(self::$db));
 			}
+
+			pg_query_params(self::$db, $sql['courses_users']['dropped_students'], array(4, 'false'));
 			pg_query(self::$db, $sql['courses_users']['commit']);
 		}
 
