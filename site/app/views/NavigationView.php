@@ -631,9 +631,8 @@ HTML;
                     $quick_links = "";
                 }
 
-                if (!$this->core->getUser()->accessGrading()) {
+                if (!$this->core->getUser()->accessGrading() && !$g_data->getPeerGrading()) {
                     $gradeable_grade_range = "";
-
                 }
 
                 $return .= <<<HTML
@@ -642,7 +641,7 @@ HTML;
                 <td style="padding: 20px;">{$gradeable_team_range}</td>
                 <td style="padding: 20px;">{$gradeable_open_range}</td>
 HTML;
-                if ($this->core->getUser()->accessGrading() && ($this->core->getUser()->getGroup() <= $g_data->getMinimumGradingGroup())) {
+                if (($this->core->getUser()->accessGrading() && ($this->core->getUser()->getGroup() <= $g_data->getMinimumGradingGroup())) || ($this->core->getUser()->getGroup() === 4 && $g_data->getPeerGrading())) {
                     $return .= <<<HTML
                 <td style="padding: 20px;">{$gradeable_grade_range}</td>
                 <td style="padding: 20px;">{$admin_button}</td>

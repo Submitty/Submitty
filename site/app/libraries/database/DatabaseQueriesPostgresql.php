@@ -11,6 +11,7 @@ use app\models\GradeableVersion;
 use app\models\User;
 use app\models\SimpleLateUser;
 use app\models\Team;
+use app\models\Course;
 use app\models\SimpleStat;
 
 class DatabaseQueriesPostgresql extends AbstractDatabaseQueries{
@@ -227,6 +228,7 @@ SELECT";
   eg.eg_student_download,
   eg.eg_student_any_version,
   eg.eg_peer_grading,
+  eg.eg_peer_grade_set,
   eg.eg_submission_open_date,
   eg.eg_submission_due_date,
   eg.eg_late_days,
@@ -261,6 +263,7 @@ SELECT";
   gd.array_gcd_graded_version,
   gd.array_gcd_grade_time,
   gd.array_gcd_user_id,
+  gd.array_gcd_anon_id,
   gd.array_gcd_user_firstname,
   gd.array_gcd_user_preferred_firstname,
   gd.array_gcd_user_lastname,
@@ -340,6 +343,7 @@ LEFT JOIN (
     in_gcd.array_gcd_grade_time,
     in_gcd.array_array_gcm_mark,
     in_gcd.array_gcd_user_id,
+    in_gcd.array_gcd_anon_id,
     in_gcd.array_gcd_user_firstname,
     in_gcd.array_gcd_user_preferred_firstname,
     in_gcd.array_gcd_user_lastname,
@@ -357,6 +361,7 @@ LEFT JOIN (
       array_agg(gcd_grade_time) AS array_gcd_grade_time,
       array_agg(array_gcm_mark) AS array_array_gcm_mark,
       array_agg(u.user_id) AS array_gcd_user_id,
+      array_agg(u.anon_id) AS array_gcd_anon_id,
       array_agg(u.user_firstname) AS array_gcd_user_firstname,
       array_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
       array_agg(u.user_lastname) AS array_gcd_user_lastname,
@@ -366,11 +371,11 @@ LEFT JOIN (
         SELECT gcd.* , gcmd.array_gcm_mark
         FROM gradeable_component_data AS gcd 
         LEFT JOIN (
-          SELECT gc_id, gd_id, array_to_string(array_agg(gcm_id), ',') as array_gcm_mark
+          SELECT gc_id, gd_id, gcd_grader_id, array_to_string(array_agg(gcm_id), ',') as array_gcm_mark
           FROM gradeable_component_mark_data AS gcmd
-          GROUP BY gc_id, gd_id, gd_id
+          GROUP BY gc_id, gd_id, gd_id, gcd_grader_id
         ) as gcmd
-    ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id
+    ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id AND gcmd.gcd_grader_id=gcd.gcd_grader_id
     ) AS gcd
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id 
     GROUP BY gcd.gd_id
@@ -440,16 +445,26 @@ ORDER BY u.{$section_key}, {$sort_key}";
     }
 
     public function getGradeableComponents($g_id, $gd_id=null) {
-        $this->course_db->query("
-SELECT gcd.*, gc.*
-FROM gradeable_component AS gc
-LEFT JOIN (
+        $left_join = "";
+        $gcd = "";
+
+        $params = array();
+        if($gd_id != null) {
+            $params[] = $gd_id;
+            $left_join = "LEFT JOIN (
   SELECT *
   FROM gradeable_component_data
   WHERE gd_id = ?
-) as gcd ON gc.gc_id = gcd.gc_id
+) as gcd ON gc.gc_id = gcd.gc_id";
+        $gcd = ', gcd.*';
+        }
+        $params[] = $g_id;
+        $this->course_db->query("
+SELECT gc.*{$gcd}
+FROM gradeable_component AS gc
+{$left_join}
 WHERE gc.g_id=?
-", array($gd_id, $g_id));
+", $params);
 
         $return = array();
         foreach ($this->course_db->rows() as $row) {
@@ -635,11 +650,15 @@ ORDER BY {$section_key}", $params);
             $params = array_merge($params, $sections);
         }
         $this->course_db->query("
-SELECT count(u.*) as cnt, u.{$section_key}
-FROM(
-  SELECT * FROM gradeable_component_data AS gcd LEFT JOIN gradeable_data AS gd ON gcd.gd_id = gd.gd_id WHERE g_id=?
-) AS gd 
-INNER JOIN users AS u ON u.user_id = gd.gd_user_id
+SELECT  u.{$section_key}, count(u.*) as cnt
+FROM users AS u
+INNER JOIN (
+  SELECT * FROM gradeable_data AS gd 
+  LEFT JOIN (
+  gradeable_component_data AS gcd
+  INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer='f'
+  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
+) AS gd ON u.user_id = gd.gd_user_id
 {$where}
 GROUP BY u.{$section_key}
 ORDER BY u.{$section_key}", $params);
@@ -761,7 +780,6 @@ ORDER BY g.sections_registration_id, g.user_id", $params);
         }
         return $return;
     }
-
     public function getGradersForRotatingSections($g_id, $sections) {
         $return = array();
         $params = array($g_id);
@@ -1028,30 +1046,43 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
     public function updateGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
+        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
         $this->course_db->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_grader_id=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?", $params);
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?", $params);
     }
-
-    public function deleteGradeableComponentData($gd_id, GradeableComponent $component) {
+    
+    public function replaceGradeableComponentData($gd_id, GradeableComponent $component) {
         $params = array($component->getId(), $gd_id);
-        $this->course_db->query("
-DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
+        $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
+        $this->insertGradeableComponentData($gd_id, $component);
     }
 
-    public function checkGradeableComponentData($gd_id, GradeableComponent $component) {
-        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", 
-          array($component->getId(), $gd_id));
+    public function deleteGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
+        $params = array($component->getId(), $gd_id, $grader_id);
+        $this->course_db->query("
+DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
+    }
+
+    public function checkGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
+        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", 
+          array($component->getId(), $gd_id, $grader_id));
         if ($this->course_db->row()['cnt'] == 0) {
           return false;
         }
         return true;
     }
 
-    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
-        $params = array($gc_id, $gd_id, $mark->getId());
+    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark, $gcd_grader_id="") {
+        if($gcd_grader_id === "") {
+            $params = array($gc_id, $gd_id, $mark->getId());
+            $and = "";
+        }
+        else {
+            $params = array($gc_id, $gd_id, $mark->getId(), $gcd_grader_id);
+            $and = " AND gcd_grader_id=?";
+        }
         $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?{$and}", $params);
     }
 
     public function getDataFromGCMD($gc_id, GradeableComponentMark $mark) {
@@ -1071,11 +1102,11 @@ SELECT gd_user_id FROM gradeable_data WHERE gd_id=?", array($row['gd_id']));
         return $return_data;
     }
 
-    public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark) {
-        $params = array($gc_id, $gd_id, $mark->getId());
+    public function insertGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $gcd_grader_id, $mark->getId());
         $this->course_db->query("
-INSERT INTO gradeable_component_mark_data (gc_id, gd_id, gcm_id)
-VALUES (?, ?, ?)", $params);
+INSERT INTO gradeable_component_mark_data (gc_id, gd_id, gcd_grader_id, gcm_id)
+VALUES (?, ?, ?, ?)", $params);
     }
 
     public function createNewGradeable(Gradeable $gradeable) {
@@ -1511,17 +1542,163 @@ ORDER BY gt.{$section_key}", $params);
         }
     }
     
-    public function getPeerGradingAssignNumber($gradeable_id) {
-        $this->course_db->query("SELECT eg_peer_grade_set FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
-        return $this->course_db->row()['eg_peer_grade_set'];
-    }
-    
     public function clearPeerGradingAssignments($gradeable_id) {
         $this->course_db->query("DELETE FROM peer_assign WHERE g_id=?", array($gradeable_id));
     }
     
     public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
+    }
+
+    public function getStudentCoursesById($user_id) {
+        $this->submitty_db->query("
+SELECT semester, course
+FROM courses_users u
+WHERE u.user_id=?", array($user_id));
+       $return = array();
+        foreach ($this->submitty_db->rows() as $row) {
+            $return[] = new Course($this->core, $row);
+        }
+        return $return;
+    }
+    
+    public function getPeerAssignment($gradeable_id, $grader) {
+        $this->course_db->query("SELECT user_id FROM peer_assign WHERE g_id=? AND grader_id=?", array($gradeable_id, $grader));
+        $return = array();
+        foreach($this->course_db->rows() as $id) {
+            $return[] = $id['user_id'];
+        }
+        return $return;
+    }
+    
+    public function getPeerGradingAssignNumber($g_id) {
+        $this->course_db->query("SELECT eg_peer_grade_set FROM electronic_gradeable WHERE g_id=?", array($g_id));
+        return $this->course_db->rows()[0]['eg_peer_grade_set'];
+    }
+    
+    public function getNumPeerComponents($g_id) {
+        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE gc_is_peer='t' and g_id=?", array($g_id));
+        return intval($this->course_db->rows()[0]['cnt']);
+    }
+    
+    public function getNumGradedPeerComponents($gradeable_id, $grader) {
+        if (!is_array($grader)) {
+            $params = array($grader);
+        }
+        else {
+            $params = $grader;
+        }
+        $grader_list = implode(",", array_fill(0, count($params), "?"));
+        $params[] = $gradeable_id;     
+        $this->course_db->query("SELECT COUNT(*) as cnt
+FROM gradeable_component_data as gcd
+WHERE gcd.gcd_grader_id IN ({$grader_list})
+AND gc_id IN (
+    SELECT gc_id
+    FROM gradeable_component
+    WHERE gc_is_peer='t' AND g_id=?)", $params);
+        
+        return intval($this->course_db->rows()[0]['cnt']);
+    }
+    
+    public function getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections=array()) {
+        $where = "";
+        $params = array();
+        if(count($sections) > 0) {
+            $where = "WHERE registration_section IN (".implode(",", arrayfill(0,count($sections),"?"));
+            $params = $sections;
+        }
+        $params[] = $gradeable_id;
+        $this->course_db->query("
+        SELECT count(u.*), u.registration_section 
+        FROM users as u
+        INNER JOIN(
+            SELECT gd.* FROM gradeable_data as gd
+            LEFT JOIN(
+                gradeable_component_data as gcd
+                LEFT JOIN gradeable_component as gc
+                ON gcd.gc_id = gc.gc_id and gc.gc_is_peer = 't'
+            ) as gcd ON gcd.gd_id = gd.gd_id
+            WHERE gd.g_id = ?
+            GROUP BY gd.gd_id
+        ) as gd ON gd.gd_user_id = u.user_id
+        {$where}
+        GROUP BY u.registration_section
+        ORDER BY u.registration_section", $params);
+        
+        $return = array();
+        foreach($this->course_db->rows() as $row) {
+            $return[$row['registration_section']] = intval($row['count']);
+        }
+        return $return;
+    }
+    
+    public function getGradedPeerComponentsByRotatingSection($gradeable_id, $sections=array()) {
+        $where = "";
+        $params = array();
+        if(count($sections) > 0) {
+            $where = "WHERE rotating_section IN (".implode(",", arrayfill(0,count($sections),"?"));
+            $params = $sections;
+        }
+        $params[] = $gradeable_id;
+        $this->course_db->query("
+        SELECT count(u.*), u.rotating_section
+        FROM users as u
+        INNER JOIN(
+            SELECT gd.* FROM gradeable_data as gd
+            LEFT JOIN(
+                gradeable_component_data as gcd
+                LEFT JOIN gradeable_component as gc
+                ON gcd.gc_id = gc.gc_id and gc.gc_is_peer = 't'
+            ) as gcd ON gcd.gd_id = gd.gd_id
+            WHERE gd.g_id = ?
+            GROUP BY gd.gd_id
+        ) as gd ON gd.gd_user_id = u.user_id
+        {$where}
+        GROUP BY u.rotating_section
+        ORDER BY u.rotating_section", $params);
+        
+        $return = array();
+        foreach($this->course_db->rows() as $row) {
+            $return[$row['rotating_section']] = intval($row['count']);
+        }
+        return $return;
+    }
+    
+    public function getAnonId($user_id) {
+        $params = array();
+        if(!is_array($user_id)) {
+            $params[] = $user_id;
+        }
+        else {
+            $params = $user_id;
+        }
+        
+        $question_marks = implode(",", array_fill(0, count($params), "?"));
+        $this->course_db->query("SELECT user_id, anon_id FROM users WHERE user_id IN({$question_marks})", $params);
+        $return = array();
+        foreach($this->course_db->rows() as $id_map) {
+            $return[$id_map['user_id']] = $id_map['anon_id'];
+        }
+        return $return;
+    }
+    
+    public function getUserFromAnon($anon_id) {
+        $params = array();
+        if(!is_array($anon_id)) {
+            $params[] = $anon_id;
+        }
+        else {
+            $params = $anon_id;
+        }
+        
+        $question_marks = implode(",", array_fill(0, count($params), "?"));
+        $this->course_db->query("SELECT anon_id, user_id FROM users WHERE anon_id IN ({$question_marks})", $params);
+        $return = array();
+        foreach($this->course_db->rows() as $id_map) {
+            $return[$id_map['anon_id']] = $id_map['user_id'];
+        }
+        return $return;
     }
 }
 

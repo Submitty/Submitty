@@ -193,95 +193,25 @@ class AdminGradeableController extends AbstractController {
                 $users = $this->core->getQueries()->getAllUsers();
                 $user_ids = array();
                 $grading = array();
-                $incomplete_grading = array();
-                $graded_by = array();
-                $incomplete_graded_by = array();
                 $peer_grade_set = $gradeable->getPeerGradeSet();
-                foreach($users as $key => $user) {
+                foreach($users as $key=>$user) {
                     // Need to remove non-student users, or users in the NULL section
                     if ($user->getRegistrationSection() == null) {
                         unset($users[$key]);
                     }
                     else {
-                        $grading[$user->getId()] = array();
-                        $graded_by[$user->getId()] = array();
                         $user_ids[] = $user->getId();
-                        $incomplete_grading[] = $user->getId();
-                        $incomplete_graded_by[] = $user->getId();
+                        $grading[$user->getId()] = array();
                     }
                 }
                 $user_number = count($user_ids);
+                shuffle($user_ids);
                 for($i = 0; $i<$user_number; $i++) {
-                    /* This is a mess...
-                    * we continually try to fill the grading and graded_by arrays (while loop) with random selections from the opposite incomplete arrays
-                    * (incomplete_grading to fill graded_by and incomplete_graded_by to fill grading)
-                    * 
-                    * If one of the randomly selected items is invalid (already in array, or is the same as the person who's array we are trying to fill)
-                    * we just try again on the next iteration of the while loop
-                    * we do this for both grading and graded_by, which should create a valid, random permutation, that we put in the database
-                    */
-                    
-                    // check to see if we're stuck, and if so, start over.
-                    $in_incomplete = (in_array($user_ids[$i], $incomplete_grading)) ? 1 : 0;
-                    $bad_check =  count($incomplete_grading) - ($peer_grade_set - count($graded_by[$user_ids[$i]])) - $in_incomplete;
-                    if ($bad_check < 0 && count($graded_by[$user_ids[$i]]) != $peer_grade_set) {
-                        // if we are, we clear all the arrays and try again, setting $i = -1 to start over
-                        $grading = array_fill_keys($user_ids, array());
-                        $graded_by = array_fill_keys($user_ids, array());
-                        $incomplete_grading = array_map(function() { return $this; }, $user_ids);
-                        $incomplete_graded_by = array_map(function() { return $this; }, $user_ids);
-                        $i = -1;
-                        continue;
+                    for($j = 1; $j <=$peer_grade_set; $j++) {
+                        $grading[$user_ids[$i]][] = $user_ids[($i+$j)%$user_number];
                     }
-                    while(count($graded_by[$user_ids[$i]]) != $peer_grade_set) {
-                        $select_num = $peer_grade_set - count($graded_by[$user_ids[$i]]);
-                        $random_keys = array_rand($incomplete_grading, $select_num);
-                        // if select_num is 1, array_rand just returns a number, and subsequent code expects an array
-                        if(!is_array($random_keys)) {
-                            $random_keys = array($random_keys);
-                        }
-                        for($j = 0; $j < $select_num ;$j++) {
-                            if(!(($incomplete_grading[$random_keys[$j]] === $user_ids[$i]) || (in_array($incomplete_grading[$random_keys[$j]], $graded_by[$user_ids[$i]])))) {
-                                $graded_by[$user_ids[$i]][] = $incomplete_grading[$random_keys[$j]];
-                                $grading[$incomplete_grading[$random_keys[$j]]][] = $user_ids[$i];
-                                if(count($grading[$incomplete_grading[$random_keys[$j]]]) == $peer_grade_set) {
-                                    unset($incomplete_grading[$random_keys[$j]]);
-                                }
-                            }
-                        }
-                    }
-                    unset($incomplete_graded_by[$i]);
-                    
-                    // no need to do an in_array check for $incomplete_graded_by because we just unset it from the array
-                    $bad_check = count($incomplete_graded_by) - ($peer_grade_set - count($graded_by[$user_ids[$i]]));
-                    if ($bad_check < 0 && count($grading[$user_ids[$i]]) != $peer_grade_set) {
-                        // if we are, we clear all the arrays and try again, setting $i = -1 to start over
-                        $grading = array_fill_keys($user_ids, array());
-                        $graded_by = array_fill_keys($user_ids, array());
-                        $incomplete_grading = array_map(function() { return $this; }, $user_ids);
-                        $incomplete_graded_by = array_map(function() { return $this; }, $user_ids);
-                        $i = -1;
-                        continue;
-                    }
-                    while(count($grading[$user_ids[$i]]) != $peer_grade_set) {
-                        $select_num = $peer_grade_set - count($grading[$user_ids[$i]]);
-                        $random_keys = array_rand($incomplete_graded_by, $select_num);
-                        if(!is_array($random_keys)) {
-                            $random_keys = array($random_keys);
-                        }
-                        for($j = 0; $j < $select_num; $j++) {
-                            if(!(($incomplete_graded_by[$random_keys[$j]] === $user_ids[$i]) || (in_array($incomplete_graded_by[$random_keys[$j]], $grading[$user_ids[$i]])))) {
-                                $grading[$user_ids[$i]][] = $incomplete_graded_by[$random_keys[$j]];
-                                $graded_by[$incomplete_graded_by[$random_keys[$j]]][] = $user_ids[$i];
-                                if (count($graded_by[$incomplete_graded_by[$random_keys[$j]]]) === $peer_grade_set) {
-                                    unset($incomplete_graded_by[$random_keys[$j]]);
-                                }
-                            }
-                        }
-                    }
-                    unset($incomplete_grading[$i]);
                 }
-                // I know I could do this on the fly in the above loop set, but I think its clearer to do it separately
+                
                 foreach($grading as $grader=> $assignment) {
                     foreach($assignment as $student) {
                         $this->core->getQueries()->insertPeerGradingAssignment($grader, $student, $gradeable->getId());
@@ -292,14 +222,23 @@ class AdminGradeableController extends AbstractController {
             if ($edit_gradeable === 1) {
                 $x = 0;
                 foreach ($old_components as $old_component) {
+                    if(is_array($old_component)) {
+                        $old_component = $old_component[0];
+                    }
                     if ($x < $num_questions && $x < $num_old_components) {
                         $old_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                         $old_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
                         $old_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
-                        $old_component->setLowerClamp($_POST['lower_' . strval($x + 1)]);
-                        $old_component->setDefault($_POST['default_' . strval($x + 1)]);
+                        $is_penalty = (isset($_POST['rad_penalty-'.strval($x+1)]) && $_POST['rad_penalty-'.strval($x+1)]=='yes') ? true : false;
+                        $lower_clamp = ($is_penalty === true) ? floatval($_POST['lower_'.strval($x+1)]) : 0;
+                        $old_component->setLowerClamp($lower_clamp);
+                        $is_deduction = (isset($_POST['grade_by-'.strval($x+1)]) && $_POST['grade_by-'.strval($x+1)]=='count_down') ? true : false;
+                        $temp_num = ($is_deduction === true) ? floatval($_POST['points_' . strval($x + 1)]) : 0;
+                        $old_component->setDefault($temp_num);
                         $old_component->setMaxValue($_POST['points_' . strval($x + 1)]);
-                        $old_component->setUpperClamp($_POST['upper_' . strval($x + 1)]);
+                        $is_extra = (isset($_POST['rad_extra_credit-'.strval($x+1)]) && $_POST['rad_extra_credit-'.strval($x+1)]=='yes') ? true : false;
+                        $upper_clamp = ($is_extra === true) ? (floatval($_POST['points_' . strval($x+1)]) + floatval($_POST['upper_' . strval($x + 1)])) : floatval($_POST['points_' . strval($x+1)]);
+                        $old_component->setUpperClamp($upper_clamp);
                         $old_component->setIsText(false);
                         $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
                         $old_component->setIsPeer($peer_grading_component);
@@ -327,10 +266,16 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                 $gradeable_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
                 $gradeable_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
-                $gradeable_component->setLowerClamp($_POST['lower_' . strval($x + 1)]);
-                $gradeable_component->setDefault($_POST['default_' . strval($x + 1)]);
+                $is_penalty = (isset($_POST['rad_penalty-'.strval($x+1)]) && $_POST['rad_penalty-'.strval($x+1)]=='yes') ? true : false;
+                $lower_clamp = ($is_penalty === true) ? floatval($_POST['lower_'.strval($x+1)]) : 0;
+                $gradeable_component->setLowerClamp($lower_clamp);
+                $is_deduction = (isset($_POST['grade_by-'.strval($x+1)]) && $_POST['grade_by-'.strval($x+1)]=='count_down') ? true : false;
+                $temp_num = ($is_deduction === true) ? floatval($_POST['points_' . strval($x + 1)]) : 0;
+                $gradeable_component->setDefault($temp_num);
                 $gradeable_component->setMaxValue($_POST['points_' . strval($x + 1)]);
-                $gradeable_component->setUpperClamp($_POST['upper_' . strval($x + 1)]);
+                $is_extra = (isset($_POST['rad_extra_credit-'.strval($x+1)]) && $_POST['rad_extra_credit-'.strval($x+1)]=='yes') ? true : false;
+                $upper_clamp = ($is_extra === true) ? (floatval($_POST['points_' . strval($x+1)]) + floatval($_POST['upper_' . strval($x + 1)])) : floatval($_POST['points_' . strval($x+1)]);
+                $gradeable_component->setUpperClamp($upper_clamp);
                 $gradeable_component->setIsText(false);
                 $peer_grading_component = (isset($_POST['peer_component_'.strval($x+1)]) && $_POST['peer_component_'.strval($x+1)]=='on') ? true : false;
                 $gradeable_component->setIsPeer($peer_grading_component);
@@ -355,9 +300,12 @@ class AdminGradeableController extends AbstractController {
                 $components = $gradeable->getComponents();
                 $index = 1;
                 foreach ($components as $comp) {
+                    if(is_array($comp)) {
+                        $comp = $comp[0];
+                    }
                     $num_marks = 0;
                     foreach($_POST as $k=>$v){
-                        if(strpos($k,'deduct_points_' . $index) !== false){
+                        if(strpos($k,'mark_points_' . $index) !== false){
                             $num_marks++;
                         }
                     }
@@ -365,8 +313,8 @@ class AdminGradeableController extends AbstractController {
                     for ($y = 0; $y < $num_marks; $y++) {
                         $mark = new GradeableComponentMark($this->core);
                         $mark->setGcId($comp->getId());
-                        $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                        $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                        $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
+                        $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                         $mark->setOrder($y);
                         $this->core->getQueries()->createGradeableComponentMark($mark);
                     }                    
@@ -377,9 +325,12 @@ class AdminGradeableController extends AbstractController {
                 $components = $gradeable->getComponents();
                 $index = 1;
                 foreach ($components as $comp) {
+                    if(is_array($comp)) {
+                        $comp = $comp[0];
+                    }
                     $num_marks = 0; //current number of marks
                     foreach($_POST as $k=>$v){
-                        if(strpos($k,'deduct_points_' . $index) !== false){
+                        if(strpos($k,'mark_points_' . $index) !== false){
                             $num_marks++;
                         }
                     }
@@ -393,8 +344,8 @@ class AdminGradeableController extends AbstractController {
                     foreach($marks as $mark) {
                         if($y < $num_marks && $y < $num_old_mark) {
                             $mark->setGcId($comp->getId());
-                            $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                            $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                            $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
+                            $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                             $mark->setOrder($y);
                             $this->core->getQueries()->updateGradeableComponentMark($mark);
                         } else if($num_old_mark > $num_marks) {
@@ -405,8 +356,8 @@ class AdminGradeableController extends AbstractController {
                     for($y = $num_old_mark; $y < $num_marks; $y++) {
                         $mark = new GradeableComponentMark($this->core);
                         $mark->setGcId($comp->getId());
-                        $mark->setPoints(floatval($_POST['deduct_points_' . $index . '_' . $y]));
-                        $mark->setNote($_POST['deduct_text_' . $index . '_' . $y]);
+                        $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
+                        $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                         $mark->setOrder($y);
                         $this->core->getQueries()->createGradeableComponentMark($mark);
                     }             
