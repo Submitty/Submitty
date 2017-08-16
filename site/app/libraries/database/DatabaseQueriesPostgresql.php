@@ -1063,9 +1063,14 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
 DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
     }
 
-    public function checkGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
-        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", 
-          array($component->getId(), $gd_id, $grader_id));
+    public function checkGradeableComponentData($gd_id, GradeableComponent $component, $grader_id="") {
+        $params = array($component->getId(), $gd_id);
+        $and = "";
+        if($grader_id != "") {
+            $and = " AND gcd_grader_id=?";
+            $params[] = $grader_id;
+        }
+        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component_data WHERE gc_id=? AND gd_id=?{$and}", $params);
         if ($this->course_db->row()['cnt'] == 0) {
           return false;
         }
