@@ -41,6 +41,7 @@ def get_queue_time(next_directory,next_to_grade):
 def get_submission_path(next_directory,next_to_grade):
     queue_file = os.path.join(next_directory,next_to_grade)
     if not os.path.isfile(queue_file):
+        grade_items_logging.log_message("ERROR: the file does not exist " + queue_file)
         raise SystemExit("ERROR: the file does not exist",queue_file)
     with open(queue_file, 'r') as infile:
         obj = json.load(infile)
@@ -73,6 +74,7 @@ def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
 # it will overwrite files with the same name if they exist
 def copy_contents_into(source,target):
     if not os.path.isdir(target):
+        grade_items_logging.log_message("ERROR: the target directory does not exist " + target)
         raise SystemExit("ERROR: the target directory does not exist '", target, "'")
     if os.path.isdir(source):
         for item in os.listdir(source):
@@ -81,6 +83,7 @@ def copy_contents_into(source,target):
                     # recurse
                     copy_contents_into(os.path.join(source,item),os.path.join(target,item))
                 elif os.path.isfile(os.path.join(target,item)):
+                    grade_items_logging.log_message("ERROR: the target subpath is a file not a directory '" + os.path.join(target,item) + "'")
                     raise SystemExit("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
                 else:
                     # copy entire subtree
@@ -129,6 +132,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
+        grade_items_logging.log_message("ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
     # --------------------------------------------------------
@@ -137,6 +141,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
                                    "submissions",obj["gradeable"],obj["who"],str(obj["version"]))
     if not os.path.isdir(submission_path):
+        grade_items_logging.log_message("ERROR: the submission directory does not exist" + submission_path)
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
     print ("pid",my_pid,"GRADE THIS", submission_path)
 
