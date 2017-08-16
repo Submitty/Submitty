@@ -11,6 +11,7 @@ use app\models\GradeableVersion;
 use app\models\User;
 use app\models\SimpleLateUser;
 use app\models\Team;
+use app\models\Course;
 use app\models\SimpleStat;
 
 class DatabaseQueriesPostgresql extends AbstractDatabaseQueries{
@@ -1547,6 +1548,18 @@ ORDER BY gt.{$section_key}", $params);
     
     public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
+    }
+
+    public function getStudentCoursesById($user_id) {
+        $this->submitty_db->query("
+SELECT semester, course
+FROM courses_users u
+WHERE u.user_id=?", array($user_id));
+       $return = array();
+        foreach ($this->submitty_db->rows() as $row) {
+            $return[] = new Course($this->core, $row);
+        }
+        return $return;
     }
     
     public function getPeerAssignment($gradeable_id, $grader) {
