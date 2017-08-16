@@ -38,6 +38,7 @@ use app\libraries\Utils;
  * @method \DateTimeZone getTimezone()
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
+ * @method bool isCourseLoaded()
  */
 
 class Config extends AbstractModel {
@@ -60,6 +61,13 @@ class Config extends AbstractModel {
     protected $config_path;
     /** @property @var string path to the ini file that contains all the course specific settings */
     protected $course_ini;
+
+    /**
+    * Indicates whether a course config has been successfully loaded.
+    * @var bool
+    * @property
+    */
+    protected $course_loaded = false;
 
     /*** MASTER CONFIG ***/
     /** @property @var string */
@@ -154,23 +162,24 @@ class Config extends AbstractModel {
      * Config constructor.
      *
      * @param Core   $core
-     * @param string $semester
-     * @param string $course
-     * @param string $master_ini_path
      */
-    public function __construct(Core $core, $semester, $course, $master_ini_path) {
+    public function __construct(Core $core, $semester, $course) {
         parent::__construct($core);
         $this->semester = $semester;
         $this->course = $course;
-        $this->config_path = dirname($master_ini_path);
+    }
 
+    public function loadMasterIni($master_ini_path) {
+        if (!file_exists($master_ini_path)) {
+            throw new ConfigException("Could not find master ini file: ". $master_ini_path, true);
+        }
+        $this->config_path = dirname($master_ini_path);
         // Load config details from the master config file
         $master = IniParser::readFile($master_ini_path);
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
         $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
         $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
-
         if (isset($master['site_details']['debug'])) {
            $this->debug = $master['site_details']['debug'] === true;
         }
@@ -181,12 +190,12 @@ class Config extends AbstractModel {
                 throw new ConfigException("Invalid Timezone identifier: {$this->timezone}");
             }
         }
+
         $this->timezone = new \DateTimeZone($this->timezone);
 
         if (isset($master['database_details']['database_type'])) {
             $this->database_type = $master['database_details']['database_type'];
         }
-
         $this->base_url = rtrim($this->base_url, "/")."/";
         $this->cgi_url = rtrim($this->cgi_url, "/")."/";
         $this->ta_base_url = rtrim($this->ta_base_url, "/")."/";
@@ -204,29 +213,24 @@ class Config extends AbstractModel {
                 throw new ConfigException("Missing log folder: {$path}");
             }
         }
+        $this->site_url = $this->base_url."index.php?";
 
-        if (!is_dir(implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester)))) {
-            throw new ConfigException("Invalid semester: ".$this->semester, true);
+        if (!empty($this->semester) && !empty($this->course)) {
+            $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
         }
+    }
 
-        $this->course_path = implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester, $this->course));
-        if (!is_dir($this->course_path)) {
-            throw new ConfigException("Invalid course: ".$this->course, true);
+    public function loadCourseIni($course_ini) {
+        if (!file_exists($course_ini)) {
+            throw new ConfigException("Could not find course config file: ".$course_ini, true);
         }
-
-        $this->course_ini = implode(DIRECTORY_SEPARATOR, array($this->course_path, "config", "config.ini"));
-
-        if (!file_exists($this->course_ini)) {
-            throw new ConfigException("Could not find course config file: ".$this->course_ini, true);
-        }
+        $this->course_ini = $course_ini;
         $course = IniParser::readFile($this->course_ini);
-
         $this->setConfigValues($course, 'hidden_details', array('database_name'));
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
             'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type');
         $this->setConfigValues($course, 'course_details', $array);
-
         $this->hidden_details = $course['hidden_details'];
         if (isset($course['hidden_details']['course_url'])) {
             $this->base_url = rtrim($course['hidden_details']['course_url'], "/")."/";;
@@ -249,7 +253,8 @@ class Config extends AbstractModel {
         }
     
         $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
-    }
+        $this->course_loaded = true;
+   }
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
