@@ -38,6 +38,7 @@ use app\libraries\Utils;
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
  * @method string getCourseIniPath()
+ * @method bool isCourseLoaded()
  */
 
 class Config extends AbstractModel {
@@ -60,6 +61,16 @@ class Config extends AbstractModel {
     protected $config_path;
     /** @property @var string path to the ini file that contains all the course specific settings */
     protected $course_ini_path;
+
+    /** @property @var array */
+    protected $course_ini;
+
+    /**
+    * Indicates whether a course config has been successfully loaded.
+    * @var bool
+    * @property
+    */
+    protected $course_loaded = false;
 
     /*** MASTER CONFIG ***/
     /** @property @var string */
@@ -95,9 +106,6 @@ class Config extends AbstractModel {
     /** @property @var array */
     protected $course_database_params = array();
 
-    /*** COURSE SPECIFIC CONFIG ***/
-    protected $course_ini;
-
     /** @property @var string */
     protected $course_name;
     /** @property @var string */
@@ -130,16 +138,18 @@ class Config extends AbstractModel {
      * Config constructor.
      *
      * @param Core   $core
-     * @param string $semester
-     * @param string $course
-     * @param string $master_ini_path
      */
-    public function __construct(Core $core, $semester, $course, $master_ini_path) {
+    public function __construct(Core $core, $semester, $course) {
         parent::__construct($core);
         $this->semester = $semester;
         $this->course = $course;
-        $this->config_path = dirname($master_ini_path);
+    }
 
+    public function loadMasterIni($master_ini_path) {
+        if (!file_exists($master_ini_path)) {
+            throw new ConfigException("Could not find master ini file: ". $master_ini_path, true);
+        }
+        $this->config_path = dirname($master_ini_path);
         // Load config details from the master config file
         $master = IniParser::readFile($master_ini_path);
 
@@ -167,12 +177,12 @@ class Config extends AbstractModel {
                 throw new ConfigException("Invalid Timezone identifier: {$this->timezone}");
             }
         }
+
         $this->timezone = new \DateTimeZone($this->timezone);
 
         if (isset($master['database_details']['driver'])) {
             $this->database_driver = $master['database_details']['driver'];
         }
-
         $this->base_url = rtrim($this->base_url, "/")."/";
         $this->cgi_url = rtrim($this->cgi_url, "/")."/";
         $this->ta_base_url = rtrim($this->ta_base_url, "/")."/";
@@ -190,22 +200,18 @@ class Config extends AbstractModel {
                 throw new ConfigException("Missing log folder: {$path}");
             }
         }
+        $this->site_url = $this->base_url."index.php?";
 
-        if (!is_dir(implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester)))) {
-            throw new ConfigException("Invalid semester: ".$this->semester, true);
+        if (!empty($this->semester) && !empty($this->course)) {
+            $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
         }
+    }
 
-        $this->course_path = implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester, $this->course));
-        if (!is_dir($this->course_path)) {
-            throw new ConfigException("Invalid course: ".$this->course, true);
+    public function loadCourseIni($course_ini) {
+        if (!file_exists($course_ini)) {
+            throw new ConfigException("Could not find course config file: ".$course_ini, true);
         }
-
-        $this->course_ini_path = implode(DIRECTORY_SEPARATOR, array($this->course_path, "config", "config.ini"));
-
-        if (!file_exists($this->course_ini_path)) {
-            throw new ConfigException("Could not find course config file: ".$this->course_ini_path, true);
-        }
-
+        $this->course_ini_path = $course_ini;
         $this->course_ini = IniParser::readFile($this->course_ini_path);
 
         if (!isset($this->course_ini['database_details']) || !is_array($this->course_ini['database_details'])) {
@@ -243,7 +249,8 @@ class Config extends AbstractModel {
         }
     
         $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
-    }
+        $this->course_loaded = true;
+   }
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {

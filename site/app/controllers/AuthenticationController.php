@@ -51,8 +51,10 @@ class AuthenticationController extends AbstractController {
     public function isLoggedIn() {
         if ($this->logged_in) {
             $redirect = array();
-            foreach ($_REQUEST['old'] as $key => $value) {
-                $redirect[$key] = $value;
+            if(isset($_REQUEST['old'])) {
+                foreach ($_REQUEST['old'] as $key => $value) {
+                    $redirect[$key] = $value;
+                }
             }
             $this->core->redirect($this->core->buildUrl($redirect));
         }
@@ -66,8 +68,10 @@ class AuthenticationController extends AbstractController {
     public function logout() {
         $cookie_id = 'submitty_session_id';
         Utils::setCookie($cookie_id, '', time() - 3600);
+        $redirect = array();
+        $redirect['page'] = 'login';
         $this->core->removeCurrentSession();
-        $this->core->redirect($this->core->buildUrl());
+        $this->core->redirect($this->core->buildUrl($redirect));
     }
     
     /**
@@ -95,7 +99,6 @@ class AuthenticationController extends AbstractController {
             }
             $this->core->redirect($this->core->buildUrl($redirect));
         }
-
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
@@ -106,6 +109,7 @@ class AuthenticationController extends AbstractController {
             }
             $this->core->addSuccessMessage("Successfully logged in as ".htmlentities($_POST['user_id']));
             $redirect['success_login'] = "true";
+
             $this->core->redirect($this->core->buildUrl($redirect));
         }
         else {

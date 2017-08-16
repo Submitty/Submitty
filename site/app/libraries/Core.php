@@ -46,6 +46,7 @@ class Core {
     /** @var Output */
     private $output = null;
 
+
     /**
      * Core constructor.
      *
@@ -82,11 +83,23 @@ class Core {
      *
      * @param $semester
      * @param $course
-     * @param $master_ini_path
      * @throws \Exception
      */
-    public function loadConfig($semester, $course, $master_ini_path) {
-        $this->config = new Config($this, $semester, $course, $master_ini_path);
+    public function loadConfig($semester, $course) {
+        $master_ini_path = FileUtils::joinPaths(__DIR__, "..", "..", "config", "master.ini");
+
+        $this->config = new Config($this, $semester, $course);
+        $this->config->loadMasterIni($master_ini_path);
+
+        if (!empty($semester) && !empty($course)) {
+            $course_ini_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.ini");
+            if (file_exists($course_ini_path)) {
+                $this->config->loadCourseIni($course_ini_path);
+            }
+        }
+    }
+
+    public function loadAuthentication() {
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
@@ -113,10 +126,12 @@ class Core {
         $this->submitty_db = $database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
         $this->submitty_db->connect();
 
-        $this->course_db = $database_factory->getDatabase($this->config->getCourseDatabaseParams());
-        $this->course_db->connect();
-
         $this->database_queries = $database_factory->getQueries($this);
+
+        if ($this->config->isCourseLoaded()) {
+            $this->course_db = $database_factory->getDatabase($this->config->getCourseDatabaseParams());
+            $this->course_db->connect();
+        }
     }
 
     /**
@@ -192,7 +207,12 @@ class Core {
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
-        $this->user = $this->database_queries->getUserById($user_id);
+        if(!$this->getConfig()->isCourseLoaded()){
+           $this->loadSubmittyUser();
+        }
+        else{
+            $this->user = $this->database_queries->getUserById($user_id);
+        }
     }
 
     /**
@@ -253,7 +273,6 @@ class Core {
         if ($user_id === false) {
             return false;
         }
-
         $this->loadUser($user_id);
         return true;
     }
@@ -329,7 +348,7 @@ class Core {
      * @return string
      */
     public function buildUrl($parts=array(), $hash = null) {
-        $url = $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+        $url = $this->getConfig()->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
         if ($hash !== null) {
             $url .= "#".$hash;
         }

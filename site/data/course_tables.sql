@@ -215,6 +215,7 @@ CREATE TABLE gradeable_component_mark (
 CREATE TABLE gradeable_component_mark_data (
     gc_id integer NOT NULL,
     gd_id integer NOT NULL,
+    gcd_grader_id character varying(255) NOT NULL,
     gcm_id integer NOT NULL
 );
 
@@ -481,7 +482,15 @@ ALTER TABLE ONLY electronic_gradeable
 --
 
 ALTER TABLE ONLY gradeable_component_data
-    ADD CONSTRAINT gradeable_component_data_pkey PRIMARY KEY (gc_id, gd_id);
+    ADD CONSTRAINT gradeable_component_data_pkey PRIMARY KEY (gc_id, gd_id, gcd_grader_id);
+    
+
+--
+-- Name: gradeable_component_data_normal_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_component_data_no_grader_index
+ON gradeable_component_data (gc_id, gd_id);
 
 
 --
@@ -503,7 +512,7 @@ ALTER TABLE ONLY gradeable_component_mark
 --
 
 ALTER TABLE ONLY gradeable_component_mark_data
-    ADD CONSTRAINT gradeable_component_mark_data_pkey PRIMARY KEY (gcm_id, gc_id, gd_id);
+    ADD CONSTRAINT gradeable_component_mark_data_pkey PRIMARY KEY (gcm_id, gc_id, gd_id, gcd_grader_id);
 
 --
 -- Name: gradeable_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -
@@ -729,7 +738,7 @@ ALTER TABLE ONLY gradeable_component_mark_data
 --
 
 ALTER TABLE ONLY gradeable_component_mark_data
-    ADD CONSTRAINT gradeable_component_mark_data_gd_id_and_gc_id_fkey FOREIGN KEY (gd_id, gc_id) REFERENCES gradeable_component_data(gd_id, gc_id) ON DELETE CASCADE;
+    ADD CONSTRAINT gradeable_component_mark_data_gd_id_and_gc_id_fkey FOREIGN KEY (gd_id, gc_id, gcd_grader_id) REFERENCES gradeable_component_data(gd_id, gc_id, gcd_grader_id) ON DELETE CASCADE;
 
 --
 -- Name: gradeable_data_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

@@ -144,6 +144,13 @@ abstract class AbstractDatabase {
         return true;
     }
 
+    /**
+     * @param $query
+     * @param $parameters
+     * @param $callback
+     *
+     * @return DatabaseRowIterator|null
+     */
     public function queryIterator($query, $parameters, $callback) {
         try {
             $statement = $this->link->prepare($query, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);

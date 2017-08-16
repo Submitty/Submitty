@@ -50,7 +50,9 @@ TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial", "exam
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
-DB_PASS = "hsdbu"
+with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
+    submitty_config_json = json.load(submitty_config)
+    DB_PASS = submitty_config_json["database_password"]
 
 DB_ONLY = False
 
@@ -809,7 +811,7 @@ class Course(object):
                                 first_set = False
                                 for mark in component.marks:
                                     if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
-                                        conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key)
+                                        conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key, gcd_grader_id=self.instructor.id)
                                         if(first):
                                             first_set = True
                                     first = False
@@ -1323,6 +1325,7 @@ class Mark(object):
         self.note = mark['gcm_note']
         self.points = mark['gcm_points']
         self.order = order
+        self.grader = 'instructor'
         self.key = None
 
     def create(self, gc_id, conn, table):
