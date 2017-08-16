@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import time
 import grade_items_logging
 import grade_item
 from submitty_utils import glob
@@ -76,7 +77,7 @@ def grade_queue_file(queue_file,which_untrusted):
         grade_item.just_grade_item(my_dir, queue_file, which_untrusted)
     except Exception as e:
         print ("ERROR attempting to grade item: ", queue_file, " exception=",e)
-        grade_items_logging.log_message(False,"","","","","ERROR attempting to grade item: " + queue_file + " exception " + e)
+        grade_items_logging.log_message(False,"","","","","ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
 
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
@@ -188,12 +189,24 @@ def launch_workers(num_workers):
         p.start()
         processes.append(p)
 
-    # wait until the processes finish (doesn't happen under normal operation)
-    for i in range(0,num_workers):
-        processes[i].join()
+    while True:
+        alive = 0
+        for i in range(0,num_workers):
+            if processes[i].is_alive:
+                alive = alive+1
+            else:
+                grade_items_logging.log_message(False,"","","","","ERROR: process "+str(i)+" is not alive")
+        if alive != num_workers:
+            grade_items_logging.log_message(False,"","","","","ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
+        print ("workers= ",num_workers,"  alive=",alive)
+        time.sleep(1)
 
-    observer.stop()
-    observer.join()
+    # wait until the processes finish (doesn't happen under normal operation)
+    #for i in range(0,num_workers):
+    #    processes[i].join()
+
+    #observer.stop()
+    #observer.join()
 
     grade_items_logging.log_message(False,"","","","","grade_scheduler.py terminated")
 
