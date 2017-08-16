@@ -38,6 +38,7 @@ use app\libraries\Utils;
  * @method \DateTimeZone getTimezone()
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
+ * @method string getCourseIniPath()
  * @method bool isCourseLoaded()
  */
 
@@ -60,6 +61,8 @@ class Config extends AbstractModel {
     /** @property @var string path on the filesystem that points to the course data directory */
     protected $config_path;
     /** @property @var string path to the ini file that contains all the course specific settings */
+    protected $course_ini_path;
+    /** @property @var array */
     protected $course_ini;
 
     /**
@@ -224,20 +227,22 @@ class Config extends AbstractModel {
         if (!file_exists($course_ini)) {
             throw new ConfigException("Could not find course config file: ".$course_ini, true);
         }
-        $this->course_ini = $course_ini;
-        $course = IniParser::readFile($this->course_ini);
-        $this->setConfigValues($course, 'hidden_details', array('database_name'));
+        $this->course_ini_path = $course_ini;
+        $this->course_ini = IniParser::readFile($this->course_ini_path);
+
+        $this->setConfigValues($this->course_ini, 'hidden_details', array('database_name'));
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
             'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type');
-        $this->setConfigValues($course, 'course_details', $array);
-        $this->hidden_details = $course['hidden_details'];
-        if (isset($course['hidden_details']['course_url'])) {
-            $this->base_url = rtrim($course['hidden_details']['course_url'], "/")."/";;
+        $this->setConfigValues($this->course_ini, 'course_details', $array);
+
+        $this->hidden_details = $this->course_ini['hidden_details'];
+        if (isset($this->course_ini['hidden_details']['course_url'])) {
+            $this->base_url = rtrim($this->course_ini['hidden_details']['course_url'], "/")."/";
         }
 
-        if (isset($course['hidden_details']['ta_base_url'])) {
-            $this->ta_base_url = rtrim($course['hidden_details']['ta_base_url'], "/")."/";
+        if (isset($this->course_ini['hidden_details']['ta_base_url'])) {
+            $this->ta_base_url = rtrim($this->course_ini['hidden_details']['ta_base_url'], "/")."/";
         }
         
         $this->upload_message = Utils::prepareHtmlString($this->upload_message);
@@ -315,10 +320,7 @@ class Config extends AbstractModel {
         return $this->submitty_log_path;
     }
 
-    /**
-     * @return string
-     */
-    public function getCourseIniPath() {
-        return $this->course_ini;
+    public function saveCourseIni($save) {
+        IniParser::writeFile($this->course_ini_path, array_merge($this->course_ini, $save));
     }
 }
