@@ -74,9 +74,9 @@ def grade_queue_file(queue_file,which_untrusted):
     #untrusted = multiprocessing.current_process().untrusted
     try:
         grade_item.just_grade_item(my_dir, queue_file, which_untrusted)
-    except:
-        print ("ERROR attempting to grade item: ", queue_file)
-        grade_items_logging.log_message(False,"","","","","ERROR attempting to grade item: " + queue_file)
+    except Exception as e:
+        print ("ERROR attempting to grade item: ", queue_file, " exception=",e)
+        grade_items_logging.log_message(False,"","","","","ERROR attempting to grade item: " + queue_file + " exception " + e)
 
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file

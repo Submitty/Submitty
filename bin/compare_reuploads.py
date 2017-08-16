@@ -24,6 +24,7 @@ def main(a,b):
     good = 0
     bad = 0
     error_sum = 0
+    no_pair = 0
     
     for user in os.listdir(a):
         for version in os.listdir(os.path.join(a,user)):
@@ -42,7 +43,8 @@ def main(a,b):
             if not os.path.isfile(file_b):
                 file_b = os.path.join(b,user,version,"results_grade.txt")
                 if not os.path.isfile(file_b):
-                    print ("ERROR! ",file_b," is not a file")
+                    no_pair = no_pair+1
+                    #print ("ERROR! ",file_b," is not a file")
                     continue
 
             with open(file_a, 'r') as foo:
@@ -63,6 +65,7 @@ def main(a,b):
                 
     print ("good = ",good)
     print ("bad = ",bad)
+    print ("no_pair = ",no_pair)
 
     print ("avg error =",error_sum/bad)
                 
