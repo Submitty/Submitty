@@ -647,6 +647,14 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         calculatePercentageTotal();
 
         var overwrite = "false";
+        var old_grader = document.getElementById("graded-by-"+num);
+        if(old_grader.innerHTML == "Ungraded!") {
+            old_grader = null;
+        }
+        else {
+            old_grader = old_grader.innerHTML.slice(10, old_grader.innerHTML.length);
+        }
+        console.log(old_grader);
         if($('#overwrite-id').is(':checked')) {
             overwrite = "true";
         } else {
@@ -666,7 +674,8 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                 'custom_points' : custom_points,
                 'custom_message' : custom_message,
                 'overwrite' : overwrite,
-                'marks' : mark_data
+                'marks' : mark_data,
+                'old_grader' : old_grader
             },
             success: function(data) {
                 console.log("success for saving a mark");

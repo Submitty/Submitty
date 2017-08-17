@@ -277,7 +277,7 @@ abstract class AbstractDatabaseQueries {
 
     abstract public function insertGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark);
 
-    abstract public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark, $gcd_grader_id="");
+    abstract public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark, $gcd_grader_id);
 
     /**
      * Creates a new gradeable in the database
