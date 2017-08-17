@@ -98,7 +98,9 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                         data_table.c.autograding_hidden_non_extra_credit:
                             bindparam("autograding_hidden_non_extra_credit"),
                         data_table.c.autograding_hidden_extra_credit:
-                            bindparam("autograding_hidden_extra_credit")
+                            bindparam("autograding_hidden_extra_credit"),
+                        data_table.c.autograding_complete:
+                            bindparam("autograding_complete")
                     })\
                 .where(data_table.c.g_id == bindparam('u_g_id'))\
                 .where(data_table.c.team_id == bindparam('u_team_id'))\
@@ -114,7 +116,8 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                    autograding_non_hidden_extra_credit=non_hidden_ec,
                    autograding_hidden_non_extra_credit=hidden_non_ec,
                    autograding_hidden_extra_credit=hidden_ec,
-                   submission_time=submission_time)
+                   submission_time=submission_time,
+                   autograding_complete=True)
 
     else:
         result = db.execute(select([func.count()]).select_from(data_table)
@@ -137,7 +140,9 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                         data_table.c.autograding_hidden_non_extra_credit:
                             bindparam("autograding_hidden_non_extra_credit"),
                         data_table.c.autograding_hidden_extra_credit:
-                            bindparam("autograding_hidden_extra_credit")
+                            bindparam("autograding_hidden_extra_credit"),
+                        data_table.c.autograding_complete:
+                            bindparam("autograding_complete")
                     })\
                 .where(data_table.c.g_id == bindparam('u_g_id'))\
                 .where(data_table.c.user_id == bindparam('u_user_id'))\
@@ -153,7 +158,8 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                    autograding_non_hidden_extra_credit=non_hidden_ec,
                    autograding_hidden_non_extra_credit=hidden_non_ec,
                    autograding_hidden_extra_credit=hidden_ec,
-                   submission_time=submission_time)
+                   submission_time=submission_time,
+                   autograding_complete=True)
     db.close()
     engine.dispose()
 
