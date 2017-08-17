@@ -492,7 +492,7 @@ echo -e "Compile and install analysis tools"
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 
 # compile the tools
-./build.sh v0.2.5
+./build.sh v0.2.6
 
 popd
 
