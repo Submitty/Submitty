@@ -233,9 +233,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # give the untrusted user read/write/execute permissions on the tmp directory & files
     add_permissions_recursive(tmp_compilation,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
+                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
+                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
 
     add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH)
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)

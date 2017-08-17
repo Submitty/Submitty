@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 import os
+import sys
+import time
+import signal
 import grade_items_logging
 import grade_item
 from submitty_utils import glob
@@ -76,7 +79,7 @@ def grade_queue_file(queue_file,which_untrusted):
         grade_item.just_grade_item(my_dir, queue_file, which_untrusted)
     except Exception as e:
         print ("ERROR attempting to grade item: ", queue_file, " exception=",e)
-        grade_items_logging.log_message(False,"","","","","ERROR attempting to grade item: " + queue_file + " exception " + e)
+        grade_items_logging.log_message(False,"","","","","ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
 
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
@@ -114,6 +117,11 @@ def populate_queue(queue, folder):
         queue.put(os.path.join(folder, f))
 
 
+def exit_gracefully(signum,frame):
+    print ("EXITING GRACEFULLY")
+    raise SystemExit("exiting gracefully")
+    #sys.exit(0)
+
 # ==================================================================================
 # ==================================================================================
 def worker_process(interactive_queue,batch_queue,new_job_event,overall_lock,which_untrusted):
@@ -124,25 +132,30 @@ def worker_process(interactive_queue,batch_queue,new_job_event,overall_lock,whic
     of the queues.
     """
 
-    while True:
-        overall_lock.acquire()
-        if not interactive_queue.empty():
-            job = interactive_queue.get()
-            overall_lock.release()
-            grade_queue_file(job,which_untrusted)
-            continue
-        elif not batch_queue.empty():
-            job = batch_queue.get()
-            overall_lock.release()
-            grade_queue_file(job,which_untrusted)
-            continue
-        else:
-            new_job_event.clear()
-            overall_lock.release()
-            pid = os.getpid()
-            print ("pid ",pid,": no job for now, going to wait 10 seconds")
-            new_job_event.wait(10)
+    # ignore keyboard interrupts in the worker processes
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
 
+    try:
+        while True:
+            overall_lock.acquire()
+            if not interactive_queue.empty():
+                job = interactive_queue.get()
+                overall_lock.release()
+                grade_queue_file(job,which_untrusted)
+                continue
+            elif not batch_queue.empty():
+                job = batch_queue.get()
+                overall_lock.release()
+                grade_queue_file(job,which_untrusted)
+                continue
+            else:
+                new_job_event.clear()
+                overall_lock.release()
+                pid = os.getpid()
+                print ("pid ",pid,": no job for now, going to wait 10 seconds")
+                new_job_event.wait(10)
+    except:
+        print ("exiting worker")
 
 # ==================================================================================
 # ==================================================================================
@@ -188,12 +201,49 @@ def launch_workers(num_workers):
         p.start()
         processes.append(p)
 
-    # wait until the processes finish (doesn't happen under normal operation)
-    for i in range(0,num_workers):
-        processes[i].join()
+    # main monitoring loop
+    try:
+        while True:
+            alive = 0
+            for i in range(0,num_workers):
+                if processes[i].is_alive:
+                    alive = alive+1
+                else:
+                    grade_items_logging.log_message(False,"","","","","ERROR: process "+str(i)+" is not alive")
+            if alive != num_workers:
+                grade_items_logging.log_message(False,"","","","","ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
+            #print ("workers= ",num_workers,"  alive=",alive)
+            time.sleep(1)
 
-    observer.stop()
-    observer.join()
+    except KeyboardInterrupt:
+        grade_items_logging.log_message(False,"","","","","grade_scheduler.py keyboard interrupt")
+
+
+
+        # just kill everything in this group id right now
+        # NOTE:  this may be a bug if the grandchildren have a different group id and not be killed
+        os.kill(-os.getpid(), signal.SIGKILL)
+
+        # run this to check if everything is dead
+        #    ps  xao pid,ppid,pgid,sid,comm,user  | grep untrust
+
+
+
+        # everything's dead, including the main process so the rest of this will be ignored
+        # but this was mostly working...
+
+
+        # terminate the jobs
+        for i in range(0,num_workers):
+            processes[i].terminate()
+        # wake up sleeping jobs
+        new_job_event.set()
+        # wait for them to join
+        for i in range(0,num_workers):
+            processes[i].join()
+        # cleanup observer
+        observer.stop()
+        observer.join()
 
     grade_items_logging.log_message(False,"","","","","grade_scheduler.py terminated")
 
