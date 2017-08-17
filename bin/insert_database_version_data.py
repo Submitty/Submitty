@@ -155,6 +155,7 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                    autograding_hidden_extra_credit=hidden_ec,
                    submission_time=submission_time)
     db.close()
+    engine.dispose()
 
 
 def get_testcases(semester, course, g_id):
