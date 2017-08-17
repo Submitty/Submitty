@@ -486,6 +486,17 @@ ORDER BY gcm_order ASC
         }
         return $return;
     }
+    
+    public function getGradeableComponentMarksData($gc_id, $gd_id, $gcd_grader_id="") {
+        $params = array($gc_id, $gd_id);
+        $and = "";
+        if($gcd_grader_id != "") {
+            $and = " AND gcd_grader_id = {$gcd_grader_id}";
+            $params[] = $gcd_grader_id;
+        }
+        $this->course_db->query("SELECT gcm_id FROM gradeable_component_mark_data WHERE gc_id = ? AND gd_id=?{$and}", $params);
+        return $this->course_db->rows();
+    }
 
 // This has to be updated to also load components for each version
     public function getGradeableVersions($g_id, $user_id, $team_id, $due_date) {
@@ -1063,26 +1074,24 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
 DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
     }
 
-    public function checkGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
-        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", 
-          array($component->getId(), $gd_id, $grader_id));
+    public function checkGradeableComponentData($gd_id, GradeableComponent $component, $grader_id="") {
+        $params = array($component->getId(), $gd_id);
+        $and = "";
+        if($grader_id != "") {
+            $and = " AND gcd_grader_id=?";
+            $params[] = $grader_id;
+        }
+        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component_data WHERE gc_id=? AND gd_id=?{$and}", $params);
         if ($this->course_db->row()['cnt'] == 0) {
           return false;
         }
         return true;
     }
 
-    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark, $gcd_grader_id="") {
-        if($gcd_grader_id === "") {
-            $params = array($gc_id, $gd_id, $mark->getId());
-            $and = "";
-        }
-        else {
-            $params = array($gc_id, $gd_id, $mark->getId(), $gcd_grader_id);
-            $and = " AND gcd_grader_id=?";
-        }
+    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark, $gcd_grader_id) {
+        $params = array($gc_id, $gd_id, $mark->getId(), $gcd_grader_id);
         $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?{$and}", $params);
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=? AND gcd_grader_id=?", $params);
     }
 
     public function getDataFromGCMD($gc_id, GradeableComponentMark $mark) {
