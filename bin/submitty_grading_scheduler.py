@@ -217,6 +217,22 @@ def launch_workers(num_workers):
 
     except KeyboardInterrupt:
         grade_items_logging.log_message(False,"","","","","grade_scheduler.py keyboard interrupt")
+
+
+
+        # just kill everything in this group id right now
+        # NOTE:  this may be a bug if the grandchildren have a different group id and not be killed
+        os.kill(-os.getpid(), signal.SIGKILL)
+
+        # run this to check if everything is dead
+        #    ps  xao pid,ppid,pgid,sid,comm,user  | grep untrust
+
+
+
+        # everything's dead, including the main process so the rest of this will be ignored
+        # but this was mostly working...
+
+
         # terminate the jobs
         for i in range(0,num_workers):
             processes[i].terminate()
