@@ -145,6 +145,7 @@ TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
 // ==============================================================================
 // ==============================================================================
 
+
 TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
@@ -212,6 +213,30 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
   diff->type = ByLineByChar;
   return diff;
 }
+
+
+
+
+TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::string comparison = grader.value("comparison","byLinebyChar");
+  bool ignoreWhitespace = grader.value("ignoreWhitespace",true);
+  if (comparison == std::string("byLinebyChar")) {
+    return mysersDiffbyLinebyChar_doit(tc,j);
+  } else if (comparison == std::string("byLinebyWord")) {
+    return mysersDiffbyLinebyWord_doit(tc,j);
+  } else if (comparison == std::string("byLine")) {
+    if (ignoreWhitespace)
+      return mysersDiffbyLine_doit(tc,j);
+    else
+      return mysersDiffbyLineNoWhite_doit(tc,j);
+  } else {
+    std::cout << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
+    std::cerr << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
+    return new TestResults(0.0);
+  }
+}
+
+
 
 TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int autocheck_number) {
   std::string actual_file = j.value("actual_file","");

@@ -53,10 +53,8 @@ TestResults* warnIfEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 
 TestResults* ImageDiff_doit (const TestCase &tc, const nlohmann::json& j, int autocheck_num);
-TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::json& j);
-TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::json& j);
-TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j);
-TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::json& j);
+
+TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j);
 
 TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j);
 

@@ -221,10 +221,7 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
   else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);                }
   else if (method == "searchToken")                { return searchToken_doit(*this,grader);                 }
   else if (method == "intComparison")              { return intComparison_doit(*this,grader);               }
-  else if (method == "myersDiffbyLinebyChar")      { return myersDiffbyLinebyChar_doit(*this,grader);       }
-  else if (method == "myersDiffbyLinebyWord")      { return myersDiffbyLinebyWord_doit(*this,grader);       }
-  else if (method == "myersDiffbyLine")            { return myersDiffbyLine_doit(*this,grader);             }
-  else if (method == "myersDiffbyLineNoWhite")     { return myersDiffbyLineNoWhite_doit(*this,grader);      }
+  else if (method == "diff")                       { return diff_doit(*this,grader);                        }
   else if (method == "diffLineSwapOk")             { return diffLineSwapOk_doit(*this,grader);              }
   else if (method == "fileExists")                 { return fileExists_doit(*this,grader);                  }
   else if (method == "warnIfNotEmpty")             { return warnIfNotEmpty_doit(*this,grader);              }
