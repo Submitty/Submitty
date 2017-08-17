@@ -43,7 +43,17 @@ SET default_with_oids = false;
 
 CREATE TABLE courses (
     semester character varying(255) NOT NULL,
-    course character varying(255) NOT NULL
+    course character varying(255) NOT NULL,
+    status smallint NOT NULL default 1
+);
+
+
+CREATE TABLE mapped_courses (
+    semester character varying(255) NOT NULL,
+    course character varying(255) NOT NULL,
+    registration_section integer NOT NULL,
+    mapped_course character varying(255) NOT NULL,
+    mapped_section integer NOT NULL
 );
 
 
@@ -102,6 +112,8 @@ CREATE TABLE users (
 ALTER TABLE ONLY courses
     ADD CONSTRAINT courses_pkey PRIMARY KEY (semester, course);
 
+ALTER TABLE ONLY mapped_courses
+    ADD CONSTRAINT mapped_courses_pkey PRIMARY KEY (semester, course, registration_section);
 
 --
 -- TOC entry 2037 (class 2606 OID 19658)
@@ -130,6 +142,8 @@ ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
 
 
+ALTER TABLE ONLY mapped_courses
+    ADD CONSTRAINT mapped_courses_fkey FOREIGN KEY (semester, mapped_course) REFERENCES courses(semester, course) ON UPDATE CASCADE;
 --
 -- TOC entry 2039 (class 2606 OID 19659)
 -- Name: courses_users_course_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
@@ -206,6 +220,7 @@ BEGIN
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
 -- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
 -- table users.  NOTE: INSERT should not trigger this function as function
