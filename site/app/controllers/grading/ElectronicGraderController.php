@@ -748,7 +748,8 @@ class ElectronicGraderController extends AbstractController {
             if($gradeable->getGdId() == null) {
                 $gradeable->saveData2();
             }
-
+            $old_grader = (isset($_POST['old_grader']) && $_POST['old_grader'] != null) ? $_POST['old_grader']: null;
+            $replace = false;
             if($all_false === true) {
                 $component->deleteData($gradeable->getGdId());
                 $debug = 'delete';
@@ -756,6 +757,12 @@ class ElectronicGraderController extends AbstractController {
                 if($mark_modified === true) { //only change the component information is the mark was modified
                     if ($component->getGrader() === null || $overwrite === "true") {
                         $component->setGrader($this->core->getUser());
+                        if($old_grader != null && $old_grader != $component->getGrader()->getId()) {
+                            $replace = true;
+                        }
+                        else {
+                            $overwrite = 'false';
+                        }
                     }     
                     
                     $component->setGradedVersion($_POST['active_version']);
@@ -775,7 +782,12 @@ class ElectronicGraderController extends AbstractController {
                 $mark->save();
                 $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                 if($all_false === false) {
-                    $mark->saveData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId(), $overwrite === 'true');
+                    if($replace) {
+                        $mark->saveData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId(), $old_grader);
+                    }
+                    else {
+                        $mark->saveData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
+                    }
                 }
                 $index++;
             }
@@ -798,7 +810,7 @@ class ElectronicGraderController extends AbstractController {
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
 
-        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug);
+        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite);
         $this->core->getOutput()->renderJson($response);
         return $response;
     }
