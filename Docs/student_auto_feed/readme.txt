@@ -4,7 +4,7 @@ These are code examples for any University to use as a basis to have student
 enrollment data inserted or updated into any or every course's database.  Users
 table data backup and recovery example code is also provided.
 
-Requires at least PHP 5.4 with pgsql and iconv extensions.
+Requires at least PHP 5.4 with pgsql, iconv, and ssh2 extensions.
 
 THIS SOFTWARE IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
 COMPATIBLE WITH YOUR UNIVERSITY'S INFORMATION SYSTEMS.  THIS IS ONLY A CODE

@@ -6,7 +6,7 @@
  * submitty_student_auto_feed.php
  * By Peter Bailie, Systems Programmer (RPI dept of computer science)
  *
- * Requires minimum PHP version 5.4 with pgsql and iconv extensions.
+ * Requires minimum PHP version 5.4 with pgsql, iconv, and ssh2 extensions.
  *
  * This class will read a student enrollment CSV feed provided by the campus
  * registrar or data warehouse and "upsert" (insert/update) the feed into
@@ -85,9 +85,13 @@ class submitty_student_auto_feed {
             //Auto-run class processes by executing them in constructor.
             //Halts when FALSE is returned by a method.
             switch(false) {
-            //Load CSV data and make sure data is Ok to process.
-            case $this->load_and_validate_csv():
-                $this->log_it("CSV feed file could not be loaded or failed validation.");
+            //Load CSV data
+			case $this->load_csv($csv_data):
+				$this->log_it("Student CSV data could not be read.");
+				break;
+			//Validate CSV data (anything pertinent is stored in self::$data property)
+            case $this->validate_csv($csv_data):
+                $this->log_it("Student CSV data failed validation.");
                 break;
             //Chooses which data upsert function to run based on psql version.
             //(upsert v9.4 with batch upsert or v9.5 with CONFLICT resloution upsert)
@@ -114,33 +118,34 @@ class submitty_student_auto_feed {
 
         //Output logs, if any.
         if (!empty(self::$log_msg_queue)) {
-            error_log(self::$log_msg_queue, 1, ERROR_E_MAIL);    //to email
-            error_log(self::$log_msg_queue, 3, ERROR_LOG_FILE);  //to file
-        }
-    }
+        	if (!is_null(ERROR_EMAIL)) {
+         	    error_log(self::$log_msg_queue, 1, ERROR_EMAIL);  //to email
+         	}
 
-    private function load_and_validate_csv() {
+	        error_log(self::$log_msg_queue, 3, ERROR_LOG_FILE);  //to file
+        }
+	}
+
+    private function validate_csv($csv_data) {
     //IN:  No parameters
     //OUT: No specific return, but self::$data property will contain csv data.
     //PURPOSE: Load CSV data, run some error checks, set data to class property.
 
-        $csv_file = CSV_FILE;
-        $loaded_data = file($csv_file, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
-        if ($loaded_data === false) {
-            $this->log_it("Failed to load {$csv_file}.");
+        if (empty($csv_data)) {
+            $this->log_it("No data read from student CSV file.");
             return false;
         }
 
         //Windows generated data feeds should be converted to UTF-8
         if (CONVERT_CP1252) {
-            foreach($loaded_data as &$row) {
+            foreach($csv_data as &$row) {
                 $row = iconv("WINDOWS-1252", "UTF-8//TRANSLIT", $row);
             } unset($row);
         }
 
         //Validate CSV
         $validate_num_fields = VALIDATE_NUM_FIELDS;
-        foreach($loaded_data as $index => $row) {
+        foreach($csv_data as $index => $row) {
             //Trim any extraneous whitespaces from end of each row.
             //Split each row by delim character so that individual fields are indexed.
             $row = explode(CSV_DELIM_CHAR, trim($row, ' '));
@@ -293,6 +298,39 @@ SQL;
         }
 
         return $mappings;
+    }
+
+    private function load_csv(&$csv_data) {
+
+    	$csv_file = CSV_FILE;
+
+    	switch(CSV_AUTH) {
+    	case 'local':
+			$host = "";
+	    	break;
+    	case 'remote_password':
+			$ssh2 = ssh2_connect(CSV_REMOTE_SERVER, 22);
+			if (ssh2_auth_password($ssh2, CSV_AUTH_USER, CSV_AUTH_PASSWORD)) {
+				$sftp = ssh2_sftp($ssh2);
+				$host = "ssh2.sftp://" . intval($sftp);
+			} else {
+				return false;
+			}
+    		break;
+    	case 'remote_keypair':
+			$ssh2 = ssh2_connect(CSV_REMOTE_SERVER, 22);
+			if (ssh2_auth_pubkey_file($ssh2, CSV_AUTH_USER, CSV_AUTH_PUBKEY, CSV_AUTH_PRIVKEY, CSV_PRIVKEY_PASSPHRASE)) {
+				$sftp = ssh2_sftp($ssh2);
+				$host = "ssh2.sftp://" . intval($sftp);
+			} else {
+				return false;
+			}
+    		break;
+    	default:
+    		return false;
+    	}
+
+	   	$csv_data = file("{$host}{$csv_file}", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     }
 
     private function upsert_psql94() {
