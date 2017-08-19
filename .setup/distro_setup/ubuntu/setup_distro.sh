@@ -128,7 +128,7 @@ apt-get install -qqy php7.0-zip
 # DOCUMENTATION FIXME: Go through this list and categorize purpose of
 # these packages (as appropriate.. )
 
-apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
+apt-get install -qqy clang autoconf automake autotools-dev diffstat finger gdb git git-man \
 hardening-includes p7zip-full patchutils \
 libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
 javascript-common  \
@@ -139,46 +139,12 @@ g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler
 echo "installing cmake"
 apt-get install -qqy cmake
 
-#GLEW and GLM
-echo "installing graphics libraries"
-apt-get install -qqy glew-utils libglew-dev libglm-dev
-apt-get install -qqy libxrandr-dev xorg-dev
-
-#CMAKE permissions
-#These permissions are necessary so that untrusted user can use pkgconfig with cmake.
-#Note that pkgconfig does not appear until after graphics installs (Section above)
-chmod -R o+rx /usr/local/lib/pkgconfig
-chmod -R o+rx /usr/local/lib/cmake
-
 # Install Oracle 8 Non-Interactively
 echo "installing java8"
 apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
 apt-get install -qqy oracle-java8-set-default
 
-# Install Racket and Swi-prolog for Programming Languages
-echo "installing Racket and Swi-prolog"
-apt-add-repository -y ppa:plt/racket  > /dev/null 2>&1
-apt-get install -qqy racket > /dev/null 2>&1
-apt-get install -qqy swi-prolog > /dev/null 2>&1
-
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
-
-# Used by Network Programming class
-apt-get install -qqy libssl-dev
-
-#GLFW
-echo "installing GLFW"
-wget https://github.com/glfw/glfw/releases/download/3.2.1/glfw-3.2.1.zip
-unzip glfw-3.2.1.zip
-cd glfw-3.2.1
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-cd ../..
-rm -R glfw-3.2.1
-rm glfw-3.2.1.zip
 
 apt-get -qqy autoremove

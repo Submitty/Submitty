@@ -14,7 +14,7 @@ import glob
 import os
 import pwd
 import shutil
-
+import json
 import yaml
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -107,7 +107,9 @@ def main():
                   .format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
 
     if cmd_exists('psql'):
-        os.environ['PGPASSWORD'] = 'hsdbu'
+        with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
+            submitty_config_json = json.load(submitty_config)
+            os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
         os.system("psql -U hsdbu --list | grep submitty* | awk '{print $1}' | "
                   "xargs -I \"@@\" dropdb -h localhost -U hsdbu \"@@\"")
         os.system('psql -d postgres -U hsdbu -c "CREATE DATABASE submitty"')

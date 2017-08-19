@@ -7,6 +7,9 @@ use app\models\User;
 
 class SimpleGraderController extends AbstractController  {
     public function run() {
+        if(!$this->core->getUser()->accessGrading()) {
+            $this->core->getOutput()->showError("This account doesn't have access to grading");
+        }
         switch ($_REQUEST['action']) {
             case 'lab':
                 $this->grade('lab');
@@ -40,7 +43,7 @@ class SimpleGraderController extends AbstractController  {
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getName()}");
 
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -94,7 +97,7 @@ class SimpleGraderController extends AbstractController  {
         $gradeable = $this->core->getQueries()->getGradeable($g_id, $user_id);
 
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -152,7 +155,7 @@ class SimpleGraderController extends AbstractController  {
         $g_id = $_POST['g_id'];
         $gradeable = $this->core->getQueries()->getGradeable($g_id, $username);
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade {$gradeable->getName()}";
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 

@@ -416,7 +416,7 @@ function cancelMark(num, gradeable_id, user_id, gc_id) {
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_gradeable_comment'}),
             data: {
                 'gradeable_id' : gradeable_id,
-                'user_id' : user_id
+                'anon_id' : user_id
             },
             success: function(data) {
                 console.log("success for canceling gradeable comment");
@@ -445,7 +445,7 @@ function cancelMark(num, gradeable_id, user_id, gc_id) {
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
             data: {
                 'gradeable_id' : gradeable_id,
-                'user_id' : user_id,
+                'anon_id' : user_id,
                 'gradeable_component_id' : gc_id
             },
             success: function(data) {
@@ -501,6 +501,8 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         var comment_row = $('#comment-general-id');
         var gradeable_comment = comment_row.val();
         var current_question_text = $('#rubric-textarea-custom');
+        var overwrite = $('#overwrite-id').is(":checked");
+        console.log(overwrite);
         current_question_text[0].innerHTML = '<pre>' + gradeable_comment + '</pre>';
 
         $.ajax({
@@ -509,7 +511,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             async: sync,
             data: {
                 'gradeable_id' : gradeable_id,
-                'user_id' : user_id,
+                'anon_id' : user_id,
                 'active_version' : active_version,
                 'gradeable_comment' : gradeable_comment
             },
@@ -645,26 +647,35 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         calculatePercentageTotal();
 
         var overwrite = "false";
+        var old_grader = document.getElementById("graded-by-"+num);
+        if(old_grader.innerHTML == "Ungraded!") {
+            old_grader = null;
+        }
+        else {
+            old_grader = old_grader.innerHTML.slice(10, old_grader.innerHTML.length);
+        }
+        console.log(old_grader);
         if($('#overwrite-id').is(':checked')) {
             overwrite = "true";
         } else {
             overwrite = "false";
         }
-
+        console.log(mark_data);
         $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
             async: sync,
             data: {
                 'gradeable_id' : gradeable_id,
-                'user_id' : user_id,
+                'anon_id' : user_id,
                 'gradeable_component_id' : gc_id,
                 'num_mark' : arr_length,
                 'active_version' : active_version,
                 'custom_points' : custom_points,
                 'custom_message' : custom_message,
                 'overwrite' : overwrite,
-                marks : mark_data
+                'marks' : mark_data,
+                'old_grader' : old_grader
             },
             success: function(data) {
                 console.log("success for saving a mark");

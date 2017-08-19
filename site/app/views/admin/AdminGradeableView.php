@@ -1407,6 +1407,11 @@ function createCrossBrowserJSDate(val){
                 if($(this).val() == 'true') {
                     $('.peer_input').show();
                     $('#peer_averaging_scheme').show();
+                    if($('#team_yes_radio').is(':checked')) {
+                        $('#team_yes_radio').prop('checked', false);
+                        $('#team_no_radio').prop('checked', true);
+                        $('input:radio[name="team_assignment"]').trigger("change");
+                    }
                 }
             }
         });
@@ -1576,6 +1581,11 @@ function createCrossBrowserJSDate(val){
             $('input[name="eg_max_team_size"]').val('{$electronic_gradeable['eg_max_team_size']}');
             $('input[name="date_team_lock"]').val('{$electronic_gradeable['eg_team_lock_date']}');
             $('#team_yes').show();
+            if($('#peer_yes_radio').is(':checked')) {
+                $('#peer_yes_radio').prop('checked', false);
+                $('#peer_no_radio').prop('checked', true);
+                $('input:radio[name="peer_grading"]').trigger("change");
+            }
         }
         else {
             $('#team_yes').hide();

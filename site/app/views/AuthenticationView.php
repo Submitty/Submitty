@@ -6,7 +6,7 @@ class AuthenticationView extends AbstractView {
     public function loginForm() {
         $return = <<<HTML
 <div class="content">
-    <h2>Login for {$this->core->getFullCourseName()}</h2>
+    <h2>Submitty Login</h2>
     <div class="sub">
         <form action="{$this->core->getConfig()->getSiteUrl()}" method="post" id="login">
             <input type="hidden" name="component" value="authentication" />

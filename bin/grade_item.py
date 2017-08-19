@@ -41,6 +41,7 @@ def get_queue_time(next_directory,next_to_grade):
 def get_submission_path(next_directory,next_to_grade):
     queue_file = os.path.join(next_directory,next_to_grade)
     if not os.path.isfile(queue_file):
+        grade_items_logging.log_message("ERROR: the file does not exist " + queue_file)
         raise SystemExit("ERROR: the file does not exist",queue_file)
     with open(queue_file, 'r') as infile:
         obj = json.load(infile)
@@ -73,6 +74,7 @@ def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
 # it will overwrite files with the same name if they exist
 def copy_contents_into(source,target):
     if not os.path.isdir(target):
+        grade_items_logging.log_message("ERROR: the target directory does not exist " + target)
         raise SystemExit("ERROR: the target directory does not exist '", target, "'")
     if os.path.isdir(source):
         for item in os.listdir(source):
@@ -81,6 +83,7 @@ def copy_contents_into(source,target):
                     # recurse
                     copy_contents_into(os.path.join(source,item),os.path.join(target,item))
                 elif os.path.isfile(os.path.join(target,item)):
+                    grade_items_logging.log_message("ERROR: the target subpath is a file not a directory '" + os.path.join(target,item) + "'")
                     raise SystemExit("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
                 else:
                     # copy entire subtree
@@ -107,20 +110,7 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
             
 
 # give permissions to all created files to the hwcron user
-def untrusted_grant_read_access(which_untrusted,my_dir):
-    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                     which_untrusted,
-                     "/usr/bin/find",
-                     my_dir,
-                     "-user",
-                     which_untrusted,
-                     "-exec",
-                     "/bin/chmod",
-                     "o+rwx",   # FIXME: needed more permissions to get tutorial_10_java_coverage to work
-                     "{}",
-                     ";"])
-# give permissions to all created files to the hwcron user
-def untrusted_grant_write_access(which_untrusted,my_dir):
+def untrusted_grant_rwx_access(which_untrusted,my_dir):
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
                      which_untrusted,
                      "/usr/bin/find",
@@ -133,6 +123,7 @@ def untrusted_grant_write_access(which_untrusted,my_dir):
                      "{}",
                      ";"])
 
+
 # ==================================================================================
 # ==================================================================================
 def just_grade_item(next_directory,next_to_grade,which_untrusted):
@@ -141,6 +132,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
+        grade_items_logging.log_message("ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
     # --------------------------------------------------------
@@ -149,6 +141,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
                                    "submissions",obj["gradeable"],obj["who"],str(obj["version"]))
     if not os.path.isdir(submission_path):
+        grade_items_logging.log_message("ERROR: the submission directory does not exist" + submission_path)
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
     print ("pid",my_pid,"GRADE THIS", submission_path)
 
@@ -182,8 +175,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
-    tmp=tempfile.mkdtemp()
-
+    tmp=os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
+    shutil.rmtree(tmp,ignore_errors=True)
+    os.makedirs(tmp)
+    
     # switch to tmp directory
     os.chdir(tmp)
 
@@ -238,9 +233,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # give the untrusted user read/write/execute permissions on the tmp directory & files
     add_permissions_recursive(tmp_compilation,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IXOTH)
+                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
+                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
+                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
 
     add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH)
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
@@ -262,7 +257,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
 
 
-    untrusted_grant_read_access(which_untrusted,tmp_compilation)
+    untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
         
     # remove the compilation program
     os.remove(os.path.join(tmp_compilation,"my_compile.out"))
@@ -302,7 +297,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     add_permissions_recursive(tmp_work,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IXOTH)
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     # run the run.out as the untrusted user
     with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
@@ -324,8 +319,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         print ("pid",my_pid,"RUNNER FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","RUNNER FAILURE")
 
-    untrusted_grant_read_access(which_untrusted,tmp_work)
-    untrusted_grant_write_access(which_untrusted,tmp_compilation)
+    untrusted_grant_rwx_access(which_untrusted,tmp_work)
+    untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
@@ -357,7 +352,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     add_permissions_recursive(tmp_work,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH)
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     add_permissions(os.path.join(tmp_work,"my_validator.out"),stat.S_IROTH | stat.S_IXOTH)
 
@@ -378,8 +373,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         print ("pid",my_pid,"VALIDATOR FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","VALIDATION FAILURE")
 
-    untrusted_grant_read_access(which_untrusted,tmp_work)
-    untrusted_grant_write_access(which_untrusted, tmp_work) #FIXME
+    untrusted_grant_rwx_access(which_untrusted,tmp_work)
 
     # grab the result of autograding
     grade_result = ""
