@@ -74,7 +74,7 @@ class BaseTestCase(unittest2.TestCase):
             user_name = self.user_name
 
         self.get(url)
-        print(self.driver.page_source)
+        # print(self.driver.page_source)
 
         self.assertIn(title, self.driver.title)
         self.driver.find_element_by_name('user_id').send_keys(user_id)
