@@ -120,7 +120,6 @@ before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
-  - curl http://localhost/cgi-bin/pam_check.cgi
 
 script:
   # if these fail, travis fails
@@ -135,7 +134,7 @@ after_script:
   # Eventually this should be moved into the "script" once we've gotten the build to a point where all contained
   # python files will actually pass (which a lot right now will not)
   # - pylint_runner3 -v ${TRAVIS_BUILD_DIR}
-  - sudo ./.setup/travis/print_debug.sh
+  # - sudo ./.setup/travis/print_debug.sh
   # if this fails, it only prints, travis does not fail
   - sudo cat /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh
   - sudo cat /usr/local/submitty/site/config/master.ini
