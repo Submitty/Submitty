@@ -72,11 +72,14 @@ install:
   - travis_retry composer install --prefer-dist --no-interaction
   - pip3 install -U pip
   - pip3 install python-pam
-  - pip3 install psycopg2
   - pip3 install PyYAML
+  - pip3 install psycopg2
   - pip3 install sqlalchemy
   - pip3 install pylint_runner
+  - pip3 install psutil
   - pip3 install python-dateutil
+  - pip3 install watchdog
+  - pip3 install xlsx2csv
   - pip3 install selenium
   - pip3 install nose2
   - pip3 install unittest2

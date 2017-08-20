@@ -351,7 +351,7 @@ def get_php_db_password(password):
         ["php", "-r", "print(password_hash('{}', PASSWORD_DEFAULT));".format(password)],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (out, err) = proc.communicate()
-    return out
+    return out.decode('utf-8')
 
 
 def get_current_semester():
