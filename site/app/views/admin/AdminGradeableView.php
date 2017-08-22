@@ -609,7 +609,8 @@ HTML;
                                   'question_total'        => 0,
                                   'question_extra_credit' => 0,
                                   'peer_component'        => 0,
-                                  'page_component'        => 1);
+                                  'page_component'        => 1,
+                                  'question_order'        => 0);
     }
 
     //this is a hack
@@ -617,6 +618,7 @@ HTML;
     $index_question = 0;
     foreach ($old_questions as $num => $question) {
         if($num == 0 || $num == -1) continue;
+        if($question['question_order'] == -1) continue;
         $html_output .= <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;

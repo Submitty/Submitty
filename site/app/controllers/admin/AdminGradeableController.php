@@ -229,12 +229,12 @@ class AdminGradeableController extends AbstractController {
                         $old_component = $old_component[0];
                     }
                     if ($x < $num_questions && $x < $num_old_components) {
-                        if($old_component->getTitle() === "Grading Complete") {
+                        if($old_component->getTitle() === "Grading Complete" || $old_component->getOrder() == -1) {
                             if($peer_grading_complete_score == 0) {
                                 $this->core->getQueries()->deleteGradeableComponent($old_component);
                             }
-                            else if($old_component->getMaxScore() != $peer_grading_complete_score) {
-                                $old_component->setMaxScore($peer_grading_complete_score);
+                            else if($old_component->getMaxValue() != $peer_grading_complete_score) {
+                                $old_component->setMaxValue($peer_grading_complete_score);
                                 $old_component->setUpperClamp($peer_grading_complete_score);
                                 $this->core->getQueries()->updateGradeableComponent($old_component);
                             }
@@ -326,6 +326,9 @@ class AdminGradeableController extends AbstractController {
                     if(is_array($comp)) {
                         $comp = $comp[0];
                     }
+                    if($comp->getOrder() == -1) {
+                        continue;
+                    }
                     $num_marks = 0;
                     foreach($_POST as $k=>$v){
                         if(strpos($k,'mark_points_' . $index) !== false){
@@ -350,6 +353,9 @@ class AdminGradeableController extends AbstractController {
                 foreach ($components as $comp) {
                     if(is_array($comp)) {
                         $comp = $comp[0];
+                    }
+                    if($comp->getOrder() == -1) {
+                        continue;
                     }
                     $num_marks = 0; //current number of marks
                     foreach($_POST as $k=>$v){
