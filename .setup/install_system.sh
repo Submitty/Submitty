@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Usage:
+#   install_system.sh [--vagrant] [<extra> <extra> ...]
+
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
@@ -27,10 +30,11 @@ COURSE_BUILDERS_GROUP=course_builders
 # PROVISION SETUP
 #################
 
-if [[ $1 == vagrant ]]; then
+if [[ $1 == "--vagrant" ]]; then
   echo "Non-interactive vagrant script..."
   export VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
+  shift
 else
   #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
   export VAGRANT=0
@@ -42,16 +46,15 @@ fi
 
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
+#################################################################
+# STACK SETUP
+#################
+
 if [ ${VAGRANT} == 1 ]; then
     # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
 fi
-
-# Check to make sure you got the right setup by typing:
-#   apache2ctl -V | grep MPM
-# (it should say event)
-apachectl -V | grep MPM
 
 #################################################################
 # USERS SETUP
@@ -381,16 +384,17 @@ if [[ ${VAGRANT} == 1 ]]; then
     DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g")
 
     rm -rf ${SUBMITTY_DATA_DIR}/logs/*
-    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/*
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/autograding
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
+    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/autograding
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
     chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/logs/autograding
     chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/access
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/site_errors
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/access ${SUBMITTY_DATA_DIR}/logs/access
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/access
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/site_errors
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
     chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/access
     chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
     chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site_errors

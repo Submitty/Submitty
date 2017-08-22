@@ -55,19 +55,127 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $this->core->getOutput()->addBreadcrumb("Status {$gradeable->getName()}");
-
+        $peer = false;
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == 4)) {
+                $peer = true;
+            }
+            else {
+                $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            }
         }
 
         /*
          * we need number of students per section
          */
+        
+        $no_team_users = array();
+        $graded_components = array();
+        $graders = array();
+        $average_scores = array();
         $sections = array();
-        $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id);
-        $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id);
-        $this->getStats($gradeable, $sections);
+        $total_users = array();
+        if ($peer) {
+            $peer_grade_set = $gradeable->getPeerGradeSet();
+            $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
+            $num_components = $gradeable->getNumPeerComponents();
+            $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
+            $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
+            $component_averages = array();
+            $overall_average = array();
+        }
+        else if ($gradeable->isGradeByRegistration()) {
+            if(!$this->core->getUser()->accessFullGrading()){
+                $sections = $this->core->getUser()->getGradingRegistrationSections();
+            }
+            else {
+                $sections = $this->core->getQueries()->getRegistrationSections();
+                foreach ($sections as $i => $section) {
+                    $sections[$i] = $section['sections_registration_id'];
+                }
+            }
+            $section_key='registration_section';
+            if (count($sections) > 0) {
+                $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
+            }
+            $num_components = $gradeable->getNumTAComponents();
+        }
+        else {
+            if(!$this->core->getUser()->accessFullGrading()){
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+            }
+            else {
+                $sections = $this->core->getQueries()->getRotatingSections();
+                foreach ($sections as $i => $section) {
+                    $sections[$i] = $section['sections_rotating_id'];
+                }
+            }
+            $section_key='rotating_section';
+            if (count($sections) > 0) {
+                $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable_id, $sections);
+            }
+        }
+
+        if (count($sections) > 0) {
+            if ($gradeable->isTeamAssignment()) {
+                $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
+                $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key);
+            }
+            else {
+                $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
+                $no_team_users = array();
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key);
+                $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id);
+                $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id);
+            }
+            $num_components = $gradeable->getNumTAComponents();
+        }
+        $sections = array();
+        if (count($total_users) > 0) {
+            if ($peer) {
+                $sections['stu_grad'] = array(
+                    'total_components' => $num_components * $peer_grade_set,
+                    'graded_components' => $my_grading,
+                    'graders' => array()
+                );
+                $sections['all'] = array(
+                    'total_components' => 0,
+                    'graded_components' => 0,
+                    'graders' => array()
+                );
+                foreach($total_users as $key => $value) {
+                    if($key == 'NULL') continue;
+                    $sections['all']['total_components'] += $value *$num_components*$peer_grade_set;
+                    $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
+                }
+                $sections['all']['total_components'] -= $peer_grade_set*$num_components;
+                $sections['all']['graded_components'] -= $my_grading;
+            } 
+            else {
+                
+                foreach ($total_users as $key => $value) {
+                    $sections[$key] = array(
+                        'total_components' => $value * $num_components,                        
+                        'graded_components' => 0,
+                        'graders' => array()
+                    );
+                    if (isset($graded_components[$key])) {
+                        $sections[$key]['graded_components'] = intval($graded_components[$key]);
+                    }
+                    if (isset($graders[$key])) {
+                        $sections[$key]['graders'] = $graders[$key];
+                    }
+                    if ($gradeable->isTeamAssignment()) {
+                    $sections[$key]['no_team'] = $no_team_users[$key];
+                    }
+                    if (isset($graded_components[$key])) {
+                        $sections[$key]['graded_components'] = intval($graded_components[$key]);
+                    }
+                }
+            }
+        }
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $overall_average);
     }
 
@@ -78,18 +186,28 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $this->core->getOutput()->addBreadcrumb("Details {$gradeable->getName()}");
-
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-        }
-
+        $peer = false;
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
         }
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
+                $peer = true;
+            }
+            else {
+                $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            }
+        }
+        
         $students = array();
-        if ($gradeable->isGradeByRegistration()) {
+        if ($peer) {
+            $student_ids = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
+            $graders = array();
+            $section_key = "registration_section";
+        }
+        else if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
             if (!isset($_GET['view']) || $_GET['view'] !== "all") {
@@ -109,8 +227,10 @@ class ElectronicGraderController extends AbstractController {
         if ((isset($_GET['view']) && $_GET['view'] === "all") || ($this->core->getUser()->accessAdmin() && count($sections) === 0)) {
             $students = $this->core->getQueries()->getAllUsers($section_key);
         }
-
-        $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
+        
+        if(!$peer) {
+            $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
+        }
 
         $empty_teams = array();
         if ($gradeable->isTeamAssignment()) {
@@ -295,7 +415,6 @@ class ElectronicGraderController extends AbstractController {
                 $this->core->addErrorMessage("ERROR: {$team_id} is not a valid Team ID");
                 $this->core->redirect($return_url);
             }
-
             $team_members = $team->getMembers();
             $add_user_ids = array();
             foreach($user_ids as $id) {
@@ -420,15 +539,27 @@ class ElectronicGraderController extends AbstractController {
     public function showGrading() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-
+        $peer = false;
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup()==4) {
+                $peer = true;
+            }
+            else {
+                $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            }
         }
+        
 
         $graded = 0;
         $total = 0;
-        if ($gradeable->isGradeByRegistration()) {
+        if($peer) {
+            $section_key = 'registration_section';
+            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
+            $total = $gradeable->getPeerGradeSet();
+            $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / $gradeable->getNumPeerComponents();
+        }
+        else if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
             if ($this->core->getUser()->accessAdmin() && $sections == null) {
@@ -463,13 +594,19 @@ class ElectronicGraderController extends AbstractController {
         else {
             $progress = round(($graded / $total) * 100, 1);
         }
-
-        $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
+        if(!$peer) {
+            $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
+        }
         $gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
-
-        $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
+        
+        $who_id = isset($_REQUEST['who_id']) ? $this->core->getQueries()->getUserFromAnon($_REQUEST['who_id']): "";
+        $who_id = isset($who_id[$_REQUEST['who_id']]) ? $who_id[$_REQUEST['who_id']] : "";
         if (($who_id !== "") && ($this->core->getUser()->getGroup() === 3) && !in_array($who_id, $user_ids_to_grade)) {
             $this->core->addErrorMessage("You do not have permission to grade {$who_id}");
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+        }
+        if($peer && !in_array($who_id, $user_ids_to_grade)) {
+            $_SESSION['messages']['error'][] = "You do not have permission to grade this student. who_id = ".$who_id[$_REQUEST['who_id']];
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
@@ -506,18 +643,28 @@ class ElectronicGraderController extends AbstractController {
     }
 
     public function saveSingleComponent() {
+        $grader_id = $this->core->getUser()->getId();
         $gradeable_id = $_POST['gradeable_id'];
-        $user_id = $_POST['user_id'];
+        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        $overwrite = $_POST['overwrite'];
         $debug = "";
         $mark_modified = false;
-
-        //makes sure only the users a grader is assigned to can be graded
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
-            return;
+        
+        if ($this->core->getUser()->getGroup() === 4) {
+            if(!$gradeable->getPeerGrading()) {
+                $this->core->addErrorMessage("You do not have permission to grade this");
+                return;
+            }
+            else {
+                $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
+                if(!in_array($user_id, $user_ids_to_grade)) {
+                    $this->core->addErrorMessage("You do not have permission to grade this student");
+                    return;
+                }
+            }
         }
-        if ($this->core->getUser()->getGroup() === 3) {
+        else if ($this->core->getUser()->getGroup() === 3) {
             if ($gradeable->isGradeByRegistration()) {
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
                 $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
@@ -532,114 +679,145 @@ class ElectronicGraderController extends AbstractController {
                 return;
             }
         }
-
         foreach ($gradeable->getComponents() as $component) {
-            if ($component->getId() != $_POST['gradeable_component_id']) {
-                continue;
-            }
-            else {
-                //checks if a component has changed, i.e. a mark has been selected or unselected since last time
-                //also checks if all the marks are false
-                $index = 0;
-                $temp_mark_selected = false;
-                $all_false = true;
-                foreach ($component->getMarks() as $mark) {
-                    $temp_mark_selected = ($_POST['marks'][$index]['selected'] == 'true') ? true : false;
-                    if($all_false === true && $temp_mark_selected === true) {
-                        $all_false = false;
-                    }
-                    if($temp_mark_selected !== $mark->getHasMark()) {
-                        $mark_modified = true;
-                    }
-                    $index++;
+            if(is_array($component)) {
+                if($component[0]->getId() != $_POST['gradeable_component_id']) {
+                    continue;
                 }
-                for ($i = $index; $i < $_POST['num_mark']; $i++) {
-                    if ($_POST['marks'][$index]['selected'] == 'true') {
-                        $all_false = false;
-                        $mark_modified = true;
+                $found = false;
+                foreach($component as $peer) {
+                    if($peer->getGrader() === null) {
+                        $component = $peer;
+                        $found = true;
+                        break;
+                    }
+                    if($peer->getGrader()->getId() == $grader_id) {
+                        $component = $peer;
+                        $found = true;
                         break;
                     }
                 }
+                if(!$found){
+                    $component = $this->core->getQueries()->getGradeableComponents($gradeable->getId())[$component[0]->getId()];
+                    $marks = $this->core->getQueries()->getGradeableComponentsMarks($component->getId());
+                    $component->setMarks($marks);
+                }
+            }
+            else if ($component->getId() != $_POST['gradeable_component_id']) {
+                continue;
+            }
+            //checks if a component has changed, i.e. a mark has been selected or unselected since last time
+            //also checks if all the marks are false
+            $index = 0;
+            $temp_mark_selected = false;
+            $all_false = true;
+            foreach ($component->getMarks() as $mark) {
+                $temp_mark_selected = ($_POST['marks'][$index]['selected'] == 'true') ? true : false;
+                if($all_false === true && $temp_mark_selected === true) {
+                    $all_false = false;
+                }
+                if($temp_mark_selected !== $mark->getHasMark()) {
+                    $mark_modified = true;
+                }
+                $index++;
+            }
+            for ($i = $index; $i < $_POST['num_mark']; $i++) {
+                if ($_POST['marks'][$index]['selected'] == 'true') {
+                    $all_false = false;
+                    $mark_modified = true;
+                    break;
+                }
+            }
 
-                if($all_false === true) {
-                    if($_POST['custom_message'] != "" || floatval($_POST['custom_points']) != 0) {
-                        $all_false = false;
+            if($all_false === true) {
+                if($_POST['custom_message'] != "" || floatval($_POST['custom_points']) != 0) {
+                    $all_false = false;
+                }
+            }
+            
+            if($mark_modified === false) {
+                if ($component->getComment() != $_POST['custom_message']) {
+                    $mark_modified = true;
+                }
+                if ($component->getScore() != $_POST['custom_points']) {
+                    $mark_modified = true;
+                    break;
+                }
+            }
+            //if no gradeable id exists adds one to the gradeable data
+            if($gradeable->getGdId() == null) {
+                $gradeable->saveData2();
+            }
+            $old_grader = (isset($_POST['old_grader']) && $_POST['old_grader'] != null) ? $_POST['old_grader']: null;
+            $replace = false;
+            if($all_false === true) {
+                $component->deleteData($gradeable->getGdId());
+                $debug = 'delete';
+            } else {
+                if($mark_modified === true) { //only change the component information is the mark was modified
+                    if ($component->getGrader() === null || $overwrite === "true") {
+                        $component->setGrader($this->core->getUser());
+                        if($old_grader != null && $old_grader != $component->getGrader()->getId()) {
+                            $replace = true;
+                        }
+                        else {
+                            $overwrite = 'false';
+                        }
+                    }     
+                    
+                    $component->setGradedVersion($_POST['active_version']);
+                    $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                    $component->setComment($_POST['custom_message']);
+                    $component->setScore($_POST['custom_points']);
+                    $debug = $component->saveData($gradeable->getGdId(), $overwrite === 'true');
+                }
+            }
+            
+            $index = 0;
+            // save existing marks
+            foreach ($component->getMarks() as $mark) {
+                $mark->setPoints($_POST['marks'][$index]['points']);
+                $mark->setNote($_POST['marks'][$index]['note']);
+                $mark->setOrder($_POST['marks'][$index]['order']);
+                $mark->save();
+                $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
+                if($all_false === false) {
+                    if($replace) {
+                        $mark->saveData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId(), $old_grader);
+                    }
+                    else {
+                        $mark->saveData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
                     }
                 }
-                
-                if($mark_modified === false) {
-                    if ($component->getComment() != $_POST['custom_message']) {
-                        $mark_modified = true;
-                    }
-                    if ($component->getScore() != $_POST['custom_points']) {
-                        $mark_modified = true;
-                    }
+                $index++;
+            }
+            // create new marks
+            for ($i = $index; $i < $_POST['num_mark']; $i++) {
+                $mark = new GradeableComponentMark($this->core);
+                $mark->setGcId($component->getId());
+                $mark->setPoints($_POST['marks'][$i]['points']);
+                $mark->setNote($_POST['marks'][$i]['note']);
+                $mark->setOrder($_POST['marks'][$i]['order']);
+                $mark_id = $mark->save();
+                $mark->setId($mark_id);
+                $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
+                if($all_false === false) {
+                    $mark->saveData($gradeable->getGdId(), $component->getId(), $this->core->getUser()->getId());
                 }
-
-                //if no gradeable id exists adds one to the gradeable data
-                if($gradeable->getGdId() == null) {
-                    $gradeable->saveData2();
-                }
-
-                if($all_false === true) {
-                    $component->deleteData($gradeable->getGdId());
-                } else {
-                    if($mark_modified === true) { //only change the component information is the mark was modified
-                        if ($component->getGrader() === null || $_POST['overwrite'] === "true") {
-                            $component->setGrader($this->core->getUser());
-                        }     
-                        
-                        $component->setGradedVersion($_POST['active_version']);
-                        $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
-                        $component->setComment($_POST['custom_message']);
-                        $component->setScore($_POST['custom_points']);
-                        $debug = $component->saveData($gradeable->getGdId());
-                    }
-                }
-                
-                $index = 0;
-                // save existing marks
-                foreach ($component->getMarks() as $mark) {
-                    $mark->setPoints($_POST['marks'][$index]['points']);
-                    $mark->setNote($_POST['marks'][$index]['note']);
-                    $mark->setOrder($_POST['marks'][$index]['order']);
-                    $mark->save();
-                    $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
-                    if($all_false === false) {
-                        $mark->saveData($gradeable->getGdId(), $component->getId());
-                    }
-                    $index++;
-                }
-                // create new marks
-                for ($i = $index; $i < $_POST['num_mark']; $i++) {
-                    $mark = new GradeableComponentMark($this->core);
-                    $mark->setGcId($component->getId());
-                    $mark->setPoints($_POST['marks'][$i]['points']);
-                    $mark->setNote($_POST['marks'][$i]['note']);
-                    $mark->setOrder($_POST['marks'][$i]['order']);
-                    $mark_id = $mark->save();
-                    $mark->setId($mark_id);
-                    $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
-                    if($all_false === false) {
-                        $mark->saveData($gradeable->getGdId(), $component->getId());
-                    }
-                }
-                $mark_modified = ($mark_modified === true) ? "true" : "false";
             }
         }
-
         //generates the HW Report each time a mark is saved
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
 
-        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false);
+        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite);
         $this->core->getOutput()->renderJson($response);
         return $response;
     }
 
     public function saveGradeableComment() {
         $gradeable_id = $_POST['gradeable_id'];
-        $user_id = $_POST['user_id'];
+        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $gradeable->setOverallComment($_POST['gradeable_comment']);
         $gradeable->saveData2();
@@ -650,26 +828,42 @@ class ElectronicGraderController extends AbstractController {
     public function getMarkDetails() {
         //gets all the details from the database of a mark to readd it to the view
         $gradeable_id = $_POST['gradeable_id'];
-        $user_id = $_POST['user_id'];
+        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        foreach ($gradeable->getComponents() as $component) {
-            if ($component->getId() != $_POST['gradeable_component_id']) {
-                continue;
+        foreach ($gradeable->getComponents() as $question) {
+            if(is_array($question)) {
+                if($question[0]->getId() != $_POST['gradeable_component_id']) {
+                    continue;
+                }
+                foreach($question as $cmpt) {
+                    if($cmpt->getGrader() == null) {
+                        $component = $cmpt;
+                        break;
+                    }
+                    if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
+                        $component = $cmpt;
+                        break;
+                    }
+                }
             }
             else {
-                $return_data = array();
-                foreach ($component->getMarks() as $mark) {
-                    $temp_array = array();
-                    $temp_array['score'] = $mark->getPoints();
-                    $temp_array['note'] = $mark->getNote();
-                    $temp_array['has_mark'] = $mark->getHasMark();
-                    $return_data[] = $temp_array;
+                $component = $question;
+                if($component->getId() != $_POST['gradeable_component_id']) {
+                    continue;
                 }
+            }
+            $return_data = array();
+            foreach ($component->getMarks() as $mark) {
                 $temp_array = array();
-                $temp_array['custom_score'] = $component->getScore();
-                $temp_array['custom_note'] = $component->getComment();
+                $temp_array['score'] = $mark->getPoints();
+                $temp_array['note'] = $mark->getNote();
+                $temp_array['has_mark'] = $mark->getHasMark();
                 $return_data[] = $temp_array;
             }
+            $temp_array = array();
+            $temp_array['custom_score'] = $component->getScore();
+            $temp_array['custom_note'] = $component->getComment();
+            $return_data[] = $temp_array;
         }
 
         $response = array('status' => 'success', 'data' => $return_data);
@@ -679,7 +873,7 @@ class ElectronicGraderController extends AbstractController {
 
     public function getGradeableComment() {
         $gradeable_id = $_POST['gradeable_id'];
-        $user_id = $_POST['user_id'];
+        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $response = array('status' => 'success', 'data' => $gradeable->getOverallComment());
         $this->core->getOutput()->renderJson($response);
