@@ -128,6 +128,9 @@ class AdminGradeableView extends AbstractView {
                 $component_ids = array();
                 for ($i = 0; $i < $num_old_questions; $i++) {
                     $json = json_decode($data[1]);
+                    if($peer_yes_checked && $i == 0 && $json[$i]->gc_order == -1) {
+                        $peer_grade_complete_score = $json[$i]->gc_max_value;
+                    }
                     $component_ids[] = $json[$i]->gc_id;
                     if (($json[$i]->gc_page) !== 0) {
                         $pdf_page = true;
@@ -172,6 +175,9 @@ class AdminGradeableView extends AbstractView {
                 $component_ids = array();
                 for ($i = 0; $i < $num_old_questions; $i++) {
                     $json = json_decode($data[1]);
+                    if($peer_yes_checked && $i == 0 && $json[$i]->gc_order == -1) {
+                        $peer_grade_complete_score = $json[$i]->gc_max_value;
+                    }
                     $component_ids[] = $json[$i]->gc_id;
                     if (($json[$i]->gc_page) !== 0) {
                         $pdf_page = true;
@@ -610,7 +616,7 @@ HTML;
     array_unshift($old_questions, "tmp");
     $index_question = 0;
     foreach ($old_questions as $num => $question) {
-        if($num == 0) continue;
+        if($num == 0 || $num == -1) continue;
         $html_output .= <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;

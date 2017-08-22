@@ -41,8 +41,10 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= strtoupper($gradeable->getName())." GRADE".$nl;
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             $name_and_emails = array();
+            $peer_component_count = 0;
             foreach($gradeable->getComponents() as $component){
                 if(is_array($component)) {
+                    $peer_component_count++;
                     foreach($component as $cmpt) {
                         if(!$cmpt->getGrader() == null) {
                             $name_and_emails[] = "Student";
@@ -125,6 +127,13 @@ class HWReport extends AbstractModel {
                     }
                     else {
                         $component = $question;
+                    }
+                    if($component->getOrder() == -1) {
+                        $grading_units = $gradeable->getPeerGradeSet() * $peer_component_count;
+                        $completed_components = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getQueries()->getUser()->getId());
+                        $score = $gradeable->roundToPointPrecision($completed_components * $component->getMaxValue() / $grading_units);
+                        $student_output_text .= "Points for Grading Completion: [". $score. " / ".$component->getMaxValue()."]".$nl;
+                        continue;
                     }
                     $temp_notes = "";
                     $temp_score = $component->getDefault();
