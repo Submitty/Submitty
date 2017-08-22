@@ -93,8 +93,9 @@ $core->loadConfig($semester, $course);
 $core->loadAuthentication();
 
 if($core->getConfig()->isCourseLoaded()){
-    $core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()->getCourseHomeUrl(),true);
-    $core->getOutput()->addBreadcrumb("Submitty", $core->buildUrl());
+    $core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
+    $core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->buildUrl());
+    $core->getOutput()->addBreadcrumb("", $core->getConfig()->getCourseHomeUrl(),false, true);
 }
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());

@@ -23,10 +23,7 @@ class HomePageView extends AbstractView {
                         <td><b>User Id:</b> {$user->getId()} </td>
                     </tr>
                     <tr>
-                        <td><b>First Name:</b> {$user->getFirstName()} </td>
-                    </tr>
-                    <tr>
-                        <td><b>Preferred First Name:</b> {$user->getDisplayedFirstName()} </td>
+                        <td><b>First Name:</b> {$user->getDisplayedFirstName()} </td> 
                     </tr>
                     <tr>
                         <td><b>Last Name:</b> {$user->getLastName()} </td>
@@ -42,10 +39,11 @@ class HomePageView extends AbstractView {
 HTML;
 
                     foreach($courses as $course){
+                        $display_text = $course->getSemester() . " " . $course->getTitle();
                         $return .= <<<HTML
                         <tr>
                             <td colspan="8">
-                                <a class="btn btn-primary" style="width:400%;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$course->getTitle()}</a>
+                                <a class="btn btn-primary" style="width:400%;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$display_text}</a>
                             </td>
                         </tr>
 HTML;
