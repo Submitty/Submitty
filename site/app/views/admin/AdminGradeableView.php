@@ -39,6 +39,7 @@ class AdminGradeableView extends AbstractView {
         $peer_yes_checked = false;
         $peer_no_checked = true;
         $peer_grade_set = 3;
+        $peer_grade_complete_score = 0;
         $TA_grade_open_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
         $TA_grade_release_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
@@ -537,6 +538,9 @@ HTML;
                         <br />
                         How many peers should each student grade?
                         <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' />
+                        <br />
+                        How many points should be associated with a students completion of their grading?
+                        <input style='width: 50px' type='text' name="peer_grade_complete_score" value="{$peer_grade_complete_score}" class='int_val' />
                     </div>
                 </fieldset>
                 <br />
