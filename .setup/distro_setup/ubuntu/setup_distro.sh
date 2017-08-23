@@ -24,7 +24,10 @@ else
 fi
 
 if [ ${VAGRANT} == 1 ]; then
-   #
+    export SUBMISSION_URL='http://192.168.56.101'
+    export GIT_URL='http://192.168.56.102'
+
+    #
     # The goal here is to ensure the VM is accessible from your own
     # computer for code testing, has an outgoing connection to the
     # Internet to access github and receive Ubuntu updates, but is also
@@ -42,17 +45,17 @@ if [ ${VAGRANT} == 1 ]; then
     # interface remains consistent among VM reboots as Vagrant has a bad habit of
     # discarding and recreating networking interfaces everytime the VM is restarted.
     # ep0s8 is statically bound to 192.168.56.101.
-    echo -e "auto enp0s8\niface enp0s8 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    echo -e "auto enp0s8\niface enp0s8 inet static\naddress ${SUBMISSION_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    echo -e "auto enp0s8:1\niface enp0s8:1 inet static\naddress ${GIT_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
 
     # Turn them on.
-    ifup enp0s8
+    ifup enp0s8 enp0s8:1
 
-    export SUBMISSION_URL='http://192.168.56.101'
     chmod -x /etc/update-motd.d/*
     chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
     chmod +x /etc/update-motd.d/00-header
 
-    echo -e '
+    echo -e "
  _______  __   __  _______  __   __  ___   _______  _______  __   __
 |       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
 |  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
@@ -73,16 +76,17 @@ if [ ${VAGRANT} == 1 ]; then
 ##    hsdbu, postgres, root, vagrant                      ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
-##    http://192.168.56.101 (submission)                  ##
-##    http://192.168.56.101/cgi-bin (cgi-bin scripts)     ##
-##    http://192.168.56.101/hwgrading (tagrading)         ##
+##    ${SUBMISSION_URL} (submission)                  ##
+##    ${SUBMISSION_URL}/cgi-bin (cgi-bin scripts)     ##
+##    ${SUBMISSION_URL}/hwgrading (tagrading)         ##
+##    ${GIT_URL}/git (git)                     ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##
 ##                                                        ##
 ##  Happy developing!                                     ##
 ############################################################
-' > /etc/motd
+" > /etc/motd
     chmod +rx /etc/motd
 fi
 
@@ -146,5 +150,9 @@ apt-get install -qqy oracle-java8-set-default
 
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
+
+if [ ${VAGRANT} == 1 ]; then
+    apt-get install -qqy libapache2-mod-wsgi-py3 gitweb libcgi-session-perl
+fi
 
 apt-get -qqy autoremove

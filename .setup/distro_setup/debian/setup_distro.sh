@@ -42,6 +42,8 @@ else
 fi
 
 if [ ${VAGRANT} == 1 ]; then
+    export SUBMISSION_URL='http://192.168.56.201'
+    export GIT_URL='http://192.168.56.202'
     #
     # The goal here is to ensure the VM is accessible from your own
     # computer for code testing, has an outgoing connection to the
@@ -59,14 +61,15 @@ if [ ${VAGRANT} == 1 ]; then
     # interface remains consistent among VM reboots as Vagrant has a bad habit of
     # discarding and recreating networking interfaces everytime the VM is restarted.
     # eth1 is statically bound to 192.168.56.101.
-    printf "auto eth1\niface eth1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    printf "auto eth1\niface eth1 inet static\naddress ${SUBMISSION_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    printf "auto eth1:1\niface eth1 inet static\naddress ${GIT_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 
     # Turn them on.
-    ifup eth1
+    ifup eth1 eth1:1
 
-    export SUBMISSION_URL='http://192.168.56.102'
+
     rm /etc/motd
-    echo -e '
+    echo -e "
  _______  __   __  _______  __   __  ___   _______  _______  __   __
 |       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
 |  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
@@ -87,16 +90,17 @@ if [ ${VAGRANT} == 1 ]; then
 ##    hsdbu, postgres, root, vagrant                      ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
-##    http://192.168.56.102 (submission)                  ##
-##    http://192.168.56.102/cgi-bin (cgi-bin scripts)     ##
-##    http://192.168.56.102/hwgrading (tagrading)         ##
+##    ${SUBMISSION_URL} (submission)                  ##
+##    ${SUBMISSION_URL}/cgi-bin (cgi-bin scripts)     ##
+##    ${SUBMISSION_URL}/hwgrading (tagrading)         ##
+##    ${GIT_URL}/git (git)                     ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:25432                                      ##
 ##                                                        ##
 ##  Happy developing!                                     ##
 ############################################################
-' > /etc/motd
+" > /etc/motd
     chmod +rx /etc/motd
 fi
 

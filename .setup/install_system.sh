@@ -93,6 +93,7 @@ adduser hwphp hwcronphp
 
 adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcgi hwphp
+adduser hwcgi www-data
 # NOTE: hwcgi must be in the shadow group so that it has access to the
 # local passwords for pam authentication
 adduser hwcgi shadow
@@ -219,10 +220,15 @@ if [ ${VAGRANT} == 1 ]; then
 
     cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
     cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
+    cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
+
+    sed -i -e "s/SUBMITTY_URL/${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
+    sed -i -e "s/GIT_URL/${GIT_URL:7}/g" /etc/apache2/sites-available/git.conf
 
     # permissions: rw- r-- ---
     chmod 0640 /etc/apache2/sites-available/*.conf
     a2ensite submitty
+    a2ensite git
 
     sed -i '25s/^/\#/' /etc/pam.d/common-password
 	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
