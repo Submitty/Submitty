@@ -210,15 +210,15 @@ HTML;
         $return .= <<<HTML
     <div style="margin-top: 20px; vertical-align:bottom;">
 HTML;
-            if($percentage !== -1 || $this->core->getUser()->accessFullGrading() || $peer){
-                $return .= <<<HTML
+        if($percentage !== -1 || $this->core->getUser()->accessFullGrading() || $peer){
+            $return .= <<<HTML
         <a class="btn btn-primary" 
             href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
             Grading Details
         </a>
 HTML;
-                if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
-                    $return .= <<<HTML
+            if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
+                $return .= <<<HTML
         <a class="btn btn-primary"
             href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'individual'=>'0'))}">
             Grade Next Student
@@ -228,16 +228,16 @@ HTML;
             Download Zip of All Assigned Students
         </a>
 HTML;
-                }
-                if($this->core->getUser()->accessFullGrading()) {
-                    $return .= <<<HTML
+            }
+            if($this->core->getUser()->accessFullGrading()) {
+                $return .= <<<HTML
         <a class="btn btn-primary" 
             href="{$this->core->buildUrl(array('component'=>'misc', 'page'=>'download_all_assigned', 'dir'=>'submissions', 'gradeable_id'=>$gradeable->getId(), 'type'=>'All'))}">
             Download Zip of All Students
         </a>
 HTML;
-                }
             }
+        }
         $return .= <<<HTML
     </div>
 </div>
@@ -407,7 +407,6 @@ HTML;
                         $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
-                    $different = false;
                 }
                 else{
                     $viewed_grade = "";
@@ -553,9 +552,12 @@ HTML;
                 else {
                     $score =0;
                     foreach($peer_cmpts as $cmpts) {
+                        //getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score
                         $score += $cmpts->getScore();
                     }
                     $graded = $autograding_score + $score;
+                    // instead of autograding_score it should be total autograding possible
+                    // I don't think total_peer_grading_non_extra_credit ever gets set...it should be set in the gradeable constructor
                     $total_possible = $autograding_score + $row->getTotalPeerGradingNonExtraCredit();
                     $contents = "{$score}&nbsp;/&nbsp;{$row->getTotalPeerGradingNonExtraCredit()}";
                     $btn_class = "btn-default";
@@ -639,18 +641,18 @@ HTML;
         $return .= <<<HTML
         </tbody>
 HTML;
-            if ($gradeable->isTeamAssignment() && count($empty_teams) > 0) {
-                $return .= <<<HTML
-        <tr class="info persist-header">
-            <td colspan="{$cols}" style="text-align: center">Empty Teams</td>
-        </tr>
+        if ($gradeable->isTeamAssignment() && count($empty_teams) > 0) {
+            $return .= <<<HTML
+            <tr class="info persist-header">
+                <td colspan="{$cols}" style="text-align: center">Empty Teams</td>
+            </tr>
         <tbody>
 HTML;
-                $count = 1;
-                foreach($empty_teams as $team) {
-                    $display_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
-                    if ($display_section == null) $display_section = "NULL";
-                    $return .= <<<HTML
+            $count = 1;
+            foreach($empty_teams as $team) {
+                $display_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
+                if ($display_section == null) $display_section = "NULL";
+                $return .= <<<HTML
             <tr id="{empty-team-row-{$team->getId()}}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
@@ -658,21 +660,21 @@ HTML;
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$team->getId()}</td>
 HTML;
-                    for ($i = 4; $i < $cols; $i++) {
-                        $return .= <<<HTML
+                for ($i = 4; $i < $cols; $i++) {
+                    $return .= <<<HTML
                 <td></td>
 HTML;
-                    }
-                        $return .= <<<HTML
+                }
+                $return .= <<<HTML
             </tr>
 HTML;
-                    $count++;
-                }
+                $count++;
+            }
             $return .= <<<HTML
         </tbody>
 HTML;
-            }
-            $return .= <<<HTML
+        }
+        $return .= <<<HTML
     </table>
 </div>
 HTML;
