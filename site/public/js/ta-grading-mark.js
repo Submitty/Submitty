@@ -701,6 +701,9 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
 
 //finds what mark is currently open
 function findCurrentOpenedMark() {
+    if($('#grading_rubric').hasClass('empty')) {
+        return -3;
+    }
     var index = 1;
     var found = false;
     var doesExist = ($('#summary-' + index).length) ? true : false;
