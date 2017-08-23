@@ -85,7 +85,7 @@ if __name__ == "__main__":
     print (sys.argv)
     print (len(sys.argv))
     if len(sys.argv) < 3 or len(sys.argv) > 4:
-        print ("USAGE:  compuare_reuploads.py  <submissions_dir_a>  <submissions_dir_b>  [ <which_test> ]")
+        print ("USAGE:  compare_reuploads.py  <submissions_dir_a>  <submissions_dir_b>  [ <which_test> ]")
         exit(1)
     if len(sys.argv) == 3:
         main(sys.argv[1],sys.argv[2],"")
