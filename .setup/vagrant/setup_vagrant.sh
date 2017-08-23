@@ -20,11 +20,9 @@ apt-get install libpython${PY3_VERSION}
 # the repo will give us something out-of-date and hard to install/manage)
 if [ ! -x "$(command -v pip)" ]; then
     wget --tries=5 https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
-    python2 /tmp/get-pip.py
     python3 /tmp/get-pip.py
     rm -rf /tmp/get-pip.py
 else
-    pip2 install -U pip
     pip3 install -U pip
 fi
 

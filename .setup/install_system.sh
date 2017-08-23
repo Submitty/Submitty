@@ -116,15 +116,6 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser hwcron vagrant
 fi
 
-# TODO: We should look into making it so that only certain users have access to certain packages
-# so that hwphp is the only one who could use PAM for example
-pip2 install -U pip
-pip2 install python-pam
-pip2 install psycopg2
-pip2 install PyYAML
-pip2 install sqlalchemy
-pip2 install python-dateutil
-
 pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
