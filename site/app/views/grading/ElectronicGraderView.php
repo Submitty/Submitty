@@ -976,9 +976,16 @@ HTML;
             $span_style = '';
             $checked = 'checked';
         }
+        $empty = "";
+        if(!$gradeable->useTAGrading()) {
+            $empty = "empty";
+        }
         $return .= <<<HTML
-<div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
+<div id="grading_rubric" class="draggable rubric_panel {$empty}" style="right:15px; top:140px; width:48%; height:42%;">
     <span class="grading_label">Grading Rubric</span>
+HTML;
+        if($gradeable->useTAGrading()) {
+        $return .= <<<HTML
     <div style="float: right; float: right; position: relative; top: 10px; right: 1%;">
         <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
         <span {$span_style}> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" {$checked}/> Overwrite Grader </span>
@@ -1336,7 +1343,10 @@ HTML;
         </div>
     </form>
     </div>
-</div>
+HTML;
+        }
+        $return .= <<<HTML
+</div> 
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading.js"></script>
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading-mark.js"></script>
 <script type="text/javascript">
