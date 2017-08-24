@@ -809,6 +809,10 @@ class ElectronicGraderController extends AbstractController {
         //generates the HW Report each time a mark is saved
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
+        
+        if($this->core->getUser()->getGroup() == 4) {
+            $hwReport->generateSingleReport($this->core->getUser()->getId(), $gradeable_id);
+        }
 
         $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite);
         $this->core->getOutput()->renderJson($response);

@@ -1051,6 +1051,7 @@ HTML;
             else {
                 $question = $component;
             }
+            if($question->getOrder() == -1) continue;
             $lower_clamp = $question->getLowerClamp();
             $default = $question->getDefault();
             $upper_clamp = $question->getUpperClamp();

@@ -1090,4 +1090,10 @@ class Gradeable extends AbstractModel {
         }
         return $return;
     }
+    
+    // putting this here for now, not sure if it should go somewhere else
+    public function roundToPointPrecision($score) {
+        $factor = 1/$this->point_precision;
+        return floor($score*$factor)/$factor;
+    }
 }
