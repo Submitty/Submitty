@@ -12,7 +12,7 @@
 
 if [ -z ${SUBMITTY_REPOSITORY+x} ]; then
     echo "ERROR! Configuration variables not initialized"
-    exit
+    exit 1
 fi
 
 
@@ -21,7 +21,7 @@ fi
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
-    exit
+    exit 1
 fi
 
 # check optional argument
@@ -36,7 +36,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1>"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test_rainbow"
-    exit
+    exit 1
 fi
 
 echo -e "\nBeginning installation of the Submitty homework submission server\n"
@@ -492,7 +492,7 @@ echo -e "Compile and install analysis tools"
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 
 # compile the tools
-./build.sh v0.2.5
+./build.sh v0.2.6
 
 popd
 
@@ -513,12 +513,6 @@ echo -e "\nCompleted installation of the Submitty homework submission server\n"
 echo -e "Install python_submitty_utils"
 
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-
-# FIXME: There is an error with glob installation on python2.  This
-# can go away when we have all submitty scripts ported to python3.
-python2 setup.py -q install
-echo -e "NOTE: There is an error with glob installation on python2."
-echo -e "      This error can safely be ignored (we are only using glob recursive in python3).\n" 
 python3 setup.py -q install
 
 # fix permissions
@@ -535,27 +529,60 @@ popd
 ################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 
+
+# stop the scheduler (if it's running)
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_before=$?
+if [[ "$is_active_before" == "0" ]]; then
+    systemctl stop submitty_grading_scheduler
+    echo -e "Stopped Submitty Grading Scheduler Daemon\n"
+fi
+
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_tmp=$?
+if [[ "$is_active_tmp" == "0" ]]; then
+    echo -e "ERROR: did not successfully stop submitty grading scheduler daemon\n"
+    exit 1
+fi
+
+
+# update the scheduler daemon
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.service   /etc/systemd/system/submitty_grading_scheduler.service
 chown -R hwcron:hwcron /etc/systemd/system/submitty_grading_scheduler.service
 chmod 444 /etc/systemd/system/submitty_grading_scheduler.service
 
-systemctl is-active --quiet submitty_grading_scheduler
-is_active_before=$?
 
-# if the daemon is currently running, restart it now
-systemctl try-restart submitty_grading_scheduler
+# delete the autograding tmp directories
+rm -rf /var/local/submitty/autograding_tmp
 
-systemctl is-active --quiet submitty_grading_scheduler
-is_active_after=$?
+# recreate the top level autograding tmp directory
+mkdir /var/local/submitty/autograding_tmp
+chown root:root /var/local/submitty/autograding_tmp
+chmod 511 /var/local/submitty/autograding_tmp
 
-if [[ $is_active_before -ne 0 ]]; then
-    echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_grading_scheduler\n"
-else
-    if [[ $is_active_after -ne 0 ]]; then
+# recreate the per untrusted directories
+for ((i=0;i<$NUM_UNTRUSTED;i++));
+do
+    myuser=`printf "untrusted%02d" $i`
+    mydir=`printf "/var/local/submitty/autograding_tmp/untrusted%02d" $i`
+    mkdir $mydir
+    chown hwcron:$myuser $mydir
+    chmod 770 $mydir
+done
+
+
+# start the scheduler (if it was running)
+if [[ "$is_active_before" == "0" ]]; then
+    systemctl start submitty_grading_scheduler
+    systemctl is-active --quiet submitty_grading_scheduler
+    is_active_after=$?
+    if [[ "$is_active_after" != "0" ]]; then
         echo -e "\nERROR!  Failed to restart Submitty Grading Scheduler Daemon\n"
     fi
     echo -e "Restarted Submitty Grading Scheduler Daemon\n"
+else
+    echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_grading_scheduler\n"
 fi
 
 
@@ -581,7 +608,7 @@ if [[ "$#" -ge 1 && $1 == "test" ]]; then
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
-    python ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
+    ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
 
     echo -e "\nCompleted Autograding Test Suite\n"
 fi
@@ -611,7 +638,7 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     shift
     # pass any additional command line arguments to the run test suite
     rainbow_total=$((rainbow_total+1))
-    python ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+    ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
     
     if [[ $? -ne 0 ]]; then
         echo -e "\n[ FAILED ] sample test\n"

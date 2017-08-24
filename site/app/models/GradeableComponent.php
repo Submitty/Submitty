@@ -180,7 +180,7 @@ class GradeableComponent extends AbstractModel {
     }
 
     public function deleteData($gd_id) {
-        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this) === true) {
+        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this, $this->core->getUser()->getId()) === true) {
             $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
             return true;
         }
@@ -189,7 +189,12 @@ class GradeableComponent extends AbstractModel {
 
     public function saveData($gd_id, $overwrite=false) {
         if ($this->modified) {
-            $action = $this->core->getQueries()->checkGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
+            if($this->getIsPeer()) {
+                $action = $this->core->getQueries()->checkGradeableComponentData($gd_id, $this, $this->core->getUser()->getId());
+            }
+            else {
+                $action = $this->core->getQueries()->checkGradeableComponentData($gd_id, $this);
+            }
             if($action) {
                 if($overwrite) {
                     $this->core->getQueries()->replaceGradeableComponentData($gd_id, $this);
