@@ -1025,9 +1025,6 @@ HTML;
 
         foreach ($gradeable->getComponents() as $component) {
             if($peer && !is_array($component)) continue;
-            $min = -1000;
-            $max = 0;
-            $ungraded = false;
             $question = null;
             $show_graded_info = true;
             $num_peer_components = 0;
@@ -1143,7 +1140,11 @@ HTML;
             $first_text = true;
             $question_points = $question->getDefault();
             
-            if($show_graded_info) {
+
+            if((!$question->getHasMarks() && !$question->getHasGrade()) || !$show_graded_info) {
+                $initial_text = "Click me to grade!";
+            }
+            else if($show_graded_info) {
                 foreach ($question->getMarks() as $mark) {
                     if($mark->getHasMark() === true) {
                         $question_points += $mark->getPoints();
@@ -1182,11 +1183,6 @@ HTML;
                     }
                 }
             }
-
-            if($initial_text == "") {
-                $initial_text = "Click me to grade!";
-                $ungraded = true;
-            }
             
             if($show_graded_info) {
                 $question_points += $question->getScore();
@@ -1196,7 +1192,7 @@ HTML;
             if($question_points < $question->getLowerClamp()) $question_points = $question->getLowerClamp();
             if($question_points > $question->getUpperClamp()) $question_points = $question->getUpperClamp();
             
-            if(!$question->getHasMarks() && !$question->getHasGrade()) {
+            if((!$question->getHasMarks() && !$question->getHasGrade()) || !$show_graded_info) {
                 $question_points = " ";
             }
 
