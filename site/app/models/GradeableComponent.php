@@ -67,9 +67,9 @@ class GradeableComponent extends AbstractModel {
     protected $is_text = false;
     /** @property @var int Order for components to be shown in */
     protected $order = 1;
-    /** @property @var float Given grade that someone has given this component */
+    /** @property @var float custom "mark" score for this component */
     protected $score = 0;
-    /** @property @var string Comment that grader has put on the component while grading for student */
+    /** @property @var string Comment that grader has put on the custom "mark" while grading for student */
     protected $comment = "";
     /** @property @var int for page number */
     protected $page = 0;
@@ -211,7 +211,7 @@ class GradeableComponent extends AbstractModel {
             }
         }
     }
-    
+
     public function setMarks($marks) {
         if(count($this->marks) == 0) {
             $this->marks = $marks;
