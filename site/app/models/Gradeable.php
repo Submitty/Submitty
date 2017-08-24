@@ -403,7 +403,6 @@ class Gradeable extends AbstractModel {
                     }
                 }
                 // really only care about $grade_details (aka component data) if the component is graded should be in the if above probably
-                // acts as if all the different component scores/comments will be loaded. This is not the case. Only the current grader's scores/coments are loaded
                 // No need to make two cases here.
                 if(count($grade_details) <= 1) {
                     if(count($grade_details) == 1) {
@@ -829,46 +828,23 @@ class Gradeable extends AbstractModel {
         return $this->total_auto_hidden_non_extra_credit + $this->total_auto_non_hidden_non_extra_credit;
     }
 
+    // this is a misnomer now that peers also grade stuff and this accounts for that
+    // this is only to be used to show total points to a specific user...this is not their final grade
     public function getGradedTAPoints() {
         $points = 0;
         foreach($this->components as $component) {
-            $marks = null;
-            $temp_score = null;
             if(is_array($component)) {
                 foreach($component as $cmpt) {
-                    if($cmpt->getGrader() == null) {
-                        $marks = $cmpt->getMarks();
-                        break;
-                    }
-                    if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
-                        $marks = $cmpt->getMarks();
+                    // if this peer graded this component or no peers have graded this component
+                    if(($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) || (!$cmpt->getHasMarks() && !$cmpt->getHasGrade())) {
+                        $points += $cmpt->getGradedTAPoints();
                         break;
                     }
                 }
-                if($marks === null) {
-                    $points += $component[0]->getDefault();
-                }
+
             }
             else {
-                $marks = $component->getMarks();
-                $temp_points = $component->getDefault();
-                
-                foreach ($marks as $mark) {
-                    if ($mark->getHasMark()) {
-                        $temp_points += $mark->getPoints();
-                    }
-                }
-
-                $temp_points += $component->getScore();
-
-                if($temp_points < $component->getLowerClamp()) {
-                    $temp_points = $component->getLowerClamp();
-                }
-                if($temp_points > $component->getUpperClamp()) {
-                    $temp_points = $component->getUpperClamp();
-                }
-                
-                $points += $temp_points;
+                $points += $component->getGradedTAPoints();
             }
         }
         return $points;
@@ -1092,11 +1068,5 @@ class Gradeable extends AbstractModel {
             }
         }
         return $return;
-    }
-    
-    // putting this here for now, not sure if it should go somewhere else
-    public function roundToPointPrecision($score) {
-        $factor = 1/$this->point_precision;
-        return floor($score*$factor)/$factor;
     }
 }

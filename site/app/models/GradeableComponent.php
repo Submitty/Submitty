@@ -165,6 +165,25 @@ class GradeableComponent extends AbstractModel {
 
     }
     
+    public function getGradedTAPoints() {
+        $points = $this->default;
+        foreach ($this->marks as $mark) {
+            if ($mark->getHasMark()) {
+                $points += $mark->getPoints();
+            }
+        }
+
+        $points += $this->score;
+
+        if($points < $this->lower_clamp) {
+            $points = $this->lower_clamp;
+        }
+        if($points > $this->upper_clamp) {
+            $points = $this->upper_clamp;
+        }
+        return $points;
+    }
+
     public function setGrader(User $user) {
         if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
             $this->grader_modified = true;
