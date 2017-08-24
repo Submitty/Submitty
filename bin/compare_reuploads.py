@@ -19,15 +19,20 @@ def getGrade(fname,which_testcase):
         return (int(ss_total[3]),int(ss_nh_total[4]))
     else:
         for line in content:
-            if line.find(which_testcase):
+            loc = line.find(which_testcase)
+            if loc != -1:
                 ss_line = line.split()
-                return (int(ss_line[len(ss_line)-3]),0)
+                n = len(ss_line)
+                if ss_line[n-2] == "HIDDEN":
+                    n = n-3
+                thing = ss_line[n-3]
+                return (int(thing),0)
         print ("BAD STRING ",which_testcase)
         return (-1,-1)
 
 
 def main(a,b,which_testcase):
-    print ("main")
+    print ("main '",which_testcase,"'")
 
     good = 0
     bad = 0
@@ -80,10 +85,9 @@ def main(a,b,which_testcase):
 
     if bad > 0:
         print ("avg error =",error_sum/bad)
-                
+
+
 if __name__ == "__main__":
-    print (sys.argv)
-    print (len(sys.argv))
     if len(sys.argv) < 3 or len(sys.argv) > 4:
         print ("USAGE:  compare_reuploads.py  <submissions_dir_a>  <submissions_dir_b>  [ <which_test> ]")
         exit(1)
