@@ -184,6 +184,48 @@ class GradeableComponent extends AbstractModel {
         return $points;
     }
 
+    public function getGradedTAComments($nl) {
+        $text = "";
+        $first_text = true;
+        foreach ($this->marks as $mark) {
+            if($mark->getHasMark() === true) {
+                if ($first_text === true) {
+                    if (floatval($mark->getPoints()) == 0) {
+                        $text .= "* " . $mark->getNote();
+                    } else {
+                        $text .= "* (" . $mark->getPoints() . ") " . $mark->getNote();
+                    }
+                    $first_text = false;
+                }
+                else {
+                    if (floatval($mark->getPoints()) == 0) {
+                        $text .= $nl . "* " . $mark->getNote();
+                    } else {
+                        $text .= $nl . "* (" . $mark->getPoints() . ") " . $mark->getNote();
+                    }
+                }
+            }
+        }
+        if($this->comment != "") {
+            if ($first_text === true) {
+                if (floatval($this->score) == 0) {
+                    $text .= "* " . $this->comment;
+                } else {
+                    $text .= "* (" . $this->score . ") ". $this->comment;
+                }
+                $first_text = false;
+            }
+            else {
+                if (floatval($this->score) == 0) {
+                    $text .= $nl . "* " . $this->comment;
+                } else {
+                    $text .= $nl . "* (" . $this->score . ") " . $this->comment;
+                }
+            }
+        }
+        return $text;
+    }
+
     public function setGrader(User $user) {
         if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
             $this->grader_modified = true;
