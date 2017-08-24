@@ -40,6 +40,7 @@ class HWReport extends AbstractModel {
         if($gradeable->beenTAgraded()) {
             $student_output_text_main .= strtoupper($gradeable->getName())." GRADE".$nl;
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
+            $names = array();
             $name_and_emails = array();
             $peer_component_count = 0;
             foreach($gradeable->getComponents() as $component){
@@ -47,15 +48,16 @@ class HWReport extends AbstractModel {
                     $peer_component_count++;
                     foreach($component as $cmpt) {
                         if(!$cmpt->getGrader() == null) {
-                            $name_and_emails[] = "Student";
+                            $names[] = "Peers";
                         }
                     }
                     continue;
                 }
-                if($component->getGrader() === null) {
-                    //nothing happens
+                else if($component->getGrader() === null) {
+                    //nothing happens, this is the case when a ta has not graded a component
                 } 
                 else if($component->getGrader()->accessFullGrading()) {
+                    $names[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()}";
                     $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>";
                 } else {
                     $name_and_emails[] = $TEMP_EMAIL;
@@ -63,10 +65,12 @@ class HWReport extends AbstractModel {
                 
             }
 
+            $names = array_unique($names);
+            $names = implode(", ", $names);
             $name_and_emails = array_unique($name_and_emails);
             $name_and_emails = implode(", ", $name_and_emails);
 
-            $student_output_text_main .= "Graded by : " . $name_and_emails;
+            $student_output_text_main .= "Graded by : " . $names;
 
             // Calculate late days for this gradeable
             $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $g_id);
@@ -92,7 +96,6 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
 
             if($gradeable->validateVersions()) {
-                // uses active version...
                 $active_version = $gradeable->getActiveVersion();
                 $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $active_version, "grade.txt");
                 $auto_grading_awarded = 0;
