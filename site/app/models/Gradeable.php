@@ -402,6 +402,9 @@ class Gradeable extends AbstractModel {
                         }
                     }
                 }
+                // really only care about $grade_details (aka component data) if the component is graded should be in the if above probably
+                // acts as if all the different component scores/comments will be loaded. This is not the case. Only the current grader's scores/coments are loaded
+                // No need to make two cases here.
                 if(count($grade_details) <= 1) {
                     if(count($grade_details) == 1) {
                         $component_details = array_merge($component_details, $grade_details[$keys[0]]);
@@ -1089,5 +1092,11 @@ class Gradeable extends AbstractModel {
             }
         }
         return $return;
+    }
+    
+    // putting this here for now, not sure if it should go somewhere else
+    public function roundToPointPrecision($score) {
+        $factor = 1/$this->point_precision;
+        return floor($score*$factor)/$factor;
     }
 }
