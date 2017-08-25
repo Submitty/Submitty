@@ -29,8 +29,8 @@ public:
   void initialize() {
     distance = 0;
     grade = 0;
-    compilation_error = false;
-    compilation_warning = false;
+    tr_error = false;
+    tr_warning = false;
     strcpy(diff,"");
     char default_message[] = "ERROR: TestResults not initialized. Probably caused by error in validation. If you cannot debug the issue, ask your instructor to check results_log_validator.txt";
     types[0] = MESSAGE_FAILURE;
@@ -38,11 +38,11 @@ public:
     strcpy(messages,default_message);
   }
 
-  void PACK(std::string d, int dist, std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > m, float g, bool ce, bool cw) {
+  void PACK(std::string d, int dist, std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > m, float g, bool tr_e, bool tr_w) {
     grade = g;
     distance = dist;
-    compilation_error = ce;
-    compilation_warning = cw;
+    tr_error = tr_e;
+    tr_warning = tr_w;
     if (d.size() >= TEST_RESULT_DIFF_SIZE-1) {
       m.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR: diff too large to calculate/display."));
       strcpy(diff,"");
@@ -87,8 +87,8 @@ public:
     return answer;
   }
 
-  bool hasCompilationError() const { return compilation_error; }
-  bool hasCompilationWarning() const { return compilation_warning; }
+  bool hasError() const { return tr_error; }
+  bool hasWarning() const { return tr_warning; }
 
   friend std::ostream& operator<< (std::ostream& ostr, const TestResultsFixedSize &tr) {
     ostr << "TR grade=" << tr.grade << " messages='" << tr.messages << "'";
@@ -101,8 +101,8 @@ private:
   char diff[TEST_RESULT_DIFF_SIZE];
   char messages[TEST_RESULT_NUM_MESSAGES*TEST_RESULT_MESSAGES_SIZE];
   TEST_RESULTS_MESSAGE_TYPE types[TEST_RESULT_NUM_MESSAGES];
-  bool compilation_error;
-  bool compilation_warning;
+  bool tr_error;
+  bool tr_warning;
 };
 
 // ==============================================================================================
@@ -113,16 +113,16 @@ public:
   // CONSTRUCTOR
   TestResults(float g=0.0, 
               const std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &m = {},
-              const std::string &sd="",
-              bool ce=false,
-              bool cw=false) :
-    my_grade(g),swap_difference(sd),distance(0) {
+              const std::string &sd="") :
+    my_grade(g),swap_difference(sd),distance(0),tr_error(false),tr_warning(false) {
     for (int i= 0; i < m.size(); i++) {
       if (m[i].second != "")
         messages.push_back(m[i]);
+      if (m[i].first == MESSAGE_FAILURE)
+        tr_error = true;
+      if (m[i].first == MESSAGE_WARNING)
+        tr_warning = true;
     }
-    compilation_error = ce;
-    compilation_warning = cw;
   }
   
   virtual void printJSON(std::ostream & file_out) {
@@ -138,8 +138,8 @@ public:
   float getGrade() const { assert (my_grade >= 0); return my_grade; }
   const std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> >& getMessages() const { return messages; }
   int getDistance() const { return distance; }
-  bool hasCompilationError() const { return compilation_error; }
-  bool hasCompilationWarning() const { return compilation_warning; }
+  bool hasError() const { return tr_error; }
+  bool hasWarning() const { return tr_warning; }
 
   // MODIFIERS
   void setGrade(float g) { assert (g >= 0); my_grade = g; }
@@ -150,7 +150,7 @@ public:
     std::stringstream tmp;
     printJSON(tmp);
     myself = tmp.str();
-    ptr->PACK(myself,distance,messages,my_grade,compilation_error,compilation_warning);
+    ptr->PACK(myself,distance,messages,my_grade,tr_error,tr_warning);
   }
 
 protected:
@@ -160,8 +160,8 @@ protected:
   float my_grade;
   std::string swap_difference;
   int distance;
-  bool compilation_warning;
-  bool compilation_error;
+  bool tr_warning;
+  bool tr_error;
 
 };
 
