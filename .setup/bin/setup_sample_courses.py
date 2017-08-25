@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Setup script that reads in the users.yml and courses.yml files in the ../data directory and then
 creates the users and courses for the system. This is primarily used by Vagrant and Travis to
@@ -16,7 +16,7 @@ just the ones used for testing.
 from __future__ import print_function, division
 import argparse
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, timedelta
 import glob
 import grp
 import hashlib
@@ -50,7 +50,9 @@ TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial", "exam
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
-DB_PASS = "hsdbu"
+with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
+    submitty_config_json = json.load(submitty_config)
+    DB_PASS = submitty_config_json["database_password"]
 
 DB_ONLY = False
 
@@ -156,7 +158,7 @@ def main():
     with open(list_of_courses_file, "w") as courses_file:
         courses_file.write("")
         for course_id in courses.keys():
-            courses_file.write('<a href="'+args.submission_url+'index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
+            courses_file.write('<a href="'+args.submission_url+'/index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
             courses_file.write('<br />')
 
     for course_id in courses.keys():
@@ -349,7 +351,7 @@ def get_php_db_password(password):
         ["php", "-r", "print(password_hash('{}', PASSWORD_DEFAULT));".format(password)],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (out, err) = proc.communicate()
-    return out
+    return out.decode('utf-8')
 
 
 def get_current_semester():
@@ -602,8 +604,8 @@ class Course(object):
 
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
-        m.update(self.code)
-        random.seed(int(m.hexdigest(),16))
+        m.update(bytes(self.code, 'utf-8'))
+        random.seed(int(m.hexdigest(), 16))
 
         course_group = self.code + "_tas_www"
         archive_group = self.code + "_archive"
@@ -755,7 +757,7 @@ class Course(object):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
-                        current_time_string = dateutils.write_submitty_date()
+                        current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=1))
 
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time_string)
@@ -795,16 +797,24 @@ class Course(object):
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:
                             for component in gradeable.components:
-                                if status == 0:
+                                if status == 0 or random.random() < 0.5:
                                     score = 0
-                                elif component.max_value > 0:
-                                    score = random.randint(0, component.max_value * 2) / 2
+                                elif random.random() < 0.9:
+                                    score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
                                 else:
-                                    score = random.randint(component.max_value * 2, 0) / 2
+                                    score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                 conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                              gcd_score=score, gcd_component_comment="lorem ipsum",
                                              gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=1)
+                                first = True
+                                first_set = False
+                                for mark in component.marks:
+                                    if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
+                                        conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key, gcd_grader_id=self.instructor.id)
+                                        if(first):
+                                            first_set = True
+                                    first = False
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
@@ -840,7 +850,7 @@ class Course(object):
 
         # Reseed to minimize the situations under which customization.json changes
         m = hashlib.md5()
-        m.update(course_id)
+        m.update(bytes(course_id, "utf-8"))
         random.seed(int(m.hexdigest(), 16))
 
         customization_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup")
@@ -859,7 +869,7 @@ class Course(object):
         gradeables_percentages = []
         gradeable_percentage_left = 100 - len(gradeables)
         for i in range(len(gradeables)):
-            gradeables_percentages.append(random.randint(1, gradeable_percentage_left) + 1)
+            gradeables_percentages.append(random.randint(1, max(1, gradeable_percentage_left)) + 1)
             gradeable_percentage_left -= (gradeables_percentages[-1] - 1)
         if gradeable_percentage_left > 0:
             gradeables_percentages[-1] += gradeable_percentage_left
@@ -912,8 +922,6 @@ class Course(object):
                 # For non-electronic gradeables, or electronic gradeables with TA grading, read through components
                 if use_ta_grading or g_type != 0:
                     for component in components:
-                        if component.is_extra_credit:
-                            continue
                         if component.max_value >0:
                             max_ta += component.max_value
 
@@ -1131,9 +1139,14 @@ class Gradeable(object):
             elif self.type > 0:
                 component['gc_ta_comment'] = ""
                 component['gc_student_comment'] = ""
+                component['gc_page'] = 0
 
             if self.type == 1:
+                component['gc_lower_clamp'] = 0
+                component['gc_default'] = 0
                 component['gc_max_value'] = 1
+                component['gc_upper_clamp'] = 1
+            i-=1;
             self.components.append(Component(component, i+1))
 
     def create(self, conn, gradeable_table, electronic_table, reg_table, component_table, mark_table):
@@ -1198,23 +1211,25 @@ class Gradeable(object):
             for i in range(len(self.components)):
                 component = self.components[i]
                 form_json['comment_title'].append(component.title)
+                # form_json['lower_clamp'].append(component.lower_clamp)
+                # form_json['default'].append(component.default)
                 form_json['points'].append(component.max_value)
+                # form_json['upper_clamp'].append(component.upper_clamp)
                 form_json['ta_comment'].append(component.ta_comment)
                 form_json['student_comment'].append(component.student_comment)
-                if component.is_extra_credit:
-                    form_json['eg_extra'].append(i+1)
         elif self.type == 1:
             form_json['checkpoint_label'] = []
             form_json['checkpoint_extra'] = []
             for i in range(len(self.components)):
                 component = self.components[i]
                 form_json['checkpoint_label'].append(component.title)
-                if component.is_extra_credit:
-                    form_json['checkpoint_extra'].append(i+1)
         else:
             form_json['num_numeric_items'] = 0
             form_json['numeric_labels'] = []
+            form_json['lower_clamp'] = []
+            form_json['default'] = []
             form_json['max_score'] = []
+            form_json['upper_clamp'] = []
             form_json['numeric_extra'] = []
             form_json['num_text_items'] = 0
             form_json['text_label'] = []
@@ -1226,9 +1241,10 @@ class Gradeable(object):
                 else:
                     form_json['num_numeric_items'] += 1
                     form_json['numeric_labels'].append(component.title)
+                    form_json['lower_clamp'].append(component.lower_clamp)
+                    form_json['default'].append(component.default)
                     form_json['max_score'].append(component.max_value)
-                    if component.is_extra_credit:
-                        form_json['numeric_extra'].append(i+1)
+                    form_json['upper_clamp'].append(component.upper_clamp)
         form_json['minimum_grading_group'] = self.min_grading_group
         form_json['gradeable_buckets'] = self.syllabus_bucket
 
@@ -1260,10 +1276,9 @@ class Component(object):
         self.title = component['gc_title']
         self.ta_comment = ""
         self.student_comment = ""
-
         self.is_text = False
-        self.is_extra_credit = False
         self.is_peer = False
+        self.page = 0
         self.order = order
         self.marks = []
         if 'marks' in component:
@@ -1277,21 +1292,28 @@ class Component(object):
             self.student_comment = component['gc_student_comment']
         if 'gc_is_text' in component:
             self.is_text = component['gc_is_text'] is True
-        if 'gc_is_extra_credit' in component:
-            self.is_extra_credit = component['gc_is_extra_credit'] is True
+        if 'gc_page' in component:
+            self.page = int(component['gc_page'])
 
         if self.is_text:
+            self.lower_clamp = 0
+            self.default = 0
             self.max_value = 0
+            self.upper_clamp = 0
         else:
+            self.lower_clamp = float(component['gc_lower_clamp'])
+            self.default = float(component['gc_default'])
             self.max_value = float(component['gc_max_value'])
+            self.upper_clamp = float(component['gc_upper_clamp'])
 
         self.key = None
 
     def create(self, g_id, conn, table, mark_table):
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
-                                    gc_max_value=self.max_value, gc_is_text=self.is_text,
-                                    gc_is_extra_credit=self.is_extra_credit, gc_is_peer=self.is_peer, gc_order=self.order)
+                                    gc_lower_clamp=self.lower_clamp, gc_default=self.default, gc_max_value=self.max_value, 
+                                    gc_upper_clamp=self.upper_clamp, gc_is_text=self.is_text,
+                                    gc_is_peer=self.is_peer, gc_order=self.order, gc_page=self.page)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
 
@@ -1303,6 +1325,7 @@ class Mark(object):
         self.note = mark['gcm_note']
         self.points = mark['gcm_points']
         self.order = order
+        self.grader = 'instructor'
         self.key = None
 
     def create(self, gc_id, conn, table):

@@ -21,7 +21,14 @@ use app\libraries\Core;
  * @method string getTitle()
  * @method string getTaComment()
  * @method string getStudentComment()
+ * @method float getLowerClamp()
+ * @method void setLowerClamp(float $lower_clamp)
+ * @method float getDefault()
+ * @method void setDefault(float $default)
  * @method float getMaxValue()
+ * @method void setMaxValue(float $max_value)
+ * @method float getUpperClamp()
+ * @method void setUpperClamp(float$upper_clamp)
  * @method bool getIsText();
  * @method bool getIsExtraCredit()
  * @method bool getIsPeer()
@@ -32,7 +39,6 @@ use app\libraries\Core;
  * @method string getComment()
  * @method void setComment(string $comment)
  * @method User getGrader()
- * @method void setGrader(User $grader)
  * @method int getGradedVersion()
  * @method void setGradedVersion(int $graded_version)
  * @method \DateTime getGradeTime()
@@ -49,18 +55,24 @@ class GradeableComponent extends AbstractModel {
     protected $ta_comment = "";
     /** @property @var string Comment shown to both graders and students giving more information about the component */
     protected $student_comment = "";
-    /** @property @var float Maximum value that the component can have */
+    /** @property @var float Minimum value that the component can have */
+    protected $lower_clamp = 0;
+    /** @property @var float Value that the component starts grading at */
+    protected $default = 0;
+    /** @property @var float Value that the component is worth */
     protected $max_value = 0;
-    /** @property @var bool Is the component just used for text fields (ignore max_value and is_extra_credit and score) */
+    /** @property @var float Maximum value that the component can have */
+    protected $upper_clamp = 0;
+    /** @property @var bool Is the component just used for text fields (ignore lower_clamp, default, max_value, upper_clamp and score) */
     protected $is_text = false;
-    /** @property @var bool Is the component extra credit for this gradeable */
-    protected $is_extra_credit = false;
     /** @property @var int Order for components to be shown in */
     protected $order = 1;
-    /** @property @var float Given grade that someone has given this component */
+    /** @property @var float custom "mark" score for this component */
     protected $score = 0;
-    /** @property @var string Comment that grader has put on the component while grading for student */
+    /** @property @var string Comment that grader has put on the custom "mark" while grading for student */
     protected $comment = "";
+    /** @property @var int for page number */
+    protected $page = 0;
 
     /** @property @var User */
     protected $grader = null;
@@ -82,6 +94,9 @@ class GradeableComponent extends AbstractModel {
 
     /** @property @var \app\models\GradeableComponentMark[] */
     protected $marks = array();
+    
+    /** @property @var bool has the grader of this component been modified*/
+    protected $grader_modified = false;
 
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
@@ -92,11 +107,14 @@ class GradeableComponent extends AbstractModel {
         $this->title = $details['gc_title'];
         $this->ta_comment = $details['gc_ta_comment'];
         $this->student_comment = $details['gc_student_comment'];
+        $this->lower_clamp = $details['gc_lower_clamp'];
+        $this->default = $details['gc_default'];
         $this->max_value = $details['gc_max_value'];
+        $this->upper_clamp = $details['gc_upper_clamp'];
         $this->is_text = $details['gc_is_text'];
-        $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
         $this->is_peer = isset($details['gc_is_peer']) ? $details['gc_is_peer']: false;
+        $this->page = $details['gc_page'];
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = $details['gcd_grader'];
@@ -146,6 +164,74 @@ class GradeableComponent extends AbstractModel {
         }
 
     }
+    
+    public function getGradedTAPoints() {
+        $points = $this->default;
+        foreach ($this->marks as $mark) {
+            if ($mark->getHasMark()) {
+                $points += $mark->getPoints();
+            }
+        }
+
+        $points += $this->score;
+
+        if($points < $this->lower_clamp) {
+            $points = $this->lower_clamp;
+        }
+        if($points > $this->upper_clamp) {
+            $points = $this->upper_clamp;
+        }
+        return $points;
+    }
+
+    public function getGradedTAComments($nl) {
+        $text = "";
+        $first_text = true;
+        foreach ($this->marks as $mark) {
+            if($mark->getHasMark() === true) {
+                if ($first_text === true) {
+                    if (floatval($mark->getPoints()) == 0) {
+                        $text .= "* " . $mark->getNote();
+                    } else {
+                        $text .= "* (" . $mark->getPoints() . ") " . $mark->getNote();
+                    }
+                    $first_text = false;
+                }
+                else {
+                    if (floatval($mark->getPoints()) == 0) {
+                        $text .= $nl . "* " . $mark->getNote();
+                    } else {
+                        $text .= $nl . "* (" . $mark->getPoints() . ") " . $mark->getNote();
+                    }
+                }
+            }
+        }
+        if($this->comment != "") {
+            if ($first_text === true) {
+                if (floatval($this->score) == 0) {
+                    $text .= "* " . $this->comment;
+                } else {
+                    $text .= "* (" . $this->score . ") ". $this->comment;
+                }
+                $first_text = false;
+            }
+            else {
+                if (floatval($this->score) == 0) {
+                    $text .= $nl . "* " . $this->comment;
+                } else {
+                    $text .= $nl . "* (" . $this->score . ") " . $this->comment;
+                }
+            }
+        }
+        return $text;
+    }
+
+    public function setGrader(User $user) {
+        if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
+            $this->grader_modified = true;
+        }
+        $this->grader = $user;
+    }
 
     /**
      * @raises \BadMethodCallException
@@ -155,19 +241,41 @@ class GradeableComponent extends AbstractModel {
     }
 
     public function deleteData($gd_id) {
-        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this) === true) {
-            $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this);
+        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this, $this->core->getUser()->getId()) === true) {
+            $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
+            return true;
         }
+        return false;
     }
 
-    public function saveData($gd_id) {
+    public function saveData($gd_id, $overwrite=false) {
         if ($this->modified) {
-            if ($this->has_grade || $this->has_marks) {
-                $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
+            if($this->getIsPeer()) {
+                $action = $this->core->getQueries()->checkGradeableComponentData($gd_id, $this, $this->core->getUser()->getId());
+            }
+            else {
+                $action = $this->core->getQueries()->checkGradeableComponentData($gd_id, $this);
+            }
+            if($action) {
+                if($overwrite) {
+                    $this->core->getQueries()->replaceGradeableComponentData($gd_id, $this);
+                    return "replace";
+                }
+                else {
+                    $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
+                    return "update";
+                }
             }
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
+                return "insert";
             }
+        }
+    }
+
+    public function setMarks($marks) {
+        if(count($this->marks) == 0) {
+            $this->marks = $marks;
         }
     }
 }

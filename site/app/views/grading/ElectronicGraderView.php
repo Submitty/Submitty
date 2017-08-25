@@ -14,7 +14,11 @@ class ElectronicGraderView extends AbstractView {
      * @param array     $sections
      * @return string
      */
-    public function statusPage($gradeable, $sections) {
+    public function statusPage($gradeable, $sections, $component_averages, $overall_average) {
+        $peer = false;
+        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
+            $peer = true; 
+        }
         $course = $this->core->getConfig()->getCourse();
         $semester = $this->core->getConfig()->getSemester();
         $graded = 0;
@@ -43,76 +47,170 @@ class ElectronicGraderView extends AbstractView {
 <div class="content">
     <h2>Status of {$gradeable->getName()}</h2>
 HTML;
-    if($percentage === -1){
-        $view = 'all';
-        $return .= <<<HTML
+        if($percentage === -1){
+            $view = 'all';
+            $return .= <<<HTML
     <div class="sub">
         No Grading To Be Done! :)
     </div>
 HTML;
-
-    }
-    else{
-        $view = null;
-        $return .= <<<HTML
-    <div class="sub">
-        Current percentage of grading done: {$percentage}% ({$graded}/{$total})
-HTML;
-        if ($gradeable->isTeamAssignment() && $no_team_total > 0) {
-            $return .= <<<HTML
-         - {$no_team_total} students with no team
-HTML;
         }
-        $return .= <<<HTML
-        <br />
-        <br />
-        By Grading Sections:
-        <div style="margin-left: 20px">
-HTML;
-        foreach ($sections as $key => $section) {
-            $percentage = $section['total_components'] !== 0 ? round(($section['graded_components'] / $section['total_components']) * 100) : 0;
+        else{
+            $view = null;
+            $change_value = $gradeable->getNumTAComponents();
+            $show_total = $total/$change_value;
+            $show_graded = round($graded/$change_value, 2);
+            if($peer) {
+                $change_value = $gradeable->getNumPeerComponents() * $gradeable->getPeerGradeSet();
+                $show_graded = $graded/$change_value;
+                $show_total = $total/$change_value;
+            }
             $return .= <<<HTML
-            Section {$key}: {$percentage}% ({$section['graded_components']} / {$section['total_components']})
+    <div class="sub">
+        <div class="box half">
+            Current percentage of grading done: {$percentage}% ({$show_graded}/{$show_total})
 HTML;
-            if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
+            if ($gradeable->isTeamAssignment() && $no_team_total > 0) {
                 $return .= <<<HTML
-             - {$section['no_team']} students with no team
+             - {$no_team_total} students with no team
 HTML;
             }
             $return .= <<<HTML
             <br />
+            <br />
 HTML;
-        }
-        $return .= <<<HTML
+            if ($peer) {
+                $show_total = floor($sections['stu_grad']['total_components']/$gradeable->getNumPeerComponents());
+                $show_graded = floor($sections['stu_grad']['graded_components']/$gradeable->getNumPeerComponents());
+                $percentage = round(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100);
+                $return .= <<<HTML
+            Current percentage of students grading done: {$percentage}% ({$show_graded}/{$show_total})
         </div>
-        <br />
-        Graders:
-        <div style="margin-left: 20px">
+            <br />
 HTML;
-        foreach ($sections as $key => $section) {
-            if ($key === "NULL") {
-                continue;
-            }
-            if (count($section['graders']) > 0) {
-                $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
             }
             else {
-                $graders = "Nobody";
-            }
-            $return .= <<<HTML
-            Section {$key}: {$graders}<br />
+                $return .= <<<HTML
+            By Grading Sections:
+            <div style="margin-left: 20px">
 HTML;
-        }
-        $return .= <<<HTML
+                foreach ($sections as $key => $section) {
+                    if($section['total_components'] == 0) {
+                        $percentage = 0;
+                    }
+                    else {
+                        $percentage = round(($section['graded_components'] / $section['total_components']) * 100);
+                    }
+                    $show_graded = $section['graded_components']/$change_value;
+                    $show_total = $section['total_components']/$change_value;
+                    $return .= <<<HTML
+                Section {$key}: {$percentage}% ({$show_graded} / {$show_total})<br />
+HTML;
+                    if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
+                        $return .= <<<HTML
+                - {$section['no_team']} students with no team
+HTML;
+                    }
+                }
+                $return .= <<<HTML
+            </div>
+            <br />
+            Graders:
+            <div style="margin-left: 20px">
+HTML;
+                foreach ($sections as $key => $section) {
+                    if ($key === "NULL") {
+                        continue;
+                    }
+                    if (count($section['graders']) > 0) {
+                        $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
+                    }
+                    else {
+                        $graders = "Nobody";
+                    }
+                    $return .= <<<HTML
+                Section {$key}: {$graders}<br />
+HTML;
+                }
+                $return .= <<<HTML
+            </div>
         </div>
+HTML;
+            }
+            if(!$peer) {
+                if(!$gradeable->isTeamAssignment()) {
+                    $return .= <<<HTML
+        <div class="box half">
+            <b>Statistics for Completely Graded Assignments: </b><br/>
+            <div style="margin-left: 20px">
+HTML;
+                    if($overall_average == null) {
+                        $return .= <<<HTML
+                There are no students completely graded yet.
+            </div>
+HTML;
+                    }
+                    else {
+                        if($gradeable->getTotalAutograderNonExtraCreditPoints() == null) {
+                            $total = $overall_average->getMaxValue();
+                        }
+                        else {
+                            $total = $overall_average->getMaxValue() + $gradeable->getTotalAutograderNonExtraCreditPoints();                    
+                        }
+                        $return .= <<< HTML
+                Average: {$overall_average->getAverageScore()} / {$total} <br/>
+                Standard Deviation: {$overall_average->getStandardDeviation()} <br/>
+                Count: {$overall_average->getCount()} <br/>
+            </div>
+HTML;
+                    }
+                    $return .= <<<HTML
+            <br/><b>Statistics of Graded Components: </b><br/>
+            <div style="margin-left: 20px">
+HTML;
+                    if(count($component_averages) == 0) {
+                        $return .= <<<HTML
+            No components have been graded yet.
+HTML;
+                    }
+                    else {
+                        $overall_score = 0;
+                        $overall_max = 0;
+                        foreach($component_averages as $comp) {
+                            $overall_score += $comp->getAverageScore();
+                            $overall_max += $comp->getMaxValue();
+                            $return .= <<<HTML
+                {$comp->getTitle()}:<br/>
+                <div style="margin-left: 40px">
+                    Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} <br/>
+                    Standard Deviation: {$comp->getStandardDeviation()} <br/>
+                    Count: {$comp->getCount()} <br/>
+                </div>
+HTML;
+                        }
+                        if($overall_max !=0){
+                            $percentage = round($overall_score / $overall_max *100);
+                            $return .= <<<HTML
+                <br/>Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
+HTML;
+                        }
+                    }
+                }
+                $return .= <<<HTML
+            </div>
+        </div>
+HTML;
+            }
+            //{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
+            $return .= <<<HTML
     </div>
 HTML;
-    }
-    //{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
-    $return .= <<<HTML
-    <div style="margin-top: 20px">
+        }
+        //{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
+        $return .= <<<HTML
+    <div style="margin-top: 20px; vertical-align:bottom;">
 HTML;
-        if($percentage !== -1 || $this->core->getUser()->accessFullGrading()){
+        if($percentage !== -1 || $this->core->getUser()->accessFullGrading() || $peer){
             $return .= <<<HTML
         <a class="btn btn-primary" 
             href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
@@ -169,7 +267,14 @@ HTML;
             $text = 'View Your Sections';
             $view = null;
         }
-        if($gradeable->isGradeByRegistration()){
+        $peer = false;
+        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup()==4) {
+            $peer = true;
+        }
+        if($peer) {
+            $grading_count = $gradeable->getPeerGradeSet();
+        }
+        else if($gradeable->isGradeByRegistration()){
             $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
         }
         else{
@@ -191,41 +296,71 @@ HTML;
     <h2>Grade Details for {$gradeable->getName()}</h2>
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
-            <tr>
+            <tr>    
 HTML;
-        if ($gradeable->isTeamAssignment()) {
-            if ($this->core->getUser()->accessAdmin()) {
-                $cols = 5;
+        $cols = 0;
+        if($peer) {
+            $return .= <<<HTML
+                <td width="5%"></td>
+                <td width="30%">Student</td>
+HTML;
+            if($gradeable->getTotalNonHiddenNonExtraCreditPoints() !== 0) {
+                $cols = 6;
                 $return .= <<<HTML
-                <td width="3%"></td>
-                <td width="5%">Section</td>
-                <td width="6%">Edit Team</td>
-                <td width="12%">Team ID</td>
-                <td width="32%">Team Members</td>
+                <td width="15%">Autograding</td>
+                <td width="20%">Grading</td>
+                <td width="15%">Total</td>
+                <td width="15%">Active Version</td>
+            </tr>
+        </thead>
 HTML;
             }
             else {
-                $cols = 3;
+                $cols = 5;
+                $show_auto_grading_points = false;
                 $return .= <<<HTML
-                <td width="3%"></td>
-                <td width="5%">Section</td>
-                <td width="50%">Team Members</td>
+                <td width="30%">Grading</td>
+                <td width="20%">Total</td>
+                <td width="15%">Active Version</td>
+            </tr>
+        </thead>
 HTML;
             }
         }
         else {
-            $cols = 5;
-            $return .= <<<HTML
+            if ($gradeable->isTeamAssignment()) {
+                if($this->core->getUser()->accessAdmin()) {
+                    $cols = 5;
+                    $return .= <<<HTML
+                <td width="3%"></td>
+                <td width="5%">Section</td>
+                <td width="6%">Edit Teams</td>
+                <td width="12%">Team Id</td>
+                <td width="32%">Team Members</td>
+HTML;
+                }
+                else {
+                    $cols = 3;
+                    $return .= <<<HTML
+                <td width="3%"></td>
+                <td width="5%">Section</td>
+                <td width="50%">Team Members</td>
+HTML;
+                }
+            }
+            else {
+                $cols = 5;
+                $return .= <<<HTML
                 <td width="3%"></td>
                 <td width="5%">Section</td>
                 <td width="20%">User ID</td>
                 <td width="15%">First Name</td>
                 <td width="15%">Last Name</td>
 HTML;
-        }
-        if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
-            $cols += 5;
-            $return .= <<<HTML
+            }
+            if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
+                $cols += 5;
+                $return .= <<<HTML
                 <td width="9%">Autograding</td>
                 <td width="8%">TA Grading</td>
                 <td width="7%">Total</td>
@@ -234,11 +369,11 @@ HTML;
             </tr>
         </thead>
 HTML;
-        }
-        else {
-            $show_auto_grading_points = false;
-            $cols += 4;
-            $return .= <<<HTML
+            }
+            else {
+                $show_auto_grading_points = false;
+                $cols += 4;
+                $return .= <<<HTML
                 <td width="12%">TA Grading</td>
                 <td width="12%">Total</td>
                 <td width="10%">Active Version</td>
@@ -246,13 +381,20 @@ HTML;
             </tr>
         </thead>
 HTML;
+            }
         }
-            $count = 1;
-            $last_section = false;
-            $tbody_open = false;
-            foreach ($rows as $row) {
-                $active_version = $row->getActiveVersion();
-                $highest_version = $row->getHighestVersion();
+        $count = 1;
+        $last_section = false;
+        $tbody_open = false;
+        foreach ($rows as $row) {
+            $active_version = $row->getActiveVersion();
+            $highest_version = $row->getHighestVersion();
+            if ($peer) {
+                $autograding_score = $row->getGradedNonHiddenPoints();
+                $graded = $autograding_score;
+                $total_possible = $autograding_score + $gradeable->getTotalPeerGradingNonExtraCredit();
+            }
+            else {
                 $autograding_score = $row->getGradedAutograderPoints();
                 if ($row->beenTAgraded()){
                     if ($row->getUserViewedDate() === null || $row->getUserViewedDate() === "") {
@@ -272,32 +414,39 @@ HTML;
                     $grade_viewed_color = "";
                 }
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
-                $graded = $autograding_score + $row->getGradedTAPoints();
-
-                if ($graded < 0) $graded = 0;
-                if ($gradeable->isGradeByRegistration()) {
-                    $section = $row->getTeam() === null ? $row->getUser()->getRegistrationSection() : $row->getTeam()->getRegistrationSection();
+                $graded = $autograding_score;
+            }
+            
+            if ($graded < 0) $graded = 0;
+            if($peer) {
+                $section = "PEER STUDENT GRADER";
+            }
+            else if ($gradeable->isGradeByRegistration()) {
+                $section = $row->getTeam() === null ? $row->getUser()->getRegistrationSection() : $row->getTeam()->getRegistrationSection();
+            }
+            else {
+                $section = $row->getTeam() === null ? $row->getUser()->getRotatingSection() : $row->getTeam()->getRotatingSection();
+            }
+            $display_section = ($section === null) ? "NULL" : $section;
+            if ($section !== $last_section) {
+                $last_section = $section;
+                $count = 1;
+                if (isset($graders[$display_section]) && count($graders[$display_section]) > 0) {
+                    $section_graders = implode(", ", array_map(function(User $user) { return $user->getId(); }, $graders[$display_section]));
                 }
                 else {
-                    $section = $row->getTeam() === null ? $row->getUser()->getRotatingSection() : $row->getTeam()->getRotatingSection();
+                    $section_graders = "Nobody";
                 }
-                $display_section = ($section === null) ? "NULL" : $section;
-                if ($section !== $last_section) {
-                    $last_section = $section;
-                    $count = 1;
-                    if (isset($graders[$display_section]) && count($graders[$display_section]) > 0) {
-                        $section_graders = implode(", ", array_map(function(User $user) { return $user->getId(); }, $graders[$display_section]));
-                    }
-                    else {
-                        $section_graders = "Nobody";
-                    }
-                    if ($tbody_open) {
-                        $return .= <<<HTML
+                if ($peer) {
+                    $section_graders = $this->core->getUser()->getId();
+                }
+                if ($tbody_open) {
+                    $return .= <<<HTML
         </tbody>
 HTML;
-                    }
-                    $tbody_open = true;
-                    $return .= <<<HTML
+                }
+                $tbody_open = true;
+                $return .= <<<HTML
         <tr class="info persist-header">
             <td colspan="{$cols}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
         </tr>
@@ -306,159 +455,204 @@ HTML;
         </tr>
         <tbody>
 HTML;
-                }
-                $style = "";
-                if ($row->getUser()->accessGrading()) {
-                    $style = "style='background: #7bd0f7;'";
-                }
-                if ($gradeable->isTeamAssignment() && $row->getTeam() === null) {
-                    $return .= <<<HTML
+            }
+            $style = "";
+            if ($row->getUser()->accessGrading()) {
+                $style = "style='background: #7bd0f7;'";
+            }
+
+            if($peer) {
+                $return .= <<<HTML
+
+            <tr id="user-row-{$row->getUser()->getAnonId()}" {$style}>
+                <td>{$count}</td>
+                <td>{$row->getUser()->getAnonId()}</td>
+HTML;
+            }
+            else {
+                $return .= <<<HTML
+
             <tr id="user-row-{$row->getUser()->getId()}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
 HTML;
+                if($gradeable->isTeamAssignment()) {
                     if ($this->core->getUser()->accessAdmin()) {
                         $return .= <<<HTML
+
                 <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
-                <td></td>
 HTML;
-                    }
-                    $return .= <<<HTML
-                <td>{$row->getUser()->getId()}</td>
-HTML;
-                    if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
-                        $return .= <<<HTML
-                <td></td>
-HTML;
-                    }
-                    $return .= <<<HTML
-                <td><b><i>No Team</i></b></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-HTML;
-                }
-                else {
-                    $return .= <<<HTML
-            <tr id="{user-row-{$row->getUser()->getId()}}" {$style}>
-                <td>{$count}</td>
-                <td>{$display_section}</td>
-HTML;
-                    if ($gradeable->isTeamAssignment()) {
-                        if ($this->core->getUser()->accessAdmin()) {
-                            $members_js = json_encode($row->getTeam()->getMembers());
+                        if($row->getTeam()=== null) {
                             $return .= <<<HTML
-                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$members_js}, {$gradeable->getMaxTeamSize()});'>
-                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+
+                <td></td>
+HTML;
+                        }
+                        else {
+                            $return .= <<<HTML
+
                 <td>{$row->getTeam()->getId()}</td>
 HTML;
                         }
-                        $return .= <<<HTML
-                <td>{$row->getTeam()->getMemberList()}</td>
+                    }
+                    if($row->getTeam() === null) {
+                        $return .=<<<HTML
+
+                <td>{$row->getUser()->getId()}</td>
 HTML;
                     }
                     else {
                         $return .= <<<HTML
+
+                <td>{$row->getTeam()->getMemberList()}</td>
+HTML;
+                    }
+                }
+                else {
+                    $return .= <<<HTML
+
                 <td>{$row->getUser()->getId()}</td>
                 <td>{$row->getUser()->getDisplayedFirstName()}</td>
                 <td>{$row->getUser()->getLastName()}</td>
 HTML;
+                }
+            }
+            if($show_auto_grading_points) {
+                if ($highest_version != 0) {
+                    if($peer) {
+                        $return .= <<<HTML
+
+                <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalNonHiddenNonExtraCreditPoints()}</td>
+HTML;
                     }
-                    if($show_auto_grading_points) {
-                        if ($highest_version != 0) {
-                            $return .= <<<HTML
+                    else {
+                        $return .= <<<HTML
+
                 <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
 HTML;
-                        }
-                        else {
-                            $return .= <<<HTML
-                <td></td>
-HTML;
-                        }
                     }
-                    if ($highest_version != 0) {
-                        $return .= <<<HTML
-                <td>
+                }
+                else {
+                    $return .= <<<HTML
+
+                <td></td>                   
 HTML;
-                        $box_background = "";
-                        if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
-                            $box_background = "late-box";
-                        }
-                    
-                        if ($row->beenTAgraded()) {
-                            $btn_class = "btn-default";
-                            if($row->validateVersions()) {
-                                $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-                            }
-                            else{
-                                $contents = "Version Conflict";
-                            }
-                        }
-                        else {
-                            $btn_class = "btn-primary";
-                            $contents = "Grade";
-                        }
-                        $return .= <<<HTML
-                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
+                    $btn_class = "btn-primary";
+                    $contents = "Grade";
+                }
+            }
+            if($peer) {
+                $box_background = "";
+                $peer_cmpts = $row->getComponentsGradedBy($this->core->getUser()->getId());
+                if(count($peer_cmpts) == 0) {
+                    $contents = "Grade";
+                    $btn_class = "btn-primary";
+                }
+                else {
+                    $score =0;
+                    foreach($peer_cmpts as $cmpts) {
+                        //getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score
+                        $score += $cmpts->getScore();
+                    }
+                    $graded = $autograding_score + $score;
+                    // instead of autograding_score it should be total autograding possible
+                    // I don't think total_peer_grading_non_extra_credit ever gets set...it should be set in the gradeable constructor
+                    $total_possible = $autograding_score + $row->getTotalPeerGradingNonExtraCredit();
+                    $contents = "{$score}&nbsp;/&nbsp;{$row->getTotalPeerGradingNonExtraCredit()}";
+                    $btn_class = "btn-default";
+                }
+            }
+            else {
+                $box_background = "";
+                if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
+                    $box_background = "late-box";
+                }
+                if ($row->beenTAgraded()) {
+                    $btn_class = "btn-default";
+                    if($row->validateVersions()) {
+                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                    }
+                    else{
+                        $contents = "Version Conflict";
+                    }
+                }
+                else {
+                    $btn_class = "btn-primary";
+                    $contents = "Grade";
+                }
+            }
+            if($row->isTeamAssignment() && $row->getTeam()===null) {
+                $return .= <<<HTML
+                <td><b><i>No Team</i></b></td>
+HTML;
+            }
+            else {
+                $return .= <<<HTML
+
+                <td>
+                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getAnonId(), 'individual'=>'1'))}">
                         {$contents}
                     </a>
                 </td>
 HTML;
-                        if($row->validateVersions()) {
-                            $return .= <<<HTML
+            }
+            
+            if($row->validateVersions()) {
+                $return .= <<<HTML
+
                 <td><div class="{$box_background}">{$graded}&nbsp;/&nbsp;{$total_possible}</div></td>
 HTML;
-                        }
-                        else{
-                            $return .= <<<HTML
+            }
+            else{
+                $return .= <<<HTML
+
                 <td></td>
 HTML;
-                        }
-                        if($active_version == $highest_version) {
-                            $return .= <<<HTML
+            }
+            if($highest_version == 0) {
+                $return .= <<<HTML
+                
+                <td></td>
+HTML;
+            }
+            else if($active_version == $highest_version) {
+                $return .= <<<HTML
+
                 <td>{$active_version}</td>
 HTML;
-                        }
-                        else {
-                            $return .= <<<HTML
+            }
+            else {
+                $return .= <<<HTML
+
                 <td>{$active_version}&nbsp;/&nbsp;{$highest_version}</td>
 HTML;
-                        }
-                    }
-                    else {
-                        $return .= <<<HTML
-                <td>
-                    <a class="btn btn-default" style="color:#a5a5a5;" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">Grade
-                    </a>
-                </td>
-                <td></td>
-                <td></td>
-HTML;
-                    }
-                    $return .= <<<HTML
+            }
+            if(!$peer) {
+            $return .= <<<HTML
                 <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
-            </tr>
 HTML;
-                }
-                $count++;
             }
             $return .= <<<HTML
+            </tr>
+HTML;
+            $count++;
+        }
+        $return .= <<<HTML
         </tbody>
 HTML;
-            if ($gradeable->isTeamAssignment() && count($empty_teams) > 0) {
-                $return .= <<<HTML
-        <tr class="info persist-header">
-            <td colspan="{$cols}" style="text-align: center">Empty Teams</td>
-        </tr>
+        if ($gradeable->isTeamAssignment() && count($empty_teams) > 0) {
+            $return .= <<<HTML
+            <tr class="info persist-header">
+                <td colspan="{$cols}" style="text-align: center">Empty Teams</td>
+            </tr>
         <tbody>
 HTML;
-                $count = 1;
-                foreach($empty_teams as $team) {
-                    $display_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
-                    if ($display_section == null) $display_section = "NULL";
-                    $return .= <<<HTML
+            $count = 1;
+            foreach($empty_teams as $team) {
+                $display_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
+                if ($display_section == null) $display_section = "NULL";
+                $return .= <<<HTML
             <tr id="{empty-team-row-{$team->getId()}}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
@@ -466,21 +660,21 @@ HTML;
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$team->getId()}</td>
 HTML;
-                    for ($i = 4; $i < $cols; $i++) {
-                        $return .= <<<HTML
+                for ($i = 4; $i < $cols; $i++) {
+                    $return .= <<<HTML
                 <td></td>
 HTML;
-                    }
-                        $return .= <<<HTML
+                }
+                $return .= <<<HTML
             </tr>
 HTML;
-                    $count++;
-                }
+                $count++;
+            }
             $return .= <<<HTML
         </tbody>
 HTML;
-            }
-            $return .= <<<HTML
+        }
+        $return .= <<<HTML
     </table>
 </div>
 HTML;
@@ -531,24 +725,38 @@ HTML;
     }
 
     public function hwGradingPage($gradeable, $progress, $prev_id, $next_id, $individual) {
+        $peer = false;
+        if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
+            $peer = true;
+        }
+        $user = $gradeable->getUser();
+        $your_user_id = $this->core->getUser()->getId();
         $prev_href = $prev_id == '' ? '' : "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id, 'individual'=>$individual))}\"";
         $next_href = $next_id == '' ? '' : "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual))}\"";
         $return = <<<HTML
 <div class="grading_toolbar">
-    <a {$prev_href}><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
-    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
-    <a {$next_href}><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
+    <a onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);" {$prev_href}><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
+    <a onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
+    <a onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);" {$next_href}><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
     <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="handleKeyPress('KeyR');"></i>
     <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="handleKeyPress('KeyA');"></i>
     <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="handleKeyPress('KeyG');"></i>
     <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="handleKeyPress('KeyO');"></i>
+HTML;
+        if(!$peer) {
+            $return .= <<<HTML
     <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="handleKeyPress('KeyS');"></i>
+HTML;
+        }
+        $return .= <<<HTML
 </div>
 
 <div class="progress_bar">
     <progress class="progressbar" max="100" value="{$progress}" style="width:80%; height: 100%;"></progress>
     <div class="progress-value" style="display:inline;"></div>
 </div>
+
+
 
 <div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
     <span class="grading_label">Auto-Grading Testcases</span>
@@ -575,9 +783,15 @@ HTML;
     <span class="grading_label">Submissions and Results Browser</span>
     <button class="btn btn-default" onclick="openAll()">Expand All</button>
     <button class="btn btn-default" onclick="closeAll()">Close All</button>
+HTML;
+        if(!$peer) {
+        $return .= <<<HTML
     <button class="btn btn-default" onclick="downloadZip('{$gradeable->getId()}','{$gradeable->getUser()->getId()}')">Download Zip File</button>
+HTML;
+        }
+        $return .= <<<HTML
     <br />
-    <div class="inner-container">
+    <div class="inner-container" id="file-container">
 HTML;
         function add_files(&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array(); 
@@ -605,13 +819,13 @@ HTML;
                     $return .= <<<HTML
                 <div>
                     <div class="file-viewer">
-                        <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count})'>
+                        <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count}); updateCookies();'>
                             <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
                         {$dir}</a> &nbsp;
                         <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
                         <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
                     </div><br/>
-                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px"></div>
+                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$contents}"></div>
                 </div>
 HTML;
                     $count++;
@@ -624,11 +838,11 @@ HTML;
                     $return .= <<<HTML
             <div>
                 <div class="div-viewer">
-                    <a class='openAllDiv' onclick='openDiv({$count});'>
+                    <a class='openAllDiv' onclick='openDiv({$count}); updateCookies();'>
                         <span class="fa fa-folder" style='vertical-align:text-top;'></span>
                     {$dir}</a> 
                 </div><br/>
-                <div id='div_viewer_{$count}' style='margin-left:15px; display: none'>
+                <div id='div_viewer_{$count}' style='margin-left:15px; display: none' data-file_name="{$dir}">
 HTML;
                     $count++;
                     display_files($contents, $count, $indent+1, $return);
@@ -640,7 +854,7 @@ HTML;
             }
         }
         $files = array();
-        add_files($files, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles(), $gradeable->getSvnFiles()), 'submissions');
+        add_files($files, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles(), $gradeable->getVcsFiles()), 'submissions');
         add_files($files, $gradeable->getResultsFiles(), 'results');
         $count = 1;
         display_files($files,$count,1,$return);
@@ -650,7 +864,8 @@ HTML;
 HTML;
 
         $user = $gradeable->getUser();
-        $return .= <<<HTML
+        if(!$peer) {
+            $return .= <<<HTML
 
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
     <span class="grading_label">Student Information</span>
@@ -658,26 +873,26 @@ HTML;
         <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
         <div class="rubric-title">
 HTML;
-        $who = $gradeable->getUser()->getId();
-        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'individual'=>$individual,
+            $who = $gradeable->getUser()->getId();
+            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'individual'=>$individual,
                                                       'gradeable_version' => ""))}', this)";
-        $formatting = "font-size: 13px;";
-        $return .= <<<HTML
+            $formatting = "font-size: 13px;";
+            $return .= <<<HTML
             <div style="float:right;">
 HTML;
-        $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
+            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
         
-        // If viewing the active version, show cancel button, otherwise so button to switch active
-        if ($gradeable->getCurrentVersionNumber() > 0) {
-            if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
-                $version = 0;
-                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">';
-            }
-            else {
-                $version = $gradeable->getCurrentVersionNumber();
-                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">';
-            }
-            $return .= <<<HTML
+            // If viewing the active version, show cancel button, otherwise show button to switch active
+            if ($gradeable->getCurrentVersionNumber() > 0) {
+                if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
+                    $version = 0;
+                    $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">';
+                }
+                else {
+                    $version = $gradeable->getCurrentVersionNumber();
+                    $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">';
+                }
+                $return .= <<<HTML
                 <br/><br/>
                 <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
                         action="{$this->core->buildUrl(array('component' => 'student',
@@ -688,71 +903,94 @@ HTML;
                     {$button}
                 </form>
 HTML;
-        }
-        $return .= <<<HTML
+            }
+            $return .= <<<HTML
             </div>
+            <div>
 HTML;
 
-        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+            if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
             $return .= <<<HTML
-        <b>Team:<br/>
+                <b>Team:<br/>
 HTML;
-            foreach ($gradeable->getTeam()->getMembers() as $team_member) {
-                $team_member = $this->core->getQueries()->getUserById($team_member);
+                foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+                    $team_member = $this->core->getQueries()->getUserById($team_member);
+                    $return .= <<<HTML
+                &emsp;{$team_member->getFirstName()} {$team_member->getLastName()} ({$team_member->getId()})<br/>
+HTML;
+                }
+            }
+            else {
                 $return .= <<<HTML
-        &emsp;{$team_member->getFirstName()} {$team_member->getLastName()} ({$team_member->getId()})<br/>
+                <b>{$user->getFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
 HTML;
             }
-        }
-        else {
+
             $return .= <<<HTML
-        <b>{$user->getFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
+                Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
+                Submitted: {$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
+            </div>
 HTML;
-        }
-
-        $return .= <<<HTML
-        Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
-        Submitted: {$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
-        </div>
-HTML;
-        $return .= <<<HTML
-        <form id="rubric_form" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'submit'))}" method="post">
-            <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-            <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
-            <input type="hidden" name="u_id" value="{$user->getId()}" />
-            <input type="hidden" name="individual" value="{$individual}" />
-            <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
-HTML;
-
-        //Late day calculation
-        $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
-        $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
-        $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
-        $status = $late_days_data['status'];
-
-        $color = "green";
-        if($status != "Good" && $status != "Late") {
-            $color = "red";
             $return .= <<<HTML
-        <script>
-            $('body').css('background-color', 'red');
-            $("#rubric_form").submit(function(event){
-                var confirm = window.confirm("This submission has a bad status. Are you sure you want to submit a grade for it?");
-                if(!confirm){
-                    event.preventDefault();
-                }
-            });
-        </script>
+            <form id="rubric_form" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'submit'))}" method="post">
+                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
+                <input type="hidden" name="u_id" value="{$user->getId()}" />
+                <input type="hidden" name="individual" value="{$individual}" />
+                <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
 HTML;
-        }
-        $return .= <<<HTML
-        <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
+
+            //Late day calculation
+            $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
+            $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
+            $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
+            $status = $late_days_data['status'];
+
+            $color = "green";
+            if($status != "Good" && $status != "Late") {
+                $color = "red";
+                $return .= <<<HTML
+            <script>
+                $('body').css('background', 'red');
+                // pretty sure the following code is no longer used
+                $("#rubric_form").submit(function(event){
+                    var confirm = window.confirm("This submission has a bad status. Are you sure you want to submit a grade for it?");
+                    if(!confirm){
+                        event.preventDefault();
+                    }
+                });
+            </script>
+HTML;
+            }
+            $return .= <<<HTML
+            <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
         </div>
     </div>
 </div>
-
-<div id="grading_rubric" class="draggable rubric_panel" style="right:15px; top:140px; width:48%; height:42%;">
-    <span class="grading_label">Grading Rubric</span> <span style="float: right; position: relative; top: 10px; right: 1%;"> Overwrite Grader: <input type='checkbox' id="overwrite-id" name='overwrite' value='1' /> </span>
+HTML;
+        }
+        if($peer) {
+            $span_style = 'style="display:none;"';
+            $checked = 'disabled';
+        }
+        else {
+            $span_style = '';
+            $checked = 'checked';
+        }
+        $empty = "";
+        if(!$gradeable->useTAGrading()) {
+            $empty = "empty";
+        }
+        $return .= <<<HTML
+<div id="grading_rubric" class="draggable rubric_panel {$empty}" style="right:15px; top:140px; width:48%; height:42%;">
+    <span class="grading_label">Grading Rubric</span>
+HTML;
+        if($gradeable->useTAGrading()) {
+        $return .= <<<HTML
+    <div style="float: right; float: right; position: relative; top: 10px; right: 1%;">
+        <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
+        <span {$span_style}> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" {$checked}/> Overwrite Grader </span>
+    </div>
 HTML;
         $break_onclick = "";
         $disabled = '';
@@ -763,36 +1001,60 @@ HTML;
     <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
         }
+        $num_questions = count($gradeable->getComponents());
+
+        // if use student components, get the values for pages from the student's submissions
+        $files = $gradeable->getSubmittedFiles();
+        $student_pages = array();
+        foreach ($files as $filename => $content) {
+            if ($filename == "student_pages.json") {
+                $path = $content["path"];
+                $student_pages = FileUtils::readJsonFile($content["path"]);
+            }
+        }
+
         $return .= <<<HTML
     <div style="margin:3px;">
-        <table class="rubric-table" id="rubric-table">
+        <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-num_questions="{$num_questions}">
             <tbody>
 HTML;
 
         $c = 1;
         $precision = floatval($gradeable->getPointPrecision());
         $num_questions = count($gradeable->getComponents());
+        $your_user_id = $this->core->getUser()->getId();
 
-        foreach ($gradeable->getComponents() as $question) {
-            $type = 0; //0 is common deductable, 1 is common additive
-            $min = -1000;
-            $max = 0;
-            $ungraded = false;
-            foreach ($question->getMarks() as $mark) {
-                if($mark->getPoints() < 0) {
-                    $min = -1000;
-                    $max = 0;
-                    $type = 0;
-                    break;
+        foreach ($gradeable->getComponents() as $component) {
+            if($peer && !is_array($component)) continue;
+            $question = null;
+            $show_graded_info = true;
+            $num_peer_components = 0;
+            if(is_array($component)) {
+                $num_peer_components = count($component);
+                foreach($component as $cmpt) {
+                    if($cmpt->getGrader() == null) {
+                        $question = $cmpt;
+                        break;
+                    }
+                    if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
+                        $question = $cmpt;
+                        break;
+                    }
                 }
-                else if ($mark->getPoints() > 0) {
-                    $min = 0;  
-                    $max = 1000;
-                    $type = 1;
-                    break;
+                if($question === null) {
+                    $show_graded_info = false;
+                    $question = $component[0];
                 }
             }
-            $word = ($type === 1) ? "Addition" : "Deduction";
+            else {
+                $question = $component;
+            }
+            if($question->getOrder() == -1) continue;
+            $lower_clamp = $question->getLowerClamp();
+            $default = $question->getDefault();
+            $upper_clamp = $question->getUpperClamp();
+            $max = $upper_clamp - $default;
+            $min = $lower_clamp - $default;
             // hide auto-grading if it has no value
             if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
@@ -807,56 +1069,55 @@ HTML;
 HTML;
             $penalty = !(intval($question->getMaxValue()) >= 0);
             $message = htmlentities($question->getTitle());
-            $message = "<b>{$message}</b>";
+            $message = "<b>{$message} {$num_peer_components}</b>";
             if ($question->getGradedVersion() != -1 && $gradeable->getActiveVersion() != $question->getGradedVersion()) {
-                $message .= "  " . "Before submitting regrade, please edit or ensure that comments from version " . $question->getGradedVersion() . " still apply.";
+                $message .= "  " . "Please edit or ensure that comments from version " . $question->getGradedVersion() . " still apply.";
             }
             $note = htmlentities($question->getTaComment());
             if ($note != "") {
                 $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
             }
-
-            //adds an icon depending on the question type (extra credit, normal, penalty)
-            //adds background color as well.
-            if($question->getIsExtraCredit()) {
-                $return .= <<<HTML
-                    <td style="font-size: 12px; background-color: #D8F2D8;" colspan="4">
-                        <i class="fa fa-plus-circle" aria-hidden="true"></i> 
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>$message</b>
-HTML;
+            $page = intval($question->getPage());
+            // if the page is determined by the student json
+            if ($page == -1) {
+                // usually the order matches the json
+                if ($student_pages[intval($question->getOrder())]["order"] == intval($question->getOrder())) {
+                    $page = intval($student_pages[intval($question->getOrder())]["page #"]);
+                }
+                // otherwise, iterate through until the order matches
+                else {
+                    foreach ($student_pages as $student_page) {
+                        if ($student_page["order"] == intval($question->getOrder())) {
+                            $page = intval($student_page["page #"]);
+                            break;
+                        }
+                    }
+                }
             }
-            else if($penalty) {
-                $return .= <<<HTML
-                    <td style="font-size: 12px; background-color: #FAD5D3;" colspan="4">
-                        <i class="fa fa-minus-circle" aria-hidden="true"></i> 
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>$message</b>
-HTML;
-            }
-            else {
-                $return .= <<<HTML
-                    <td style="font-size: 12px;" colspan="4">
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
-                        <b>{$message}</b>
-HTML;
+            if ($page > 0) {
+                $message .= "<i> Page #: " . $page . "</i>";
             }
 
+            $return .= <<<HTML
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
+                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
+                        {$message}
+HTML;
             //get the grader's id if it exists
             $grader_id = "";
-            if($question->getGrader() === null) {
+            if($question->getGrader() === null || !$show_graded_info) {
                 $grader_id = "Ungraded!";
             } else {
                 $grader_id = "Graded by " . $question->getGrader()->getId();
             }
 
             $return .= <<<HTML
-            <div style="float: right;">
-                <span id="graded-by-{$c}" style="font-style: italic;">{$grader_id}</span>
-                <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark(-2, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                <span id="save-mark-{$c}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
-            </div>
-            </span> <span id="ta_note-{$c}" style="display: none;"> {$note} </span> 
+                        <div style="float: right;">
+                            <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
+                            <span id="save-mark-{$c}" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span> 
+                        </div>
+                        </span> <span id="ta_note-{$c}" style="display: none;"> {$note}</span> 
+                        <span id="page-{$c}" style="display: none;">{$page}</span>
 HTML;
 
             $student_note = htmlentities($question->getStudentComment());
@@ -867,92 +1128,52 @@ HTML;
             $return .= <<<HTML
                         <span id="student_note-{$c}" style="display: none;">{$student_note}</span>
                     </td>
+                    <td id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0">
+                        <div>
+                            <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark({$c}, '{$gradeable->getId()}', '{$user->getAnonId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                        </div>
+                    </td>
                 </tr>
 HTML;
 
             //gets the initial point value and text
-            $initial_text = "";
-            $first_text = true;
-            if ($question->getMaxValue() < 0) {
-                if ($type === 0) {
-                    $question_points = 0;
-                } else {
-                    $question_points = $question->getMaxValue();
-                }
-            } else {
-                if ($type === 0) {
-                    $question_points = $question->getMaxValue();
-                } else {
-                    $question_points = 0;
-                }
-            }
-            
-            foreach ($question->getMarks() as $mark) {
-                if($mark->getHasMark() === true) {
-                    $question_points += $mark->getPoints();
-                    if ($first_text === true) {
-                        $initial_text .= "* " . $mark->getNote();
-                        $first_text = false;
-                    }
-                    else {
-                        $initial_text .= "<br>* " . $mark->getNote();
-                    }
-                }
-            }
-            if($question->getComment() != "") {
-                if ($first_text === true) {
-                    $initial_text .= "* " . $question->getComment();
-                    $first_text = false;
-                }
-                else {
-                    $initial_text .= "<br>* " . $question->getComment();
-                }
-            }
 
-            if($initial_text == "") {
+            
+            if((!$question->getHasMarks() && !$question->getHasGrade()) || !$show_graded_info) {
                 $initial_text = "Click me to grade!";
-                $ungraded = true;
             }
-
-            $question_points += $question->getScore();
-            if($question->getMaxValue() < 0) {
-                if ($type === 0) {
-                    if ($question_points < $question->getMaxValue()) $question_points = $question->getMaxValue();
-                } else {
-                    if ($question_points > 0) $question_points = 0;
-                }
-            } else {
-                if ($type === 0) {
-                    if ($question_points < 0) $question_points = 0;
-                } else {
-                    if ($question_points > $question->getMaxValue()) $question_points = $question->getMaxValue();
-                }
+            else if($show_graded_info) {
+                $nl = "<br>";
+                $initial_text = $question->getGradedTAComments($nl);
             }
             
-            if($ungraded === true) {
+            
+            $question_points = $question->getGradedTAPoints();
+
+            if((!$question->getHasMarks() && !$question->getHasGrade()) || !$show_graded_info) {
                 $question_points = " ";
             }
 
             $background = "";
-            if ($question->getIsExtraCredit()) {
+            if ($question_points > $question->getMaxValue()) {
                 $background = "background-color: #D8F2D8;";
             }
-            else if ($penalty) {
+            else if ($question_points < 0) {
                 $background = "background-color: #FAD5D3;";
             }
             
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose({$c}, {$num_questions});">
+                <tr id="summary-{$c}" style="" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
-                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-max_points="{$question->getMaxValue()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
+                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
-                    <td style="width:98%; {$background}" colspan="3">
+                    <td style="width:98%;" colspan="3">
                         <div id="rubric-{$c}">
                             <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;">{$initial_text}</span>
                         </div>
                     </td>
                 </tr>
-                <tbody id="extra-{$c}" style="{$background}; display: none" colspan="4" data-question_id="{$question->getId()}">
+                <tbody id="extra-{$c}" style="display: none" colspan="4" data-question_id="{$question->getId()}">
 HTML;
 
             $d = 0;
@@ -962,89 +1183,107 @@ HTML;
                 if ($first === true) {
                     $first = false;
                     $noChange = "readonly";
-                    $mark_text = ($type === 1) ? "No Credit" : "Full Credit";
+                    $mark_text = ($question->getDefault() == 0) ? "No Credit" : "Full Credit";
                 }
                 else {
                     $noChange = "";
                     $mark_text = $mark->getNote();
                 }
-                $icon_mark = ($mark->getHasMark() === true) ? "fa-square" : "fa-square-o";
+                $icon_mark = ($mark->getHasMark() === true && $show_graded_info) ? "fa-square" : "fa-square-o";
                 $return .= <<<HTML
-                <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
-                    <td colspan="1" style="{$background}; text-align: center; width: 12%;"> 
-                        <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
-                        <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;" {$noChange}>
-                    </td>
-                    <td colspan="3" style="{$background}; width: 88%">
-                        <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width: 95%; resize:none; float:left;" {$noChange}>{$mark_text}</textarea>
-                    </td>
-                </tr>
+                    <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
+                        <td colspan="1" style="text-align: center; width: 12%; white-space: nowrap;"> 
+                            <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                            <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none; min-width: 50px;" {$noChange}>
+                        </td>
+                        <td colspan="3" style="white-space: nowrap;">
+                                <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width: 90%; resize:none;" {$noChange}>{$mark_text}</textarea>
+                                <span id="mark_info_id-{$c}-{$d}" onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); getMarkInfo(this, '{$gradeable->getId()}');"> <i class="fa fa-users icon-got-this-mark"></i> </span>
+                        </td>
+                    </tr>
 HTML;
-            $d++;
+                $d++;
             }
+            $has_mark = false;
+            if(($question->getScore() == 0 && $question->getComment() == "") || !$show_graded_info) {
                 $has_mark = false;
-                if($question->getScore() == 0 && $question->getComment() == "") {
-                    $has_mark = false;
-                }
-                else {
-                    $has_mark = true;
-                }
-                $icon_mark = ($has_mark === true) ? "fa-square" : "fa-square-o";
+            }
+            else {
+                $has_mark = true;
+            }
+            $icon_mark = ($has_mark === true) ? "fa-square" : "fa-square-o";
+            if(!$peer) {
                 $return .= <<<HTML
-                <tr>
-                    <td colspan="4" style="{$background};">
-                        <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '{$background}', {$min}, {$max}, '{$precision}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
-                        Add New Common {$word}</span>
-                    </td>
-                </tr>
-                <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                    <td colspan="1" style="text-align: center; {$background}"> 
-                    <span onclick=""> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
-                    <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;">
-                    </td>
-                    <td colspan="3" style="{$background};">
-                        Custom: <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" rows="1" placeholder="Custom message for student..." style="width:85.6%; resize:none;">{$question->getComment()}</textarea>
-                    </td>
-                </tr>
+                    <tr>
+                        <td colspan="4">
+                            <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+                            Add New Common Mark</span>
+                        </td>
+                    </tr>
+
+HTML;
+            }
+            $return .= <<<HTML
+                    <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
+                        <td colspan="1" style="text-align: center;; white-space: nowrap;"> 
+                        <span onclick=""> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                        <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px;">
+                        </td>
+                        <td colspan="3" style="white-space: nowrap;">
+                            Custom: <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
+                        </td>
+                    </tr>
                 </tbody>
 HTML;
             $c++;
         }
+        if($peer) {
+            $break_onclick = 'return false;';
+            $disabled = 'disabled';
+        }
         $return .= <<<HTML
-            <tr>
-                <td colspan="4">
-                    <b>General Comment</b>
-                    <div style="float: right;">
-                        <span id="cancel-mark-general"onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                        <span id="save-mark-general" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}, {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
-                    </div> 
-                </td>
-            </tr>
-            <tr id="summary-general" style="background-color: #f9f9f9;" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getId()}', {$gradeable->getActiveVersion()}); openClose(-2, {$num_questions});">
-                <td style="white-space:nowrap; vertical-align:middle; text-align:center" colspan="1">
-                </td>
-                <td style="width:98%;" colspan="3">
-                    <div id="rubric-custom">
-                        <span id="rubric-textarea-custom" name="comment-custom" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;"><pre>{$gradeable->getOverallComment()}</pre></span>
-                    </div>
-                </td>
-            </tr>
-            <tbody id="extra-general" style="display: none" colspan="4">
                 <tr>
-                    <td colspan="4">
-                        <textarea id="comment-general-id" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
+                    <td id="title-general" colspan="4" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
+                        <b>General Comment</b>
+                        <div style="float: right;">                        
+                            <span id="save-mark-general" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                        </div> 
+                    </td>
+                    <td id="title-general-cancel" style="font-size: 12px; display: none; width: 5%" colspan="0">
+                        <span id="cancel-mark-general" onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getAnonId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                     </td>
                 </tr>
-            </tbody>
+                <tr id="summary-general" style="" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
+                    <td style="white-space:nowrap; vertical-align:middle; text-align:center" colspan="1">
+                    </td>
+                    <td style="width:98%;" colspan="3">
+                        <div id="rubric-custom">
+                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;"><pre>{$gradeable->getOverallComment()}</pre></span>
+                        </div>
+                    </td>
+                </tr>
+                <tbody id="extra-general" style="display: none" colspan="4">
+                    <tr>
+                        <td colspan="4">
+                            <textarea id="comment-general-id" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
+                        </td>
+                    </tr>
+                </tbody>
 HTML;
-
-        $total_points = $gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints();
+        
+        if($peer) {
+            $total_points = $gradeable->getTotalNonHiddenNonExtraCreditPoints() + $gradeable->getTotalPeerGradingNonExtraCredit();
+        }
+        else {
+            $total_points = $gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints();
+        }
+        
         $return .= <<<HTML
                 <tr>
                     <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></td>
                     <td style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total">0 / {$total_points}&emsp;&emsp;&emsp;
-                        AUTO-GRADING {$gradeable->getGradedAutograderPoints()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</strong>
-                    </td>
+                        AUTO-GRADING {$gradeable->getGradedAutograderPoints()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</strong></td>
+                    <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="2"></td>
                 </tr>
             </tbody>
         </table>
@@ -1054,14 +1293,44 @@ HTML;
 HTML;
         $now = new \DateTime('now');        
         $return .= <<<HTML
+            </form>
         </div>
-    </form>
     </div>
-</div>
+HTML;
+        }
+        $return .= <<<HTML
+</div> 
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading.js"></script>
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading-mark.js"></script>
 <script type="text/javascript">
-
+    $(document).ready(function() {
+        $( "#autograding_results" ).scroll(function() {
+            updateHandle("#autograding_results");
+        });
+        $( "#autograding_results" ).resize(function() {
+            updateHandle("#autograding_results");
+        });
+        $( "#grading_rubric" ).scroll(function() {
+            updateHandle("#grading_rubric");
+        });
+        $( "#grading_rubric" ).resize(function() {
+            updateHandle("#grading_rubric");
+        });
+        $( "#submission_browser" ).scroll(function() {
+            updateHandle("#submission_browser");
+        });
+        $( "#submission_browser" ).resize(function() {
+            updateHandle("#submission_browser");
+        });
+        $( "#student_info" ).scroll(function() {
+            updateHandle("#student_info");
+        });
+        $( "#student_info" ).resize(function() {
+            updateHandle("#student_info");
+        });
+    });
+</script>
+<script type="text/javascript">
     function openFrame(html_file, url_file, num) {
         var iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open')) {
@@ -1071,10 +1340,10 @@ HTML;
             else if (url_file.includes("results")) directory = "results";  
             // handle pdf
             if(url_file.substring(url_file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='750px' height='600px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' height='600px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='750px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }
@@ -1105,7 +1374,6 @@ HTML;
 
         $("#score_total").html(total+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});
     }
-
     function openFile(html_file, url_file) {
         url_file = decodeURIComponent(url_file);
         directory = "";
@@ -1118,4 +1386,19 @@ HTML;
 HTML;
         return $return;
     }
+
+    public function popupStudents() {
+        $return = <<<HTML
+<div class="popup-form" id="student-marklist-popup">
+    <div style="width: auto; height: 450px; overflow-y: auto;" id="student-marklist-popup-content"></div>
+    <div style="float: right; width: auto">
+        <a onclick="$('#student-marklist-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
+    </div>
+</div>
+HTML;
+        return $return;
+    }
+
 }
+
+

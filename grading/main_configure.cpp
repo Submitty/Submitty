@@ -34,8 +34,11 @@ nlohmann::json printTestCase(TestCase test) {
 
 void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cpp");
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cxx");
   whole_config["autograding"]["submission_to_compilation"].push_back("**/*.c");
   whole_config["autograding"]["submission_to_compilation"].push_back("**/*.h");
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.hpp");
+  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.hxx");
   whole_config["autograding"]["submission_to_compilation"].push_back("**/*.java");
 
   whole_config["autograding"]["submission_to_runner"].push_back("**/*.py");
@@ -84,7 +87,8 @@ int main(int argc, char *argv[]) {
   int max_submissions = MAX_NUM_SUBMISSIONS;
 
   nlohmann::json all;
-  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++) {
+  int which_testcase = 0;
+  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,which_testcase++) {
     int points = itr->value("points",0);
     bool extra_credit = itr->value("extra_credit",false);
     bool hidden = itr->value("hidden",false);
@@ -96,7 +100,7 @@ int main(int argc, char *argv[]) {
       if (!hidden)
         visible += points;
     }
-    TestCase tc(*itr,config_json);
+    TestCase tc(config_json,which_testcase);
     if (tc.isSubmissionLimit()) {
       max_submissions = tc.getMaxSubmissions();
     }
@@ -140,13 +144,13 @@ int main(int argc, char *argv[]) {
   if (config_json.find("assignment_message") != config_json.end()) {
     j["assignment_message"] = config_json.value("assignment_message",""); 
   }
-  if (config_json.find("conditional_message") != config_json.end()) {
-    nlohmann::json conditional_message = config_json.value("conditional_message",nlohmann::json::object());
-    nlohmann::json cond;
-    cond["message"] = conditional_message.value("message","");
-    cond["minimum_days_early"] = conditional_message.value("minimum_days_early",0);
-    cond["minimum_points"] = conditional_message.value("minimum_points",0);
-    j["conditional_message"] = cond; 
+  if (config_json.find("early_submission_incentive") != config_json.end()) {
+    nlohmann::json early_submission_incentive = config_json.value("early_submission_incentive",nlohmann::json::object());
+    nlohmann::json incentive;
+    incentive["message"] = early_submission_incentive.value("message","");
+    incentive["minimum_days_early"] = early_submission_incentive.value("minimum_days_early",0);
+    incentive["minimum_points"] = early_submission_incentive.value("minimum_points",0);
+    j["early_submission_incentive"] = incentive; 
   }
   j["max_submissions"] = max_submissions;
   j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);

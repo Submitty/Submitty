@@ -300,6 +300,37 @@ function handle_textbox_keypress() {
     setButtonStatus();
 }
 
+// BULK UPLOAD
+//========================================================================================
+function openFile(url_full) {
+    window.open(url_full,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+}
+
+// moving to next input for split item submissions
+// referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
+function moveNextInput(count) {
+    var next_count = count+1;
+    var next_input = "#bulk_user_id_" + next_count;
+    if ($(next_input).length) {
+        $(next_input).focus();
+        $(next_input).select(); 
+
+        var inputOffset = $(next_input).offset().top;
+        var inputHeight = $(next_input).height();
+        var windowHeight = $(window).height();
+        var offset;
+
+        if (inputHeight < windowHeight) {
+            offset = inputOffset - ((windowHeight / 2) - (inputHeight / 2));
+        }
+        else {
+            offset = inputOffset;
+        }
+        var speed = 500;
+        $('html, body').animate({scrollTop:offset}, speed); 
+    }
+}
+
 
 
 // HANDLE SUBMISSION
@@ -332,7 +363,7 @@ function isValidSubmission(){
  * @param count
  * @param makeSubmission, a callback function
  */
-function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, makeSubmission) {
+function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, repo_id, makeSubmission) {
 
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
@@ -350,7 +381,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count);
+                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
                 }
                 else {
                     alert("ERROR! \n\n" + data['message']);
@@ -572,11 +603,14 @@ function handleBulk(gradeable_id, num_pages) {
  * @param versions_used
  * @param versions_allowed
  * @param csrf_token
- * @param svn_checkout
+ * @param vcs_checkout
  * @param num_textboxes
  * @param user_id
+ * @param repo_id
+ * @param student_page
+ * @param num_components
  */
-function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes, gradeable_id, user_id) {
+function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components) {
     $("#submit").prop("disabled", true);
 
     submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id});
@@ -607,10 +641,12 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
-    formData.append('svn_checkout', svn_checkout);
+    formData.append('vcs_checkout', vcs_checkout);
     formData.append('user_id', user_id);
+    formData.append('repo_id', repo_id);
+    formData.append('student_page', student_page)
 
-    if (!svn_checkout) {
+    if (!vcs_checkout) {
         // Check if new submission
         if (!isValidSubmission() && empty_textboxes) {
             alert("Not a new submission.");
@@ -648,6 +684,25 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         textbox_answers[i] = $("#textbox_"+i).val();
     }
     formData.append('textbox_answers', JSON.stringify(textbox_answers));
+
+    if (student_page) {
+        var pages = [];
+        for (var i = 0; i < num_components; i++) {
+            pages[i] = $("#page_"+i).val();
+            if (pages[i] == "") {
+                alert("You cannot leave a page textbox empty.");
+                $("#submit").prop("disabled", false);
+                return;
+            }
+            if (parseInt(pages[i]) < 1) {
+                alert("Page numbers cannot be less than 1.");
+                $("#submit").prop("disabled", false);
+                return;
+            }
+        }
+        formData.append('pages', JSON.stringify(pages));
+    }
+
 
     $.ajax({
         url: submit_url,

@@ -141,21 +141,19 @@ abstract class AbstractDatabaseQueries {
 
     abstract public function getUsersByRegistrationSections($sections);
 
-    abstract public function getTotalUserCountByRegistrationSections($sections);
+    abstract public function getTotalUserCountByGradingSections($sections, $section_key);
 
     abstract public function getTotalComponentCount($g_id);
 
-    abstract public function getGradedComponentsCountByRegistrationSections($g_id, $sections);
+    abstract public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key);
+
+    abstract public function getAverageComponentScores($g_id);
 
     abstract public function getGradersForRegistrationSections($sections);
 
     abstract public function getRotatingSectionsForGradeableAndUser($g_id, $user_id);
 
     abstract public function getUsersByRotatingSections($sections);
-
-    abstract public function getTotalUserCountByRotatingSections($sections);
-
-    abstract public function getGradedComponentsCountByRotatingSections($g_id, $sections);
 
     abstract public function getGradersForRotatingSections($g_id, $sections);
 
@@ -277,9 +275,9 @@ abstract class AbstractDatabaseQueries {
      */
     abstract public function updateGradeableComponentData($gd_id, GradeableComponent $component);
 
-    abstract public function insertGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark);
+    abstract public function insertGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark);
 
-    abstract public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark);
+    abstract public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark, $gcd_grader_id);
 
     /**
      * Creates a new gradeable in the database
@@ -486,12 +484,6 @@ abstract class AbstractDatabaseQueries {
      * @param integer $days
      */
     abstract public function updateExtensions($user_id, $g_id, $days);
-    
-    /**
-     * Gets number of people each peer grader is assigned to grade
-     * @param string $gradeable_id
-     */
-    abstract public function getPeerGradingAssignNumber($gradeable_id);
     
     /**
      * Removes peer grading assignment if instructor decides to change the number of people each person grades for assignment

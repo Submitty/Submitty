@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     std::cout << "========================================================" << std::endl;
     std::cout << "TEST #" << i+1 << std::endl;
 
-    TestCase my_testcase((*tc)[i],config_json);
+    TestCase my_testcase(config_json,i);
 
     if (my_testcase.isFileCheck()) continue;
     if (my_testcase.isCompilation()) continue;

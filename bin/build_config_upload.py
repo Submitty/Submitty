@@ -52,6 +52,9 @@ def main():
     if username != "hwcron":
         raise SystemError("ERROR!  This script must be run by hwcron")
 
+    # ensure future pushd & popd commands don't complain
+    os.chdir("/var/local/submitty/to_be_built/")
+
     start = time.time()
     count = 0
     while True:

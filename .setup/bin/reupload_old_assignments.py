@@ -4,18 +4,15 @@ import os
 import json
 import shutil
 import argparse
+from submitty_utils import dateutils
 from sqlalchemy import create_engine, Table, MetaData, bindparam, and_
 import grp
 
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
-sys.path.append("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"+"/bin")
-import submitty_utils
-
 DB_HOST = "__INSTALL__FILLIN__DATABASE_HOST__"
 DB_USER = "__INSTALL__FILLIN__DATABASE_USER__"
 DB_PASS = "__INSTALL__FILLIN__DATABASE_PASSWORD__"
-
 
 
 # This script was created to help professors re-upload an old semester's assignments for autograding.
@@ -77,7 +74,8 @@ def main():
 
     #For every user folder in our directory, for every submission folder inside of it, copy over that user/submission, add it to 
     #the database, and create a queue file. 
-    for user_folder in os.listdir(args.ARCHIVED_directory):
+    for user_folder in sorted(os.listdir(args.ARCHIVED_directory)):
+        print("evaluating " + user_folder)
         #If the item we are currently looking at is a directory, we will assume it is a student submission directory.
         ARCHIVED_user_dir = os.path.join(args.ARCHIVED_directory, user_folder)
         print("Starting work on archived dir: " + ARCHIVED_user_dir)
@@ -86,6 +84,10 @@ def main():
             continue
         user_name = user_folder
         print("processing user: " + user_name)
+        CURRENT_user_path = os.path.join(CURRENT_assignment_path, user_name)
+        with open(os.path.join(ARCHIVED_user_dir, "user_assignment_settings.json"), "r") as open_file:
+            user_assignment_settings = json.load(open_file)
+
         #For every folder inside of the user submission folder.
         for submission in os.listdir(ARCHIVED_user_dir):
             ARCHIVED_submission_path = os.path.join(ARCHIVED_user_dir, submission)
@@ -94,9 +96,12 @@ def main():
             #Right now, we ignore these.
             #TODO copy over the user_assignment_settings files and use them instead of creating new ones.
             if not os.path.isdir(ARCHIVED_submission_path):
+                if user_folder == ".submit.timestamp":
+                    with open(ARCHIVED_submission_path, 'r') as old_timestamp, open(CURRENT_user_path, 'w') as new_timestamp:
+                        for line in old_timestamp:
+                            new_timestamp.write(line)
+                        os.system("chown -R hwphp:{} {}".format(course_group, new_timestamp))
                 continue
-            CURRENT_user_path = os.path.join(CURRENT_assignment_path, user_name)
-
             #if the student's submission dir does not exist, make it.
             if not os.path.isdir(CURRENT_user_path):
                 os.makedirs(CURRENT_user_path)
@@ -117,7 +122,7 @@ def main():
             #give the appropriate permissions
             os.system("chown -R hwphp:{} {}".format(course_group, CURRENT_submission_path))
             #add each submission to the database.
-            current_time_string = submitty_utils.write_submitty_date()
+            current_time_string = dateutils.write_submitty_date()
 
             conn.execute(electronic_gradeable_data.insert(), g_id=args.assignment_name, user_id=user_name,
                          g_version=submission, submission_time=current_time_string)
@@ -126,36 +131,31 @@ def main():
             if int(submission) == 1:
                 print("Entered new user " + user_name + " because submission was " + submission)
                 conn.execute(electronic_gradeable_version.insert(), g_id=args.assignment_name, user_id=user_name,
-                         active_version=submission)
+                         active_version=user_assignment_settings['active_version'])
             else:
-                print("UPDATED: where g_id is " + args.assignment_name + " and user id is " + user_name + " to value " + str(submission))
+                print("UPDATED: where g_id is " + args.assignment_name + " and user id is " + user_name + " to value " + str(user_assignment_settings['active_version']))
                 stmt = electronic_gradeable_version.update().\
                         where(and_(electronic_gradeable_version.c.g_id==args.assignment_name, electronic_gradeable_version.c.user_id==user_name)).\
-                        values(active_version=submission)
+                        values(active_version=user_assignment_settings['active_version'])
                 conn.execute(stmt)
             with open(os.path.join(CURRENT_user_path, "user_assignment_settings.json"), "w") as open_file:
-                json.dump({"active_version": submission, "history": [{"version": submission, "time": current_time_string}]},
-                          open_file)
-            timestamp_path = os.path.join(CURRENT_submission_path, ".submit.timestamp")
-            with open(timestamp_path, "w") as open_file:
-                open_file.write(current_time_string + "\n")
+                json.dump(user_assignment_settings, open_file, indent = 4)
 
-                if args.grade:
-                    #Create a queue file for each submission            
-                    queue_file = "__".join([args.semester, args.course_name, args.assignment_name, user_name, submission])
-                    print("Creating queue file:", queue_file)
-                    queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
-                    with open(queue_file, "w") as open_file:
-                        # FIXME: This will need to be adjusted for team assignments!
-                        json.dump({"semester": args.semester,
-                                   "course": args.course_name,
-                                   "gradeable": args.assignment_name,
-                                   "user": user_name,
-                                   "version": submission,
-                                   "who": user_name,
-                                   "is_team": False,
-                                   "team": ""}, open_file)
-            os.system("chown -R hwphp:{} {}".format(course_group, timestamp_path))
+            if args.grade:
+                # Create a queue file for each submission
+                queue_file = "__".join([args.semester, args.course_name, args.assignment_name, user_name, submission])
+                print("Creating queue file:", queue_file)
+                queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
+                with open(queue_file, "w") as open_file:
+                    # FIXME: This will need to be adjusted for team assignments!
+                    json.dump({"semester": args.semester,
+                               "course": args.course_name,
+                               "gradeable": args.assignment_name,
+                               "user": user_name,
+                               "version": submission,
+                               "who": user_name,
+                               "is_team": False,
+                               "team": ""}, open_file)
 
     conn.close()
 

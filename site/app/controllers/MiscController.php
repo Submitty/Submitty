@@ -40,7 +40,7 @@ class MiscController extends AbstractController {
                 return false;
             }
         }
-
+        
         if (!FileUtils::isValidFileName($path)) {
             return false;
         }
@@ -83,6 +83,12 @@ class MiscController extends AbstractController {
             // gradeable to get temporary info from
             // if team, get one of the user ids via the team id
             $current_gradeable = $this->core->getQueries()->getGradeable($path_gradeable_id, $current_user_id);
+            if($current_gradeable->getPeerGrading()) {
+                $peer_grade_set = $this->core->getQueries()->getPeerAssignment($path_gradeable_id, $current_user_id);
+                if(in_array($path_user_id, $peer_grade_set)) {
+                    return true;
+                }
+            }
             if ($current_gradeable->isTeamAssignment()) {
                 $path_team_id = $path_user_id;
                 $path_team_members = $this->core->getQueries()->getTeamById($path_team_id)->getMembers();

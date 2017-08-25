@@ -4,7 +4,7 @@
     left: 0px;
     height: 41px;
     width: 290px;
-    z-index: 1099;
+    z-index: 1;
     background-color: #edf6f6;
 }
 
@@ -101,7 +101,7 @@
     left: 290px;
     height: 31px;
     width: 250px;
-    z-index: 1099;
+    z-index: 1;
     background-color: #edf6f6;
     border: 5px solid #edf6f6;
 }
@@ -236,6 +236,14 @@ progress::-webkit-progress-value {
     width: 14px;
 }
 
+.icon-got-this-mark {
+    visibility: visible; 
+    cursor: pointer; 
+    position: relative; 
+    top: 2px; 
+    left: 1%;
+}
+
 .rubric-title {
     width: 100%;
     margin-left: 0;
@@ -283,6 +291,46 @@ progress::-webkit-progress-value {
 .rubric-table tbody > tr:nth-child(odd) > td,
 .rubric-table tbody > tr:nth-child(odd) > th {
   background-color: #f9f9f9;
+}
+
+.ta-rubric-table {
+    border: 1px solid #dddddd;
+    border-collapse: separate;
+    *border-collapse: collapse;
+    -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+            border-radius: 4px;
+}
+
+.ta-rubric-table th, 
+.ta-rubric-table td {
+    padding: 8px;
+    line-height: 20px;
+    text-align: left;
+    vertical-align: top;
+    border-top: 1px solid #dddddd;
+    border-left: 1px solid #dddddd;
+}
+
+.ta-rubric-table th {
+  font-weight: bold;
+}
+
+.ta-rubric-table thead th {
+  vertical-align: bottom;
+}
+
+.ta-rubric-table caption + thead tr:first-child th,
+.ta-rubric-table caption + thead tr:first-child td,
+.ta-rubric-table colgroup + thead tr:first-child th,
+.ta-rubric-table colgroup + thead tr:first-child td,
+.ta-rubric-table thead:first-child tr:first-child th,
+.ta-rubric-table thead:first-child tr:first-child td {
+  border-top: 0;
+}
+
+.ta-rubric-table-background {
+    background-color: #b3b3b3;
 }
 
 .btn-large {

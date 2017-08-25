@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Usage:
+#   install_system.sh [--vagrant] [<extra> <extra> ...]
+
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
@@ -27,10 +30,11 @@ COURSE_BUILDERS_GROUP=course_builders
 # PROVISION SETUP
 #################
 
-if [[ $1 == vagrant ]]; then
+if [[ $1 == "--vagrant" ]]; then
   echo "Non-interactive vagrant script..."
   export VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
+  shift
 else
   #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
   export VAGRANT=0
@@ -42,16 +46,15 @@ fi
 
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
+#################################################################
+# STACK SETUP
+#################
+
 if [ ${VAGRANT} == 1 ]; then
     # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
 fi
-
-# Check to make sure you got the right setup by typing:
-#   apache2ctl -V | grep MPM
-# (it should say event)
-apachectl -V | grep MPM
 
 #################################################################
 # USERS SETUP
@@ -113,15 +116,6 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser hwcron vagrant
 fi
 
-# TODO: We should look into making it so that only certain users have access to certain packages
-# so that hwphp is the only one who could use PAM for example
-pip2 install -U pip
-pip2 install python-pam
-pip2 install psycopg2
-pip2 install PyYAML
-pip2 install sqlalchemy
-pip2 install python-dateutil
-
 pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
@@ -132,11 +126,6 @@ pip3 install psutil
 pip3 install python-dateutil
 pip3 install watchdog
 pip3 install xlsx2csv
-
-pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-python2 setup.py install
-python3 setup.py install
-popd
 
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
@@ -311,7 +300,7 @@ else
     git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     # remember to change this version in .setup/travis/autograder.sh too
-    git checkout v0.91
+    git checkout v0.92
     popd
 fi
 
@@ -374,8 +363,10 @@ sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
 apache2ctl -t
 
-PGPASSWORD=hsdbu psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/submitty_db.sql
+hsdbu_password=`cat /usr/local/submitty/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+
+PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+PGPASSWORD=${hsdbu_password} psql -d submitty -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/submitty_db.sql
 
 if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much
@@ -384,16 +375,17 @@ if [[ ${VAGRANT} == 1 ]]; then
     DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g")
 
     rm -rf ${SUBMITTY_DATA_DIR}/logs/*
-    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/*
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/autograding
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
+    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/autograding
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
     chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/logs/autograding
     chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/access
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/site_errors
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/access ${SUBMITTY_DATA_DIR}/logs/access
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/access
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/site_errors
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
     chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/access
     chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
     chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site_errors
@@ -413,12 +405,6 @@ if [[ ${VAGRANT} == 1 ]]; then
     ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
-# Deferred ownership change
-chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
-
-# With this line, subdirectories inherit the group by default and
-# blocks r/w access to the directory by others on the system.
-chmod 2771 ${SUBMITTY_INSTALL_DIR}
 
 #################################################################
 # RESTART SERVICES

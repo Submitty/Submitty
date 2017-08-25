@@ -21,6 +21,8 @@ will explain how to do that.
 """
 import json
 import os
+import time
+import grade_items_logging
 from submitty_utils import dateutils
 
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
@@ -63,7 +65,9 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
         conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD, db_name, DB_HOST)
     else:
         conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name)
-    db = create_engine(conn_string)
+
+    engine = create_engine(conn_string)
+    db = engine.connect()
     metadata = MetaData(bind=db)
     data_table = Table('electronic_gradeable_data', metadata, autoload=True)
 
@@ -80,6 +84,7 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                             .where(data_table.c.g_version == bindparam('g_version')),
                             g_id=gradeable_id,  team_id=team_id, g_version=version)
         row = result.fetchone()
+        result.close()
         query_type = data_table.insert()
         if row[0] > 0:
             query_type = data_table\
@@ -93,7 +98,9 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                         data_table.c.autograding_hidden_non_extra_credit:
                             bindparam("autograding_hidden_non_extra_credit"),
                         data_table.c.autograding_hidden_extra_credit:
-                            bindparam("autograding_hidden_extra_credit")
+                            bindparam("autograding_hidden_extra_credit"),
+                        data_table.c.autograding_complete:
+                            bindparam("autograding_complete")
                     })\
                 .where(data_table.c.g_id == bindparam('u_g_id'))\
                 .where(data_table.c.team_id == bindparam('u_team_id'))\
@@ -109,7 +116,8 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                    autograding_non_hidden_extra_credit=non_hidden_ec,
                    autograding_hidden_non_extra_credit=hidden_non_ec,
                    autograding_hidden_extra_credit=hidden_ec,
-                   submission_time=submission_time)
+                   submission_time=submission_time,
+                   autograding_complete=True)
 
     else:
         result = db.execute(select([func.count()]).select_from(data_table)
@@ -118,6 +126,7 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                             .where(data_table.c.g_version == bindparam('g_version')),
                             g_id=gradeable_id, user_id=user_id, g_version=version)
         row = result.fetchone()
+        result.close()
         query_type = data_table.insert()
         if row[0] > 0:
             query_type = data_table\
@@ -131,7 +140,9 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                         data_table.c.autograding_hidden_non_extra_credit:
                             bindparam("autograding_hidden_non_extra_credit"),
                         data_table.c.autograding_hidden_extra_credit:
-                            bindparam("autograding_hidden_extra_credit")
+                            bindparam("autograding_hidden_extra_credit"),
+                        data_table.c.autograding_complete:
+                            bindparam("autograding_complete")
                     })\
                 .where(data_table.c.g_id == bindparam('u_g_id'))\
                 .where(data_table.c.user_id == bindparam('u_user_id'))\
@@ -147,7 +158,10 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
                    autograding_non_hidden_extra_credit=non_hidden_ec,
                    autograding_hidden_non_extra_credit=hidden_non_ec,
                    autograding_hidden_extra_credit=hidden_ec,
-                   submission_time=submission_time)
+                   submission_time=submission_time,
+                   autograding_complete=True)
+    db.close()
+    engine.dispose()
 
 
 def get_testcases(semester, course, g_id):

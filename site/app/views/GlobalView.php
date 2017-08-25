@@ -4,6 +4,7 @@ namespace app\views;
 
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $css=array()) {
+        $extra = "";
         if ($this->core->getConfig()->isDebug()) {
             $extra = "?v=".time();
         }
@@ -27,10 +28,10 @@ HTML;
         }
         $messages .= <<<HTML
 </div>
-
 HTML;
+
         $override_css = '';
-        if (file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
+        if ($this->core->getConfig()->isCourseLoaded() && file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
             $override_css = "<style type='text/css'>".file_get_contents($this->core->getConfig()->getCoursePath()."/config/override.css")."</style>";
         }
 
@@ -38,7 +39,21 @@ HTML;
 <!DOCTYPE html>
 <html lang="en">
 <head>
+HTML;
+    if($this->core->getConfig()->isCourseLoaded())
+    {
+        $return .= <<<HTML
     <title>{$this->core->getFullCourseName()}</title>
+HTML;
+    }
+    else
+    {
+        $return .= <<<HTML
+    <title>Submitty</title>
+HTML;
+    }
+
+    $return .= <<<HTML
     <link rel="shortcut icon" href="{$this->core->getConfig()->getBaseUrl()}img/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css{$extra}" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css{$extra}" />
@@ -47,6 +62,7 @@ HTML;
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css{$extra}" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css{$extra}" />
 HTML;
+
     foreach($css as $css_ref) {
         $return .= <<<HTML
         <link rel="stylesheet" type="text/css" href="{$css_ref}{$extra}" />
@@ -65,7 +81,8 @@ HTML;
 <div id="container">
 
 HTML;
-        if ($this->core->getUser() != null) {
+
+        if ($this->core->getConfig()->isCourseLoaded() && $this->core->userLoaded()) {
             if($this->core->getUser()->accessGrading()) {
                 $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
                 $semester = $this->core->getConfig()->getSemester();
@@ -100,6 +117,7 @@ HTML;
             </li>
 
 HTML;
+
                     if ($this->core->getUser()->isDeveloper()) {
                         $return .= <<<HTML
             <li><a href="#" onClick="togglePageDetails();">Show Page Details</a></li>
@@ -114,6 +132,7 @@ HTML;
                 }
             }
         }
+
 
         $return .= <<<HTML
 <div id="header">
@@ -130,7 +149,7 @@ HTML;
         }
         else {
             $return .= <<<HTML
-            <span id="login-guest">Hello Guest</span>
+            <span id="login-guest">Welcome to Submitty</span>
 HTML;
         }
         $return .= <<<HTML
@@ -144,14 +163,14 @@ HTML;
 
 HTML;
         return $return;
-    }
+     }
 
     public function footer($runtime) {
         $return = <<<HTML
     <div id="push"></div>
 </div>
 <div id="footer">
-    <span id="copyright">&copy; 2016 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
+    <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
     <span id="github">
         <a href="https://github.com/Submitty/Submitty" target="blank" title="Fork us on Github">
             <i class="fa fa-github fa-lg"></i>

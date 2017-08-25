@@ -40,12 +40,24 @@ class HWReport extends AbstractModel {
         if($gradeable->beenTAgraded()) {
             $student_output_text_main .= strtoupper($gradeable->getName())." GRADE".$nl;
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
+            $names = array();
             $name_and_emails = array();
+            $peer_component_count = 0;
             foreach($gradeable->getComponents() as $component){
-                if($component->getGrader() === null) {
-                    //nothing happens
+                if(is_array($component)) {
+                    $peer_component_count++;
+                    foreach($component as $cmpt) {
+                        if(!$cmpt->getGrader() == null) {
+                            $names[] = "Peers";
+                        }
+                    }
+                    continue;
+                }
+                else if($component->getGrader() === null) {
+                    //nothing happens, this is the case when a ta has not graded a component
                 } 
                 else if($component->getGrader()->accessFullGrading()) {
+                    $names[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()}";
                     $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>";
                 } else {
                     $name_and_emails[] = $TEMP_EMAIL;
@@ -53,10 +65,12 @@ class HWReport extends AbstractModel {
                 
             }
 
+            $names = array_unique($names);
+            $names = implode(", ", $names);
             $name_and_emails = array_unique($name_and_emails);
             $name_and_emails = implode(", ", $name_and_emails);
 
-            $student_output_text_main .= "Graded by : " . $name_and_emails;
+            $student_output_text_main .= "Graded by : " . $names;
 
             // Calculate late days for this gradeable
             $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $g_id);
@@ -82,7 +96,6 @@ class HWReport extends AbstractModel {
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
 
             if($gradeable->validateVersions()) {
-                // uses active version...
                 $active_version = $gradeable->getActiveVersion();
                 $submit_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id, $student_id, $active_version, "grade.txt");
                 $auto_grading_awarded = 0;
@@ -100,100 +113,57 @@ class HWReport extends AbstractModel {
                 }
 
                 foreach($gradeable->getComponents() as $component) {
-                    $temp_notes = "";
-                    $type = 0; // 0 is deduct, 1 is addition
-                    foreach($component->getMarks() as $mark) {
-                        if($mark->getPoints() < 0) {
-                            $type = 0;
-                            break;
+
+                    // it's already a component...
+                    // if($component->getOrder() == -1) {
+                    //     $grading_units = $gradeable->getPeerGradeSet() * $peer_component_count;
+                    //     $completed_components = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
+                    //     $score = $gradeable->roundToPointPrecision($completed_components * $component->getMaxValue() / $grading_units);
+                    //     $student_output_text .= "Points for Grading Completion: [". $score. " / ".$component->getMaxValue()."]".$nl;
+                    //     continue;
+                    // }
+
+                    if(is_array($component)) {
+                        $peer_score = 0;
+                        $temp_notes = "Peer graded question." . $nl;
+                        $stu_count = 0;
+                        $peer_score = 0;
+                        foreach($component as $peer_comp){
+                            $stu_count++;
+                            $peer_score += $peer_comp->getGradedTAPoints();
+                            $temp_notes .= "Student " . $stu_count . "'s score: " . $peer_comp->getGradedTAPoints() . $nl . $peer_comp->getGradedTAComments($nl) . $nl;
                         }
-                        if($mark->getPoints() > 0) {
-                            $type = 1;
-                            break;
-                        }
+                        $temp_score = $peer_score/$stu_count;
+                        $title = $component[0]->getTitle();
+                        $max_value = $component[0]->getMaxValue();
+                        $student_comment = $component[0]->getStudentComment();
                     }
-                    if ($component->getMaxValue() < 0) {
-                        $temp_score = ($type === 0) ? 0 : $component->getMaxValue();
-                    } else {
-                        $temp_score = ($type === 0) ? $component->getMaxValue() : 0;
+                    else {
+                        $title = $component->getTitle();
+                        $max_value = $component->getMaxValue();
+                        $student_comment = $component->getStudentComment();
+                        $temp_score = $component->getGradedTAPoints();
+                        $temp_notes = $component->getGradedTAComments($nl) . $nl;
                     }
                     
-                    foreach($component->getMarks() as $mark) {
-                        if($mark->getHasMark()) {
-                            $temp_score += $mark->getPoints();
-                            $temp_notes .= $mark->getPoints() . " : " . $mark->getNote() . $nl;
-                        }
-                    }
-
-                    if(!($component->getScore() == 0 && $component->getComment() == "")) {
-                        $wrong_number = false;
-                        if ($type === 0) {
-                            if ($component->getScore() > 0) {
-                                $wrong_number = true;
-                                $temp_notes .= "0" . " : " . $component->getComment() . $nl;
-                            }
-                        }
-                        else {
-                            if ($component->getScore() < 0) {
-                                $wrong_number = true;
-                                $temp_notes .= "0" . " : " . $component->getComment() . $nl;
-                            }
-                        }
-                        if ($wrong_number === false) {
-                            $temp_score += $component->getScore();
-                            $temp_notes .= $component->getScore() . " : " . $component->getComment() . $nl;
-                        }
-                        
-                    }
-
-                    if ($component->getMaxValue() < 0) {
-                        if ($type === 0) {
-                            if ($temp_score < $component->getMaxValue()) {
-                                $temp_score = $component->getMaxValue();
-                            }
-                        } else {
-                            if ($temp_score > 0) {
-                                $temp_score = 0;
-                            }
-                        }
-                    } else {
-                        if($type === 0) {
-                            if($temp_score < 0) {
-                                $temp_score = 0;
-                            }
-                        } else {
-                            if($temp_score > $component->getMaxValue()) {
-                                $temp_score = $component->getMaxValue();
-                            }
-                        }
-                    }
-                    
-                    $student_output_text .= $component->getTitle() . "[" . $temp_score . "/" . $component->getMaxValue() . "] ";
-                    if ($component->getGrader() === null) {
-                        $student_output_text .= $nl;
-                    } else if ($component->getGrader()->accessFullGrading()) {
+                    $student_output_text .= $title . "[" . $temp_score . "/" . $max_value . "] ";
+                    if (!is_array($component) && $component->getGrader()->accessFullGrading()) {
                         $student_output_text .= "(Graded by {$component->getGrader()->getId()})".$nl;
                     } else {
                         $student_output_text .= $nl;
                     }
                     
-                    if($component->getStudentComment() != "") {
-                        $student_output_text .= "Rubric: " . $component->getStudentComment() . $nl;
+                    if($student_comment != "") {
+                        $student_output_text .= "Rubric: " . $student_comment . $nl;
                     }
-                    //if($component->getComment() != "") {
-                    //    $student_output_text .= "TA NOTE: " . $component->getComment() . $nl;
-                    //}
 
                     $student_output_text .= $temp_notes;
 
                     $student_output_text .= $nl;
                     
-                    //$student_grade += $component->getScore();
                     $student_grade += $temp_score;
-                    if(!$component->getIsExtraCredit() && $component->getMaxValue() > 0) {
-                        $rubric_total += $component->getMaxValue();
-                        $ta_max_score += $component->getMaxValue();
-                    }
+                    $rubric_total += $max_value;
+                    $ta_max_score += $max_value;
                 }
                 $student_output_text .= "TA GRADING TOTAL [ " . $student_grade . " / " . $ta_max_score . " ]". $nl;
                 $student_output_text .= "----------------------------------------------------------------------" . $nl;

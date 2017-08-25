@@ -543,7 +543,7 @@ table tr.table-header {
 .yellow-message {
     font-style: italic;
     font-weight: bold;
-    color: #eac73d;
+    color: #ff9900;
 }
 
 .black-message {
@@ -828,3 +828,8 @@ table .instructor .two-options{
     visibility: visible;
     opacity: 1;
 }
+
+.required::-webkit-input-placeholder { color: red; }
+.required:-moz-placeholder { color: red; }
+.required::-moz-placeholder { color: red; }
+.required:-ms-input-placeholder { color: red; }

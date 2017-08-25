@@ -7,6 +7,8 @@
     <testsuites>
         <testsuite name="Unit Tests">
             <directory suffix="Tester.php">unitTests/app</directory>
+            <!-- Github Issue: https://github.com/Submitty/Submitty/issues/1356 -->
+            <exclude>unitTests/app/models/ConfigTester.php</exclude>
         </testsuite>
     </testsuites>
 

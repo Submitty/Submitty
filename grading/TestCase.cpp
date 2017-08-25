@@ -355,7 +355,10 @@ bool validShowValue(const nlohmann::json& v) {
            v == "on_success"));
 }
 
-TestCase::TestCase (nlohmann::json& input,const nlohmann::json &whole_config) : _json(input) {
+
+TestCase::TestCase (nlohmann::json &whole_config, int which_testcase) :
+  _json((*whole_config.find("testcases"))[which_testcase]) {
+
   test_case_id = next_test_case_id;
   next_test_case_id++;
   General_Helper();
@@ -671,6 +674,15 @@ const nlohmann::json TestCase::get_test_case_limits() const {
     adjust_test_case_limits(_test_case_limits,RLIMIT_RSS,1000*1000*1000);  // 1 GB
   }
 
+  if (isSubmittyCount()) {
+    // necessary for the analysis tools count program
+    adjust_test_case_limits(_test_case_limits,RLIMIT_NPROC,1000);
+    adjust_test_case_limits(_test_case_limits,RLIMIT_NOFILE,1000);
+    adjust_test_case_limits(_test_case_limits,RLIMIT_CPU,60);
+    adjust_test_case_limits(_test_case_limits,RLIMIT_AS,RLIM_INFINITY);
+    adjust_test_case_limits(_test_case_limits,RLIMIT_SIGPENDING,100);
+  }
+  
   return _test_case_limits;
 }
 
@@ -833,7 +845,7 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
   nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
-    TestCase my_testcase((*tc)[i],config_json);
+    TestCase my_testcase(config_json,i);
     int points = (*tc)[i].value("points",0);
     if (points > 0) {
       total_points += points;

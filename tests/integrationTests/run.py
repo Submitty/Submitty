@@ -1,8 +1,6 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 import sys
-import os
-import subprocess
 
 import lib
 
