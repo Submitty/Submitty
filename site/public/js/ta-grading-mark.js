@@ -680,7 +680,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                 console.log("success for saving a mark");
                 console.log(data);
                 data = JSON.parse(data);
-                if (data['modified'] === 'true') {
+                if (data['modified'] === true) {
                     if (all_false === true) {
                         $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
                     } else {
