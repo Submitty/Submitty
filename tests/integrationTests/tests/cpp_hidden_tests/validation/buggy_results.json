@@ -95,6 +95,16 @@
         {
             "autochecks": [
                 {
+                    "actual_file": "test09_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                },
+                {
                     "actual_file": "test09_STDERR.txt",
                     "description": "STDERR.txt",
                     "difference_file": "test09_1_diff.json",

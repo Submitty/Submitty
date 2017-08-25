@@ -33,9 +33,15 @@ def initialize(test):
 
 ############################################################################
 
+def cleanup(test):
+    # cleanup the non empty logfile
+    subprocess.call(["rm",
+        os.path.join(test.testcase_path, "data/", "test01_execute_logfile.txt")])
+    
 
 @testcase
 def correct(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["cp",
@@ -52,6 +58,7 @@ def correct(test):
 
 @testcase
 def buggy(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["cp",
@@ -68,6 +75,7 @@ def buggy(test):
 
 @testcase
 def buggy2(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["cp",
@@ -84,6 +92,7 @@ def buggy2(test):
 
 @testcase
 def syntax_error(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["cp",
@@ -97,13 +106,11 @@ def syntax_error(test):
     test.json_diff("test01_0_diff.json","test01_0_diff.json_syntax_error")
     test.diff("grade.txt","grade.txt_syntax_error","-b")
     test.json_diff("results.json","results.json_syntax_error")
-    # cleanup the non empty logfile
-    subprocess.call(["rm",
-        os.path.join(test.testcase_path, "data/", "test01_execute_logfile.txt")])
 
 
 @testcase
 def infinite_loop_too_much_output(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["rm"] + ["-f"] +
@@ -119,13 +126,11 @@ def infinite_loop_too_much_output(test):
     test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_too_much_output")
     test.diff("grade.txt","grade.txt_infinite_loop_too_much_output","-b")
     test.json_diff("results.json","results.json_infinite_loop_too_much_output")
-    # cleanup the non empty logfile
-    subprocess.call(["rm",
-        os.path.join(test.testcase_path, "data/", "test01_execute_logfile.txt")])
 
 
 @testcase
 def infinite_loop_time_cutoff(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["rm"] + ["-f"] +
@@ -141,6 +146,3 @@ def infinite_loop_time_cutoff(test):
     test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_time_cutoff")
     test.diff("grade.txt","grade.txt_infinite_loop_time_cutoff","-b")
     test.json_diff("results.json","results.json_infinite_loop_time_cutoff")
-    # cleanup the non empty logfile
-    subprocess.call(["rm",
-        os.path.join(test.testcase_path, "data/", "test01_execute_logfile.txt")])
