@@ -25,7 +25,7 @@ class AdminGradeableView extends AbstractView {
 	public function show_add_gradeable($type_of_action, $initial_data = array(""), $data = array("")) {
 
         $electronic_gradeable = array();
-        $TA_beta_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
+        $g_ta_view_start_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
         $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
         $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
         $electronic_gradeable['eg_subdirectory'] = "";
@@ -36,12 +36,12 @@ class AdminGradeableView extends AbstractView {
         $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
         $team_yes_checked = false;
         $team_no_checked = true;
-        $peer_yes_checked = false;
+        $eg_peer_grading = false;
         $peer_no_checked = true;
         $peer_grade_set = 3;
         $peer_grade_complete_score = 0;
-        $TA_grade_open_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
-        $TA_grade_release_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
+        $g_grade_start_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
+        $g_grade_released_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         $vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
         $BASE_URL = "http:/localhost/hwgrading";
@@ -50,11 +50,11 @@ class AdminGradeableView extends AbstractView {
         $button_string = "Add";
         $extra = "";
         $gradeable_submission_id = "";
-        $gradeable_name = "";
+        $g_title = "";
         $g_instructions_url = "";
         $g_gradeable_type = 0;
-        $is_repository = false;
-        $use_ta_grading = false;
+        $eg_is_repository = false;
+        $eg_use_ta_grading = false;
         $student_view = true;
         $student_submit = true;
         $student_download = false;
@@ -89,11 +89,11 @@ class AdminGradeableView extends AbstractView {
             $string = "Edit";
             $button_string = "Edit";
             $extra = ($data[2]) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
-            $TA_beta_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_ta_view_start_date']));
-            $TA_grade_open_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_start_date']));
-            $TA_grade_release_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_released_date']));
+            $g_ta_view_start_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_ta_view_start_date']));
+            $g_grade_start_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_start_date']));
+            $g_grade_released_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_released_date']));
             $gradeable_submission_id = $data[0]['g_id'];
-            $gradeable_name = $data[0]['g_title'];
+            $g_title = $data[0]['g_title'];
             $g_instructions_url = $data[0]['g_instructions_url'];
             $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
             $old_components = $data[1];
@@ -112,14 +112,14 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_team_lock_date']));
                 $team_yes_checked = $data[3]['eg_team_assignment'];
                 $team_no_checked = !$team_yes_checked;
-                $is_repository = $data[3]['eg_is_repository'];
-                $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $eg_is_repository = $data[3]['eg_is_repository'];
+                $eg_use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $student_view = $data[3]['eg_student_view'];
                 $student_submit = $data[3]['eg_student_submit'];
                 $student_download = $data[3]['eg_student_download'];
                 $student_any_version = $data[3]['eg_student_any_version'];
-                $peer_yes_checked = $data[3]['eg_peer_grading'];
-                $peer_no_checked = !$peer_yes_checked;
+                $eg_peer_grading = $data[3]['eg_peer_grading'];
+                $peer_no_checked = !$eg_peer_grading;
                 if(isset($data[3]['eg_peer_grade_set'])){
                     $peer_grade_set = $data[3]['eg_peer_grade_set'];
                 }
@@ -128,7 +128,7 @@ class AdminGradeableView extends AbstractView {
                 $component_ids = array();
                 for ($i = 0; $i < $num_old_questions; $i++) {
                     $json = json_decode($data[1]);
-                    if($peer_yes_checked && $i == 0 && $json[$i]->gc_order == -1) {
+                    if($eg_peer_grading && $i == 0 && $json[$i]->gc_order == -1) {
                         $peer_grade_complete_score = $json[$i]->gc_max_value;
                     }
                     $component_ids[] = $json[$i]->gc_id;
@@ -160,13 +160,13 @@ class AdminGradeableView extends AbstractView {
                 $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
                 $team_yes_checked = $data[3]['eg_team_assignment'];
                 $team_no_checked = !$team_yes_checked;
-                $use_ta_grading = $data[3]['eg_use_ta_grading'];
+                $eg_use_ta_grading = $data[3]['eg_use_ta_grading'];
                 $student_view = $data[3]['eg_student_view'];
                 $student_submit = $data[3]['eg_student_submit'];
                 $student_download = $data[3]['eg_student_download'];
                 $student_any_version = $data[3]['eg_student_any_version'];
-                $peer_yes_checked = $data[3]['eg_peer_grading'];
-                $peer_no_checked = !$peer_yes_checked;
+                $eg_peer_grading = $data[3]['eg_peer_grading'];
+                $peer_no_checked = !$eg_peer_grading;
                 $peer_grade_set = $data[3]['eg_peer_grade_set'];
                 $precision = $data[3]['eg_precision'];
                 $electronic_gradeable['eg_precision'] = $precision;
@@ -175,7 +175,7 @@ class AdminGradeableView extends AbstractView {
                 $component_ids = array();
                 for ($i = 0; $i < $num_old_questions; $i++) {
                     $json = json_decode($data[1]);
-                    if($peer_yes_checked && $i == 0 && $json[$i]->gc_order == -1) {
+                    if($eg_peer_grading && $i == 0 && $json[$i]->gc_order == -1) {
                         $peer_grade_complete_score = $json[$i]->gc_max_value;
                     }
                     $component_ids[] = $json[$i]->gc_id;
@@ -333,12 +333,12 @@ HTML;
 }
         $html_output .= <<<HTML
             <br />
-            What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' id='gradeable_title_id' class="required" value="{$gradeable_name}" placeholder="(Required)" required/>
+            What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' id='gradeable_title_id' class="required" value="{$g_title}" placeholder="(Required)" required/>
             <br />
             What is the URL to the assignment instructions? (shown to student) <input style='width: 227px' type='text' name='instructions_url' value="{$g_instructions_url}" placeholder="(Optional)" />
             <br />
             What is the <em style='color: orange;'><b>TA Beta Testing Date</b></em>? (gradeable visible to TAs):
-            <input name="date_ta_view" id="date_ta_view" class="date_picker" type="text" value="{$TA_beta_date}"
+            <input name="date_ta_view" id="date_ta_view" class="date_picker" type="text" value="{$g_ta_view_start_date}"
             style="cursor: auto; background-color: #FFF; width: 250px;">
             <br />
             <br /> 
@@ -411,14 +411,14 @@ HTML;
 
                     <input type="radio" id="upload_file_radio" class="upload_file" name="upload_type" value="upload_file"
 HTML;
-                    if ($is_repository === false) { $html_output .= ' checked="checked"'; }
+                    if ($eg_is_repository === false) { $html_output .= ' checked="checked"'; }
 
                 $html_output .= <<<HTML
                     > Upload File(s)
 
                     <input type="radio" id="repository_radio" class="upload_repo" name="upload_type" value="repository"
 HTML;
-                    if ($is_repository === true) { $html_output .= ' checked="checked"'; }
+                    if ($eg_is_repository === true) { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
                     > Version Control System (VCS) Repository
                       
@@ -512,12 +512,12 @@ HTML;
           Will any or all of this assignment be manually graded (e.g., by TAs or the instructor)?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
-                if ($use_ta_grading===true) { $html_output .= ' checked="checked"'; }
+                if ($eg_use_ta_grading===true) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> Yes
                 <input type="radio" id="no_ta_grade" name="ta_grading" value="false"
 HTML;
-                if ($use_ta_grading===false) { $html_output .= ' checked="checked"'; }
+                if ($eg_use_ta_grading===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                 /> No 
                 <br /><br />
@@ -529,7 +529,7 @@ HTML;
                     <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes"
 HTML;
         $display_peer_checkboxes = "";
-                    if(($type_of_action === "edit" || $type_of_action === "add_template") && $peer_yes_checked) { $html_output .= ' checked="checked"'; }
+                    if(($type_of_action === "edit" || $type_of_action === "add_template") && $eg_peer_grading) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                     /> Yes
                     <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no"
@@ -650,7 +650,7 @@ HTML;
             </div>
 HTML;
         }
-        if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $use_ta_grading === true) {
+        if (($type_of_action === "edit" || $type_of_action === "add_template") && $data[0]['g_gradeable_type'] === 0 && $eg_use_ta_grading === true) {
             $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
             $lower_clamp = $question['question_lower_clamp'];
             $default = $question['question_default'];
@@ -1083,14 +1083,14 @@ HTML;
     $html_output .= <<<HTML
             <!-- TODO default to the submission + late days for electronic -->
             What is the <em style='color: orange;'><b>Manual Grading Open Date</b></em>? (graders may begin grading)
-            <input name="date_grade" id="date_grade" class="date_picker" type="text" value="{$TA_grade_open_date}"
+            <input name="date_grade" id="date_grade" class="date_picker" type="text" value="{$g_grade_start_date}"
             style="cursor: auto; background-color: #FFF; width: 250px;">
               <em style='color: orange;'>must be >= <span id="ta_grading_compare_date">Due Date (+ max allowed late days)</span></em>
             <br />
             </div>
 
             What is the <em style='color: orange;'><b>Grades Released Date</b></em>? (manual grades will be visible to students)
-            <input name="date_released" id="date_released" class="date_picker" type="text" value="{$TA_grade_release_date}"
+            <input name="date_released" id="date_released" class="date_picker" type="text" value="{$g_grade_released_date}"
             style="cursor: auto; background-color: #FFF; width: 250px;">
             <em style='color: orange;'>must be >= <span id="grades_released_compare_date">Due Date (+ max allowed late days) and Manual Grading Open Date</span></em>
             <br />
