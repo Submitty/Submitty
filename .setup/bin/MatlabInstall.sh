@@ -7,7 +7,7 @@
 # After getting access to your matlab installation from your institution, download them as a zip file.
 # Unzip the file and move it somewhere safe. Then, enter that directory here.
 # NOTE: This directory should hold the "install" executable.                                                                             
-ABSOLUTE_PATH_TO_INSTALLATION_FILES="/home/emaicus/Desktop/MatlabInstall/matlab_input_files/"
+ABSOLUTE_PATH_TO_INSTALLATION_FILES=""
 #
 # The installation key for your files. To find this:
 #     1) Login to the matlab website and select your license.
@@ -20,10 +20,10 @@ ABSOLUTE_PATH_TO_INSTALLATION_FILES="/home/emaicus/Desktop/MatlabInstall/matlab_
 #        Answer that the software is not installed and then continue. 
 #     6) Download your license file and paste your file installation key below.
 #        NOTE: regardless of how many activations you are going to do, you only need one installation key.
-INSTALLATION_KEY="asdf"
+INSTALLATION_KEY=""
 #
 #     Please enter the paths to the licenses that you wish to activate. (obtained above, one per user.)
-declare -a PATHS_TO_LICENSE_FILES=("asdf") 
+declare -a PATHS_TO_LICENSE_FILES=("") 
 #
 # End of user configuration                                                                                                   
 ###############################################################################################################################
