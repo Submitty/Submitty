@@ -216,28 +216,6 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
 
 
 
-
-TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::string comparison = grader.value("comparison","byLinebyChar");
-  bool ignoreWhitespace = grader.value("ignoreWhitespace",true);
-  if (comparison == std::string("byLinebyChar")) {
-    return mysersDiffbyLinebyChar_doit(tc,j);
-  } else if (comparison == std::string("byLinebyWord")) {
-    return mysersDiffbyLinebyWord_doit(tc,j);
-  } else if (comparison == std::string("byLine")) {
-    if (ignoreWhitespace)
-      return mysersDiffbyLine_doit(tc,j);
-    else
-      return mysersDiffbyLineNoWhite_doit(tc,j);
-  } else {
-    std::cout << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
-    std::cerr << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
-    return new TestResults(0.0);
-  }
-}
-
-
-
 TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int autocheck_number) {
   std::string actual_file = j.value("actual_file","");
   std::string expected_file = j.value("expected_file","");
@@ -964,3 +942,32 @@ template<class T> Difference* sesSecondary ( Difference* text_diff,
   return text_diff;
 }
 // formats and outputs a Difference object to the ofstream
+
+
+
+
+
+
+
+
+
+TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::string comparison = j.value("comparison","byLinebyChar");
+  bool ignoreWhitespace = j.value("ignoreWhitespace",false);
+  if (comparison == std::string("byLinebyChar")) {
+    return myersDiffbyLinebyChar_doit(tc,j);
+  } else if (comparison == std::string("byLinebyWord")) {
+    return myersDiffbyLinebyWord_doit(tc,j);
+  } else if (comparison == std::string("byLine")) {
+    if (ignoreWhitespace)
+      return myersDiffbyLine_doit(tc,j);
+    else
+      return myersDiffbyLineNoWhite_doit(tc,j);
+  } else {
+    std::cout << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
+    std::cerr << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
+    return new TestResults(0.0);
+  }
+}
+
+

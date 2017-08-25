@@ -347,16 +347,11 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
 }
 
 
-
 /* Runs through each test case, pulls in the correct files, validates, and outputs the results */
 int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime) {
 
-
   // LOAD HW CONFIGURATION JSON
-  nlohmann::json config_json;
-  std::stringstream sstr(GLOBAL_config_json_string);
-  sstr >> config_json;
-  AddSubmissionLimitTestCase(config_json);
+  nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
 
   // PREPARE GRADE.TXT FILE
   std::string grade_path = "grade.txt";
@@ -370,7 +365,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::stringstream testcase_json;
   nlohmann::json all_testcases;
 
-  CustomizeAutoGrading(rcsid,config_json);
+
 
   system("find . -type f -exec ls -sh {} +");
 
