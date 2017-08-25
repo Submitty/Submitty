@@ -220,6 +220,10 @@ class Output {
         {
             return;
         }
-        $this->breadcrumbs[] = $string;
+        if($icon){
+            $this->breadcrumbs[count($this->breadcrumbs)-1].= $string;
+        }else{
+           $this->breadcrumbs[] = $string;
+        }
     }
 }

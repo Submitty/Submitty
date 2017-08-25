@@ -15,6 +15,7 @@ use app\libraries\DatabaseUtils;
  * @method string getPassword()
  * @method string getFirstName() Get the first name of the loaded user
  * @method string getPreferredFirstName() Get the preferred name of the loaded user
+ * @method string setPreferredFirstName() Set the preferred name of the loaded user (does not affect db. call updateUser.)
  * @method string getDisplayedFirstName() Returns the preferred name if one exists and is not null or blank,
  *                                        otherwise return the first name field for the user.
  * @method string getLastName() Get the last name of the loaded user

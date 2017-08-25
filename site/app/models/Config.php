@@ -40,6 +40,9 @@ use app\libraries\Utils;
  * @method array getHiddenDetails()
  * @method string getCourseIniPath()
  * @method bool isCourseLoaded()
+ * @method string getInstitutionName()
+ * @method string getInstitutionHomepage()
+ * @method string getUsernameChangeText()
  */
 
 class Config extends AbstractModel {
@@ -102,6 +105,29 @@ class Config extends AbstractModel {
      * @property
      */
     protected $database_type = "pgsql";
+
+    /**
+     * The name of the institution that deployed Submitty. Added to the breadcrumb bar if non-empty.
+     * @var string
+     * @property
+     */
+    protected $institution_name = "";
+
+    /**
+     * The url of the institution's homepage. Linked to from the breadcrumb created with institution_name.
+     * @var string
+     * @property
+     */
+    protected $institution_homepage = "";
+
+    /**
+     * The text to be shown to a user when they attempt to change their username.
+     * @var string
+     * @property
+     */
+    protected $username_change_text = "";
+
+
 
     /**
      * Database host for PDO
@@ -192,6 +218,18 @@ class Config extends AbstractModel {
             if (!in_array($this->timezone, \DateTimeZone::listIdentifiers())) {
                 throw new ConfigException("Invalid Timezone identifier: {$this->timezone}");
             }
+        }
+
+        if (isset($master['site_details']['institution_name'])) {
+            $this->institution_name = $master['site_details']['institution_name'];
+        }
+
+        if (isset($master['site_details']['institution_url'])) {
+            $this->institution_homepage = $master['site_details']['institution_url'];
+        }
+
+        if (isset($master['site_details']['username_change_text'])) {
+            $this->username_change_text = $master['site_details']['username_change_text'];
         }
 
         $this->timezone = new \DateTimeZone($this->timezone);

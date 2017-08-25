@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "========================================================" << std::endl;
 
-    TestCase my_testcase((*tc)[i],config_json);
+    TestCase my_testcase(config_json,i);
 
     if (my_testcase.isFileCheck()) {
 

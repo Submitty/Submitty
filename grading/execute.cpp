@@ -406,7 +406,7 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
   }
 
   if (count_matches == 0) {
-    std::cout << "ERROR: FOUND NO MATCHES" << std::endl;
+    std::cout << "ERROR: WILDCARD FOUND NO MATCHES" << std::endl;
   }
 
   // sort the matches, so things are deterministic (and unix wildcard is sorted)

@@ -114,7 +114,18 @@ CONFIGURATION_JSON = os.path.join(SETUP_INSTALL_DIR, 'submitty_conf.json')
 defaults = {'database_host': 'localhost',
             'database_user': 'hsdbu',
             'submission_url': '',
-            'authentication_method': 1}
+            'authentication_method': 1,
+            'institution_name' : '',
+            'username_change_text' :    'Submitty welcomes individuals of all ages, backgrounds, citizenships,\
+                                        disabilities, sex, education, ethnicities, family statuses, genders,\
+                                        gender identities, geographical locations, languages, military\
+                                        experience, political views, races, religions, sexual orientations,\
+                                        socioeconomic statuses, and work experiences.\
+                                        \
+                                        In an effort to create an inclusive environment, you may specify a\
+                                        preferred name to be used instead of what was provided on the\
+                                        registration roster.',
+            'institution_homepage' : ''}
 
 if os.path.isfile(CONFIGURATION_JSON):
     with open(CONFIGURATION_JSON) as conf_file:
@@ -147,6 +158,17 @@ print()
 
 SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
 print()
+
+INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank if desired)', defaults['institution_name'])
+print()
+
+if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
+    INSTITUTION_HOMEPAGE = ''
+else:
+    INSTITUTION_HOMEPAGE = get_input('What is the url of your institution\'s homepage? (Leave blank if desired)', defaults['institution_homepage'])
+    print()
+
+USERNAME_TEXT = defaults['username_change_text']
 
 print("What authentication method to use:\n1. PAM\n2. Database\n")
 while True:
@@ -216,6 +238,11 @@ obj['site_log_path'] = TAGRADING_LOG_PATH
 obj['num_grading_scheduler_workers'] = NUM_GRADING_SCHEDULER_WORKERS
 
 obj['debugging_enabled'] = DEBUGGING_ENABLED
+
+obj['institution_name'] = INSTITUTION_NAME
+obj['username_change_text'] = USERNAME_TEXT
+obj['institution_homepage'] = INSTITUTION_HOMEPAGE
+
 
 with open(CONFIGURATION_FILE, 'w') as open_file:
     def write(x=''):

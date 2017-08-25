@@ -67,9 +67,9 @@ class GradeableComponent extends AbstractModel {
     protected $is_text = false;
     /** @property @var int Order for components to be shown in */
     protected $order = 1;
-    /** @property @var float Given grade that someone has given this component */
+    /** @property @var float custom "mark" score for this component */
     protected $score = 0;
-    /** @property @var string Comment that grader has put on the component while grading for student */
+    /** @property @var string Comment that grader has put on the custom "mark" while grading for student */
     protected $comment = "";
     /** @property @var int for page number */
     protected $page = 0;
@@ -165,6 +165,67 @@ class GradeableComponent extends AbstractModel {
 
     }
     
+    public function getGradedTAPoints() {
+        $points = $this->default;
+        foreach ($this->marks as $mark) {
+            if ($mark->getHasMark()) {
+                $points += $mark->getPoints();
+            }
+        }
+
+        $points += $this->score;
+
+        if($points < $this->lower_clamp) {
+            $points = $this->lower_clamp;
+        }
+        if($points > $this->upper_clamp) {
+            $points = $this->upper_clamp;
+        }
+        return $points;
+    }
+
+    public function getGradedTAComments($nl) {
+        $text = "";
+        $first_text = true;
+        foreach ($this->marks as $mark) {
+            if($mark->getHasMark() === true) {
+                if ($first_text === true) {
+                    if (floatval($mark->getPoints()) == 0) {
+                        $text .= "* " . $mark->getNote();
+                    } else {
+                        $text .= "* (" . $mark->getPoints() . ") " . $mark->getNote();
+                    }
+                    $first_text = false;
+                }
+                else {
+                    if (floatval($mark->getPoints()) == 0) {
+                        $text .= $nl . "* " . $mark->getNote();
+                    } else {
+                        $text .= $nl . "* (" . $mark->getPoints() . ") " . $mark->getNote();
+                    }
+                }
+            }
+        }
+        if($this->comment != "") {
+            if ($first_text === true) {
+                if (floatval($this->score) == 0) {
+                    $text .= "* " . $this->comment;
+                } else {
+                    $text .= "* (" . $this->score . ") ". $this->comment;
+                }
+                $first_text = false;
+            }
+            else {
+                if (floatval($this->score) == 0) {
+                    $text .= $nl . "* " . $this->comment;
+                } else {
+                    $text .= $nl . "* (" . $this->score . ") " . $this->comment;
+                }
+            }
+        }
+        return $text;
+    }
+
     public function setGrader(User $user) {
         if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
             $this->grader_modified = true;
@@ -211,7 +272,7 @@ class GradeableComponent extends AbstractModel {
             }
         }
     }
-    
+
     public function setMarks($marks) {
         if(count($this->marks) == 0) {
             $this->marks = $marks;
