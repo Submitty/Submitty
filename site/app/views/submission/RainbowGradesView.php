@@ -10,8 +10,8 @@ class RainbowGradesView extends AbstractView {
 <div class="content">
     <h3 class="label">Grade Summary</h3>
 HTML;
-        $display_iris_grades_summary = $this->core->getConfig()->displayIrisGradesSummary();
-        if ($display_iris_grades_summary && $grade_file !== null) {
+        $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
+        if ($display_rainbow_grades_summary && $grade_file !== null) {
             $return .= <<<HTML
     {$grade_file}
 HTML;

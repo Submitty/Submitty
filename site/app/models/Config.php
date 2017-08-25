@@ -149,7 +149,7 @@ class Config extends AbstractModel {
     /** @property @var bool */
     protected $keep_previous_files;
     /** @property @var bool */
-    protected $display_iris_grades_summary;
+    protected $display_rainbow_grades_summary;
     /** @property @var bool */
     protected $display_custom_message;
     /** @property @var string*/
@@ -232,7 +232,7 @@ class Config extends AbstractModel {
 
         $this->setConfigValues($this->course_ini, 'hidden_details', array('database_name'));
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
-            'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
+            'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
@@ -251,7 +251,7 @@ class Config extends AbstractModel {
             $this->$key = intval($this->$key);
         }
 
-        $array = array('zero_rubric_grades', 'keep_previous_files', 'display_iris_grades_summary',
+        $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
@@ -312,8 +312,8 @@ class Config extends AbstractModel {
     /**
      * @return bool
      */
-    public function displayIrisGradesSummary() {
-        return $this->display_iris_grades_summary;
+    public function displayRainbowGradesSummary() {
+        return $this->display_rainbow_grades_summary;
     }
 
     public function getLogPath() {

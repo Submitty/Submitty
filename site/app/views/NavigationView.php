@@ -59,8 +59,8 @@ HTML;
         // ======================================================================================
         // GRADES SUMMARY BUTTON
         // ======================================================================================
-        $display_iris_grades_summary = $this->core->getConfig()->displayIrisGradesSummary();
-        if ($display_iris_grades_summary) {
+        $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
+        if ($display_rainbow_grades_summary) {
         $return .= <<<HTML
         <a="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow'))}">View Grades</a>
 HTML;
