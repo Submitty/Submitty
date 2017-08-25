@@ -42,10 +42,11 @@ class HomePageView extends AbstractView {
 HTML;
 
                     foreach($courses as $course){
+                        $buttonText = $course->getSemester() . " " . $course->getTitle();
                         $return .= <<<HTML
                         <tr>
                             <td colspan="8">
-                                <a class="btn btn-primary" style="width:400%;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$course->getTitle()}</a>
+                                <a class="btn btn-primary" style="width:400%;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$buttonText}</a>
                             </td>
                         </tr>
 HTML;
