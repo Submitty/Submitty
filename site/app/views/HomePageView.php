@@ -13,6 +13,7 @@ class HomePageView extends AbstractView {
     *@param List of courses the student is in.
     */
     public function showHomePage($user, $courses = array(), $changeNameText) {
+        $displayedFirstName = $user->getDisplayedFirstName();
         $return = <<< HTML
 <div class="content">
     <div class="sub">
@@ -25,7 +26,7 @@ class HomePageView extends AbstractView {
                     </tr>
                     <tr>
                         <td><b>First Name:</b> {$user->getDisplayedFirstName()} </td>
-                        <td><a onclick="userNameChange('$user->getDisplayedFirstName()')"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                        <td><a onclick="userNameChange('$displayedFirstName')"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                         <script type="text/javascript">
                             function userNameChange() {
                                 $('.popup-form').css('display', 'none');

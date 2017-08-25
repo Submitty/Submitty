@@ -116,15 +116,7 @@ defaults = {'database_host': 'localhost',
             'submission_url': '',
             'authentication_method': 1,
             'institution_name' : '',
-            'username_change_text' :    'Submitty welcomes individuals of all ages, backgrounds, citizenships,\
-                                        disabilities, sex, education, ethnicities, family statuses, genders,\
-                                        gender identities, geographical locations, languages, military\
-                                        experience, political views, races, religions, sexual orientations,\
-                                        socioeconomic statuses, and work experiences.\
-                                        \
-                                        In an effort to create an inclusive environment, you may specify a\
-                                        preferred name to be used instead of what was provided on the\
-                                        registration roster.',
+            'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
             'institution_homepage' : ''}
 
 if os.path.isfile(CONFIGURATION_JSON):
