@@ -56,7 +56,5 @@ TestResults* ImageDiff_doit (const TestCase &tc, const nlohmann::json& j, int au
 
 TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j);
 
-TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j);
-
 
 #endif

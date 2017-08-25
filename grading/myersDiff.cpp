@@ -233,7 +233,9 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
 
 // FIXME: might be nice to highlight small errors on a line
 //
-TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
+TestResults* diffLineSwapOk_doit (const nlohmann::json& j,const std::string &student_file_contents,
+                                  const std::string &expected_file_contents) {
+  /*
   std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::string student_file_contents;
   std::string expected_file_contents;
@@ -243,7 +245,7 @@ TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
-
+  */
 
   // break each file (at the newlines) into vectors of strings
   vectorOfLines student = stringToLines( student_file_contents, j );
@@ -870,6 +872,7 @@ TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j) {
   TestResults* answer = NULL;
   std::string comparison = j.value("comparison","byLinebyChar");
   bool ignoreWhitespace = j.value("ignoreWhitespace",false);
+  bool lineSwapOk = j.value("lineSwapOk",false);
   if (comparison == std::string("byLinebyChar")) {
     bool extraStudentOutputOk = j.value("extra_student_output",false);
     vectorOfLines text_a = stringToLines( student_file_contents, j );
@@ -882,7 +885,12 @@ TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j) {
     answer = ses(j, &text_a, &text_b, true );
     ((Difference*)answer)->type = ByLineByWord;
   } else if (comparison == std::string("byLine")) {
-    if (ignoreWhitespace) {
+
+    std::cout << "LINE SWAP? " << lineSwapOk << std::endl;
+    
+    if (lineSwapOk) {
+      answer = diffLineSwapOk_doit(j,student_file_contents,expected_file_contents);
+    } else if (ignoreWhitespace) {
       vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
       vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
       answer = ses(j, &text_a, &text_b, false );

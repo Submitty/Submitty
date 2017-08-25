@@ -44,7 +44,6 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
   int which_testcase = 0;
   for (nlohmann::json::iterator my_testcase = tc->begin();
        my_testcase != tc->end(); my_testcase++,which_testcase++) {
-    std::cout << "testcase " << which_testcase << std::endl;
     nlohmann::json::iterator validators = my_testcase->find("validation");
     if (validators == my_testcase->end()) { /* no autochecks */ continue; }
 
@@ -70,7 +69,14 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
         autocheck["comparison"] = "byLine";
+        assert (autocheck.find("ignoreWhitespace") == autocheck.end());
         autocheck["ignoreWhitespace"] = true;
+      } else if (method == "diffLineSwapOk") {
+        autocheck["method"] = "diff";
+        assert (autocheck.find("comparison") == autocheck.end());
+        autocheck["comparison"] = "byLine";
+        assert (autocheck.find("lineSwapOk") == autocheck.end());
+        autocheck["lineSwapOk"] = true;
       }
     }
   }
