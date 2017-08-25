@@ -399,7 +399,7 @@ class Core {
      * @return string
      */
     public function getDisplayedCourseName(){
-        if (!$this->getConfig()->getCourseName() === "" && !ctype_space($this->getConfig()->getCourseName()) && $this->getConfig()->getCourseName() !== "Course Name") {
+        if (!$this->getConfig()->getCourseName() !== "" && $this->getConfig()->getCourseName() !== "Course Name") {
             return htmlentities($this->getConfig()->getCourseName());
         }
         else{
