@@ -1017,7 +1017,7 @@ class Gradeable extends AbstractModel {
         $this->core->getCourseDB()->commit();
     }
 
-    public function saveData2() {
+    public function saveGradeableData() {
         $this->core->getCourseDB()->beginTransaction();
         if ($this->gd_id === null) {
             $this->gd_id = $this->core->getQueries()->insertGradeableData($this);
