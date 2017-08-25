@@ -94,7 +94,7 @@ class ConfigurationView extends AbstractView {
         <div class="option">
             <div class="option-input"><input type="checkbox" name="display_custom_message" value="true" {$display_custom_message} /></div>
             <div class="option-desc">
-                <div class="option-title">Display Rainbow Custom Message</div>
+                <div class="option-title">Display Custom Message</div>
                 <div class="option-alt">The primary use of the custom message is to announce Exam Zone Seating Assignments.</div>
             </div>
         </div>
@@ -122,8 +122,8 @@ class ConfigurationView extends AbstractView {
         <div class="option">
             <div class="option-input">
                 <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {$vcs_type_git}/> Git
-                <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {$vcs_type_svn}/> SVN
-                <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {$vcs_type_mer}/> Mercurial
+                <!--<input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {$vcs_type_svn}/> SVN
+                <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {$vcs_type_mer}/> Mercurial-->
             </div>
             <div class="option-desc">
                 <div class="option-title">Version Control System (VCS) Type</div>

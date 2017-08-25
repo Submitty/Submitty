@@ -62,7 +62,7 @@ HTML;
         $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
         if ($display_rainbow_grades_summary) {
         $return .= <<<HTML
-        <a="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow'))}">View Grades</a>
+        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow'))}">View Grades</a>
 HTML;
           }
         $return .= <<<HTML

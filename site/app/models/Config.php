@@ -267,8 +267,21 @@ class Config extends AbstractModel {
         }
 
         foreach ($keys as $key) {
+
+
+            // TEMPORARY WORKAROUND FOR BACKWARDS COMPATIBILITY OF
+            // CHANGED COURSE CONFIG VARIABLE.
+            // FIXME: THIS CAN BE REMOVED WITH THE NEXT MAJOR RELEASE
+            if (!isset($config[$section][$key]) &&
+                $key == "display_rainbow_grades_summary" &&
+                isset($config[$section]["display_iris_grades_summary"])) {
+              $config[$section][$key] = $config[$section]["display_iris_grades_summary"];
+            }
+            // END TEMPORARY WORKAROUND
+
+
             if (!isset($config[$section][$key])) {
-                throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
+              throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
             }
             $this->$key = $config[$section][$key];
         }
