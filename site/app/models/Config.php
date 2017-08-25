@@ -40,9 +40,9 @@ use app\libraries\Utils;
  * @method array getHiddenDetails()
  * @method string getCourseIniPath()
  * @method bool isCourseLoaded()
- * @method bool getInstitutionName()
- * @method bool getInstitutionHomepage()
- * @method bool getPasswordChangeText()
+ * @method string getInstitutionName()
+ * @method string getInstitutionHomepage()
+ * @method string getUsernameChangeText()
  */
 
 class Config extends AbstractModel {
@@ -125,7 +125,7 @@ class Config extends AbstractModel {
      * @var string
      * @property
      */
-    protected $password_change_text = "";
+    protected $username_change_text = "";
 
 
 

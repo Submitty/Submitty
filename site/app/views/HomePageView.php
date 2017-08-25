@@ -12,8 +12,7 @@ class HomePageView extends AbstractView {
     /*
     *@param List of courses the student is in.
     */
-    public function showHomePage($user, $courses = array()) {
-
+    public function showHomePage($user, $courses = array(), $changeNameText) {
         $return = <<< HTML
 <div class="content">
     <div class="sub">
@@ -37,7 +36,6 @@ class HomePageView extends AbstractView {
                         </script>
                         <div class="popup-form" id="edit-username-form">
                             <h2>Specify Preferred First Name</h2>
-                            <p>&emsp;</p>
                             <p>{$changeNameText}</p>
                             <p>&emsp;</p>
                             <form method="post" action="{$this->core->buildUrl(array('page' => 'change_username'))}">
