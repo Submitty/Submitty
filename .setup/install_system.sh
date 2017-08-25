@@ -300,7 +300,7 @@ else
     git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     # remember to change this version in .setup/travis/autograder.sh too
-    git checkout v0.92
+    git checkout v0.93
     popd
 fi
 

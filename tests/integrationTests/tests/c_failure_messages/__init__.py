@@ -41,7 +41,8 @@ def correct(test):
     test.run_run()
     test.run_validator()
     test.diff("grade.txt", "grade.txt_correct", "-b")
-
+    test.json_diff("results.json","results.json_correct")
+    
 
 @testcase
 def buggy(test):
@@ -54,6 +55,7 @@ def buggy(test):
     test.run_validator()
     test.diff("grade.txt", "grade.txt_buggy", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "buggy.c")])
+    test.json_diff("results.json","results.json_buggy")
 
 
 @testcase
@@ -67,7 +69,8 @@ def alternate(test):
     test.run_validator()
     test.diff("grade.txt", "grade.txt_alternate", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "alternate.c")])
-
+    test.json_diff("results.json","results.json_alternate")
+    
 
 @testcase
 def hello_world(test):
@@ -80,3 +83,18 @@ def hello_world(test):
     test.run_validator()
     test.diff("grade.txt", "grade.txt_hello_world", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "hello_world.c")])
+    test.json_diff("results.json","results.json_hello_world")
+
+
+@testcase
+def does_not_compile(test):
+    cleanup(test)
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "does_not_compile.c"),
+                     os.path.join(test.testcase_path, "data", "does_not_compile.c")])
+    test.run_compile()
+    test.run_run()
+    test.run_validator()
+    test.diff("grade.txt", "grade.txt_does_not_compile", "-b")
+    subprocess.call(["rm", os.path.join(test.testcase_path, "data", "does_not_compile.c")])
+    test.json_diff("results.json","results.json_does_not_compile")

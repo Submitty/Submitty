@@ -20,7 +20,7 @@
 	    "points" : 10,
 	    "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "description" : "Standard OUTPUT (STDOUT)",
 		    "expected_file" : "test2_output.txt"

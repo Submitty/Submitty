@@ -33,7 +33,8 @@
             "points" : 4,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
                     "actual_file" : "output.txt",
                     "expected_file" : "inst_output.txt"
                 }
@@ -46,7 +47,8 @@
             "points" : 4,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyWord",
+                    "method" : "diff",
+                    "comparison" : "byLinebyWord",
                     "actual_file" : "output.txt",
                     "expected_file" : "inst_output.txt"
                 }
@@ -59,7 +61,8 @@
             "points" : 4,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLine",
+                    "method" : "diff",
+                    "comparison" : "byLine",
                     "actual_file" : "output.txt",
                     "expected_file" : "inst_output.txt"
                 }
@@ -72,7 +75,9 @@
             "points" : 4,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLineNoWhite",
+                    "method" : "diff",
+                    "comparison" : "byLine",
+                    "ignoreWhitespace" : true,
                     "actual_file" : "output.txt",
                     "expected_file" : "inst_output.txt"
                 }
