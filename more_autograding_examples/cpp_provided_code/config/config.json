@@ -18,7 +18,6 @@
             "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output.txt"
                 }

@@ -46,7 +46,6 @@
             "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_1.txt"
                 }
@@ -60,7 +59,6 @@
             "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_2.txt"
                 }
@@ -75,7 +73,6 @@
             "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_3.txt"
                 }
@@ -89,7 +86,6 @@
             "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_4.txt"
                 }
@@ -103,7 +99,6 @@
             "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_5.txt"
                 }
@@ -119,13 +114,11 @@
             "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_6.txt"
                 },
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDERR.txt",
                     "expected_file" : "output_6B.txt"
                 }
@@ -140,13 +133,11 @@
             "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_7.txt"
                 },
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDERR.txt",
                     "expected_file" : "output_7B.txt"
                 },

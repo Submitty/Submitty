@@ -8,7 +8,6 @@
             "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",
                     "expected_file" : "hw01part1_sol.txt"

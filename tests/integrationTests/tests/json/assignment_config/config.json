@@ -21,7 +21,6 @@
 	    "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT.txt",
                     "description" : "Standard OUTPUT (STDOUT)",
 		    "expected_file" : "test2_output.txt"

@@ -22,7 +22,6 @@
                 {
                     // verify program output
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT_0.txt",
                     "description" : "Program Output",
                     "expected_file" : "p1_out.txt"
@@ -48,7 +47,6 @@
                 {
                     // verify correctness of answer
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "part2/*.txt",
                     "description" : "Program Output",
 		    "expected_file" : "p2_out.txt",
@@ -70,7 +68,6 @@
                 {
                     // verify program output
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT_0.txt",
                     "description" : "Program Output",
                     "expected_file" : "p3_out.txt"
@@ -119,7 +116,6 @@
                 {
                     // verify program output
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
                     "actual_file" : "STDOUT_0.txt",
                     "description" : "Program Output",
                     "expected_file" : "p4_out.txt"

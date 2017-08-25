@@ -46,7 +46,6 @@
 		},
 		{
 		    "method" : "diff",
-                    "comparison" : "byLinebyChar",
 		    "actual_file" : "STDOUT_2.txt",
                     "expected_file" : "second_third.txt",
 		    "show_actual" : "never",
@@ -66,7 +65,6 @@
 	    "validation" : [
 		{
 		    "method" : "diff",
-                    "comparison" : "byLinebyChar",
 		    "actual_file" : "STDOUT.txt",
                     "expected_file" : "raw_output.txt",
 		    "failure_message" : "Your raw output does not match.",
@@ -93,7 +91,6 @@
 		},
 		{
 		    "method" : "diff",
-                    "comparison" : "byLinebyChar",
 		    "actual_file" : "STDOUT_1.txt",
                     "expected_file" : "sorted_output.txt",
 		    "failure_message" : "ERROR: Your sorted output does not match.",
@@ -129,7 +126,6 @@
 		},
 		{
 		    "method" : "diff",
-                    "comparison" : "byLinebyChar",
 		    "actual_file" : "STDOUT_2.txt",
                     "expected_file" : "second_third.txt",
 		    "show_actual" : "always",
