@@ -392,6 +392,20 @@ class Core {
         }
         return $course_name;
     }
+
+     /**
+     * Returns either the 'actual' coursename or the coursename set by the professor.
+     *
+     * @return string
+     */
+    public function getDisplayedCourseName(){
+        if (!$this->getConfig()->getCourseName() === "" && !ctype_space($this->getConfig()->getCourseName()) && $this->getConfig()->getCourseName() !== "Course Name") {
+            return htmlentities($this->getConfig()->getCourseName());
+        }
+        else{
+            return $this->getConfig()->getCourse();
+        }
+    }
     
     /**
      * @return Output

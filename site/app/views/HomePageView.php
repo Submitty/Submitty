@@ -13,16 +13,7 @@ class HomePageView extends AbstractView {
     *@param List of courses the student is in.
     */
     public function showHomePage($user, $courses = array()) {
-        $url = "";
-        $changeNameText = 'Submitty welcomes individuals of all ages, backgrounds, citizenships,
-disabilities, sex, education, ethnicities, family statuses, genders,
-gender identities, geographical locations, languages, military
-experience, political views, races, religions, sexual orientations,
-socioeconomic statuses, and work experiences.
 
-In an effort to create an inclusive environment, you may specify a
-preferred name to be used instead of what was provided on the
-registration roster.';
         $return = <<< HTML
 <div class="content">
     <div class="sub">
@@ -36,9 +27,60 @@ registration roster.';
                     <tr>
                         <td><b>First Name:</b> {$user->getDisplayedFirstName()} </td>
                         <td><a onclick="userNameChange('$user->getDisplayedFirstName()')"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                        <script type="text/javascript">
+                            function userNameChange() {
+                                $('.popup-form').css('display', 'none');
+                                var form = $("#edit-username-form");
+                                form.css("display", "block");
+                                $('[name="user_name_change"]', form).val("");
+                            }
+                        </script>
+                        <div class="popup-form" id="edit-username-form">
+                            <h2>Specify Preferred First Name</h2>
+                            <p>&emsp;</p>
+                            <p>{$changeNameText}</p>
+                            <p>&emsp;</p>
+                            <form method="post" action="{$this->core->buildUrl(array('page' => 'change_username'))}">
+                                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                                <div>
+                                    <input type="text" name="user_name_change" />
+                                </div>
+                                <div style="float: right; width: auto; margin-top: 10px">
+                                    <a onclick="$('#edit-username-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+                                    <input class="btn btn-primary" type="submit" value="Submit" />
+                                </div>
+                            </form>
+                        </div>
                     </tr>
                     <tr>
                         <td><b>Last Name:</b> {$user->getLastName()} </td>
+                    </tr>
+                    <tr>
+                        <td><b>Change Password</b></td>
+                        <td><a onclick="passwordChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                        <script type="text/javascript">
+                            function passwordChange() {
+                                $('.popup-form').css('display', 'none');
+                                var form = $("#change-password-form");
+                                form.css("display", "block");
+                                $('[name="new_password"]', form).val("");
+                                $('[name="confirm_new_password"]', form).val("");
+                            }
+                        </script>
+                        <div class="popup-form" id="change-password-form">
+                            <h2>Change password</h2>
+                            <p>Add your message here.</p>
+                            <p>&emsp;</p>
+                            <form method="post" action="{$this->core->buildUrl(array('page' => 'change_password'))}">
+                                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                                <div>
+                                    Password: <input type="password" name="new_password"/>
+                                    Confirm: <input type="password" name="confirm_new_password"/>
+                                    <a onclick="$('#change-password-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+                                    <input class="btn btn-primary" type="submit" value="Submit" />
+                                </div>
+                            </form>
+                        </div>
                     </tr>
                 </tbody>
             </table>
