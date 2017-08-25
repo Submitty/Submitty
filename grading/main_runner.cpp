@@ -16,18 +16,6 @@
 int main(int argc, char *argv[]) {
   std::cout << "Running User Code..." << std::endl;
 
-  nlohmann::json config_json;
-  std::stringstream sstr(GLOBAL_config_json_string);
-  sstr >> config_json;
-  AddSubmissionLimitTestCase(config_json);
-
-  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
-  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
-  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
-  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
-  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
-  
-
   std::string hw_id = "";
   std::string rcsid = "";
   int subnum = -1;
@@ -45,10 +33,17 @@ int main(int argc, char *argv[]) {
     return 1;
   } 
 
+  // LOAD HW CONFIGURATION JSON
+  nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
+
+  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
+  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
+  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
+  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
+  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
+
   // necessary since the untrusted user does not have a home directory
   setenv("DYNAMORIO_CONFIGDIR", ".", 1);
-
-  CustomizeAutoGrading(rcsid,config_json);
 
   system("find . -type f -exec ls -sh {} +");
 

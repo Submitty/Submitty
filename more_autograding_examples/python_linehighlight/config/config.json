@@ -3,7 +3,7 @@
         "TOTAL_POINTS" : 90,
         "AUTO_POINTS" : 90
     },
-    "assignment_message" : "Test of diffLineSwapOk compared to myersDiffbyLinebyChar",
+    "assignment_message" : "Test of byLine with lineSwapOk compared to myersDiffbyLinebyChar",
     "testcases" : [
         {
             "title" : "CORRECT SOLUTION",
@@ -11,12 +11,15 @@
             "points" : 10,
             "validation" : [
                 {
-                    "method" : "diffLineSwapOk",
+                    "method" : "diff",
+                    "comparison" : "byLine",
+                    "lineSwapOk" : true,
                     "actual_file" : "output_correct.txt",
                     "expected_file" : "output_instructor.txt"
                 },
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
                     "actual_file" : "output_correct.txt",
                     "expected_file" : "output_instructor.txt"
                 }
@@ -29,7 +32,8 @@
             "points" : 10,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
                     "actual_file" : "output_duplicates.txt",
                     "expected_file" : "output_instructor.txt"
                 }
@@ -41,7 +45,9 @@
             "points" : 10,
             "validation" : [
                 {
-                    "method" : "diffLineSwapOk",
+                    "method" : "diff",
+                    "comparison" : "byLine",
+                    "lineSwapOk" : true,
                     "actual_file" : "output_duplicates.txt",
                     "expected_file" : "output_instructor.txt"
                 }
@@ -54,7 +60,8 @@
             "points" : 10,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
                     "actual_file" : "output_extra.txt",
                     "expected_file" : "output_instructor.txt"
                 }
@@ -66,7 +73,9 @@
             "points" : 10,
             "validation" : [
                 {
-                    "method" : "diffLineSwapOk",
+                    "method" : "diff",
+                    "comparison" : "byLine",
+                    "lineSwapOk" : true,
                     "actual_file" : "output_extra.txt",
                     "expected_file" : "output_instructor.txt"
                 }
@@ -79,7 +88,8 @@
             "points" : 10,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
                     "actual_file" : "output_missing.txt",
                     "expected_file" : "output_instructor.txt"
                 }
@@ -91,7 +101,9 @@
             "points" : 10,
             "validation" : [
                 {
-                    "method" : "diffLineSwapOk",
+                    "method" : "diff",
+                    "comparison" : "byLine",
+                    "lineSwapOk" : true,
                     "actual_file" : "output_missing.txt",
                     "expected_file" : "output_instructor.txt"
                 }
@@ -104,7 +116,8 @@
             "points" : 10,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
                     "actual_file" : "output_reordered.txt",
                     "expected_file" : "output_instructor.txt"
                 }
@@ -116,7 +129,9 @@
             "points" : 10,
             "validation" : [
                 {
-                    "method" : "diffLineSwapOk",
+                    "method" : "diff",
+                    "comparison" : "byLine",
+                    "lineSwapOk" : true,
                     "actual_file" : "output_reordered.txt",
                     "expected_file" : "output_instructor.txt"
                 }

@@ -45,7 +45,7 @@
             "points" : 5,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_1.txt"
                 }
@@ -58,7 +58,7 @@
             "points" : 5,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_2.txt"
                 }
@@ -72,7 +72,7 @@
             "points" : 2,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_3.txt"
                 }
@@ -85,7 +85,7 @@
             "points" : 2,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_4.txt"
                 }
@@ -98,7 +98,7 @@
             "points" : 1,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_5.txt"
                 }
@@ -113,12 +113,12 @@
             "extra_credit" : true,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_6.txt"
                 },
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDERR.txt",
                     "expected_file" : "output_6B.txt"
                 }
@@ -132,12 +132,12 @@
             "extra_credit" : true,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output_7.txt"
                 },
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDERR.txt",
                     "expected_file" : "output_7B.txt"
                 },
