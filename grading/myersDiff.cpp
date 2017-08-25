@@ -235,17 +235,6 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
 //
 TestResults* diffLineSwapOk_doit (const nlohmann::json& j,const std::string &student_file_contents,
                                   const std::string &expected_file_contents) {
-  /*
-  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
-  std::string student_file_contents;
-  std::string expected_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  */
 
   // break each file (at the newlines) into vectors of strings
   vectorOfLines student = stringToLines( student_file_contents, j );
@@ -885,9 +874,6 @@ TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j) {
     answer = ses(j, &text_a, &text_b, true );
     ((Difference*)answer)->type = ByLineByWord;
   } else if (comparison == std::string("byLine")) {
-
-    std::cout << "LINE SWAP? " << lineSwapOk << std::endl;
-    
     if (lineSwapOk) {
       answer = diffLineSwapOk_doit(j,student_file_contents,expected_file_contents);
     } else if (ignoreWhitespace) {
