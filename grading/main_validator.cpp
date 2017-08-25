@@ -64,8 +64,7 @@ bool ShowHelper(const std::string& when, bool success) {
 double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::json &autocheck_js,
                       const std::string &hw_id, std::string &testcase_message) {
 
-  std::cout << "-------------------------------------------------------------" << std::endl;
-  std::cout << "autocheck #" << which_grader+1 << " / " << my_testcase.numFileGraders() << std::endl;
+  std::cout << "\nAUTOCHECK #" << which_grader+1 << " / " << my_testcase.numFileGraders() << std::endl;
 
   TestResultsFixedSize result = my_testcase.do_the_grading(which_grader);
 
@@ -127,7 +126,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
       }
       for (int i = 0; i < files.size(); i++) {
         actual_file = files[i];
-        std::cout << "MATCH " << files[i] << std::endl;
+        std::cout << "FILE MATCH " << files[i] << std::endl;
       }
       bool studentFileExists, studentFileEmpty;
       bool expectedFileExists=false, expectedFileEmpty=false;
@@ -233,105 +232,34 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader, nlohmann::j
 }
 
 
-/* Runs through each test case, pulls in the correct files, validates, and outputs the results */
-int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime) {
+void WriteToResultsJSON(const TestCase &my_testcase,
+                        const std::string &title,
+                        bool view_testcase,
+                        nlohmann::json& autocheck_js,
+                        const std::string &testcase_message,
+                        int testcase_pts,
+                        nlohmann::json &all_testcases) {
 
-  nlohmann::json config_json;
-  std::stringstream sstr(GLOBAL_config_json_string);
-  sstr >> config_json;
-  AddSubmissionLimitTestCase(config_json);
+  nlohmann::json tc_j;
+  tc_j["test_name"] = title;
 
-  std::string grade_path = "grade.txt";
-  std::ofstream gradefile(grade_path.c_str());
+  if (view_testcase == false) {
+    tc_j["view_testcase"] = view_testcase;
+  }
+  if (autocheck_js.size() > 0) {
+    tc_j["autochecks"] = autocheck_js;
+  }
 
-  int automated_points_awarded = 0;
-  int automated_points_possible = 0;
-  int nonhidden_automated_points_awarded = 0;
-  int nonhidden_automated_points_possible = 0;
+  if (testcase_message != "") tc_j["testcase_message"] = testcase_message;
+  tc_j["points_awarded"] = testcase_pts;
 
-  std::stringstream testcase_json;
-  nlohmann::json all_testcases;
+  all_testcases.push_back(tc_j);
+}
 
-  CustomizeAutoGrading(rcsid,config_json);
 
-  system("find . -type f -exec ls -sh {} +");
-
-  // LOOP OVER ALL TEST CASES
-  nlohmann::json::iterator tc = config_json.find("testcases");
-  assert (tc != config_json.end());
-  for (unsigned int i = 0; i < tc->size(); i++) {
-
-    std::cout << "------------------------------------------\n";
-    TestCase my_testcase((*tc)[i],config_json);
-    std::string title = "Test " + std::to_string(i+1) + " " + (*tc)[i].value("title","MISSING TITLE");
-    int points = (*tc)[i].value("points",0);
-    std::cout << title << " - points: " << points << std::endl;
-    std::string testcase_message = "";
-
-    nlohmann::json tc_j;
-    tc_j["test_name"] = title;
-    nlohmann::json autocheck_js;
-    int testcase_pts = 0;
-
-    if (my_testcase.isSubmissionLimit()) {
-      int max = my_testcase.getMaxSubmissions();
-      float penalty = my_testcase.getPenalty();
-      assert (penalty <= 0);
-      int points = my_testcase.getPoints();
-      int excessive_submissions = std::max(0,subnum-max);
-      // round down to the biggest negative full point penalty
-      testcase_pts = std::floor(excessive_submissions * penalty);
-      if (testcase_pts < points) testcase_pts = points;
-      if (testcase_pts == 0) {
-        tc_j["view_testcase"] = false;
-      } else {
-        std::cout << "EXCESSIVE SUBMISSIONS PENALTY = " << testcase_pts << std::endl;
-      }
-    }
-    else {
-      double my_score = 1.0;
-      std::cout << "NUM FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
-      assert (my_testcase.numFileGraders() > 0);
-      for (int j = 0; j < my_testcase.numFileGraders(); j++) {
-        my_score -= ValidateGrader(my_testcase, j, autocheck_js, hw_id, testcase_message);
-      }
-      bool fileExists, fileEmpty;
-      std::string execute_logfile = my_testcase.getPrefix() + "_execute_logfile.txt";
-      fileStatus(execute_logfile, fileExists,fileEmpty);
-      bool show_execute_logfile = my_testcase.ShowExecuteLogfile("execute_logfile.txt");
-      if (fileExists && !fileEmpty && show_execute_logfile) {
-        nlohmann::json autocheck_j;
-        autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
-        autocheck_j["description"] = "Execution Logfile";
-        autocheck_js.push_back(autocheck_j);
-      }
-      if (autocheck_js.size() > 0) {
-        tc_j["autochecks"] = autocheck_js;
-      }
-      assert (my_score <= 1.00002);
-      my_score += 0.00001;
-      assert (my_score <= 1.00002);
-      my_score = std::max(0.0,std::min(1.0,my_score));
-      std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
-      testcase_pts = my_score * my_testcase.getPoints();
-      std::cout << "thing " << testcase_pts << " " << my_score * my_testcase.getPoints() << std::endl;
-      std::cout << "Grade: " << testcase_pts << std::endl;
-    }
-    if (testcase_message != "") tc_j["testcase_message"] = testcase_message;
-    tc_j["points_awarded"] = testcase_pts;
-    automated_points_awarded += testcase_pts;
-    if (!my_testcase.getHidden()) {
-      nonhidden_automated_points_awarded += testcase_pts;
-    }
-    if (my_testcase.getPoints() > 0 && !my_testcase.getExtraCredit()) {
-      automated_points_possible += my_testcase.getPoints();
-      if (!my_testcase.getHidden()) {
-        nonhidden_automated_points_possible += my_testcase.getPoints();
-      }
-    }
-    all_testcases.push_back(tc_j);
+void WriteToGradefile(int which_testcase,const TestCase &my_testcase,std::ofstream& gradefile,int testcase_pts) {
     gradefile << "Testcase"
-              << std::setw(3) << std::right << i+1 << ": "
+              << std::setw(3) << std::right << which_testcase+1 << ": "
               << std::setw(50) << std::left << my_testcase.getTitle() << " ";
     if (my_testcase.getExtraCredit()) {
       if (testcase_pts > 0) {
@@ -354,9 +282,134 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       gradefile << "  [ HIDDEN ]";
     }
     gradefile << std::endl;
+}
 
-  } // end test case loop
 
+void ValidateATestCase(nlohmann::json config_json, int which_testcase,
+                       std::ofstream& gradefile,
+                       int subnum, const std::string &hw_id,
+                       int &automated_points_awarded,
+                       int &automated_points_possible,
+                       int &nonhidden_automated_points_awarded,
+                       int &nonhidden_automated_points_possible,
+                       nlohmann::json &all_testcases) {
+
+    nlohmann::json::iterator tc = config_json.find("testcases");
+    assert (tc != config_json.end());
+
+    TestCase my_testcase(config_json,which_testcase);
+
+    std::string title = "Test " + std::to_string(which_testcase+1) + " " + (*tc)[which_testcase].value("title","MISSING TITLE");
+    int points = (*tc)[which_testcase].value("points",0);
+    std::cout << title << " - points: " << points << std::endl;
+    std::string testcase_message = "";
+
+    nlohmann::json autocheck_js;
+    int testcase_pts = 0;
+
+    bool view_testcase = true;
+
+    if (my_testcase.isSubmissionLimit()) {
+      int max = my_testcase.getMaxSubmissions();
+      float penalty = my_testcase.getPenalty();
+      assert (penalty <= 0);
+      int points = my_testcase.getPoints();
+      int excessive_submissions = std::max(0,subnum-max);
+      // round down to the biggest negative full point penalty
+      testcase_pts = std::floor(excessive_submissions * penalty);
+      if (testcase_pts < points) testcase_pts = points;
+      if (testcase_pts == 0) {
+        view_testcase = false;
+      } else {
+        std::cout << "EXCESSIVE SUBMISSIONS PENALTY = " << testcase_pts << std::endl;
+      }
+    }
+    else {
+      double my_score = 1.0;
+      std::cout << "NUM AUTOCHECKS / FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
+      assert (my_testcase.numFileGraders() > 0);
+      for (int j = 0; j < my_testcase.numFileGraders(); j++) {
+        my_score -= ValidateGrader(my_testcase, j, autocheck_js, hw_id, testcase_message);
+      }
+      bool fileExists, fileEmpty;
+      std::string execute_logfile = my_testcase.getPrefix() + "_execute_logfile.txt";
+      fileStatus(execute_logfile, fileExists,fileEmpty);
+      bool show_execute_logfile = my_testcase.ShowExecuteLogfile("execute_logfile.txt");
+      if (fileExists && !fileEmpty && show_execute_logfile) {
+        nlohmann::json autocheck_j;
+        autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
+        autocheck_j["description"] = "Execution Logfile";
+        autocheck_js.push_back(autocheck_j);
+      }
+      assert (my_score <= 1.00002);
+      my_score += 0.00001;
+      assert (my_score <= 1.00002);
+      my_score = std::max(0.0,std::min(1.0,my_score));
+      std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
+      testcase_pts = my_score * my_testcase.getPoints();
+      std::cout << "thing " << testcase_pts << " " << my_score * my_testcase.getPoints() << std::endl;
+      std::cout << "Grade: " << testcase_pts << std::endl;
+    }
+
+    // UPDATE POINTS
+    automated_points_awarded += testcase_pts;
+    if (!my_testcase.getHidden()) {
+      nonhidden_automated_points_awarded += testcase_pts;
+    }
+    if (my_testcase.getPoints() > 0 && !my_testcase.getExtraCredit()) {
+      automated_points_possible += my_testcase.getPoints();
+      if (!my_testcase.getHidden()) {
+        nonhidden_automated_points_possible += my_testcase.getPoints();
+      }
+    }
+
+    WriteToResultsJSON(my_testcase,title,view_testcase,autocheck_js,testcase_message,testcase_pts,all_testcases);
+    WriteToGradefile(which_testcase,my_testcase,gradefile,testcase_pts);
+}
+
+
+
+/* Runs through each test case, pulls in the correct files, validates, and outputs the results */
+int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime) {
+
+
+  // LOAD HW CONFIGURATION JSON
+  nlohmann::json config_json;
+  std::stringstream sstr(GLOBAL_config_json_string);
+  sstr >> config_json;
+  AddSubmissionLimitTestCase(config_json);
+
+  // PREPARE GRADE.TXT FILE
+  std::string grade_path = "grade.txt";
+  std::ofstream gradefile(grade_path.c_str());
+
+  int automated_points_awarded = 0;
+  int automated_points_possible = 0;
+  int nonhidden_automated_points_awarded = 0;
+  int nonhidden_automated_points_possible = 0;
+
+  std::stringstream testcase_json;
+  nlohmann::json all_testcases;
+
+  CustomizeAutoGrading(rcsid,config_json);
+
+  system("find . -type f -exec ls -sh {} +");
+
+
+  // =======================================
+  // LOOP OVER ALL TEST CASES
+  nlohmann::json::iterator tc = config_json.find("testcases");
+  assert (tc != config_json.end());
+  for (unsigned int i = 0; i < tc->size(); i++) {
+    std::cout << "------------------------------------------\n";
+    ValidateATestCase(config_json, i, gradefile,
+                      subnum,hw_id,
+                      automated_points_awarded,
+                      automated_points_possible,
+                      nonhidden_automated_points_awarded,
+                      nonhidden_automated_points_possible,
+                      all_testcases);
+  }
 
   nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",automated_points_possible);
@@ -368,7 +421,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   sj["testcases"] = all_testcases;
   std::ofstream json_file("results.json");
   json_file << sj.dump(4);
-
 
   // clamp total to zero (no negative total!)
   automated_points_awarded = std::max(0,automated_points_awarded);
