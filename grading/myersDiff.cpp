@@ -944,12 +944,8 @@ template<class T> Difference* sesSecondary ( Difference* text_diff,
 // formats and outputs a Difference object to the ofstream
 
 
-
-
-
-
-
-
+// ===================================================================
+// ===================================================================
 
 TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j) {
   std::string comparison = j.value("comparison","byLinebyChar");
@@ -960,9 +956,9 @@ TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j) {
     return myersDiffbyLinebyWord_doit(tc,j);
   } else if (comparison == std::string("byLine")) {
     if (ignoreWhitespace)
-      return myersDiffbyLine_doit(tc,j);
-    else
       return myersDiffbyLineNoWhite_doit(tc,j);
+    else
+      return myersDiffbyLine_doit(tc,j);
   } else {
     std::cout << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
     std::cerr << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
@@ -970,4 +966,4 @@ TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j) {
   }
 }
 
-
+// ===================================================================
