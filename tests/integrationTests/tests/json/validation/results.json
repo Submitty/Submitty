@@ -3,10 +3,28 @@
         {
             "autochecks": [
                 {
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
                     "description": "Create Executable",
                     "messages": [
                         {
                             "message": "ERROR: required files not found:  a.out",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Standard Output (STDOUT)",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
