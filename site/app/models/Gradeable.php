@@ -115,7 +115,7 @@ class Gradeable extends AbstractModel {
     /** @property @var int How many people should each person grade*/
     protected $peer_grade_set = 0;
     
-    /** @property @var string Iris Bucket to place gradeable */
+    /** @property @var string Rainbow Grades Bucket to place gradeable */
     protected $bucket = null;
     
     /** @property @var int Minimum group that's allowed to submit grades for this gradeable */
@@ -1017,7 +1017,7 @@ class Gradeable extends AbstractModel {
         $this->core->getCourseDB()->commit();
     }
 
-    public function saveData2() {
+    public function saveGradeableData() {
         $this->core->getCourseDB()->beginTransaction();
         if ($this->gd_id === null) {
             $this->gd_id = $this->core->getQueries()->insertGradeableData($this);

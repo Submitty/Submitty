@@ -835,7 +835,7 @@ HTML;
             <em style='color: orange;'>must be >= <span id="grades_released_compare_date">{$initial_grades_released_compare_date}</span></em>
             <br />
             
-            What <a target=_blank href="http://submitty.org/instructor/iris_rainbow_grades">syllabus category</a> does this item belong to?:
+            What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">syllabus category</a> does this item belong to?:
             
             <select name="gradeable_buckets" style="width: 170px;">
 HTML;

@@ -1065,10 +1065,10 @@ INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_com
 VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
-    public function updateGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
+    public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
+        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id, $grader_id);
         $this->course_db->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?", $params);
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
     }
     
     public function replaceGradeableComponentData($gd_id, GradeableComponent $component) {
@@ -1097,10 +1097,10 @@ DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id
         return true;
     }
 
-    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark, $gcd_grader_id) {
-        $params = array($gc_id, $gd_id, $mark->getId(), $gcd_grader_id);
+    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $grader_id, $mark->getId());
         $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=? AND gcd_grader_id=?", $params);
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=? AND gcm_id=?", $params);
     }
 
     public function getDataFromGCMD($gc_id, GradeableComponentMark $mark) {
