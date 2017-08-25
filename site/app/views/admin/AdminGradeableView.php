@@ -366,7 +366,7 @@ HTML;
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable_type_options electronic_file" id="electronic_file" >
                 <br />
-                Is this a team assignment?
+                Is this a team assignment? (Team assignments are new as of Fall 2017. If there are any issues please email submitty@cs.rpi.edu)
                 <fieldset>
                     <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="true"
 HTML;
@@ -523,7 +523,8 @@ HTML;
                 <br /><br />
                 
                 <div id="rubric_questions" class="bool_val rubric_questions">
-                Will this assignment have peer grading?: 
+<!--
+                Will this assignment have peer grading?
                 <fieldset>
                     <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes"
 HTML;
@@ -549,7 +550,7 @@ HTML;
                         <input style='width: 50px' type='text' name="peer_grade_complete_score" value="{$peer_grade_complete_score}" class='int_val' />
                     </div>
                 </fieldset>
-                <br />
+                <br /> -->
 
                 Is this a PDF with a page assigned to each component?
                 <fieldset>
@@ -640,9 +641,11 @@ HTML;
                 <div id="mark_id-{$num}-0" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
                 <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{$num}_0" value="0" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                 <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_0" style="resize: none; width: 80.5%;">Full Credit</textarea> 
+                <!--
                 <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                -->
                 <br> 
             </div>
 HTML;
@@ -665,9 +668,11 @@ HTML;
                     <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
                     <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" step="{$precision}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                     <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 80.5%;">{$mark->getNote()}</textarea> 
+                    <!--
                     <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                     <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                     <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    -->
                     <br> 
                 </div>
 HTML;
@@ -758,18 +763,21 @@ HTML;
 
         $peer_checked = ($question['peer_component']) ? ' checked="checked"' : "";
         $pdf_page = (isset($question['page_component'])) ? $question['page_component'] : 1;
+        /*
         $html_output .= <<<HTML
                 <div id="peer_checkbox_{$num}" class="peer_input" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
                 <div id="pdf_page_{$num}" class="pdf_page_input" {$display_pdf_page_input}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{$num}" value={$pdf_page} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
-HTML;
+HTML;*/
         if ($num > 1){
         $html_output .= <<<HTML
+                <!--
                 <a id="delete-{$num}" class="question-icon" onclick="deleteQuestion({$num});">
                 <i class="fa fa-times" aria-hidden="true"></i></a>
                 <a id="down-{$num}" class="question-icon" onclick="moveQuestionDown({$num});">
                 <i class="fa fa-arrow-down" aria-hidden="true"></i></a>       
                 <a id="up-{$num}" class="question-icon" onclick="moveQuestionUp({$num});">
                 <i class="fa fa-arrow-up" aria-hidden="true"></i></a>
+                -->
 HTML;
         }
         
@@ -1087,7 +1095,7 @@ HTML;
             <em style='color: orange;'>must be >= <span id="grades_released_compare_date">Due Date (+ max allowed late days) and Manual Grading Open Date</span></em>
             <br />
             
-            What <a target=_blank href="http://submitty.org/instructor/iris_rainbow_grades">syllabus category</a> does this item belong to?:
+            What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grades">syllabus category</a> does this item belong to?:
             
             <select name="gradeable_buckets" style="width: 170px;">
 HTML;
@@ -2360,23 +2368,29 @@ $('#gradeable-form').on('submit', function(e){
             <br> \
             <input type="radio" id="id_grade_by_down-'+newQ+'" name="grade_by-'+newQ+'" value="count_down" data-question_num="'+newQ+'" onclick="onDeduction(this);"> Grade by count down \
                 <br /> \
+                <!--\
                 <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
+                -->\
                 <div id="pdf_page_'+newQ+'" class="pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_'+newQ+'" value="1" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div> \
+                <!--\
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <i class="fa fa-times" aria-hidden="true"></i></a> \
                 <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \
                     <i class="fa fa-arrow-down" aria-hidden="true"></i></a> \
                 <a id="up-'+newQ+'" class="question-icon" onclick="moveQuestionUp('+newQ+');"> \
                     <i class="fa fa-arrow-up" aria-hidden="true"></i></a> \
+                -->\
             </td> \
         </tr>');
         $("#rubric_add_mark_" + newQ).before(' \
             <div id="mark_id-'+newQ+'-0" name="mark_'+newQ+'" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;"> \
             <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
             <textarea rows="1" placeholder="Comment" name="mark_text_'+newQ+'_0" style="resize: none; width: 80.5%;">No Credit</textarea> \
+            <!--\
             <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            -->\
             <br> \
         </div> \
             ');
@@ -2492,9 +2506,11 @@ $('#gradeable-form').on('submit', function(e){
 <div id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
 <i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="mark_points_'+num+'_'+new_num+'" value="0" step="'+precision+'" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
 <textarea rows="1" placeholder="Comment" name="mark_text_'+num+'_'+new_num+'" style="resize: none; width: 80.5%;"></textarea> \
+<!--\
 <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up"  aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+-->\
 <br> \
 </div>');
     }
