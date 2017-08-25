@@ -14,7 +14,7 @@
             "points" : 5,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output.txt"
                 }
@@ -29,7 +29,7 @@
             "points" : 5,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output.txt"
                 }
@@ -52,7 +52,7 @@
             "points" : 3,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output.txt"
                 }
@@ -75,7 +75,7 @@
             "points" : 3,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "output.txt"
                 }

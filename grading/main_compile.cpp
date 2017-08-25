@@ -23,7 +23,6 @@
 // =====================================================================
 // =====================================================================
 
-
 void CleanUpMultipleParts() {
 
   std::cout << "Clean up multiple parts" << std::endl;
@@ -86,21 +85,6 @@ void CleanUpMultipleParts() {
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "MAIN COMPILE" << std::endl;
-  std::vector<std::string> actions;
-  nlohmann::json config_json;
-  std::stringstream sstr(GLOBAL_config_json_string);
-  sstr >> config_json;
-  AddSubmissionLimitTestCase(config_json);
-
-  std::cout << "JSON PARSED" << std::endl;
-
-  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
-  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
-  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
-  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
-  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
-
   std::string hw_id = "";
   std::string rcsid = "";
   int subnum = -1;
@@ -116,14 +100,23 @@ int main(int argc, char *argv[]) {
   else if (argc != 1) {
     std::cerr << "INCORRECT ARGUMENTS TO COMPILER" << std::endl;
     return 1;
-  } 
+  }
+
+  // LOAD HW CONFIGURATION JSON
+  nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
+
+  std::cout << "MAIN COMPILE" << std::endl;
+  std::vector<std::string> actions;
+
+  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
+  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
+  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
+  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
+  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
 
   std::cout << "Compiling User Code..." << std::endl;
 
   system("find . -type f -exec ls -sh {} +");
-
-  CustomizeAutoGrading(rcsid,config_json);
-
 
   // if it's a "one part only" assignment, check if student
   // submitted to multiple parts
