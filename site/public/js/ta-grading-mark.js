@@ -502,7 +502,6 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         var gradeable_comment = comment_row.val();
         var current_question_text = $('#rubric-textarea-custom');
         var overwrite = $('#overwrite-id').is(":checked");
-        console.log(overwrite);
         current_question_text[0].innerHTML = '<pre>' + gradeable_comment + '</pre>';
 
         $.ajax({
@@ -523,7 +522,8 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                 alert("There was an error with saving the comment. Please refresh the page and try agian.");
             }
         })
-    } else if (num === -2) {
+    }
+    else if (num === -2) {
         var index = 1;
         var found = false;
         var doesExist = ($('#summary-' + index).length) ? true : false;
@@ -546,9 +546,11 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         } else {
             saveMark(-3, gradeable_id, user_id, active_version, -1, your_user_id, sync);
         }
-    } else if (num === -1) {
+    }
+    else if (num === -1) {
 
-    } else {
+    }
+    else {
         var arr_length = $('tr[name=mark_'+num+']').length;
         var mark_data = new Array(arr_length);
 
@@ -597,10 +599,12 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                         new_text += "* (" + mark_data[i].points + ") " + mark_data[i].note;
                     }
                     first_text = false;
-                } else {
+                }
+                else {
                     if (parseFloat(mark_data[i].points) == 0) {
                         new_text += "\<br>* " + mark_data[i].note;
-                    } else {
+                    }
+                    else {
                         new_text += "\<br>* (" + mark_data[i].points + ") "+ mark_data[i].note;
                     }
                     
@@ -609,7 +613,8 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         }
         if (isNaN(parseFloat(custom_points))) {
             current_points += 0;
-        } else {
+        }
+        else {
             current_points += parseFloat(custom_points);
         }
         
@@ -620,14 +625,17 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             if(first_text === true) {
                 if (parseFloat(custom_points) == 0) {
                     new_text += "* " + custom_message;
-                } else {
+                }
+                else {
                     new_text += "* (" + custom_points + ") " + custom_message;
                 } 
                 first_text = false;
-            } else {
+            }
+            else {
                 if (parseFloat(custom_points) == 0) {
                     new_text += "\<br>* " + custom_message;
-                } else {
+                }
+                else {
                     new_text += "\<br>* (" + custom_points + ") " + custom_message;
                 }
             }
@@ -654,13 +662,12 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         else {
             old_grader = old_grader.innerHTML.slice(10, old_grader.innerHTML.length);
         }
-        console.log(old_grader);
         if($('#overwrite-id').is(':checked')) {
             overwrite = "true";
-        } else {
+        }
+        else {
             overwrite = "false";
         }
-        console.log(mark_data);
         $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),

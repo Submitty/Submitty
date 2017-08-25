@@ -648,8 +648,6 @@ class ElectronicGraderController extends AbstractController {
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $overwrite = $_POST['overwrite'];
-        $debug = "";
-        $mark_modified = false;
         
         if ($this->core->getUser()->getGroup() === 4) {
             if(!$gradeable->getPeerGrading()) {
@@ -711,6 +709,8 @@ class ElectronicGraderController extends AbstractController {
             $index = 0;
             $temp_mark_selected = false;
             $all_false = true;
+            $debug = "";
+            $mark_modified = false;
             foreach ($component->getMarks() as $mark) {
                 $temp_mark_selected = ($_POST['marks'][$index]['selected'] == 'true') ? true : false;
                 if($all_false === true && $temp_mark_selected === true) {
@@ -722,7 +722,7 @@ class ElectronicGraderController extends AbstractController {
                 $index++;
             }
             for ($i = $index; $i < $_POST['num_mark']; $i++) {
-                if ($_POST['marks'][$index]['selected'] == 'true') {
+                if ($_POST['marks'][$i]['selected'] == 'true') {
                     $all_false = false;
                     $mark_modified = true;
                     break;
@@ -734,14 +734,13 @@ class ElectronicGraderController extends AbstractController {
                     $all_false = false;
                 }
             }
-            
+
             if($mark_modified === false) {
                 if ($component->getComment() != $_POST['custom_message']) {
                     $mark_modified = true;
                 }
                 if ($component->getScore() != $_POST['custom_points']) {
                     $mark_modified = true;
-                    break;
                 }
             }
             //if no gradeable id exists adds one to the gradeable data
