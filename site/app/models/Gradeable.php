@@ -402,6 +402,8 @@ class Gradeable extends AbstractModel {
                         }
                     }
                 }
+                // really only care about $grade_details (aka component data) if the component is graded should be in the if above probably
+                // No need to make two cases here.
                 if(count($grade_details) <= 1) {
                     if(count($grade_details) == 1) {
                         $component_details = array_merge($component_details, $grade_details[$keys[0]]);
@@ -826,46 +828,23 @@ class Gradeable extends AbstractModel {
         return $this->total_auto_hidden_non_extra_credit + $this->total_auto_non_hidden_non_extra_credit;
     }
 
+    // this is a misnomer now that peers also grade stuff and this accounts for that
+    // this is only to be used to show total points to a specific user...this is not their final grade
     public function getGradedTAPoints() {
         $points = 0;
         foreach($this->components as $component) {
-            $marks = null;
-            $temp_score = null;
             if(is_array($component)) {
                 foreach($component as $cmpt) {
-                    if($cmpt->getGrader() == null) {
-                        $marks = $cmpt->getMarks();
-                        break;
-                    }
-                    if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
-                        $marks = $cmpt->getMarks();
+                    // if no peers have graded this component or this peer graded this component
+                    if((!$cmpt->getHasMarks() && !$cmpt->getHasGrade()) || ($cmpt->getGrader()->getId() == $this->core->getUser()->getId())) {
+                        $points += $cmpt->getGradedTAPoints();
                         break;
                     }
                 }
-                if($marks === null) {
-                    $points += $component[0]->getDefault();
-                }
+
             }
             else {
-                $marks = $component->getMarks();
-                $temp_points = $component->getDefault();
-                
-                foreach ($marks as $mark) {
-                    if ($mark->getHasMark()) {
-                        $temp_points += $mark->getPoints();
-                    }
-                }
-
-                $temp_points += $component->getScore();
-
-                if($temp_points < $component->getLowerClamp()) {
-                    $temp_points = $component->getLowerClamp();
-                }
-                if($temp_points > $component->getUpperClamp()) {
-                    $temp_points = $component->getUpperClamp();
-                }
-                
-                $points += $temp_points;
+                $points += $component->getGradedTAPoints();
             }
         }
         return $points;
@@ -983,20 +962,24 @@ class Gradeable extends AbstractModel {
         return $return;
     }
     
-    public function validateVersions($peer=false) {
-        $active_check = $this->active_version;
-        if(is_string($peer) || $this->peer_grading) {
+    public function validateVersions($active_check = null) {
+        if($active_check === null) {
+            $active_check = $this->active_version;
+        }
+        if($this->peer_grading) {
             foreach($this->components as $cmpt) {
                 if(is_array($cmpt)) {
                     foreach($cmpt as $graded_by) {
-                        if($graded_by->getGrader() !== null && $graded_by->getGrader()->getId() === $peer && $graded_by->getGradedVersion() !== $active_check) {
+                        if($graded_by->getGradedVersion() !== $active_check) {
                             return false;
                         }
                     }
                 }
                 else {
                     if($cmpt->getGradedVersion() !== $active_check) {
-                        return false;
+                        if($cmpt->getTitle() != "Grading Complete"){
+                            return false;
+                        }
                     }
                 }
             }

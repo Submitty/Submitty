@@ -107,9 +107,9 @@ TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) 
   }
   if (student_file_contents != "") {
     if (student_file_contents.find("error") != std::string::npos)
-      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")},"",true,true);
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")});
     else if (student_file_contents.find("warning") != std::string::npos)
-      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")},"",false,true);
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")});
     else
       return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")});
   }

@@ -1222,22 +1222,23 @@ WHERE gcm_id=?", $params);
 
             $is_repository = $electronic_gradeable['eg_is_repository'];
             $late_days = $electronic_gradeable['eg_late_days'];
-            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, gc_is_peer, gc_page FROM gradeable_component 
+            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, gc_is_peer, gc_page, gc_order FROM gradeable_component 
                         WHERE g_id=? GROUP BY gc_id ORDER BY gc_order ASC",array($gradeable_id));
             $tmp_questions = $this->course_db->rows();
             $old_questions = array();
             if ($use_ta_grading) {
                 foreach($tmp_questions as $question){
 
-                    array_push($old_questions, array('question_message' => $question['gc_title'],
+                    array_push($old_questions, array('question_message'     => $question['gc_title'],
                                                     'question_grading_note' => $question['gc_ta_comment'],
                                                     'student_grading_note'  => $question['gc_student_comment'],
-                                                    'question_lower_clamp'        => $question['gc_lower_clamp'],
-                                                    'question_default'        => $question['gc_default'],
+                                                    'question_lower_clamp'  => $question['gc_lower_clamp'],
+                                                    'question_default'      => $question['gc_default'],
                                                     'question_total'        => $question['gc_max_value'],
-                                                    'question_upper_clamp'        => $question['gc_upper_clamp'],
+                                                    'question_upper_clamp'  => $question['gc_upper_clamp'],
                                                     'peer_component'        => $question['gc_is_peer'],
-                                                    'page_component'        => $question['gc_page']));
+                                                    'page_component'        => $question['gc_page'],
+                                                    'question_order'        => $question['gc_order']));
                 }
             }
         } else {

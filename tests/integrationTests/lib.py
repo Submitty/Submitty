@@ -47,14 +47,18 @@ class TestcaseFile:
 
 to_run = defaultdict(lambda: TestcaseFile(), {})
 
+
 # Helpers for color
 class ASCIIEscapeManager:
     def __init__(self, codes):
-        self.codes = map(str, codes)
+        self.codes = list(map(str, codes))
+
     def __enter__(self):
         sys.stdout.write("\033[" + ";".join(self.codes) + "m")
+
     def __exit__(self, exc_type, exc_value, traceback):
         sys.stdout.write("\033[0m")
+
     def __add__(self, other):
         return ASCIIEscapeManager(self.codes + other.codes)
 

@@ -100,7 +100,7 @@ class AdminGradeableController extends AbstractController {
     //if $edit_gradeable === 0 then it uploads the gradeable to the database
     //if $edit_gradeable === 1 then it updates the gradeable to the database
     private function modifyGradeable($edit_gradeable) {
-
+        $peer_grading_complete_score = 0;
         if ($edit_gradeable === 0) {
             $gradeable = new Gradeable($this->core);
             $gradeable->setId($_POST['gradeable_id']);
@@ -149,7 +149,10 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setConfigPath($_POST['config_path']);
             $is_peer_grading = $this->isRadioButtonTrue('peer_grading');
             $gradeable->setPeerGrading($is_peer_grading);
-            if ($is_peer_grading) { $gradeable->setPeerGradeSet($_POST['peer_grade_set']); }
+            if ($is_peer_grading) { 
+                $gradeable->setPeerGradeSet($_POST['peer_grade_set']);
+                $peer_grading_complete_score = $_POST['peer_grade_complete_score'];
+            }
         }
 
         if ($edit_gradeable === 0) {
@@ -226,6 +229,17 @@ class AdminGradeableController extends AbstractController {
                         $old_component = $old_component[0];
                     }
                     if ($x < $num_questions && $x < $num_old_components) {
+                        if($old_component->getTitle() === "Grading Complete" || $old_component->getOrder() == -1) {
+                            if($peer_grading_complete_score == 0) {
+                                $this->core->getQueries()->deleteGradeableComponent($old_component);
+                            }
+                            else if($old_component->getMaxValue() != $peer_grading_complete_score) {
+                                $old_component->setMaxValue($peer_grading_complete_score);
+                                $old_component->setUpperClamp($peer_grading_complete_score);
+                                $this->core->getQueries()->updateGradeableComponent($old_component);
+                            }
+                            continue;
+                        }
                         $old_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                         $old_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
                         $old_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
@@ -262,6 +276,14 @@ class AdminGradeableController extends AbstractController {
                 }
             } 
             for ($x = $start_index; $x < $num_questions; $x++) {
+                if($x == 0 && $peer_grading_complete_score != 0) {
+                    $gradeable_component = new GradeableComponent($this->core);
+                    $gradeable_component->setMaxValue($peer_grading_complete_score);
+                    $gradeable_component->setUpperClamp($peer_grading_complete_score);
+                    $gradeable_component->setOrder($x-1);
+                    $gradeable_component->setTitle("Grading Complete");
+                    $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable);
+                }
                 $gradeable_component = new GradeableComponent($this->core);
                 $gradeable_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                 $gradeable_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
@@ -291,7 +313,8 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setPage($page_component);
                 $gradeable_component->setOrder($x);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
-            }  
+            }
+            
 
             //remake the gradeable to update all the data
             $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
@@ -302,6 +325,9 @@ class AdminGradeableController extends AbstractController {
                 foreach ($components as $comp) {
                     if(is_array($comp)) {
                         $comp = $comp[0];
+                    }
+                    if($comp->getOrder() == -1) {
+                        continue;
                     }
                     $num_marks = 0;
                     foreach($_POST as $k=>$v){
@@ -327,6 +353,9 @@ class AdminGradeableController extends AbstractController {
                 foreach ($components as $comp) {
                     if(is_array($comp)) {
                         $comp = $comp[0];
+                    }
+                    if($comp->getOrder() == -1) {
+                        continue;
                     }
                     $num_marks = 0; //current number of marks
                     foreach($_POST as $k=>$v){

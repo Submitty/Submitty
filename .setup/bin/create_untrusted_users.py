@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 This creates untrusted users for the system starting at untrusted00 and going up to untrusted59.
 We use these users to then run our autograding tests against student submissions in a tmp directory.

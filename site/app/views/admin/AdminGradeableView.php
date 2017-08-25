@@ -39,6 +39,7 @@ class AdminGradeableView extends AbstractView {
         $peer_yes_checked = false;
         $peer_no_checked = true;
         $peer_grade_set = 3;
+        $peer_grade_complete_score = 0;
         $TA_grade_open_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
         $TA_grade_release_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
@@ -127,6 +128,9 @@ class AdminGradeableView extends AbstractView {
                 $component_ids = array();
                 for ($i = 0; $i < $num_old_questions; $i++) {
                     $json = json_decode($data[1]);
+                    if($peer_yes_checked && $i == 0 && $json[$i]->gc_order == -1) {
+                        $peer_grade_complete_score = $json[$i]->gc_max_value;
+                    }
                     $component_ids[] = $json[$i]->gc_id;
                     if (($json[$i]->gc_page) !== 0) {
                         $pdf_page = true;
@@ -171,6 +175,9 @@ class AdminGradeableView extends AbstractView {
                 $component_ids = array();
                 for ($i = 0; $i < $num_old_questions; $i++) {
                     $json = json_decode($data[1]);
+                    if($peer_yes_checked && $i == 0 && $json[$i]->gc_order == -1) {
+                        $peer_grade_complete_score = $json[$i]->gc_max_value;
+                    }
                     $component_ids[] = $json[$i]->gc_id;
                     if (($json[$i]->gc_page) !== 0) {
                         $pdf_page = true;
@@ -537,6 +544,9 @@ HTML;
                         <br />
                         How many peers should each student grade?
                         <input style='width: 50px' type='text' name="peer_grade_set" value="{$peer_grade_set}" class='int_val' />
+                        <br />
+                        How many points should be associated with a students completion of their grading?
+                        <input style='width: 50px' type='text' name="peer_grade_complete_score" value="{$peer_grade_complete_score}" class='int_val' />
                     </div>
                 </fieldset>
                 <br />
@@ -599,14 +609,16 @@ HTML;
                                   'question_total'        => 0,
                                   'question_extra_credit' => 0,
                                   'peer_component'        => 0,
-                                  'page_component'        => 1);
+                                  'page_component'        => 1,
+                                  'question_order'        => 0);
     }
 
     //this is a hack
     array_unshift($old_questions, "tmp");
     $index_question = 0;
     foreach ($old_questions as $num => $question) {
-        if($num == 0) continue;
+        if($num == 0 || $num == -1) continue;
+        if($question['question_order'] == -1) continue;
         $html_output .= <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Script to reset the vagrant box and the configurations that install_system does
@@ -149,7 +149,7 @@ def main():
         user = load_data_yaml(user_file)
         delete_user(user['user_id'])
 
-    os.system('pkill -u username hwcron')
+    os.system('pkill -u hwcron')
     os.system('crontab -u hwcron -r')
     for user in ["hwcgi", "hwphp", "hwcron", "hsdbu"]:
         delete_user(user)

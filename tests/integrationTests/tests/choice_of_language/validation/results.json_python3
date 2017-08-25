@@ -9,6 +9,16 @@
                     "expected_file": "test_output/testassignment/output.txt"
                 },
                 {
+                    "actual_file": "test01_STDERR.txt",
+                    "description": "Standard Error (STDERR)",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                },
+                {
                     "actual_file": "test01_execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
@@ -30,6 +40,16 @@
         },
         {
             "autochecks": [
+                {
+                    "actual_file": "test03_STDERR.txt",
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
+                    ]
+                },
                 {
                     "description": "Create Executable",
                     "messages": [
@@ -60,6 +80,15 @@
                     ]
                 },
                 {
+                    "description": "Standard Error (STDERR)",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
                     "actual_file": "test04_execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
@@ -69,6 +98,16 @@
         },
         {
             "autochecks": [
+                {
+                    "actual_file": "test05_STDERR.txt",
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
+                    ]
+                },
                 {
                     "description": "Create Executable",
                     "messages": [
@@ -94,6 +133,15 @@
                     "messages": [
                         {
                             "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Standard Error (STDERR)",
+                    "messages": [
+                        {
+                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
                             "type": "failure"
                         }
                     ]
