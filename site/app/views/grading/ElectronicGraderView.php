@@ -932,7 +932,7 @@ HTML;
             </div>
 HTML;
             $return .= <<<HTML
-            <form id="rubric_form" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'submit'))}" method="post">
+            <form id="rubric_form">
                 <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
                 <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
                 <input type="hidden" name="u_id" value="{$user->getId()}" />
@@ -952,13 +952,6 @@ HTML;
                 $return .= <<<HTML
             <script>
                 $('body').css('background', 'red');
-                // pretty sure the following code is no longer used
-                $("#rubric_form").submit(function(event){
-                    var confirm = window.confirm("This submission has a bad status. Are you sure you want to submit a grade for it?");
-                    if(!confirm){
-                        event.preventDefault();
-                    }
-                });
             </script>
 HTML;
             }

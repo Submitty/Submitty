@@ -248,27 +248,13 @@ class GradeableComponent extends AbstractModel {
         return false;
     }
 
-    public function saveData($gd_id, $overwrite=false) {
+    public function saveGradeableComponentData($gd_id) {
         if ($this->modified) {
-            if($this->getIsPeer()) {
-                $action = $this->core->getQueries()->checkGradeableComponentData($gd_id, $this, $this->core->getUser()->getId());
-            }
-            else {
-                $action = $this->core->getQueries()->checkGradeableComponentData($gd_id, $this);
-            }
-            if($action) {
-                if($overwrite) {
-                    $this->core->getQueries()->replaceGradeableComponentData($gd_id, $this);
-                    return "replace";
-                }
-                else {
-                    $this->core->getQueries()->updateGradeableComponentData($gd_id, $this);
-                    return "update";
-                }
+            if ($this->has_grade || $this->has_marks) {
+                $this->core->getQueries()->updateGradeableComponentData($gd_id, $this->getGrader()->getId(), $this);
             }
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
-                return "insert";
             }
         }
     }
