@@ -23,9 +23,9 @@ if($user_is_administrator)
                     {$dir}
 		    </p>
 		    <p>
-		    Then, follow these instructions to prepare and release Iris Grade Summaries:<br />
-		    <a href="http://submitty.org/instructor/iris_rainbow_grades">
-                    http://submitty.org/instructor/iris_rainbow_grades</a>
+		    Then, follow these instructions to prepare and release Rainbow Grades Summaries:<br />
+		    <a href="http://submitty.org/instructor/rainbow_grades">
+                    http://submitty.org/instructor/rainbow_grades</a>
 		    </p>
                 </div>
 
