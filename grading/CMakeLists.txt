@@ -14,6 +14,7 @@ set (GRADINGCODE ${SUBMITTY_INSTALL_DIR}/src)
 # source files
 
 add_library(submitty_grading
+  ${GRADINGCODE}/grading/load_config_json.cpp
   ${GRADINGCODE}/grading/TestCase.cpp 
   ${GRADINGCODE}/grading/JUnitGrader.cpp
   ${GRADINGCODE}/grading/DrMemoryGrader.cpp

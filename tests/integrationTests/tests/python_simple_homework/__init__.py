@@ -35,7 +35,7 @@ def initialize(test):
 
 def cleanup(test):
     # cleanup the non empty logfile
-    subprocess.call(["rm",
+    subprocess.call(["rm","-f",
         os.path.join(test.testcase_path, "data/", "test01_execute_logfile.txt")])
     
 
