@@ -102,6 +102,15 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
+    public function updateSubmittyUser(User $user)
+    {
+        $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
+                       $user->getLastName(), $user->getEmail(), $user->getId());
+        $this->submitty_db->query("
+UPDATE users SET user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
+WHERE user_id=?", $array);
+    }
+
     public function updateUser(User $user, $semester, $course) {
         $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
                        $user->getLastName(), $user->getEmail(), $user->getId());
