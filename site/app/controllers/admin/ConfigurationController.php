@@ -31,7 +31,7 @@ class ConfigurationController extends AbstractController {
             'zero_rubric_grades'        => $this->core->getConfig()->shouldZeroRubricGrades(),
             'upload_message'            => $this->core->getConfig()->getUploadMessage(),
             'keep_previous_files'       => $this->core->getConfig()->keepPreviousFiles(),
-            'display_iris_grades_summary' => $this->core->getConfig()->displayIrisGradesSummary(),
+            'display_rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'display_custom_message'      => $this->core->getConfig()->displayCustomMessage(),
             'course_email'              => $this->core->getConfig()->getCourseEmail(),
             'vcs_base_url'              => $this->core->getConfig()->getVcsBaseUrl(),
@@ -50,7 +50,7 @@ class ConfigurationController extends AbstractController {
             }
         }
 
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_iris_grades_summary', 'display_custom_message') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
             }
@@ -84,7 +84,7 @@ class ConfigurationController extends AbstractController {
             $_POST[$key] = (isset($_POST[$key])) ? intval($_POST[$key]) : 0;
         }
 
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_iris_grades_summary', 'display_custom_message') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message') as $key) {
             $_POST[$key] = (isset($_POST[$key]) && $_POST[$key] == "true") ? true : false;
         }
 
@@ -97,7 +97,7 @@ class ConfigurationController extends AbstractController {
                 'zero_rubric_grades'        => $_POST['zero_rubric_grades'],
                 'upload_message'            => nl2br($_POST['upload_message']),
                 'keep_previous_files'       => $_POST['keep_previous_files'],
-                'display_iris_grades_summary' => $_POST['display_iris_grades_summary'],
+                'display_rainbow_grades_summary' => $_POST['display_rainbow_grades_summary'],
                 'display_custom_message'      => $_POST['display_custom_message'],
                 'course_email'                => $_POST['course_email'],
                 'vcs_base_url'              => $_POST['vcs_base_url'],

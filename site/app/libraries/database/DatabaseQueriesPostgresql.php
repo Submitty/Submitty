@@ -102,6 +102,15 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
+    public function updateSubmittyUser(User $user)
+    {
+        $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
+                       $user->getLastName(), $user->getEmail(), $user->getId());
+        $this->submitty_db->query("
+UPDATE users SET user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
+WHERE user_id=?", $array);
+    }
+
     public function updateUser(User $user, $semester, $course) {
         $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
                        $user->getLastName(), $user->getEmail(), $user->getId());
@@ -1056,10 +1065,10 @@ INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_com
 VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
-    public function updateGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
+    public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
+        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id, $grader_id);
         $this->course_db->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?", $params);
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
     }
     
     public function replaceGradeableComponentData($gd_id, GradeableComponent $component) {
@@ -1088,10 +1097,10 @@ DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id
         return true;
     }
 
-    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark, $gcd_grader_id) {
-        $params = array($gc_id, $gd_id, $mark->getId(), $gcd_grader_id);
+    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $grader_id, $mark->getId());
         $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=? AND gcd_grader_id=?", $params);
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=? AND gcm_id=?", $params);
     }
 
     public function getDataFromGCMD($gc_id, GradeableComponentMark $mark) {
@@ -1222,22 +1231,23 @@ WHERE gcm_id=?", $params);
 
             $is_repository = $electronic_gradeable['eg_is_repository'];
             $late_days = $electronic_gradeable['eg_late_days'];
-            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, gc_is_peer, gc_page FROM gradeable_component 
+            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, gc_is_peer, gc_page, gc_order FROM gradeable_component 
                         WHERE g_id=? GROUP BY gc_id ORDER BY gc_order ASC",array($gradeable_id));
             $tmp_questions = $this->course_db->rows();
             $old_questions = array();
             if ($use_ta_grading) {
                 foreach($tmp_questions as $question){
 
-                    array_push($old_questions, array('question_message' => $question['gc_title'],
+                    array_push($old_questions, array('question_message'     => $question['gc_title'],
                                                     'question_grading_note' => $question['gc_ta_comment'],
                                                     'student_grading_note'  => $question['gc_student_comment'],
-                                                    'question_lower_clamp'        => $question['gc_lower_clamp'],
-                                                    'question_default'        => $question['gc_default'],
+                                                    'question_lower_clamp'  => $question['gc_lower_clamp'],
+                                                    'question_default'      => $question['gc_default'],
                                                     'question_total'        => $question['gc_max_value'],
-                                                    'question_upper_clamp'        => $question['gc_upper_clamp'],
+                                                    'question_upper_clamp'  => $question['gc_upper_clamp'],
                                                     'peer_component'        => $question['gc_is_peer'],
-                                                    'page_component'        => $question['gc_page']));
+                                                    'page_component'        => $question['gc_page'],
+                                                    'question_order'        => $question['gc_order']));
                 }
             }
         } else {

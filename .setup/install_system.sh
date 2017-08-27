@@ -117,15 +117,6 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser hwcron vagrant
 fi
 
-# TODO: We should look into making it so that only certain users have access to certain packages
-# so that hwphp is the only one who could use PAM for example
-pip2 install -U pip
-pip2 install python-pam
-pip2 install psycopg2
-pip2 install PyYAML
-pip2 install sqlalchemy
-pip2 install python-dateutil
-
 pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
@@ -315,7 +306,7 @@ else
     git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     # remember to change this version in .setup/travis/autograder.sh too
-    git checkout v0.92
+    git checkout v0.93
     popd
 fi
 
@@ -348,6 +339,7 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 ${SUBMISSION_URL}
+
 1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 else

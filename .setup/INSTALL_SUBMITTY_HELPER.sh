@@ -76,6 +76,9 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__SITE_LOG_PATH__|$SITE_LOG_PATH|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__AUTHENTICATION_METHOD__|${AUTHENTICATION_METHOD}|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__INSTITUTION__NAME__|$INSTITUTION_NAME|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__INSTITUTION__URL__|$INSTITUTION_URL|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__USERNAME__TEXT__|$USERNAME_CHANGE_TEXT|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__DEBUGGING_ENABLED__|$DEBUGGING_ENABLED|g" $1
 
@@ -517,12 +520,6 @@ echo -e "\nCompleted installation of the Submitty homework submission server\n"
 echo -e "Install python_submitty_utils"
 
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-
-# FIXME: There is an error with glob installation on python2.  This
-# can go away when we have all submitty scripts ported to python3.
-python2 setup.py -q install
-echo -e "NOTE: There is an error with glob installation on python2."
-echo -e "      This error can safely be ignored (we are only using glob recursive in python3).\n" 
 python3 setup.py -q install
 
 # fix permissions
@@ -618,7 +615,7 @@ if [[ "$#" -ge 1 && $1 == "test" ]]; then
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
-    python ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
+    ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
 
     echo -e "\nCompleted Autograding Test Suite\n"
 fi
@@ -648,7 +645,7 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     shift
     # pass any additional command line arguments to the run test suite
     rainbow_total=$((rainbow_total+1))
-    python ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+    ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
     
     if [[ $? -ne 0 ]]; then
         echo -e "\n[ FAILED ] sample test\n"

@@ -11,7 +11,7 @@
             "points" : 5,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "min_char_changes" : 75,
                     "max_char_changes" : 125,
                     "ignore_line_endings" : true,

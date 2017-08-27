@@ -1,5 +1,4 @@
 {
-    
     "resource_limits" : {
         "RLIMIT_NPROC" : 10
     },
@@ -8,7 +7,6 @@
         "PROCESS_CONTROL_NEW_PROCESS_THREAD",
         "PROCESS_CONTROL_SCHEDULING"
     ],
-
 
     "assignment_message" :
 	"Note that during manual grading, points may be deducted from the autograded portion if homework specifications are not met.",
@@ -47,7 +45,7 @@
                     "deduction" : 0.0
 		},
 		{
-		    "method" : "myersDiffbyLinebyChar",
+		    "method" : "diff",
 		    "actual_file" : "STDOUT_2.txt",
                     "expected_file" : "second_third.txt",
 		    "show_actual" : "never",
@@ -66,7 +64,7 @@
 	    "points" : 5,
 	    "validation" : [
 		{
-		    "method" : "myersDiffbyLinebyChar",
+		    "method" : "diff",
 		    "actual_file" : "STDOUT.txt",
                     "expected_file" : "raw_output.txt",
 		    "failure_message" : "Your raw output does not match.",
@@ -92,7 +90,7 @@
                     "deduction" : 0.0
 		},
 		{
-		    "method" : "myersDiffbyLinebyChar",
+		    "method" : "diff",
 		    "actual_file" : "STDOUT_1.txt",
                     "expected_file" : "sorted_output.txt",
 		    "failure_message" : "ERROR: Your sorted output does not match.",
@@ -127,7 +125,7 @@
                     "deduction" : 0.0
 		},
 		{
-		    "method" : "myersDiffbyLinebyChar",
+		    "method" : "diff",
 		    "actual_file" : "STDOUT_2.txt",
                     "expected_file" : "second_third.txt",
 		    "show_actual" : "always",

@@ -107,9 +107,9 @@ TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) 
   }
   if (student_file_contents != "") {
     if (student_file_contents.find("error") != std::string::npos)
-      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")},"",true,true);
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")});
     else if (student_file_contents.find("warning") != std::string::npos)
-      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")},"",false,true);
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")});
     else
       return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: This file should be empty!")});
   }
@@ -144,74 +144,6 @@ TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
 
 // ==============================================================================
 // ==============================================================================
-
-TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
-  std::string student_file_contents;
-  std::string expected_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
-      student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
-  }
-  vectorOfWords text_a = stringToWords( student_file_contents );
-  vectorOfWords text_b = stringToWords( expected_file_contents );
-  Difference* diff = ses(j, &text_a, &text_b, true );
-  diff->type = ByLineByWord;
-  return diff;
-}
-
-
-TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
-  std::string student_file_contents;
-  std::string expected_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
-      student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
-  }
-  vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
-  vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
-  Difference* diff = ses(j, &text_a, &text_b, false );
-  diff->type = ByLineByWord;
-  return diff;
-}
-
-
-TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
-  std::string student_file_contents;
-  std::string expected_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
-      student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
-  }
-  vectorOfLines text_a = stringToLines( student_file_contents, j );
-  vectorOfLines text_b = stringToLines( expected_file_contents, j );
-
-  bool extraStudentOutputOk = j.value("extra_student_output",false);
-
-  Difference* diff = ses(j, &text_a, &text_b, false,extraStudentOutputOk);
-  diff->type = ByLineByChar;
-  return diff;
-}
 
 TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int autocheck_number) {
   std::string actual_file = j.value("actual_file","");
@@ -267,30 +199,6 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int aut
 }
 
 
-TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
-  std::string student_file_contents;
-  std::string expected_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
-      student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
-  }
-
-  bool extraStudentOutputOk = j.value("extra_student_output",false);
-
-  vectorOfLines text_a = stringToLines( student_file_contents, j );
-  vectorOfLines text_b = stringToLines( expected_file_contents, j );
-  Difference* diff = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
-  diff->type = ByLineByChar;
-  return diff;
-}
-
 // ==============================================================================
 // ==============================================================================
 
@@ -325,17 +233,8 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
 
 // FIXME: might be nice to highlight small errors on a line
 //
-TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
-  std::string student_file_contents;
-  std::string expected_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-
+TestResults* diffLineSwapOk_doit (const nlohmann::json& j,const std::string &student_file_contents,
+                                  const std::string &expected_file_contents) {
 
   // break each file (at the newlines) into vectors of strings
   vectorOfLines student = stringToLines( student_file_contents, j );
@@ -939,3 +838,63 @@ template<class T> Difference* sesSecondary ( Difference* text_diff,
   return text_diff;
 }
 // formats and outputs a Difference object to the ofstream
+
+
+// ===================================================================
+// ===================================================================
+
+TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
+  std::string student_file_contents;
+  std::string expected_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) {
+    return new TestResults(0.0,messages);
+  }
+  if (!openExpectedFile(tc,j,expected_file_contents,messages)) {
+    return new TestResults(0.0,messages);
+  }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Student file too large for grader")});
+  }
+
+  TestResults* answer = NULL;
+  std::string comparison = j.value("comparison","byLinebyChar");
+  bool ignoreWhitespace = j.value("ignoreWhitespace",false);
+  bool lineSwapOk = j.value("lineSwapOk",false);
+  if (comparison == std::string("byLinebyChar")) {
+    bool extraStudentOutputOk = j.value("extra_student_output",false);
+    vectorOfLines text_a = stringToLines( student_file_contents, j );
+    vectorOfLines text_b = stringToLines( expected_file_contents, j );
+    answer = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
+    ((Difference*)answer)->type = ByLineByChar;
+  } else if (comparison == std::string("byLinebyWord")) {
+    vectorOfWords text_a = stringToWords( student_file_contents );
+    vectorOfWords text_b = stringToWords( expected_file_contents );
+    answer = ses(j, &text_a, &text_b, true );
+    ((Difference*)answer)->type = ByLineByWord;
+  } else if (comparison == std::string("byLine")) {
+    if (lineSwapOk) {
+      answer = diffLineSwapOk_doit(j,student_file_contents,expected_file_contents);
+    } else if (ignoreWhitespace) {
+      vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
+      vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
+      answer = ses(j, &text_a, &text_b, false );
+      ((Difference*)answer)->type = ByLineByWord;
+    } else {
+      vectorOfLines text_a = stringToLines( student_file_contents, j );
+      vectorOfLines text_b = stringToLines( expected_file_contents, j );
+      bool extraStudentOutputOk = j.value("extra_student_output",false);
+      answer = ses(j, &text_a, &text_b, false,extraStudentOutputOk);
+      ((Difference*)answer)->type = ByLineByChar;
+    }
+  } else {
+    std::cout << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
+    std::cerr << "ERROR!  UNKNOWN COMPARISON" << comparison << std::endl;
+    answer = new TestResults(0.0);
+  }
+  assert (answer != NULL);
+  return answer;
+}
+
+// ===================================================================

@@ -83,7 +83,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
                 'zero_rubric_grades' => false,
                 'upload_message' => "",
                 'keep_previous_files' => false,
-                'display_iris_grades_summary' => false,
+                'display_rainbow_grades_summary' => false,
                 'display_custom_message' => false,
                 'course_email' => 'Please contact your TA or instructor for a regrade request.',
                 'vcs_base_url' => '',
@@ -127,7 +127,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals("", $config->getUploadMessage());
         $this->assertFalse($config->displayCustomMessage());
         $this->assertFalse($config->keepPreviousFiles());
-        $this->assertFalse($config->displayIrisGradesSummary());
+        $this->assertFalse($config->displayRainbowGradesSummary());
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.ini"),
             $config->getCourseIniPath());
 
@@ -159,7 +159,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'zero_rubric_grades' => false,
             'upload_message' => '',
             'keep_previous_files' => false,
-            'display_iris_grades_summary' => false,
+            'display_rainbow_grades_summary' => false,
             'display_custom_message' => false,
             'course_email' => 'Please contact your TA or instructor for a regrade request.',
             'vcs_base_url' => '',
@@ -261,7 +261,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             ),
             'course_details' => array(
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
-                'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
+                'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type'
             )
         );
