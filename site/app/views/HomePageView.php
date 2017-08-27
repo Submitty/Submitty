@@ -1,6 +1,7 @@
 <?php
 namespace app\views;
 
+use app\authentication\DatabaseAuthentication;
 use app\views\AbstractView;
 use app\models\Course;
 
@@ -54,6 +55,9 @@ class HomePageView extends AbstractView {
                     <tr>
                         <td><b>Last Name:</b> {$user->getLastName()} </td>
                     </tr>
+HTML;
+        if ($this->core->getAuthentication() instanceof DatabaseAuthentication) {
+            $return .= <<<HTML
                     <tr>
                         <td><b>Change Password</b></td>
                         <td><a onclick="passwordChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
@@ -81,6 +85,9 @@ class HomePageView extends AbstractView {
                             </form>
                         </div>
                     </tr>
+HTML;
+        }
+        $return .= <<<HTML
                 </tbody>
             </table>
         </div>
