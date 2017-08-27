@@ -40,10 +40,15 @@ class HomePageController extends AbstractController {
     }
 
     public function changePassword(){
-
-        if(isset($_POST['new_password']) && isset($_POST['confirm_new_password']))
-        {
-            //your logic here.
+        $user = $this->core->getUser();
+        if(isset($_POST['new_password']) && isset($_POST['confirm_new_password'])
+            && $_POST['new_password'] == $_POST['confirm_new_password']) {
+            $user->setPassword($_POST['new_password']);
+            $this->core->getQueries()->updateUser($user);
+            $this->core->addSuccessMessage("Updated password");
+        }
+        else {
+            $this->core->addErrorMessage("Must put same password in both boxes.");
         }
     }
 
@@ -56,7 +61,7 @@ class HomePageController extends AbstractController {
                 if(strlen($newName) <= 30)
                 {
                     $user->setPreferredFirstName($newName);
-                    $this->core->getQueries()->updateSubmittyUser($user);
+                    $this->core->getQueries()->updateUser($user);
                 }
                 else
                 {

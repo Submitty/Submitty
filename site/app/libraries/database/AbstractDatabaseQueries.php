@@ -82,7 +82,7 @@ abstract class AbstractDatabaseQueries {
      * @param string $semester
      * @param string $course
      */
-    abstract public function updateUser(User $user, $semester, $course);
+    abstract public function updateUser(User $user, $semester=null, $course=null);
 
     /**
      * @param string    $user_id
