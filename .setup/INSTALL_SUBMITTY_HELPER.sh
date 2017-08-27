@@ -277,6 +277,7 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/adduser.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/generate_repo.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
