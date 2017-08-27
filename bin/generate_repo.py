@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-This script will generate the repository structure necessary
+This script will generate the repositories for a specified course and semester
+for each student that currently does not have a repository. You can either make
+the repositories at a per course level (for a repo that would carry through
+all gradeables for example) or on a per gradeable level.
 """
+
 import argparse
-import pwd
 import os
 import shutil
 from sqlalchemy import create_engine, MetaData, Table, bindparam
