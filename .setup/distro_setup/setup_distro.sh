@@ -25,7 +25,7 @@ IFS=',' read -ra ADDR <<< "${@}"
 if [ ${#ADDR[@]} ]; then
     echo "Installing extra packages..."
     for i in "${ADDR[@]}"; do
-        if [ -f source ${CURRENT_DIR}/${DISTRO}/${i}.sh ]; then
+        if [ -f ${CURRENT_DIR}/${DISTRO}/${i}.sh ]; then
             echo "Running ${CURRENT_DIR}/${DISTRO}/${i}.sh"
             source ${CURRENT_DIR}/${DISTRO}/${i}.sh
         else
