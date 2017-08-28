@@ -93,7 +93,7 @@ HTML;
         </div>
         <div class="box half">
             <div class="half">
-            <h2>Courses You're Enrolled In</h2>
+            <h2>Your Courses</h2>
                 <table>
                     <tbody>
 HTML;
