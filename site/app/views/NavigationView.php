@@ -262,21 +262,11 @@ HTML;
                     $gradeable_grade_range = 'REGRADE';
                   }
                 }
-                $thing = "";
-
-                if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
-                  if ($g_data->useTAGrading()) {
-                    $thing = "willbetagraded";
-                  } else {
-                    $thing = "NO-TA-GRADING";
-                  }
-                }
-
                 if(trim($g_data->getInstructionsURL())!=''){
-                    $gradeable_title = '<label>'.$thing.$g_data->getName().'</label><a class="external" href="'.$g_data->getInstructionsURL().'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
+                    $gradeable_title = '<label>'.$g_data->getName().'</label><a class="external" href="'.$g_data->getInstructionsURL().'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
                 }
                 else{
-                    $gradeable_title = '<label>'.$thing.$g_data->getName().'</label>';
+                    $gradeable_title = '<label>'.$g_data->getName().'</label>';
                 }
 
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
