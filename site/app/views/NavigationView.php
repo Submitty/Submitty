@@ -238,7 +238,7 @@ HTML;
                 }
                 $time = " @ H:i";
 
-                $gradeable_grade_range = 'PREVIEW FORM<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}").")</span>";
+                $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}").")</span>";
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
                   if ($g_data->useTAGrading()) {
                     $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}")."</span>)";
@@ -501,14 +501,18 @@ HTML;
                             REGRADE</a>
 HTML;
                         } else {
+                            $button_type = $title_to_button_type_grading[$title_save];
+                            if (!$g_data->useTAGrading()) {
+                              $button_type = 'btn-default';
+                            }
                             $gradeable_grade_range = <<<HTML
-                            <a class="btn {$title_to_button_type_grading[$title_save]} btn-nav" \\
+                            <a class="btn {$button_type} btn-nav" \\
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
                             {$gradeable_grade_range}</a>
 HTML;
                         }                           
                         //Give the TAs a progress bar too                        
-                        if (($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED") && $components_total != 0) {
+                        if (($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED") && $components_total != 0 && $g_data->useTAGrading()) {
                             $gradeable_grade_range .= <<<HTML
                             <style type="text/css"> 
                                 .meter3 { 
