@@ -102,23 +102,25 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
-    public function updateUser(User $user, $semester, $course) {
+    public function updateUser(User $user, $semester=null, $course=null) {
         $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
                        $user->getLastName(), $user->getEmail(), $user->getId());
         $this->submitty_db->query("
 UPDATE users SET user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
 WHERE user_id=?", $array);
 
-        $params = array($user->getGroup(), $user->getRegistrationSection(),
-                        Utils::convertBooleanToString($user->isManualRegistration()), $semester, $course,
-                        $user->getId());
-        $this->submitty_db->query("
+        if (!empty($semester) && !empty($course)) {
+            $params = array($user->getGroup(), $user->getRegistrationSection(),
+                            Utils::convertBooleanToString($user->isManualRegistration()), $semester, $course,
+                            $user->getId());
+            $this->submitty_db->query("
 UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=? 
 WHERE semester=? AND course=? AND user_id=?", $params);
 
-        $params = array($user->getRotatingSection(), $user->getId());
-        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id=?", $params);
-        $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
+            $params = array($user->getRotatingSection(), $user->getId());
+            $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id=?", $params);
+            $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
+        }
     }
 
     public function updateGradingRegistration($user_id, $user_group, $sections) {

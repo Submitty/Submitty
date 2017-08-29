@@ -202,15 +202,28 @@ class Output {
         $this->use_footer = $bool;
     }
     
-    public function addBreadcrumb($string, $url=null, $top=false) {
+    public function addBreadcrumb($string, $url=null, $top=false, $icon=false) {
         if ($url !== null && $url !== "") {
-            if ($top === true) {
+            if(!$icon){
+                if ($top === true) {
                     $string = "<a target=\"_top\" href='{$url}'>{$string}</a>";
-            }
-            else {
+                }
+                else {
                     $string = "<a href='{$url}'>{$string}</a>";
+                }
             }
+            else{
+                $string = '<a class="external" href="'.$url.'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
+            }   
         }
-        $this->breadcrumbs[] = $string;
+        if(empty($url) && empty($string))
+        {
+            return;
+        }
+        if($icon){
+            $this->breadcrumbs[count($this->breadcrumbs)-1].= $string;
+        }else{
+           $this->breadcrumbs[] = $string;
+        }
     }
 }
