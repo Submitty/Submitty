@@ -1268,6 +1268,7 @@ WHERE gcm_id=?", $params);
         $admin_gradeable->addGradeableInfo($this->course_db->row());
 
         $this->course_db->query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
+          $admin_gradeable->setOldComponentsJson(json_encode($this->course_db->rows()));
         foreach($this->course_db->rows() as $row) {
           $admin_gradeable->addGradeableComponent($row);
         }

@@ -34,7 +34,9 @@ class AdminGradeable extends AbstractModel {
     /** @property @var string Id of the gradeable (must be unique) */
     protected $g_id = "";
     /** @property @var string Title of the gradeable */
-    protected $g_title = "";
+    protected $g_title = "";    
+    /** @property @var string instructions url of the gradeable */
+    protected $g_instructions_url = "";
     /** @property @var string Instructions to give to TA for grading */
     protected $g_overall_ta_instructions = "";
     /** @property @var int 0 is electronic, 1 is checkponts, 2 is numeric/text */
@@ -54,6 +56,8 @@ class AdminGradeable extends AbstractModel {
 
     /** @property @var \app\models\GradeableComponent[] */
     protected $old_components = array();
+    /** @property @var same info as above but encoded */
+    protected $old_components_json;
 
     protected $has_grades = false;
 
@@ -91,9 +95,14 @@ class AdminGradeable extends AbstractModel {
     protected $eg_late_days = 2;
     /** @property @var int How many people should each person grade*/
     protected $eg_peer_grade_set = 3;
-    /** @property @var float Precision to allow for inputting points when grading (such that precision of 0.5 then allows grades
-     * of 0, 0.5, 1, 1.5, etc.) */
+    /** @property @var int How many points for completing peer grading*/
+    protected $peer_grade_complete_score = 0;
+    /** @property @var float Precision to allow for inputting points when grading (such that precision of 0.5 then allows grades of 0, 0.5, 1, 1.5, etc.) */
     protected $eg_point_precision = 0.5;
+    /** @property @var bool is there a pdf page*/
+    protected $pdf_page = false;
+    /** @property @var bool does the student supply the pdf page*/
+    protected $pdf_page_student = false;
 
 // if a gradeable is numeric/text
 
@@ -102,12 +111,13 @@ class AdminGradeable extends AbstractModel {
 
 
 
-
+// peer_grade_complete_score
+// pdf_page
+// pdf_page_student
 
     protected $team_yes_checked = false;
     protected $team_no_checked = true;
     protected $peer_no_checked = true;
-    protected $peer_grade_complete_score = 0;
     protected $default_late_days;
     protected $vcs_base_url;
     protected $BASE_URL = "http:/localhost/hwgrading";
@@ -115,8 +125,6 @@ class AdminGradeable extends AbstractModel {
     protected $string = "Add";
     protected $button_string = "Add";
     protected $extra = "";
-    protected $pdf_page = false;
-    protected $pdf_page_student = false;
     protected $have_old = false;
 
     // protected $edit = json_encode($type_of_action === "edit");
@@ -165,6 +173,7 @@ class AdminGradeable extends AbstractModel {
     public function addGradeableInfo($details=array()) {
         $this->g_id = $details['g_id'];
         $this->g_title = $details['g_title'];
+        $this->g_instructions_url = $details['g_instructions_url'];
         $this->g_overall_ta_instructions = $details['g_overall_ta_instructions'];
         $this->g_gradeable_type = $details['g_gradeable_type'];
         $this->g_grade_by_registration = $details['g_grade_by_registration'];
