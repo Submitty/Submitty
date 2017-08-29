@@ -255,8 +255,20 @@ replace_fillin_variables ${course_dir}/config/config.ini
 
 echo -e "Creating database ${DATABASE_NAME}\n"
 PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d postgres -c "CREATE DATABASE ${DATABASE_NAME}"
+if [[ $? -ne "0" ]] ; then
+    echo "ERROR: Failed to create database ${DATABASE_NAME}"
+    exit
+fi
 PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d ${DATABASE_NAME} -f ${SUBMITTY_INSTALL_DIR}/site/data/course_tables.sql
+if [[ $? -ne "0" ]] ; then
+    echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
+    exit
+fi
 PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -c "INSERT INTO courses (semester, course) VALUES ('${semester}', '${course}');"
+if [[ $? -ne "0" ]] ; then
+    echo "ERROR: Failed to add this course to the master Submitty database."
+    exit
+fi
 echo -e "\nSUCCESS!\n\n"
 
 ########################################################################################################################
