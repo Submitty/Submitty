@@ -1269,9 +1269,22 @@ WHERE gcm_id=?", $params);
         $admin_gradeable->setGradeableInfo($this->course_db->row(), $template);
 
         $this->course_db->query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
-          $admin_gradeable->setOldComponentsJson(json_encode($this->course_db->rows()));
+        $admin_gradeable->setOldComponentsJson(json_encode($this->course_db->rows()));
+        $components = array();
         foreach($this->course_db->rows() as $row) {
-          $admin_gradeable->addGradeableComponent($row);
+          $components[] = new GradeableComponent($this->core, $row);
+        }
+        $admin_gradeable->setOldComponents($components);
+        foreach($components as $comp) {
+          if($comp->getOrder() == -1 && $comp->getIsPeer()) {
+            $admin_gradeable->setPeerGradeCompleteScore($comp->getMaxValue());
+          }
+          if($comp->getPage() != 0) {
+            $admin_gradeable->setPdfPage(true);
+            if($comp->getPage() == -1) {
+              $admin_gradeable->setPdfPageStudent(true);
+            }
+          }
         }
 
         //2 is numeric/text

@@ -110,27 +110,9 @@ class AdminGradeable extends AbstractModel {
     protected $num_text = 0;
 
 
-
-// peer_grade_complete_score
-// pdf_page
-// pdf_page_student
-
-    protected $team_yes_checked = false;
-    protected $team_no_checked = true;
-    protected $peer_no_checked = true;
     protected $default_late_days;
     protected $vcs_base_url;
     protected $BASE_URL = "http:/localhost/hwgrading";
-    protected $action = "upload_new_gradeable";
-    protected $string = "Add";
-    protected $button_string = "Add";
-    protected $extra = "";
-    protected $have_old = false;
-
-    // protected $edit = json_encode($type_of_action === "edit");
-    protected $template_value = "";
-    // protected $gradeable_id_title = $initial_data[5];
-    protected $gradeables_array = array();
 
     public function __construct(Core $core) {
         parent::__construct($core);
@@ -161,9 +143,9 @@ class AdminGradeable extends AbstractModel {
         $this->g_syllabus_bucket = $details['g_syllabus_bucket'];        
     }
 
-    public function addGradeableComponent($details=array()) {
-        $this->old_components[] = new GradeableComponent($this->core, $details);
-    }
+    // public function addGradeableComponent($details=array()) {
+    //     $this->old_components[] = new GradeableComponent($this->core, $details);
+    // }
 
     public function setElectronicGradeableInfo($details, $template) {
         $this->eg_config_path = $details['eg_config_path'];

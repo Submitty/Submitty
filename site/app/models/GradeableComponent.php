@@ -72,7 +72,7 @@ class GradeableComponent extends AbstractModel {
     /** @property @var string Comment that grader has put on the custom "mark" while grading for student */
     protected $comment = "";
     /** @property @var int for page number */
-    protected $page = 1;
+    protected $page = 0;
 
     /** @property @var User */
     protected $grader = null;
