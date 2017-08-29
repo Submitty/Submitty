@@ -122,9 +122,12 @@ apt-get install -qqy libpam-passwdqc
 
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql-9.5
-apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup
-apt-get install -qqy php7.0 php7.0-cli php-xdebug libapache2-mod-fastcgi php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt
-apt-get install -qqy php7.0-zip
+apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3 libapache2-mod-fastcgi
+apt-get install -qqy php7.0 php7.0-cli php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt php7.0-zip
+
+if [ ${VAGRANT} == 1 ]; then
+    apt-get install -qqy php-xdebug
+fi
 
 # Add additional packages for compiling, authentication, and security,
 # and program support
@@ -152,7 +155,7 @@ apt-get install -qqy oracle-java8-set-default
 apt-get install -qqy imagemagick
 
 if [ ${VAGRANT} == 1 ]; then
-    apt-get install -qqy libapache2-mod-wsgi-py3 gitweb libcgi-session-perl
+    apt-get install -qqy gitweb libcgi-session-perl
 fi
 
 apt-get -qqy autoremove
