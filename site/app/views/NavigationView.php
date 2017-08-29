@@ -76,7 +76,7 @@ HTML;
         $return .= <<<HTML
     <table class="gradeable_list" style="width:100%;">
 HTML;
-		//What the title is suppose to display to the user as the title for each category
+	//What title is displayed to the user for each category
         $title_to_category_title = array(
             "FUTURE" => "FUTURE &nbsp;&nbsp; <em>visible only to Instructors</em>",
             "BETA" => "BETA &nbsp;&nbsp; <em>open for testing by TAs</em>",
@@ -238,9 +238,13 @@ HTML;
                 }
                 $time = " @ H:i";
 
-                $gradeable_grade_range = 'VIEW FORM<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}").")</span>";
+                $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}").")</span>";
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
-                  $gradeable_grade_range = 'VIEW SUBMISSIONS<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}")."</span>)";
+                  if ($g_data->useTAGrading()) {
+                    $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}")."</span>)";
+                  } else {
+                    $gradeable_grade_range = 'VIEW SUBMISSIONS<br><span style="font-size:smaller;">(<em>no manual grading</em></span>)';
+                  }
                 }
                 $temp_regrade_text = "";
                 if ($title_save=='ITEMS BEING GRADED') {
@@ -248,9 +252,16 @@ HTML;
                   $temp_regrade_text = 'REGRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/Y{$time}").'</span>)';
                 }
                 if ($title_save=='GRADED') {
-                  $gradeable_grade_range = 'GRADE';
+                  if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
+                    if ($g_data->useTAGrading()) {
+                      $gradeable_grade_range = 'GRADE';
+                    } else {
+                      $gradeable_grade_range = 'VIEW SUBMISSIONS';
+                    }
+                  } else {
+                    $gradeable_grade_range = 'REGRADE';
+                  }
                 }
-
                 if(trim($g_data->getInstructionsURL())!=''){
                     $gradeable_title = '<label>'.$g_data->getName().'</label><a class="external" href="'.$g_data->getInstructionsURL().'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
                 }
@@ -480,14 +491,18 @@ HTML;
                             REGRADE</a>
 HTML;
                         } else {
+                            $button_type = $title_to_button_type_grading[$title_save];
+                            if (!$g_data->useTAGrading()) {
+                              $button_type = 'btn-default';
+                            }
                             $gradeable_grade_range = <<<HTML
-                            <a class="btn {$title_to_button_type_grading[$title_save]} btn-nav" \\
+                            <a class="btn {$button_type} btn-nav" \\
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
                             {$gradeable_grade_range}</a>
 HTML;
                         }                           
                         //Give the TAs a progress bar too                        
-                        if (($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED") && $components_total != 0) {
+                        if (($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED") && $components_total != 0 && $g_data->useTAGrading()) {
                             $gradeable_grade_range .= <<<HTML
                             <style type="text/css"> 
                                 .meter3 { 
