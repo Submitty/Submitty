@@ -4,6 +4,7 @@ namespace app\libraries\database;
 
 use app\libraries\Utils;
 use \app\libraries\GradeableType;
+use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
@@ -1263,9 +1264,9 @@ WHERE gcm_id=?", $params);
         return $data;
     }
 
-    public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable) {
+    public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template=false) {
         $this->course_db->query("SELECT * FROM gradeable WHERE g_id=?",array($gradeable_id));
-        $admin_gradeable->addGradeableInfo($this->course_db->row());
+        $admin_gradeable->setGradeableInfo($this->course_db->row(), $template);
 
         $this->course_db->query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
           $admin_gradeable->setOldComponentsJson(json_encode($this->course_db->rows()));
@@ -1293,7 +1294,7 @@ WHERE gcm_id=?", $params);
         if($admin_gradeable->getGGradeableType() == 0) {
             //get the electronic file stuff
             $this->course_db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
-            $admin_gradeable->setElectronicGradeableInfo($this->course_db->row());
+            $admin_gradeable->setElectronicGradeableInfo($this->course_db->row(), $template);
 
         }
 

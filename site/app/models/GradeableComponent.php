@@ -66,13 +66,13 @@ class GradeableComponent extends AbstractModel {
     /** @property @var bool Is the component just used for text fields (ignore lower_clamp, default, max_value, upper_clamp and score) */
     protected $is_text = false;
     /** @property @var int Order for components to be shown in */
-    protected $order = 1;
+    protected $order = 0;
     /** @property @var float custom "mark" score for this component */
     protected $score = 0;
     /** @property @var string Comment that grader has put on the custom "mark" while grading for student */
     protected $comment = "";
     /** @property @var int for page number */
-    protected $page = 0;
+    protected $page = 1;
 
     /** @property @var User */
     protected $grader = null;

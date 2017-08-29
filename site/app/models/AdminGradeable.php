@@ -57,7 +57,7 @@ class AdminGradeable extends AbstractModel {
     /** @property @var \app\models\GradeableComponent[] */
     protected $old_components = array();
     /** @property @var same info as above but encoded */
-    protected $old_components_json;
+    protected $old_components_json = "{}";
 
     protected $has_grades = false;
 
@@ -98,7 +98,7 @@ class AdminGradeable extends AbstractModel {
     /** @property @var int How many points for completing peer grading*/
     protected $peer_grade_complete_score = 0;
     /** @property @var float Precision to allow for inputting points when grading (such that precision of 0.5 then allows grades of 0, 0.5, 1, 1.5, etc.) */
-    protected $eg_point_precision = 0.5;
+    protected $eg_precision = 0.5;
     /** @property @var bool is there a pdf page*/
     protected $pdf_page = false;
     /** @property @var bool does the student supply the pdf page*/
@@ -144,42 +144,19 @@ class AdminGradeable extends AbstractModel {
         $this->vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
     }
 
-    // public function setRotatingGradeables($details) {
-    //     $this->rotating_gradeables = $details;
-    // }
-    // public function setGradeableSectionHistory($details) {
-    //     $this->gradeable_section_history = $details;
-    // }
-    // public function setNumSections($num) {
-    //     $this->num_sections = $num;
-
-    // }
-    // public function setGradersAllSection($details) {
-    //     $this->graders_all_section = $details;
-
-    // }
-    // public function setGradersFromUsertypes($details) {
-    //     $this->graders_from_usertypes = $details;
-
-    // }
-    // public function setTemplateList($details) {
-    //     $this->template_list = $details;
-    // }
-
-
-
-
     // following only if edit or from template
-    public function addGradeableInfo($details=array()) {
+    public function setGradeableInfo($details=array(), $template) {
         $this->g_id = $details['g_id'];
         $this->g_title = $details['g_title'];
         $this->g_instructions_url = $details['g_instructions_url'];
         $this->g_overall_ta_instructions = $details['g_overall_ta_instructions'];
         $this->g_gradeable_type = $details['g_gradeable_type'];
         $this->g_grade_by_registration = $details['g_grade_by_registration'];
-        $this->g_ta_view_start_date = $details['g_ta_view_start_date'];
-        $this->g_grade_start_date = $details['g_grade_start_date'];
-        $this->g_grade_released_date = $details['g_grade_released_date'];
+        if(!$template){
+            $this->g_ta_view_start_date = $details['g_ta_view_start_date'];
+            $this->g_grade_start_date = $details['g_grade_start_date'];
+            $this->g_grade_released_date = $details['g_grade_released_date'];
+        }
         $this->g_min_grading_group = $details['g_min_grading_group'];
         $this->g_syllabus_bucket = $details['g_syllabus_bucket'];        
     }
@@ -188,24 +165,28 @@ class AdminGradeable extends AbstractModel {
         $this->old_components[] = new GradeableComponent($this->core, $details);
     }
 
-    public function setElectronicGradeableInfo($details) {
+    public function setElectronicGradeableInfo($details, $template) {
         $this->eg_config_path = $details['eg_config_path'];
         $this->eg_is_repository = $details['eg_is_repository'];
         $this->eg_subdirectory = $details['eg_subdirectory'];
         $this->eg_team_assignment = $details['eg_team_assignment'];
         $this->eg_max_team_size = $details['eg_max_team_size'];
-        $this->eg_team_lock_date = $details['eg_team_lock_date'];
+        if(!$template) {
+            $this->eg_team_lock_date = $details['eg_team_lock_date'];
+        }
         $this->eg_use_ta_grading = $details['eg_use_ta_grading'];
         $this->eg_student_view = $details['eg_student_view'];
         $this->eg_student_submit = $details['eg_student_submit'];
         $this->eg_student_download = $details['eg_student_download'];
         $this->eg_student_any_version = $details['eg_student_any_version'];
         $this->eg_peer_grading = $details['eg_peer_grading'];
-        $this->eg_submission_open_date = $details['eg_submission_open_date'];
-        $this->eg_submission_due_date = $details['eg_submission_due_date'];
+        if(!$template) {
+            $this->eg_submission_open_date = $details['eg_submission_open_date'];
+            $this->eg_submission_due_date = $details['eg_submission_due_date'];
+        }
         $this->eg_late_days = $details['eg_late_days'];
         $this->eg_peer_grade_set = $details['eg_peer_grade_set'];
-        $this->eg_point_precision = $details['eg_point_precision'];
+        $this->eg_precision = $details['eg_precision'];
     }
 
     public function setNumericTextInfo($detials) {

@@ -11,57 +11,11 @@ class AdminGradeableView extends AbstractView {
      */
 	public function show_add_gradeable($type_of_action, AdminGradeable $admin_gradeable) {
 
-        // $electronic_gradeable = array();
-        // $g_ta_view_start_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
-        // $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
-        // $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
-        // $electronic_gradeable['eg_subdirectory'] = "";
-        // $electronic_gradeable['eg_config_path'] = "";
-        // $electronic_gradeable['eg_late_days'] = 2;
-        // $electronic_gradeable['eg_precision'] = 0.5;
-        // $electronic_gradeable['eg_max_team_size'] = 1;
-        // $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
-        // $team_yes_checked = false;
-        // $team_no_checked = true;
-        // $eg_peer_grading = false;
-        // $peer_no_checked = true;
-        // $peer_grade_set = 3;
-        // $peer_grade_complete_score = 0;
-        // $g_grade_start_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
-        // $g_grade_released_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
-        // $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-        // $vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
-        // $BASE_URL = "http:/localhost/hwgrading";
         $action = "upload_new_gradeable"; //decides how the page's data is displayed
-        // $string = "Add"; //Add or Edit
         $button_string = "Add";
         $extra = "";
-        // $gradeable_submission_id = "";
-        // $g_title = "";
-        // $g_instructions_url = "";
-        // $g_gradeable_type = 0;
-        // $eg_is_repository = false;
-        // $eg_use_ta_grading = false;
-        // $student_view = true;
-        // $student_submit = true;
-        // $student_download = false;
-        // $student_any_version = true;
-        // $pdf_page = false;
-        // $pdf_page_student = false;
-        // $old_questions = array();
-        // $g_min_grading_group = 0;
-        // $g_overall_ta_instructions = "";
         $have_old = false;
-        // $old_components = array();
-        // $old_components = "{}";
-        // $num_numeric = $num_text = 0;
-        // $g_syllabus_bucket = -1;
-        // $g_grade_by_registration = -1;
         $edit = json_encode($type_of_action === "edit");
-        // $template_value = "";
-        // $precision = 0.5;
-        // $electronic_gradeable['eg_precision'] = $precision;
-        // $gradeable_id_title = $initial_data[5]; //list of previous gradeables
         $gradeables_array = array();
 
         foreach ($admin_gradeable->getTemplateList() as $g_id_title) { //makes an array of gradeable ids for javascript
@@ -73,112 +27,12 @@ class AdminGradeableView extends AbstractView {
         if ($type_of_action === "edit") {
             $have_old = true;
             $action = "upload_edit_gradeable";
-        //     $string = "Edit";
             $button_string = "Edit";
             $extra = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
-        //     $g_ta_view_start_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_ta_view_start_date']));
-        //     $g_grade_start_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_start_date']));
-        //     $g_grade_released_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_released_date']));
-        //     $gradeable_submission_id = $data[0]['g_id'];
-        //     $g_title = $data[0]['g_title'];
-        //     $g_instructions_url = $data[0]['g_instructions_url'];
-        //     $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
-        //     $old_components = $data[1];
-        //     $g_min_grading_group = $data[0]['g_min_grading_group'];
-        //     $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
-        //     $g_grade_by_registration = $data[0]['g_grade_by_registration'];
-        //     if ($data[0]['g_gradeable_type'] === 0) { //if the gradeable edited is electronic gradeable
-        //         $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_open_date']));
-        //         $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_due_date']));
-        //         $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
-        //         $electronic_gradeable['eg_subdirectory'] = $data[3]['eg_subdirectory'];
-        //         $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
-        //         $precision = $data[3]['eg_precision'];
-        //         $electronic_gradeable['eg_precision'] = $precision;
-        //         $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
-        //         $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_team_lock_date']));
-        //         $team_yes_checked = $data[3]['eg_team_assignment'];
-        //         $team_no_checked = !$team_yes_checked;
-        //         $eg_is_repository = $data[3]['eg_is_repository'];
-        //         $eg_use_ta_grading = $data[3]['eg_use_ta_grading'];
-        //         $student_view = $data[3]['eg_student_view'];
-        //         $student_submit = $data[3]['eg_student_submit'];
-        //         $student_download = $data[3]['eg_student_download'];
-        //         $student_any_version = $data[3]['eg_student_any_version'];
-        //         $eg_peer_grading = $data[3]['eg_peer_grading'];
-        //         $peer_no_checked = !$eg_peer_grading;
-        //         if(isset($data[3]['eg_peer_grade_set'])){
-        //             $peer_grade_set = $data[3]['eg_peer_grade_set'];
-        //         }
-        //         $old_questions = $data[5];
-        //         $num_old_questions = count($old_questions);                
-        //         $component_ids = array();
-        //         for ($i = 0; $i < $num_old_questions; $i++) {
-        //             $json = json_decode($data[1]);
-        //             if($eg_peer_grading && $i == 0 && $json[$i]->gc_order == -1) {
-        //                 $peer_grade_complete_score = $json[$i]->gc_max_value;
-        //             }
-        //             $component_ids[] = $json[$i]->gc_id;
-        //             if (($json[$i]->gc_page) !== 0) {
-        //                 $pdf_page = true;
-        //                 if (($json[$i]->gc_page) === -1) {
-        //                     $pdf_page_student = true;
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     if ($data[0]['g_gradeable_type'] === 2) { //if the gradeable edited is num/text gradeable
-        //         $num_numeric = $data[3];
-        //         $num_text = $data[4];
-        //     }
+
         }
 
-        // //if the user is using a template
-        // if ($type_of_action === "add_template") {
-        //     $g_instructions_url = $data[0]['g_instructions_url'];
-        //     $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
-        //     $old_components = $data[1];
-        //     $g_min_grading_group = $data[0]['g_min_grading_group'];
-        //     $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
-        //     $g_grade_by_registration = $data[0]['g_grade_by_registration'];
-        //     if ($data[0]['g_gradeable_type'] === 0) {
-        //         $electronic_gradeable['eg_subdirectory'] = $data[3]['eg_subdirectory'];
-        //         $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
-        //         $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
-        //         $team_yes_checked = $data[3]['eg_team_assignment'];
-        //         $team_no_checked = !$team_yes_checked;
-        //         $eg_use_ta_grading = $data[3]['eg_use_ta_grading'];
-        //         $student_view = $data[3]['eg_student_view'];
-        //         $student_submit = $data[3]['eg_student_submit'];
-        //         $student_download = $data[3]['eg_student_download'];
-        //         $student_any_version = $data[3]['eg_student_any_version'];
-        //         $eg_peer_grading = $data[3]['eg_peer_grading'];
-        //         $peer_no_checked = !$eg_peer_grading;
-        //         $peer_grade_set = $data[3]['eg_peer_grade_set'];
-        //         $precision = $data[3]['eg_precision'];
-        //         $electronic_gradeable['eg_precision'] = $precision;
-        //         $old_questions = $data[5];
-        //         $num_old_questions = count($old_questions);                
-        //         $component_ids = array();
-        //         for ($i = 0; $i < $num_old_questions; $i++) {
-        //             $json = json_decode($data[1]);
-        //             if($eg_peer_grading && $i == 0 && $json[$i]->gc_order == -1) {
-        //                 $peer_grade_complete_score = $json[$i]->gc_max_value;
-        //             }
-        //             $component_ids[] = $json[$i]->gc_id;
-        //             if (($json[$i]->gc_page) !== 0) {
-        //                 $pdf_page = true;
-        //                 if (($json[$i]->gc_page) === -1) {
-        //                     $pdf_page_student = true;
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     if ($data[0]['g_gradeable_type'] === 2) {
-        //         $num_numeric = $data[3];
-        //         $num_text = $data[4];
-        //     }
-        // }
+
 
 		$html_output = <<<HTML
 		<style type="text/css">
@@ -357,12 +211,12 @@ HTML;
                 <fieldset>
                     <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="true"
 HTML;
-                if (($type_of_action === "edit" || $type_of_action === "add_template") && $team_yes_checked) { $html_output .= ' checked="checked"'; }
+                if (($type_of_action === "edit" || $type_of_action === "add_template") && $admin_gradeable->getEgTeamAssignment()) { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
                 > Yes
                     <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="false"
 HTML;
-                if ((($type_of_action === "edit" || $type_of_action === "add_template") && $team_no_checked) || $type_of_action === "add") { $html_output .= ' checked="checked"'; }
+                if ((($type_of_action === "edit" || $type_of_action === "add_template") && !$admin_gradeable->getEgTeamAssignment()) || $type_of_action === "add") { $html_output .= ' checked="checked"'; }
                 $html_output .= <<<HTML
                 > No
                     <div class="team_assignment team_yes" id="team_yes">
@@ -516,12 +370,12 @@ HTML;
                     <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes"
 HTML;
         $display_peer_checkboxes = "";
-                    if(($type_of_action === "edit" || $type_of_action === "add_template") && $eg_peer_grading) { $html_output .= ' checked="checked"'; }
+                    if(($type_of_action === "edit" || $type_of_action === "add_template") && $admin_gradeable->getEgPeerGrading()) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
                     /> Yes
                     <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no"
 HTML;
-                    if ((($type_of_action === "edit" || $type_of_action === "add_template") && $peer_no_checked) || $type_of_action === "add") {
+                    if ((($type_of_action === "edit" || $type_of_action === "add_template") && !$admin_gradeable->getEgPeerGrading()) || $type_of_action === "add") {
                         $html_output .= ' checked="checked"';
                         $display_peer_checkboxes = 'style="display:none"';
                     }
@@ -577,7 +431,7 @@ HTML;
                 <br />
 
                 Point precision (for manual grading): 
-                <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{$admin_gradeable->getEgPointPrecision()}" class="float_val" />
+                <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{$admin_gradeable->getEgPrecision()}" class="float_val" />
                 <br /><br />
                 
                 <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
@@ -590,44 +444,30 @@ HTML;
                     <tbody style="background: #f9f9f9;">
 HTML;
     
-    $old_questions = $admin_gradeable->getOldComponents();
-    if (count($old_questions) == 0) {
-        $old_questions[0] = array('question_message'      => "",
-                                  'question_grading_note' => "",
-                                  'student_grading_note'  => "",
-                                  'question_total'        => 0,
-                                  'question_extra_credit' => 0,
-                                  'peer_component'        => 0,
-                                  'page_component'        => 1,
-                                  'question_order'        => 0);
-    }
 
-    //this is a hack (to make counting start at 1 rather than 0?...not sure why we don't just keep a counter)
-    array_unshift($old_questions, "tmp");
-    $index_question = 0;
-    foreach ($old_questions as $num => $question) {
-        if($num == 0 || $num == -1) continue;
-        if($question['question_order'] == -1) continue;
+    $num = 1;
+    foreach ($admin_gradeable->getOldComponents() as $question) {
+        if($question->getOrder() == -1) continue;
         $html_output .= <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;
         $html_output .= <<<HTML
                 <td style="overflow: hidden;">
                     <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" 
-                              placeholder="Rubric Item Title">{$question['question_message']}</textarea>
+                              placeholder="Rubric Item Title">{$question->getTitle()}</textarea>
                     <textarea name="ta_comment_{$num}" id="individual_{$num}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA/Grader (seen only by TAs/Graders)"  onkeyup="autoResizeComment(event);"
                                                style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
-                                               display: block; height: auto;">{$question['question_grading_note']}</textarea>
+                                               display: block; height: auto;">{$question->getTaComment()}</textarea>
                     <textarea name="student_comment_{$num}" id="student_{$num}" class="student_comment complex_type" rows="1" placeholder=" Message to Student (seen by both students and graders)" onkeyup="autoResizeComment(event);"
                               style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
-                              display: block; height: auto;">{$question['student_grading_note']}</textarea>
+                              display: block; height: auto;">{$question->getStudentComment()}</textarea>
                     <div id="mark_questions_{$num}">
 HTML;
 
         if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
             $html_output .= <<<HTML
                 <div id="mark_id-{$num}-0" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
-                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{$num}_0" value="0" step="{$admin_gradeable->getEgPointPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{$num}_0" value="0" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                 <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_0" style="resize: none; width: 80.5%;">Full Credit</textarea> 
                 <!--
                 <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -638,11 +478,8 @@ HTML;
             </div>
 HTML;
         }
-        if (($type_of_action === "edit" || $type_of_action === "add_template") && $admin_gradeable->getGGradeableType() === 0 && $eg_use_ta_grading === true) {
-            $marks = $this->core->getQueries()->getGradeableComponentsMarks($component_ids[$index_question]);
-            $lower_clamp = $question['question_lower_clamp'];
-            $default = $question['question_default'];
-            $upper_clamp = $question['question_upper_clamp'];
+        if (($type_of_action === "edit" || $type_of_action === "add_template") && $admin_gradeable->getGGradeableType() === 0 && $admin_gradeable->getEgUseTaGrading() === true) {
+            $marks = $this->core->getQueries()->getGradeableComponentsMarks($question->getId());
             $first = true;
             foreach ($marks as $mark) {
                 if($first === true) {
@@ -654,7 +491,7 @@ HTML;
                 }
                 $html_output .= <<<HTML
                     <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
-                    <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" step="{$admin_gradeable->getEgPointPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
+                    <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                     <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 80.5%;">{$mark->getNote()}</textarea> 
                     <!--
                     <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -673,10 +510,10 @@ HTML;
 
                 <td style="background-color:#EEE;">
 HTML;
-        $old_lower_clamp = (isset($question['question_lower_clamp'])) ? $question['question_lower_clamp'] : 0;
-        $old_default = (isset($question['question_default'])) ? $question['question_default'] : 0;
-        $old_max = (isset($question['question_total'])) ? $question['question_total'] : 0;
-        $old_upper_clamp = (isset($question['question_upper_clamp'])) ? $question['question_upper_clamp'] : 0;
+        $old_lower_clamp = $question->getLowerClamp();
+        $old_default = $question->getDefault();
+        $old_max = $question->getMaxValue();
+        $old_upper_clamp = $question->getUpperClamp();
         $extra_credit_yes = "";
         $extra_credit_no = "";
         $extra_credit_hidden = "";
@@ -728,19 +565,19 @@ HTML;
             }
         }  
         $html_output .= <<<HTML
-        Points: <input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_max}" min="0" step="{$admin_gradeable->getEgPointPrecision()}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
+        Points: <input type="number" id="grade-{$num}" class="points" name="points_{$num}" value="{$old_max}" min="0" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
         <br>
         Extra Credit: 
         <input type="radio" id="rad_id_extra_credit_yes-{$num}" name="rad_extra_credit-{$num}" value="yes" data-question_num="{$num}" onclick="openExtra(this);" {$extra_credit_yes}> Yes 
         <input type="radio" id="rad_id_extra_credit_no-{$num}" name="rad_extra_credit-{$num}" value="no" data-question_num="{$num}" onclick="closeExtra(this);" {$extra_credit_no}> No 
         <div id="extra_credit_{$num}" style="{$extra_credit_hidden}">
-            Extra Credit Points: <input type="number" class="points3" name="upper_{$num}" value="{$extra_credit_points}" min="0" step="{$admin_gradeable->getEgPointPrecision()}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
+            Extra Credit Points: <input type="number" class="points3" name="upper_{$num}" value="{$extra_credit_points}" min="0" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
         </div>
         Penalty: 
         <input type="radio" id="rad_id_penalty_yes-{$num}" name="rad_penalty-{$num}" value="yes" data-question_num="{$num}" onclick="openPenalty(this);" {$penalty_yes}> Yes 
         <input type="radio" id="rad_id_penalty_no-{$num}" name="rad_penalty-{$num}" value="no" data-question_num="{$num}" onclick="closePenalty(this);" {$penalty_no}> No 
         <div id="penalty_{$num}" style="{$penalty_hidden}">
-            Penalty Points: <input type="number" class="points2" name="lower_{$num}" value="{$old_lower_clamp}" max="0" step="{$admin_gradeable->getEgPointPrecision()}" placeholder="±0.5" style="width:40px; resize:none;">
+            Penalty Points: <input type="number" class="points2" name="lower_{$num}" value="{$old_lower_clamp}" max="0" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:40px; resize:none;">
         </div>
         <br>
         <input type="radio" id="id_grade_by_up-{$num}" name="grade_by-{$num}" value="count_up" data-question_num="{$num}" onclick="onAddition(this);" {$grade_by_up}> Grade by count up 
@@ -749,8 +586,8 @@ HTML;
         <br>         
 HTML;
 
-        $peer_checked = ($question['peer_component']) ? ' checked="checked"' : "";
-        $pdf_page = (isset($question['page_component'])) ? $question['page_component'] : 1;
+        $peer_checked = $question->getIsPeer() ? ' checked="checked"' : "";
+        $pdf_page = $question->getPage();
         /*
         $html_output .= <<<HTML
                 <div id="peer_checkbox_{$num}" class="peer_input" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
@@ -773,7 +610,7 @@ HTML;
                 </td>
             </tr>
 HTML;
-        $index_question++;
+        $num++;
     }
         $html_output .= <<<HTML
             <tr id="add-question">
@@ -1523,7 +1360,7 @@ function createCrossBrowserJSDate(val){
             $('input[name="subdirectory"]').val('{$admin_gradeable->getEgSubdirectory()}');
             $('input[name="config_path"]').val('{$admin_gradeable->getEgConfigPath()}');
             $('input[name="eg_late_days"]').val('{$admin_gradeable->getEgLateDays()}');
-            $('input[name="point_precision"]').val('{$admin_gradeable->getEgPointPrecision()}');
+            $('input[name="point_precision"]').val('{$admin_gradeable->getEgPrecision()}');
             $('#ta_instructions_id').hide();
             
             if($('#repository_radio').is(':checked')){
