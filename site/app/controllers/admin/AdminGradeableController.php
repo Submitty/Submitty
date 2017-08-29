@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use \lib\Database;
 use \lib\Functions;
 use \app\libraries\GradeableType;
+use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
@@ -44,35 +45,35 @@ class AdminGradeableController extends AbstractController {
             $this->viewPage();
             return;
         }
-        $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
-        $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
-        $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections($_REQUEST['template_id']);
+        $admin_gradeable = new AdminGradeable($this->core);
+        $admin_gradeable->setRotatingGradeables($this->core->getQueries()->getRotatingSectionsGradeableIDS());
+        $admin_gradeable->setGradeableSectionHistory($this->core->getQueries()->getGradeablesPastAndSection());
+        $admin_gradeable->setNumSections($this->core->getQueries()->getNumberRotatingSections());
+        $admin_gradeable->setGradersAllSection($this->core->getQueries()->getGradersForAllRotatingSections($_REQUEST['template_id']));
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
         $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
         $graders_from_usertypes = array($graders_from_usertype1, $graders_from_usertype2, $graders_from_usertype3);
-        $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        $ini_data = array($rotatingGradeables, $gradeableSectionHistory, $num_sections, $graders_all_section, $graders_from_usertypes,
-            $template_list);
-        $data = $this->core->getQueries()->getGradeableData($_REQUEST['template_id']);
-        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add_template", $ini_data, $data);
+        $admin_gradeable->setGradersFromUsertypes($graders_from_usertypes);
+        $admin_gradeable->setTemplateList($this->core->getQueries()->getAllGradeablesIdsAndTitles());
+        $this->core->getQueries()->getGradeableInfo($_REQUEST['template_id'], $admin_gradeable);
+        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add_template", $admin_gradeable);
     }
 
     //view the page with no data from previous gradeables
     private function viewPage() {
-        $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
-        $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
-        $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections("");
+        $admin_gradeable = new AdminGradeable($this->core);
+        $admin_gradeable->setRotatingGradeables($this->core->getQueries()->getRotatingSectionsGradeableIDS());
+        $admin_gradeable->setGradeableSectionHistory($this->core->getQueries()->getGradeablesPastAndSection());
+        $admin_gradeable->setNumSections($this->core->getQueries()->getNumberRotatingSections());
+        $admin_gradeable->setGradersAllSection($this->core->getQueries()->getGradersForAllRotatingSections(""));
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
         $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
         $graders_from_usertypes = array($graders_from_usertype1, $graders_from_usertype2, $graders_from_usertype3);
-        $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        $ini_data = array($rotatingGradeables, $gradeableSectionHistory, $num_sections, $graders_all_section, $graders_from_usertypes,
-            $template_list);
-        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add", $ini_data);
+        $admin_gradeable->setGradersFromUsertypes($graders_from_usertypes);
+        $admin_gradeable->setTemplateList($this->core->getQueries()->getAllGradeablesIdsAndTitles());
+        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add", $admin_gradeable);
     }
 
     //view the page with pulled data from the gradeable to be edited

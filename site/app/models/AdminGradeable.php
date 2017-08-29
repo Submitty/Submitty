@@ -7,25 +7,46 @@ use app\models\GradeableComponent;
 
 
 /**
- * Class Gradeable
+ * Class AdminGradeable
+ * @method void setRotatingGradeables()
+ * @method void setGradeableSectionHistory()
+ * @method void setNumSections()
+ * @method void setGradersAllSection()
+ * @method void setGradersFromUserTypes()
+ * @method void setTemplateList()
  */
 class AdminGradeable extends AbstractModel {
+    /** @property @var */
+    protected $rotating_gradeables = array();
+    /** @property @var */
+    protected $gradeable_section_history = array();
+    /** @property @var */
+    protected $num_sections = 0;
+    /** @property @var */
+    protected $graders_all_section = array();
+    /** @property @var */
+    protected $graders_from_usertypes = array();
+    /** @property @var */
+    protected $template_list =  array();
+
+
+
     /** @property @var string Id of the gradeable (must be unique) */
     protected $g_id = "";
     /** @property @var string Title of the gradeable */
     protected $g_title = "";
     /** @property @var string Instructions to give to TA for grading */
     protected $g_overall_ta_instructions = "";
-    /** @property @var int 0 is electronic, 1 is checkponts, 2 is numeric/test */
+    /** @property @var int 0 is electronic, 1 is checkponts, 2 is numeric/text */
     protected $g_gradeable_type = 0;
     /** @property @var bool Should the gradeable be graded by registration section (or by rotating section) */
     protected $g_grade_by_registration = -1;
     /** @property @var \DateTime Date for when grading can view */
-    protected $g_ta_view_start_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
+    protected $g_ta_view_start_date;
     /** @property @var \DateTime Date for when grading can start */
-    protected $g_grade_start_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
+    protected $g_grade_start_date;
     /** @property @var \DateTime Date for when the grade will be released to students */
-    protected $g_grade_released_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
+    protected $g_grade_released_date;
     /** @property @var int Minimum group that's allowed to submit grades for this gradeable */
     protected $g_min_grading_group = 0;
     /** @property @var string Iris Bucket to place gradeable */
@@ -33,6 +54,8 @@ class AdminGradeable extends AbstractModel {
 
     /** @property @var \app\models\GradeableComponent[] */
     protected $old_components = array();
+
+    protected $has_grades = false;
 
 // if a gradeable is electronic
 
@@ -47,7 +70,7 @@ class AdminGradeable extends AbstractModel {
     /** @property @var int maximum allowed team size */
     protected $eg_max_team_size = 1;
     /** @property @var \DateTime Date when students cannot create/leave/join teams without instructor's help */
-    protected $eg_team_lock_date = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
+    protected $eg_team_lock_date;
     /** @property @var bool Is there any TA grading to be done for this gradeable (ie. any rubric questions) */
     protected $eg_use_ta_grading = false;
     /** @property @var bool Will students be able to view submissions? */
@@ -61,9 +84,9 @@ class AdminGradeable extends AbstractModel {
     /** @property @var bool Does this assignment use peer grading*/
     protected $eg_peer_grading = false;
     /** @property @var \DateTime When is an electronic submission open to students */
-    protected $eg_submission_open_date = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
+    protected $eg_submission_open_date;
     /** @property @var \DateTime Due date for an electronic submission */
-    protected $eg_submission_due_date = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
+    protected $eg_submission_due_date;
     /** @property @var int Number of days late you can submit */
     protected $eg_late_days = 2;
     /** @property @var int How many people should each person grade*/
@@ -78,19 +101,15 @@ class AdminGradeable extends AbstractModel {
     protected $num_text = 0;
 
 
-    protected $rotatingGradeables = array();
-    protected $gradeableSectionHistory = array();
-    protected $num_sections = 0;
-    protected $graders_all_section = array();
-    protected $graders_from_usertypes = array();
-    protected $template_list =  array();
+
+
 
     protected $team_yes_checked = false;
     protected $team_no_checked = true;
     protected $peer_no_checked = true;
     protected $peer_grade_complete_score = 0;
-    protected $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-    protected $vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
+    protected $default_late_days;
+    protected $vcs_base_url;
     protected $BASE_URL = "http:/localhost/hwgrading";
     protected $action = "upload_new_gradeable";
     protected $string = "Add";
@@ -99,18 +118,51 @@ class AdminGradeable extends AbstractModel {
     protected $pdf_page = false;
     protected $pdf_page_student = false;
     protected $have_old = false;
-    protected $old_components = array();
-    protected $old_components = "{}";
-    protected $edit = json_encode($type_of_action === "edit");
+
+    // protected $edit = json_encode($type_of_action === "edit");
     protected $template_value = "";
-    protected $gradeable_id_title = $initial_data[5];
+    // protected $gradeable_id_title = $initial_data[5];
     protected $gradeables_array = array();
 
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core) {
         parent::__construct($core);
-        if(!isset($details['g_id'])) {
-            return;
-        }
+        $this->g_ta_view_start_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
+        $this->g_grade_start_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
+        $this->g_grade_released_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
+        $this->eg_team_lock_date = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
+        $this->eg_submission_open_date = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
+        $this->eg_submission_due_date = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
+        $this->default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
+        $this->vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
+    }
+
+    // public function setRotatingGradeables($details) {
+    //     $this->rotating_gradeables = $details;
+    // }
+    // public function setGradeableSectionHistory($details) {
+    //     $this->gradeable_section_history = $details;
+    // }
+    // public function setNumSections($num) {
+    //     $this->num_sections = $num;
+
+    // }
+    // public function setGradersAllSection($details) {
+    //     $this->graders_all_section = $details;
+
+    // }
+    // public function setGradersFromUsertypes($details) {
+    //     $this->graders_from_usertypes = $details;
+
+    // }
+    // public function setTemplateList($details) {
+    //     $this->template_list = $details;
+    // }
+
+
+
+
+    // following only if edit or from template
+    public function addGradeableInfo($details=array()) {
         $this->g_id = $details['g_id'];
         $this->g_title = $details['g_title'];
         $this->g_overall_ta_instructions = $details['g_overall_ta_instructions'];
@@ -120,12 +172,11 @@ class AdminGradeable extends AbstractModel {
         $this->g_grade_start_date = $details['g_grade_start_date'];
         $this->g_grade_released_date = $details['g_grade_released_date'];
         $this->g_min_grading_group = $details['g_min_grading_group'];
-        $this->g_syllabus_bucket = $details['g_syllabus_bucket'];
+        $this->g_syllabus_bucket = $details['g_syllabus_bucket'];        
     }
 
-
-    public function addGradeableComponent(Core $core, $details=array()) {
-        $this->old_components[] = new GradeableComponent($core, $details);
+    public function addGradeableComponent($details=array()) {
+        $this->old_components[] = new GradeableComponent($this->core, $details);
     }
 
     public function setElectronicGradeableInfo($details) {
@@ -152,26 +203,8 @@ class AdminGradeable extends AbstractModel {
         $this->num_text = $details['num_text'];
         $this->num_numeric = $details['num_numeric'];
     }
-    
-    public function setRotatingGradeables($details) {
-        $this->rotatingGradeables = $details;
-    }
-    public function setGradeableSectionHistory($details) {
-        $this->gradeableSectionHistory = $details;
-    }
-    public function setNum_sections($details) {
-        $this->num_sections = $details;
 
-    }
-    public function setGraders_all_section($details) {
-        $this->graders_all_section = $details;
-
-    }
-    public function setGraders_from_usertypes($details) {
-        $this->graders_from_usertypes = $details;
-
-    }
-    public function setTemplate_list($details) {
-        $this->template_list = $details;
+    public function setHasGrades($has_grades) {
+        $this->has_grades = $has_grades;
     }
 }

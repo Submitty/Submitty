@@ -3,6 +3,7 @@
 namespace app\views\admin;
 
 use app\views\AbstractView;
+use app\models\AdminGradeable;
 
 class AdminGradeableView extends AbstractView {
     /**
@@ -22,176 +23,176 @@ class AdminGradeableView extends AbstractView {
      *   Num/text: $data = array($old_gradeable, $old_components, $has_grades, $num_numeric, $num_text, $initial_ta_grading_compare_date, 
      *          $initial_grades_released_compare_date);
      */
-	public function show_add_gradeable($type_of_action, $initial_data = array(""), $data = array("")) {
+	public function show_add_gradeable($type_of_action, AdminGradeable $admin_gradeable) {
 
-        $electronic_gradeable = array();
-        $g_ta_view_start_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
-        $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
-        $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
-        $electronic_gradeable['eg_subdirectory'] = "";
-        $electronic_gradeable['eg_config_path'] = "";
-        $electronic_gradeable['eg_late_days'] = 2;
-        $electronic_gradeable['eg_precision'] = 0.5;
-        $electronic_gradeable['eg_max_team_size'] = 1;
-        $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
-        $team_yes_checked = false;
-        $team_no_checked = true;
-        $eg_peer_grading = false;
-        $peer_no_checked = true;
-        $peer_grade_set = 3;
-        $peer_grade_complete_score = 0;
-        $g_grade_start_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
-        $g_grade_released_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
-        $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-        $vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
-        $BASE_URL = "http:/localhost/hwgrading";
+        // $electronic_gradeable = array();
+        // $g_ta_view_start_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
+        // $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
+        // $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
+        // $electronic_gradeable['eg_subdirectory'] = "";
+        // $electronic_gradeable['eg_config_path'] = "";
+        // $electronic_gradeable['eg_late_days'] = 2;
+        // $electronic_gradeable['eg_precision'] = 0.5;
+        // $electronic_gradeable['eg_max_team_size'] = 1;
+        // $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
+        // $team_yes_checked = false;
+        // $team_no_checked = true;
+        // $eg_peer_grading = false;
+        // $peer_no_checked = true;
+        // $peer_grade_set = 3;
+        // $peer_grade_complete_score = 0;
+        // $g_grade_start_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
+        // $g_grade_released_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
+        // $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
+        // $vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
+        // $BASE_URL = "http:/localhost/hwgrading";
         $action = "upload_new_gradeable"; //decides how the page's data is displayed
-        $string = "Add"; //Add or Edit
+        // $string = "Add"; //Add or Edit
         $button_string = "Add";
         $extra = "";
-        $gradeable_submission_id = "";
-        $g_title = "";
-        $g_instructions_url = "";
-        $g_gradeable_type = 0;
-        $eg_is_repository = false;
-        $eg_use_ta_grading = false;
-        $student_view = true;
-        $student_submit = true;
-        $student_download = false;
-        $student_any_version = true;
-        $pdf_page = false;
-        $pdf_page_student = false;
-        $old_questions = array();
-        $g_min_grading_group = 0;
-        $g_overall_ta_instructions = "";
-        $have_old = false;
-        $old_components = array();
-        $old_components = "{}";
-        $num_numeric = $num_text = 0;
-        $g_syllabus_bucket = -1;
-        $g_grade_by_registration = -1;
-        $edit = json_encode($type_of_action === "edit");
-        $template_value = "";
-        $precision = 0.5;
-        $electronic_gradeable['eg_precision'] = $precision;
-        $gradeable_id_title = $initial_data[5]; //list of previous gradeables
+        // $gradeable_submission_id = "";
+        // $g_title = "";
+        // $g_instructions_url = "";
+        // $g_gradeable_type = 0;
+        // $eg_is_repository = false;
+        // $eg_use_ta_grading = false;
+        // $student_view = true;
+        // $student_submit = true;
+        // $student_download = false;
+        // $student_any_version = true;
+        // $pdf_page = false;
+        // $pdf_page_student = false;
+        // $old_questions = array();
+        // $g_min_grading_group = 0;
+        // $g_overall_ta_instructions = "";
+        // $have_old = false;
+        // $old_components = array();
+        // $old_components = "{}";
+        // $num_numeric = $num_text = 0;
+        // $g_syllabus_bucket = -1;
+        // $g_grade_by_registration = -1;
+        // $edit = json_encode($type_of_action === "edit");
+        // $template_value = "";
+        // $precision = 0.5;
+        // $electronic_gradeable['eg_precision'] = $precision;
+        // $gradeable_id_title = $initial_data[5]; //list of previous gradeables
         $gradeables_array = array();
 
-        foreach ($gradeable_id_title as $g_id_title) { //makes an array of gradeable ids for javascript
+        foreach ($admin_gradeable->getTemplateList() as $g_id_title) { //makes an array of gradeable ids for javascript
             array_push($gradeables_array, $g_id_title['g_id']);
         }
         $js_gradeables_array = json_encode($gradeables_array);
 
-        //if the user is editing a gradeable instead of adding
+        // //if the user is editing a gradeable instead of adding
         if ($type_of_action === "edit") {
-            $have_old = true;
+        //     $have_old = true;
             $action = "upload_edit_gradeable";
-            $string = "Edit";
+        //     $string = "Edit";
             $button_string = "Edit";
-            $extra = ($data[2]) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
-            $g_ta_view_start_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_ta_view_start_date']));
-            $g_grade_start_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_start_date']));
-            $g_grade_released_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_released_date']));
-            $gradeable_submission_id = $data[0]['g_id'];
-            $g_title = $data[0]['g_title'];
-            $g_instructions_url = $data[0]['g_instructions_url'];
-            $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
-            $old_components = $data[1];
-            $g_min_grading_group = $data[0]['g_min_grading_group'];
-            $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
-            $g_grade_by_registration = $data[0]['g_grade_by_registration'];
-            if ($data[0]['g_gradeable_type'] === 0) { //if the gradeable edited is electronic gradeable
-                $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_open_date']));
-                $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_due_date']));
-                $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
-                $electronic_gradeable['eg_subdirectory'] = $data[3]['eg_subdirectory'];
-                $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
-                $precision = $data[3]['eg_precision'];
-                $electronic_gradeable['eg_precision'] = $precision;
-                $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
-                $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_team_lock_date']));
-                $team_yes_checked = $data[3]['eg_team_assignment'];
-                $team_no_checked = !$team_yes_checked;
-                $eg_is_repository = $data[3]['eg_is_repository'];
-                $eg_use_ta_grading = $data[3]['eg_use_ta_grading'];
-                $student_view = $data[3]['eg_student_view'];
-                $student_submit = $data[3]['eg_student_submit'];
-                $student_download = $data[3]['eg_student_download'];
-                $student_any_version = $data[3]['eg_student_any_version'];
-                $eg_peer_grading = $data[3]['eg_peer_grading'];
-                $peer_no_checked = !$eg_peer_grading;
-                if(isset($data[3]['eg_peer_grade_set'])){
-                    $peer_grade_set = $data[3]['eg_peer_grade_set'];
-                }
-                $old_questions = $data[5];
-                $num_old_questions = count($old_questions);                
-                $component_ids = array();
-                for ($i = 0; $i < $num_old_questions; $i++) {
-                    $json = json_decode($data[1]);
-                    if($eg_peer_grading && $i == 0 && $json[$i]->gc_order == -1) {
-                        $peer_grade_complete_score = $json[$i]->gc_max_value;
-                    }
-                    $component_ids[] = $json[$i]->gc_id;
-                    if (($json[$i]->gc_page) !== 0) {
-                        $pdf_page = true;
-                        if (($json[$i]->gc_page) === -1) {
-                            $pdf_page_student = true;
-                        }
-                    }
-                }
-            }
-            if ($data[0]['g_gradeable_type'] === 2) { //if the gradeable edited is num/text gradeable
-                $num_numeric = $data[3];
-                $num_text = $data[4];
-            }
+            $extra = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
+        //     $g_ta_view_start_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_ta_view_start_date']));
+        //     $g_grade_start_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_start_date']));
+        //     $g_grade_released_date = date('Y-m-d H:i:sO', strtotime($data[0]['g_grade_released_date']));
+        //     $gradeable_submission_id = $data[0]['g_id'];
+        //     $g_title = $data[0]['g_title'];
+        //     $g_instructions_url = $data[0]['g_instructions_url'];
+        //     $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
+        //     $old_components = $data[1];
+        //     $g_min_grading_group = $data[0]['g_min_grading_group'];
+        //     $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
+        //     $g_grade_by_registration = $data[0]['g_grade_by_registration'];
+        //     if ($data[0]['g_gradeable_type'] === 0) { //if the gradeable edited is electronic gradeable
+        //         $electronic_gradeable['eg_submission_open_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_open_date']));
+        //         $electronic_gradeable['eg_submission_due_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_submission_due_date']));
+        //         $electronic_gradeable['eg_late_days'] = $data[3]['eg_late_days'];
+        //         $electronic_gradeable['eg_subdirectory'] = $data[3]['eg_subdirectory'];
+        //         $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
+        //         $precision = $data[3]['eg_precision'];
+        //         $electronic_gradeable['eg_precision'] = $precision;
+        //         $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
+        //         $electronic_gradeable['eg_team_lock_date'] = date('Y-m-d H:i:sO', strtotime($data[3]['eg_team_lock_date']));
+        //         $team_yes_checked = $data[3]['eg_team_assignment'];
+        //         $team_no_checked = !$team_yes_checked;
+        //         $eg_is_repository = $data[3]['eg_is_repository'];
+        //         $eg_use_ta_grading = $data[3]['eg_use_ta_grading'];
+        //         $student_view = $data[3]['eg_student_view'];
+        //         $student_submit = $data[3]['eg_student_submit'];
+        //         $student_download = $data[3]['eg_student_download'];
+        //         $student_any_version = $data[3]['eg_student_any_version'];
+        //         $eg_peer_grading = $data[3]['eg_peer_grading'];
+        //         $peer_no_checked = !$eg_peer_grading;
+        //         if(isset($data[3]['eg_peer_grade_set'])){
+        //             $peer_grade_set = $data[3]['eg_peer_grade_set'];
+        //         }
+        //         $old_questions = $data[5];
+        //         $num_old_questions = count($old_questions);                
+        //         $component_ids = array();
+        //         for ($i = 0; $i < $num_old_questions; $i++) {
+        //             $json = json_decode($data[1]);
+        //             if($eg_peer_grading && $i == 0 && $json[$i]->gc_order == -1) {
+        //                 $peer_grade_complete_score = $json[$i]->gc_max_value;
+        //             }
+        //             $component_ids[] = $json[$i]->gc_id;
+        //             if (($json[$i]->gc_page) !== 0) {
+        //                 $pdf_page = true;
+        //                 if (($json[$i]->gc_page) === -1) {
+        //                     $pdf_page_student = true;
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     if ($data[0]['g_gradeable_type'] === 2) { //if the gradeable edited is num/text gradeable
+        //         $num_numeric = $data[3];
+        //         $num_text = $data[4];
+        //     }
         }
 
-        //if the user is using a template
-        if ($type_of_action === "add_template") {
-            $g_instructions_url = $data[0]['g_instructions_url'];
-            $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
-            $old_components = $data[1];
-            $g_min_grading_group = $data[0]['g_min_grading_group'];
-            $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
-            $g_grade_by_registration = $data[0]['g_grade_by_registration'];
-            if ($data[0]['g_gradeable_type'] === 0) {
-                $electronic_gradeable['eg_subdirectory'] = $data[3]['eg_subdirectory'];
-                $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
-                $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
-                $team_yes_checked = $data[3]['eg_team_assignment'];
-                $team_no_checked = !$team_yes_checked;
-                $eg_use_ta_grading = $data[3]['eg_use_ta_grading'];
-                $student_view = $data[3]['eg_student_view'];
-                $student_submit = $data[3]['eg_student_submit'];
-                $student_download = $data[3]['eg_student_download'];
-                $student_any_version = $data[3]['eg_student_any_version'];
-                $eg_peer_grading = $data[3]['eg_peer_grading'];
-                $peer_no_checked = !$eg_peer_grading;
-                $peer_grade_set = $data[3]['eg_peer_grade_set'];
-                $precision = $data[3]['eg_precision'];
-                $electronic_gradeable['eg_precision'] = $precision;
-                $old_questions = $data[5];
-                $num_old_questions = count($old_questions);                
-                $component_ids = array();
-                for ($i = 0; $i < $num_old_questions; $i++) {
-                    $json = json_decode($data[1]);
-                    if($eg_peer_grading && $i == 0 && $json[$i]->gc_order == -1) {
-                        $peer_grade_complete_score = $json[$i]->gc_max_value;
-                    }
-                    $component_ids[] = $json[$i]->gc_id;
-                    if (($json[$i]->gc_page) !== 0) {
-                        $pdf_page = true;
-                        if (($json[$i]->gc_page) === -1) {
-                            $pdf_page_student = true;
-                        }
-                    }
-                }
-            }
-            if ($data[0]['g_gradeable_type'] === 2) {
-                $num_numeric = $data[3];
-                $num_text = $data[4];
-            }
-        }
+        // //if the user is using a template
+        // if ($type_of_action === "add_template") {
+        //     $g_instructions_url = $data[0]['g_instructions_url'];
+        //     $g_overall_ta_instructions = $data[0]['g_overall_ta_instructions'];
+        //     $old_components = $data[1];
+        //     $g_min_grading_group = $data[0]['g_min_grading_group'];
+        //     $g_syllabus_bucket = $data[0]['g_syllabus_bucket'];
+        //     $g_grade_by_registration = $data[0]['g_grade_by_registration'];
+        //     if ($data[0]['g_gradeable_type'] === 0) {
+        //         $electronic_gradeable['eg_subdirectory'] = $data[3]['eg_subdirectory'];
+        //         $electronic_gradeable['eg_config_path'] = $data[3]['eg_config_path'];
+        //         $electronic_gradeable['eg_max_team_size'] = $data[3]['eg_max_team_size'];
+        //         $team_yes_checked = $data[3]['eg_team_assignment'];
+        //         $team_no_checked = !$team_yes_checked;
+        //         $eg_use_ta_grading = $data[3]['eg_use_ta_grading'];
+        //         $student_view = $data[3]['eg_student_view'];
+        //         $student_submit = $data[3]['eg_student_submit'];
+        //         $student_download = $data[3]['eg_student_download'];
+        //         $student_any_version = $data[3]['eg_student_any_version'];
+        //         $eg_peer_grading = $data[3]['eg_peer_grading'];
+        //         $peer_no_checked = !$eg_peer_grading;
+        //         $peer_grade_set = $data[3]['eg_peer_grade_set'];
+        //         $precision = $data[3]['eg_precision'];
+        //         $electronic_gradeable['eg_precision'] = $precision;
+        //         $old_questions = $data[5];
+        //         $num_old_questions = count($old_questions);                
+        //         $component_ids = array();
+        //         for ($i = 0; $i < $num_old_questions; $i++) {
+        //             $json = json_decode($data[1]);
+        //             if($eg_peer_grading && $i == 0 && $json[$i]->gc_order == -1) {
+        //                 $peer_grade_complete_score = $json[$i]->gc_max_value;
+        //             }
+        //             $component_ids[] = $json[$i]->gc_id;
+        //             if (($json[$i]->gc_page) !== 0) {
+        //                 $pdf_page = true;
+        //                 if (($json[$i]->gc_page) === -1) {
+        //                     $pdf_page_student = true;
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     if ($data[0]['g_gradeable_type'] === 2) {
+        //         $num_numeric = $data[3];
+        //         $num_text = $data[4];
+        //     }
+        // }
 
 		$html_output = <<<HTML
 		<style type="text/css">
@@ -286,7 +287,7 @@ class AdminGradeableView extends AbstractView {
           method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
         <div class="modal-header" style="overflow: auto;">
-            <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
+            <h3 id="myModalLabel" style="float: left;">{$button_string} Gradeable {$extra}</h3>
 HTML;
 if ($type_of_action === "add" || $type_of_action === "add_template"){
   $html_output .= <<<HTML
@@ -296,7 +297,7 @@ if ($type_of_action === "add" || $type_of_action === "add_template"){
             <option>--None--</option>
 HTML;
 
-    foreach ($gradeable_id_title as $g_id_title){
+    foreach ($admin_gradeable->getTemplateList() as $g_id_title){
      $html_output .= <<<HTML
         <option 
 HTML;
@@ -323,12 +324,12 @@ HTML;
 HTML;
 if ($type_of_action === "edit"){
     $html_output .= <<<HTML
-            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px; background-color: #999999' type='text' name='gradeable_id' id="gradeable_id" class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
+            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px; background-color: #999999' type='text' name='gradeable_id' id="gradeable_id" class="required" value="{$admin_gradeable->getGId}" placeholder="(Required)"/>
 HTML;
 }
 else {
     $html_output .= <<<HTML
-            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" value="{$gradeable_submission_id}" placeholder="(Required)" required/>
+            What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>): <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" value="{$admin_gradeable->getGId}" placeholder="(Required)" required/>
 HTML;
 }
         $html_output .= <<<HTML

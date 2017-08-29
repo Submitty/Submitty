@@ -1261,9 +1261,9 @@ WHERE gcm_id=?", $params);
         return $data;
     }
 
-    public function getAdminGradeable($gradeable_id) {
+    public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable) {
         $this->course_db->query("SELECT * FROM gradeable WHERE g_id=?",array($gradeable_id));
-        $admin_gradeable = new AdminGradeable($this->core, $this->course_db->row());
+        $admin_gradeable->addGradeableInfo($this->course_db->row());
 
         $this->course_db->query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
         foreach($this->course_db->rows() as $row) {
@@ -1292,24 +1292,9 @@ WHERE gcm_id=?", $params);
             $this->course_db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
             $admin_gradeable->setElectronicGradeableInfo($this->course_db->row());
 
-        } else {//1 is checkponts
-         // numeric or checkpoint
-         $initial_ta_grading_compare_date = "TA Beta Testing Date";
-         $initial_grades_released_compare_date = "TA Grading Open Date";
-        }
-        if ($old_gradeable['g_gradeable_type']==0) {
-            $data = array($old_gradeable, $old_components, $has_grades, $electronic_gradeable, $initial_grades_released_compare_date, 
-                $old_questions);
-        }
-        if ($old_gradeable['g_gradeable_type']==1) {
-            $data = array($old_gradeable, $old_components, $has_grades, $initial_ta_grading_compare_date, $initial_grades_released_compare_date);
-        }
-        if ($old_gradeable['g_gradeable_type']==2) {
-            $data = array($old_gradeable, $old_components, $has_grades, $num_numeric, $num_text, $initial_ta_grading_compare_date, 
-                $initial_grades_released_compare_date);
         }
 
-        return $data;
+        return $admin_gradeable;
     }
 
     public function updateUserViewedDate(Gradeable $gradeable) {
