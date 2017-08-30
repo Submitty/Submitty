@@ -996,6 +996,7 @@ class Gradeable extends AbstractModel {
         
     }
 
+    //save all the information in this gradeable and the gradeable components. Used in tests and text/numeric where the whole gradeable is saved at the same time rather than by component
     public function saveData() {
         $this->core->getCourseDB()->beginTransaction();
         if ($this->gd_id === null) {
@@ -1007,16 +1008,17 @@ class Gradeable extends AbstractModel {
         foreach ($this->components as $component) {
             if(is_array($component)) {
                 foreach($component as $peer_grade) {
-                    $peer_grade->saveData($this->gd_id);
+                    $peer_grade->saveGradeableComponentData($this->gd_id);
                 }
             }
             else {
-                $component->saveData($this->gd_id);
+                $component->saveGradeableComponentData($this->gd_id);
             }
         }
         $this->core->getCourseDB()->commit();
     }
 
+    //save only the information stored in gradeabledata
     public function saveGradeableData() {
         $this->core->getCourseDB()->beginTransaction();
         if ($this->gd_id === null) {

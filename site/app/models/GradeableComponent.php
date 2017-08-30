@@ -241,11 +241,7 @@ class GradeableComponent extends AbstractModel {
     }
 
     public function deleteData($gd_id) {
-        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this, $this->core->getUser()->getId()) === true) {
-            $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
-            return true;
-        }
-        return false;
+        $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
     }
 
     public function saveGradeableComponentData($gd_id) {
