@@ -1,0 +1,59 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 5,
+            "test_name": "Test 1 Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_STDOUT_0.txt",
+                    "description": "STDOUT_0.txt"
+                }
+            ],
+            "points_awarded": 10,
+            "test_name": "Test 2 NORMAL GRADING:  (hiding the details)"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test03_0_diff.json",
+                    "expected_file": "test_output/testassignment/raw_output.txt"
+                }
+            ],
+            "points_awarded": 5,
+            "test_name": "Test 3 BEHIND THE SCENES:  raw output"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04_STDOUT_1.txt",
+                    "description": "STDOUT_1.txt",
+                    "difference_file": "test04_1_diff.json",
+                    "expected_file": "test_output/testassignment/sorted_output.txt"
+                }
+            ],
+            "points_awarded": 5,
+            "test_name": "Test 4 BEHIND THE SCENES:  checking the sorted output"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test05_STDOUT_2.txt",
+                    "description": "STDOUT_2.txt",
+                    "difference_file": "test05_2_diff.json",
+                    "expected_file": "test_output/testassignment/second_third.txt"
+                }
+            ],
+            "points_awarded": 5,
+            "test_name": "Test 5 BEHIND THE SCENES:  checking the second and third words"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 6 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

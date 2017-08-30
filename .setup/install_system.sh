@@ -93,6 +93,7 @@ adduser hwphp hwcronphp
 
 adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcgi hwphp
+adduser hwcgi www-data
 # NOTE: hwcgi must be in the shadow group so that it has access to the
 # local passwords for pam authentication
 adduser hwcgi shadow
@@ -115,15 +116,6 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser hwcgi vagrant
 	adduser hwcron vagrant
 fi
-
-# TODO: We should look into making it so that only certain users have access to certain packages
-# so that hwphp is the only one who could use PAM for example
-pip2 install -U pip
-pip2 install python-pam
-pip2 install psycopg2
-pip2 install PyYAML
-pip2 install sqlalchemy
-pip2 install python-dateutil
 
 pip3 install -U pip
 pip3 install python-pam
@@ -217,17 +209,22 @@ if [ ${VAGRANT} == 1 ]; then
     rm /etc/apache2/sites*/000-default.conf
     rm /etc/apache2/sites*/default-ssl.conf
 
-    cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
     cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
+    cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
+
+    sed -i -e "s/SUBMITTY_URL/${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
+    sed -i -e "s/GIT_URL/${GIT_URL:7}/g" /etc/apache2/sites-available/git.conf
 
     # permissions: rw- r-- ---
     chmod 0640 /etc/apache2/sites-available/*.conf
     a2ensite submitty
+    a2ensite git
 
     sed -i '25s/^/\#/' /etc/pam.d/common-password
 	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 fi
 
+cp ${SUBMITTY_REPOSITORY}/.setup/php7.0-fpm/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
 chmod 0640 /etc/apache2/suexec/www-data
 
@@ -281,7 +278,6 @@ ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
 # POSTGRES SETUP
 #################
 if [ ${VAGRANT} == 1 ]; then
-	service postgresql restart
 	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
 	cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
 	cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
@@ -309,7 +305,7 @@ else
     git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     # remember to change this version in .setup/travis/autograder.sh too
-    git checkout v0.92
+    git checkout v0.93
     popd
 fi
 
@@ -342,6 +338,7 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 ${SUBMISSION_URL}
+
 1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 else

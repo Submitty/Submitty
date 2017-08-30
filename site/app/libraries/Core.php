@@ -93,8 +93,12 @@ class Core {
 
         if (!empty($semester) && !empty($course)) {
             $course_ini_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.ini");
-            if (file_exists($course_ini_path)) {
+            if (file_exists($course_ini_path) && is_readable ($course_ini_path)) {
                 $this->config->loadCourseIni($course_ini_path);
+            }
+            else{
+                $message = "Unable to access configuration file for " . $semester . " " . $course . " please contact your instructor.";
+                $this->addErrorMessage($message);
             }
         }
     }
@@ -391,6 +395,20 @@ class Core {
             $course_name .= ": ".htmlentities($this->getConfig()->getCourseName());
         }
         return $course_name;
+    }
+
+     /**
+     * Returns either the 'actual' coursename or the coursename set by the professor.
+     *
+     * @return string
+     */
+    public function getDisplayedCourseName(){
+        if ($this->getConfig()->getCourseName() !== "") {
+            return htmlentities($this->getConfig()->getCourseName());
+        }
+        else{
+            return $this->getConfig()->getCourse();
+        }
     }
     
     /**

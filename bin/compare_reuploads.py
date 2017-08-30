@@ -6,20 +6,33 @@ import os
 import sys
 
 
-def getGrade(fname):
+def getGrade(fname,which_testcase):
 
     with open(fname) as f:
         content = f.readlines()
-    total = content[len(content)-2]
-    nh_total = content[len(content)-1]
-    ss_total = total.split()
-    ss_nh_total = nh_total.split()
+ 
+    if which_testcase == "":
+        total = content[len(content)-2]
+        nh_total = content[len(content)-1]
+        ss_total = total.split()
+        ss_nh_total = nh_total.split()
+        return (int(ss_total[3]),int(ss_nh_total[4]))
+    else:
+        for line in content:
+            loc = line.find(which_testcase)
+            if loc != -1:
+                ss_line = line.split()
+                n = len(ss_line)
+                if ss_line[n-2] == "HIDDEN":
+                    n = n-3
+                thing = ss_line[n-3]
+                return (int(thing),0)
+        print ("BAD STRING ",which_testcase)
+        return (-1,-1)
 
-    return (int(ss_total[3]),int(ss_nh_total[4]))
-    
 
-def main(a,b):
-    print ("main")
+def main(a,b,which_testcase):
+    print ("main '",which_testcase,"'")
 
     good = 0
     bad = 0
@@ -52,26 +65,33 @@ def main(a,b):
             with open(file_b, 'r') as foo:
                    fb = foo.read()
 
-            if fa == fb:
+            ag = getGrade(file_a,which_testcase)
+            bg = getGrade(file_b,which_testcase)
+            error = ag[0]-bg[0]
+                   
+            #if fa == fb:
+
+            if error == 0:
                 good = good+1
             else:
                 bad = bad+1
-                ag = getGrade(file_a)
-                bg = getGrade(file_b)
-                error = ag[0]-bg[0]
-                if (abs(error)>5):
-                    print("MISMATCH",file_a,ag,"vs",bg,"    ",str(error))
+                #if error != 0: #True: #(abs(error)>5):
+                print("MISMATCH",file_a,ag,"vs",bg,"    ",str(error))
                 error_sum += abs(error)
                 
     print ("good = ",good)
     print ("bad = ",bad)
     print ("no_pair = ",no_pair)
 
-    print ("avg error =",error_sum/bad)
-                
+    if bad > 0:
+        print ("avg error =",error_sum/bad)
+
+
 if __name__ == "__main__":
-    print (sys.argv)
-    print (len(sys.argv))
-    if len(sys.argv) != 3:
+    if len(sys.argv) < 3 or len(sys.argv) > 4:
+        print ("USAGE:  compare_reuploads.py  <submissions_dir_a>  <submissions_dir_b>  [ <which_test> ]")
         exit(1)
-    main(sys.argv[1],sys.argv[2])
+    if len(sys.argv) == 3:
+        main(sys.argv[1],sys.argv[2],"")
+    else:
+        main(sys.argv[1],sys.argv[2],sys.argv[3])

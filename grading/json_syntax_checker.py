@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import argparse
 import os
 import json
-import re
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="JSON validator to ensure that a JSON is of proper format")

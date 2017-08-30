@@ -26,7 +26,7 @@
             "points" : 2,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "frame_1.txt"
                 }
@@ -38,7 +38,7 @@
             "points" : 2,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "frame_5.txt"
                 }
@@ -50,7 +50,7 @@
             "points" : 2,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "frame_10.txt"
                 }
@@ -63,7 +63,7 @@
             "hidden" : true,
             "validation" : [
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "frame_13.txt"
                 }
@@ -82,7 +82,7 @@
                     "actual_file" : "STDOUT.txt"
                 },
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDERR.txt",
                     "expected_file" : "error_nonpositive.txt",
                     "deduction" : 1.0
@@ -100,7 +100,7 @@
                     "actual_file" : "STDOUT.txt"
                 },
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDERR.txt",
                     "expected_file" : "error_nonpositive.txt",
                     "deduction" : 1.0
@@ -121,7 +121,7 @@
                     "actual_file" : "STDOUT.txt"
                 },
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDERR.txt",
                     "expected_file" : "error_arguments.txt",
                     "deduction" : 1.0
@@ -140,7 +140,7 @@
                     "actual_file" : "STDOUT.txt"
                 },
                 {
-                    "method" : "myersDiffbyLinebyChar",
+                    "method" : "diff",
                     "actual_file" : "STDERR.txt",
                     "expected_file" : "error_arguments.txt",
                     "deduction" : 1.0

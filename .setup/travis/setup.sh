@@ -32,7 +32,7 @@ sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
 sudo ln -s ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
-sudo python ${DIR}/../bin/create_untrusted_users.py
+sudo ${DIR}/../bin/create_untrusted_users.py
 
 sudo addgroup hwcronphp
 sudo addgroup course_builders
@@ -56,6 +56,7 @@ echo -e "/var/run/postgresql
 hsdbu
 hsdbu
 http://localhost
+
 ${AUTH_METHOD}" | sudo ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 

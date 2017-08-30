@@ -40,6 +40,9 @@ use app\libraries\Utils;
  * @method array getHiddenDetails()
  * @method string getCourseIniPath()
  * @method bool isCourseLoaded()
+ * @method string getInstitutionName()
+ * @method string getInstitutionHomepage()
+ * @method string getUsernameChangeText()
  */
 
 class Config extends AbstractModel {
@@ -104,6 +107,29 @@ class Config extends AbstractModel {
     protected $database_type = "pgsql";
 
     /**
+     * The name of the institution that deployed Submitty. Added to the breadcrumb bar if non-empty.
+     * @var string
+     * @property
+     */
+    protected $institution_name = "";
+
+    /**
+     * The url of the institution's homepage. Linked to from the breadcrumb created with institution_name.
+     * @var string
+     * @property
+     */
+    protected $institution_homepage = "";
+
+    /**
+     * The text to be shown to a user when they attempt to change their username.
+     * @var string
+     * @property
+     */
+    protected $username_change_text = "";
+
+
+
+    /**
      * Database host for PDO
      * @var string
      * @property
@@ -149,7 +175,7 @@ class Config extends AbstractModel {
     /** @property @var bool */
     protected $keep_previous_files;
     /** @property @var bool */
-    protected $display_iris_grades_summary;
+    protected $display_rainbow_grades_summary;
     /** @property @var bool */
     protected $display_custom_message;
     /** @property @var string*/
@@ -194,6 +220,18 @@ class Config extends AbstractModel {
             }
         }
 
+        if (isset($master['site_details']['institution_name'])) {
+            $this->institution_name = $master['site_details']['institution_name'];
+        }
+
+        if (isset($master['site_details']['institution_url'])) {
+            $this->institution_homepage = $master['site_details']['institution_url'];
+        }
+
+        if (isset($master['site_details']['username_change_text'])) {
+            $this->username_change_text = $master['site_details']['username_change_text'];
+        }
+
         $this->timezone = new \DateTimeZone($this->timezone);
 
         if (isset($master['database_details']['database_type'])) {
@@ -232,7 +270,7 @@ class Config extends AbstractModel {
 
         $this->setConfigValues($this->course_ini, 'hidden_details', array('database_name'));
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
-            'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
+            'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
@@ -251,7 +289,7 @@ class Config extends AbstractModel {
             $this->$key = intval($this->$key);
         }
 
-        $array = array('zero_rubric_grades', 'keep_previous_files', 'display_iris_grades_summary',
+        $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
@@ -267,11 +305,29 @@ class Config extends AbstractModel {
         }
 
         foreach ($keys as $key) {
+
+
+            // TEMPORARY WORKAROUND FOR BACKWARDS COMPATIBILITY OF
+            // CHANGED COURSE CONFIG VARIABLE.
+            // FIXME: THIS CAN BE REMOVED WITH THE NEXT MAJOR RELEASE
+            if (!isset($config[$section][$key]) &&
+                $key == "display_rainbow_grades_summary" &&
+                isset($config[$section]["display_iris_grades_summary"])) {
+              $config[$section][$key] = $config[$section]["display_iris_grades_summary"];
+            }
+            // END TEMPORARY WORKAROUND
+
+
             if (!isset($config[$section][$key])) {
-                throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
+              throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
             }
             $this->$key = $config[$section][$key];
         }
+    }
+
+    public function getHomepageUrl()
+    {
+        return $this->base_url."index.php?";
     }
 
     /**
@@ -312,8 +368,8 @@ class Config extends AbstractModel {
     /**
      * @return bool
      */
-    public function displayIrisGradesSummary() {
-        return $this->display_iris_grades_summary;
+    public function displayRainbowGradesSummary() {
+        return $this->display_rainbow_grades_summary;
     }
 
     public function getLogPath() {

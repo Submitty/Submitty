@@ -3,6 +3,16 @@
         {
             "autochecks": [
                 {
+                    "actual_file": "test01_STDERR.txt",
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
                     "description": "Create Executable",
                     "messages": [
                         {
@@ -22,6 +32,16 @@
         },
         {
             "autochecks": [
+                {
+                    "actual_file": "test02_STDERR.txt",
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
+                    ]
+                },
                 {
                     "description": "Create Executable",
                     "messages": [
