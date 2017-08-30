@@ -44,16 +44,16 @@ class PamAuthentication extends AbstractAuthentication {
             throw new AuthenticationException(curl_error($ch));
         }
 
-        $output = json_decode($output, true);
+        $output_after = json_decode($output, true);
         curl_close($ch);
 
-        if ($output === null) {
-            throw new AuthenticationException("Error JSON response for PAM: ".json_last_error_msg());
+        if ($output_after === null) {
+		throw new AuthenticationException("Error JSON response for PAM: ".json_last_error_msg());
         }
-        else if (!isset($output['authenticated'])) {
+        else if (!isset($output_after['authenticated'])) {
             throw new AuthenticationException("Missing response in JSON for PAM");
         }
-        else if ($output['authenticated'] !== true) {
+        else if ($output_after['authenticated'] !== true) {
             return false;
         }
 
