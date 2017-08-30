@@ -159,13 +159,17 @@ print()
 SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
 print()
 
-INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank if desired)', defaults['institution_name'])
+INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)', defaults['institution_name'])
+if INSTITUTION_NAME.lower() == "none":
+    INSTITUTION_NAME = ''
 print()
 
 if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
     INSTITUTION_HOMEPAGE = ''
 else:
-    INSTITUTION_HOMEPAGE = get_input('What is the url of your institution\'s homepage? (Leave blank if desired)', defaults['institution_homepage'])
+    INSTITUTION_HOMEPAGE = get_input('What is the url of your institution\'s homepage? (Leave blank/type "none" if not desired)', defaults['institution_homepage'])
+    if INSTITUTION_HOMEPAGE.lower() == "none":
+        INSTITUTION_HOMEPAGE = ''
     print()
 
 USERNAME_TEXT = defaults['username_change_text']

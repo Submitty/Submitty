@@ -93,7 +93,8 @@ $core->loadConfig($semester, $course);
 $core->loadAuthentication();
 
     if($core->getConfig()->getInstitutionName() !== ""){
-        $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), $core->getConfig()->getInstitutionHomepage());
+        $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), "");
+        $core->getOutput()->addBreadcrumb("", $core->getConfig()->getInstitutionHomepage(),false, true);
     }
     $core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
     if($core->getConfig()->isCourseLoaded()){
