@@ -19,11 +19,11 @@ class HomePageView extends AbstractView {
 <div class="content">
     <div class="sub">
         <div class="box half">
-        <h2>User Data</h2>
+        <h2>About You</h2>
             <table>
                 <tbody>
                     <tr>
-                        <td><b>User Id:</b> {$user->getId()} </td>
+                        <td><b>Username:</b> {$user->getId()} </td>
                     </tr>
                     <tr>
                         <td><b>First Name:</b> {$user->getDisplayedFirstName()} </td>
@@ -99,7 +99,7 @@ HTML;
 HTML;
 
                     foreach($courses as $course){
-                        $display_text = $course->getSemester() . " " . $course->getTitle();
+                        $display_text = strtoupper($course->getSemester()) . " " . strtoupper($course->getTitle());
                         $return .= <<<HTML
                         <tr>
                             <td colspan="8">

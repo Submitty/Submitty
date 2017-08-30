@@ -58,7 +58,7 @@ class ConfigurationView extends AbstractView {
             </div>
         </div>
 
-
+	<!--
         <div class="option">
             <div class="option-input"><input type="checkbox" name="zero_rubric_grades" value="true" {$zero_checked} /></div>
             <div class="option-desc">
@@ -67,7 +67,9 @@ class ConfigurationView extends AbstractView {
                   default at full credit.   Note: Assignments that are not submitted/submitted too late always be set to zero.</div>
             </div>
         </div>
-        <div class="option">
+	-->
+
+	<div class="option">
             <div class="option-input"><textarea style="height: 50px" name="upload_message">{$fields['upload_message']}</textarea></div>
             <div class="option-desc">
                 <div class="option-title">Upload Message</div>

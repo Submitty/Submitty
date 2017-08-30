@@ -204,7 +204,7 @@ HTML;
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable_type_options electronic_file" id="electronic_file" >
                 <br />
-                Is this a team assignment? (Team assignments are new as of Fall 2017. If there are any issues please email submitty@cs.rpi.edu)
+                Is this a team assignment? <em style='color:green;'>Team assignments are new as of Fall 2017.  Email questions/bugs/feedback to: submitty@cs.rpi.edu.</em>
                 <fieldset>
                     <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="true"
 HTML;
@@ -300,7 +300,7 @@ HTML;
 HTML;
                     if ($admin_gradeable->getEgStudentView()===false) { $html_output .= ' checked="checked"'; }
         $html_output .= <<<HTML
-                    /> No 
+                    /> No  &nbsp;&nbsp;&nbsp; (Select 'No' during grading of a bulk upload pdf quiz/exam.)
 
                     <div id="student_submit_download_view">
 
