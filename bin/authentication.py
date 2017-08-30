@@ -29,10 +29,13 @@ def check_password(environ, user, password):
     :return:         Boolean for whether user was properly authenticated (True) or not (False)
     """
     # REQUEST_URI
-    params = list(filter(lambda x: len(x) > 0 and x != 'vcs', environ['REQUEST_URI'].split("/")))
-    if len(params) < 5:
+    params = list(filter(lambda x: len(x) > 0, environ['REQUEST_URI'].split("/")))
+    if len(params) == 5:
+        vcs, semester, course, user_id = params[:5]
+    elif len(params) == 6:
+        vcs, semester, course, gradeable, user_id = params[:6]
+    else:
         return None
-    vcstype, semester, course, gradeable, user_id = params[:5]
 
     engine = connection = metadata = None
     authenticated = False

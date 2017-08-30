@@ -15,7 +15,7 @@ DATABASE_HOST = '__INSTALL__FILLIN__DATABASE_HOST__'
 DATABASE_USER = '__INSTALL__FILLIN__DATABASE_USER__'
 DATABASE_PASS = '__INSTALL__FILLIN__DATABASE_PASSWORD__'
 
-VCS_FOLDER = os.path.join('__INSTALL__FILLIN__SUBMITTY_DATA_DIR__', 'vcs', 'git')
+VCS_FOLDER = os.path.join('__INSTALL__FILLIN__SUBMITTY_DATA_DIR__', 'vcs')
 
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
 parser.add_argument("semester", help="semester")
