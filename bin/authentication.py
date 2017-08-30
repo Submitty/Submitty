@@ -30,9 +30,9 @@ def check_password(environ, user, password):
     """
     # REQUEST_URI
     params = list(filter(lambda x: len(x) > 0 and x != 'vcs', environ['REQUEST_URI'].split("/")))
-    if len(params) < 4:
+    if len(params) < 5:
         return None
-    semester, course, gradeable, user_id = params[:4]
+    vcstype, semester, course, gradeable, user_id = params[:5]
 
     engine = connection = metadata = None
     authenticated = False
