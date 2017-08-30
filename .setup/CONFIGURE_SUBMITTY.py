@@ -119,10 +119,18 @@ defaults = {'database_host': 'localhost',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
             'institution_homepage' : ''}
 
+loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
     with open(CONFIGURATION_JSON) as conf_file:
-        defaults = json.load(conf_file)
-    defaults['authentication_method'] = 1 if defaults['authentication_method'] == 'PamAuthentication' else 2
+        loaded_defaults = json.load(conf_file)
+    loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
+
+# grab anything not loaded in (useful for backwards compatibility if a new default is added that 
+# is not in an existing config file.)
+for key in defaults.keys():
+    if not key in loaded_defaults:
+        loaded_defaults[key] = defaults[key]
+defaults = loaded_defaults
 
 print("\nWelcome to the Submitty Homework Submission Server Configuration\n")
 DEBUGGING_ENABLED = args.debug is True
