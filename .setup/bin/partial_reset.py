@@ -110,10 +110,10 @@ def main():
         with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
             submitty_config_json = json.load(submitty_config)
             os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
-        os.system("psql -h localhost -U hsdbu --list | grep submitty* | awk '{print $1}' | "
+        os.system("psql localhost -U hsdbu --list | grep submitty* | awk '{print $1}' | "
                   "xargs -I \"@@\" dropdb -h localhost -U hsdbu \"@@\"")
-        os.system('psql -h localhost -d postgres -U hsdbu -c "CREATE DATABASE submitty"')
-        os.system('psql -h localhost -d submitty -U hsdbu -f {}/site/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
+        os.system('psql localhost -d postgres -U hsdbu -c "CREATE DATABASE submitty"')
+        os.system('psql localhost -d submitty -U hsdbu -f {}/site/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
         del os.environ['PGPASSWORD']
 
     for user_file in glob.iglob(os.path.join(args.users_path, "*.yml")):

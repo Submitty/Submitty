@@ -35,7 +35,7 @@ class Course extends AbstractModel {
 
     public function loadDisplayName($submitty_path){
         $course_ini_path = FileUtils::joinPaths($submitty_path, "courses", $this->semester, $this->title, "config", "config.ini");
-        if (file_exists($course_ini_path)) {
+        if (file_exists($course_ini_path) && is_readable ($course_ini_path)) {
             $config = IniParser::readFile($course_ini_path);
             if (isset($config['course_details']['course_name'])) {
                 $this->display_name = $config['course_details']['course_name'];            
