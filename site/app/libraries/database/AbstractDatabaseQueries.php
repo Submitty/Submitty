@@ -4,6 +4,7 @@ namespace app\libraries\database;
 
 use app\libraries\Core;
 use app\libraries\Database;
+use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
@@ -307,13 +308,14 @@ abstract class AbstractDatabaseQueries {
     abstract public function deleteGradeableComponentMark(GradeableComponentMark $mark);
 
     /**
-     * Gets an array that contains all revelant data in a gradeable.
-     * Uses the gradeable id to use the data in the database.
+     * .
+     * Uses the gradeable id to add relevent information from gradeable into AdminGradeable model.
      *
      * @param $gradeable_id
-     *
+     * @param AdminGradeable
+     * @param $template
      */
-    abstract public function getGradeableData($gradeable_id);
+    abstract public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template);
 
     /**
      * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
