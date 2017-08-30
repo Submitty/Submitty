@@ -66,7 +66,7 @@ class GradeableComponent extends AbstractModel {
     /** @property @var bool Is the component just used for text fields (ignore lower_clamp, default, max_value, upper_clamp and score) */
     protected $is_text = false;
     /** @property @var int Order for components to be shown in */
-    protected $order = 1;
+    protected $order = 0;
     /** @property @var float custom "mark" score for this component */
     protected $score = 0;
     /** @property @var string Comment that grader has put on the custom "mark" while grading for student */
@@ -241,11 +241,7 @@ class GradeableComponent extends AbstractModel {
     }
 
     public function deleteData($gd_id) {
-        if ($this->core->getQueries()->checkGradeableComponentData($gd_id, $this, $this->core->getUser()->getId()) === true) {
-            $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
-            return true;
-        }
-        return false;
+        $this->core->getQueries()->deleteGradeableComponentData($gd_id, $this->core->getUser()->getId(), $this);
     }
 
     public function saveGradeableComponentData($gd_id) {

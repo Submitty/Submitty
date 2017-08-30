@@ -4,6 +4,7 @@ namespace app\libraries\database;
 
 use app\libraries\Utils;
 use \app\libraries\GradeableType;
+use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
@@ -102,32 +103,25 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
-    public function updateSubmittyUser(User $user)
-    {
-        $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
-                       $user->getLastName(), $user->getEmail(), $user->getId());
-        $this->submitty_db->query("
-UPDATE users SET user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
-WHERE user_id=?", $array);
-    }
-
-    public function updateUser(User $user, $semester, $course) {
+    public function updateUser(User $user, $semester=null, $course=null) {
         $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
                        $user->getLastName(), $user->getEmail(), $user->getId());
         $this->submitty_db->query("
 UPDATE users SET user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
 WHERE user_id=?", $array);
 
-        $params = array($user->getGroup(), $user->getRegistrationSection(),
-                        Utils::convertBooleanToString($user->isManualRegistration()), $semester, $course,
-                        $user->getId());
-        $this->submitty_db->query("
+        if (!empty($semester) && !empty($course)) {
+            $params = array($user->getGroup(), $user->getRegistrationSection(),
+                            Utils::convertBooleanToString($user->isManualRegistration()), $semester, $course,
+                            $user->getId());
+            $this->submitty_db->query("
 UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=? 
 WHERE semester=? AND course=? AND user_id=?", $params);
 
-        $params = array($user->getRotatingSection(), $user->getId());
-        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id=?", $params);
-        $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
+            $params = array($user->getRotatingSection(), $user->getId());
+            $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id=?", $params);
+            $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
+        }
     }
 
     public function updateGradingRegistration($user_id, $user_group, $sections) {
@@ -1083,20 +1077,6 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
 DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
     }
 
-    public function checkGradeableComponentData($gd_id, GradeableComponent $component, $grader_id="") {
-        $params = array($component->getId(), $gd_id);
-        $and = "";
-        if($grader_id != "") {
-            $and = " AND gcd_grader_id=?";
-            $params[] = $grader_id;
-        }
-        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component_data WHERE gc_id=? AND gd_id=?{$and}", $params);
-        if ($this->course_db->row()['cnt'] == 0) {
-          return false;
-        }
-        return true;
-    }
-
     public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
         $params = array($gc_id, $gd_id, $grader_id, $mark->getId());
         $this->course_db->query("
@@ -1198,76 +1178,54 @@ WHERE gcm_id=?", $params);
         $this->course_db->query("DELETE FROM gradeable_component_mark WHERE gcm_id=?", array($mark->getId()));
     }
 
-    public function getGradeableData($gradeable_id) {
+    public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template=false) {
         $this->course_db->query("SELECT * FROM gradeable WHERE g_id=?",array($gradeable_id));
-        $old_gradeable = $this->course_db->row();
+        $admin_gradeable->setGradeableInfo($this->course_db->row(), $template);
+
         $this->course_db->query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
-        $old_components = json_encode($this->course_db->rows());
-        if ($old_gradeable['g_gradeable_type']==2){
+        $admin_gradeable->setOldComponentsJson(json_encode($this->course_db->rows()));
+        $components = array();
+        foreach($this->course_db->rows() as $row) {
+          $components[] = new GradeableComponent($this->core, $row);
+        }
+        $admin_gradeable->setOldComponents($components);
+        foreach($components as $comp) {
+          if($comp->getOrder() == -1 && $comp->getIsPeer()) {
+            $admin_gradeable->setPeerGradeCompleteScore($comp->getMaxValue());
+          }
+          if($comp->getPage() != 0) {
+            $admin_gradeable->setPdfPage(true);
+            if($comp->getPage() == -1) {
+              $admin_gradeable->setPdfPageStudent(true);
+            }
+          }
+        }
+
+        //2 is numeric/text
+        if($admin_gradeable->getGGradeableType() == 2) {
             $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
                         ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", array($gradeable_id));
-            $num_numeric = $this->course_db->row()['cnt'];
+            $num[0] = $this->course_db->row()['cnt'];
             $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
                         ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", array($gradeable_id));
-            $num_text = $this->course_db->row()['cnt'];
+            $num[1] = $this->course_db->row()['cnt'];
+            $admin_gradeable->setNumericTextInfo($num);
         }
 
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id 
                     INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($gradeable_id));
         $has_grades= $this->course_db->row()['cnt'];
+        $admin_gradeable->setHasGrades($has_grades);
 
-        if($old_gradeable['g_gradeable_type']==0){
+        //0 is electronic
+        if($admin_gradeable->getGGradeableType() == 0) {
             //get the electronic file stuff
             $this->course_db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
-            $electronic_gradeable = $this->course_db->row();
-            $use_ta_grading = $electronic_gradeable['eg_use_ta_grading'];
-            $initial_ta_grading_compare_date = "Due Date (+ max allowed late days)";
+            $admin_gradeable->setElectronicGradeableInfo($this->course_db->row(), $template);
 
-            if ($use_ta_grading) {
-              $initial_grades_released_compare_date = "TA Grading Open Date";
-            } else {
-              $initial_grades_released_compare_date = "Due Date";
-            }
-
-            $is_repository = $electronic_gradeable['eg_is_repository'];
-            $late_days = $electronic_gradeable['eg_late_days'];
-            $this->course_db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_lower_clamp, gc_default, gc_max_value, gc_upper_clamp, gc_is_peer, gc_page, gc_order FROM gradeable_component 
-                        WHERE g_id=? GROUP BY gc_id ORDER BY gc_order ASC",array($gradeable_id));
-            $tmp_questions = $this->course_db->rows();
-            $old_questions = array();
-            if ($use_ta_grading) {
-                foreach($tmp_questions as $question){
-
-                    array_push($old_questions, array('question_message'     => $question['gc_title'],
-                                                    'question_grading_note' => $question['gc_ta_comment'],
-                                                    'student_grading_note'  => $question['gc_student_comment'],
-                                                    'question_lower_clamp'  => $question['gc_lower_clamp'],
-                                                    'question_default'      => $question['gc_default'],
-                                                    'question_total'        => $question['gc_max_value'],
-                                                    'question_upper_clamp'  => $question['gc_upper_clamp'],
-                                                    'peer_component'        => $question['gc_is_peer'],
-                                                    'page_component'        => $question['gc_page'],
-                                                    'question_order'        => $question['gc_order']));
-                }
-            }
-        } else {
-         // numeric or checkpoint
-         $initial_ta_grading_compare_date = "TA Beta Testing Date";
-         $initial_grades_released_compare_date = "TA Grading Open Date";
-        }
-        if ($old_gradeable['g_gradeable_type']==0) {
-            $data = array($old_gradeable, $old_components, $has_grades, $electronic_gradeable, $initial_grades_released_compare_date, 
-                $old_questions);
-        }
-        if ($old_gradeable['g_gradeable_type']==1) {
-            $data = array($old_gradeable, $old_components, $has_grades, $initial_ta_grading_compare_date, $initial_grades_released_compare_date);
-        }
-        if ($old_gradeable['g_gradeable_type']==2) {
-            $data = array($old_gradeable, $old_components, $has_grades, $num_numeric, $num_text, $initial_ta_grading_compare_date, 
-                $initial_grades_released_compare_date);
         }
 
-        return $data;
+        return $admin_gradeable;
     }
 
     public function updateUserViewedDate(Gradeable $gradeable) {

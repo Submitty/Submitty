@@ -209,7 +209,6 @@ if [ ${VAGRANT} == 1 ]; then
     rm /etc/apache2/sites*/000-default.conf
     rm /etc/apache2/sites*/default-ssl.conf
 
-    cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
     cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
     cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
 
@@ -225,6 +224,7 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 fi
 
+cp ${SUBMITTY_REPOSITORY}/.setup/php7.0-fpm/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
 chmod 0640 /etc/apache2/suexec/www-data
 
@@ -278,7 +278,6 @@ ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
 # POSTGRES SETUP
 #################
 if [ ${VAGRANT} == 1 ]; then
-	service postgresql restart
 	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
 	cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
 	cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
