@@ -13,7 +13,7 @@ class HomePageView extends AbstractView {
     /*
     *@param List of courses the student is in.
     */
-    public function showHomePage($user, $courses = array(), $changeNameText) {
+    public function showHomePage($user, $courses = array(), $changeNameText, $course_display_name) {
         $displayedFirstName = $user->getDisplayedFirstName();
         $return = <<< HTML
 <div class="content">
@@ -99,11 +99,15 @@ HTML;
 HTML;
 
                     foreach($courses as $course){
-                        $display_text = strtoupper($course->getSemester()) . " " . strtoupper($course->getTitle());
+                        $display_text = $course->getSemester() . " " . $course->getTitle();
+                        if($course->getDisplayName() !== "")
+                        {
+                            $display_text .= " " . $course->getDisplayName();
+                        }
                         $return .= <<<HTML
                         <tr>
                             <td colspan="8">
-                                <a class="btn btn-primary" style="width:400%;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$display_text}</a>
+                                <a class="btn btn-primary" style="width: 696px;white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$display_text}</a>
                             </td>
                         </tr>
 HTML;

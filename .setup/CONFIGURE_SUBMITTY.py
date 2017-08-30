@@ -119,10 +119,18 @@ defaults = {'database_host': 'localhost',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
             'institution_homepage' : ''}
 
+loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
     with open(CONFIGURATION_JSON) as conf_file:
-        defaults = json.load(conf_file)
-    defaults['authentication_method'] = 1 if defaults['authentication_method'] == 'PamAuthentication' else 2
+        loaded_defaults = json.load(conf_file)
+    loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
+
+# grab anything not loaded in (useful for backwards compatibility if a new default is added that 
+# is not in an existing config file.)
+for key in defaults.keys():
+    if not key in loaded_defaults:
+        loaded_defaults[key] = defaults[key]
+defaults = loaded_defaults
 
 print("\nWelcome to the Submitty Homework Submission Server Configuration\n")
 DEBUGGING_ENABLED = args.debug is True
@@ -151,13 +159,17 @@ print()
 SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
 print()
 
-INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank if desired)', defaults['institution_name'])
+INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)', defaults['institution_name'])
+if INSTITUTION_NAME.lower() == "none":
+    INSTITUTION_NAME = ''
 print()
 
 if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
     INSTITUTION_HOMEPAGE = ''
 else:
-    INSTITUTION_HOMEPAGE = get_input('What is the url of your institution\'s homepage? (Leave blank if desired)', defaults['institution_homepage'])
+    INSTITUTION_HOMEPAGE = get_input('What is the url of your institution\'s homepage? (Leave blank/type "none" if not desired)', defaults['institution_homepage'])
+    if INSTITUTION_HOMEPAGE.lower() == "none":
+        INSTITUTION_HOMEPAGE = ''
     print()
 
 USERNAME_TEXT = defaults['username_change_text']

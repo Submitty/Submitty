@@ -80,7 +80,8 @@ class HomePageController extends AbstractController {
      */
     public function showHomepage() {
         $user = $this->core->getUser();
-        $courses = $this->core->getQueries()->getStudentCoursesById($user->getId());
+        $submitty_path = $this->core->getConfig()->getSubmittyPath();
+        $courses = $this->core->getQueries()->getStudentCoursesById($user->getId(), $submitty_path);
         $changeNameText = $this->core->getConfig()->getUsernameChangeText();
         $this->core->getOutput()->renderOutput('HomePage', 'showHomePage', $user, $courses, $changeNameText);
     }

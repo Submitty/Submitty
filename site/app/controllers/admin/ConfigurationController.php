@@ -38,11 +38,13 @@ class ConfigurationController extends AbstractController {
             'vcs_type'                  => $this->core->getConfig()->getVcsType()
         );
 
-        foreach (array('course_name', 'upload_message', 'course_email') as $key) {
+        foreach (array('upload_message', 'course_email') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = htmlentities($_SESSION['request'][$key]);
             }
         }
+
+        $fields['course_name'] = $this->core->getDisplayedCourseName();
 
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
             if (isset($_SESSION['request'][$key])) {

@@ -1527,14 +1527,16 @@ ORDER BY gt.{$section_key}", $params);
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
     }
 
-    public function getStudentCoursesById($user_id) {
+    public function getStudentCoursesById($user_id, $submitty_path) {
         $this->submitty_db->query("
 SELECT semester, course
 FROM courses_users u
 WHERE u.user_id=?", array($user_id));
        $return = array();
         foreach ($this->submitty_db->rows() as $row) {
-            $return[] = new Course($this->core, $row);
+          $course = new Course($this->core, $row);
+          $course->loadDisplayName($submitty_path);
+          $return[] = $course;
         }
         return $return;
     }

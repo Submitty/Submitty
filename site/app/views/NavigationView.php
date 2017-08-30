@@ -9,7 +9,7 @@ class NavigationView extends AbstractView {
     public function noAccessCourse() {
         return <<<HTML
 <div class="content">
-   You don't have access to {$this->core->getConfig()->getCourseName()}. If you think this is mistake,
+   You don't have access to {$this->core->getDisplayedCourseName()}. If you think this is mistake,
    please contact your instructor to gain access.
 </div>
 HTML;
