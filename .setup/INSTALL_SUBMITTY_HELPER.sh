@@ -135,7 +135,7 @@ echo -e "Make top level directores & set permissions"
 
 mkdir -p ${SUBMITTY_DATA_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}/courses
-mkdir -p ${SUBMITTY_DATA_DIR}/git
+mkdir -p ${SUBMITTY_DATA_DIR}/vcs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
@@ -147,8 +147,8 @@ chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
 chmod  751                                        ${SUBMITTY_DATA_DIR}
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
 chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
-chown  root:www-data                              ${SUBMITTY_DATA_DIR}/git
-chmod  750                                        ${SUBMITTY_DATA_DIR}/git
+chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
+chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
 chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
 chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
@@ -302,7 +302,7 @@ chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
-chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
