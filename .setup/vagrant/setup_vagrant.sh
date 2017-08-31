@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# this script must be run by root or sudo
+if [[ "$UID" -ne "0" ]] ; then
+    echo "ERROR: This script must be run by root or sudo"
+    exit
+fi
+
+DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g" | tr '[:upper:]' '[:lower:]')
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
 
@@ -13,16 +20,15 @@ apt-get install libpython${PY3_VERSION}
 # the repo will give us something out-of-date and hard to install/manage)
 if [ ! -x "$(command -v pip)" ]; then
     wget --tries=5 https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
-    python2 /tmp/get-pip.py
     python3 /tmp/get-pip.py
     rm -rf /tmp/get-pip.py
 else
-    pip2 install -U pip
     pip3 install -U pip
 fi
 
 pip3 install -U PyYAML
 
 python3 ${SUBMITTY_REPOSITORY}/.setup/bin/reset_system.py
-sudo ${SUBMITTY_REPOSITORY}/.setup/install_system.sh vagrant
+
+sudo ${SUBMITTY_REPOSITORY}/.setup/install_system.sh --vagrant ${@}
 

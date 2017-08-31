@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use \lib\Database;
 use \lib\Functions;
 use \app\libraries\GradeableType;
+use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
@@ -44,52 +45,37 @@ class AdminGradeableController extends AbstractController {
             $this->viewPage();
             return;
         }
-        $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
-        $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
-        $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections($_REQUEST['template_id']);
-        $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
-        $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
-        $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
-        $graders_from_usertypes = array($graders_from_usertype1, $graders_from_usertype2, $graders_from_usertype3);
-        $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        $ini_data = array($rotatingGradeables, $gradeableSectionHistory, $num_sections, $graders_all_section, $graders_from_usertypes,
-            $template_list);
-        $data = $this->core->getQueries()->getGradeableData($_REQUEST['template_id']);
-        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add_template", $ini_data, $data);
+        $admin_gradeable = $this->getAdminGradeable($_REQUEST['template_id']);
+        $this->core->getQueries()->getGradeableInfo($_REQUEST['template_id'], $admin_gradeable, true);
+        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add_template", $admin_gradeable);
     }
 
     //view the page with no data from previous gradeables
     private function viewPage() {
-        $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
-        $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
-        $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections("");
-        $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
-        $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
-        $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
-        $graders_from_usertypes = array($graders_from_usertype1, $graders_from_usertype2, $graders_from_usertype3);
-        $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        $ini_data = array($rotatingGradeables, $gradeableSectionHistory, $num_sections, $graders_all_section, $graders_from_usertypes,
-            $template_list);
-        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add", $ini_data);
+        $admin_gradeable = $this->getAdminGradeable("");
+        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add", $admin_gradeable);
     }
 
     //view the page with pulled data from the gradeable to be edited
     private function editPage() {
-        $rotatingGradeables = $this->core->getQueries()->getRotatingSectionsGradeableIDS();
-        $gradeableSectionHistory = $this->core->getQueries()->getGradeablesPastAndSection();
-        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
-        $graders_all_section = $this->core->getQueries()->getGradersForAllRotatingSections($_REQUEST['id']);
+        $admin_gradeable = $this->getAdminGradeable($_REQUEST['id']);
+        $this->core->getQueries()->getGradeableInfo($_REQUEST['id'], $admin_gradeable, false);
+        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "edit", $admin_gradeable);
+    }
+
+    private function getAdminGradeable($gradeable_id) {
+        $admin_gradeable = new AdminGradeable($this->core);
+        $admin_gradeable->setRotatingGradeables($this->core->getQueries()->getRotatingSectionsGradeableIDS());
+        $admin_gradeable->setGradeableSectionHistory($this->core->getQueries()->getGradeablesPastAndSection());
+        $admin_gradeable->setNumSections($this->core->getQueries()->getNumberRotatingSections());
+        $admin_gradeable->setGradersAllSection($this->core->getQueries()->getGradersForAllRotatingSections($gradeable_id));
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
         $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
         $graders_from_usertypes = array($graders_from_usertype1, $graders_from_usertype2, $graders_from_usertype3);
-        $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        $ini_data = array($rotatingGradeables, $gradeableSectionHistory, $num_sections, $graders_all_section, $graders_from_usertypes,
-            $template_list);
-        $data = $this->core->getQueries()->getGradeableData($_REQUEST['id']);
-        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "edit", $ini_data, $data);
+        $admin_gradeable->setGradersFromUsertypes($graders_from_usertypes);
+        $admin_gradeable->setTemplateList($this->core->getQueries()->getAllGradeablesIdsAndTitles());
+        return $admin_gradeable;
     }
 
     // check whether radio button's value is 'true'
@@ -100,7 +86,7 @@ class AdminGradeableController extends AbstractController {
     //if $edit_gradeable === 0 then it uploads the gradeable to the database
     //if $edit_gradeable === 1 then it updates the gradeable to the database
     private function modifyGradeable($edit_gradeable) {
-
+        $peer_grading_complete_score = 0;
         if ($edit_gradeable === 0) {
             $gradeable = new Gradeable($this->core);
             $gradeable->setId($_POST['gradeable_id']);
@@ -149,7 +135,10 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setConfigPath($_POST['config_path']);
             $is_peer_grading = $this->isRadioButtonTrue('peer_grading');
             $gradeable->setPeerGrading($is_peer_grading);
-            if ($is_peer_grading) { $gradeable->setPeerGradeSet($_POST['peer_grade_set']); }
+            if ($is_peer_grading) { 
+                $gradeable->setPeerGradeSet($_POST['peer_grade_set']);
+                $peer_grading_complete_score = $_POST['peer_grade_complete_score'];
+            }
         }
 
         if ($edit_gradeable === 0) {
@@ -226,6 +215,17 @@ class AdminGradeableController extends AbstractController {
                         $old_component = $old_component[0];
                     }
                     if ($x < $num_questions && $x < $num_old_components) {
+                        if($old_component->getTitle() === "Grading Complete" || $old_component->getOrder() == -1) {
+                            if($peer_grading_complete_score == 0) {
+                                $this->core->getQueries()->deleteGradeableComponent($old_component);
+                            }
+                            else if($old_component->getMaxValue() != $peer_grading_complete_score) {
+                                $old_component->setMaxValue($peer_grading_complete_score);
+                                $old_component->setUpperClamp($peer_grading_complete_score);
+                                $this->core->getQueries()->updateGradeableComponent($old_component);
+                            }
+                            continue;
+                        }
                         $old_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                         $old_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
                         $old_component->setStudentComment($_POST['student_comment_' . strval($x + 1)]);
@@ -262,6 +262,14 @@ class AdminGradeableController extends AbstractController {
                 }
             } 
             for ($x = $start_index; $x < $num_questions; $x++) {
+                if($x == 0 && $peer_grading_complete_score != 0) {
+                    $gradeable_component = new GradeableComponent($this->core);
+                    $gradeable_component->setMaxValue($peer_grading_complete_score);
+                    $gradeable_component->setUpperClamp($peer_grading_complete_score);
+                    $gradeable_component->setOrder($x-1);
+                    $gradeable_component->setTitle("Grading Complete");
+                    $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable);
+                }
                 $gradeable_component = new GradeableComponent($this->core);
                 $gradeable_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
                 $gradeable_component->setTaComment($_POST['ta_comment_' . strval($x + 1)]);
@@ -291,7 +299,8 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_component->setPage($page_component);
                 $gradeable_component->setOrder($x);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable); 
-            }  
+            }
+            
 
             //remake the gradeable to update all the data
             $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
@@ -302,6 +311,9 @@ class AdminGradeableController extends AbstractController {
                 foreach ($components as $comp) {
                     if(is_array($comp)) {
                         $comp = $comp[0];
+                    }
+                    if($comp->getOrder() == -1) {
+                        continue;
                     }
                     $num_marks = 0;
                     foreach($_POST as $k=>$v){
@@ -327,6 +339,9 @@ class AdminGradeableController extends AbstractController {
                 foreach ($components as $comp) {
                     if(is_array($comp)) {
                         $comp = $comp[0];
+                    }
+                    if($comp->getOrder() == -1) {
+                        continue;
                     }
                     $num_marks = 0; //current number of marks
                     foreach($_POST as $k=>$v){

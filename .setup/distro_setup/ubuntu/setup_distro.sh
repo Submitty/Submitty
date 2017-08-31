@@ -24,7 +24,10 @@ else
 fi
 
 if [ ${VAGRANT} == 1 ]; then
-   #
+    export SUBMISSION_URL='http://192.168.56.101'
+    export GIT_URL='http://192.168.56.102'
+
+    #
     # The goal here is to ensure the VM is accessible from your own
     # computer for code testing, has an outgoing connection to the
     # Internet to access github and receive Ubuntu updates, but is also
@@ -42,17 +45,17 @@ if [ ${VAGRANT} == 1 ]; then
     # interface remains consistent among VM reboots as Vagrant has a bad habit of
     # discarding and recreating networking interfaces everytime the VM is restarted.
     # ep0s8 is statically bound to 192.168.56.101.
-    echo -e "auto enp0s8\niface enp0s8 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    echo -e "auto enp0s8\niface enp0s8 inet static\naddress ${SUBMISSION_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    echo -e "auto enp0s8:1\niface enp0s8:1 inet static\naddress ${GIT_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
 
     # Turn them on.
-    ifup enp0s8
+    ifup enp0s8 enp0s8:1
 
-    export SUBMISSION_URL='http://192.168.56.101'
     chmod -x /etc/update-motd.d/*
     chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
     chmod +x /etc/update-motd.d/00-header
 
-    echo -e '
+    echo -e "
  _______  __   __  _______  __   __  ___   _______  _______  __   __
 |       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
 |  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
@@ -73,16 +76,17 @@ if [ ${VAGRANT} == 1 ]; then
 ##    hsdbu, postgres, root, vagrant                      ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
-##    http://192.168.56.101 (submission)                  ##
-##    http://192.168.56.101/cgi-bin (cgi-bin scripts)     ##
-##    http://192.168.56.101/hwgrading (tagrading)         ##
+##    ${SUBMISSION_URL} (submission)                  ##
+##    ${SUBMISSION_URL}/cgi-bin (cgi-bin scripts)     ##
+##    ${SUBMISSION_URL}/hwgrading (tagrading)         ##
+##    ${GIT_URL}/git (git)                     ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##
 ##                                                        ##
 ##  Happy developing!                                     ##
 ############################################################
-' > /etc/motd
+" > /etc/motd
     chmod +rx /etc/motd
 fi
 
@@ -118,9 +122,12 @@ apt-get install -qqy libpam-passwdqc
 
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql-9.5
-apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup
-apt-get install -qqy php7.0 php7.0-cli php-xdebug libapache2-mod-fastcgi php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt
-apt-get install -qqy php7.0-zip
+apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3 libapache2-mod-fastcgi
+apt-get install -qqy php7.0 php7.0-cli php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt php7.0-zip
+
+if [ ${VAGRANT} == 1 ]; then
+    apt-get install -qqy php-xdebug
+fi
 
 # Add additional packages for compiling, authentication, and security,
 # and program support
@@ -128,7 +135,7 @@ apt-get install -qqy php7.0-zip
 # DOCUMENTATION FIXME: Go through this list and categorize purpose of
 # these packages (as appropriate.. )
 
-apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
+apt-get install -qqy clang autoconf automake autotools-dev diffstat finger gdb git git-man \
 hardening-includes p7zip-full patchutils \
 libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
 javascript-common  \
@@ -139,46 +146,16 @@ g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler
 echo "installing cmake"
 apt-get install -qqy cmake
 
-#GLEW and GLM
-echo "installing graphics libraries"
-apt-get install -qqy glew-utils libglew-dev libglm-dev
-apt-get install -qqy libxrandr-dev xorg-dev
-
-#CMAKE permissions
-#These permissions are necessary so that untrusted user can use pkgconfig with cmake.
-#Note that pkgconfig does not appear until after graphics installs (Section above)
-chmod -R o+rx /usr/local/lib/pkgconfig
-chmod -R o+rx /usr/local/lib/cmake
-
 # Install Oracle 8 Non-Interactively
 echo "installing java8"
 apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
 apt-get install -qqy oracle-java8-set-default
 
-# Install Racket and Swi-prolog for Programming Languages
-echo "installing Racket and Swi-prolog"
-apt-add-repository -y ppa:plt/racket  > /dev/null 2>&1
-apt-get install -qqy racket > /dev/null 2>&1
-apt-get install -qqy swi-prolog > /dev/null 2>&1
-
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
-# Used by Network Programming class
-apt-get install -qqy libssl-dev
-
-#GLFW
-echo "installing GLFW"
-wget https://github.com/glfw/glfw/releases/download/3.2.1/glfw-3.2.1.zip
-unzip glfw-3.2.1.zip
-cd glfw-3.2.1
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-cd ../..
-rm -R glfw-3.2.1
-rm glfw-3.2.1.zip
+if [ ${VAGRANT} == 1 ]; then
+    apt-get install -qqy gitweb libcgi-session-perl
+fi
 
 apt-get -qqy autoremove

@@ -15,7 +15,7 @@ import pam
 print("Content-type: text/html")
 print()
 
-response = False
+authenticated = False
 try:
     arguments = cgi.FieldStorage()
     # prevent a user from figuring out a way of passing a path instead of a filename
@@ -23,9 +23,8 @@ try:
     with open("/tmp/" + f, "r") as read_file:
         j = json.loads(read_file.read())
         p = pam.pam()
-        if p.authenticate(j['username'], j['password']):
-            response = True
+        authenticated = p.authenticate(j['username'], j['password'])
 except:
-    response = False
+    pass
 
-print(json.dumps({"authenticated": response}))
+print(json.dumps({"authenticated": authenticated}))

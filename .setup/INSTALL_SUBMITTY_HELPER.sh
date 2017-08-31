@@ -12,7 +12,7 @@
 
 if [ -z ${SUBMITTY_REPOSITORY+x} ]; then
     echo "ERROR! Configuration variables not initialized"
-    exit
+    exit 1
 fi
 
 
@@ -21,7 +21,7 @@ fi
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
-    exit
+    exit 1
 fi
 
 # check optional argument
@@ -36,7 +36,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1>"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test_rainbow"
-    exit
+    exit 1
 fi
 
 echo -e "\nBeginning installation of the Submitty homework submission server\n"
@@ -76,6 +76,9 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__SITE_LOG_PATH__|$SITE_LOG_PATH|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__AUTHENTICATION_METHOD__|${AUTHENTICATION_METHOD}|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__INSTITUTION__NAME__|$INSTITUTION_NAME|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__INSTITUTION__HOMEPAGE__|$INSTITUTION_HOMEPAGE|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__USERNAME__TEXT__|$USERNAME_CHANGE_TEXT|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__DEBUGGING_ENABLED__|$DEBUGGING_ENABLED|g" $1
 
@@ -132,6 +135,7 @@ echo -e "Make top level directores & set permissions"
 
 mkdir -p ${SUBMITTY_DATA_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}/courses
+mkdir -p ${SUBMITTY_DATA_DIR}/vcs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
@@ -143,6 +147,8 @@ chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
 chmod  751                                        ${SUBMITTY_DATA_DIR}
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
 chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
+chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
+chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
 chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
 chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
@@ -271,8 +277,10 @@ chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 #replace necessary variables in the copied scripts
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/adduser.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/generate_repo.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
@@ -290,9 +298,11 @@ find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
+chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
@@ -470,10 +480,7 @@ echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"  
 
 ## NOTE:  the build_config_upload script is hardcoded to run for ~5 minutes and then exit
 minutes=0
-while [ $minutes -lt 60 ]; do
-    printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py  >  /dev/null\n"  $minutes  >> ${HWCRON_CRONTAB_FILE}
-    minutes=$(($minutes + 5))
-done
+printf "*/5 * * * *   ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py  >  /dev/null\n"  >> ${HWCRON_CRONTAB_FILE}
 
 echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
 echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
@@ -492,7 +499,7 @@ echo -e "Compile and install analysis tools"
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 
 # compile the tools
-./build.sh v0.2.5
+./build.sh v0.2.6
 
 popd
 
@@ -513,12 +520,6 @@ echo -e "\nCompleted installation of the Submitty homework submission server\n"
 echo -e "Install python_submitty_utils"
 
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-
-# FIXME: There is an error with glob installation on python2.  This
-# can go away when we have all submitty scripts ported to python3.
-python2 setup.py -q install
-echo -e "NOTE: There is an error with glob installation on python2."
-echo -e "      This error can safely be ignored (we are only using glob recursive in python3).\n" 
 python3 setup.py -q install
 
 # fix permissions
@@ -535,27 +536,60 @@ popd
 ################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 
+
+# stop the scheduler (if it's running)
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_before=$?
+if [[ "$is_active_before" == "0" ]]; then
+    systemctl stop submitty_grading_scheduler
+    echo -e "Stopped Submitty Grading Scheduler Daemon\n"
+fi
+
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_tmp=$?
+if [[ "$is_active_tmp" == "0" ]]; then
+    echo -e "ERROR: did not successfully stop submitty grading scheduler daemon\n"
+    exit 1
+fi
+
+
+# update the scheduler daemon
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.service   /etc/systemd/system/submitty_grading_scheduler.service
 chown -R hwcron:hwcron /etc/systemd/system/submitty_grading_scheduler.service
 chmod 444 /etc/systemd/system/submitty_grading_scheduler.service
 
-systemctl is-active --quiet submitty_grading_scheduler
-is_active_before=$?
 
-# if the daemon is currently running, restart it now
-systemctl try-restart submitty_grading_scheduler
+# delete the autograding tmp directories
+rm -rf /var/local/submitty/autograding_tmp
 
-systemctl is-active --quiet submitty_grading_scheduler
-is_active_after=$?
+# recreate the top level autograding tmp directory
+mkdir /var/local/submitty/autograding_tmp
+chown root:root /var/local/submitty/autograding_tmp
+chmod 511 /var/local/submitty/autograding_tmp
 
-if [[ $is_active_before -ne 0 ]]; then
-    echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_grading_scheduler\n"
-else
-    if [[ $is_active_after -ne 0 ]]; then
+# recreate the per untrusted directories
+for ((i=0;i<$NUM_UNTRUSTED;i++));
+do
+    myuser=`printf "untrusted%02d" $i`
+    mydir=`printf "/var/local/submitty/autograding_tmp/untrusted%02d" $i`
+    mkdir $mydir
+    chown hwcron:$myuser $mydir
+    chmod 770 $mydir
+done
+
+
+# start the scheduler (if it was running)
+if [[ "$is_active_before" == "0" ]]; then
+    systemctl start submitty_grading_scheduler
+    systemctl is-active --quiet submitty_grading_scheduler
+    is_active_after=$?
+    if [[ "$is_active_after" != "0" ]]; then
         echo -e "\nERROR!  Failed to restart Submitty Grading Scheduler Daemon\n"
     fi
     echo -e "Restarted Submitty Grading Scheduler Daemon\n"
+else
+    echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_grading_scheduler\n"
 fi
 
 
@@ -581,7 +615,7 @@ if [[ "$#" -ge 1 && $1 == "test" ]]; then
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
-    python ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
+    ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
 
     echo -e "\nCompleted Autograding Test Suite\n"
 fi
@@ -611,7 +645,7 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     shift
     # pass any additional command line arguments to the run test suite
     rainbow_total=$((rainbow_total+1))
-    python ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+    ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
     
     if [[ $? -ne 0 ]]; then
         echo -e "\n[ FAILED ] sample test\n"

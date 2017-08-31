@@ -4,6 +4,9 @@ namespace app\libraries\database;
 
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
+use app\libraries\Utils;
+use app\libraries\GradeableType;
+use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
@@ -115,7 +118,7 @@ class DatabaseQueries {
      * @param string $semester
      * @param string $course
      */
-    public function updateUser(User $user, $semester, $course) {
+    public function updateUser(User $user, $semester=null, $course=null) {
         throw new NotImplementedException();
     }
 
@@ -222,6 +225,17 @@ ORDER BY gcm_order ASC
             $return[$row['gcm_id']] = new GradeableComponentMark($this->core, $row);
         }
         return $return;
+    }
+    
+    public function getGradeableComponentMarksData($gc_id, $gd_id, $gcd_grader_id="") {
+        $params = array($gc_id, $gd_id);
+        $and = "";
+        if($gcd_grader_id != "") {
+            $and = " AND gcd_grader_id = {$gcd_grader_id}";
+            $params[] = $gcd_grader_id;
+        }
+        $this->course_db->query("SELECT gcm_id FROM gradeable_component_mark_data WHERE gc_id = ? AND gd_id=?{$and}", $params);
+        return $this->course_db->rows();
     }
 
     /**
@@ -705,12 +719,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
 
     /**
      * @param string             $gd_id
+     * @param string             $grader_id
      * @param GradeableComponent $component
      */
-    public function updateGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id);
+    public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
+        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id, $grader_id);
         $this->course_db->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=?", $params);
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
     }
     
     public function replaceGradeableComponentData($gd_id, GradeableComponent $component) {
@@ -725,17 +740,10 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
 DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
     }
 
-    public function deleteGradeableComponentMarkData($gd_id, $gc_id, GradeableComponentMark $mark, $gcd_grader_id="") {
-        if($gcd_grader_id === "") {
-            $params = array($gc_id, $gd_id, $mark->getId());
-            $and = "";
-        }
-        else {
-            $params = array($gc_id, $gd_id, $mark->getId(), $gcd_grader_id);
-            $and = " AND gcd_grader_id=?";
-        }
+    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
+        $params = array($gc_id, $gd_id, $grader_id, $mark->getId());
         $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?{$and}", $params);
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=? AND gcm_id=?", $params);
     }
 
     public function getDataFromGCMD($gc_id, GradeableComponentMark $mark) {
@@ -848,9 +856,11 @@ WHERE gcm_id=?", $params);
      * Uses the gradeable id to use the data in the database.
      *
      * @param $gradeable_id
+     * @param $admin_gradeable
+     * @param $template
      *
      */
-    public function getGradeableData($gradeable_id) {
+    public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template=false) {
         throw new NotImplementedException();
     }
 
@@ -1283,14 +1293,16 @@ ORDER BY gt.{$section_key}", $params);
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
     }
 
-    public function getStudentCoursesById($user_id) {
+    public function getStudentCoursesById($user_id, $submitty_path) {
         $this->submitty_db->query("
 SELECT semester, course
 FROM courses_users u
 WHERE u.user_id=?", array($user_id));
        $return = array();
         foreach ($this->submitty_db->rows() as $row) {
-            $return[] = new Course($this->core, $row);
+          $course = new Course($this->core, $row);
+          $course->loadDisplayName($submitty_path);
+          $return[] = $course;
         }
         return $return;
     }

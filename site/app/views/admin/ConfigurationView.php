@@ -8,7 +8,7 @@ class ConfigurationView extends AbstractView {
     public function viewConfig($fields) {
         $zero_checked = ($fields['zero_rubric_grades'] === true) ? 'checked' : '';
         $keep_previous_files = ($fields['keep_previous_files'] === true) ? 'checked' : '';
-        $display_iris_grades_summary = ($fields['display_iris_grades_summary'] === true) ? 'checked' : '';
+        $display_rainbow_grades_summary = ($fields['display_rainbow_grades_summary'] === true) ? 'checked' : '';
         $display_custom_message = ($fields['display_custom_message'] === true) ? 'checked' : '';
         $vcs_type_git = ($fields['vcs_type'] === 'git') ? 'checked' : '';
         $vcs_type_svn = ($fields['vcs_type'] === 'svn') ? 'checked' : '';
@@ -58,7 +58,7 @@ class ConfigurationView extends AbstractView {
             </div>
         </div>
 
-
+	<!--
         <div class="option">
             <div class="option-input"><input type="checkbox" name="zero_rubric_grades" value="true" {$zero_checked} /></div>
             <div class="option-desc">
@@ -67,7 +67,9 @@ class ConfigurationView extends AbstractView {
                   default at full credit.   Note: Assignments that are not submitted/submitted too late always be set to zero.</div>
             </div>
         </div>
-        <div class="option">
+	-->
+
+	<div class="option">
             <div class="option-input"><textarea style="height: 50px" name="upload_message">{$fields['upload_message']}</textarea></div>
             <div class="option-desc">
                 <div class="option-title">Upload Message</div>
@@ -84,17 +86,17 @@ class ConfigurationView extends AbstractView {
         </div>
 
         <div class="option">
-            <div class="option-input"><input type="checkbox" name="display_iris_grades_summary" value="true" {$display_iris_grades_summary} /></div>
+            <div class="option-input"><input type="checkbox" name="display_rainbow_grades_summary" value="true" {$display_rainbow_grades_summary} /></div>
             <div class="option-desc">
-                <div class="option-title">Display Iris Grades Summary</div>
-                <div class="option-alt">Should Iris Grades Summary be displayed to students.</div>
+                <div class="option-title">Display Rainbow Grades Summary</div>
+                <div class="option-alt">Should Rainbow Grades Summary be displayed to students.</div>
             </div>
         </div>
 
         <div class="option">
             <div class="option-input"><input type="checkbox" name="display_custom_message" value="true" {$display_custom_message} /></div>
             <div class="option-desc">
-                <div class="option-title">Display Iris Custom Message</div>
+                <div class="option-title">Display Custom Message</div>
                 <div class="option-alt">The primary use of the custom message is to announce Exam Zone Seating Assignments.</div>
             </div>
         </div>
@@ -122,8 +124,8 @@ class ConfigurationView extends AbstractView {
         <div class="option">
             <div class="option-input">
                 <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {$vcs_type_git}/> Git
-                <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {$vcs_type_svn}/> SVN
-                <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {$vcs_type_mer}/> Mercurial
+                <!--<input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {$vcs_type_svn}/> SVN
+                <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {$vcs_type_mer}/> Mercurial-->
             </div>
             <div class="option-desc">
                 <div class="option-title">Version Control System (VCS) Type</div>

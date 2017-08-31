@@ -92,10 +92,16 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
 $core->loadConfig($semester, $course);
 $core->loadAuthentication();
 
-if($core->getConfig()->isCourseLoaded()){
-    $core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()->getCourseHomeUrl(),true);
-    $core->getOutput()->addBreadcrumb("Submitty", $core->buildUrl());
-}
+    if($core->getConfig()->getInstitutionName() !== ""){
+        $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), "");
+        $core->getOutput()->addBreadcrumb("", $core->getConfig()->getInstitutionHomepage(),false, true);
+    }
+    $core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
+    if($core->getConfig()->isCourseLoaded()){
+        $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildUrl());
+        $core->getOutput()->addBreadcrumb("", $core->getConfig()->getCourseHomeUrl(),false, true);
+    }
+
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 Logger::setLogPath($core->getConfig()->getLogPath());

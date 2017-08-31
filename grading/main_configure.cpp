@@ -32,37 +32,12 @@ nlohmann::json printTestCase(TestCase test) {
   return j;
 }
 
-void AddAutogradingConfiguration(nlohmann::json &whole_config) {
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cpp");
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.c");
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.h");
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.java");
-
-  whole_config["autograding"]["submission_to_runner"].push_back("**/*.py");
-  whole_config["autograding"]["submission_to_runner"].push_back("**/*.pdf");
-
-  whole_config["autograding"]["compilation_to_runner"].push_back("**/*.out");
-  whole_config["autograding"]["compilation_to_runner"].push_back("**/*.class");
-
-  whole_config["autograding"]["compilation_to_validation"].push_back("test*.txt");
-
-  whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
-  whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
-
-  whole_config["autograding"]["work_to_details"].push_back("test*.txt");
-  whole_config["autograding"]["work_to_details"].push_back("test*_diff.json");
-  whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
-}
 
 
 int main(int argc, char *argv[]) {
 
-  nlohmann::json config_json;
-  std::stringstream sstr(GLOBAL_config_json_string);
-  sstr >> config_json;
-  AddSubmissionLimitTestCase(config_json);
-
-  AddAutogradingConfiguration(config_json);
+  // LOAD HW CONFIGURATION JSON
+  nlohmann::json config_json = LoadAndProcessConfigJSON("");  // don't know the username yet
 
   nlohmann::json j;
 
@@ -84,7 +59,8 @@ int main(int argc, char *argv[]) {
   int max_submissions = MAX_NUM_SUBMISSIONS;
 
   nlohmann::json all;
-  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++) {
+  int which_testcase = 0;
+  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,which_testcase++) {
     int points = itr->value("points",0);
     bool extra_credit = itr->value("extra_credit",false);
     bool hidden = itr->value("hidden",false);
@@ -96,7 +72,7 @@ int main(int argc, char *argv[]) {
       if (!hidden)
         visible += points;
     }
-    TestCase tc(*itr,config_json);
+    TestCase tc(config_json,which_testcase);
     if (tc.isSubmissionLimit()) {
       max_submissions = tc.getMaxSubmissions();
     }

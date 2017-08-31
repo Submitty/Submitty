@@ -153,6 +153,7 @@ CREATE TABLE electronic_gradeable_data (
     autograding_hidden_non_extra_credit numeric DEFAULT 0 NOT NULL,
     autograding_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
     submission_time timestamp(6) with time zone NOT NULL,
+    autograding_complete boolean DEFAULT FALSE NOT NULL,
     CONSTRAINT egd_user_team_id_check CHECK (user_id IS NOT NULL OR team_id IS NOT NULL),
     CONSTRAINT egd_g_user_team_id_unique UNIQUE (g_id, user_id, team_id, g_version)
 );

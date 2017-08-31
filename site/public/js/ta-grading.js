@@ -232,7 +232,6 @@ function updateCookies(){
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
     document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
-
     if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() == -2) {
         if (findCurrentOpenedMark() == -2) {
             var current_mark = document.getElementById('title-general');
