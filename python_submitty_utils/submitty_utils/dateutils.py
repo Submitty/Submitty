@@ -56,14 +56,23 @@ def read_submitty_date(s):
         raise SystemExit("ERROR: unexpected date format %s" % s)
     thedatetime = str(words[0] + ' ' + words[1])
     try:
+        # hoping to find timezone -0400
         with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
     except ValueError:
         try:
+            # hoping to find no timezone
             without_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S')
             my_timezone = get_timezone()
             with_timezone = my_timezone.localize(without_timezone)
         except ValueError:
-            raise SystemExit("ERROR:  invalid date format %s" % s)
+            try:
+                # hoping to find timezone -04
+                thedatetime = thedatetime+"00"
+                print ("added a thing",thedatetime)
+                with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
+            except ValueError:
+                print ("DATE PROBLEM",s)
+                raise SystemExit("ERROR:  invalid date format %s" % s)
     return with_timezone
 
 
