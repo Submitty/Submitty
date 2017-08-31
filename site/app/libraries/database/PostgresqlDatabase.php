@@ -19,7 +19,7 @@ class PostgresqlDatabase extends AbstractDatabase {
      * port
      * dbname
      */
-    public function __construct($connection_params) {
+    public function __construct($connection_params=array()) {
         parent::__construct($connection_params);
         if (isset($connection_params['host'])) {
             $this->host = $connection_params['host'];
@@ -61,7 +61,7 @@ class PostgresqlDatabase extends AbstractDatabase {
      *
      * @return array PHP array representation
      */
-    public function fromDatabaseArrayToPHP($text, $parse_bools = false, $start=0, &$end=null) {
+    public function fromDatabaseToPHPArray($text, $parse_bools = false, $start=0, &$end=null) {
         $text = trim($text);
 
         if(empty($text) || $text[0] != "{") {
@@ -79,7 +79,7 @@ class PostgresqlDatabase extends AbstractDatabase {
                     $in_array = true;
                 }
                 else if (!$in_string && $ch == "{") {
-                    $return[] = $this->fromDatabaseArrayToPHP($text, $parse_bools, $i, $i);
+                    $return[] = $this->fromDatabaseToPHPArray($text, $parse_bools, $i, $i);
                 }
                 else if (!$in_string && $ch == "}") {
                     $this->parsePGArrayValue($element, $have_string, $parse_bools, $return);
@@ -158,7 +158,7 @@ class PostgresqlDatabase extends AbstractDatabase {
      *
      * @return string Postgres text representation of array
      */
-    public function fromPHPArrayToDatabase($array) {
+    public function fromPHPToDatabaseArray($array) {
         if (!is_array($array)) {
             return '{}';
         }
@@ -168,7 +168,7 @@ class PostgresqlDatabase extends AbstractDatabase {
                 $elements[] = "null";
             }
             else if (is_array($e)) {
-                $elements[] = $this->fromPHPArrayToDatabase($e);
+                $elements[] = $this->fromPHPToDatabaseArray($e);
             }
             else if (is_string($e)) {
                 $elements[] .= '"'. str_replace('"', '\"', $e) .'"';

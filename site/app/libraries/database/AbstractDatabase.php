@@ -71,8 +71,8 @@ abstract class AbstractDatabase {
      *
      * @return array
      */
-    abstract public function fromDatabaseArrayToPHP($text, $parse_bools = false, $start=0, &$end=null);
-    abstract public function fromPHPArrayToDatabase($array);
+    abstract public function fromDatabaseToPHPArray($text, $parse_bools = false, $start=0, &$end=null);
+    abstract public function fromPHPToDatabaseArray($array);
 
     /**
      * Connects to a database through the PDO extension (@link http://php.net/manual/en/book.pdo.php).
