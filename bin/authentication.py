@@ -2,6 +2,7 @@
 
 import json
 import os
+import subprocess
 import uuid
 
 import requests
@@ -28,11 +29,25 @@ def check_password(environ, user, password):
     :param password: String containing the password passed to the apache authentication box
     :return:         Boolean for whether user was properly authenticated (True) or not (False)
     """
-    # REQUEST_URI
-    params = list(filter(lambda x: len(x) > 0 and x != 'vcs', environ['REQUEST_URI'].split("/")))
-    if len(params) < 4:
+    # The REQUEST_URI will contain stuff after the usual /<VCS>/<SEMESTER>/<COURSE>/<G_ID>/<USER_ID> that have
+    # to do with the GIT and whether it's pushing, pulling, cloning, etc.
+
+    params = list(filter(lambda x: len(x) > 0, environ['REQUEST_URI'].split("/")))
+    vcs = params[0]
+
+    vcs_paths = []
+    if vcs == 'git':
+        # info/refs?service=git-upload-pack
+        vcs_paths = ['info', 'git-upload-pack', 'refs?service=git-upload-pack', 'refs?service=git-receive-pack',
+                     'git-receive-pack']
+
+    params = list(filter(lambda x: x not in vcs_paths, params))
+    if len(params) == 4:
+        semester, course, user_id = params[1:]
+    elif len(params) == 5:
+        semester, course, gradeable, user_id = params[1:5]
+    else:
         return None
-    semester, course, gradeable, user_id = params[:4]
 
     engine = connection = metadata = None
     authenticated = False
@@ -123,12 +138,35 @@ def check_database(username, password, connection, metadata):
     if user is None:
         authenticated = None
     else:
-        authenticated = user['user_password'] == password
+        php = "print(password_verify('{}', '{}') == true ? 'true' : 'false');".format(password, user['password'])
+        authenticated = subprocess.check_output(['php', '-r', php]) == 'true'
 
     return authenticated
 
 if __name__ == "__main__":
+    """
+    To test this script, you'll have to run this as www-data or hwphp or hwcgi so that when it creates the temp
+    files, pam_check.cgi has access to them. Run it like this:
+    sudo -u www-data /usr/local/submitty/bin/authentication.py
+    
+    The output should be:
+    True
+    True
+    False
+    True
+    True
+    True
+    False
+    True
+    """
+    #
     print(check_password({'REQUEST_URI': '/git/f17/sample/open_homework/instructor'}, 'instructor', 'instructor'))
     print(check_password({'REQUEST_URI': '/git/f17/sample/open_homework/instructor'}, 'ta', 'ta'))
     print(check_password({'REQUEST_URI': '/git/f17/sample/open_homework/instructor'}, 'student', 'student'))
     print(check_password({'REQUEST_URI': '/git/f17/sample/open_homework/student'}, 'student', 'student'))
+
+    print(check_password({'REQUEST_URI': '/git/f17/sample/instructor'}, 'instructor', 'instructor'))
+    print(check_password({'REQUEST_URI': '/git/f17/sample/instructor'}, 'ta', 'ta'))
+    print(check_password({'REQUEST_URI': '/git/f17/sample/instructor'}, 'student', 'student'))
+    print(check_password({'REQUEST_URI': '/git/f17/sample/student'}, 'student', 'student'))
+
