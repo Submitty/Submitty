@@ -117,6 +117,11 @@ define('VALIDATE_NUM_FIELDS', 10);
 //                        Set to null, if the private key is not encrypted.
 //                        This constant is ignored when CSV_AUTH is set to
 //                        anything other than 'remote_keypair'.
+//                        NOTE: To use encrypted keys with an Ubuntu SSH/SFTP
+//                              host, libssh2 needs be manually recompiled with
+//                              OpenSSH.  Otherwise, authentication will always
+//                              fail. q.v. https://bugs.php.net/bug.php?id=58573
+//                              and http://php.net/manual/en/function.ssh2-auth-pubkey-file.php
 define('CSV_AUTH',               'remote_keypair');
 define('CSV_FILE',               '/path/to/datafile.csv');
 define('CSV_REMOTE_SERVER',      'fileserver.myuniversity.edu');

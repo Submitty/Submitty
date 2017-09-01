@@ -1,4 +1,4 @@
-Submitty Student Auto Feed PHP Scripts Readme, August 16 2017
+Submitty Student Auto Feed PHP Scripts Readme, August 31 2017
 
 These are code examples for any University to use as a basis to have student
 enrollment data inserted or updated into any or every course's database.  Users
@@ -21,7 +21,7 @@ Code comments will help explain usage.
 
 
 submitty_student_auto_feed.php
-A command line executabke script that is a code class to read a student
+A command line executable script that is a code class to read a student
 enrollment data form in CSV format and "upsert" (update/insert) student
 enrollment for all registered courses in Submitty.
 
