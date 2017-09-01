@@ -24,6 +24,7 @@
  *
  * Process flow code exists in the constructor, so all that is needed is to
  * (1) include "config.php" so that constants are defined.
+ *     (and make sure that constants are properly configured)
  * (2) instantiate this class to process a data feed.
  *
  * -------------------------------------------------------------------------- */
@@ -36,7 +37,6 @@ class submitty_student_auto_feed {
     private static $course_list;
     private static $course_mappings;
     private static $db;
-    private static $psql_version;
     private static $data;
     private static $log_msg_queue;
 
@@ -66,18 +66,19 @@ class submitty_student_auto_feed {
         $db_host     = DB_HOST;
         $db_user     = DB_LOGIN;
         $db_password = DB_PASSWORD;
-        self::$db = pg_connect("host={$db_host} dbname=submitty user={$db_user} password={$db_password}");
+        self::$db = pg_connect("host={$db_host} dbname=submitty user={$db_user} password={$db_password} sslmode=prefer");
 
         //Make sure there's a DB connection to Submitty.
-        if (pg_connection_status(self::$db) === PGSQL_CONNECTION_BAD) {
+        if (pg_connection_status(self::$db) === false) {
             $this->log_it("Error: Cannot connect to submitty DB");
         } else {
-            //$psql_version will determine which upsert method is used.
-            //Version >= 9.5 permits update on conflict.  Version <= 9.4 uses batch transaction.
-            self::$psql_version = floatval(pg_parameter_status(self::$db, 'server_version'));
-
 			//Get course list
 			self::$course_list = $this->get_participating_course_list();
+
+			//Prepare empty courses data
+			foreach (self::$course_list as $course) {
+				self::$data['courses_users'][$course] = array();
+			}
 
 			//Get mapped_courses list (when one class is merged into another)
 			self::$course_mappings = $this->get_course_mappings();
@@ -93,12 +94,7 @@ class submitty_student_auto_feed {
             case $this->validate_csv($csv_data):
                 $this->log_it("Student CSV data failed validation.");
                 break;
-            //Chooses which data upsert function to run based on psql version.
-            //(upsert v9.4 with batch upsert or v9.5 with CONFLICT resloution upsert)
-            //Case condition is resolved by function return value
-            //
-            //upsert_psql95 not yet ready.
-            //case ((self::$psql_version >= 9.5) ? $this->upsert_psql95() : $this->upsert_psql94()):
+            //Data upsert
             case $this->upsert_psql94():
                 $this->log_it("Error during upsert of data.");
                 break;
@@ -112,7 +108,7 @@ class submitty_student_auto_feed {
     public function __destruct() {
 
         //Close DB connection, if it exists.
-        if (pg_connection_status(self::$db) === PGSQL_CONNECTION_OK) {
+        if (pg_connection_status(self::$db) === false) {
         	pg_close(self::$db);
         }
 
@@ -129,7 +125,7 @@ class submitty_student_auto_feed {
     private function validate_csv($csv_data) {
     //IN:  No parameters
     //OUT: No specific return, but self::$data property will contain csv data.
-    //PURPOSE: Load CSV data, run some error checks, set data to class property.
+    //PURPOSE: Run some error checks and set data to class property.
 
         if (empty($csv_data)) {
             $this->log_it("No data read from student CSV file.");
@@ -152,7 +148,7 @@ class submitty_student_auto_feed {
 
             //BEGIN VALIDATION
             $course = strtolower($row[COLUMN_COURSE_PREFIX]) . $row[COLUMN_COURSE_NUMBER];
-            $section = $row[COLUMN_SECTION];
+            $section = intval($row[COLUMN_SECTION]);
             $num_fields = count($row);
 
             //Row validation filters.  If any prove false, row is discarded.
@@ -185,8 +181,8 @@ class submitty_student_auto_feed {
                     $this->log_it("Row {$index} failed validation for student last name ({$row[COLUMN_LNAME]}).  Row discarded.");
                     break;
                 //Student section must be greater than zero.  intval($str) returns zero when $str is not integer.
-                case (intval($row[COLUMN_SECTION]) > 0):
-                    $this->log_it("Row {$index} failed validation for student section ({$row[COLUMN_SECTION]}).  Row discarded.");
+                case ($section > 0):
+                    $this->log_it("Row {$index} failed validation for student section ({$section}).  Row discarded.");
                     break;
                 //Loose email address check for format of "address@domain" or "address@[ipv4]"
                 case (preg_match("~^.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $row[COLUMN_EMAIL])):
@@ -199,9 +195,9 @@ class submitty_student_auto_feed {
                 			$tmp_course  = $course;
                 			$tmp_section = $section;
 							$course = self::$course_mappings[$tmp_course][$tmp_section]['mapped_course'];
-							$section = self::$course_mappings[$tmp_course][$tmp_section]['mapped_section'];
+							$section = intval(self::$course_mappings[$tmp_course][$tmp_section]['mapped_section']);
 						} else {
-							$this->log_it("{$course} has been mapped, but section {$section} is in feed, but not mapped.");
+							$this->log_it("{$course} has been mapped.  Section {$section} is in feed, but not mapped.");
 						}
                 	}
 
@@ -241,12 +237,18 @@ class submitty_student_auto_feed {
     }
 
     private function get_participating_course_list() {
+    //IN:  No parameters
+    //OUT: Array showing courses that are participating in Submitty.
+    //PURPOSE: Submitty can handle multiple courses.  This function retrieves
+    //         a list of participating courses from the database.
+
         //EXPECTED: self::$db has an active/open Postgres connection.
-        if (pg_connection_status(self::$db) === PGSQL_CONNECTION_BAD) {
-            $this->log_it("Error: not connected to submitty DB when retrieving active course list.");
+        if (pg_connection_status(self::$db) === false) {
+            $this->log_it("Error: not connected to Submitty DB when retrieving active course list.");
             return false;
         }
 
+        //SQL query code to get course list.
         $sql = <<<SQL
 SELECT course
 FROM courses
@@ -254,39 +256,55 @@ WHERE semester = $1
 AND status = 1
 SQL;
 
+        //Get all courses listed in DB.
         $res = pg_query_params(self::$db, $sql, array(self::$semester));
 
+        //Error check
         if ($res === false) {
             $this->log_it("RETRIEVE PARTICIPATING COURSES : " . pg_last_error(self::$db));
             return false;
         }
 
+        //Return course list.
         return pg_fetch_all_columns($res, 0);
     }
 
     private function get_course_mappings() {
-        //EXPECTED: self::$db has an active/open Postgres connection.
+    //IN:  No parameters.
+    //OUT: A list of "course mappings" (where one course is merged into another)
+    //PURPOSE:  Sometimes a course is combined with undergrads/grad students, or
+    //          a course is crosslisted, but meets collectively.  Course
+    //          mappings will "merge" courses into a single master course.
 
-        if (pg_connection_status(self::$db) === PGSQL_CONNECTION_BAD) {
-            $this->log_it("Error: not connected to submitty DB when retrieving active course list.");
+        //EXPECTED: self::$db has an active/open Postgres connection.
+        if (pg_connection_status(self::$db) === false) {
+            $this->log_it("Error: not connected to Submitty DB when retrieving course mappings list.");
             return false;
         }
 
+        //SQL query code to retrieve course mappinsg
         $sql = <<<SQL
 SELECT course, registration_section, mapped_course, mapped_section
 FROM mapped_courses
 WHERE semester = $1
 SQL;
 
+        //Gett all mappings from DB.
 	    $res = pg_query_params(self::$db, $sql, array(self::$semester));
 
+        //Error check
         if ($res === false) {
             $this->log_it("RETRIEVE MAPPED COURSES : " . pg_last_error(self::$db));
             return false;
         }
 
+        //Check for no mappings returned.
         $results = pg_fetch_all($res);
+        if (empty($results)) {
+        	return array();
+        }
 
+        //Describe how auto-feed data is translated by mappings.
         $mappings = array();
         foreach ($results as $row) {
         	$course = $row['course'];
@@ -301,6 +319,15 @@ SQL;
     }
 
     private function load_csv(&$csv_data) {
+    //IN:  Empty variable to recieve auto feed data by reference.
+    //OUT: True when process completes OK.  False when there is a problem.
+    //PURPOSE:  Function to load auto feed data.  Constants need to be set in
+    //          config.php.
+    //NOTE: 'remote_keypair' auth doesn't quite work with encrypted keys on
+    //      Ubuntu systems due to a bug in the PHP API when libssh2 is NOT
+    //      compiled with OpenSSH (as is normal with Ubuntu).
+    //      q.v. https://bugs.php.net/bug.php?id=58573
+    //           http://php.net/manual/en/function.ssh2-auth-pubkey-file.php
 
     	$csv_file = CSV_FILE;
 
@@ -318,11 +345,12 @@ SQL;
 			}
     		break;
     	case 'remote_keypair':
-			$ssh2 = ssh2_connect(CSV_REMOTE_SERVER, 22);
+			$ssh2 = ssh2_connect(CSV_REMOTE_SERVER, 22, array('hostkey'=>'ssh-rsa'));
 			if (ssh2_auth_pubkey_file($ssh2, CSV_AUTH_USER, CSV_AUTH_PUBKEY, CSV_AUTH_PRIVKEY, CSV_PRIVKEY_PASSPHRASE)) {
 				$sftp = ssh2_sftp($ssh2);
 				$host = "ssh2.sftp://" . intval($sftp);
 			} else {
+				$this->log_it("SFTP keypair auth failed.\n" . CSV_REMOTE_SERVER . PHP_EOL . CSV_AUTH_USER . PHP_EOL . CSV_AUTH_PUBKEY . PHP_EOL . CSV_AUTH_PRIVKEY . PHP_EOL . CSV_PRIVKEY_PASSPHRASE . PHP_EOL);
 				return false;
 			}
     		break;
@@ -331,25 +359,29 @@ SQL;
     	}
 
 	   	$csv_data = file("{$host}{$csv_file}", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+	   	return true;
     }
 
     private function upsert_psql94() {
     //IN:  No parameters.
     //OUT: TRUE when upsert is complete.
-    //PURPOSE:  "Update/Insert" data into the database.  Code capable of "batch"
+    //PURPOSE:  "Update/Insert" data into the database.  Code works via "batch"
     //          upserts.
 
 /* -----------------------------------------------------------------------------
  * This SQL code was adapted from upsert discussion on Stack Overflow and is
- * meant to be compatible with PostgreSQL prior to v9.5.
+ * meant to be compatible with PostgreSQL prior to v9.5.  Code does work with
+ * PostgreSQL 9.5 (and presumably later versions).
  *
  *  q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
  * -------------------------------------------------------------------------- */
 
-        $sql = array('users'         => array('begin'  => 'BEGIN',
-                                              'commit' => 'COMMIT'),
-                     'courses_users' => array('begin'  => 'BEGIN',
-                                              'commit' => 'COMMIT'));
+        $sql = array('users'         => array('begin'    => 'BEGIN',
+                                              'commit'   => 'COMMIT',
+                                              'rollback' => 'ROLLBACK'),
+                     'courses_users' => array('begin'    => 'BEGIN',
+                                              'commit'   => 'COMMIT',
+                                              'rollback' => 'ROLLBACK'));
 
         //TEMPORARY table to hold all new values that will be "upserted"
         $sql['users']['temp_table'] = <<<SQL
@@ -359,7 +391,7 @@ CREATE TEMPORARY TABLE upsert_users (
     user_preferred_firstname VARCHAR,
     user_lastname            VARCHAR,
     user_email               VARCHAR
-) ON COMMIT DROP;
+) ON COMMIT DROP
 SQL;
 
         $sql['courses_users']['temp_table'] = <<<SQL
@@ -370,7 +402,7 @@ CREATE TEMPORARY TABLE upsert_courses_users (
     user_group           INTEGER,
     registration_section INTEGER,
     manual_registration  BOOLEAN
-) ON COMMIT DROP;
+) ON COMMIT DROP
 SQL;
 
         //INSERT new data into temporary table -- prepares all data to be
@@ -402,6 +434,8 @@ SET
     user_email=upsert_users.user_email
 FROM upsert_users
 WHERE users.user_id=upsert_users.user_id
+AND users.user_updated=FALSE
+AND users.instructor_updated=FALSE
 SQL;
 
         $sql['courses_users']['update'] = <<<SQL
@@ -415,6 +449,8 @@ SET
     manual_registration=upsert_courses_users.manual_registration
 FROM upsert_courses_users
 WHERE courses_users.user_id=upsert_courses_users.user_id
+AND courses_users.course=upsert_courses_users.course
+AND courses_users.semester=upsert_courses_users.semester
 AND courses_users.manual_registration=FALSE
 SQL;
 
@@ -455,30 +491,41 @@ INSERT INTO courses_users (
     upsert_courses_users.manual_registration
 FROM upsert_courses_users
 LEFT OUTER JOIN courses_users
-    ON courses_users.user_id=upsert_courses_users.user_id
+    ON upsert_courses_users.user_id=courses_users.user_id
+    AND upsert_courses_users.course=courses_users.course
+    AND upsert_courses_users.semester=courses_users.semester
 WHERE courses_users.user_id IS NULL
+AND courses_users.course IS NULL
+AND courses_users.semester IS NULL
 SQL;
+
 
         //We also need to move students no longer in auto feed to the NULL registered section
         //Make sure this only affects students (AND users.user_group=$1)
 
-        //Nothing to drop in users table.
+        //Nothing to update in users table.
         $sql['users']['dropped_students'] = null;
 
         $sql['courses_users']['dropped_students'] = <<<SQL
 UPDATE courses_users
 SET registration_section=NULL
-FROM (SELECT courses_users.user_id
-    FROM courses_users
-    JOIN upsert_courses_users
-        ON courses_users.user_id=upsert_courses_users.user_id
-    WHERE upsert_courses_users.user_id IS NULL
-    AND courses_users.course=upsert_courses_users.course
-    AND courses_users.semester=upsert_courses_users.semester)
-AS dropped
+FROM (
+	SELECT
+		courses_users.user_id,
+		courses_users.course,
+		courses_users.semester
+	FROM courses_users
+	LEFT OUTER JOIN upsert_courses_users
+		ON courses_users.user_id=upsert_courses_users.user_id
+	WHERE upsert_courses_users.user_id IS NULL
+	AND courses_users.course=$1
+	AND courses_users.semester=$2
+	AND courses_users.user_group=4
+) AS dropped
 WHERE courses_users.user_id=dropped.user_id
-AND courses_users.user_group=$1
-AND courses_users.manual_registration=$2
+AND courses_users.course=dropped.course
+AND courses_users.semester=dropped.semester
+AND courses_users.manual_registration=FALSE
 SQL;
 
 		//Transactions
@@ -490,14 +537,19 @@ SQL;
 			pg_query_params(self::$db, $sql['users']['data'], $row);
 		}
 		pg_query(self::$db, $sql['users']['lock']);
-		if (pg_query(self::$db, $sql['users']['update']) === false) {
+		switch (false) {
+		case pg_query(self::$db, $sql['users']['update']):
 			$this->log_it("USERS (UPDATE) : " . pg_last_error(self::$db));
-		}
-		if (pg_query(self::$db, $sql['users']['insert']) === false) {
+			pg_query(self::$db, $sql['users']['rollback']);
+			break;
+		case pg_query(self::$db, $sql['users']['insert']):
 			$this->log_it("USERS (INSERT) : " . pg_last_error(self::$db));
+			pg_query(self::$db, $sql['users']['rollback']);
+			break;
+		default:
+			pg_query(self::$db, $sql['users']['commit']);
+			break;
 		}
-		$this->log_it(pg_last_error(self::$db));
-		pg_query(self::$db, $sql['users']['commit']);
 
 		//'courses_users' table (per course)
 		foreach(self::$data['courses_users'] as $course_name => $course_data) {
@@ -510,33 +562,24 @@ SQL;
 			pg_query(self::$db, $sql['courses_users']['lock']);
 			if (pg_query(self::$db, $sql['courses_users']['update']) === false) {
 				$this->log_it(strtoupper($course_name) . " (UPDATE) : " . pg_last_error(self::$db));
-			}
+				pg_query(self::$db, $sql['courses_users']['rollback']);
+				continue;
+ 			}
 			if (pg_query(self::$db, $sql['courses_users']['insert']) === false) {
 				$this->log_it(strtoupper($course_name) . " (INSERT) : " . pg_last_error(self::$db));
+				pg_query(self::$db, $sql['courses_users']['rollback']);
+				continue;
 			}
-
-			pg_query_params(self::$db, $sql['courses_users']['dropped_students'], array(4, 'false'));
+			if (pg_query_params(self::$db, $sql['courses_users']['dropped_students'], array($course_name, self::$semester)) === false) {
+				$this->log_it(strtoupper($course_name) . " (DROPPED STUDENTS) : " . pg_last_error(self::$db));
+				pg_query(self::$db, $sql['courses_users']['rollback']);
+				continue;
+			}
 			pg_query(self::$db, $sql['courses_users']['commit']);
 		}
 
         //indicate success.
         return true;
-    }
-
-    private function upsert_psql95() {
-    //IN:  No parameters.
-    //OUT: TRUE when upsert is complete.
-    //PURPOSE:  "Update/Insert" data into the database.  Code takes advantage
-    //          of ON CONFLICT clause for UPDATE
-
-/* -----------------------------------------------------------------------------
- * SQL upsert code for Postgres v9.5+ (permits update on conflict)
- *
- * q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
- * -------------------------------------------------------------------------- */
-
-	//To do at a later time.  upsert_psql94() will work with postgresql v9.5+.
-
     }
 
     private function log_it($msg) {
@@ -553,13 +596,22 @@ SQL;
 class deduplicate {
 
 	public static function deduplicate_data(&$arr, $key='user_id') {
+	//IN:  Array to be deduplicated, passed by reference.
+	//OUT: No specific return.  Deduplicated array is passed by reference.
+	//PURPOSE: Users table in "Submitty" database must have a unique student
+	//         per row.  Students in multiple courses may have multiple entries
+	//         where deduplication is necessary.
 
 		self::merge_sort($arr, $key);
 		self::dedup($arr, $key);
 	}
 
 	private static function merge_sort(&$arr, $key) {
-    //NOTE: PHP's sort() function is unstable and does not sort by column.
+	//IN:  Array to sort (returned by reference) and key to sort by
+	//OUT: No return statement.  Array to be sorted is passed by reference.
+    //PURPOSE: PHP's built in sort is quicksort.  It is not stable and cannot
+    //         sort rows by column, and therefore is not sufficient, here.
+    //         This implementation of merge sort does what is needed.
 
 		//Arrays of size < 2 require no action.
 		if (count($arr) < 2) {
@@ -606,8 +658,12 @@ class deduplicate {
 	}
 
 	private static function dedup(&$arr, $key) {
+	//IN:  Sorted array, passed by reference.
+	//OUT: No return statement.  Deduplicated array is passed by reference.
+	//PURPOSE:  remove duplicated student data
 
-		for ($i = 1; $i < count($arr); $i++) {
+		$count = count($arr);
+		for ($i = 1; $i < $count; $i++) {
 			if ($arr[$i][$key] === $arr[$i-1][$key]) {
 				unset($arr[$i-1]);
 			}
