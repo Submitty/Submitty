@@ -56,7 +56,7 @@ class DatabaseFactory {
                 return new SqliteDatabase($connection_params);
                 break;
             default:
-                throw new NotImplementedException("Driver not implemented: {$this->driver}");
+                throw new NotImplementedException("Database not implemented for driver: {$this->driver}");
         }
     }
 

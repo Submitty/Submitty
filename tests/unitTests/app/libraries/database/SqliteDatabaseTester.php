@@ -14,4 +14,20 @@ class SqliteDatabaseTester extends \PHPUnit_Framework_TestCase {
         $database = new SqliteDatabase(array('path' => '/tmp/test.sq3'));
         $this->assertEquals("sqlite:/tmp/test.sq3", $database->getDSN());
     }
+
+    /**
+     * @expectedException \app\exceptions\NotImplementedException
+     */
+    public function testFromDatabaseToPHPArray() {
+        $database = new SqliteDatabase();
+        $database->fromDatabaseToPHPArray("");
+    }
+
+    /**
+     * @expectedException \app\exceptions\NotImplementedException
+     */
+    public function testFromPHPToDatabaseArray() {
+        $database = new SqliteDatabase();
+        $database->fromPHPToDatabaseArray(array());
+    }
 }

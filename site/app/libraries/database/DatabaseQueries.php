@@ -63,7 +63,7 @@ class DatabaseQueries {
      */
     public function getSubmittyUser($user_id) {
         $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
-        return ($this->submitty_db->rowCount() > 0) ? new User($this->core, $this->submitty_db->row()) : null;
+        return ($this->submitty_db->getRowCount() > 0) ? new User($this->core, $this->submitty_db->row()) : null;
     }
 
     /**

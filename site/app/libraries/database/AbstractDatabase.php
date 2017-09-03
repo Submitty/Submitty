@@ -41,6 +41,15 @@ abstract class AbstractDatabase {
     protected $password = null;
 
     /**
+     * Should we emulate prepares within PDO. Generally we want to leave this to false, but for some
+     * drivers (such as PDO_MySQL, it may be beneficial for performace to turn this to true
+     * @var bool
+     */
+    protected $emulate_prepares = false;
+
+    protected $columns = array();
+
+    /**
      * Database constructor. This function (overridden in all children) sets our
      * connection parameters for when we connect. Due to the sensitive nature of the
      * parameters of this function and that we never want to leak these either to the
@@ -99,8 +108,7 @@ abstract class AbstractDatabase {
                     $this->link = new PDO($this->getDSN());
                 }
 
-
-                $this->link->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+                $this->link->setAttribute(PDO::ATTR_EMULATE_PREPARES, $this->emulate_prepares);
                 $this->link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             }
             catch (PDOException $pdoException) {
@@ -110,67 +118,135 @@ abstract class AbstractDatabase {
     }
 
     /**
-     * Run a query against connected PDO link
+     * "Disconnect" from current PDO connection by just setting the link to null, and PDO will take care of actually
+     * recycling the connection upon the GC destruction of the PDO object. This will additionally commit any open
+     * transactions before disconnecting.
+     */
+    public function disconnect() {
+        if ($this->transaction) {
+            $this->commit();
+        }
+        $this->link = null;
+    }
+
+    /**
+     * @return bool Returns true if we're connected to a database, else return false
+     */
+    public function isConnected() {
+        return $this->link !== null;
+    }
+
+    /**
+     * Run a query against the connected PDO DB.
      *
      * @param string $query
      * @param array $parameters
      *
-     * @return boolean
+     * @return boolean true if query suceeded, else false.
      */
     public function query($query, $parameters=array()) {
         try {
-            $statement = $this->link->prepare($query);
-            $statement->execute($parameters);
-            $this->results = $statement->fetchAll();
-            $lower = strtolower($query);
-            if (Utils::startsWith($lower, "update") || Utils::startsWith($lower, "delete")
-                || Utils::startsWith($lower, "insert")) {
-                $this->row_count = $statement->rowCount();
-            }
-            else {
-                $this->row_count = count($this->results);
-            }
             $this->query_count++;
             $this->all_queries[] = array($query, $parameters);
+            $statement = $this->link->prepare($query);
+            $result = $statement->execute($parameters);
+            $lower = strtolower($query);
+
+            $this->row_count = null;
+            if (Utils::startsWith($lower, 'update') || Utils::startsWith($lower, 'delete')
+                || Utils::startsWith($lower, 'insert')) {
+                $this->row_count = $statement->rowCount();
+            }
+            elseif (Utils::startsWith($lower, 'select')) {
+                $columns = $this->getColumnData($statement);
+                $this->results = $statement->fetchAll(\PDO::FETCH_ASSOC);
+                // Under normal circumstances, we don't really need to worry about $this->results being false.
+                // @codeCoverageIgnoreStart
+                if ($this->results === false) {
+                    return false;
+                }
+                // @codeCoverageIgnoreEnd
+                foreach ($this->results as $idx => $result) {
+                    $this->results[$idx] = $this->transformResult($result, $columns);
+                }
+                $this->row_count = count($this->results);
+            }
         }
         catch (PDOException $pdoException) {
-            if ($this->transaction) {
-                $this->link->rollBack();
-                $this->transaction = false;
-            }
             throw new DatabaseException($pdoException->getMessage(), $query, $parameters);
         }
 
-        return true;
+        return $result;
     }
 
     /**
+     * Given a query, if it's a SELECT, it'll run the query against the DB returning a {@see DatabaseIterator}
+     * which can be used to scroll through the results. However, if the query is of any other type, it'll
+     * run it through the query() function which will just return a boolean on if the function suceeded or
+     * not. In all cases, it will throw a {@see DatabaseException} on an invalid query.
+     *
      * @param $query
      * @param $parameters
      * @param $callback
      *
-     * @return DatabaseRowIterator|null
+     * @return DatabaseRowIterator|bool
+     *
+     * @throws \app\exceptions\DatabaseException
      */
-    public function queryIterator($query, $parameters, $callback) {
+    public function queryIterator($query, $parameters=array(), $callback=null) {
+        $lower = strtolower($query);
+        if (!Utils::startsWith($lower, "select")) {
+            return $this->query($query, $parameters);
+        }
         try {
-            $statement = $this->link->prepare($query, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
-            $statement->execute($parameters);
-            $lower = strtolower($query);
             $this->query_count++;
             $this->all_queries[] = array($query, $parameters);
-            if (Utils::startsWith($lower, "update") || Utils::startsWith($lower, "delete")
-                || Utils::startsWith($lower, "insert")) {
-                $this->row_count = $statement->rowCount();
-                return null;
-            }
-            else {
-                $this->row_count = null;
-                return new DatabaseRowIterator($statement, $callback);
-            }
+            $statement = $this->link->prepare($query);
+            $statement->execute($parameters);
+            $this->row_count = null;
+            return new DatabaseRowIterator($statement, $this, $callback);
         }
         catch (PDOException $exception) {
             throw new DatabaseException($exception->getMessage(), $query, $parameters);
         }
+    }
+
+    /**
+     * @param \PDOStatement $statement
+     *
+     * @return array
+     */
+    public function getColumnData($statement) {
+        $columns = array();
+        for ($i = 0; $i < $statement->columnCount(); $i++) {
+            $col = $statement->getColumnMeta($i);
+            if ($col !== false) {
+                $columns[$col['name']] = $col;
+            }
+        }
+        return $columns;
+    }
+
+    /**
+     * @param $result
+     * @param $columns
+     *
+     * @return mixed
+     */
+    public function transformResult($result, $columns) {
+        foreach ($result as $col => $value) {
+            if (isset($columns[$col])) {
+                $column = $columns[$col];
+                if ($column['native_type'] === 'integer' && $column['pdo_type'] !== PDO::PARAM_INT) {
+                    $value = (integer) $value;
+                }
+                elseif ($column['native_type'] === 'boolean' && $column['pdo_type'] !== PDO::PARAM_BOOL) {
+                    $value = (boolean) $value;
+                }
+                $result[$col] = $value;
+            }
+        }
+        return $result;
     }
 
     /**
@@ -191,6 +267,13 @@ abstract class AbstractDatabase {
     public function commit() {
         if ($this->transaction) {
             $this->link->commit();
+            $this->transaction = false;
+        }
+    }
+
+    public function rollback() {
+        if ($this->transaction) {
+            $this->link->rollBack();
             $this->transaction = false;
         }
     }
@@ -234,7 +317,7 @@ abstract class AbstractDatabase {
      *
      * @return int
      */
-    public function rowCount() {
+    public function getRowCount() {
         return $this->row_count;
     }
 
@@ -243,8 +326,12 @@ abstract class AbstractDatabase {
      *
      * @return int
      */
-    public function totalQueries() {
-        return $this->query_count;
+    public function getQueryCount() {
+        return count($this->all_queries);
+    }
+
+    public function getQueries() {
+        return $this->all_queries;
     }
 
     /**
@@ -252,7 +339,7 @@ abstract class AbstractDatabase {
      *
      * @return string
      */
-    public function getQueries() {
+    public function getPrintQueries() {
         $c = 1;
         $print = "";
         foreach($this->all_queries as $query) {
@@ -266,36 +353,22 @@ abstract class AbstractDatabase {
     }
 
     /**
-     * "Disconnect" from current PDO connection by just setting
-     * the link to null.
-     */
-    public function disconnect() {
-        if ($this->transaction) {
-            $this->commit();
-        }
-        $this->link = null;
-    }
-
-    /**
-     * Returns true if we're connected to a database,
-     * else return false
-     *
      * @return bool
      */
-    public function hasConnection() {
-        return $this->link !== null;
-    }
-
     public function inTransaction() {
         return $this->transaction;
     }
 
-    public function getLastInsertId($name = "") {
-        if (!empty($name)) {
-            return $this->link->lastInsertId($name);
-        }
-        else {
-            return $this->link->lastInsertId();
-        }
+    /**
+     * Get the 'ID' (generally the Primary Key) of the last inserted row, either from the last insert
+     * (if $name is null) or pertaining to the series given by $name (if supported). Some drivers, like
+     * PDO_PGSQL, require a $name perameter to return the ID while some, like PDO_SQLITE, largely ignore it.
+     *
+     * @param string $name name of the sequence to get the ID of (if supported)
+     *
+     * @return mixed ID of the last inserted row
+     */
+    public function getLastInsertId($name = null) {
+        return $this->link->lastInsertId($name);
     }
 }

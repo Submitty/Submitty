@@ -35,4 +35,13 @@ class DatabaseFactoryTester extends BaseUnitTest {
         /** @noinspection PhpParamsInspection */
         $this->assertInstanceOf(DatabaseQueries::class, $factory->getQueries($this->createMockCore()));
     }
+
+    /**
+     * @expectedException \app\exceptions\NotImplementedException
+     * @expectedExceptionMessage Database not implemented for driver: invalid
+     */
+    public function testDatabaseFactoryInvalid() {
+         $factory = new DatabaseFactory('invalid');
+         $factory->getDatabase(array());
+    }
 }

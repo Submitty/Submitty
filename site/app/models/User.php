@@ -14,7 +14,6 @@ use app\libraries\Core;
  * @method string getPassword()
  * @method string getFirstName() Get the first name of the loaded user
  * @method string getPreferredFirstName() Get the preferred name of the loaded user
- * @method string setPreferredFirstName() Set the preferred name of the loaded user (does not affect db. call updateUser.)
  * @method string getDisplayedFirstName() Returns the preferred name if one exists and is not null or blank,
  *                                        otherwise return the first name field for the user.
  * @method string getLastName() Get the last name of the loaded user
@@ -161,6 +160,10 @@ class User extends AbstractModel {
         $this->setDisplayedFirstName();
     }
 
+    /**
+     * Set the preferred name of the loaded user (does not affect db. call updateUser.)
+     * @param string $name
+     */
     public function setPreferredFirstName($name) {
         $this->preferred_first_name = $name;
         $this->setDisplayedFirstName();
