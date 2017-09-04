@@ -272,7 +272,7 @@ class AbstractDatabaseTester extends \PHPUnit_Framework_TestCase {
      * @expectedException \app\exceptions\DatabaseException
      */
     public function testInvalidDSN() {
-        $database = new PostgresqlDatabase();
+        $database = new PostgresqlDatabase(array('dbname' => 'invalid_db'));
         $database->connect();
     }
 
