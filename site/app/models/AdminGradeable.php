@@ -55,7 +55,7 @@ class AdminGradeable extends AbstractModel {
     protected $g_syllabus_bucket = -1;
 
     /** @property @var \app\models\GradeableComponent[] */
-    protected $old_components = array();
+    protected $old_components;
     /** @property @var same info as above but encoded */
     protected $old_components_json = "{}";
 
@@ -124,6 +124,7 @@ class AdminGradeable extends AbstractModel {
         $this->eg_submission_due_date = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
         $this->default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         $this->vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
+        $this->old_components = array(new GradeableComponent($this->core, array()));
     }
 
     // following only if edit or from template
