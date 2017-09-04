@@ -193,6 +193,19 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         filehandle,history_file_tmp=tempfile.mkstemp()
         shutil.copy(history_file,history_file_tmp)
 
+    # get info from the gradeable config file
+    json_config=os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","form","form_"+obj["gradeable"]+".json")
+    with open(json_config, 'r') as infile:
+        gradeable_config_obj = json.load(infile)
+
+    # get info from the gradeable config file
+    complete_config=os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","complete_config","complete_config_"+obj["gradeable"]+".json")
+    with open(complete_config, 'r') as infile:
+        complete_config_obj = json.load(infile)
+
+    checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
+    checkout_subdir_path = os.path.join(checkout_path,checkout_subdirectory)
+
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
     tmp=os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
@@ -250,16 +263,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     os.mkdir(tmp_compilation)
     os.chdir(tmp_compilation)
     
-    # get info from the gradeable config file
-    json_config=os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","form","form_"+obj["gradeable"]+".json")
-    with open(json_config, 'r') as infile:
-        gradeable_config_obj = json.load(infile)
-
-    # get info from the gradeable config file
-    complete_config=os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","complete_config","complete_config_"+obj["gradeable"]+".json")
-    with open(complete_config, 'r') as infile:
-        complete_config_obj = json.load(infile)
-
     gradeable_upload_type=gradeable_config_obj["upload_type"]
     #print ("UPLOAD TYPE ",gradeable_upload_type)
     #FIXME:  deal with svn/git/whatever
@@ -269,7 +272,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
     pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
     if is_vcs:
-        pattern_copy("checkout_to_compilation",patterns_submission_to_compilation,checkout_path,tmp_compilation,tmp_logs)
+        pattern_copy("checkout_to_compilation",patterns_submission_to_compilation,checkout_subdir_path,tmp_compilation,tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
     copy_contents_into(provided_code_path,tmp_compilation)
@@ -330,7 +333,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     patterns_submission_to_runner = complete_config_obj["autograding"]["submission_to_runner"]
     pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work,tmp_logs)
     if is_vcs:
-        pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_path,tmp_work,tmp_logs)
+        pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work,tmp_logs)
 
     patterns_compilation_to_runner = complete_config_obj["autograding"]["compilation_to_runner"]
     pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
@@ -382,7 +385,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     patterns_submission_to_validation = complete_config_obj["autograding"]["submission_to_validation"]
     pattern_copy("submission_to_validation",patterns_submission_to_validation,submission_path,tmp_work,tmp_logs)
     if is_vcs:
-        pattern_copy("checkout_to_validation",patterns_submission_to_validation,checkout_path,tmp_work,tmp_logs)
+        pattern_copy("checkout_to_validation",patterns_submission_to_validation,checkout_subdir_path,tmp_work,tmp_logs)
     patterns_compilation_to_validation = complete_config_obj["autograding"]["compilation_to_validation"]
     pattern_copy("compilation_to_validation",patterns_compilation_to_validation,tmp_compilation,tmp_work,tmp_logs)
     
