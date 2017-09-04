@@ -197,7 +197,7 @@ HTML;
 HTML;
                 }
                 $return .= <<<HTML
-    <input type="submit" id="submit" class="btn btn-primary" value="Grade Version Control System (VCS) Repository" />
+    <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
 HTML;
             }
             else {
