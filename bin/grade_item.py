@@ -76,12 +76,12 @@ def get_vcs_info(top_dir,semester,course,gradeable,userid):
     with open(form_json_file, 'r') as fj:
         form_json = json.load(fj)
 
-    is_vcs=form_json["upload_type"]=="repository"
-    vcs_type="git"
-    vcs_base_url=""
-    vcs_subdirectory=""
+    is_vcs = form_json["upload_type"]=="repository"
+    vcs_type = "git"
+    vcs_base_url = ""
+    vcs_subdirectory = ""
     if is_vcs:
-        vcs_subdirectory= form_json["subdirectory"]
+        vcs_subdirectory = form_json["subdirectory"]
 
     vcs_subdirectory = vcs_subdirectory.replace("{$user_id}",userid)
 
@@ -119,7 +119,7 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
         for pattern in patterns:
             for my_file in glob.glob(os.path.join(source,pattern),recursive=True):
                 # grab the matched name
-                relpath=os.path.relpath(my_file,source)
+                relpath = os.path.relpath(my_file,source)
                 # make the necessary directories leading to the file
                 os.makedirs(os.path.join(target,os.path.dirname(relpath)),exist_ok=True)
                 # copy the file
@@ -171,8 +171,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     queue_time = get_queue_time(next_directory,next_to_grade)
     queue_time_longstring = dateutils.write_submitty_date(queue_time)
-    grading_began=dateutils.get_current_time()
-    waittime=int((grading_began-queue_time).total_seconds())
+    grading_began = dateutils.get_current_time()
+    waittime = int((grading_began-queue_time).total_seconds())
     grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"wait:",waittime,"")
 
     # --------------------------------------------------------
@@ -183,23 +183,23 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     custom_validation_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"custom_validation_code",obj["gradeable"])
     bin_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"bin")
 
-    checkout_path= os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"checkout",obj["gradeable"],obj["who"],str(obj["version"]))
+    checkout_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"checkout",obj["gradeable"],obj["who"],str(obj["version"]))
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",obj["gradeable"],obj["who"],str(obj["version"]))
 
     # grab a copy of the current history.json file (if it exists)
-    history_file=os.path.join(results_path,"history.json")
-    history_file_tmp=""
+    history_file = os.path.join(results_path,"history.json")
+    history_file_tmp = ""
     if os.path.isfile(history_file):
-        filehandle,history_file_tmp=tempfile.mkstemp()
+        filehandle,history_file_tmp = tempfile.mkstemp()
         shutil.copy(history_file,history_file_tmp)
 
     # get info from the gradeable config file
-    json_config=os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","form","form_"+obj["gradeable"]+".json")
+    json_config = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","form","form_"+obj["gradeable"]+".json")
     with open(json_config, 'r') as infile:
         gradeable_config_obj = json.load(infile)
 
     # get info from the gradeable config file
-    complete_config=os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","complete_config","complete_config_"+obj["gradeable"]+".json")
+    complete_config = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","complete_config","complete_config_"+obj["gradeable"]+".json")
     with open(complete_config, 'r') as infile:
         complete_config_obj = json.load(infile)
 
@@ -208,7 +208,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
-    tmp=os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
+    tmp = os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
     shutil.rmtree(tmp,ignore_errors=True)
     os.makedirs(tmp)
     
@@ -221,9 +221,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
-        submission_string=submission_time_file.read().rstrip()
+        submission_string = submission_time_file.read().rstrip()
     
-    submission_datetime=dateutils.read_submitty_date(submission_string)
+    submission_datetime = dateutils.read_submitty_date(submission_string)
 
 
     # --------------------------------------------------------------------
@@ -263,10 +263,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     os.mkdir(tmp_compilation)
     os.chdir(tmp_compilation)
     
-    gradeable_upload_type=gradeable_config_obj["upload_type"]
-    #print ("UPLOAD TYPE ",gradeable_upload_type)
-    #FIXME:  deal with svn/git/whatever
-
     gradeable_deadline_string = gradeable_config_obj["date_due"]
     
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
@@ -323,7 +319,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print ("====================================\nRUNNER STARTS", file=f)
         
-    tmp_work=os.path.join(tmp,"TMP_WORK")
+    tmp_work = os.path.join(tmp,"TMP_WORK")
     os.makedirs(tmp_work)
     os.chdir(tmp_work)
 
@@ -435,7 +431,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     with open(os.path.join(tmp_work,"grade.txt")) as f:
         lines = f.readlines()
         for line in lines:
-            line=line.rstrip('\n')
+            line = line.rstrip('\n')
             if line.startswith("Automatic grading total:"):
                 grade_result = line
 
@@ -476,11 +472,11 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     if not history_file_tmp == "":
         shutil.move(history_file_tmp,history_file)
         # fix permissions
-        ta_group_id=os.stat(results_path).st_gid
+        ta_group_id = os.stat(results_path).st_gid
         os.chown(history_file,int(HWCRON_UID),ta_group_id)
         add_permissions(history_file,stat.S_IRGRP)
         
-    grading_finished=dateutils.get_current_time()
+    grading_finished = dateutils.get_current_time()
 
     # -------------------------------------------------------------
     # create/append to the results history
@@ -496,7 +492,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
 
 
-    gradingtime=int((grading_finished-grading_began).total_seconds())
+    gradingtime = int((grading_finished-grading_began).total_seconds())
 
 
     write_grade_history.just_write_grade_history(history_file,
