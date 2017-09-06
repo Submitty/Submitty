@@ -141,14 +141,17 @@ class submitty_student_auto_feed {
 
         //Validate CSV
         $validate_num_fields = VALIDATE_NUM_FIELDS;
-        foreach($csv_data as $index => $row) {
-            //Trim any extraneous whitespaces from end of each row.
+        foreach($csv_data as $index => $csv_row) {
             //Split each row by delim character so that individual fields are indexed.
-            $row = explode(CSV_DELIM_CHAR, trim($row, ' '));
+            //Trim any extraneous whitespaces from all rows and fields.
+            $row = array();
+            foreach (explode(CSV_DELIM_CHAR, trim($csv_row)) as $i=>$field) {
+            	$row[$i] = trim($field);
+            }
 
             //BEGIN VALIDATION
             $course = strtolower($row[COLUMN_COURSE_PREFIX]) . $row[COLUMN_COURSE_NUMBER];
-            $section = intval($row[COLUMN_SECTION]);
+            $section = intval($row[COLUMN_SECTION]);  //intval($str) returns zero when $str is not integer.
             $num_fields = count($row);
 
             //Row validation filters.  If any prove false, row is discarded.
@@ -172,6 +175,10 @@ class submitty_student_auto_feed {
                 case ((is_null(EXPECTED_TERM_CODE)) ? true : ($row[COLUMN_TERM_CODE] === EXPECTED_TERM_CODE)):
                 	$this->log_it("Row {$index} failed validation for mismatched term code.  Row discarded");
                 	break;
+                //User ID may not have white spaces
+                case (preg_match("~^\S+$~", $row[COLUMN_USER_ID])):
+                	$this->log_it("Row {$index} failed validation for user id having a whitespace ({$row[COLUMN_USER_ID]}).  Row discarded.");
+                	break;
                 //First name must be alpha characters, white-space, or certain punctuation.
                 case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_FIRSTNAME])):
                     $this->log_it("Row {$index} failed validation for student first name ({$row[COLUMN_FNAME]}).  Row discarded.");
@@ -180,14 +187,13 @@ class submitty_student_auto_feed {
                 case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_LASTNAME])):
                     $this->log_it("Row {$index} failed validation for student last name ({$row[COLUMN_LNAME]}).  Row discarded.");
                     break;
-                //Student section must be greater than zero.  intval($str) returns zero when $str is not integer.
+                //Student section must be greater than zero.
                 case ($section > 0):
                     $this->log_it("Row {$index} failed validation for student section ({$section}).  Row discarded.");
                     break;
                 //Loose email address check for format of "address@domain" or "address@[ipv4]"
                 case (preg_match("~^.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $row[COLUMN_EMAIL])):
                     $this->log_it("Row {$index} failed validation for student email ({$row[COLUMN_EMAIL]}).  Row discarded.");
-
                 default:
                 	//Check for mapped (merged) course.
                 	if (array_key_exists($course, self::$course_mappings)) {
