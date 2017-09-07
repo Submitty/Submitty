@@ -336,6 +336,37 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 }
 
 
+bool contains_unescaped_wildcard(const std::string &pattern) {
+
+  std::cout << "CHECK FOR UNESCAPED WILDCARD '" << pattern << "'" << std::endl;
+  int loc = pattern.find("*");
+  if (loc == std::string::npos) return false;
+  if (loc == 0 || pattern[loc-1] != '\\') return true;
+  return false;
+}
+
+bool contains_escaped_wildcard(const std::string &pattern) {
+  int loc = pattern.find("*");
+  if (loc == std::string::npos) return false;
+  if (loc > 0 && pattern[loc-1] == '\\') return true;
+  return false;
+}
+
+std::string replace_escaped_wildcard(const std::string &input) {
+
+  std::string answer;
+  std::cout << "BEFORE '" << input << "'" << std::endl;
+    for (int i = 0; i < input.size(); i++) {
+    if (i+1 < input.size() && input[i] == '\\' && input[i+1] == '*') {
+      i++;
+    }
+    answer += input[i];
+  }
+  std::cout << "AFTER '" << answer << "'" << std::endl;
+  return answer;
+}
+
+
 void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::string &full_pattern, std::ostream &logfile) {
 
   //std::cout << "IN WILDCARD EXPANSION " << full_pattern << std::endl;
@@ -541,7 +572,7 @@ void parse_command_line(const std::string &cmd,
     }
 
     // remainder of the arguments
-    else if (token.find("*") != std::string::npos) {
+    else if (contains_unescaped_wildcard(token)) { //token.find("*") != std::string::npos) {
       wildcard_expansion(my_args,token,logfile);
     }
 
@@ -560,6 +591,11 @@ void parse_command_line(const std::string &cmd,
     }
 
     else {
+
+      if (contains_escaped_wildcard(token)) {
+	token = replace_escaped_wildcard(token);
+      }
+
       // validate_filename(token);
       // validate_option(my_program,token);
       //std::cout << "before TOKEN IS " << token << std::endl;
