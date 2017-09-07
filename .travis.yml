@@ -53,11 +53,13 @@ addons:
       - libboost-all-dev
 
 before_install:
+  - pip -V
+  - python --version
+  - python3 --verison
   - jdk_switcher use default
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
-  - PY_VERSION_2="$(python2 -V 2>&1 | egrep -o '2.7.[0-9]{2,}')"
   - PY_VERSION_3="$(python3 -V 2>&1 | egrep -o '[0-9].[0-9].[0-9]{1,}')"
-  - sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/${PY_VERSION_2}/bin:/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
+  - sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
   - mkdir -p ~/.local/bin
   - export PATH=$HOME/.local/bin:$PATH
 
@@ -70,19 +72,19 @@ install:
   - sudo chmod u+x chromedriver
   - sudo mv chromedriver /usr/bin/
   - travis_retry composer install --prefer-dist --no-interaction
-  - pip3 install -U pip
-  - pip3 install python-pam
-  - pip3 install PyYAML
-  - pip3 install psycopg2
-  - pip3 install sqlalchemy
-  - pip3 install pylint_runner
-  - pip3 install psutil
-  - pip3 install python-dateutil
-  - pip3 install watchdog
-  - pip3 install xlsx2csv
-  - pip3 install selenium
-  - pip3 install nose2
-  - pip3 install unittest2
+  - pip install -U pip
+  - pip install python-pam
+  - pip install PyYAML
+  - pip install psycopg2
+  - pip install sqlalchemy
+  - pip install pylint_runner
+  - pip install psutil
+  - pip install python-dateutil
+  - pip install watchdog
+  - pip install xlsx2csv
+  - pip install selenium
+  - pip install nose2
+  - pip install unittest2
   - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
   - python3 setup.py install
   - popd
