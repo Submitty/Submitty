@@ -53,11 +53,13 @@ addons:
       - libboost-all-dev
 
 before_install:
+  - pip -V
+  - python --version
+  - python3 --version
   - jdk_switcher use default
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
-  - PY_VERSION_2="$(python2 -V 2>&1 | egrep -o '2.7.[0-9]{2,}')"
   - PY_VERSION_3="$(python3 -V 2>&1 | egrep -o '[0-9].[0-9].[0-9]{1,}')"
-  - sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/${PY_VERSION_2}/bin:/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
+  - sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
   - mkdir -p ~/.local/bin
   - export PATH=$HOME/.local/bin:$PATH
 
