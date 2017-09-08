@@ -482,6 +482,10 @@ function setupCheckboxCells() {
             var lastScore = null;
             var setFull = false;
             parent.children(".cell-grade").each(function() {
+                updateCheckpointCell(this, setFull);
+                elems.push(this);
+            });
+            parent.children(".cell-grade").each(function() {
                 if (lastScore === null) {
                     lastScore = $(this).data("score");
                 }
@@ -489,10 +493,6 @@ function setupCheckboxCells() {
                     setFull = true;
                 }
                 scores[$(this).data('id')] = $(this).data('score');
-            });
-            parent.children(".cell-grade").each(function() {
-                updateCheckpointCell(this, setFull);
-                elems.push(this);
             });
         }
         else {
