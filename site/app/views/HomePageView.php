@@ -13,7 +13,7 @@ class HomePageView extends AbstractView {
     /*
     *@param List of courses the student is in.
     */
-    public function showHomePage($user, $courses = array(), $changeNameText, $course_display_name) {
+    public function showHomePage($user, $courses = array(), $changeNameText) {
         $displayedFirstName = $user->getDisplayedFirstName();
         $return = <<< HTML
 <div class="content">
