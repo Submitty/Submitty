@@ -48,22 +48,23 @@ class UsersController extends AbstractController {
 
     public function listStudents() {
         $students = $this->core->getQueries()->getAllUsers();
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
-        $this->renderUserForm('update_student');
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm');
+        $this->renderUserForm('update_student', $use_database);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm', $use_database);
     }
 
     public function listGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders);
-        $this->renderUserForm('update_grader');
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'graderListForm');
+        $this->renderUserForm('update_grader', $use_database);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'graderListForm', $use_database);
     }
 
-    private function renderUserForm($action) {
+    private function renderUserForm($action, $use_database) {
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'userForm', $reg_sections, $rot_sections, $action, $use_database);
     }
 
@@ -92,6 +93,20 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        $error_message = "";
+        //Username must contain only lowercase alpha, numbers, underscores, hyphens
+        $error_message .= preg_match("~^[a-z0-9_\-]+$~", trim($_POST['user_id'])) ? "" : "Error in username: {$_POST['user_id']}," . PHP_EOL;
+        //First and Last name must be alpha characters, white-space, or certain punctuation.
+        $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", trim($_POST['user_firstname'])) ? "" : "Error in first name: {$_POST['user_firstname']}," . PHP_EOL;
+        $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", trim($_POST['user_lastname'])) ? "" : "Error in last name: {$_POST['user_lastname']}," . PHP_EOL;
+        //Check email address for format "address@domain".
+        $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", trim($_POST['user_email'])) ? "" : "Error in email: {$_POST['user_email']}," . PHP_EOL;
+
+        if (!empty($error_message)) {
+            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
+            $this->core->redirect($return_url);
+        }
+
         if ($_POST['edit_user'] == "true") {
             $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
             if ($user === null) {
@@ -101,16 +116,16 @@ class UsersController extends AbstractController {
         }
         else {
             $user = $this->core->loadModel(User::class);
-            $user->setId($_POST['user_id']);
+            $user->setId(trim($_POST['user_id']));
         }
 
-        $user->setFirstName($_POST['user_firstname']);
+        $user->setFirstName(trim($_POST['user_firstname']));
         if (isset($_POST['user_preferred_firstname'])) {
-            $user->setPreferredFirstName($_POST['user_preferred_firstname']);
+            $user->setPreferredFirstName(trim($_POST['user_preferred_firstname']));
         }
 
-        $user->setLastName($_POST['user_lastname']);
-        $user->setEmail($_POST['user_email']);
+        $user->setLastName(trim($_POST['user_lastname']));
+        $user->setEmail(trim($_POST['user_email']));
         if (isset($_POST['user_password'])) {
             $user->setPassword($_POST['user_password']);
         }
@@ -358,10 +373,12 @@ class UsersController extends AbstractController {
         $graders_data = array();
         foreach($contents as $content) {
             $row_num++;
-            $vals = str_getcsv(trim($content));
+            $vals = str_getcsv($content);
+            $vals = array_map('trim', $vals);
             if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
 
-            //No check on user_id (computing login ID) -- different Univeristies have different formats.
+            //Username must contain only lowercase alpha, numbers, underscores, hyphens
+            $error_message .= preg_match("~^[a-z0-9_\-]+$~", $vals[0]) ? "" : "Error in username column, row #{$row_num}: {$vals[0]}," . PHP_EOL;
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
             $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}," . PHP_EOL;
@@ -452,7 +469,8 @@ class UsersController extends AbstractController {
         $students_data = array();
         foreach($contents as $content) {
             $row_num++;
-            $vals = str_getcsv(trim($content));
+            $vals = str_getcsv($content);
+            $vals = array_map('trim', $vals);
             if (isset($vals[4])) {
                 if (is_numeric($vals[4])) {
                     $vals[4] = intval($vals[4]);
@@ -462,7 +480,8 @@ class UsersController extends AbstractController {
                 }
             }
 
-            //No check on user_id (computing login ID) -- different Univeristies have different formats.
+            //Username must contain only lowercase alpha, numbers, underscores, hyphens
+            $error_message .= preg_match("~^[a-z0-9_\-]+$~", $vals[0]) ? "" : "Error in username column, row #{$row_num}: {$vals[0]}," . PHP_EOL;
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
             $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}," . PHP_EOL;

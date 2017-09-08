@@ -392,14 +392,14 @@ HTML;
         return $return;
     }
 
-    public function graderListForm() {
+    public function graderListForm($use_database) {
         $return = <<<HTML
 <div class="popup-form" id="grader-list-form">
     <h2>Upload Grader List</h2>
     <p>&emsp;</p>
     <p>
         Format your grader data as an .xlsx or .csv file with 5 columns:<br>
-        &emsp;username, LastName, FirstName, email, GraderGroup<br>
+        &emsp;username, FirstName, LastName, email, GraderGroup<br>
     </p>
     <p>&emsp;</p>
     <p>
@@ -429,14 +429,22 @@ HTML;
         return $return;
     }
 
-    public function classListForm() {
+    public function classListForm($use_database) {
+        if ($use_database) {
+            $num_cols = 7;
+            $password_col = "password, ";
+        }
+        else {
+            $num_cols = 6;
+            $password_col = "";
+        }
         $return = <<<HTML
 <div class="popup-form" id="class-list-form">
     <h2>Upload Classlist</h2>
     <p>&emsp;</p>
     <p>
-        Format your class list as an .xlsx or .csv file with 5 columns:<br>
-        &emsp;username, LastName, FirstName, email, RegistrationSection<br>
+        Format your class list as an .xlsx or .csv file with {$num_cols} columns:<br>
+        &emsp;username, first name, last name, email, registration section, {$password_col}preferred first name<br>
     </p>
     <p>&emsp;</p>
     <p>
