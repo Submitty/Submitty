@@ -53,10 +53,7 @@ addons:
       - libboost-all-dev
 
 before_install:
-  - ls -la /opt/python
-  - pyenv versions
   - PY_VERSION_3=$(ls /opt/python | grep "3.6.[0-9]")
-  - echo $PY_VERSION_3
   - jdk_switcher use default
   - pyenv global ${PY_VERSION_3}
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
@@ -73,19 +70,19 @@ install:
   - sudo chmod u+x chromedriver
   - sudo mv chromedriver /usr/bin/
   - travis_retry composer install --prefer-dist --no-interaction
-  - pip install -U pip
-  - pip install python-pam
-  - pip install PyYAML
-  - pip install psycopg2
-  - pip install sqlalchemy
-  - pip install pylint_runner
-  - pip install psutil
-  - pip install python-dateutil
-  - pip install watchdog
-  - pip install xlsx2csv
-  - pip install selenium
-  - pip install nose2
-  - pip install unittest2
+  - pip3 install -U pip
+  - pip3 install python-pam
+  - pip3 install PyYAML
+  - pip3 install psycopg2
+  - pip3 install sqlalchemy
+  - pip3 install pylint_runner
+  - pip3 install psutil
+  - pip3 install python-dateutil
+  - pip3 install watchdog
+  - pip3 install xlsx2csv
+  - pip3 install selenium
+  - pip3 install nose2
+  - pip3 install unittest2
   - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
   - python3 setup.py install
   - popd
