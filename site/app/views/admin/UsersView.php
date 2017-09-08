@@ -393,13 +393,21 @@ HTML;
     }
 
     public function graderListForm($use_database) {
+        if ($use_database) {
+            $num_cols = 7;
+            $password_col = "password, ";
+        }
+        else {
+            $num_cols = 6;
+            $password_col = "";
+        }
         $return = <<<HTML
 <div class="popup-form" id="grader-list-form">
     <h2>Upload Grader List</h2>
     <p>&emsp;</p>
     <p>
-        Format your grader data as an .xlsx or .csv file with 5 columns:<br>
-        &emsp;username, FirstName, LastName, email, GraderGroup<br>
+        Format your grader data as an .xlsx or .csv file with {$num_cols} columns:<br>
+        &emsp;username, first name, last name, email, grader group, {$password_col}preferred first name<br>
     </p>
     <p>&emsp;</p>
     <p>
@@ -411,6 +419,7 @@ HTML;
     </p>
     <p>&emsp;</p>
     <p>
+        Preferred first name is optional.<br>
         Do not use a header row.<br>
     </p>
     <br />
@@ -448,6 +457,7 @@ HTML;
     </p>
     <p>&emsp;</p>
     <p>
+        Preferred first name is optional.<br>
         Registration section can be null.<br>
         Do not use a header row.<br>
     </p>
