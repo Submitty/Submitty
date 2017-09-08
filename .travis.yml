@@ -53,6 +53,8 @@ addons:
       - libboost-all-dev
 
 before_install:
+  - ls -la /opt
+  - ls -la /opt/python
   - pip -V
   - python --version
   - python3 --verison
