@@ -408,7 +408,7 @@ class UsersController extends AbstractController {
 
             //Database password cannot be blank, no check on format
             if ($use_database) {
-                $error_message .= (isset($vals[5]) && ($vals[5] != "")) ? "" : "Error in password column, row #{$row_num}: cannot be blank," . PHP_EOL;
+                $error_message .= $vals[5] != "" ? "" : "Error in password column, row #{$row_num}: cannot be blank," . PHP_EOL;
             }
 
             $graders_data[] = $vals;
@@ -529,7 +529,7 @@ class UsersController extends AbstractController {
 
             //Database password cannot be blank, no check on format
             if ($use_database) {
-                $error_message .= (isset($vals[5]) && ($vals[5] != "")) ? "" : "Error in password column, row #{$row_num}: cannot be blank," . PHP_EOL;
+                $error_message .= $vals[5] != "" ? "" : "Error in password column, row #{$row_num}: cannot be blank," . PHP_EOL;
             }
 
             $students_data[] = $vals;
