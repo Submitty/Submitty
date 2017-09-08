@@ -130,7 +130,6 @@ script:
   - if [ ${INTEGRATION_SUITE} = false ]; then vendor/bin/phpunit --configuration tests/phpunit.xml; fi
   - if [ ${INTEGRATION_SUITE} = false ]; then TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"; fi
   - if [ ${INTEGRATION_SUITE} = true ]; then sudo /usr/local/submitty/test_suite/integrationTests/run.py; fi
-  - if [ ${INTEGRATION_SUITE} = true ]; then cat /usr/local/submitty/test_suite/integrationTests/tests/tutorial_10_java_coverage/*/test*_STDERR.txt; fi
 
 # Add more linters to the build process here
 after_script:
