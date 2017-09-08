@@ -53,8 +53,10 @@ addons:
       - libboost-all-dev
 
 before_install:
-  - PY_VERSION_3=$(ls /opt/python | grep "3.6.[0-9]")
   - jdk_switcher use default
+  # we have to unset this as the JVM will print a message on STDERR on any execution if this is set because somehow that makes sense I guess
+  - unset _JAVA_OPTIONS
+  - PY_VERSION_3=$(ls /opt/python | grep "3.6.[0-9]")
   - pyenv global ${PY_VERSION_3}
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
   - sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
