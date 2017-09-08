@@ -6,6 +6,7 @@ This script can be used to assign new anonymous ids to all the members of a cour
 from sqlalchemy import create_engine, Table, MetaData, bindparam
 import string
 import getpass
+import random
 
 # function taken from setup_sample_courses
 def generate_random_user_id(length=15):
