@@ -358,20 +358,25 @@ class UsersController extends AbstractController {
         $graders_data = array();
         foreach($contents as $content) {
             $row_num++;
-            $vals = str_getcsv(trim($content));
+
+			//Ensure row and all fields are trimmed.
+			$vals = array();
+            foreach (str_getcsv(trim($content)) as $i => $csv_val) $vals[$i] = trim($csv_val);
+
             if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
 
-            //No check on user_id (computing login ID) -- different Univeristies have different formats.
+            //user_id may not have any whitespaces
+            $error_message .= preg_match("~^\S+$~", $vals[0]) ? "" : "ERROR on row {$row_num}, username \"{$vals[0]}\"<br>";
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}," . PHP_EOL;
-            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[2]) ? "" : "Error in last name column, row #{$row_num}: {$vals[2]}," . PHP_EOL;
+            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[1]) ? "" : "ERROR on row {$row_num}, LastName \"{$vals[1]}\"<br>";
+            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[2]) ? "" : "ERROR on row {$row_num}, FirstName \"{$vals[2]}\"<br>";
 
             //Check email address for format "address@domain".
-            $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_num}: {$vals[3]}," . PHP_EOL;
+            $error_message .= preg_match('~^("[^"]+"|[^"^(^)^,^:^;^<^>^@^\[^\\^\]]+)@{1}[a-zA-Z0-9:\.\-\[\]]+$~', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"{$vals[3]}\"<br>";
 
             //grader-level check is a digit between 1 - 4.
-            $error_message .= preg_match("~[1-4]{1}~", $vals[4]) ? "" : "Error in grader-level column, row #{$row_num}: {$vals[4]}," . PHP_EOL;
+            $error_message .= preg_match("~^[1-4]{1}$~", $vals[4]) ? "" : "ERROR on row {$row_num}, gradergroup \"{$vals[4]}\"<br>";
 
             $graders_data[] = $vals;
         }
@@ -452,7 +457,11 @@ class UsersController extends AbstractController {
         $students_data = array();
         foreach($contents as $content) {
             $row_num++;
-            $vals = str_getcsv(trim($content));
+
+			//Ensure both row and all fields are trimmed.
+			$vals = array();
+            foreach (str_getcsv(trim($content)) as $i => $csv_val) $vals[$i] = trim($csv_val);
+
             if (isset($vals[4])) {
                 if (is_numeric($vals[4])) {
                     $vals[4] = intval($vals[4]);
@@ -462,17 +471,18 @@ class UsersController extends AbstractController {
                 }
             }
 
-            //No check on user_id (computing login ID) -- different Univeristies have different formats.
+            //user_id may not have any whitespaces
+            $error_message .= preg_match("~^\S+$~", $vals[0]) ? "" : "ERROR on row {$row_num}, username \"{$vals[0]}\"<br>";
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[1]) ? "" : "Error in first name column, row #{$row_num}: {$vals[1]}," . PHP_EOL;
-            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[2]) ? "" : "Error in last name column, row #{$row_num}: {$vals[2]}," . PHP_EOL;
+            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[1]) ? "" : "ERROR on row {$row_num}, LastName \"{$vals[1]}\"<br>";
+            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[2]) ? "" : "ERROR on row {$row_num}, FirstName \"{$vals[2]}\"<br>";
 
             //Check email address for format "address@domain".
-            $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_num}: {$vals[3]}," . PHP_EOL;
+            $error_message .= preg_match('~^("[^"]+"|[^"^(^)^,^:^;^<^>^@^\[^\\^\]]+)@{1}[a-zA-Z0-9:\.\-\[\]]+$~', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"{$vals[3]}\"<br>";
 
             //Student section must be greater than zero (intval($str) returns zero when $str is not integer)
-            $error_message .= (($vals[4] > 0 && $vals[4] <= $num_reg_sections) || $vals[4] === null) ? "" : "Error in student section column, row #{$row_num}: {$vals[4]}," . PHP_EOL;
+            $error_message .= (($vals[4] > 0 && $vals[4] <= $num_reg_sections) || $vals[4] === null) ? "" : "ERROR on row {$row_num}, RegistrationSection \"{$vals[4]}\"<br>";
 
             $students_data[] = $vals;
         }
