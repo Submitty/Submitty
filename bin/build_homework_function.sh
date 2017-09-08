@@ -60,6 +60,7 @@ function build_homework {
     rsync -ruz --delete  $hw_source/   $hw_build_path || ( echo 'ERROR: configuration source directory does not exist or hwcron cannot read this directory' ; exit 1 )
     find $hw_build_path -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $hw_build_path -type f -exec chmod -f ug+rw,o= {} \;
+    find $hw_build_path -type f -exec chgrp -f ${course_group} {} \;
 
     # grab the universal cmake file
     cp $SUBMITTY_INSTALL_DIR/src/grading/Sample_CMakeLists.txt   $hw_build_path/CMakeLists.txt
