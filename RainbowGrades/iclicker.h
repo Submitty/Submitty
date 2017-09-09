@@ -43,7 +43,7 @@ extern std::map<int,Date> LECTURE_DATE_CORRESPONDENCES;
 class iClickerQuestion {
 public:
   iClickerQuestion(const std::string& f, int q, const std::string& ca) {
-    filename = f;
+    handleXMLFilename(f);
     which_question = q;
     assert (which_question >= 0 && which_question < 20);
     correct_answer = ca;
@@ -53,6 +53,7 @@ public:
   int getColumn() const { return 4 + (which_question-1)*6; }
   bool participationQuestion() const { return correct_answer == "ABCDE"; }
   bool isCorrectAnswer(char c) { return correct_answer.find(c) != std::string::npos; }
+  void handleXMLFilename(const std::string& f);
 
 private:
   std::string filename;

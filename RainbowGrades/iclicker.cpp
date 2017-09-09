@@ -15,6 +15,14 @@ std::map<int,Date> LECTURE_DATE_CORRESPONDENCES;
 
 Student* GetStudent(const std::vector<Student*> &students, const std::string& name);
 
+//Internally change .xml paths to .csv paths
+void iClickerQuestion::handleXMLFilename(const std::string& f){
+  filename = f;
+  if(filename.substr(filename.size()-4) == ".xml"){
+    filename.resize(filename.size()-3);
+    filename += "csv";
+  }
+}
 
 Date dateFromFilename(const std::string& filename_with_directory) {
   
@@ -28,10 +36,6 @@ Date dateFromFilename(const std::string& filename_with_directory) {
   assert (filename.size() == 15);
   assert (filename[0] == 'L');
   //  assert (filename[7] == '_');
-  if(filename.substr(11,4) == ".xml"){
-    filename.resize(12);
-    filename += "csv";
-  }
   assert (filename.substr(11,4) == ".csv");
 
   Date answer;
