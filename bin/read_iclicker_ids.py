@@ -57,7 +57,7 @@ def main():
                     iclicker = f.read()
 
                     # WRITE TO EXPECTED FORMAT (matches iclicker.com format)
-                    remote_ids.write('#{0},"{1}"\n'.format(iclicker,username))
+                    remote_ids.write('#{0},"{1}"\n'.format(iclicker.upper(),username))
 
 if __name__ == "__main__":
     main()
