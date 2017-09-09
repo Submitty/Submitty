@@ -28,6 +28,10 @@ Date dateFromFilename(const std::string& filename_with_directory) {
   assert (filename.size() == 15);
   assert (filename[0] == 'L');
   //  assert (filename[7] == '_');
+  if(filename.substr(11,4) == ".xml"){
+    filename.resize(12);
+    filename += "csv";
+  }
   assert (filename.substr(11,4) == ".csv");
 
   Date answer;
