@@ -13,11 +13,12 @@ class HomePageView extends AbstractView {
     /*
     *@param List of courses the student is in.
     */
-    public function showHomePage($user, $courses = array(), $changeNameText, $course_display_name) {
+    public function showHomePage($user, $courses = array(), $changeNameText) {
         $displayedFirstName = $user->getDisplayedFirstName();
         $return = <<< HTML
 <div class="content">
     <div class="sub">
+        <div class="container", style = "min-width:100px; width: auto !important; width: 100px;">
         <div class="box half">
         <h2>About You</h2>
             <table>
@@ -91,10 +92,9 @@ HTML;
                 </tbody>
             </table>
         </div>
-        <div class="box half">
-            <div class="half">
+        <div class="box", style = "float: none;width:48%;display:block;overflow:hidden;">
             <h2>Your Courses</h2>
-                <table>
+                <table width='95%'>
                     <tbody>
 HTML;
 
@@ -107,7 +107,7 @@ HTML;
                         $return .= <<<HTML
                         <tr>
                             <td colspan="8">
-                                <a class="btn btn-primary" style="width: 696px;white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$display_text}</a>
+                                <a class="btn btn-primary btn-block" style="width:95%;white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$display_text}</a>
                             </td>
                         </tr>
 HTML;
