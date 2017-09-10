@@ -14,10 +14,10 @@ def generate_random_user_id(length=15):
 
 
 def main():
-    COURSE = raw_input("Course: ")
-    SEMESTER = raw_input("Semester: ")
-    DB_HOST = raw_input("Database Host: ")
-    DB_USER = raw_input("Database User: ")
+    COURSE = input("Course: ")
+    SEMESTER = input("Semester: ")
+    DB_HOST = input("Database Host: ")
+    DB_USER = input("Database User: ")
     DB_PASS = getpass.getpass("Database Password: ")
     database = "submitty_"+SEMESTER+"_"+COURSE
 
