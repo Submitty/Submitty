@@ -1,4 +1,4 @@
-#!usr/bin/env python3
+#!/usr/bin/env python3
 """
 This script can be used to assign new anonymous ids to all the members of a course.
 """
@@ -34,9 +34,13 @@ def main():
 
     for row in rows:
         user = row["user_id"]
-        anon = generate_random_user_id()
-        while(anon in anon_ids) :
-            anon = generate_random_user_id()
+
+        #anon = generate_random_user_id()
+        #while(anon in anon_ids) :
+        #    anon = generate_random_user_id()
+
+        anon=user
+            
         anon_ids[anon] = user;
         new_info = {'anon_id':anon}
         update = users.update(values=new_info).where(users.c.user_id == bindparam('b_user_id'))
