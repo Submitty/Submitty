@@ -5,7 +5,7 @@
  * config.php script used by submitty_student_auto_feed
  * By Peter Bailie, Systems Programmer (RPI dept of computer science)
  *
- * Requires minimum PHP version 5.4 with pgsql and iconv extensions.
+ * Requires minimum PHP version 5.4 with pgsql, iconv, and ssh2 extensions.
  *
  * Configuration of submitty_student_auto_feed is structured through a series
  * of named constants.  This configuration is also used by
@@ -20,45 +20,31 @@
  *
  * -------------------------------------------------------------------------- */
 
-//Course list to be processed.  Other courses in the CSV feed will be ignored.
-//Elements should be string data representing the course, both prefix and
-//number.  Do not seperate or deliminate prefix and number.
-//***THIS NEEDS TO BE SET as a serialized array.
-define('COURSE_LIST', serialize( array(
-'cs100',
-'cs150',
-'cs200',
-'cs250',
-'cs300',
-'cs350',
-'cs400'
-)));
-
-//Some Universities will hold mixed enrollment of graduate and undergraduate
-//students and/or corss registered courses in a single classroom.  Having
-//multiple Submitty courses for one whole classroom may be inconvenient, so this
-//list will map enrollment of a "base" course to all related courses.
-//
-//Enrollees in any mapped courses will appear in additional sections in the
-//"base" course.  ***THIS NEEDS TO BE SET as arrays of a serialized array.
-
-/* EXAMPLES --------------------------------------------------------------------
+/* SUGGESTED SETTINGS FOR TIMEZONES IN USA -------------------------------------
  *
- * CS-300 is mapped to graduate course CS-500 only.  Entry is as follows:
+ * Eastern ........... America/New_York
+ * Central ........... America/Chicago
+ * Mountain .......... America/Denver
+ * Mountain no DST ... America/Phoenix
+ * Pacific ........... America/Los_Angeles
+ * Alaska ............ America/Anchorage
+ * Hawaii ............ America/Adak
+ * Hawaii no DST ..... Pacific/Honolulu
  *
- * 'cs300' => array('cs500')
- *
- * CS-400 is mapped to graduate course CS-600 and cross registered with courses
- * IT-400 and IT-600.  Entry is as follows:
- *
- * 'cs400' => array('cs600', 'it400', 'it600')
+ * For complete list of timezones, view http://php.net/manual/en/timezones.php
  *
  * -------------------------------------------------------------------------- */
 
-define('COURSE_MAPPINGS', serialize( array(
-'cs300' => array('cs500'),
-'cs400' => array('cs600', 'it400', 'it600')
-)));
+// Univeristy campus's timezone.  ***THIS NEEDS TO BE SET.
+date_default_timezone_set('America/New_York');
+
+
+/* Definitions for error logging -------------------------------------------- */
+// While not recommended, email reports of errors may be disabled by setting
+// 'ERROR_EMAIL' to null.
+define('ERROR_EMAIL',    'sysadmins@lists.myuniversity.edu');
+define('ERROR_LOG_FILE', '/var/local/submitty/bin/auto_feed_error.log');
+
 
 //Student registration status is important, as data dumps can contain students
 //who have dropped a course either before the semester starts or during the
@@ -86,11 +72,64 @@ define('VALIDATE_MIN_FILESIZE', 65536);
 //CSV that are not needed by submitty_student_auto_feed).
 define('VALIDATE_NUM_FIELDS', 10);
 
-//The path/file or URL provided by the registrar.  ***THIS NEEDS TO BE SET.
-define('CSV_FILE', '/path/to/datafile.csv');
-
-//Try uncommenting this if there are problems accessing CSV file by URL.
-//ini_set("allow_url_fopen", true);
+// The following constants are used to read the CSV auto feed file provided by
+// the registrar / data warehouse.  ***THESE NEED TO BE SET.
+//
+// CSV_AUTH can be set to 'local' or 'remote_password' or 'remote_keypair'.
+//
+//          'local' means the CSV file can be read locally by the script, so no
+//          remote authentication details are needed.
+//
+//          'remote_password' means that the file must be accessed on another
+//           server, and authentication is by password.
+//           q.v. CSV_AUTH_PASSWORD
+//
+//           'remote_key' means that the file must be accessed on another
+//           server, and authentication is by RSA key pair.
+//           q.v. CSV_AUTH_PUBKEY, CSV_AUTH_PRIVKEY, CSV_PRIVKEY_PASSPHRASE
+//
+// CSV_FILE is the full path of the student auto feed file, regardless if it is
+//          accessed locally or remotely.
+//
+// CSV_REMOTE_SERVER is the fully qualified domain name of the server that hosts
+//                   the student feed CSV file.  This constant is ignored when
+//                   CSV_AUTH is set to 'local'.
+//
+// CSV_AUTH_USER is the user account to access the student feed CSV, when the
+//               file exists on a remote server.  This constant is ignored when
+//               CSV_AUTH is set to 'local'.
+//
+// CSV_AUTH_PASSWORD is the user account password required to access the student
+//                   feed CSV on a remote server.  This constant is ignored when
+//                   CSV_AUTH is set to anything other than 'remote_password'.
+//
+// CSV_AUTH_PUBKEY is the path to the public key used to authenticate with the
+//                 remote server that has the student feed CSV.  The public key
+//                 needs to be in OpenSSH format.  This constant is ignored
+//                 when CSV_AUTH is set to anything other than 'remote_keypair'.
+//
+// CSV_AUTH_PRIVKEY is the path to the private key used to communicate with the
+//                  remote server that has the student feed CSV.  This constant
+//                  is ignored when CSV_AUTH is set to anything other than
+//                  'remote_keypair'.
+//
+// CSV_PRIVKEY_PASSPHRASE is the passphrase used to encrypt the private key.
+//                        Set to null, if the private key is not encrypted.
+//                        This constant is ignored when CSV_AUTH is set to
+//                        anything other than 'remote_keypair'.
+//                        NOTE: To use encrypted keys with an Ubuntu SSH/SFTP
+//                              host, libssh2 needs be manually recompiled with
+//                              OpenSSH.  Otherwise, authentication will always
+//                              fail. q.v. https://bugs.php.net/bug.php?id=58573
+//                              and http://php.net/manual/en/function.ssh2-auth-pubkey-file.php
+define('CSV_AUTH',               'remote_keypair');
+define('CSV_FILE',               '/path/to/datafile.csv');
+define('CSV_REMOTE_SERVER',      'fileserver.myuniversity.edu');
+define('CSV_AUTH_USER',          'remote_user');
+define('CSV_AUTH_PASSWORD',      null);
+define('CSV_AUTH_PUBKEY',        '/path/to/rsa_key.pub');
+define('CSV_AUTH_PRIVKEY',       '/path/to/rsa_key.pfx');
+define('CSV_PRIVKEY_PASSPHRASE', 'MySecretPassphrase');
 
 //Define what character is delimiting each field.  ***THIS NEEDS TO BE SET.
 //EXAMPLE: chr(9) is the tab character.
@@ -104,16 +143,20 @@ define('DB_PASSWORD', 'DB.p4ssw0rd');
 /* The following constants identify what columns to read in the CSV dump. --- */
 //these properties are used to group data by individual course and student.
 //NOTE: If your University does not support "Student's Preferred Name" in its
-//      students' registration data -- define COLUMN_PNAME as null.
+//      students' registration data -- define COLUMN_PREFERREDNAME as null.
 define('COLUMN_COURSE_PREFIX', 8);  //Course prefix
 define('COLUMN_COURSE_NUMBER', 9);  //Course number
 define('COLUMN_REGISTRATION',  7);  //Student enrollment status
 define('COLUMN_SECTION',       10); //Section student is enrolled
-define('COLUMN_CSID',          5);  //Student's computer systems ID
-define('COLUMN_FNAME',         2);  //Student's First Name
-define('COLUMN_LNAME',         1);  //Student's Last Name
-define('COLUMN_PNAME',         3);  //Student's Preferred Name
+define('COLUMN_USER_ID',       5);  //Student's computer systems ID
+define('COLUMN_FIRSTNAME',     2);  //Student's First Name
+define('COLUMN_LASTNAME',      1);  //Student's Last Name
+define('COLUMN_PREFERREDNAME', 3);  //Student's Preferred Name
 define('COLUMN_EMAIL',         4);  //Student's Campus Email
+define('COLUMN_TERM_CODE',     11); //Semester code used in data validation
+
+//Validate term code.  Set to null to disable this check.
+define('EXPECTED_TERM_CODE', '201705');
 
 //Sometimes data feeds are generated by Windows systems, in which case the data
 //file probably needs to be converted from Windows-1252 (aka CP-1252) to UTF-8.
@@ -121,11 +164,22 @@ define('COLUMN_EMAIL',         4);  //Student's Campus Email
 //Set to false if data feed is already provided in UTF-8.
 define('CONVERT_CP1252', true);
 
-//Allow "\r" EOL encoding when reading CSV.  This is rare, but just in case...
-ini_set("auto_detect_line_endings", true);
+//Allows "\r" EOL encoding.  This is rare but exists (e.g. Excel for Macintosh).
+ini_set('auto_detect_line_endings', true);
+
+//Needed to access student feed on a remote server.
+//You can comment this out if the student feed is accessed locally.
+ini_set("allow_url_fopen", true);
 
 
 /* USER TABLE BACKUP OPTIONS ------------------------------------------------ */
+
+/* *****************************************************************************
+ BACKUP TOOLS WERE WRITTEN FOR AN EARLIER VERSION OF SUBMITTY AND HAVE NOT YET
+       BEEN UPDATED TO BE COMPATIBLE WITH MORE RECENT DATABASE CHANGES.
+                 USE OF THESE TOOLS IS CURRENTLY NOT ADVISED.
+***************************************************************************** */
+
 //Folder where backup data is stored.  Backups are CSV files sorted into folders
 //by each indiividual Submitty course.  **THIS NEEDS TO BE SET
 define('SUBMITTY_AUTO_FEED_BACKUP', '/path/to/user_data_backups');
@@ -139,24 +193,5 @@ define('ENABLE_BACKUP_ENCRYPTION', false);
 //Access permissions to the keyfile must be strictly maintained.  Just like with
 //accessing the CSV, the path to the key_file may also be a URL.
 define('ENCRYPTION_KEY_FILE',  '/path/to/key_file');
-
-
-/* SUGGESTED SETTINGS FOR TIMEZONES IN USA -------------------------------------
- *
- * Eastern ........... America/New_York
- * Central ........... America/Chicago
- * Mountain .......... America/Denver
- * Mountain no DST ... America/Phoenix
- * Pacific ........... America/Los_Angeles
- * Alaska ............ America/Anchorage
- * Hawaii ............ America/Adak
- * Hawaii no DST ..... Pacific/Honolulu
- *
- * For complete list of timezones, view http://php.net/manual/en/timezones.php
- *
- * -------------------------------------------------------------------------- */
-
-// Univeristy campus's timezone.  ***THIS NEEDS TO BE SET.
-date_default_timezone_set('America/New_York');
 
 ?>

@@ -31,11 +31,11 @@ define('DB_LOGIN',  'hsdbu');
 define('DB_PASSWD', 'hsdbu_pa55w0rd');
 define('DB_HOST',   '192.168.56.101');
 
-//Location of accounts creation log file
-define('LOG_FILE', '/var/local/submitty/bin/accounts.log');
+//Location of accounts creation error log file
+define('ERROR_LOG_FILE', '/var/local/submitty/bin/accounts_errors.log');
 
 //Where to email error messages so they can get more immediate attention.
-define('ERROR_E_MAIL', 'sysadmins@lists.university.edu');
+define('ERROR_E_MAIL', 'sysadmins@lists.myuniversity.edu');
 
 /* SUGGESTED SETTINGS FOR TIMEZONES IN USA -------------------------------------
  *
@@ -57,29 +57,23 @@ date_default_timezone_set('America/New_York');
 
 /* EXAMPLE CRONTAB -------------------------------------------------------------
  *
- * This will run the script every hour at the half-hour (e.g. 8:30, 9:30, etc),
- * and any stdout/stderr output will be emailed to a sysadmin mailing list.
+ * This will run the script every hour at the half-hour (e.g. 8:30, 9:30, etc).
 
-MAILTO=sysadmins@lists.university.edu
 30 * * * * /var/local/submitty/bin/accounts.php
 
  * -------------------------------------------------------------------------- */
 
-
 /* MAIN ===================================================================== */
 //IMPORTANT: This script needs to be run as root!
 if (posix_getuid() !== 0) {
-	echo "This script must be run as root." . PHP_EOL;
-	exit(0);
+	exit("This script must be run as root." . PHP_EOL);
 }
 
-$semester = determine_semester();
+//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
+$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
 $courses  = determine_courses($semester);
 
-write_to_log("BEGIN auto account creation.");
 foreach($courses as $course) {
-
-	write_to_log("processing course {$course}");
 
 	if (array_search($course, unserialize(SVN_LIST)) !== false) {
 		//Create both auth account and SVN account
@@ -116,36 +110,8 @@ foreach($courses as $course) {
 	}
 }
 
-write_to_log("FINISHED auto account creation." . PHP_EOL . PHP_EOL);
 exit(0);
 /* END MAIN ================================================================= */
-
-
-function determine_semester() {
-//IN: No parameters
-//OUT: Returns a string representing the current semester
-//     (e.g. "f16" for Fall 2016)
-//PURPOSE: The semester string is needed to access the appropriate Submitty
-//         course databases.
-//IMPORTANT: This operates from the server's clock.  It is important to set the
-//           timezone correctly.
-
-	$month = intval(date("m"));
-	$year  = date("y");
-
-	if ($month <= 5) {
-		//spring is between months 1 - 5.
-		$semester = "s{$year}";
-	} else if ($month >=8 ) {
-		//fall is between months 8 - 12.
-		$semester = "f{$year}";
-	} else {
-		//maybe it is a summer class...?
-		$semester = "m{$year}";
-	}
-
-	return $semester;
-}
 
 function determine_courses($semester) {
 //IN:  Parameter has the current semester code (e.g. "f16" for Fall 2016)
@@ -157,10 +123,7 @@ function determine_courses($semester) {
 	$courses = scandir($path);
 
 	if ($courses === false) {
-		$err_msg = "Submitty Auto Account Creation: Cannot parse {$path}, CANNOT MAKE ACCOUNTS";
-		write_to_log($err_msg);
-		error_log($err_msg, 1, ERROR_E_MAIL);
-		error_log($err_msg, 4);
+		log_it("Submitty Auto Account Creation: Cannot parse {$path}, CANNOT MAKE ACCOUNTS");
 		exit(1);
 	}
 
@@ -188,19 +151,13 @@ function get_user_list_from_course_db($semester, $course) {
 
 	$db_conn = pg_connect("host={$db_host} dbname={$db_name} user={$db_user} password={$db_pass}");
 	if ($db_conn === false) {
-		$err_msg = "Submitty Auto Account Creation: Cannot connect to DB {$db_name}, skipping...";
-		write_to_log($msg);
-		error_log($err_msg, 1, ERROR_E_MAIL);
-		error_log($err_msg, 4);
+		log_it("Submitty Auto Account Creation: Cannot connect to DB {$db_name}, skipping...");
 		return array();
 	}
 
 	$db_query = pg_query($db_conn, "SELECT user_id FROM users;");
 	if ($db_query === false) {
-		$err_msg = "Submitty Auto Account Creation: Cannot read user list for {$course}, skipping...";
-		write_to_log($msg);
-		error_log($err_msg, 1, ERROR_E_MAIL);
-		error_log($err_msg, 4);
+        log_it("Submitty Auto Account Creation: Cannot read user list for {$course}, skipping...");
 		return array();
 	}
 
@@ -213,23 +170,15 @@ function get_user_list_from_course_db($semester, $course) {
 	return $user_list;
 }
 
-function write_to_log($msg) {
+function log_it($msg) {
 //IN:  Message to write to log file
 //OUT: No return, although log file is updated
-//PURPOSE: Log messages to a text file.
-//NOTE:    This script has no log file maintenance code.
+//PURPOSE: Log messages to email and text files.
 
-	$log = fopen(LOG_FILE, "a");
-	if ($log === false) {
-		//If the log cannot be opened for some reason, print the message to
-		//stdout so that it will be emailed to sysadmins as configured in the
-		//crontab.
-		echo "CANNOT ACCESS LOG FILE, message follows" . PHP_EOL .
-		     date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
-	} else {
-		fwrite($log, date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL);
-		fclose($log);
-	}
+    $msg = date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
+
+    error_log(msg, 1, ERROR_E_MAIL);
+   	error_log(msg, 3, ERROR_LOG_FILE);
 }
 
 /* EOF ====================================================================== */
