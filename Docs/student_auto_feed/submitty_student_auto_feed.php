@@ -192,7 +192,7 @@ class submitty_student_auto_feed {
                     $this->log_it("Row {$index} failed validation for student section ({$section}).  Row discarded.");
                     break;
 	            //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-                case (preg_match("~^[^(),:;<>@\"\[\]\\]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $row[COLUMN_EMAIL])):
+                case (preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $row[COLUMN_EMAIL])):
                     $this->log_it("Row {$index} failed validation for student email ({$row[COLUMN_EMAIL]}).  Row discarded.");
                 default:
                 	//Check for mapped (merged) course.

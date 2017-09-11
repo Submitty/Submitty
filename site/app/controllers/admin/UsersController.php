@@ -98,13 +98,13 @@ class UsersController extends AbstractController {
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
         $error_message .= preg_match("~^[a-z0-9_\-]+$~", trim($_POST['user_id'])) ? "" : "Error in username: {$_POST['user_id']}," . PHP_EOL;
         //First and Last name must be alpha characters, white-space, or certain punctuation.
-        $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", trim($_POST['user_firstname'])) ? "" : "Error in first name: {$_POST['user_firstname']}," . PHP_EOL;
-        $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", trim($_POST['user_lastname'])) ? "" : "Error in last name: {$_POST['user_lastname']}," . PHP_EOL;
-        //Check email address for format "address@domain".
-        $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", trim($_POST['user_email'])) ? "" : "Error in email: {$_POST['user_email']}," . PHP_EOL;
+        $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_firstname'])) ? "" : "Error in first name: {$_POST['user_firstname']}," . PHP_EOL;
+        $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_lastname'])) ? "" : "Error in last name: {$_POST['user_lastname']}," . PHP_EOL;
+		//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
+		$error_message .= preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", trim($_POST['user_email'])) ? "" : "Error in email: {$_POST['user_email']}," . PHP_EOL;
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
-        if (isset($_POST['user_preferred_firstname'])) {
-            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: {$_POST['user_preferred_firstname']}," . PHP_EOL;
+        if (!empty($_POST['user_preferred_firstname'])) {
+            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: {$_POST['user_preferred_firstname']}," . PHP_EOL;
         }
         //Database password cannot be blank, no check on format
         if ($use_database) {
@@ -389,26 +389,26 @@ class UsersController extends AbstractController {
             if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
 
             //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= preg_match("~^[a-z0-9_\-]+$~", $vals[0]) ? "" : "Error in username column, row #{$row_num}: {$vals[0]}," . PHP_EOL;
+            $error_message .= preg_match("~^[a-z0-9_\-]+$~", $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"{$vals[0]}\"<br>";
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[1]) ? "" : "ERROR on row {$row_num}, LastName \"{$vals[1]}\"<br>";
-            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[2]) ? "" : "ERROR on row {$row_num}, FirstName \"{$vals[2]}\"<br>";
+            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[1]) ? "" : "ERROR on row {$row_num}, Last Name \"{$vals[1]}\"<br>";
+            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[2]) ? "" : "ERROR on row {$row_num}, Firs tName \"{$vals[2]}\"<br>";
 
-            //Check email address for format "address@domain".
-            $error_message .= preg_match('~^("[^"]+"|[^"^(^)^,^:^;^<^>^@^\[^\\^\]]+)@{1}[a-zA-Z0-9:\.\-\[\]]+$~', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"{$vals[3]}\"<br>";
+            //Check email address for appropriate format. e.g. "grader@university.edu", "grader@cs.university.edu", etc.
+            $error_message .= preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $vals[3]) ? "" : "ERROR on row {$row_num}, email \"{$vals[3]}\"<br>";
 
             //grader-level check is a digit between 1 - 4.
-            $error_message .= preg_match("~^[1-4]{1}$~", $vals[4]) ? "" : "ERROR on row {$row_num}, gradergroup \"{$vals[4]}\"<br>";
+            $error_message .= preg_match("~^[1-4]{1}$~", $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"{$vals[4]}\"<br>";
 
             //Preferred first name must be alpha characters, white-space, or certain punctuation.
             if (isset($vals[$pref_name_idx]) && ($vals[$pref_name_idx] != "")) {
-                $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[$pref_name_idx]) ? "" : "Error in first name column, row #{$row_num}: {$vals[$pref_name_idx]}," . PHP_EOL;
+                $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[$pref_name_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"{$vals[$pref_name_idx]}\"<br>";
             }
 
             //Database password cannot be blank, no check on format
             if ($use_database) {
-                $error_message .= $vals[5] != "" ? "" : "Error in password column, row #{$row_num}: cannot be blank," . PHP_EOL;
+                $error_message .= $vals[5] != "" ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
             }
 
             $graders_data[] = $vals;
@@ -498,16 +498,9 @@ class UsersController extends AbstractController {
         $students_data = array();
         foreach($contents as $content) {
             $row_num++;
-<<<<<<< HEAD
-
-			//Ensure both row and all fields are trimmed.
-			$vals = array();
-            foreach (str_getcsv(trim($content)) as $i => $csv_val) $vals[$i] = trim($csv_val);
-
-=======
             $vals = str_getcsv($content);
             $vals = array_map('trim', $vals);
->>>>>>> master
+
             if (isset($vals[4])) {
                 if (is_numeric($vals[4])) {
                     $vals[4] = intval($vals[4]);
@@ -517,32 +510,27 @@ class UsersController extends AbstractController {
                 }
             }
 
-<<<<<<< HEAD
-            //user_id may not have any whitespaces
-            $error_message .= preg_match("~^\S+$~", $vals[0]) ? "" : "ERROR on row {$row_num}, username \"{$vals[0]}\"<br>";
-=======
             //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= preg_match("~^[a-z0-9_\-]+$~", $vals[0]) ? "" : "Error in username column, row #{$row_num}: {$vals[0]}," . PHP_EOL;
->>>>>>> master
+            $error_message .= preg_match("~^[a-z0-9_\-]+$~", $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"{$vals[0]}\"<br>";
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[1]) ? "" : "ERROR on row {$row_num}, LastName \"{$vals[1]}\"<br>";
-            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[2]) ? "" : "ERROR on row {$row_num}, FirstName \"{$vals[2]}\"<br>";
+            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[1]) ? "" : "ERROR on row {$row_num}, Last Name \"{$vals[1]}\"<br>";
+            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[2]) ? "" : "ERROR on row {$row_num}, First Name \"{$vals[2]}\"<br>";
 
-            //Check email address for format "address@domain".
-            $error_message .= preg_match('~^("[^"]+"|[^"^(^)^,^:^;^<^>^@^\[^\\^\]]+)@{1}[a-zA-Z0-9:\.\-\[\]]+$~', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"{$vals[3]}\"<br>";
+            //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
+            $error_message .= preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $vals[3]) ? "" : "ERROR on row {$row_num}, email \"{$vals[3]}\"<br>";
 
             //Student section must be greater than zero (intval($str) returns zero when $str is not integer)
-            $error_message .= (($vals[4] > 0 && $vals[4] <= $num_reg_sections) || $vals[4] === null) ? "" : "ERROR on row {$row_num}, RegistrationSection \"{$vals[4]}\"<br>";
+            $error_message .= (($vals[4] > 0 && $vals[4] <= $num_reg_sections) || $vals[4] === null) ? "" : "ERROR on row {$row_num}, Registration Section \"{$vals[4]}\"<br>";
 
             //Preferred first name must be alpha characters, white-space, or certain punctuation.
             if (isset($vals[$pref_name_idx]) && ($vals[$pref_name_idx] != "")) {
-                $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[$pref_name_idx]) ? "" : "Error in first name column, row #{$row_num}: {$vals[$pref_name_idx]}," . PHP_EOL;
+                $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[$pref_name_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"{$vals[$pref_name_idx]}\"<br>";
             }
 
             //Database password cannot be blank, no check on format
             if ($use_database) {
-                $error_message .= $vals[5] != "" ? "" : "Error in password column, row #{$row_num}: cannot be blank," . PHP_EOL;
+                $error_message .= $vals[5] != "" ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
             }
 
             $students_data[] = $vals;
