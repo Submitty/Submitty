@@ -448,7 +448,17 @@ HTML;
                 $tbody_open = true;
                 $return .= <<<HTML
         <tr class="info persist-header">
-            <td colspan="{$cols}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
+HTML;
+            if ($gradeable->isGradeByRegistration()) {
+                $return .= <<<HTML
+            <td colspan="{$cols}" style="text-align: center">Students Enrolled in Registration Section {$display_section}</td>
+HTML;
+            } else {
+                $return .= <<<HTML
+            <td colspan="{$cols}" style="text-align: center">Students Assigned to Rotating Section {$display_section}</td>
+HTML;
+            }
+                $return .= <<<HTML
         </tr>
         <tr class="info">
             <td colspan="{$cols}" style="text-align: center">Graders: {$section_graders}</td>
@@ -572,6 +582,7 @@ HTML;
                     $btn_class = "btn-default";
                     if($row->validateVersions()) {
                         $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+			$graded += $row->getGradedTAPoints();
                     }
                     else{
                         $contents = "Version Conflict";
@@ -591,7 +602,7 @@ HTML;
                 $return .= <<<HTML
 
                 <td>
-                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getAnonId(), 'individual'=>'1'))}">
+                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
                         {$contents}
                     </a>
                 </td>

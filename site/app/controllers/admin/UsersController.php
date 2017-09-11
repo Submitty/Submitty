@@ -48,22 +48,23 @@ class UsersController extends AbstractController {
 
     public function listStudents() {
         $students = $this->core->getQueries()->getAllUsers();
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
-        $this->renderUserForm('update_student');
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm');
+        $this->renderUserForm('update_student', $use_database);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm', $use_database);
     }
 
     public function listGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders);
-        $this->renderUserForm('update_grader');
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'graderListForm');
+        $this->renderUserForm('update_grader', $use_database);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'graderListForm', $use_database);
     }
 
-    private function renderUserForm($action) {
+    private function renderUserForm($action, $use_database) {
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'userForm', $reg_sections, $rot_sections, $action, $use_database);
     }
 
@@ -91,6 +92,29 @@ class UsersController extends AbstractController {
             $this->core->addErrorMessage("Invalid CSRF token.");
             $this->core->redirect($return_url);
         }
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+
+        $error_message = "";
+        //Username must contain only lowercase alpha, numbers, underscores, hyphens
+        $error_message .= preg_match("~^[a-z0-9_\-]+$~", trim($_POST['user_id'])) ? "" : "Error in username: {$_POST['user_id']}," . PHP_EOL;
+        //First and Last name must be alpha characters, white-space, or certain punctuation.
+        $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", trim($_POST['user_firstname'])) ? "" : "Error in first name: {$_POST['user_firstname']}," . PHP_EOL;
+        $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", trim($_POST['user_lastname'])) ? "" : "Error in last name: {$_POST['user_lastname']}," . PHP_EOL;
+        //Check email address for format "address@domain".
+        $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", trim($_POST['user_email'])) ? "" : "Error in email: {$_POST['user_email']}," . PHP_EOL;
+        //Preferred first name must be alpha characters, white-space, or certain punctuation.
+        if (isset($_POST['user_preferred_firstname'])) {
+            $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: {$_POST['user_preferred_firstname']}," . PHP_EOL;
+        }
+        //Database password cannot be blank, no check on format
+        if ($use_database) {
+            $error_message .= $_POST['user_password'] != "" ? "" : "Error must enter password for user" . PHP_EOL;
+        }
+
+        if (!empty($error_message)) {
+            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
+            $this->core->redirect($return_url);
+        }
 
         if ($_POST['edit_user'] == "true") {
             $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
@@ -101,16 +125,16 @@ class UsersController extends AbstractController {
         }
         else {
             $user = $this->core->loadModel(User::class);
-            $user->setId($_POST['user_id']);
+            $user->setId(trim($_POST['user_id']));
         }
 
-        $user->setFirstName($_POST['user_firstname']);
+        $user->setFirstName(trim($_POST['user_firstname']));
         if (isset($_POST['user_preferred_firstname'])) {
-            $user->setPreferredFirstName($_POST['user_preferred_firstname']);
+            $user->setPreferredFirstName(trim($_POST['user_preferred_firstname']));
         }
 
-        $user->setLastName($_POST['user_lastname']);
-        $user->setEmail($_POST['user_email']);
+        $user->setLastName(trim($_POST['user_lastname']));
+        $user->setEmail(trim($_POST['user_email']));
         if (isset($_POST['user_password'])) {
             $user->setPassword($_POST['user_password']);
         }
@@ -339,6 +363,7 @@ class UsersController extends AbstractController {
 
     public function uploadGraderList() {
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'graders'));
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $this->core->addErrorMessage("Invalid CSRF token");
@@ -353,20 +378,18 @@ class UsersController extends AbstractController {
         $contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
         //Validation and error checking.
+        $pref_name_idx = $use_database ? 6 : 5;
         $error_message = "";
         $row_num = 0;
         $graders_data = array();
         foreach($contents as $content) {
             $row_num++;
-
-			//Ensure row and all fields are trimmed.
-			$vals = array();
-            foreach (str_getcsv(trim($content)) as $i => $csv_val) $vals[$i] = trim($csv_val);
-
+            $vals = str_getcsv($content);
+            $vals = array_map('trim', $vals);
             if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
 
-            //user_id may not have any whitespaces
-            $error_message .= preg_match("~^\S+$~", $vals[0]) ? "" : "ERROR on row {$row_num}, username \"{$vals[0]}\"<br>";
+            //Username must contain only lowercase alpha, numbers, underscores, hyphens
+            $error_message .= preg_match("~^[a-z0-9_\-]+$~", $vals[0]) ? "" : "Error in username column, row #{$row_num}: {$vals[0]}," . PHP_EOL;
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
             $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[1]) ? "" : "ERROR on row {$row_num}, LastName \"{$vals[1]}\"<br>";
@@ -377,6 +400,16 @@ class UsersController extends AbstractController {
 
             //grader-level check is a digit between 1 - 4.
             $error_message .= preg_match("~^[1-4]{1}$~", $vals[4]) ? "" : "ERROR on row {$row_num}, gradergroup \"{$vals[4]}\"<br>";
+
+            //Preferred first name must be alpha characters, white-space, or certain punctuation.
+            if (isset($vals[$pref_name_idx]) && ($vals[$pref_name_idx] != "")) {
+                $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[$pref_name_idx]) ? "" : "Error in first name column, row #{$row_num}: {$vals[$pref_name_idx]}," . PHP_EOL;
+            }
+
+            //Database password cannot be blank, no check on format
+            if ($use_database) {
+                $error_message .= $vals[5] != "" ? "" : "Error in password column, row #{$row_num}: cannot be blank," . PHP_EOL;
+            }
 
             $graders_data[] = $vals;
         }
@@ -418,6 +451,12 @@ class UsersController extends AbstractController {
             $grader->setLastName($grader_data[2]);
             $grader->setEmail($grader_data[3]);
             $grader->setGroup($grader_data[4]);
+            if (isset($grader_data[$pref_name_idx]) && ($grader_data[$pref_name_idx] != "")) {
+                $grader->setPreferredFirstName($grader_data[$pref_name_idx]);
+            }
+            if ($use_database) {
+                $grader->setPassword($grader_data[5]);
+            }
             if ($this->core->getQueries()->getSubmittyUser($grader_data[0]) === null) {
                 $this->core->getQueries()->insertSubmittyUser($grader);
             }
@@ -437,6 +476,7 @@ class UsersController extends AbstractController {
 
     public function uploadClassList() {
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $this->core->addErrorMessage("Invalid CSRF token");
@@ -452,16 +492,22 @@ class UsersController extends AbstractController {
 
         //Validation and error checking.
         $num_reg_sections = count($this->core->getQueries()->getRegistrationSections());
+        $pref_name_idx = $use_database ? 6 : 5;
         $error_message = "";
         $row_num = 0;
         $students_data = array();
         foreach($contents as $content) {
             $row_num++;
+<<<<<<< HEAD
 
 			//Ensure both row and all fields are trimmed.
 			$vals = array();
             foreach (str_getcsv(trim($content)) as $i => $csv_val) $vals[$i] = trim($csv_val);
 
+=======
+            $vals = str_getcsv($content);
+            $vals = array_map('trim', $vals);
+>>>>>>> master
             if (isset($vals[4])) {
                 if (is_numeric($vals[4])) {
                     $vals[4] = intval($vals[4]);
@@ -471,8 +517,13 @@ class UsersController extends AbstractController {
                 }
             }
 
+<<<<<<< HEAD
             //user_id may not have any whitespaces
             $error_message .= preg_match("~^\S+$~", $vals[0]) ? "" : "ERROR on row {$row_num}, username \"{$vals[0]}\"<br>";
+=======
+            //Username must contain only lowercase alpha, numbers, underscores, hyphens
+            $error_message .= preg_match("~^[a-z0-9_\-]+$~", $vals[0]) ? "" : "Error in username column, row #{$row_num}: {$vals[0]}," . PHP_EOL;
+>>>>>>> master
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
             $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[1]) ? "" : "ERROR on row {$row_num}, LastName \"{$vals[1]}\"<br>";
@@ -483,6 +534,16 @@ class UsersController extends AbstractController {
 
             //Student section must be greater than zero (intval($str) returns zero when $str is not integer)
             $error_message .= (($vals[4] > 0 && $vals[4] <= $num_reg_sections) || $vals[4] === null) ? "" : "ERROR on row {$row_num}, RegistrationSection \"{$vals[4]}\"<br>";
+
+            //Preferred first name must be alpha characters, white-space, or certain punctuation.
+            if (isset($vals[$pref_name_idx]) && ($vals[$pref_name_idx] != "")) {
+                $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", $vals[$pref_name_idx]) ? "" : "Error in first name column, row #{$row_num}: {$vals[$pref_name_idx]}," . PHP_EOL;
+            }
+
+            //Database password cannot be blank, no check on format
+            if ($use_database) {
+                $error_message .= $vals[5] != "" ? "" : "Error in password column, row #{$row_num}: cannot be blank," . PHP_EOL;
+            }
 
             $students_data[] = $vals;
         }
@@ -525,6 +586,12 @@ class UsersController extends AbstractController {
             $student->setEmail($student_data[3]);
             $student->setRegistrationSection($student_data[4]);
             $student->setGroup(4);
+            if (isset($student_data[$pref_name_idx]) && ($student_data[$pref_name_idx] != "")) {
+                $student->setPreferredFirstName($student_data[$pref_name_idx]);
+            }
+            if ($use_database) {
+                $student->setPassword($student_data[5]);
+            }
             if ($this->core->getQueries()->getSubmittyUser($student_data[0]) === null) {
                 $this->core->getQueries()->insertSubmittyUser($student);
             }

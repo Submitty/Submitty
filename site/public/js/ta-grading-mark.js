@@ -115,11 +115,13 @@ function getMarkInfo(me, gradeable_id) {
             }
 
             var elem_html = "";
-            elem_html += "# of students with mark: " + data['data'].length + "<br>";
+            elem_html += "<h3>Students who received<br>&nbsp;<br>" + data['name_info']['question_name'] + ":<br><em>\"" 
+                + data['name_info']['mark_note'] + "\"</em></h3>";
+            elem_html += "&nbsp;<br>";
+	    elem_html += "# of students with mark: " + data['data'].length + "<br>";
             elem_html += "# of graded components: " + graded + "<br>";
             elem_html += "# of total components: " + total + "<br>";
-            elem_html += "<h1> List of Students who got " + data['name_info']['question_name'] + "'s " 
-                + data['name_info']['mark_note'] + "</h1>";
+            elem_html += "&nbsp;<br>";
             var y = 1;
             for (var x = 0; x < data['data'].length; x++) {
 

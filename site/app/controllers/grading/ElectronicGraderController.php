@@ -531,14 +531,14 @@ class ElectronicGraderController extends AbstractController {
         }
         $gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
         
-        $who_id = isset($_REQUEST['who_id']) ? $this->core->getQueries()->getUserFromAnon($_REQUEST['who_id']): "";
-        $who_id = isset($who_id[$_REQUEST['who_id']]) ? $who_id[$_REQUEST['who_id']] : "";
+        $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
+        //$who_id = isset($who_id[$_REQUEST['who_id']]) ? $who_id[$_REQUEST['who_id']] : "";
         if (($who_id !== "") && ($this->core->getUser()->getGroup() === 3) && !in_array($who_id, $user_ids_to_grade)) {
             $this->core->addErrorMessage("You do not have permission to grade {$who_id}");
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
         if($peer && !in_array($who_id, $user_ids_to_grade)) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade this student. who_id = ".$who_id[$_REQUEST['who_id']];
+            $_SESSION['messages']['error'][] = "You do not have permission to grade this student.";
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
@@ -567,7 +567,8 @@ class ElectronicGraderController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
         $gradeable->loadResultDetails();
         $individual = $_REQUEST['individual'];
-
+        
+        $anon_ids = $this->core->getQueries()->getAnonId(array($prev_id, $next_id));
 
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual);
