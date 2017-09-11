@@ -448,7 +448,17 @@ HTML;
                 $tbody_open = true;
                 $return .= <<<HTML
         <tr class="info persist-header">
-            <td colspan="{$cols}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
+HTML;
+            if ($gradeable->isGradeByRegistration()) {
+                $return .= <<<HTML
+            <td colspan="{$cols}" style="text-align: center">Students Enrolled in Registration Section {$display_section}</td>
+HTML;
+            } else {
+                $return .= <<<HTML
+            <td colspan="{$cols}" style="text-align: center">Students Assigned to Rotating Section {$display_section}</td>
+HTML;
+            }
+                $return .= <<<HTML
         </tr>
         <tr class="info">
             <td colspan="{$cols}" style="text-align: center">Graders: {$section_graders}</td>
