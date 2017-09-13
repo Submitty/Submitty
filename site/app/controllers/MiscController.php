@@ -157,7 +157,7 @@ class MiscController extends AbstractController {
         }
         else {
             $contents = htmlentities(file_get_contents($_REQUEST['path']), ENT_SUBSTITUTE);
-            if ($_REQUEST['dir'] === "submissions") {
+            if ($_REQUEST['dir'] === "submissions" && $mime_type != "text/plain") {
                 $filename = htmlentities($_REQUEST['file'], ENT_SUBSTITUTE);
                 $this->core->getOutput()->renderOutput('Misc', 'displayCode', $filename, $contents);
             }
