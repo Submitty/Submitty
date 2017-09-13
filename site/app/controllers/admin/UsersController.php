@@ -96,19 +96,19 @@ class UsersController extends AbstractController {
 
         $error_message = "";
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
-        $error_message .= preg_match("~^[a-z0-9_\-]+$~", trim($_POST['user_id'])) ? "" : "Error in username: {$_POST['user_id']}," . PHP_EOL;
+        $error_message .= preg_match("~^[a-z0-9_\-]+$~", trim($_POST['user_id'])) ? "" : "Error in username: \"{$_POST['user_id']}\"<br>";
         //First and Last name must be alpha characters, white-space, or certain punctuation.
-        $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_firstname'])) ? "" : "Error in first name: {$_POST['user_firstname']}," . PHP_EOL;
-        $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_lastname'])) ? "" : "Error in last name: {$_POST['user_lastname']}," . PHP_EOL;
+        $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_firstname'])) ? "" : "Error in first name: \"{$_POST['user_firstname']}\"<br>";
+        $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_lastname'])) ? "" : "Error in last name: \"{$_POST['user_lastname']}\"<br>";
 		//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-		$error_message .= preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", trim($_POST['user_email'])) ? "" : "Error in email: {$_POST['user_email']}," . PHP_EOL;
+		$error_message .= preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", trim($_POST['user_email'])) ? "" : "Error in email: \"{$_POST['user_email']}\"<br>";
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
         if (!empty($_POST['user_preferred_firstname'])) {
-            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: {$_POST['user_preferred_firstname']}," . PHP_EOL;
+            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"{$_POST['user_preferred_firstname']}\"<br>";
         }
         //Database password cannot be blank, no check on format
         if ($use_database) {
-            $error_message .= $_POST['user_password'] != "" ? "" : "Error must enter password for user" . PHP_EOL;
+            $error_message .= $_POST['user_password'] != "" ? "" : "Error must enter password for user<br>";
         }
 
         if (!empty($error_message)) {
