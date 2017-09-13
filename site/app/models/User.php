@@ -194,11 +194,11 @@ class User extends AbstractModel {
         if($this->anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             $random = "";
-            while(len($random) < 15) {
-                $random .= $alpha[rand(0, len($alpha)-1)];
-                if(len($random) == 15) {
+            while(strlen($random) < 15) {
+                $random .= $alpha[rand(0, strlen($alpha)-1)];
+                if(strlen($random) == 15) {
                     $check = $this->core->getQueries()->getUserFromAnon($random);
-                    if(len($check) == 0) {
+                    if(strlen($check) == 0) {
                         $this->anon_id = $random;
                         $this->core->getQueries()->updateUser($this);
                     } 

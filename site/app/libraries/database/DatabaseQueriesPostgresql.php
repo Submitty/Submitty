@@ -104,11 +104,21 @@ VALUES (?,?,?,?,?,?)", $params);
     }
 
     public function updateUser(User $user, $semester=null, $course=null) {
-        $array = array($user->getPassword(), $user->getAnonId(), $user->getFirstName(), $user->getPreferredFirstName(),
+
+
+    	//$array = array($user->getPassword(), $user->getAnonId(), $user->getFirstName(), $user->getPreferredFirstName(),
+        //               $user->getLastName(), $user->getEmail(), $user->getId());
+        //$this->submitty_db->query("
+//UPDATE users SET user_password=?, anon_id=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
+//WHERE user_id=?", $array);
+
+
+    	$array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
                        $user->getLastName(), $user->getEmail(), $user->getId());
         $this->submitty_db->query("
-UPDATE users SET user_password=?, anon_id=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
+UPDATE users SET user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
 WHERE user_id=?", $array);
+
 
         if (!empty($semester) && !empty($course)) {
             $params = array($user->getGroup(), $user->getRegistrationSection(),
@@ -1060,9 +1070,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
     public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
-        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $component->getId(), $gd_id, $grader_id);
+        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $component->getId(), $gd_id);
         $this->course_db->query("
-UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=? WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?, gcd_grader_id=? WHERE gc_id=? AND gd_id=?", $params);
     }
     
     public function replaceGradeableComponentData($gd_id, GradeableComponent $component) {
@@ -1071,10 +1081,16 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
         $this->insertGradeableComponentData($gd_id, $component);
     }
 
+    /**
+     * TODO: is this actually used somewhere?
+     * @param                                $gd_id
+     * @param                                $grader_id
+     * @param \app\models\GradeableComponent $component
+     */
     public function deleteGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
-        $params = array($component->getId(), $gd_id, $grader_id);
+        $params = array($component->getId(), $gd_id);
         $this->course_db->query("
-DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=?", $params);
+DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
     }
 
     public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
