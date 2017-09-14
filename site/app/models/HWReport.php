@@ -88,10 +88,10 @@ class HWReport extends AbstractModel {
                 $student_output_text_main .= "  Contact your TA or instructor if you believe this is an error".$nl.$nl;
             }
             if($late_days['late_days_charged'] > 0) {
-                $student_output_text_main .= "Number of late days used for this homework: " . $late_days['late_days_charged'] . $nl;
+//                $student_output_text_main .= "Number of late days used for this homework: " . $late_days['late_days_charged'] . $nl;
             }
-            $student_output_text_main .= "Total late days used this semester: " . $late_days['total_late_used'] . " (up to and including this assignment)" . $nl;
-            $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
+//            $student_output_text_main .= "Total late days used this semester: " . $late_days['total_late_used'] . " (up to and including this assignment)" . $nl;
+//            $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
             
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
 
