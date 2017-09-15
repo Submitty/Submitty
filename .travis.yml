@@ -56,6 +56,8 @@ before_install:
   - jdk_switcher use default
   # we have to unset this as the JVM will print a message on STDERR on any execution if this is set because somehow that makes sense I guess
   - unset _JAVA_OPTIONS
+  - ls -la /opt
+  - pyenv version
   - PY_VERSION_3=$(pyenv versions | grep -oP "3.6.[0-9]")
   - pyenv global ${PY_VERSION_3}
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
