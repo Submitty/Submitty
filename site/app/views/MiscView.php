@@ -12,10 +12,10 @@ class MiscView extends AbstractView {
 HTML;
     }
 
-    private function sourceSettingsJS($filename, $number) {
+    private function sourceSettingsJS($mime_type, $filename, $number) {
         $type = FileUtils::getContentType($filename);
         $number = intval($number);
-        return <<<HTML
+        $return = <<<HTML
     <script>
         var editor{$number} = CodeMirror.fromTextArea(document.getElementById('code{$number}'), {
             lineNumbers: true,
@@ -32,8 +32,15 @@ HTML;
 	        editor{$number}.setSize("100%", "auto");
 	    }
 	    editor{$number}.setOption("theme", "eclipse");
-	    editor{$number}.setOption("mode", "{$type}");
-
+HTML;
+        
+        if ($mime_type != "text/plain") {
+            $return .= <<<HTML
+        editor{$number}.setOption("mode", "{$type}");
+HTML;
+        }
+        
+        $return .= <<<HTML
 	    $("#myTab").find("a").click(function (e) {
 	        e.preventDefault();
 	        $(this).tab("show");
@@ -41,9 +48,10 @@ HTML;
 	    });
     </script>
 HTML;
+        return $return;
     }
 
-    public function displayCode($filename, $file_contents) {
+    public function displayCode($mime_type, $filename, $file_contents) {
         $return = <<<HTML
 <!doctype html>
 <html>
@@ -69,7 +77,7 @@ HTML;
         $return .= <<<HTML
     </textarea>
 HTML;
-		$return .= $this->sourceSettingsJS($filename, 0);
+		$return .= $this->sourceSettingsJS($mime_type, $filename, 0);
         $return .= <<<HTML
 </body>
 </html>
