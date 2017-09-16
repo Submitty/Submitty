@@ -585,6 +585,13 @@ HTML;
 
         $peer_checked = $question->getIsPeer() ? ' checked="checked"' : "";
         $pdf_page = $question->getPage();
+        $pdf_page_display = 'style="display:none"';
+        if ($pdf_page >= 0 && $admin_gradeable->getPdfPage()===true) {
+            $pdf_page_display = "";
+        }
+        $html_output .= <<<HTML
+            <div id="pdf_page_{$num}" class="pdf_page_input" {$pdf_page_display}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{$num}" value="{$pdf_page}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
+HTML;
         /*
         $html_output .= <<<HTML
                 <div id="peer_checkbox_{$num}" class="peer_input" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
