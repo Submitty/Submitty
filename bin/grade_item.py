@@ -91,7 +91,7 @@ def get_vcs_info(top_dir,semester,course,gradeable,userid):
 # it will create directories as needed
 # it's ok if the target directory or subdirectories already exist
 # it will overwrite files with the same name if they exist
-def copy_contents_into(source,target):
+def copy_contents_into(source,target,tmp_logs):
     if not os.path.isdir(target):
         grade_items_logging.log_message("ERROR: the target directory does not exist " + target)
         raise SystemExit("ERROR: the target directory does not exist '", target, "'")
@@ -100,7 +100,7 @@ def copy_contents_into(source,target):
             if os.path.isdir(os.path.join(source,item)):
                 if os.path.isdir(os.path.join(target,item)):
                     # recurse
-                    copy_contents_into(os.path.join(source,item),os.path.join(target,item))
+                    copy_contents_into(os.path.join(source,item),os.path.join(target,item),tmp_logs)
                 elif os.path.isfile(os.path.join(target,item)):
                     grade_items_logging.log_message("ERROR: the target subpath is a file not a directory '" + os.path.join(target,item) + "'")
                     raise SystemExit("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
@@ -108,7 +108,15 @@ def copy_contents_into(source,target):
                     # copy entire subtree
                     shutil.copytree(os.path.join(source,item),os.path.join(target,item))
             else:
-                shutil.copy(os.path.join(source,item),target)
+                if os.path.exists(os.path.join(target,item)):
+                    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+                        print ("\nWARNING: REMOVING DESTINATION FILE" , os.path.join(target,item),
+                               " THEN OVERWRITING: ", os.path.join(source,item), "\n", file=f)
+                    os.remove(os.path.join(target,item))
+                try:
+                    shutil.copy(os.path.join(source,item),target)
+                except:
+                    raise SystemExit("ERROR COPYING FILE: " +  os.path.join(source,item) + " -> " + os.path.join(target,item))
 
 
 # copy files that match one of the patterns from the source directory
@@ -271,7 +279,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         pattern_copy("checkout_to_compilation",patterns_submission_to_compilation,checkout_subdir_path,tmp_compilation,tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
-    copy_contents_into(provided_code_path,tmp_compilation)
+    copy_contents_into(provided_code_path,tmp_compilation,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
@@ -335,7 +343,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
         
     # copy input files to tmp_work directory
-    copy_contents_into(test_input_path,tmp_work)
+    copy_contents_into(test_input_path,tmp_work,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
@@ -359,9 +367,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                           submission_string],
                                           stdout=logfile)
 
-
-
-
     if runner_success == 0:
         print ("pid",my_pid,"RUNNER OK")
     else:
@@ -384,15 +389,15 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         pattern_copy("checkout_to_validation",patterns_submission_to_validation,checkout_subdir_path,tmp_work,tmp_logs)
     patterns_compilation_to_validation = complete_config_obj["autograding"]["compilation_to_validation"]
     pattern_copy("compilation_to_validation",patterns_compilation_to_validation,tmp_compilation,tmp_work,tmp_logs)
-    
+
     # remove the compilation directory
     shutil.rmtree(tmp_compilation)
 
     # copy output files to tmp_work directory
-    copy_contents_into(test_output_path,tmp_work)
+    copy_contents_into(test_output_path,tmp_work,tmp_logs)
 
     # copy any instructor custom validation code into the tmp work directory
-    copy_contents_into(custom_validation_code_path,tmp_work)
+    copy_contents_into(custom_validation_code_path,tmp_work,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
