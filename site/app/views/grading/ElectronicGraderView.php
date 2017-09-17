@@ -490,18 +490,19 @@ HTML;
                     if ($this->core->getUser()->accessAdmin()) {
                         $return .= <<<HTML
 
-                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
-                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
 HTML;
                         if($row->getTeam()=== null) {
                             $return .= <<<HTML
-
+                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
+                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td></td>
 HTML;
                         }
                         else {
+                            $members = json_encode($row->getTeam()->getMembers());
                             $return .= <<<HTML
-
+                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$members}, {$gradeable->getMaxTeamSize()});'>
+                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$row->getTeam()->getId()}</td>
 HTML;
                         }
@@ -1344,10 +1345,10 @@ HTML;
             else if (url_file.includes("results")) directory = "results";  
             // handle pdf
             if(url_file.substring(url_file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' height='600px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='600px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }
@@ -1383,7 +1384,7 @@ HTML;
         directory = "";
         if (url_file.includes("submissions")) directory = "submissions";
         else if (url_file.includes("results")) directory = "results";
-        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
 </script>
