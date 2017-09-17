@@ -103,7 +103,7 @@ class UsersController extends AbstractController {
         //Check email address for format "address@domain".
         $error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", trim($_POST['user_email'])) ? "" : "Error in email: {$_POST['user_email']}," . PHP_EOL;
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
-        if (isset($_POST['user_preferred_firstname'])) {
+        if (isset($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) != "") {
             $error_message .= preg_match("~^[a-zA-Z.'`\- ]+$~", trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: {$_POST['user_preferred_firstname']}," . PHP_EOL;
         }
         //Database password cannot be blank, no check on format
@@ -116,20 +116,24 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
         if ($_POST['edit_user'] == "true") {
-            $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
             if ($user === null) {
                 $this->core->addErrorMessage("No user found with that user id");
                 $this->core->redirect($return_url);
             }
         }
         else {
+            if ($user !== null) {
+                $this->core->addErrorMessage("A user with that ID already exists");
+                $this->core->redirect($return_url);
+            }
             $user = $this->core->loadModel(User::class);
             $user->setId(trim($_POST['user_id']));
         }
 
         $user->setFirstName(trim($_POST['user_firstname']));
-        if (isset($_POST['user_preferred_firstname'])) {
+        if (isset($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) != "") {
             $user->setPreferredFirstName(trim($_POST['user_preferred_firstname']));
         }
 
