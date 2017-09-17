@@ -466,9 +466,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         shutil.move(os.path.join(tmp,"OLD_RESULTS"),
                     os.path.join(results_path,"OLD"))
 
-    shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
-    shutil.copy(os.path.join(tmp_work,"results.json"),results_path)
-    shutil.copy(os.path.join(tmp_work,"grade.txt"),results_path)
     os.makedirs(os.path.join(results_path,"details"))
 
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
@@ -483,6 +480,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         
     grading_finished = dateutils.get_current_time()
 
+    shutil.copy(os.path.join(tmp_work,"results.json"),results_path)
+    shutil.copy(os.path.join(tmp_work,"grade.txt"),results_path)
+
     # -------------------------------------------------------------
     # create/append to the results history
 
@@ -496,9 +496,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     grading_began_longstring = dateutils.write_submitty_date(grading_began)
     grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
 
-
     gradingtime = int((grading_finished-grading_began).total_seconds())
-
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,
@@ -529,14 +527,17 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",gradingtime,grade_result)
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-        f.write("finished")
-            
-            
+        f.write("FINISHED GRADING!")
+
+    # save the logs!
+    shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
+
+
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
     shutil.rmtree(tmp)
 
-    
+
 # ==================================================================================
 # ==================================================================================
 if __name__ == "__main__":
