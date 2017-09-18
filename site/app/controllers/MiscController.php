@@ -62,7 +62,7 @@ class MiscController extends AbstractController {
         if ($dir === "config_upload" || $dir === "uploads") {
             return ($this->core->getUser()->accessAdmin());
         }
-        else if ($dir === "submissions" || $dir === "results") {
+        else if ($dir === "submissions" || $dir === "results" || $dir === "checkout") {
             // if instructor or grader, then it's okay
             if ($this->core->getUser()->accessGrading()) {
                 return true;
