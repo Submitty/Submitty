@@ -1093,11 +1093,27 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
 DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
     }
 
-    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
-        $params = array($gc_id, $gd_id, $grader_id, $mark->getId());
-        $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=? AND gcm_id=?", $params);
+
+
+
+// FIXME: THIS CODE REQUIRING GRADER_IDS MATCH FOR PEER GRADING BREAKS REGULAR GRADING
+//
+//    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
+//        $params = array($gc_id, $gd_id, $grader_id, $mark->getId());
+//        $this->course_db->query("
+//DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=? AND gcm_id=?", $params);
+//    }
+//
+
+   public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
+           $params = array($gc_id, $gd_id, $mark->getId());
+	           $this->course_db->query("
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
     }
+
+// END FIXME
+
+
 
     public function getDataFromGCMD($gc_id, GradeableComponentMark $mark) {
         $return_data = array();
