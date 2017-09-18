@@ -1069,12 +1069,23 @@ INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_com
 VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
+
+    // FIXME
+    //
+    //public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
+    //    $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $component->getId(), $gd_id);
+    //    $this->course_db->query("
+//UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?, gcd_grader_id=? WHERE gc_id=? AND gd_id=?", $params);
+    //}
+
     public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
         $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $component->getId(), $gd_id);
         $this->course_db->query("
 UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?, gcd_grader_id=? WHERE gc_id=? AND gd_id=?", $params);
     }
-    
+
+    // END FIXME
+
     public function replaceGradeableComponentData($gd_id, GradeableComponent $component) {
         $params = array($component->getId(), $gd_id);
         $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
