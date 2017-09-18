@@ -448,7 +448,17 @@ HTML;
                 $tbody_open = true;
                 $return .= <<<HTML
         <tr class="info persist-header">
-            <td colspan="{$cols}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
+HTML;
+            if ($gradeable->isGradeByRegistration()) {
+                $return .= <<<HTML
+            <td colspan="{$cols}" style="text-align: center">Students Enrolled in Registration Section {$display_section}</td>
+HTML;
+            } else {
+                $return .= <<<HTML
+            <td colspan="{$cols}" style="text-align: center">Students Assigned to Rotating Section {$display_section}</td>
+HTML;
+            }
+                $return .= <<<HTML
         </tr>
         <tr class="info">
             <td colspan="{$cols}" style="text-align: center">Graders: {$section_graders}</td>
@@ -480,18 +490,19 @@ HTML;
                     if ($this->core->getUser()->accessAdmin()) {
                         $return .= <<<HTML
 
-                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
-                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
 HTML;
                         if($row->getTeam()=== null) {
                             $return .= <<<HTML
-
+                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
+                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td></td>
 HTML;
                         }
                         else {
+                            $members = json_encode($row->getTeam()->getMembers());
                             $return .= <<<HTML
-
+                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$members}, {$gradeable->getMaxTeamSize()});'>
+                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$row->getTeam()->getId()}</td>
 HTML;
                         }
@@ -572,6 +583,7 @@ HTML;
                     $btn_class = "btn-default";
                     if($row->validateVersions()) {
                         $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+			$graded += $row->getGradedTAPoints();
                     }
                     else{
                         $contents = "Version Conflict";
@@ -591,7 +603,7 @@ HTML;
                 $return .= <<<HTML
 
                 <td>
-                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getAnonId(), 'individual'=>'1'))}">
+                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
                         {$contents}
                     </a>
                 </td>
@@ -1333,10 +1345,10 @@ HTML;
             else if (url_file.includes("results")) directory = "results";  
             // handle pdf
             if(url_file.substring(url_file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' height='600px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='600px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }
@@ -1372,7 +1384,7 @@ HTML;
         directory = "";
         if (url_file.includes("submissions")) directory = "submissions";
         else if (url_file.includes("results")) directory = "results";
-        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
 </script>

@@ -585,6 +585,13 @@ HTML;
 
         $peer_checked = $question->getIsPeer() ? ' checked="checked"' : "";
         $pdf_page = $question->getPage();
+        $pdf_page_display = 'style="display:none"';
+        if ($pdf_page >= 0 && $admin_gradeable->getPdfPage()===true) {
+            $pdf_page_display = "";
+        }
+        $html_output .= <<<HTML
+            <div id="pdf_page_{$num}" class="pdf_page_input" {$pdf_page_display}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{$num}" value="{$pdf_page}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
+HTML;
         /*
         $html_output .= <<<HTML
                 <div id="peer_checkbox_{$num}" class="peer_input" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
@@ -2581,7 +2588,7 @@ $('#gradeable-form').on('submit', function(e){
             var exists = true;
             var error = false;
             var error_message = ``;
-            while(exists){
+            while(exists){ //goes through questions
                 if($("#grade-"+index).length) {                   
                     var type = 0;
                     if ($('input[name=grade_by-'+index+']:radio:checked').val() === 'count_up') {
@@ -2594,7 +2601,7 @@ $('#gradeable-form').on('submit', function(e){
                     var temp_num = -1;
                     var exists2 = ($('#mark_id-'+index+'-0').length) ? true : false;
                     var index2 = 0;
-                    while (exists2) {
+                    while (exists2) { //goes through marks
                         temp_num = parseFloat($('#mark_id-'+index+'-'+index2).find('input[name=mark_points_'+index+'_'+index2+']').val());
                         if (type === 1) {
                             if (temp_num > 0) {
@@ -2609,7 +2616,8 @@ $('#gradeable-form').on('submit', function(e){
                         exists2 = ($('#mark_id-'+index+'-'+index2).length) ? true : false;
                     }
 
-                    if (temp_points < points) {
+                    //fun fact between caution and warning: http://www.stevensstrategic.com/technical-writing-the-difference-between-warnings-and-cautions/
+                    if (temp_points < points && index2 > 1) { //display caution message if points are not enough and more than 1 mark
                         if (error === false) {
                             error_message = error_message + `Caution! \n`;
                         } else {

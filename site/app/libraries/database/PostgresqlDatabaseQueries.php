@@ -107,11 +107,19 @@ VALUES (?,?,?,?,?,?)", $params);
     }
 
     public function updateUser(User $user, $semester=null, $course=null) {
+        //$array = array($user->getPassword(), $user->getAnonId(), $user->getFirstName(), $user->getPreferredFirstName(),
+        //               $user->getLastName(), $user->getEmail(), $user->getId());
+        //$this->submitty_db->query("
+        //UPDATE users SET user_password=?, anon_id=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
+        //WHERE user_id=?", $array);
+
+
         $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
                        $user->getLastName(), $user->getEmail(), $user->getId());
         $this->submitty_db->query("
 UPDATE users SET user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
 WHERE user_id=?", $array);
+
 
         if (!empty($semester) && !empty($course)) {
             $params = array($user->getGroup(), $user->getRegistrationSection(),

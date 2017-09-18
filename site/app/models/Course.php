@@ -25,7 +25,7 @@ class Course extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details, $submitty_path) {
+    public function __construct(Core $core, $details) {
         parent::__construct($core);
 
         $this->semester = $details['semester'];

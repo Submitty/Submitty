@@ -104,8 +104,6 @@ function newGraderListForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#grader-list-form");
     form.css("display", "block");
-    form.css("width", "500px");
-    form.css("margin-left", "-250px");
     $('[name="upload"]', form).val(null);
 }
 
@@ -113,8 +111,6 @@ function newClassListForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#class-list-form");
     form.css("display", "block");
-    form.css("width", "500px");
-    form.css("margin-left", "-250px");
     $('[name="move_missing"]', form).prop('checked', false);
     $('[name="upload"]', form).val(null);
 }

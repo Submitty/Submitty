@@ -191,4 +191,25 @@ class User extends AbstractModel {
             $this->grading_registration_sections = $sections;
         }
     }
+    
+    public function getAnonId() {
+        if($this->anon_id === null) {
+            $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            $random = "";
+            while(strlen($random) < 15) {
+                $random .= $alpha[rand(0, strlen($alpha)-1)];
+                if(strlen($random) == 15) {
+                    $check = $this->core->getQueries()->getUserFromAnon($random);
+                    if(strlen($check) == 0) {
+                        $this->anon_id = $random;
+                        $this->core->getQueries()->updateUser($this);
+                    } 
+                    else {
+                        $random = "";
+                    }
+                }
+            }
+        }
+        return $this->anon_id;
+    }
 }
