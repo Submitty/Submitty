@@ -175,7 +175,13 @@ class Config extends AbstractModel {
         }
         $this->config_path = dirname($master_ini_path);
         // Load config details from the master config file
-        $master = IniParser::readFile($master_ini_path);
+        try {
+            $master = IniParser::readFile($master_ini_path);
+        }
+        catch (\Throwable $throwable) {
+            throw new ConfigException($throwable->getMessage());
+        }
+
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
         $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
