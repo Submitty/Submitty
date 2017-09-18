@@ -96,7 +96,6 @@ abstract class AbstractDatabase {
         if ($this->link === null) {
             $this->query_count = 0;
             $this->all_queries = array();
-
             try {
                 if (isset($this->username) && isset($this->password)) {
                     $this->link = new PDO($this->getDSN(), $this->username, $this->password);
@@ -124,7 +123,7 @@ abstract class AbstractDatabase {
      */
     public function disconnect() {
         if ($this->transaction) {
-            $this->commit();
+            $this->rollback();
         }
         $this->link = null;
     }
@@ -150,7 +149,7 @@ abstract class AbstractDatabase {
             $this->all_queries[] = array($query, $parameters);
             $statement = $this->link->prepare($query);
             $result = $statement->execute($parameters);
-            $lower = strtolower($query);
+            $lower = trim(strtolower($query));
 
             $this->row_count = null;
             if (Utils::startsWith($lower, 'update') || Utils::startsWith($lower, 'delete')
@@ -194,7 +193,7 @@ abstract class AbstractDatabase {
      * @throws \app\exceptions\DatabaseException
      */
     public function queryIterator($query, $parameters=array(), $callback=null) {
-        $lower = strtolower($query);
+        $lower = trim(strtolower($query));
         if (!Utils::startsWith($lower, "select")) {
             return $this->query($query, $parameters);
         }
@@ -261,8 +260,6 @@ abstract class AbstractDatabase {
 
     /**
      * Actually commit/execute all queries to the database since we began the transaction.
-     *
-     * @throws \Exception
      */
     public function commit() {
         if ($this->transaction) {

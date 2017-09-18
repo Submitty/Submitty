@@ -52,7 +52,9 @@ class DatabaseQueries {
     public function __construct(Core $core) {
         $this->core = $core;
         $this->submitty_db = $core->getSubmittyDB();
-        $this->course_db = $core->getCourseDB();
+        if ($this->core->getConfig()->isCourseLoaded()) {
+            $this->course_db = $core->getCourseDB();
+        }
     }
 
     /**
@@ -168,7 +170,7 @@ class DatabaseQueries {
      */
     public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
         $return = array();
-        foreach ($this->getGradeablesIterator($g_ids, $user_ids, $section_key, $sort_key, $g_type) as $key => $row) {
+        foreach ($this->getGradeablesIterator($g_ids, $user_ids, $section_key, $sort_key, $g_type) as $row) {
             $return[] = $row;
         }
         return $return;

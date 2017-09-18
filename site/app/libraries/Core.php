@@ -130,12 +130,11 @@ class Core {
         $this->submitty_db = $database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
         $this->submitty_db->connect();
 
-        $this->database_queries = $database_factory->getQueries($this);
-
         if ($this->config->isCourseLoaded()) {
             $this->course_db = $database_factory->getDatabase($this->config->getCourseDatabaseParams());
             $this->course_db->connect();
         }
+        $this->database_queries = $database_factory->getQueries($this);
     }
 
     /**

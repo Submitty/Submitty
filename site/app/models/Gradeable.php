@@ -367,7 +367,7 @@ class Gradeable extends AbstractModel {
             foreach ($fields as $key) {
                 if (isset($details['array_'.$key])) {
                     // TODO: We should parse this array at the DatabaseQueries level and not here
-                    $details['array_'.$key] = $this->core->getCourseDB()->fromDatabaseArrayToPHP($details['array_'.$key], in_array($key, $bools));
+                    $details['array_'.$key] = $this->core->getCourseDB()->fromDatabaseToPHPArray($details['array_'.$key], in_array($key, $bools));
                 }
             }
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {

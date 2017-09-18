@@ -29,7 +29,7 @@ WHERE u.user_id=?", array($user_id));
         if (count($this->course_db->rows()) > 0) {
             $user = $this->course_db->row();
             if (isset($user['grading_registration_sections'])) {
-                $user['grading_registration_sections'] = $this->course_db->fromDatabaseArrayToPHP($user['grading_registration_sections']);
+                $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
             }
             return new User($this->core, $user);
         }
@@ -250,6 +250,7 @@ SELECT";
   gd.array_gcd_graded_version,
   gd.array_gcd_grade_time,
   gd.array_gcd_user_id,
+  gd.array_gcd_anon_id,
   gd.array_gcd_user_firstname,
   gd.array_gcd_user_preferred_firstname,
   gd.array_gcd_user_lastname,
@@ -329,6 +330,7 @@ LEFT JOIN (
     in_gcd.array_gcd_grade_time,
     in_gcd.array_array_gcm_mark,
     in_gcd.array_gcd_user_id,
+    in_gcd.array_gcd_anon_id,
     in_gcd.array_gcd_user_firstname,
     in_gcd.array_gcd_user_preferred_firstname,
     in_gcd.array_gcd_user_lastname,
@@ -346,6 +348,7 @@ LEFT JOIN (
       array_agg(gcd_grade_time) AS array_gcd_grade_time,
       array_agg(array_gcm_mark) AS array_array_gcm_mark,
       array_agg(u.user_id) AS array_gcd_user_id,
+      array_agg(u.anon_id) AS array_gcd_anon_id,
       array_agg(u.user_firstname) AS array_gcd_user_firstname,
       array_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
       array_agg(u.user_lastname) AS array_gcd_user_lastname,

@@ -10,7 +10,6 @@ use app\libraries\Core;
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
  * @method void setAnonId(string $anon_id)
- * @method string getAnonId() 
  * @method string getPassword()
  * @method string getFirstName() Get the first name of the loaded user
  * @method string getPreferredFirstName() Get the preferred name of the loaded user

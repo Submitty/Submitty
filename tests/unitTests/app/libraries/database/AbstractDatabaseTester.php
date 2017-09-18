@@ -67,6 +67,16 @@ class AbstractDatabaseTester extends \PHPUnit_Framework_TestCase {
         $this->assertFalse($database->isConnected());
     }
 
+    public function testQueryTrim() {
+        $database = new SqliteDatabase(array('memory' => true));
+        $database->connect();
+        $this->setupDatabase($database);
+        $database->query("
+SELECT * FROM test");
+        $this->assertEquals(2, $database->getRowCount());
+        $database->disconnect();
+    }
+
     public function testTransactions() {
         $database = new SqliteDatabase(array('memory' => true));
         $database->connect();
@@ -133,7 +143,7 @@ class AbstractDatabaseTester extends \PHPUnit_Framework_TestCase {
         $database = new SqliteDatabase(array('path' => $db));
         $database->connect();
         $database->query("SELECT * FROM test");
-        $this->assertEquals(3, count($database->rows()));
+        $this->assertEquals(2, count($database->rows()));
         $database->disconnect();
         unlink($db);
     }
@@ -166,6 +176,22 @@ class AbstractDatabaseTester extends \PHPUnit_Framework_TestCase {
         $database->connect();
         $this->setupDatabase($database);
         $iterator = $database->queryIterator("SELECT * FROM test ORDER BY pid");
+        $expected = array(0 => array('pid' => 1, 'tcol' => 'a'), 1 => array('pid' => 2, 'tcol' => 'b'));
+        $cnt = 0;
+        foreach ($iterator as $idx => $item) {
+            $this->assertSame($expected[$idx], $item);
+            $cnt++;
+        }
+        $this->assertEquals(count($expected), $cnt);
+        $database->disconnect();
+    }
+
+    public function testDatabaseIteratorTrim() {
+        $database = new SqliteDatabase(array('memory' => true));
+        $database->connect();
+        $this->setupDatabase($database);
+        $iterator = $database->queryIterator("
+SELECT * FROM test ORDER BY pid");
         $expected = array(0 => array('pid' => 1, 'tcol' => 'a'), 1 => array('pid' => 2, 'tcol' => 'b'));
         $cnt = 0;
         foreach ($iterator as $idx => $item) {
