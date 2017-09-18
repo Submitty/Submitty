@@ -94,11 +94,11 @@ class UsersController extends AbstractController {
         }
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
-        
+
         if (empty($_POST['user_id'])) {
             $this->core->addErrorMessage("User ID cannot be empty");
         }
-        
+
         $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
         if ($_POST['edit_user'] == "true" && $user === null) {
             $this->core->addErrorMessage("No user found with that user id");
@@ -111,10 +111,10 @@ class UsersController extends AbstractController {
             $user->setManualRegistration(isset($_POST['manual_registration']));
             $user->setGradingRegistrationSections(!isset($_POST['grading_registration_section']) ? array() : array_map("intval", $_POST['grading_registration_section']));
             $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
-            $this->core->addSuccessMessage("Added {$_POST['user_id'] to {$this->core->getConfig()->getCourse()}");
+            $this->core->addSuccessMessage("Added {$_POST['user_id']} to {$this->core->getConfig()->getCourse()}");
             $this->core->redirect($return_url);
         }
-        
+
         $error_message = "";
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
         $error_message .= preg_match("~^[a-z0-9_\-]+$~", trim($_POST['user_id'])) ? "" : "Error in username: \"{$_POST['user_id']}\"<br>";
