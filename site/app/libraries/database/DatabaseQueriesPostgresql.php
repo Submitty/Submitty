@@ -548,10 +548,19 @@ ORDER BY egd.g_version", array($g_id, $user_id));
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query 
     public function getLateDayUpdates($user_id) {
         if($user_id != null) {
-          $this->course_db->query("SELECT * FROM late_days WHERE user_id=?", array($user_id));
+            $query = "SELECT * FROM late_days WHERE user_id";
+            if (is_array($user_id)) {
+                $query .= ' IN ('.implode(',', array_fill(0, count($user_id), '?')).')';
+                $params = $user_id;
+            }
+            else {
+                $query .= '=?';
+                $params = array($user_id);
+            }
+            $this->course_db->query($query, $params);
         }
         else {
-          $this->course_db->query("SELECT * FROM late_days");
+            $this->course_db->query("SELECT * FROM late_days");
         }
         return $this->course_db->rows();
     }
@@ -618,8 +627,14 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                       ON submissions.g_id = lde.g_id 
                       AND submissions.user_id = lde.user_id";
         if($user_id !== null) {
-          $query .= " WHERE submissions.user_id=?";
-          $params[] = $user_id;
+            if (is_array($user_id)) {
+                $query .= " WHERE submissions.user_id IN (".implode(", ", array_fill(0, count($user_id), '?')).")";
+                $params = array_merge($params, $user_id);
+            }
+            else {
+                $query .= " WHERE submissions.user_id=?";
+                $params[] = $user_id;
+            }
         }
         $this->course_db->query($query, $params);
         return $this->course_db->rows();
