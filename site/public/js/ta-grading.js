@@ -403,7 +403,6 @@ function downloadZip(grade_id, user_id) {
 }
 
 function downloadFile(html_file, url_file) {
-    url_file = decodeURIComponent(url_file);  
     directory = "";
     if (url_file.includes("submissions")) directory = "submissions";
     else if (url_file.includes("results")) directory = "results";      

@@ -822,9 +822,10 @@ HTML;
         function display_files($files, &$count, $indent, &$return) {
             foreach ($files as $dir => $contents) {
                 if (!is_array($contents)) {
-                    $dir = htmlentities($dir);
+                    $dir_display = $dir;
+		    $dir = urlencode($dir);
                     $contents = urlencode(htmlentities($contents));
-                    $content_url = urldecode($contents); 
+                    $content_url = urlencode($contents); 
                     $indent_offset = $indent * -15;
                     $super_url = $content_url;
                     $return .= <<<HTML
@@ -832,11 +833,11 @@ HTML;
                     <div class="file-viewer">
                         <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count}); updateCookies();'>
                             <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
-                        {$dir}</a> &nbsp;
+                        {$dir_display}</a> &nbsp;
                         <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
                         <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
                     </div><br/>
-                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$contents}"></div>
+                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir_display}" data-file_url="{$contents}"></div>
                 </div>
 HTML;
                     $count++;
@@ -1379,7 +1380,7 @@ HTML;
         $("#score_total").html(total+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});
     }
     function openFile(html_file, url_file) {
-        url_file = decodeURIComponent(url_file);
+       // url_file = decodeURIComponent(url_file);
         directory = "";
         if (url_file.includes("submissions")) directory = "submissions";
         else if (url_file.includes("results")) directory = "results";
