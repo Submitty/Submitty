@@ -821,23 +821,22 @@ HTML;
             }
         }
         function display_files($files, &$count, $indent, &$return) {
-            foreach ($files as $dir => $contents) {
-                if (!is_array($contents)) {
-                    $dir = htmlentities($dir);
-                    $contents = urlencode(htmlentities($contents));
-                    $content_url = urldecode($contents); 
+            foreach ($files as $dir => $path) {
+                if (!is_array($path)) {
+                    $name = htmlentities($dir);
+                    $dir = urlencode(htmlspecialchars($dir));
+                    $path = urlencode(htmlspecialchars($path));
                     $indent_offset = $indent * -15;
-                    $super_url = $content_url;
                     $return .= <<<HTML
                 <div>
                     <div class="file-viewer">
-                        <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count}); updateCookies();'>
+                        <a class='openAllFile' onclick='openFrame("{$dir}", "{$path}", {$count}); updateCookies();'>
                             <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
-                        {$dir}</a> &nbsp;
-                        <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
-                        <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+                        {$name}</a> &nbsp;
+                        <a onclick='openFile("{$dir}", "{$path}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                        <a onclick='downloadFile("{$dir}", "{$path}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
                     </div><br/>
-                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$contents}"></div>
+                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$path}"></div>
                 </div>
 HTML;
                     $count++;
@@ -1340,9 +1339,13 @@ HTML;
         var iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open')) {
             var iframeId = "file_viewer_" + num + "_iframe";
-            directory = "";
-            if (url_file.includes("submissions")) directory = "submissions";
-            else if (url_file.includes("results")) directory = "results";  
+            var directory = "";
+            if (url_file.includes("submissions")) {
+                directory = "submissions";
+            }
+            else if (url_file.includes("results")) {
+                directory = "results";
+            }  
             // handle pdf
             if(url_file.substring(url_file.length - 3) == "pdf") {
                 iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='600px' style='border: 0'></iframe>");
@@ -1380,10 +1383,13 @@ HTML;
         $("#score_total").html(total+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});
     }
     function openFile(html_file, url_file) {
-        url_file = decodeURIComponent(url_file);
-        directory = "";
-        if (url_file.includes("submissions")) directory = "submissions";
-        else if (url_file.includes("results")) directory = "results";
+        var directory = "";
+        if (url_file.includes("submissions")) {
+            directory = "submissions";
+        }
+        else if (url_file.includes("results")) {
+            directory = "results";
+        }
         window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }

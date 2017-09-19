@@ -403,10 +403,13 @@ function downloadZip(grade_id, user_id) {
 }
 
 function downloadFile(html_file, url_file) {
-    url_file = decodeURIComponent(url_file);  
-    directory = "";
-    if (url_file.includes("submissions")) directory = "submissions";
-    else if (url_file.includes("results")) directory = "results";      
+    var directory = "";
+    if (url_file.includes("submissions")) {
+      directory = "submissions";
+    }
+    else if (url_file.includes("results")) {
+      directory = "results";
+    }
     window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': directory, 'file': html_file, 'path': url_file});
     return false;
 }
