@@ -172,7 +172,7 @@ class AdminGradeable extends AbstractModel {
         $this->eg_precision = $details['eg_precision'];
     }
 
-    public function setNumericTextInfo($detials) {
+    public function setNumericTextInfo($details) {
         $this->num_text = $details['num_text'];
         $this->num_numeric = $details['num_numeric'];
     }

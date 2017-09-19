@@ -1221,10 +1221,10 @@ WHERE gcm_id=?", $params);
         if($admin_gradeable->getGGradeableType() == 2) {
             $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
                         ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", array($gradeable_id));
-            $num[0] = $this->course_db->row()['cnt'];
+            $num['num_numeric'] = $this->course_db->row()['cnt'];
             $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
                         ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", array($gradeable_id));
-            $num[1] = $this->course_db->row()['cnt'];
+            $num['num_text'] = $this->course_db->row()['cnt'];
             $admin_gradeable->setNumericTextInfo($num);
         }
 
