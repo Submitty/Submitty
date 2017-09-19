@@ -42,6 +42,8 @@ rm glfw-3.2.1.zip
 
 
 #for computational vision
+apt-get install python3-tk
+
 pip3 install -U pip numpy
 pip3 install matplotlib
 pip3 install opencv-python

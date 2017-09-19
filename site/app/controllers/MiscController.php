@@ -45,7 +45,17 @@ class MiscController extends AbstractController {
             return false;
         }
 
-        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout");
+
+	// TEMPORARY HACK PUT THIS HERE
+	// INSTRUCTORS ARE UNABLE TO VIEW VCS CHECKOUT FILES WITHOUT THIS
+	// if instructor or grader, then it's okay
+	if ($this->core->getUser()->accessGrading()) {
+            return true;
+        }
+	// END HACK
+
+
+	$possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout");
         if (!in_array($dir, $possible_directories)) {
             return false;
         }
@@ -62,7 +72,7 @@ class MiscController extends AbstractController {
         if ($dir === "config_upload" || $dir === "uploads") {
             return ($this->core->getUser()->accessAdmin());
         }
-        else if ($dir === "submissions" || $dir === "results") {
+        else if ($dir === "submissions" || $dir === "results" || $dir === "checkout") {
             // if instructor or grader, then it's okay
             if ($this->core->getUser()->accessGrading()) {
                 return true;
@@ -139,9 +149,10 @@ class MiscController extends AbstractController {
     }
 
     private function displayFile() {
+
         // security check
         if (!$this->checkValidAccess(false)) {
-            $message = "You do not have access to that page.";
+	    $message = "You do not have access to this file";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
