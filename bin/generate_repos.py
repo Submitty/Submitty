@@ -49,25 +49,59 @@ if not os.path.isdir(vcs_course):
         for entry in dirs:
             shutil.chown(os.path.join(root, entry), group='www-data')
 
-users_table = Table('courses_users', metadata, autoload=True)
-select = users_table.select().where(users_table.c.semester == bindparam('semester')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
-users = connection.execute(select, semester=args.semester, course=args.course)
-
+is_team = False;
 if args.gradeable_id is not None:
+    course_db = "submitty_{}_{}".format(args.semester, args.course)
+    if os.path.isdir(DATABASE_HOST):
+        course_conn_string = "postgresql://{}:{}@/{}?host={}".format(DATABASE_USER, DATABASE_PASS, course_db, DATABASE_HOST)
+    else:
+        course_conn_string = "postgresql://{}:{}@{}/{}".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST, course_db)
+
+    course_engine = create_engine(course_conn_string)
+    course_connection = course_engine.connect()
+    course_metadata = MetaData(bind=course_engine)
+
+    eg_table = Table('electronic_gradeable', course_metadata, autoload=True)
+    select = eg_table.select().where(eg_table.c.g_id == bindparam('gradeable_id'))
+    eg = course_connection.execute(select, gradeable_id=args.gradeable_id).fetchone()
+
+    if eg is None:
+        raise SystemExit("'{}' is not an existing electronic gradeable_id".format(args.gradeable_id))
+    is_team = eg.eg_team_assignment
+
     if not os.path.isdir(os.path.join(vcs_course, args.gradeable_id)):
         os.makedirs(os.path.join(vcs_course, args.gradeable_id), mode=0o770)
         shutil.chown(os.path.join(vcs_course, args.gradeable_id), group='www-data')
 
-for user in users:
-    if args.gradeable_id is not None:
-        folder = os.path.join(vcs_course, args.gradeable_id, user.user_id)
-    else:
-        folder = os.path.join(vcs_course, user.user_id)
+if is_team:
+    teams_table = Table('gradeable_teams', course_metadata, autoload=True)
+    select = teams_table.select().where(teams_table.c.g_id == bindparam('gradeable_id')).order_by(teams_table.c.team_id)
+    teams = course_connection.execute(select, gradeable_id=args.gradeable_id)
 
-    if not os.path.isdir(folder):
-        os.makedirs(folder, mode=0o770)
-        os.chdir(folder)
-        os.system('git init --bare --shared')
-        for root, dirs, files in os.walk(folder):
-            for entry in files + dirs:
-                shutil.chown(os.path.join(root, entry), group='www-data')
+    for team in teams:
+        folder = os.path.join(vcs_course, args.gradeable_id, team.team_id)
+        if not os.path.isdir(folder):
+            os.makedirs(folder, mode=0o770)
+            os.chdir(folder)
+            os.system('git init --bare --shared')
+            for root, dirs, files in os.walk(folder):
+                for entry in files + dirs:
+                    shutil.chown(os.path.join(root, entry), group='www-data')
+else:
+    users_table = Table('courses_users', metadata, autoload=True)
+    select = users_table.select().where(users_table.c.semester == bindparam('semester')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
+    users = connection.execute(select, semester=args.semester, course=args.course)
+
+    for user in users:
+        if args.gradeable_id is not None:
+            folder = os.path.join(vcs_course, args.gradeable_id, user.user_id)
+        else:
+            folder = os.path.join(vcs_course, user.user_id)
+
+        if not os.path.isdir(folder):
+            os.makedirs(folder, mode=0o770)
+            os.chdir(folder)
+            os.system('git init --bare --shared')
+            for root, dirs, files in os.walk(folder):
+                for entry in files + dirs:
+                    shutil.chown(os.path.join(root, entry), group='www-data')
