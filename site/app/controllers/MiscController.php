@@ -8,6 +8,12 @@ use app\libraries\Utils;
 
 class MiscController extends AbstractController {
     public function run() {
+        foreach (array('path', 'file') as $key) {
+            if (isset($_REQUEST[$key])) {
+                $_REQUEST[$key] = htmlspecialchars_decode(urldecode($_REQUEST[$key]));
+            }
+        }
+
         switch($_REQUEST['page']) {
             case 'display_file':
                 $this->displayFile();
@@ -149,12 +155,10 @@ class MiscController extends AbstractController {
     }
 
     private function displayFile() {
-
         // security check
         if (!$this->checkValidAccess(false)) {
-	    $message = "You do not have access to this file";
-            $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->getOutput()->showError("You do not have access to this file");
+            return false;
         }
 
         $mime_type = FileUtils::getMimeType($_REQUEST['path']);
@@ -189,11 +193,10 @@ class MiscController extends AbstractController {
         
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        $file_url = $_REQUEST['path'];
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
-        header("Content-disposition: attachment; filename=\"" . basename($file_url) . "\""); 
-        readfile($file_url);
+        header("Content-disposition: attachment; filename='{$_REQUEST['file']}'");
+        readfile($_REQUEST['path']);
     }
 
     private function downloadZip() {
