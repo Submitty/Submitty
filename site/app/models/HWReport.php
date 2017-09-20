@@ -206,17 +206,20 @@ class HWReport extends AbstractModel {
     public function generateAllReports() {
         $students = $this->core->getQueries()->getAllUsers();
         $stu_ids = array_map(function($stu) {return $stu->getId();}, $students);
-        $gradeables = $this->core->getQueries()->getGradeables(null, $stu_ids, "registration_section", "u.user_id", 0);
-        $graders = $this->core->getQueries()->getAllGraders();
-        $ldu = new LateDaysCalculation($this->core);
-        foreach($gradeables as $gradeable) {
-            $this->generateReport($gradeable, $ldu);
+        $size_of_stu_id_chunks = ceil(count($stu_ids) / 2);
+        $stu_chunks = array_chunk($stu_ids, $size_of_stu_id_chunks);
+
+        foreach ($stu_chunks as $stu_chunk) {
+            $gradeables = $this->core->getQueries()->getGradeables(null, $stu_chunk, "registration_section");
+            $ldu = new LateDaysCalculation($this->core, $stu_chunk);
+            foreach($gradeables as $gradeable) {
+                $this->generateReport($gradeable, $ldu);
+            }
         }
     }
     
     public function generateSingleReport($student_id, $gradeable_id) {
-        $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $student_id, "registration_section", "u.user_id", 0);
-        $graders = $this->core->getQueries()->getAllGraders();
+        $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $student_id, "registration_section");
         $ldu = new LateDaysCalculation($this->core, $student_id);
         foreach($gradeables as $gradeable) {
             $this->generateReport($gradeable, $ldu);
@@ -226,17 +229,20 @@ class HWReport extends AbstractModel {
     public function generateAllReportsForGradeable($g_id) {
         $students = $this->core->getQueries()->getAllUsers();
         $stu_ids = array_map(function($stu) {return $stu->getId();}, $students);
-        $gradeables = $this->core->getQueries()->getGradeables($g_id, $stu_ids, "registration_section", "u.user_id", 0);
-        $graders = $this->core->getQueries()->getAllGraders();
-        $ldu = new LateDaysCalculation($this-core);
-        foreach($gradeables as $gradeable) {
-            $this->generateReport($gradeable, $ldu);
+        $size_of_stu_id_chunks = ceil(count($stu_ids) / 2);
+        $stu_chunks = array_chunk($stu_ids, $size_of_stu_id_chunks);
+
+        foreach ($stu_chunks as $stu_chunk) {
+            $gradeables = $this->core->getQueries()->getGradeables($g_id, $stu_chunk, "registration_section");
+            $ldu = new LateDaysCalculation($this->core, $stu_chunk);
+            foreach($gradeables as $gradeable) {
+                $this->generateReport($gradeable, $ldu);
+            }
         }
     }
     
     public function generateAllReportsForStudent($stu_id) {
         $gradeables = $this->core->getQueries()->getGradeables(null, $stu_id, "registration_section", "u.user_id", 0);
-        $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core, $stu_id);
         foreach($gradeables as $gradeable) {
             $this->generateReport($gradeable, $ldu);
