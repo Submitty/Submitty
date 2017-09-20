@@ -548,10 +548,19 @@ ORDER BY egd.g_version", array($g_id, $user_id));
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query 
     public function getLateDayUpdates($user_id) {
         if($user_id != null) {
-          $this->course_db->query("SELECT * FROM late_days WHERE user_id=?", array($user_id));
+            $query = "SELECT * FROM late_days WHERE user_id";
+            if (is_array($user_id)) {
+                $query .= ' IN ('.implode(',', array_fill(0, count($user_id), '?')).')';
+                $params = $user_id;
+            }
+            else {
+                $query .= '=?';
+                $params = array($user_id);
+            }
+            $this->course_db->query($query, $params);
         }
         else {
-          $this->course_db->query("SELECT * FROM late_days");
+            $this->course_db->query("SELECT * FROM late_days");
         }
         return $this->course_db->rows();
     }
@@ -618,8 +627,14 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                       ON submissions.g_id = lde.g_id 
                       AND submissions.user_id = lde.user_id";
         if($user_id !== null) {
-          $query .= " WHERE submissions.user_id=?";
-          $params[] = $user_id;
+            if (is_array($user_id)) {
+                $query .= " WHERE submissions.user_id IN (".implode(", ", array_fill(0, count($user_id), '?')).")";
+                $params = array_merge($params, $user_id);
+            }
+            else {
+                $query .= " WHERE submissions.user_id=?";
+                $params[] = $user_id;
+            }
         }
         $this->course_db->query($query, $params);
         return $this->course_db->rows();
@@ -1069,12 +1084,23 @@ INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_com
 VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
+
+    // FIXME
+    //
+    //public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
+    //    $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $component->getId(), $gd_id);
+    //    $this->course_db->query("
+//UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?, gcd_grader_id=? WHERE gc_id=? AND gd_id=?", $params);
+    //}
+
     public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
         $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $component->getId(), $gd_id);
         $this->course_db->query("
 UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?, gcd_grader_id=? WHERE gc_id=? AND gd_id=?", $params);
     }
-    
+
+    // END FIXME
+
     public function replaceGradeableComponentData($gd_id, GradeableComponent $component) {
         $params = array($component->getId(), $gd_id);
         $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
@@ -1093,11 +1119,27 @@ UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_gr
 DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
     }
 
-    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
-        $params = array($gc_id, $gd_id, $grader_id, $mark->getId());
-        $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=? AND gcm_id=?", $params);
+
+
+
+// FIXME: THIS CODE REQUIRING GRADER_IDS MATCH FOR PEER GRADING BREAKS REGULAR GRADING
+//
+//    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
+//        $params = array($gc_id, $gd_id, $grader_id, $mark->getId());
+//        $this->course_db->query("
+//DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=? AND gcm_id=?", $params);
+//    }
+//
+
+   public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
+           $params = array($gc_id, $gd_id, $mark->getId());
+	           $this->course_db->query("
+DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
     }
+
+// END FIXME
+
+
 
     public function getDataFromGCMD($gc_id, GradeableComponentMark $mark) {
         $return_data = array();
@@ -1221,10 +1263,10 @@ WHERE gcm_id=?", $params);
         if($admin_gradeable->getGGradeableType() == 2) {
             $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
                         ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", array($gradeable_id));
-            $num[0] = $this->course_db->row()['cnt'];
+            $num['num_numeric'] = $this->course_db->row()['cnt'];
             $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
                         ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", array($gradeable_id));
-            $num[1] = $this->course_db->row()['cnt'];
+            $num['num_text'] = $this->course_db->row()['cnt'];
             $admin_gradeable->setNumericTextInfo($num);
         }
 

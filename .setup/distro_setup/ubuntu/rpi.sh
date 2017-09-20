@@ -38,3 +38,17 @@ sudo make install
 cd ../..
 rm -R glfw-3.2.1
 rm glfw-3.2.1.zip
+
+
+
+#for computational vision
+apt-get install python3-tk
+
+pip3 install -U pip numpy
+pip3 install matplotlib
+pip3 install opencv-python
+
+chmod -R 555 /usr/local/lib/python*/*
+chmod 555 /usr/lib/python*/dist-packages
+sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
+sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*

@@ -77,22 +77,28 @@ class HWReport extends AbstractModel {
             // TODO: add functionality to choose who regrade requests will be sent to
             $student_output_text_main .= $nl;
             $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$name_and_emails.$nl;
-            if($gradeable->getDaysLate() > 0) {
-                $student_output_text_main .= "This submission was submitted ".$gradeable->getDaysLate()." day(s) after the due date.".$nl;
-            }
+//            if($gradeable->getDaysLate() > 0) {
+//                $student_output_text_main .= "This submission was submitted ".$gradeable->getDaysLate()." day(s) after the due date.".$nl;
+//            }
+
+//	    $student_output_text_main .= "DEBUGGING LATE DAYS..  THE INFORMATION BELOW MAY BE INCORRECT - PLEASE CHECK BACK LATER".$nl;
+    	    $student_output_text_main .= "DEBUGGING LATE DAYS..   PLEASE CHECK BACK LATER".$nl;
+
             if($late_days['extensions'] > 0) {
-                $student_output_text_main .= "You have a ".$late_days['extensions']." day extension on this assignment.".$nl;
+//                $student_output_text_main .= "You have a ".$late_days['extensions']." day extension on this assignment.".$nl;
             }
             if(substr($late_days['status'], 0, 3) == 'Bad') {
                 $student_output_text_main .= "NOTE: THIS ASSIGNMENT WILL BE RECORDED AS ZERO".$nl;
                 $student_output_text_main .= "  Contact your TA or instructor if you believe this is an error".$nl.$nl;
             }
-            if($late_days['late_days_charged'] > 0) {
-                $student_output_text_main .= "Number of late days used for this homework: " . $late_days['late_days_charged'] . $nl;
-            }
-            $student_output_text_main .= "Total late days used this semester: " . $late_days['total_late_used'] . " (up to and including this assignment)" . $nl;
-            $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
-            
+//            if($late_days['late_days_charged'] > 0) {
+//                $student_output_text_main .= "Number of late days used for this homework: " . $late_days['late_days_charged'] . $nl;
+//            }
+//            $student_output_text_main .= "Total late days used this semester: " . $late_days['total_late_used'] . " (up to and including this assignment)" . $nl;
+//            $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
+
+//	    $student_output_text_main .= "END DEBUGGING LATE DAYS".$nl;
+
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
 
             if($gradeable->validateVersions()) {
@@ -200,17 +206,20 @@ class HWReport extends AbstractModel {
     public function generateAllReports() {
         $students = $this->core->getQueries()->getAllUsers();
         $stu_ids = array_map(function($stu) {return $stu->getId();}, $students);
-        $gradeables = $this->core->getQueries()->getGradeables(null, $stu_ids, "registration_section", "u.user_id", 0);
-        $graders = $this->core->getQueries()->getAllGraders();
-        $ldu = new LateDaysCalculation($this->core);
-        foreach($gradeables as $gradeable) {
-            $this->generateReport($gradeable, $ldu);
+        $size_of_stu_id_chunks = ceil(count($stu_ids) / 2);
+        $stu_chunks = array_chunk($stu_ids, $size_of_stu_id_chunks);
+
+        foreach ($stu_chunks as $stu_chunk) {
+            $gradeables = $this->core->getQueries()->getGradeables(null, $stu_chunk, "registration_section");
+            $ldu = new LateDaysCalculation($this->core, $stu_chunk);
+            foreach($gradeables as $gradeable) {
+                $this->generateReport($gradeable, $ldu);
+            }
         }
     }
     
     public function generateSingleReport($student_id, $gradeable_id) {
-        $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $student_id, "registration_section", "u.user_id", 0);
-        $graders = $this->core->getQueries()->getAllGraders();
+        $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $student_id, "registration_section");
         $ldu = new LateDaysCalculation($this->core, $student_id);
         foreach($gradeables as $gradeable) {
             $this->generateReport($gradeable, $ldu);
@@ -220,17 +229,20 @@ class HWReport extends AbstractModel {
     public function generateAllReportsForGradeable($g_id) {
         $students = $this->core->getQueries()->getAllUsers();
         $stu_ids = array_map(function($stu) {return $stu->getId();}, $students);
-        $gradeables = $this->core->getQueries()->getGradeables($g_id, $stu_ids, "registration_section", "u.user_id", 0);
-        $graders = $this->core->getQueries()->getAllGraders();
-        $ldu = new LateDaysCalculation($this-core);
-        foreach($gradeables as $gradeable) {
-            $this->generateReport($gradeable, $ldu);
+        $size_of_stu_id_chunks = ceil(count($stu_ids) / 2);
+        $stu_chunks = array_chunk($stu_ids, $size_of_stu_id_chunks);
+
+        foreach ($stu_chunks as $stu_chunk) {
+            $gradeables = $this->core->getQueries()->getGradeables($g_id, $stu_chunk, "registration_section");
+            $ldu = new LateDaysCalculation($this->core, $stu_chunk);
+            foreach($gradeables as $gradeable) {
+                $this->generateReport($gradeable, $ldu);
+            }
         }
     }
     
     public function generateAllReportsForStudent($stu_id) {
         $gradeables = $this->core->getQueries()->getGradeables(null, $stu_id, "registration_section", "u.user_id", 0);
-        $graders = $this->core->getQueries()->getAllGraders();
         $ldu = new LateDaysCalculation($this->core, $stu_id);
         foreach($gradeables as $gradeable) {
             $this->generateReport($gradeable, $ldu);
