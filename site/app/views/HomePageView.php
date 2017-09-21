@@ -98,45 +98,16 @@ HTML;
                     <tbody>
 HTML;
 
-                    $userPermission = $this->core->getQueries()->getGroupForUserInClass($user->getId());
-                    $group_name = "";
-
-                    $pos = 0;
                     foreach($courses as $course){
                         $display_text = $course->getSemester() . " " . $course->getTitle();
                         if($course->getDisplayName() !== "")
                         {
                             $display_text .= " " . $course->getDisplayName();
                         }
-
-                        switch($userPermission[$pos]){
-                              case 0:
-                                $group_name = " [ Developer ]";
-                                break;
-                              case 1:
-                                $group_name = " [ Instructor ]";
-                                break;
-                              case 2:
-                                $group_name = " [ TA ]";
-                                break;
-                              case 3:
-                                $group_name = " [ Grader ]";
-                                break;
-                              case 4:
-                                $group_name = " [ Student ]";
-                                break;
-                              default:
-                                $group_name = " [ ]";
-                                break;
-                          }
-
-                        $display_text .= $group_name;
-                        $pos++;
-
                         $return .= <<<HTML
                         <tr>
                             <td colspan="8">
-                                <a class="btn btn-primary btn-block" style="width:95%;white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
+                                <a class="btn btn-primary btn-block" style="width:95%;white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$display_text}</a>
                             </td>
                         </tr>
 HTML;
