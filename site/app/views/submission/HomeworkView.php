@@ -72,6 +72,7 @@ HTML;
         $current_version_number = $gradeable->getCurrentVersionNumber();
         $student_page = false;
         $num_components = count($gradeable->getComponents());
+        $time = " @ H:i";
         $return .= <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 HTML;
@@ -79,7 +80,10 @@ HTML;
         if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
             $return .= <<<HTML
 <div class="content">
-    <h2>New submission for: {$gradeable->getName()}</h2>
+    <div class="upperinfo">
+        <h2 class="upperinfo-left">New submission for: {$gradeable->getName()}</h2>
+        <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format("m/d/Y{$time}")}</h2>
+    </div>
 HTML;
             if ($this->core->getUser()->accessAdmin()) {
                 $students = $this->core->getQueries()->getAllUsers();
