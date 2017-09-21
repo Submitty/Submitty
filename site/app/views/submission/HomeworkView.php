@@ -370,7 +370,7 @@ HTML;
                             $escape_quote_filename = str_replace('\'','\\\'',substr($file['relative_name'], strlen("part{$i}/")));
                         }
                         else
-                            $escape_quote_filename = str_replace('\'','\\\'', $file['relative_name']);
+                            $escape_quote_filename = str_replace('\'','\\\'',$file['relative_name']);
                         $old_files .= <<<HTML
 
                 addLabel('$escape_quote_filename', '{$size}', {$i}, true);
