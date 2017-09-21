@@ -28,4 +28,20 @@ $(document).ready(function() {
     };
 
     $('.highlight').hover(hoverOn, hoverOff);
+
+    // Check if document.getElementsByClassName is supported
+    if (!document.getElementsByClassName)
+        return;
+    var lineNumbers = document.getElementsByClassName('line_number');
+  
+    // Constant, change if font changes from Inconsolata monospace; measuring during runtime is overkill
+    var widthPerCharacter = 8;
+    var padding = 2;
+
+    // Calculate width of largest number = width per digit * number of digits
+    var maxWidth = widthPerCharacter * Math.floor(Math.log10(lineNumbers.length)+1) + padding;
+    
+    // Set the width of each line_number element to the max width so they are all aligned
+    $('.line_number').css('width', maxWidth+'px');
+
 });
