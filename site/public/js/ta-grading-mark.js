@@ -362,7 +362,7 @@ function openClose(row_id, num_questions = -1) {
                         else {
                             src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
                         }
-                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='600px' style='border: 0'></iframe>");
+                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='1200px' style='border: 0'></iframe>");
 
                         if (!pdf_div.hasClass('open')) {
                             pdf_div.addClass('open');

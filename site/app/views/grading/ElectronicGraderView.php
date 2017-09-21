@@ -1209,7 +1209,7 @@ HTML;
                 $d++;
             }
             $has_mark = false;
-            if(($question->getScore() == 0 && $question->getComment() == "") || !$show_graded_info) {
+            if (($question->getScore() == 0 && $question->getComment() == "") || !$show_graded_info) {
                 $has_mark = false;
             }
             else {
@@ -1241,7 +1241,7 @@ HTML;
 HTML;
             $c++;
         }
-        if($peer) {
+        if ($peer) {
             $break_onclick = 'return false;';
             $disabled = 'disabled';
         }
@@ -1275,7 +1275,7 @@ HTML;
                 </tbody>
 HTML;
         
-        if($peer) {
+        if ($peer) {
             $total_points = $gradeable->getTotalNonHiddenNonExtraCreditPoints() + $gradeable->getTotalPeerGradingNonExtraCredit();
         }
         else {
@@ -1350,8 +1350,8 @@ HTML;
                 directory = "checkout";
             }  
             // handle pdf
-            if(url_file.substring(url_file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='600px' style='border: 0'></iframe>");
+            if (url_file.substring(url_file.length - 3) === "pdf") {
+                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
