@@ -110,6 +110,7 @@ class UsersController extends AbstractController {
             $user->setGroup(intval($_POST['user_group']));
             $user->setManualRegistration(isset($_POST['manual_registration']));
             $user->setGradingRegistrationSections(!isset($_POST['grading_registration_section']) ? array() : array_map("intval", $_POST['grading_registration_section']));
+            $user->setInstructorUpdated(true);
             $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
             $this->core->addSuccessMessage("Added {$_POST['user_id']} to {$this->core->getConfig()->getCourse()}");
             $this->core->redirect($return_url);
@@ -179,6 +180,7 @@ class UsersController extends AbstractController {
 
         $user->setGroup(intval($_POST['user_group']));
         $user->setManualRegistration(isset($_POST['manual_registration']));
+        $user->setInstructorUpdated(true);
         if (isset($_POST['grading_registration_section'])) {
             $user->setGradingRegistrationSections(array_map("intval", $_POST['grading_registration_section']));
         }
