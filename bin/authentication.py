@@ -44,8 +44,37 @@ def check_password(environ, user, password):
     params = list(filter(lambda x: x not in vcs_paths, params))
     if len(params) == 4:
         semester, course, user_id = params[1:]
+        is_team = False
+        course_engine = course_connection = course_metadata = None
     elif len(params) == 5:
-        semester, course, gradeable, user_id = params[1:5]
+        semester, course, gradeable = params[1:4]
+
+        # check if this is a team or individual gradeable
+        course_db = "submitty_{}_{}".format(semester, course)
+        if os.path.isdir(DATABASE_HOST):
+            course_conn_string = "postgresql://{}:{}@/{}?host={}".format(DATABASE_USER, DATABASE_PASS, course_db, DATABASE_HOST)
+        else:
+            course_conn_string = "postgresql://{}:{}@{}/{}".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST, course_db)
+
+        course_engine = create_engine(course_conn_string)
+        course_connection = course_engine.connect()
+        course_metadata = MetaData(bind=course_engine)
+
+        eg_table = Table('electronic_gradeable', course_metadata, autoload=True)
+        select = eg_table.select().where(eg_table.c.g_id == bindparam('gradeable_id'))
+        eg = course_connection.execute(select, gradeable_id=gradeable).fetchone()
+
+        if eg is None:
+            close_database(course_engine, course_connection)
+            return None
+        is_team = eg.eg_team_assignment
+
+        if is_team:
+            user_id = None
+            team_id = params[4]
+        else
+            user_id = params[4]
+            team_id = None
     else:
         return None
 
@@ -59,9 +88,19 @@ def check_password(environ, user, password):
         engine, connection, metadata = open_database()
         authenticated = check_database(user, password, connection, metadata)
 
-    if authenticated is not True or user == user_id:
+    if authenticated is not True or (not is_team and user == user_id):
         close_database(engine, connection)
+        close_database(course_engine, course_connection)
         return authenticated
+
+    if is_team:
+        teams_table = Table('teams', course_metadata, autoload=True)
+        select = teams_table.select().where(teams_table.c.team_id == bindparam('team_id')).where(teams_table.c.user_id == bindparam('user_id'))
+        team_user = course_connection.execute(select, team_id=team_id, user_id=user).fetchone()
+        if team_user is not None:
+            close_database(engine, connection)
+            close_database(course_engine, course_connection)
+            return authenticated
 
     if engine is None:
         engine, connection, metadata = open_database()
