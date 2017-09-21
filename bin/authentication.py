@@ -118,6 +118,7 @@ def check_password(environ, user, password):
             authenticated = False
 
     close_database(engine, connection)
+    close_database(course_engine, course_connection)
 
     return authenticated
 
