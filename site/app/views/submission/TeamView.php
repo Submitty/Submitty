@@ -80,13 +80,28 @@ HTML;
             }
         }
         if ($gradeable->getIsRepository()) {
-            $repo = $this->core->getConfig()->getVcsBaseUrl().$gradeable->getSubdirectory();
-            $repo = str_replace("{\$gradeable_id}", $gradeable->getId(), $repo);
+
+	    //$repo = $this->core->getConfig()->getVcsBaseUrl().$gradeable->getSubdirectory();
+
+
+	    // TEMPORARY FOR NOW
+	    $repo = "https://submitty-vcs.cs.rpi.edu/git/".$semester.'/'.$course.$gradeable->getSubdirectory();
+
+
+	    $repo = str_replace("{\$gradeable_id}", $gradeable->getId(), $repo);
             $repo = str_replace("{\$team_id}", $team->getId(), $repo);
             $return .= <<<HTML
     <br />
-    <h3>Team Repository:</h3>
-    <span>&emsp;{$repo}</span> <br />
+    <h3>To access your Team Repository:</h3>
+    <span>
+<em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em>
+    <br />
+    <br />
+
+<tt>git  clone  {$repo}  SPECIFY_TARGET_DIRECTORY</tt>
+<p>
+
+    </span> <br />
 HTML;
         }
     }

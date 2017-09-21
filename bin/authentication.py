@@ -43,10 +43,12 @@ def check_password(environ, user, password):
 
     params = list(filter(lambda x: x not in vcs_paths, params))
     if len(params) == 4:
+       # FIXME: Let's disallow this path, require gradeable/reponame
         semester, course, user_id = params[1:]
         is_team = False
         course_engine = course_connection = course_metadata = None
     elif len(params) == 5:
+        # FIXME: Shouldn't this be [1:3]?
         semester, course, gradeable = params[1:4]
 
         # check if this is a team or individual gradeable

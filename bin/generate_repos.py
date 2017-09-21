@@ -60,6 +60,12 @@ if not os.path.isdir(vcs_course):
             shutil.chown(os.path.join(root, entry), group='www-data')
 
 is_team = False;
+
+#FIXME: we will always pass in an existing gradeable (may or may not
+#be a team) or a repo name (that may match a gradeable to be created
+#later).  If the name doesn't correspond to an existing gradeable,
+#pause for confirmation, then make individual repos.
+
 if args.gradeable_id is not None:
     course_db = "submitty_{}_{}".format(args.semester, args.course)
     if os.path.isdir(DATABASE_HOST):
