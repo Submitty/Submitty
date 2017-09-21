@@ -80,10 +80,13 @@ HTML;
             }
         }
         if ($gradeable->getIsRepository()) {
+            $repo = $this->core->getConfig()->getVcsBaseUrl().$gradeable->getSubdirectory();
+            $repo = str_replace("{\$gradeable_id}", $gradeable->getId(), $repo);
+            $repo = str_replace("{\$team_id}", $team->getId(), $repo);
             $return .= <<<HTML
     <br />
     <h3>Team Repository:</h3>
-    <span>&emsp;{$this->core->getConfig()->getVcsBaseUrl()}{$gradeable->getSubdirectory()}</span> <br />
+    <span>&emsp;{$repo}</span> <br />
 HTML;
         }
     }

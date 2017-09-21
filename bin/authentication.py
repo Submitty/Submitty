@@ -72,7 +72,7 @@ def check_password(environ, user, password):
         if is_team:
             user_id = None
             team_id = params[4]
-        else
+        else:
             user_id = params[4]
             team_id = None
     else:
