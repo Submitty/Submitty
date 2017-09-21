@@ -79,6 +79,13 @@ HTML;
                 }
             }
         }
+        if ($gradeable->getIsRepository()) {
+            $return .= <<<HTML
+    <br />
+    <h3>Team Repository:</h3>
+    <span>&emsp;{$this->core->getConfig()->getVcsBaseUrl()}{$gradeable->getSubdirectory()}</span> <br />
+HTML;
+        }
     }
 
     //Top content box, no team
