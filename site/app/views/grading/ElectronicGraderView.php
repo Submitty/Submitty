@@ -490,18 +490,19 @@ HTML;
                     if ($this->core->getUser()->accessAdmin()) {
                         $return .= <<<HTML
 
-                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
-                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
 HTML;
                         if($row->getTeam()=== null) {
                             $return .= <<<HTML
-
+                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
+                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td></td>
 HTML;
                         }
                         else {
+                            $members = json_encode($row->getTeam()->getMembers());
                             $return .= <<<HTML
-
+                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$members}, {$gradeable->getMaxTeamSize()});'>
+                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$row->getTeam()->getId()}</td>
 HTML;
                         }
@@ -820,23 +821,22 @@ HTML;
             }
         }
         function display_files($files, &$count, $indent, &$return) {
-            foreach ($files as $dir => $contents) {
-                if (!is_array($contents)) {
-                    $dir = htmlentities($dir);
-                    $contents = urlencode(htmlentities($contents));
-                    $content_url = urldecode($contents); 
+            foreach ($files as $dir => $path) {
+                if (!is_array($path)) {
+                    $name = htmlentities($dir);
+                    $dir = urlencode(htmlspecialchars($dir));
+                    $path = urlencode(htmlspecialchars($path));
                     $indent_offset = $indent * -15;
-                    $super_url = $content_url;
                     $return .= <<<HTML
                 <div>
                     <div class="file-viewer">
-                        <a class='openAllFile' onclick='openFrame("{$dir}", "{$contents}", {$count}); updateCookies();'>
+                        <a class='openAllFile' onclick='openFrame("{$dir}", "{$path}", {$count}); updateCookies();'>
                             <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
-                        {$dir}</a> &nbsp;
-                        <a onclick='openFile("{$dir}", "{$contents}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
-                        <a onclick='downloadFile("{$dir}", "{$contents}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+                        {$name}</a> &nbsp;
+                        <a onclick='openFile("{$dir}", "{$path}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                        <a onclick='downloadFile("{$dir}", "{$path}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
                     </div><br/>
-                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$contents}"></div>
+                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$path}"></div>
                 </div>
 HTML;
                     $count++;
@@ -1209,7 +1209,7 @@ HTML;
                 $d++;
             }
             $has_mark = false;
-            if(($question->getScore() == 0 && $question->getComment() == "") || !$show_graded_info) {
+            if (($question->getScore() == 0 && $question->getComment() == "") || !$show_graded_info) {
                 $has_mark = false;
             }
             else {
@@ -1241,13 +1241,13 @@ HTML;
 HTML;
             $c++;
         }
-        if($peer) {
+        if ($peer) {
             $break_onclick = 'return false;';
             $disabled = 'disabled';
         }
         $return .= <<<HTML
                 <tr>
-                    <td id="title-general" colspan="4" onclick="{$break_onclick} saveMark(-3,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
+                    <td id="title-general" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
                         <b>General Comment</b>
                         <div style="float: right;">                        
                             <span id="save-mark-general" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
@@ -1275,7 +1275,7 @@ HTML;
                 </tbody>
 HTML;
         
-        if($peer) {
+        if ($peer) {
             $total_points = $gradeable->getTotalNonHiddenNonExtraCreditPoints() + $gradeable->getTotalPeerGradingNonExtraCredit();
         }
         else {
@@ -1339,15 +1339,22 @@ HTML;
         var iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open')) {
             var iframeId = "file_viewer_" + num + "_iframe";
-            directory = "";
-            if (url_file.includes("submissions")) directory = "submissions";
-            else if (url_file.includes("results")) directory = "results";  
+            var directory = "";
+            if (url_file.includes("submissions")) {
+                directory = "submissions";
+            }
+            else if (url_file.includes("results")) {
+                directory = "results";
+            }  
+            else if (url_file.includes("checkout")) {
+                directory = "checkout";
+            }  
             // handle pdf
-            if(url_file.substring(url_file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' height='600px' style='border: 0'></iframe>");
+            if (url_file.substring(url_file.length - 3) === "pdf") {
+                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "' width='95%' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }
@@ -1379,11 +1386,17 @@ HTML;
         $("#score_total").html(total+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});
     }
     function openFile(html_file, url_file) {
-        url_file = decodeURIComponent(url_file);
-        directory = "";
-        if (url_file.includes("submissions")) directory = "submissions";
-        else if (url_file.includes("results")) directory = "results";
-        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        var directory = "";
+        if (url_file.includes("submissions")) {
+            directory = "submissions";
+        }
+        else if (url_file.includes("results")) {
+            directory = "results";
+        }
+        else if (url_file.includes("checkout")) {
+            directory = "checkout";
+        }
+        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
 </script>

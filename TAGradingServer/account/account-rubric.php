@@ -38,9 +38,9 @@ if ($calculate_diff) {
         if (!iframe.hasClass('open')) {
             var iframeId = "file_viewer_" + part + "_" + num + "_iframe";
             // handle pdf
-            if(url_file.substring(url_file.length - 3) == "pdf") {
+            if (url_file.substring(url_file.length - 3) === "pdf") {
                 iframe.html("<iframe id='" + iframeId + "' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" + url_file
-                            + "' width='750px' height='600px' style='border: 0'></iframe>");
+                            + "' width='750px' height='1200px' style='border: 0'></iframe>");
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" 

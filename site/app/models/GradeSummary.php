@@ -149,15 +149,15 @@ class GradeSummary extends AbstractModel {
          * There isn't any memory advantage right now to doing smaller chunks of users, but
          * that isn't to say that there might not be a benefit in the future to user chunking.
          */
-        $size_of_user_id_chunks = count($user_ids);
+        $size_of_user_id_chunks = ceil(count($user_ids) / 2);
         $size_of_gradeable_id_chunks = 5;
 
-        $ldu = new LateDaysCalculation($this->core);
         $student_output_json = array();
         $buckets = array();
         $gradeable_id_chunks = array_chunk($gradeable_ids,$size_of_gradeable_id_chunks);
         $user_id_chunks = array_chunk($user_ids,$size_of_user_id_chunks);
         foreach($user_id_chunks as $user_id_chunk) {
+            $ldu = new LateDaysCalculation($this->core, $user_id_chunk);
             foreach ($gradeable_id_chunks as $gradeable_id_chunk) {
                 $summary_data = $this->core->getQueries()->getGradeables($gradeable_id_chunk, $user_id_chunk);
                 //Logger::debug("Got gradeables " . implode(",", $gradeable_id_chunk) . " for users " . implode(",",$user_id_chunk));
