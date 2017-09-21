@@ -30,9 +30,10 @@
 
 .line_number {
     color: gray;
-    display: inline-block;
-    min-width: 20px;
     border-right: 1px solid lightgrey;
+    float: left;
+    text-align: right;
+    width: auto;
 }
 
 .line_number, .line_code {
@@ -42,7 +43,7 @@
     font-family: 'Inconsolata', monospace !important;
     font-size: 16px;
     line-height: 20px !important;
-    padding: 0 0 0 5px;
+    padding: 0 5px 0 5px;
 }
 
 .line_code_inner {

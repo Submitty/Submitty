@@ -281,7 +281,7 @@ function openFrame(url, id, filename) {
         var iframeId = "file_viewer_" + id + "_iframe";
         // handle pdf
         if(filename.substring(filename.length - 3) === "pdf") {
-            iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='600px' style='border: 0'></iframe>");
+            iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='1200px' style='border: 0'></iframe>");
         }
         else {
             iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='" + url + "' width='750px' style='border: 0'></iframe>");
