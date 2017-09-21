@@ -910,7 +910,8 @@ class SubmissionController extends AbstractController {
                     return $this->uploadResult("repository id input cannot be blank.", false);
                 }
                 $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
-                $vcs_path = str_replace("{\$user_id}",$user_id,$vcs_path);
+                $vcs_path = str_replace("{\$user_id}",$who_id,$vcs_path);
+                $vcs_path = str_replace("{\$team_id}",$who_id,$vcs_path);
                 $vcs_path = str_replace("{\$repo_id}",$repo_id,$vcs_path);
                 $vcs_full_path = $vcs_base_url.$vcs_path;
             }

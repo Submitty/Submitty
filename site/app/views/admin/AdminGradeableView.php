@@ -270,7 +270,7 @@ HTML;
                         You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
                         <ul style="list-style-position: inside;">
                             <li>gradeable_id</li>
-                            <li>user_id OR team_id OR repo_id, do not use both</li>
+                            <li>user_id OR team_id OR repo_id (only use one)</li>
                         </ul>
                         ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
                         <input style='width: 83%' type='text' name='subdirectory' value="" placeholder="(Optional)"/>

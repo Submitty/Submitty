@@ -17,6 +17,16 @@ DATABASE_PASS = '__INSTALL__FILLIN__DATABASE_PASSWORD__'
 
 VCS_FOLDER = os.path.join('__INSTALL__FILLIN__SUBMITTY_DATA_DIR__', 'vcs')
 
+def create_folder(folder):
+    if not os.path.isdir(folder):
+        os.makedirs(folder, mode=0o770)
+        os.chdir(folder)
+        os.system('git init --bare --shared')
+        for root, dirs, files in os.walk(folder):
+            for entry in files + dirs:
+                shutil.chown(os.path.join(root, entry), group='www-data')
+
+
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
 parser.add_argument("semester", help="semester")
 parser.add_argument("course", help="course code")
@@ -79,14 +89,8 @@ if is_team:
     teams = course_connection.execute(select, gradeable_id=args.gradeable_id)
 
     for team in teams:
-        folder = os.path.join(vcs_course, args.gradeable_id, team.team_id)
-        if not os.path.isdir(folder):
-            os.makedirs(folder, mode=0o770)
-            os.chdir(folder)
-            os.system('git init --bare --shared')
-            for root, dirs, files in os.walk(folder):
-                for entry in files + dirs:
-                    shutil.chown(os.path.join(root, entry), group='www-data')
+        create_folder(os.path.join(vcs_course, args.gradeable_id, team.team_id))
+
 else:
     users_table = Table('courses_users', metadata, autoload=True)
     select = users_table.select().where(users_table.c.semester == bindparam('semester')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
@@ -94,14 +98,6 @@ else:
 
     for user in users:
         if args.gradeable_id is not None:
-            folder = os.path.join(vcs_course, args.gradeable_id, user.user_id)
+            create_folder(os.path.join(vcs_course, args.gradeable_id, user.user_id))
         else:
-            folder = os.path.join(vcs_course, user.user_id)
-
-        if not os.path.isdir(folder):
-            os.makedirs(folder, mode=0o770)
-            os.chdir(folder)
-            os.system('git init --bare --shared')
-            for root, dirs, files in os.walk(folder):
-                for entry in files + dirs:
-                    shutil.chown(os.path.join(root, entry), group='www-data')
+            create_folder(os.path.join(vcs_course, user.user_id))

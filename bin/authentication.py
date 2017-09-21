@@ -88,7 +88,7 @@ def check_password(environ, user, password):
         engine, connection, metadata = open_database()
         authenticated = check_database(user, password, connection, metadata)
 
-    if authenticated is not True or (not is_team and user == user_id):
+    if authenticated is not True or user == user_id:
         close_database(engine, connection)
         close_database(course_engine, course_connection)
         return authenticated
