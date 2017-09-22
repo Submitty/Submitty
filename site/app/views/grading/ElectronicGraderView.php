@@ -1197,7 +1197,7 @@ HTML;
                 $return .= <<<HTML
                     <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
                         <td colspan="1" style="text-align: center; width: 12%; white-space: nowrap;"> 
-                            <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                            <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                             <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none; min-width: 50px;" {$noChange}>
                         </td>
                         <td colspan="3" style="white-space: nowrap;">
@@ -1209,7 +1209,7 @@ HTML;
                 $d++;
             }
             $has_mark = false;
-            if(($question->getScore() == 0 && $question->getComment() == "") || !$show_graded_info) {
+            if (($question->getScore() == 0 && $question->getComment() == "") || !$show_graded_info) {
                 $has_mark = false;
             }
             else {
@@ -1230,7 +1230,7 @@ HTML;
             $return .= <<<HTML
                     <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
                         <td colspan="1" style="text-align: center;; white-space: nowrap;"> 
-                        <span onclick=""> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                        <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                         <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px;">
                         </td>
                         <td colspan="3" style="white-space: nowrap;">
@@ -1241,7 +1241,7 @@ HTML;
 HTML;
             $c++;
         }
-        if($peer) {
+        if ($peer) {
             $break_onclick = 'return false;';
             $disabled = 'disabled';
         }
@@ -1275,7 +1275,7 @@ HTML;
                 </tbody>
 HTML;
         
-        if($peer) {
+        if ($peer) {
             $total_points = $gradeable->getTotalNonHiddenNonExtraCreditPoints() + $gradeable->getTotalPeerGradingNonExtraCredit();
         }
         else {
@@ -1291,6 +1291,10 @@ HTML;
                 </tr>
             </tbody>
         </table>
+        <br>
+        <!-- The go to the next student button -->
+        <a type="button" class="btn btn-info" style="width: 96%; padding-top: 25px; padding-bottom: 25px;" onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);" {$next_href}>Go To Next Student</a> 
+
 HTML;
         $return .= <<<HTML
         <div style="width:100%;">
@@ -1350,8 +1354,8 @@ HTML;
                 directory = "checkout";
             }  
             // handle pdf
-            if(url_file.substring(url_file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='600px' style='border: 0'></iframe>");
+            if (url_file.substring(url_file.length - 3) === "pdf") {
+                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
