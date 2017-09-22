@@ -16,6 +16,10 @@ class SimpleGraderView extends AbstractView {
      * @return string
      */
     public function simpleDisplay($gradeable, $rows, $graders) {
+
+        $g_id = $gradeable->getId();
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
         $return = <<<HTML
 <div class="content">
@@ -206,8 +210,13 @@ HTML;
 HTML;
                 if($action == 'lab'){
                     $return .= <<<HTML
-                    <a target=_blank href="{$this->core->getConfig()->getTaBaseUrl()}/account/print/print_checkpoints_gradeable.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&g_id={$gradeable->getId()}&section_id={$display_section}&grade_by_reg_section={$gradeable->isGradeByRegistration()}&sort_by={$sort}">
-                        <i class="fa fa-print"></i>
+                    <a target=_blank href="{$this->core->buildUrl(array(
+                                                                  'component' => 'grading', 
+                                                                  'action' => 'print_lab', 
+                                                                  'course' => $course, 
+                                                                  'semester' => $semester, 
+                                                                  'g_id' => $g_id))}">
+                      <i class="fa fa-print"></i>
                     </a>
 HTML;
                 }

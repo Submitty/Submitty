@@ -10,6 +10,7 @@ class SimpleGraderController extends AbstractController  {
         if(!$this->core->getUser()->accessGrading()) {
             $this->core->getOutput()->showError("This account doesn't have access to grading");
         }
+        echo("SWITCH!");
         switch ($_REQUEST['action']) {
             case 'lab':
                 $this->grade('lab');
@@ -26,9 +27,28 @@ class SimpleGraderController extends AbstractController  {
             case 'upload_csv_numeric':
                 $this->UploadCSV('numeric');
                 break;
+            case 'print_lab':
+                $this->printLab();
+                $this->grade('numeric');
+                break;
             default:
                 break;
         }
+    }
+
+    public function printLab(){
+        echo("MADE IT!");
+        $g_id = $section = $grade_by_reg_section = $sort_by = "";
+        if (!isset($_REQUEST['g_id'])) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable');
+        }
+        else{
+            $g_id = $_REQUEST['g_id'];
+        }
+   
+        $gradeable = $this->core->getQueries()->getGradeable($g_id);
+        var_dump($gradeable);
+        //printLab($g_id, $section, $grade_by_reg_section, $sort_by)
     }
 
     public function grade($action) {
