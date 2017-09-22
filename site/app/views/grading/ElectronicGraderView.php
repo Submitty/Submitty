@@ -771,6 +771,8 @@ HTML;
 
 <div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
     <span class="grading_label">Auto-Grading Testcases</span>
+    <button class="btn btn-default" onclick="openAllAutoGrading()">Expand All</button>
+    <button class="btn btn-default" onclick="closeAllAutoGrading()">Close All</button>
     <div class="inner-container">
 HTML;
         if ($gradeable->getActiveVersion() === 0){
