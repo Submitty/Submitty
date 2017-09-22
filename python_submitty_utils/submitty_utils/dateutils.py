@@ -68,7 +68,7 @@ def read_submitty_date(s):
             try:
                 # hoping to find timezone -04
                 thedatetime = thedatetime+"00"
-                print ("added a thing",thedatetime)
+                print ("dateutils read_submitty_date -- added '00' to ",thedatetime)
                 with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
             except ValueError:
                 print ("DATE PROBLEM",s)
