@@ -28,7 +28,7 @@ $(document).ready(function() {
     };
 
     $('.highlight').hover(hoverOn, hoverOff);
-
+  
     var lineNumbers = document.getElementsByClassName('line_number');
   
     // Constant, change if font changes from Inconsolata monospace; measuring during runtime is overkill

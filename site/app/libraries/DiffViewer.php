@@ -100,9 +100,12 @@ class DiffViewer {
         }
         else if ($actual_file != "") {
             // TODO: fix this hacky way to deal with images
-	        if (substr($actual_file,strlen($actual_file)-4,4) == ".png") {
-	            $this->actual_file_image = $actual_file;
-            }
+	    if ( (substr($actual_file,strlen($actual_file)-4,4) == ".png") ||
+		 (substr($actual_file,strlen($actual_file)-4,4) == ".jpg") ||
+		 (substr($actual_file,strlen($actual_file)-4,4) == ".jpeg") )
+	      {
+		$this->actual_file_image = $actual_file;
+	      }
             else {
                 $this->actual = file_get_contents($actual_file);
                 $this->has_actual = trim($this->actual) !== "" ? true: false;
@@ -116,9 +119,12 @@ class DiffViewer {
         }
         else if ($expected_file != "") {
             //TODO: fix this hacky way to deal with images.
-            if (substr($expected_file,strlen($expected_file)-4,4) == ".png") {
+            if ( (substr($expected_file,strlen($expected_file)-4,4) == ".png") ||
+		 (substr($expected_file,strlen($expected_file)-4,4) == ".jpg") ||
+		 (substr($expected_file,strlen($expected_file)-4,4) == ".jpeg") )
+	      {
                 $this->expected_file_image = $expected_file;
-            }
+	      }
             else{
                 $this->expected = file_get_contents($expected_file);
                 $this->has_expected = trim($this->expected) !== "" ? true : false;
@@ -132,9 +138,11 @@ class DiffViewer {
         }
         else if ($image_difference != "") {
             //TODO: fix this hacky way to deal with images.
-            if (substr($image_difference,strlen($image_difference)-4,4) == ".png") {
-                $this->difference_file_image = $image_difference;
-            }
+	  if ( (substr($image_difference,strlen($image_difference)-4,4) == ".png") ||
+	       (substr($image_difference,strlen($image_difference)-4,4) == ".jpg") ||
+	       (substr($image_difference,strlen($image_difference)-4,4) == ".jpeg") ){
+	    $this->difference_file_image = $image_difference;
+	  }
         }
 
         if (!file_exists($diff_file) && $diff_file != "") {
