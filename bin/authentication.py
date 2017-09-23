@@ -61,9 +61,9 @@ def check_password(environ, user, password):
         eg = course_connection.execute(select, gradeable_id=gradeable).fetchone()
 
         if eg is None:
-            close_database(course_engine, course_connection)
-            return None
-        is_team = eg.eg_team_assignment
+            is_team = False
+        else:
+            is_team = eg.eg_team_assignment
 
         if is_team:
             user_id = None

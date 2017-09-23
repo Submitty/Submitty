@@ -62,10 +62,15 @@ if not os.path.isdir(vcs_course):
 
 is_team = False;
 
-#FIXME: we will always pass in an existing gradeable (may or may not
-#be a team) or a repo name (that may match a gradeable to be created
-#later).  If the name doesn't correspond to an existing gradeable,
-#pause for confirmation, then make individual repos.
+
+# We will always pass in the name of the desired repository.
+#
+# If the repository name matches the name of an existing gradeable in
+# the course, we will check if it's a team gradeable and individual or
+# team repos as appropriate.
+#
+# If it's not an existing gradeable, we will ask the user for
+# confirmation, and make individual repos if requested.
 
 
 course_db = "submitty_{}_{}".format(args.semester, args.course)
