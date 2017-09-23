@@ -8,6 +8,7 @@ all gradeables for example) or on a per gradeable level.
 
 import argparse
 import os
+import sys
 import shutil
 from sqlalchemy import create_engine, MetaData, Table, bindparam
 
@@ -30,7 +31,7 @@ def create_folder(folder):
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
 parser.add_argument("semester", help="semester")
 parser.add_argument("course", help="course code")
-parser.add_argument("gradeable_id", help="gradeable id", nargs='?')
+parser.add_argument("repo_name", help="repository name")
 args = parser.parse_args()
 
 db = 'submitty'
@@ -66,36 +67,43 @@ is_team = False;
 #later).  If the name doesn't correspond to an existing gradeable,
 #pause for confirmation, then make individual repos.
 
-if args.gradeable_id is not None:
-    course_db = "submitty_{}_{}".format(args.semester, args.course)
-    if os.path.isdir(DATABASE_HOST):
-        course_conn_string = "postgresql://{}:{}@/{}?host={}".format(DATABASE_USER, DATABASE_PASS, course_db, DATABASE_HOST)
-    else:
-        course_conn_string = "postgresql://{}:{}@{}/{}".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST, course_db)
 
-    course_engine = create_engine(course_conn_string)
-    course_connection = course_engine.connect()
-    course_metadata = MetaData(bind=course_engine)
+course_db = "submitty_{}_{}".format(args.semester, args.course)
+if os.path.isdir(DATABASE_HOST):
+    course_conn_string = "postgresql://{}:{}@/{}?host={}".format(DATABASE_USER, DATABASE_PASS, course_db, DATABASE_HOST)
+else:
+    course_conn_string = "postgresql://{}:{}@{}/{}".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST, course_db)
 
-    eg_table = Table('electronic_gradeable', course_metadata, autoload=True)
-    select = eg_table.select().where(eg_table.c.g_id == bindparam('gradeable_id'))
-    eg = course_connection.execute(select, gradeable_id=args.gradeable_id).fetchone()
+course_engine = create_engine(course_conn_string)
+course_connection = course_engine.connect()
+course_metadata = MetaData(bind=course_engine)
 
-    if eg is None:
-        raise SystemExit("'{}' is not an existing electronic gradeable_id".format(args.gradeable_id))
+eg_table = Table('electronic_gradeable', course_metadata, autoload=True)
+select = eg_table.select().where(eg_table.c.g_id == bindparam('gradeable_id'))
+eg = course_connection.execute(select, gradeable_id=args.repo_name).fetchone()
+
+if eg is None:
+    print ("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.".format(args.semester, args.course, args.repo_name))
+    response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student? (y/n) ")
+    if not response.lower() == 'y':
+        print ("exiting");
+        sys.exit()
+    is_team = False
+else:
     is_team = eg.eg_team_assignment
 
-    if not os.path.isdir(os.path.join(vcs_course, args.gradeable_id)):
-        os.makedirs(os.path.join(vcs_course, args.gradeable_id), mode=0o770)
-        shutil.chown(os.path.join(vcs_course, args.gradeable_id), group='www-data')
+if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
+    os.makedirs(os.path.join(vcs_course, args.repo_name), mode=0o770)
+    shutil.chown(os.path.join(vcs_course, args.repo_name), group='www-data')
+
 
 if is_team:
     teams_table = Table('gradeable_teams', course_metadata, autoload=True)
     select = teams_table.select().where(teams_table.c.g_id == bindparam('gradeable_id')).order_by(teams_table.c.team_id)
-    teams = course_connection.execute(select, gradeable_id=args.gradeable_id)
+    teams = course_connection.execute(select, gradeable_id=args.repo_name)
 
     for team in teams:
-        create_folder(os.path.join(vcs_course, args.gradeable_id, team.team_id))
+        create_folder(os.path.join(vcs_course, args.repo_name, team.team_id))
 
 else:
     users_table = Table('courses_users', metadata, autoload=True)
@@ -103,7 +111,4 @@ else:
     users = connection.execute(select, semester=args.semester, course=args.course)
 
     for user in users:
-        if args.gradeable_id is not None:
-            create_folder(os.path.join(vcs_course, args.gradeable_id, user.user_id))
-        else:
-            create_folder(os.path.join(vcs_course, user.user_id))
+        create_folder(os.path.join(vcs_course, args.repo_name, user.user_id))
