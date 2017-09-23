@@ -83,7 +83,7 @@ ORDER BY u.registration_section, u.user_id");
 
 
     public function insertSubmittyUser(User $user) {
-        $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(), $user->getEmail()
+        $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(), $user->getEmail(),
                        Utils::convertBooleanToString($user->isUserUpdated()), Utils::convertBooleanToString($user->isInstructorUpdated()));
 
         $this->submitty_db->query("
