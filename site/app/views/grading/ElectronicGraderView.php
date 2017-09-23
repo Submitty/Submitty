@@ -1197,7 +1197,7 @@ HTML;
                 $return .= <<<HTML
                     <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
                         <td colspan="1" style="text-align: center; width: 12%; white-space: nowrap;"> 
-                            <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                            <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                             <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none; min-width: 50px;" {$noChange}>
                         </td>
                         <td colspan="3" style="white-space: nowrap;">
@@ -1230,7 +1230,7 @@ HTML;
             $return .= <<<HTML
                     <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
                         <td colspan="1" style="text-align: center;; white-space: nowrap;"> 
-                        <span onclick=""> <i class="fa {$icon_mark} mark" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                        <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                         <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px;">
                         </td>
                         <td colspan="3" style="white-space: nowrap;">
@@ -1291,6 +1291,10 @@ HTML;
                 </tr>
             </tbody>
         </table>
+        <br>
+        <!-- The go to the next student button -->
+        <a type="button" class="btn btn-info" style="width: 96%; padding-top: 25px; padding-bottom: 25px;" onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);" {$next_href}>Go To Next Student</a> 
+
 HTML;
         $return .= <<<HTML
         <div style="width:100%;">
