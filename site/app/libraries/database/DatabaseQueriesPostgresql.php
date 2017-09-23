@@ -83,12 +83,12 @@ ORDER BY u.registration_section, u.user_id");
 
 
     public function insertSubmittyUser(User $user) {
-        $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
-                       $user->getLastName(), $user->getEmail());
+        $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(), $user->getEmail()
+                       Utils::convertBooleanToString($user->isUserUpdated()), Utils::convertBooleanToString($user->isInstructorUpdated()));
 
         $this->submitty_db->query("
-INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email)
-VALUES (?, ?, ?, ?, ?, ?)", $array);
+INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email, user_updated, instructor_updated)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $array);
     }
 
     public function insertCourseUser(User $user, $semester, $course) {

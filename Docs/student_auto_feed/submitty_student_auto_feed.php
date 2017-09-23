@@ -457,6 +457,7 @@ FROM upsert_courses_users
 WHERE courses_users.user_id=upsert_courses_users.user_id
 AND courses_users.course=upsert_courses_users.course
 AND courses_users.semester=upsert_courses_users.semester
+AND courses_users.user_group=4
 AND courses_users.manual_registration=FALSE
 SQL;
 
