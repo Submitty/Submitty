@@ -66,8 +66,8 @@ is_team = False;
 # We will always pass in the name of the desired repository.
 #
 # If the repository name matches the name of an existing gradeable in
-# the course, we will check if it's a team gradeable and individual or
-# team repos as appropriate.
+# the course, we will check if it's a team gradeable and create 
+# individual or team repos as appropriate.
 #
 # If it's not an existing gradeable, we will ask the user for
 # confirmation, and make individual repos if requested.
