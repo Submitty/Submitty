@@ -81,14 +81,17 @@ HTML;
         }
         if ($gradeable->getIsRepository()) {
 
-	    //$repo = $this->core->getConfig()->getVcsBaseUrl().$gradeable->getSubdirectory();
+	    // FIXME: We'll eventually use this course config option.
+	    // Right now, we assume full path is specifified in gradeable
+	    //$this->core->getConfig()->getVcsBaseUrl().$gradeable->getSubdirectory();
 
+	    $repo = $gradeable->getSubdirectory();
 
-	    // TEMPORARY FOR NOW
-	    $repo = "https://submitty-vcs.cs.rpi.edu/git/".$semester.'/'.$course.$gradeable->getSubdirectory();
-
+	    // FIXME: Read from submitty config
+	    $vcs_https_path = "https://submitty-vcs.cs.rpi.edu/git/";
 
 	    $repo = str_replace("{\$gradeable_id}", $gradeable->getId(), $repo);
+	    $repo = str_replace("/var/local/submitty/vcs/",$vcs_https_path, $repo);
             $repo = str_replace("{\$team_id}", $team->getId(), $repo);
             $return .= <<<HTML
     <br />
@@ -98,7 +101,7 @@ HTML;
     <br />
     <br />
 
-<tt>git  clone  {$repo}  SPECIFY_TARGET_DIRECTORY</tt>
+<samp>git  clone  {$repo}  SPECIFY_TARGET_DIRECTORY</samp>
 <p>
 
     </span> <br />
