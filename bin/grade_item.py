@@ -69,7 +69,7 @@ def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
 
 
 
-def get_vcs_info(top_dir,semester,course,gradeable,userid):
+def get_vcs_info(top_dir,semester,course,gradeable,userid,teamid):
 
     form_json_file = os.path.join(top_dir,"courses",semester,course,"config","form","form_"+gradeable+".json")
 
@@ -82,9 +82,9 @@ def get_vcs_info(top_dir,semester,course,gradeable,userid):
     vcs_subdirectory = ""
     if is_vcs:
         vcs_subdirectory = form_json["subdirectory"]
-
+    vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}",gradeable)
     vcs_subdirectory = vcs_subdirectory.replace("{$user_id}",userid)
-
+    vcs_subdirectory = vcs_subdirectory.replace("{$team_id}",teamid)
     return (is_vcs,vcs_type,vcs_base_url,vcs_subdirectory)
 
 # copy the files & directories from source to target
@@ -172,7 +172,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
     print ("pid",my_pid,"GRADE THIS", submission_path)
 
-    is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"])
+    is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
     is_batch_job = next_directory==BATCH_QUEUE
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
@@ -249,7 +249,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         # determine which version we need to checkout
         what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
         what_version = str(what_version.decode('utf-8')).rstrip()
-        print ("what version",what_version)
         if what_version == "":
             # oops, pressed the grade button before a valid commit
             shutil.rmtree(checkout_path,ignore_errors=True)
