@@ -29,9 +29,6 @@ $(document).ready(function() {
 
     $('.highlight').hover(hoverOn, hoverOff);
 
-    // Check if document.getElementsByClassName is supported
-    if (!document.getElementsByClassName)
-        return;
     var lineNumbers = document.getElementsByClassName('line_number');
   
     // Constant, change if font changes from Inconsolata monospace; measuring during runtime is overkill
