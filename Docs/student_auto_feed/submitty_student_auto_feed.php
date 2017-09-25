@@ -431,17 +431,20 @@ LOCK TABLE courses_users IN EXCLUSIVE MODE;
 SQL;
 
         //This portion ensures that UPDATE will only occur when a record already exists.
+        //CASE WHEN clause checks user/instructor_updated flags for permission to change
+        //user_preferred_firstname column.
         $sql['users']['update'] = <<<SQL
 UPDATE users
 SET
     user_firstname=upsert_users.user_firstname,
     user_lastname=upsert_users.user_lastname,
-    user_preferred_firstname=upsert_users.user_preferred_firstname,
+    user_preferred_firstname=
+    	CASE WHEN user_updated=FALSE AND instructor_updated=FALSE
+    	THEN upsert_users.user_preferred_firstname
+    	ELSE users.user_preferred_firstname END,
     user_email=upsert_users.user_email
 FROM upsert_users
 WHERE users.user_id=upsert_users.user_id
-AND users.user_updated=FALSE
-AND users.instructor_updated=FALSE
 SQL;
 
         $sql['courses_users']['update'] = <<<SQL
