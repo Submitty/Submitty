@@ -1104,19 +1104,23 @@ HTML;
                 $message .= "<i> Page #: " . $page . "</i>";
             }
 
+            //get the grader's id if it exists
+            $grader_id = "";
+            $graded_color = "";
+            if($question->getGrader() === null || !$show_graded_info) {
+                $grader_id = "Ungraded!";
+                $graded_color = "";
+            } else {
+                $grader_id = "Graded by " . $question->getGrader()->getId();
+                $graded_color = " background-color: #eebb77";
+            }
+
             $return .= <<<HTML
                     <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         {$message}
 HTML;
-            //get the grader's id if it exists
-            $grader_id = "";
-            if($question->getGrader() === null || !$show_graded_info) {
-                $grader_id = "Ungraded!";
-            } else {
-                $grader_id = "Graded by " . $question->getGrader()->getId();
-            }
-
+            
             $return .= <<<HTML
                         <div style="float: right;">
                             <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
@@ -1169,7 +1173,7 @@ HTML;
             }
             
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
+                <tr id="summary-{$c}" style="{$graded_color}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
                         <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
