@@ -342,6 +342,19 @@ function closeAll() {
     });
 }
 
+// expand all outputs in Auto-Grading Testcases section
+function openAllAutoGrading() {
+    // show all divs whose id starts with testcase_
+    $("[id^='testcase_']").show();
+}
+
+// close all outputs in Auto-Grading Testcases section
+function closeAllAutoGrading() {
+    // hide all divs whose id starts with testcase_
+    $("[id^='testcase_']").hide();
+}
+
+
 function openDiv(num) {
     var elem = $('#div_viewer_' + num);
     if (elem.hasClass('open')) {
