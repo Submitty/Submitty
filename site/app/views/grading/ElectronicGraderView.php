@@ -359,9 +359,10 @@ HTML;
 HTML;
             }
             if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
-                $cols += 5;
+                $cols += 6;
                 $return .= <<<HTML
                 <td width="9%">Autograding</td>
+                <td width="8%">Graded Questions</td>
                 <td width="8%">TA Grading</td>
                 <td width="7%">Total</td>
                 <td width="10%">Active Version</td>
@@ -601,7 +602,40 @@ HTML;
             }
             else {
                 $return .= <<<HTML
-
+                <td>
+HTML;
+                $temp_counter = 1;
+                foreach ($row->getComponents() as $component) {
+                    if(is_array($component)) {
+                        foreach($component as $cmpt) {
+                            if($cmpt->getGrader() == null) {
+                                $question = $cmpt;
+                                break;
+                            }
+                            if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
+                                $question = $cmpt;
+                                break;
+                            }
+                        }
+                        if($question === null) {
+                            $question = $component[0];
+                        }
+                    }
+                    else {
+                        $question = $component;
+                    }
+                    if($question->getGrader() === null || $question === null) {
+                    } else {
+                        $return .= <<<HTML
+                            {$temp_counter}, 
+HTML;
+                    }
+                    $temp_counter++;
+                }
+                
+                
+                $return .= <<<HTML
+                </td>
                 <td>
                     <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
                         {$contents}
