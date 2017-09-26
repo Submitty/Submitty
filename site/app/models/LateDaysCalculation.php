@@ -6,17 +6,21 @@ use app\libraries\Core;
 use \app\models\User;
 
 class LateDaysCalculation extends AbstractModel {
-    /*var Core */
+    /** @var Core */
     protected $core;
-    /* var Array: Late day usage for all students queried for all assignments queried. The
-    *  outer array is indexed by user_id and the second array is indexed by gradeable id (g_id). 
+    /** @var array: Late day usage for all students queried for all assignments queried. The
+    *   outer array is indexed by user_id and the second array is indexed by gradeable id (g_id).
     */
     protected $all_latedays;
+    /** @var array */
+    protected $students;
+
     /* Holds grace period in seconds (300 seconds = 5 minutes)*/
     protected $SUBMISSION_GRACE_PERIOD = 300;
 
-    function __construct(Core $main_core, $user_id = null) {
-        $this->core = $main_core;
+    function __construct(Core $core, $user_id = null) {
+        parent::__construct($core);
+        $this->students = $this->parseStudents($user_id);
         //Calculate lateday usages for all students for all assignments queried
         $this->all_latedays = $this->calculateStudentLatedayUsage($user_id);
     }
@@ -49,20 +53,18 @@ class LateDaysCalculation extends AbstractModel {
             if (isset($students[$curr_student])) {
                 $students[$curr_student]['latedays'][] = $latedays[$i];
             }
-            else {
-                //Else student got a late day exception but never turned in any assignments.
-            }
+            //Else student got a late day exception but never turned in any assignments.
+
             unset($latedays[$i]);
         }
         return $students;
     }
     
     private function calculateStudentLatedayUsage($user_id) {
-        $students = $this->parseStudents($user_id);
         $all_latedays = array();
 
         //For each student for each submission calculate late day usage
-        foreach ($students as $student) {
+        foreach ($this->students as $student) {
             //Base allowed late days and remaining late days
             $curr_allowed_term = $this->core->getConfig()->getDefaultStudentLateDays();
             $curr_remaining_late = $this->core->getConfig()->getDefaultStudentLateDays();
@@ -178,7 +180,7 @@ class LateDaysCalculation extends AbstractModel {
 HTML;
 
         //If user exists in list build their table. If user does not exist empty table is returned.
-        if(array_key_exists($user_id, $this ->students)) {
+        if(array_key_exists($user_id, $this->students)) {
 
             $student = $this->all_latedays[$user_id];
 
@@ -234,7 +236,7 @@ HTML;
 HTML;
 
         //If user exists in list build their table. If user does not exist empty table is returned.
-        if(array_key_exists($user_id, $this ->students)) {
+        if(array_key_exists($user_id, $this->students)) {
 
             $student = $this->all_latedays[$user_id];
 
