@@ -1075,7 +1075,7 @@ HTML;
 HTML;
             $penalty = !(intval($question->getMaxValue()) >= 0);
             $message = htmlentities($question->getTitle());
-            $message = "<b>{$message} {$num_peer_components}</b>";
+            $message = "<b>{$message}</b>";  // {$num_peer_components}</b>";
             if ($question->getGradedVersion() != -1 && $gradeable->getActiveVersion() != $question->getGradedVersion()) {
                 $message .= "  " . "Please edit or ensure that comments from version " . $question->getGradedVersion() . " still apply.";
             }
