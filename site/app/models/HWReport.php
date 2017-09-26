@@ -153,7 +153,7 @@ class HWReport extends AbstractModel {
                     }
                     
                     $student_output_text .= $title . "[" . $temp_score . "/" . $max_value . "] ";
-                    if (!is_array($component) && && $component->getGrader() !== null && $component->getGrader()->accessFullGrading()) {
+                    if (!is_array($component) && $component->getGrader() !== null && $component->getGrader()->accessFullGrading()) {
                         $student_output_text .= "(Graded by {$component->getGrader()->getId()})".$nl;
                     } else {
                         $student_output_text .= $nl;
