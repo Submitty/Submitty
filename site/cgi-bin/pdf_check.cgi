@@ -106,7 +106,8 @@ try:
 
     os.chdir(current_path) #make sure this is in right place
     
-except:
+except Exception, e:
+    message = e
     valid = False
     # if copy exists, delete it... but relies on the fact that copy_path exists :(
     if os.path.exists(split_path):
