@@ -11,11 +11,9 @@ use app\libraries\DatabaseUtils;
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
  * @method void setAnonId(string $anon_id)
- * @method string getAnonId() 
  * @method string getPassword()
  * @method string getFirstName() Get the first name of the loaded user
  * @method string getPreferredFirstName() Get the preferred name of the loaded user
- * @method string setPreferredFirstName() Set the preferred name of the loaded user (does not affect db. call updateUser.)
  * @method string getDisplayedFirstName() Returns the preferred name if one exists and is not null or blank,
  *                                        otherwise return the first name field for the user.
  * @method string getLastName() Get the last name of the loaded user
@@ -80,6 +78,8 @@ class User extends AbstractModel {
      *
      * @param Core  $core
      * @param array $details
+     *
+     * @throws \Exception if we cannot generate random
      */
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
@@ -92,9 +92,11 @@ class User extends AbstractModel {
         if (isset($details['user_password'])) {
             $this->setPassword($details['user_password']);
         }
-        if (isset($details['anon_id'])) {
+
+        if (!empty($details['anon_id'])) {
             $this->anon_id = $details['anon_id'];
         }
+
         $this->setFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {
             $this->setPreferredFirstName($details['user_preferred_firstname']);
@@ -189,24 +191,27 @@ class User extends AbstractModel {
             $this->grading_registration_sections = $sections;
         }
     }
-    
+
     public function getAnonId() {
         if($this->anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-            $random = "";
-            while(strlen($random) < 15) {
-                $random .= $alpha[rand(0, strlen($alpha)-1)];
-                if(strlen($random) == 15) {
-                    $check = $this->core->getQueries()->getUserFromAnon($random);
-                    if(strlen($check) == 0) {
-                        $this->anon_id = $random;
-                        $this->core->getQueries()->updateUser($this);
-                    } 
-                    else {
-                        $random = "";
-                    }
+            $anon_ids = $this->core->getQueries()->getAllAnonIds();
+            $alpha_length = strlen($alpha) - 1;
+            do {
+                $random = "";
+                for ($i = 0; $i < 15; $i++) {
+                    // this throws an exception if there's no avaiable source for generating
+                    // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
+                    // so just ignore this fact
+                    /** @noinspection PhpUnhandledExceptionInspection */
+                    $random .= $alpha[random_int(0, $alpha_length)];
                 }
-            }
+                if (in_array($random, $anon_ids)) {
+                    $random = "";
+                }
+            } while(in_array($random, $anon_ids));
+            $this->anon_id = $random;
+            $this->core->getQueries()->updateUser($this, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
         }
         return $this->anon_id;
     }
