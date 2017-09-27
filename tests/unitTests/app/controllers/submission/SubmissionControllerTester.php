@@ -726,7 +726,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive", $touch_file));
     }
 
-    public function testNoPost() {
+    public function testEmptyPost() {
         $_POST = array();
         $return = $this->runController();
         $this->assertTrue($return['error']);
