@@ -726,6 +726,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive", $touch_file));
     }
 
+    public function testNoPost() {
+        $_POST = array();
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertRegExp("/Empty POST request. This may mean that the sum size of your files are greater than [0-9]*M./", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
     public function testErrorNotSetCsrfToken() {
         $_POST['csrf_token'] = null;
         $return = $this->runController();

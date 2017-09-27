@@ -593,9 +593,13 @@ class SubmissionController extends AbstractController {
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
      *
-     * @return boolean
+     * @return array
      */
     private function ajaxUploadSubmission() {
+        if (empty($_POST)) {
+            $max_size = ini_get('post_max_size');
+            return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
+        }
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
