@@ -98,8 +98,6 @@ class User extends AbstractModel {
      *
      * @param Core  $core
      * @param array $details
-     *
-     * @throws \Exception if we cannot generate random
      */
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
@@ -228,9 +226,6 @@ class User extends AbstractModel {
                     // so just ignore this fact
                     /** @noinspection PhpUnhandledExceptionInspection */
                     $random .= $alpha[random_int(0, $alpha_length)];
-                }
-                if (in_array($random, $anon_ids)) {
-                    $random = "";
                 }
             } while(in_array($random, $anon_ids));
             $this->anon_id = $random;
