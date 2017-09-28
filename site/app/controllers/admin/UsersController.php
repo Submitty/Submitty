@@ -80,6 +80,8 @@ class UsersController extends AbstractController {
             'user_group' => $user->getGroup(),
             'registration_section' => $user->getRegistrationSection(),
             'rotating_section' => $user->getRotatingSection(),
+            'user_updated' => $user->isUserUpdated(),
+            'instructor_updated' => $user->isInstructorUpdated(),
             'manual_registration' => $user->isManualRegistration(),
             'grading_registration_sections' => $user->getGradingRegistrationSections()
         ));
@@ -110,6 +112,8 @@ class UsersController extends AbstractController {
             $user->setGroup(intval($_POST['user_group']));
             $user->setManualRegistration(isset($_POST['manual_registration']));
             $user->setGradingRegistrationSections(!isset($_POST['grading_registration_section']) ? array() : array_map("intval", $_POST['grading_registration_section']));
+			//Instructor updated flag tells auto feed to not clobber some of the users data.
+            $user->setInstructorUpdated(true);
             $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
             $this->core->addSuccessMessage("Added {$_POST['user_id']} to {$this->core->getConfig()->getCourse()}");
             $this->core->redirect($return_url);
@@ -178,6 +182,8 @@ class UsersController extends AbstractController {
         }
 
         $user->setGroup(intval($_POST['user_group']));
+		//Instructor updated flag tells auto feed to not clobber some of the users data.
+        $user->setInstructorUpdated(true);
         $user->setManualRegistration(isset($_POST['manual_registration']));
         if (isset($_POST['grading_registration_section'])) {
             $user->setGradingRegistrationSections(array_map("intval", $_POST['grading_registration_section']));
