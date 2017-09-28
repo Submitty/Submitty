@@ -206,7 +206,7 @@ class HWReport extends AbstractModel {
     public function generateAllReports() {
         $students = $this->core->getQueries()->getAllUsers();
         $stu_ids = array_map(function($stu) {return $stu->getId();}, $students);
-        $size_of_stu_id_chunks = ceil(count($stu_ids) / 2);
+        $size_of_stu_id_chunks = 150; //ceil(count($stu_ids) / 2);
         $stu_chunks = array_chunk($stu_ids, $size_of_stu_id_chunks);
 
         foreach ($stu_chunks as $stu_chunk) {
@@ -229,7 +229,7 @@ class HWReport extends AbstractModel {
     public function generateAllReportsForGradeable($g_id) {
         $students = $this->core->getQueries()->getAllUsers();
         $stu_ids = array_map(function($stu) {return $stu->getId();}, $students);
-        $size_of_stu_id_chunks = ceil(count($stu_ids) / 2);
+        $size_of_stu_id_chunks = 150; //ceil(count($stu_ids) / 2);
         $stu_chunks = array_chunk($stu_ids, $size_of_stu_id_chunks);
 
         foreach ($stu_chunks as $stu_chunk) {
