@@ -11,7 +11,7 @@ use app\libraries\DatabaseUtils;
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
  * @method void setAnonId(string $anon_id)
- * @method string getAnonId() 
+ * @method string getAnonId()
  * @method string getPassword()
  * @method string getFirstName() Get the first name of the loaded user
  * @method string getPreferredFirstName() Get the preferred name of the loaded user
@@ -28,14 +28,18 @@ use app\libraries\DatabaseUtils;
  * @method int getRotatingSection()
  * @method void setManualRegistration(bool $flag)
  * @method bool isManualRegistration()
+ * @method void setUserUpdated(bool $flag)
+ * @method bool isUserUpdated()
+ * @method void setInstructorUpdated(bool $flag)
+ * @method bool isInstructorUpdated()
  * @method array getGradingRegistrationSections()
  * @method bool isLoaded()
  */
 class User extends AbstractModel {
-    
+
     /** @property @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
-    
+
     /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
     /** @property @var string The anonymous id of this user which should be unique for each course they are in*/
@@ -58,12 +62,12 @@ class User extends AbstractModel {
     protected $email;
     /** @property @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
-    
+
     /** @property @var int What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
     /** @property @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
-    
+
     /**
      * @property
      * @var bool Was the user imported via a normal class list or was added manually. This is useful for students
@@ -71,6 +75,22 @@ class User extends AbstractModel {
      *           to be shifted to a null registration section or rotating section like a dropped student
      */
     protected $manual_registration = false;
+
+	/**
+	 * @property
+	 * @var bool This flag is set TRUE when a user edits their own preferred firstname.  When TRUE, preferred firstname
+	 *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
+	 *           permitted to change (correct?) a user's legal firstname/lastname and email address.
+	 */
+    protected $user_updated = false;
+
+	/**
+	 * @property
+	 * @var bool This flag is set TRUE when the instructor edits another user's record.  When TRUE, preferred firstname
+	 *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
+	 *           permitted to change (correct?) a user's legal firstname/lastname and email address.
+	 */
+    protected $instructor_updated = false;
 
     /** @property @var array */
     protected $grading_registration_sections = array();
@@ -107,6 +127,9 @@ class User extends AbstractModel {
             $this->group = 4;
         }
 
+        $this->user_updated = isset($details['user_updated']) && $details['user_updated'] === true;
+        $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
+
         $this->registration_section = isset($details['registration_section']) ? intval($details['registration_section']) : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
@@ -114,7 +137,7 @@ class User extends AbstractModel {
             $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
         }
     }
-    
+
     /**
      * Gets whether the user is allowed to access the grading interface
      * @return bool
@@ -122,7 +145,7 @@ class User extends AbstractModel {
     public function accessGrading() {
         return $this->group < 4;
     }
-    
+
     /**
      * Gets whether the user is allowed to access the full grading interface
      * @return bool
@@ -130,7 +153,7 @@ class User extends AbstractModel {
     public function accessFullGrading() {
         return $this->group < 3;
     }
-    
+
     /**
      * Gets whether the user is allowed to access the administrative interface
      * @return bool
@@ -138,7 +161,7 @@ class User extends AbstractModel {
     public function accessAdmin() {
         return $this->group <= 1;
     }
-    
+
     /**
      * Gets whether the user is considered a developer (and thus should have access to debug information)
      * @return int
@@ -189,7 +212,7 @@ class User extends AbstractModel {
             $this->grading_registration_sections = $sections;
         }
     }
-    
+
     public function getAnonId() {
         if($this->anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -201,7 +224,7 @@ class User extends AbstractModel {
                     if(strlen($check) == 0) {
                         $this->anon_id = $random;
                         $this->core->getQueries()->updateUser($this);
-                    } 
+                    }
                     else {
                         $random = "";
                     }
