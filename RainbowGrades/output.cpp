@@ -376,9 +376,11 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s, const nlohmann::
   std::string room = GLOBAL_EXAM_DEFAULT_ROOM;
   std::string zone = "SEE INSTRUCTOR";
   std::string time = GLOBAL_EXAM_TIME;
+  std::string row = "";
+  std::string seat = "";
   if (s->getSection() == 0) {
-    room = "";
-    zone = "";
+    //room = "";
+    //zone = "";
     time = "";
   }
   if (s->getExamRoom() == "") {
@@ -386,6 +388,8 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s, const nlohmann::
   } else {
     room = s->getExamRoom();
     zone = s->getExamZone();
+    row = s->getExamRow();
+    seat = s->getExamSeat();
     if (s->getExamTime() != "") {
       time = s->getExamTime();
     }
@@ -405,6 +409,8 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s, const nlohmann::
   ostr << "  <tr><td>" << GLOBAL_EXAM_DATE << "</td><td align=center>" << time << "</td></tr>\n";
   ostr << "  <tr><td>Your room assignment: </td><td align=center>" << room << "</td></tr>\n";
   ostr << "  <tr><td>Your zone assignment: </td><td align=center>" << zone << "</td></tr>\n";
+  ostr << "  <tr><td>Your row assignment: </td><td align=center>" << row << "</td></tr>\n";
+  ostr << "  <tr><td>Your seat assignment: </td><td align=center>" << seat << "</td></tr>\n";
   ostr << "</table>\n";
   ostr << "</tr></td>\n";
 
@@ -563,6 +569,8 @@ void start_table_output( bool for_instructor,
   if (DISPLAY_EXAM_SEATING) {
     student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam room"));
     student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam zone"));
+    student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam row"));
+    student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam seat"));
     student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam time"));
     student_data.push_back(counter); table.set(0,counter++,TableCell(grey_divider));
   }
@@ -761,6 +769,8 @@ void start_table_output( bool for_instructor,
 
       std::string room = GLOBAL_EXAM_DEFAULT_ROOM;
       std::string zone = "SEE INSTRUCTOR";
+      std::string row = "";
+      std::string seat = "";
       std::string time = GLOBAL_EXAM_TIME;
 
       if (this_student->getSection() == 0) { //LastName() == "") {
@@ -773,6 +783,8 @@ void start_table_output( bool for_instructor,
       } else {
         room = this_student->getExamRoom();
         zone = this_student->getExamZone();
+        row = this_student->getExamRow();
+        seat = this_student->getExamSeat();
         if (this_student->getExamTime() != "") {
           time = this_student->getExamTime();
         }
@@ -783,6 +795,8 @@ void start_table_output( bool for_instructor,
 
       table.set(myrow,counter++,TableCell("ffffff",room));
       table.set(myrow,counter++,TableCell("ffffff",zone));
+      table.set(myrow,counter++,TableCell("ffffff",row));
+      table.set(myrow,counter++,TableCell("ffffff",seat));
       table.set(myrow,counter++,TableCell("ffffff",time));
       table.set(myrow,counter++,TableCell(grey_divider));
     }
