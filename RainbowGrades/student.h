@@ -109,6 +109,8 @@ public:
   // info about exam assignments
   const std::string& getExamRoom() const { return exam_room; }
   const std::string& getExamZone() const { return exam_zone; }
+  std::string getExamRow() const { return exam_row;}
+  std::string getExamSeat() const { return exam_seat;}
   const std::string& getExamTime() const { return exam_time; }
   const std::string& getExamZoneImage() const { return exam_zone_image; }
 
@@ -148,9 +150,9 @@ public:
 
   // info about exam assignments
   void setExamRoom(const std::string &s) { exam_room = s; }
-  void setExamZone(const std::string &s) { exam_zone = s; }
+  void setExamZone(const std::string &z, const std::string &r, const std::string &s) { exam_zone=z; exam_row=r; exam_seat=s; }
   void setExamTime(const std::string &s) { exam_time = s; }
-  void setExamZoneImage(const std::string &s) { exam_zone_image = s; }
+  void setExamZoneImage(const std::string &s) { exam_zone_image = s; std::cout << "SET ZONE IMAGE" << s << std::endl; }
 
   // per student notes
   void addWarning(const std::string &message) { early_warnings.push_back(message); }
@@ -223,6 +225,8 @@ private:
 
   // info about exam assignments
   std::string exam_zone;
+  std::string exam_row;
+  std::string exam_seat;
   std::string exam_room;
   std::string exam_time;
   std::string exam_zone_image;
