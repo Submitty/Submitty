@@ -60,7 +60,6 @@ remove_json_comments: customization.json
 	grep '{"file":' customization_no_comments.json > iclicker_file_list.txt || true
 	python ${RAINBOW_GRADES_DIRECTORY}/parsexml.py iclicker_file_list.txt
 
-
 compile:  remove_json_comments
 	g++ -Wall ${flags} ${memory_flags} \
 		${RAINBOW_GRADES_DIRECTORY}/main.cpp \
