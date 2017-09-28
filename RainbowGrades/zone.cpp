@@ -17,6 +17,44 @@ public:
   std::string image_url;
   int max;
   int count;
+
+  std::vector<std::pair<std::string,std::string> > available_seats;
+
+  bool take_seat(std::string r, std::string s) {
+    assert (count < max);
+    if (r == "N/A" && s == "N/A") {
+      assert (available_seats.size() == 0);
+      count++;
+      return true;
+    }
+    for (std::vector<std::pair<std::string,std::string> >::iterator itr = available_seats.begin();
+         itr != available_seats.end(); itr++) {
+      if (itr->first == r && itr->second == s) {
+        available_seats.erase(itr);
+        count++;
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  void assign_seat(std::string &r, std::string &s) {
+    assert (count < max);
+    if (available_seats.size() == 0) {
+      r = "N/A";
+      s = "N/A";
+      count++;
+    }
+    int random_seat = std::rand()%available_seats.size();
+    std::vector<std::pair<std::string,std::string> >::iterator itr = available_seats.begin() + random_seat;
+    assert (itr != available_seats.end());
+    r = itr->first;
+    s = itr->second;
+    available_seats.erase(itr);
+    count++;
+  }
+
 };
 
 
@@ -56,22 +94,54 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
 
   std::string line;
 
-  while (std::getline(istr_zone_counts,line)) {
-    std::stringstream ss(line);
-    if (!(ss >> zi.zone >> zi.building >> zi.room >> zi.max)) continue;
+  std::string token;
+  istr_zone_counts >> token;
+  assert (token == "zone");
+  while (1) {
 
+    std::getline(istr_zone_counts,line);
+    std::stringstream ss(line);
+
+    if (!(ss >> zi.zone >> zi.building >> zi.room >> zi.max)) {
+      std::cout << "MISFORMATTED ZONE COUNTS" << std::endl; exit(1); }
     ss >> zi.image_url;
 
-    zi.count=0;
+    std::cout << "ZONE IMAGE " << zi.image_url << std::endl;
     
+    zi.count=0;
+    zi.available_seats.clear();
     if (zones.find(zi.zone) != zones.end()) {
       std::cerr << "\nERROR: duplicate zone " << zi.zone << " in " << zone_counts_filename << std::endl;
       exit(0);
     }
-    
     assert (zi.max >= 0);
     total_seats += zi.max;
+
+    bool read_another_zone = false;
+    while (istr_zone_counts >> token) {
+      if (token == "row") {
+        std::getline(istr_zone_counts,line);
+        std::stringstream ss(line);
+        std::string row,seat;
+        ss >> row >> token;
+        assert (token == ":");
+        while (ss >> seat) {
+          zi.available_seats.push_back(std::make_pair(row,seat));
+        }
+      }
+      if (token == "zone") { read_another_zone = true; break; }
+    }
+    if (zi.available_seats.size() != 0 &&
+        zi.max != zi.available_seats.size()) {
+      std::cout << "AVAILABLE SEATS FOR ZONE " << zi.zone << " are incorrect " <<
+        zi.max << " max    vs " << zi.available_seats.size() << " available" << std::endl;
+      exit(1);
+    }
     zones.insert(std::make_pair(zi.zone,zi));
+    
+    
+    if (!read_another_zone) break;
+
   }
   std::cout << "TOTAL SEATS FOR EXAM " << total_seats << std::endl;
 
@@ -87,8 +157,8 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
       std::string line;
       while (getline(istr_zone_assignments,line)) {
         std::stringstream ss(line.c_str());
-        std::string token,last,first,rcs,building,room,zone,time;
-        ss >> last >> first >> rcs >> building >> room >> zone >> time;
+        std::string token,last,first,rcs,section,building,room,zone,row,seat,time;
+        ss >> last >> first >> rcs >> section >> building >> room >> zone >> row >> seat >> time;
 
         while (ss >> token) { time += " " + token; }
 
@@ -112,10 +182,16 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
           }
           assert (itr->second.building == building);
           assert (itr->second.room == room);
-          itr->second.count++;
+          bool success = itr->second.take_seat(row,seat);
+          if (!success) {
+            std::cout << "ERROR COULD NOT TAKE SEAT " << zone << " row:" << row
+                      << " seat:" << seat << std::endl;
+            exit(1);
+          }
+          
           existing_assignments++;
           s->setExamRoom(building+std::string(" ")+room);
-          s->setExamZone(zone);
+          s->setExamZone(zone,row,seat);
           s->setExamZoneImage(itr->second.image_url);
           if (time != "") {
             s->setExamTime(time);
@@ -172,10 +248,12 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
       assert (next_za < (int)randomized_available.size());
       ZoneInfo &next_zi = zones.find(randomized_available[next_za])->second;
       s->setExamRoom(next_zi.building+std::string(" ")+next_zi.room);
-      s->setExamZone(next_zi.zone);
+      std::string row,seat;
+      next_zi.assign_seat(row,seat);
+      s->setExamZone(next_zi.zone,row,seat);
+      s->setExamZoneImage(next_zi.image_url);
       next_za++;
       new_zone_assign++;
-      next_zi.count++;
     }
   }
   
@@ -189,7 +267,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
   // ============================================================
   // write out the assignments!
 
-  if (new_zone_assign > 0) {
+  if (1) { //new_zone_assign > 0) {
 
     std::ofstream ostr_zone_assignments(zone_assignments_filename.c_str());
     assert (ostr_zone_assignments.good());
@@ -200,7 +278,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
       
       if (s->getLastName() == "") continue;
 
-      std::string f = s->getFirstName();
+      std::string f = s->getPreferredName();
       std::string l = s->getLastName();
       std::replace( f.begin(), f.end(), ' ', '_');
       std::replace( l.begin(), l.end(), ' ', '_');
@@ -208,9 +286,15 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
       ostr_zone_assignments << std::setw(20) << std::left << l  << " ";
       ostr_zone_assignments << std::setw(15) << std::left << f << " ";
       ostr_zone_assignments << std::setw(12) << std::left << s->getUserName()  << " ";
+      if (s->getSection())
+        ostr_zone_assignments << std::setw(12) << std::left << s->getSection()  << " ";
+      else
+        ostr_zone_assignments << std::setw(12) << std::left << "" << " ";
 
       ostr_zone_assignments << std::setw(10) << std::left << s->getExamRoom()  << " ";
       ostr_zone_assignments << std::setw(10) << std::left << s->getExamZone()  << " ";
+      ostr_zone_assignments << std::setw(10) << std::left << s->getExamRow()  << " ";
+      ostr_zone_assignments << std::setw(10) << std::left << s->getExamSeat()  << " ";
       ostr_zone_assignments << std::setw(10) << std::left << s->getExamTime();
       
       ostr_zone_assignments << std::endl;
@@ -227,10 +311,10 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
   for (std::map<std::string,ZoneInfo>::iterator itr = zones.begin();
        itr != zones.end(); itr++) {
 
-    std::cout << "ZONE " << std::left  << std::setw(4) << itr->first 
+    std::cout << "ZONE " << std::left  << std::setw(6)  << itr->first 
               << " "     << std::left  << std::setw(10) << itr->second.building << "  " 
-              << " "     << std::left  << std::setw(4) << itr->second.room << "  " 
-              << " "     << std::right << std::setw(4) << itr->second.count << std::endl;
+              << " "     << std::left  << std::setw(4)  << itr->second.room << "  " 
+              << " "     << std::right << std::setw(4)  << itr->second.count << "      (" << itr->second.max-itr->second.count << " seats remain)" << std::endl;
 
     total_assignments += itr->second.count;
   }
