@@ -501,4 +501,10 @@ abstract class AbstractDatabaseQueries {
      * @param string $gradeable_id
     */
     abstract public function insertPeerGradingAssignment($grader, $student, $gradeable_id);
+
+    abstract public function getAnonId($user_id);
+
+    abstract public function getUserFromAnon($anon_id);
+
+    abstract public function getAllAnonIds();
 }

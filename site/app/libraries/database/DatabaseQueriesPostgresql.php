@@ -104,15 +104,6 @@ VALUES (?,?,?,?,?,?)", $params);
     }
 
     public function updateUser(User $user, $semester=null, $course=null) {
-
-
-    	//$array = array($user->getPassword(), $user->getAnonId(), $user->getFirstName(), $user->getPreferredFirstName(),
-        //               $user->getLastName(), $user->getEmail(), $user->getId());
-        //$this->submitty_db->query("
-//UPDATE users SET user_password=?, anon_id=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?
-//WHERE user_id=?", $array);
-
-
     	$array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(), $user->getEmail(),
                        Utils::convertBooleanToString($user->isUserUpdated()), Utils::convertBooleanToString($user->isInstructorUpdated()),
                        $user->getId());
@@ -129,8 +120,8 @@ WHERE user_id=?", $array);
 UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?
 WHERE semester=? AND course=? AND user_id=?", $params);
 
-            $params = array($user->getRotatingSection(), $user->getId());
-            $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id=?", $params);
+            $params = array($user->getAnonId(), $user->getRotatingSection(), $user->getId());
+            $this->course_db->query("UPDATE users SET anon_id=?, rotating_section=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
@@ -1737,6 +1728,11 @@ AND gc_id IN (
             $return[$id_map['anon_id']] = $id_map['user_id'];
         }
         return $return;
+    }
+
+    public function getAllAnonIds() {
+        $this->course_db->query("SELECT anon_id FROM users");
+        return $this->course_db->rows();
     }
 }
 
