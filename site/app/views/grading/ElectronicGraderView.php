@@ -359,9 +359,10 @@ HTML;
 HTML;
             }
             if($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
-                $cols += 5;
+                $cols += 6;
                 $return .= <<<HTML
                 <td width="9%">Autograding</td>
+                <td width="8%">Graded Questions</td>
                 <td width="8%">TA Grading</td>
                 <td width="7%">Total</td>
                 <td width="10%">Active Version</td>
@@ -601,7 +602,40 @@ HTML;
             }
             else {
                 $return .= <<<HTML
-
+                <td>
+HTML;
+                $temp_counter = 1;
+                foreach ($row->getComponents() as $component) {
+                    if(is_array($component)) {
+                        foreach($component as $cmpt) {
+                            if($cmpt->getGrader() == null) {
+                                $question = $cmpt;
+                                break;
+                            }
+                            if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
+                                $question = $cmpt;
+                                break;
+                            }
+                        }
+                        if($question === null) {
+                            $question = $component[0];
+                        }
+                    }
+                    else {
+                        $question = $component;
+                    }
+                    if($question->getGrader() === null || $question === null) {
+                    } else {
+                        $return .= <<<HTML
+                            {$temp_counter}, 
+HTML;
+                    }
+                    $temp_counter++;
+                }
+                
+                
+                $return .= <<<HTML
+                </td>
                 <td>
                     <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
                         {$contents}
@@ -1059,8 +1093,8 @@ HTML;
             $lower_clamp = $question->getLowerClamp();
             $default = $question->getDefault();
             $upper_clamp = $question->getUpperClamp();
-            $max = $upper_clamp - $default;
-            $min = $lower_clamp - $default;
+            $max = 10000;
+            $min = -10000;
             // hide auto-grading if it has no value
             if (($question->getScore() == 0) && (substr($question->getTitle(), 0, 12) === "AUTO-GRADING")) {
                 $question->setScore(floatval($gradeable->getGradedAutograderPoints()));
@@ -1075,7 +1109,7 @@ HTML;
 HTML;
             $penalty = !(intval($question->getMaxValue()) >= 0);
             $message = htmlentities($question->getTitle());
-            $message = "<b>{$message} {$num_peer_components}</b>";
+            $message = "<b>{$message}</b>";  // {$num_peer_components}</b>";
             if ($question->getGradedVersion() != -1 && $gradeable->getActiveVersion() != $question->getGradedVersion()) {
                 $message .= "  " . "Please edit or ensure that comments from version " . $question->getGradedVersion() . " still apply.";
             }
@@ -1104,19 +1138,23 @@ HTML;
                 $message .= "<i> Page #: " . $page . "</i>";
             }
 
+            //get the grader's id if it exists
+            $grader_id = "";
+            $graded_color = "";
+            if($question->getGrader() === null || !$show_graded_info) {
+                $grader_id = "Ungraded!";
+                $graded_color = "";
+            } else {
+                $grader_id = "Graded by " . $question->getGrader()->getId();
+                $graded_color = " background-color: #eebb77";
+            }
+
             $return .= <<<HTML
                     <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         {$message}
 HTML;
-            //get the grader's id if it exists
-            $grader_id = "";
-            if($question->getGrader() === null || !$show_graded_info) {
-                $grader_id = "Ungraded!";
-            } else {
-                $grader_id = "Graded by " . $question->getGrader()->getId();
-            }
-
+            
             $return .= <<<HTML
                         <div style="float: right;">
                             <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
@@ -1169,7 +1207,7 @@ HTML;
             }
             
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
+                <tr id="summary-{$c}" style="{$graded_color}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
                         <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
