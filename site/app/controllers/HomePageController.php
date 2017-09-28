@@ -61,6 +61,8 @@ class HomePageController extends AbstractController {
                 if(strlen($newName) <= 30)
                 {
                     $user->setPreferredFirstName($newName);
+					//User updated flag tells auto feed to not clobber some of the users data.
+                    $user->setUserUpdated(true);
                     $this->core->getQueries()->updateUser($user);
                 }
                 else
