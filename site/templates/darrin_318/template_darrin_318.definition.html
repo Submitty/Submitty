@@ -1,41 +1,53 @@
 
-<!-- INSERT CONFIG JAVASCRIPT SCRIPT TAG HERE -->
+<canvas id="diagram" width="1000" height="500">
+  Your browser does not support the HTML5 canvas tag.
+</canvas>
 
-<style>
-#diagram {
-  border: 1px solid #d3d3d3;
-}
-</style>
-
-<body>
-  <canvas id="diagram" width="850" height="430">
-    Your browser does not support the HTML5 canvas tag.
-  </canvas>
-  <img id="image">
-  <pre id="seats"></pre>
-</body>
+<!--
+<img id="image">
+<pre id="seats"></pre>
+ -->
 
 <script>
+  var student = JSON.parse(document.getElementById("config-student").innerHTML)
+  var config = JSON.parse(document.getElementById("config-room").innerHTML)
+
   var seats = {
-    "left" : [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    "middle" : [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-    "right" : [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+    "left" : [4,4,4,4,4,4,4,4,4,4,4],
+    "middle" : [14,14,14,14,14,14,14,14,14,14,14],
+    "right" : [4,4,4,4,4,4,4,4,4,4,4],
   }
   var used = {};
 
   function expand_config(config) {
-    expanded = {}
+    expanded_room = {}
+    expanded_student = {}
+
+    if("zone" in student && "row" in student && "seat" in student) {
+      expanded_student = student
+    }
+    else {
+      expanded_student = undefined
+    }
+
     try {
-      for(var section in config) {
-        expanded[section] = {}
-        for(var letter in config[section]) {
-          // config[section][letter]["rows"].sort();
-          for(var index = 0; index < config[section][letter]["rows"].length; index++) {
-            row = config[section][letter]["rows"][index];
-            color = config[section][letter]["color"];
-            expanded[section][row] = {
+      colors = config["colors"];
+      for(var section in config["zones"]) {
+        expanded_room[section] = {}
+        for(var letter in config["zones"][section]) {
+          // config["zones"][section][letter]["rows"].sort();
+          for(var index = 0; index < config["zones"][section][letter]["rows"].length; index++) {
+            row = config["zones"][section][letter]["rows"][index];
+            color = colors[config["zones"][section][letter]["color"]];
+            expanded_room[section][row] = {
               "letter": letter,
               "color": color,
+            }
+
+            if(expanded_student !== undefined) {
+              if(student["zone"] == letter) {
+                expanded_student["section"] = section
+              }
             }
           }
         }
@@ -44,7 +56,8 @@
     catch(err) {
       throw new Error("Invalid config");
     }
-    return expanded
+    // expanded_student = undefined
+    return expanded_room
   }
 
   function render_arrow_head(x, y, angle, width, height) {
@@ -103,13 +116,34 @@
 
     try {
       var empty = false;
-      var color = expanded[section][row]["color"];
+      var color = expanded_room[section][row]["color"];
       ctx.setLineDash([]);
     }
     catch(err) {
       var empty = true;
       var color = BASE_ROW_COLOR
       ctx.setLineDash([10, 10]);
+    }
+
+    student_valid = expanded_student !== undefined
+    student_row = false;
+    if(student_valid && "section" in expanded_student && "zone" in expanded_student && "row" in student) {
+      if(expanded_student["section"] == section && expanded_student["row"] == row) {
+        if(config["zones"][section][expanded_student["zone"]]["rows"].indexOf(expanded_student["row"]) > -1) {
+         student_row = true;
+        }
+      }
+    }
+
+    console.log(student_valid)
+
+    if (student_valid) {
+      if (student_row) {
+        color = config["colors"]["important"];
+      }
+      else {
+        color = BASE_ROW_COLOR;
+      }
     }
 
     if(section == "left") {
@@ -128,10 +162,20 @@
       console.log("Invalid section: " + section + " (skipping)");
     }
 
-    // Draw row
-    ctx.beginPath();
     var center_y = BASE_ROW_START + 20 * row
     var width_half = width / 2.0;
+
+    if(student_valid && student_row) {
+      ctx.beginPath();
+      ctx.strokeStyle = '#003300';
+      ctx.lineWidth = BASE_ROW_HEIGHT + 6;
+      ctx.moveTo(center_x - width_half, center_y);
+      ctx.lineTo(center_x + width_half, center_y);
+      ctx.stroke();
+    }
+
+    // Draw row
+    ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = BASE_ROW_HEIGHT;
     ctx.moveTo(center_x - width_half, center_y);
@@ -170,14 +214,14 @@
 
     // Draw points
     if( ! empty) {
-      letter = expanded[section][row]["letter"]
-      if( ! ("points" in config[section][letter])) {
-        config[section][letter]["points"] = []
+      letter = expanded_room[section][row]["letter"]
+      if( ! ("points" in config["zones"][section][letter])) {
+        config["zones"][section][letter]["points"] = []
       }
       if( ! (letter in used)) {
         used[letter] = 0
       }
-      config[section][letter]["points"].push(point_avg);
+      config["zones"][section][letter]["points"].push(point_avg);
       used[letter] += seats[section][row - 1];
 
       if(DRAW_ROW_BLACK_DOTS) {
@@ -203,10 +247,31 @@
         }
       }
 
-      ctx.beginPath();
-      ctx.arc(center_x - width_half, center_y, BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
-      ctx.fillStyle = "#d000d0";
-      ctx.fill();
+      if(DRAW_ROW_PINK_DOTS) {
+        ctx.beginPath();
+        ctx.arc(center_x - width_half, center_y, BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
+        ctx.fillStyle = "#d000d0";
+        ctx.fill();
+      }
+
+      if(student_valid && student_row && "seat" in student) {
+        density = config["zones"][section][expanded_student["zone"]]["density"]
+        line_percentage = (expanded_student["seat"] - 1) / (seats[section][row] * density)
+        line_percentage = Math.max(Math.min(line_percentage, 0.98), 0.02)
+        line_prorated = center_x - width_half + width * line_percentage
+        point = [line_prorated, center_y];
+        ctx.beginPath();
+        ctx.arc(point[0], point[1], BASE_POINT_RADIUS + 4, 0.0, 2.0 * Math.PI);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#003300';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(point[0], point[1], BASE_POINT_RADIUS + 1, 0.0, 2.0 * Math.PI);
+        ctx.fillStyle = config["colors"]["important"];
+        ctx.fill();
+      }
     }
   }
 
@@ -223,22 +288,31 @@
   }
 
   function render_zone_labels(config) {
-    try {
-      for(var section in config) {
-        for(var letter in config[section]) {
-          var num_points = config[section][letter]["points"].length;
+      for(var section in config["zones"]) {
+        console.log(section);
+        for(var letter in config["zones"][section]) {
+          console.log(letter);
+          var num_points = config["zones"][section][letter]["points"].length;
           var total_x = 0.0;
           var total_y = 0.0;
           for(var index = 0; index < num_points; index++) {
-            point = config[section][letter]["points"][index];
+            point = config["zones"][section][letter]["points"][index];
             total_x += point[0];
             total_y += point[1];
+          }
+
+          student_valid = expanded_student !== undefined
+          student_zone = false
+          if(student_valid && "section" in expanded_student && "zone" in student) {
+            if(expanded_student["section"] == section && expanded_student["zone"] == letter) {
+              student_zone = true
+            }
           }
 
           total_x /= num_points;
           total_y /= num_points;
 
-          message = letter + " (rows " + config[section][letter]["rows"][0] + "-" + + config[section][letter]["rows"][num_points - 1] + ")"
+          message = letter + " (rows " + config["zones"][section][letter]["rows"][0] + "-" + + config["zones"][section][letter]["rows"][num_points - 1] + ")"
           ctx.font = "bold 12pt sans-serif";
 
           var width = ctx.measureText(message).width + 20.0;
@@ -255,25 +329,35 @@
           ctx.fillStyle = "#ffffff";
           ctx.fillRect(total_x - width_half, total_y - height_half, width, height);
 
-          ctx.fillStyle = config[section][letter]["color"];
+          colors = config["colors"]
+          color = colors[config["zones"][section][letter]["color"]]
+
+          if(student_valid) {
+            if(student_zone) {
+              ctx.fillStyle = config["colors"]["important"];
+              ctx.fillRect(total_x - width_half, total_y - height_half, width, height);
+              color = "#ffffff"
+            }
+            else {
+              color = BASE_ROW_COLOR;
+            }
+          }
+
+          ctx.fillStyle = color;
           ctx.fillText(message, total_x, total_y);
         }
       }
-    }
-    catch(err) {
-      throw new Error("Invalid config");
-    }
-    return expanded
+    return expanded_room
 
   }
 
-  function sum_array(temp) {
-    var total = 0;
-    for(var index = 0; index < temp.length; index++) {
-        total += temp[index];
-    }
-    return total;
-  }
+  // function sum_array(temp) {
+  //   var total = 0;
+  //   for(var index = 0; index < temp.length; index++) {
+  //       total += temp[index];
+  //   }
+  //   return total;
+  // }
 
   // Find diagram DOM object and configure HTML5 canvas
   var diagram = document.getElementById("diagram");
@@ -289,22 +373,36 @@
   var BASE_ROW_COLOR = "grey"
   var BASE_POINT_RADIUS = 7
 
+  var DRAW_ROW_PINK_DOTS = false;
   var DRAW_ROW_BLACK_DOTS = false;
   var DRAW_ROW_CENTER_LABELS = false;
 
   // Render title
   ctx.font = "bold 20pt sans-serif";
-  ctx.fillText(title, BASE_ROW_CENTER, 50);
+  ctx.fillText(config["title"], BASE_ROW_CENTER, 50);
 
   // Render left note
-  ctx.font = "bold 12pt sans-serif";
-  ctx.fillStyle = "#d000d0";
-  ctx.fillText(note_left, 150, 50);
+  student_valid = student !== undefined
+  if(student_valid) {
+    ctx.textAlign="start";
+    ctx.font = "bold 12pt sans-serif";
+    ctx.fillStyle = config["colors"]["important"];
+    if("zone" in student) {
+      ctx.fillText('Assigned Zone - ' + student["zone"], 150, 35);
+    }
+    if("row" in student) {
+      ctx.fillText('Assigned Row  - ' + student["row"], 150, 50);
+    }
+    if("seat" in student) {
+      ctx.fillText('Assigned Seat  - ' + student["seat"], 150, 65);
+    }
+    ctx.textAlign="center";
+  }
 
   // Render right note
   ctx.font = "bold 12pt sans-serif";
   ctx.fillStyle = "#333333";
-  ctx.fillText(note_right, 725, 50);
+  ctx.fillText(config["note"], 725, 50);
 
   // Render front of room legend
   ctx.font = "italic 10pt sans-serif";
@@ -315,9 +413,9 @@
   ctx.fillText("Back of Room", BASE_ROW_CENTER, 400);
 
   // Render arrows
-  // render_arrow("left");
-  // render_arrow("middle");
-  // render_arrow("right");
+  render_arrow("left");
+  render_arrow("middle");
+  render_arrow("right");
 
   // Render rows and points
   for(var row = 1; row <= BASE_NUM_ROWS; row++) {
@@ -327,29 +425,29 @@
   // Render zone labels
   render_zone_labels(config);
 
-  // Render to image
-  document.getElementById("image").src = diagram.toDataURL();
+  // // Render to image
+  // document.getElementById("image").src = diagram.toDataURL();
 
-  // Print seats used
-  var temp = [];
-  for(var letter in used) {
-    temp.push(letter)
-  }
-  temp.sort();
-  container = document.getElementById("seats")
-  var total = 0;
-  for(var index in temp) {
-    var letter = temp[index];
-    container.innerHTML += letter + " DARRIN 318 " + used[letter] + "\n";
-    total += used[letter];
-  }
+  // // Print seats used
+  // var temp = [];
+  // for(var letter in used) {
+  //   temp.push(letter)
+  // }
+  // temp.sort();
+  // container = document.getElementById("seats")
+  // var total = 0;
+  // for(var index in temp) {
+  //   var letter = temp[index];
+  //   container.innerHTML += letter + " DARRIN 318 " + used[letter] + "\n";
+  //   total += used[letter];
+  // }
 
-  // Get total number of seats
-  var all = 0;
-  all += sum_array(seats["left"]);
-  all += sum_array(seats["middle"]);
-  all += sum_array(seats["right"]);
+  // // Get total number of seats
+  // var all = 0;
+  // all += sum_array(seats["left"]);
+  // all += sum_array(seats["middle"]);
+  // all += sum_array(seats["right"]);
 
-  container.innerHTML += "\nTOTAL: " + total + "\n";
-  container.innerHTML += "UNUSED: " + (all - total) + "\n";
+  // container.innerHTML += "\nTOTAL: " + total + "\n";
+  // container.innerHTML += "UNUSED: " + (all - total) + "\n";
 </script>

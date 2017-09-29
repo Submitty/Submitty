@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html>
+    <body>
+
+        <!-- COPY ME -->
+
+        <div id="config-student" style="display:none;">
+            {
+  "Xzone": "K",
+  "Xrow": 11,
+  "Xseat": 6
+}        </div>
+        <div id="config-room"    style="display:none;">
+            {
+  "title": "Darrin 308",
+  "note": "seat 1 is on the right",
+
+  "colors": {
+    "red": "#d00000",
+    "blue": "#0400d0",
+    "green": "#0b8f0a",
+    "yellow": "#e4c012",
+    "important": "#d000d0"
+  },
+
+  "zones" : {
+    "left": {
+      "J": {
+        "rows": [1,2,3],
+        "color": "red",
+        "density": 0.5
+      },
+      "K": {
+        "rows": [4,5],
+        "color": "green",
+        "density": 0.5
+      },
+      "L": {
+        "rows": [6,7],
+        "color": "blue",
+        "density": 0.5
+      },
+      "M": {
+        "rows": [8,9],
+        "color": "yellow",
+        "density": 0.5
+      },
+      "N": {
+        "rows": [11,12],
+        "color": "red",
+        "density": 0.5
+      },
+      "O": {
+        "rows": [13,14],
+        "color": "green",
+        "density": 0.5
+      }
+    },
+
+    "middle": {
+      "P": {
+        "rows": [1,2,3],
+        "color": "blue",
+        "density": 0.5
+      },
+      "Q": {
+        "rows": [4,5,6],
+        "color": "yellow",
+        "density": 0.5
+      },
+      "R": {
+        "rows": [7,8],
+        "color": "red",
+        "density": 0.5
+      },
+      "S": {
+        "rows": [10,11,12],
+        "color": "green",
+        "density": 0.5
+      },
+      "T": {
+        "rows": [13,14],
+        "color": "blue",
+        "density": 0.5
+      }
+    },
+
+    "right": {
+      "U": {
+        "rows": [1,2,3],
+        "color": "red",
+        "density": 0.5
+      },
+      "V": {
+        "rows": [4,5],
+        "color": "green",
+        "density": 0.5
+      },
+      "W": {
+        "rows": [6,7],
+        "color": "blue",
+        "density": 0.5
+      },
+      "X": {
+        "rows": [8,9],
+        "color": "yellow",
+        "density": 0.5
+      },
+      "Y": {
+        "rows": [11,12],
+        "color": "red",
+        "density": 0.5
+      },
+      "Z": {
+        "rows": [13,14],
+        "color": "green",
+        "density": 0.5
+      }
+    }
+  }
+}        </div>
+        
+<canvas id="diagram" width="1000" height="500">
+  Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<!--
+<img id="image">
+<pre id="seats"></pre>
+ -->
+
+<script>
+  var student = JSON.parse(document.getElementById("config-student").innerHTML)
+  var config = JSON.parse(document.getElementById("config-room").innerHTML)
+
+  var seats = {
+    "left" : [6,8,10,10,10,10,10,10,10,10,12,12,12,12,10,12],
+    "middle" : [6,6,8,8,8,10,10,10,12,12,12,10,14,14],
+    "right" : [8,8,10,10,10,10,10,10,10,10,12,12,12,12,10,12],
+  }
+  var used = {};
+
+  function expand_config(config) {
+    expanded_room = {}
+    expanded_student = {}
+
+    if("zone" in student && "row" in student && "seat" in student) {
+      expanded_student = student
+    }
+    else {
+      expanded_student = undefined
+    }
+
+    try {
+      colors = config["colors"];
+      for(var section in config["zones"]) {
+        expanded_room[section] = {}
+        for(var letter in config["zones"][section]) {
+          // config["zones"][section][letter]["rows"].sort();
+          for(var index = 0; index < config["zones"][section][letter]["rows"].length; index++) {
+            row = config["zones"][section][letter]["rows"][index];
+            color = colors[config["zones"][section][letter]["color"]];
+            expanded_room[section][row] = {
+              "letter": letter,
+              "color": color,
+            }
+
+            if(expanded_student !== undefined) {
+              if(student["zone"] == letter) {
+                expanded_student["section"] = section
+              }
+            }
+          }
+        }
+      }
+    }
+    catch(err) {
+      throw new Error("Invalid config");
+    }
+    // expanded_student = undefined
+    return expanded_room
+  }
+
+  function find_angle(x_start, y_start, x_end, y_end) {
+    return Math.atan2((y_end - y_start) , (x_end - x_start));
+  }
+
+  function find_point(x, y, radius, angle){
+    return [x + Math.cos(angle) * radius, y + Math.sin(angle) * radius];
+  }
+
+  function render_arrow_head(x, y, angle, width, height) {
+    var half_width = width / 2.0;
+    var half_height = height / 2.0;
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.translate(-1.0 * half_width, -1.0 * half_height);
+    ctx.beginPath();
+    ctx.moveTo(0.0, 0.0);
+    ctx.lineTo(0.0, height);
+    ctx.lineTo(width, half_height);
+    ctx.closePath();
+    ctx.fill();
+    ctx.translate(half_width, half_height);
+    ctx.rotate(-angle);
+    ctx.translate(-1.0 * x, -1.0 * y);
+  }
+
+  function render_arrow(section) {
+    if(section == "left") {
+      var row = 18;
+      var angle = Math.PI * 0.75;
+      var angle_start = Math.PI * 0.10;
+      var angle_end   = Math.PI * 0.33;
+    }
+    else if(section == "middle") {
+      var row = 17;
+      var angle = Math.PI * 1.07;
+      var angle_start = Math.PI * 0.38;
+      var angle_end   = Math.PI * 0.62;
+    }
+    else if(section == "right") {
+      var row = 18;
+      var angle = Math.PI * 1.33;
+      var angle_start = Math.PI * 0.67;
+      var angle_end   = Math.PI * 0.90;
+    }
+    else {
+      console.log("Invalid section: " + section + " (skipping)");
+    }
+
+    var radius = BASE_ROW_RADIUS + row * 20;
+    var width = 1;
+    var color = BASE_ROW_COLOR;
+    ctx.setLineDash([]);
+
+    // Draw row
+    ctx.beginPath();
+    ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start, angle_end);
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+
+    point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end);
+    render_arrow_head(point[0], point[1], angle, 10, 10);
+  }
+
+  function render_section_row(config, section, row) {
+    var radius = BASE_ROW_RADIUS + row * 20
+    var width = BASE_ROW_WIDTH
+    try {
+      var empty = false;
+      var color = expanded_room[section][row]["color"];
+      ctx.setLineDash([]);
+    }
+    catch(err) {
+      var empty = true;
+      var color = BASE_ROW_COLOR
+      ctx.setLineDash([10, 10]);
+    }
+
+    student_valid = expanded_student !== undefined
+    student_row = false;
+    if(student_valid && "section" in expanded_student && "zone" in expanded_student && "row" in student) {
+      if(expanded_student["section"] == section && expanded_student["row"] == row) {
+        if(config["zones"][section][expanded_student["zone"]]["rows"].indexOf(expanded_student["row"]) > -1) {
+         student_row = true;
+        }
+      }
+    }
+
+    console.log(student_valid)
+
+    if (student_valid) {
+      if (student_row) {
+        color = config["colors"]["important"];
+      }
+      else {
+        color = BASE_ROW_COLOR;
+      }
+    }
+
+    if(section == "left") {
+      var angle_start = Math.PI * 0.10;
+      var angle_end   = Math.PI * 0.33;
+
+      angle_avg = (angle_start + angle_end) * 0.5;
+      var offset = 4.0 * (Math.PI / radius)
+      point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start - offset);
+      ctx.font = "bold 7pt sans-serif";
+      ctx.fillStyle = "#333333";
+      ctx.fillText(row, point[0], point[1], 100);
+    }
+    else if(section == "middle") {
+      var angle_start = Math.PI * 0.38;
+      var angle_end   = Math.PI * 0.62;
+
+      point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end * 1.04);
+      ctx.font = "bold 7pt sans-serif";
+      ctx.fillStyle = "#333333";
+      ctx.fillText(row, point[0], point[1], 100);
+
+      point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start * 0.935);
+      ctx.font = "bold 7pt sans-serif";
+      ctx.fillStyle = "#333333";
+      ctx.fillText(row, point[0], point[1], 100);
+
+    }
+    else if(section == "right") {
+      var angle_start = Math.PI * 0.67;
+      var angle_end   = Math.PI * 0.90;
+
+      angle_avg = (angle_start + angle_end) * 0.5;
+      var offset = 5.0 * (Math.PI / radius)
+      point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end + offset);
+      ctx.font = "bold 7pt sans-serif";
+      ctx.fillStyle = "#333333";
+      ctx.fillText(row, point[0], point[1], 100);
+    }
+    else {
+      console.log("Invalid section: " + section + " (skipping)");
+    }
+
+    if(student_valid && student_row) {
+      ctx.beginPath();
+      ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start, angle_end);
+      ctx.lineWidth = BASE_ROW_HEIGHT + 2;
+      ctx.strokeStyle = '#003300';
+      ctx.stroke();
+    }
+
+    // Draw row
+    ctx.beginPath();
+    ctx.arc(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start, angle_end);
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+
+    angle_avg = (angle_start + angle_end) * 0.5;
+    point_avg = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_avg);
+
+    if(DRAW_ROW_CENTER_LABELS) {
+      // Draw row label
+      point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius - 9, angle_avg);
+      ctx.font = "bold 7pt sans-serif";
+      ctx.fillStyle = "#333333";
+      ctx.fillText(row, point[0], point[1], 100);
+    }
+
+    // Draw points
+    if( ! empty) {
+      letter = expanded_room[section][row]["letter"]
+      if( ! ("points" in config["zones"][section][letter])) {
+        config["zones"][section][letter]["points"] = []
+      }
+      if( ! (letter in used)) {
+        used[letter] = 0
+      }
+      config["zones"][section][letter]["points"].push(point_avg);
+      used[letter] += seats[section][row - 1];
+
+      if(DRAW_ROW_BLACK_DOTS) {
+        if(row <= 4) {
+          limit = 1
+        }
+        else if(row <= 8) {
+          limit = 2
+        }
+        else if(row <= 12) {
+          limit = 3
+        }
+        else {
+          limit = 4
+        }
+
+        for(var multiplier = 0; multiplier < limit; multiplier++)
+        {
+          var offset = 8.0 * (Math.PI / radius)
+          // var offset = (angle_end - angle_start) * 0.15
+          point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_start + multiplier * offset);
+          ctx.beginPath();
+          ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
+          ctx.fillStyle = "#333333";
+          ctx.fill();
+        }
+      }
+
+      if(DRAW_ROW_PINK_DOTS) {
+        point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end);
+        ctx.beginPath();
+        ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
+        ctx.fillStyle = config["colors"]["important"];
+        ctx.fill();
+      }
+
+      if(student_valid && student_row && "seat" in student) {
+        angle_domain = angle_end - angle_start;
+        density = config["zones"][section][expanded_student["zone"]]["density"]
+        angle_percentage = (expanded_student["seat"] - 1) / (seats[section][row] * density)
+        angle_percentage = Math.max(Math.min(angle_percentage, 0.98), 0.02)
+        angle_prorated = angle_start + angle_domain * angle_percentage
+        point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_prorated);
+        ctx.beginPath();
+        ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#003300';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(point[0], point[1], BASE_POINT_RADIUS-3, 0.0, 2.0 * Math.PI);
+        ctx.fillStyle = config["colors"]["important"];
+        ctx.fill();
+      }
+    }
+  }
+
+  function render_row(config, row) {
+    render_section_row(config, "left", row);
+    if(row <= 14) {
+      render_section_row(config, "middle", row);
+    }
+    render_section_row(config, "right", row);
+  }
+
+  function render_section(section) {
+    for(var row = 1; row <= BASE_NUM_ROWS; row++) {
+      render_section_row(section, row);
+    }
+  }
+
+  function render_zone_labels(config) {
+    try {
+      for(var section in config["zones"]) {
+        for(var letter in config["zones"][section]) {
+          var num_points = config["zones"][section][letter]["points"].length;
+          var total_x = 0.0;
+          var total_y = 0.0;
+          for(var index = 0; index < num_points; index++) {
+            point = config["zones"][section][letter]["points"][index];
+            total_x += point[0];
+            total_y += point[1];
+          }
+
+          student_valid = expanded_student !== undefined
+          student_zone = false
+          if(student_valid && "section" in expanded_student && "zone" in student) {
+            if(expanded_student["section"] == section && expanded_student["zone"] == letter) {
+              student_zone = true
+            }
+          }
+
+          total_x /= num_points;
+          total_y /= num_points;
+
+          message = letter + " (rows " + config["zones"][section][letter]["rows"][0] + "-" + + config["zones"][section][letter]["rows"][num_points - 1] + ")"
+          ctx.font = "bold 12pt sans-serif";
+
+          var width = ctx.measureText(message).width + 20.0;
+          var height = 24.0
+          var width_half = width / 2.0;
+          var height_half = height / 2.0;
+          ctx.fillStyle = "#333333";
+          ctx.fillRect(total_x - width_half, total_y - height_half, width, height);
+
+          var width = ctx.measureText(message).width + 18.0;
+          var height = 22.0
+          var width_half = width / 2.0;
+          var height_half = height / 2.0;
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(total_x - width_half, total_y - height_half, width, height);
+
+          colors = config["colors"]
+          color = colors[config["zones"][section][letter]["color"]]
+
+          if(student_valid) {
+            if(student_zone) {
+              ctx.fillStyle = config["colors"]["important"];
+              ctx.fillRect(total_x - width_half, total_y - height_half, width, height);
+              color = "#ffffff"
+            }
+            else {
+              color = BASE_ROW_COLOR;
+            }
+          }
+
+          ctx.fillStyle = color;
+          ctx.fillText(message, total_x, total_y);
+        }
+      }
+    }
+    catch(err) {
+      throw new Error("Invalid config");
+    }
+    return expanded_room
+
+  }
+
+  // Find diagram DOM object and configure HTML5 canvas
+  var diagram = document.getElementById("diagram");
+  var ctx = diagram.getContext("2d");
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+
+  var EXPANDED = expand_config(config);
+  var BASE_NUM_ROWS = 16
+  var BASE_ROW_HEIGHT = 10
+  var BASE_ROW_CENTER = document.getElementById("diagram").offsetWidth / 2.0;
+  var BASE_ROW_RADIUS = 150
+  var BASE_ROW_WIDTH = 6
+  var BASE_ROW_COLOR = "grey"
+  var BASE_POINT_RADIUS = 12
+
+  var DRAW_ROW_PINK_DOTS = false;
+  var DRAW_ROW_BLACK_DOTS = false;
+  var DRAW_ROW_CENTER_LABELS = false;
+
+  // Render title
+  ctx.font = "bold 20pt sans-serif";
+  ctx.fillText(config["title"], BASE_ROW_CENTER, 50);
+
+  // Render left note
+  student_valid = student !== undefined
+  if(student_valid) {
+    ctx.textAlign="start";
+    ctx.font = "bold 12pt sans-serif";
+    ctx.fillStyle = config["colors"]["important"];
+    if("zone" in student) {
+      ctx.fillText('Assigned Zone - ' + student["zone"], 50, 35);
+    }
+    if("row" in student) {
+      ctx.fillText('Assigned Row  - ' + student["row"], 50, 50);
+    }
+    if("seat" in student) {
+      ctx.fillText('Assigned Seat  - ' + student["seat"], 50, 65);
+    }
+    ctx.textAlign="center";
+  }
+
+  // Render right note
+  ctx.textAlign="end";
+  ctx.font = "bold 12pt sans-serif";
+  ctx.fillStyle = "#333333";
+  ctx.fillText(config["note"], 950, 35);
+  ctx.font = "bold 12pt sans-serif";
+  ctx.fillStyle = "#333333";
+  ctx.fillText("when facing the screen", 950, 55);
+  ctx.textAlign="center";
+
+  // Render front of room legend
+  ctx.font = "italic 10pt sans-serif";
+  ctx.fillText("Front of Room", BASE_ROW_CENTER, 120);
+
+  // Render back of room legend
+  ctx.font = "italic 10pt sans-serif";
+  ctx.fillText("Back of Room", BASE_ROW_CENTER, 470);
+
+  // Render arrows
+  render_arrow("left");
+  render_arrow("middle");
+  render_arrow("right");
+
+  // Render rows and points
+  for(var row = 1; row <= BASE_NUM_ROWS; row++) {
+    render_row(config, row);
+  }
+
+  // Render zone labels
+  render_zone_labels(config);
+
+  // // Render to image
+  // document.getElementById("image").src = diagram.toDataURL();
+
+  // // Print seats used
+  // var temp = [];
+  // for(var letter in used) {
+  //   temp.push(letter)
+  // }
+  // temp.sort();
+  // container = document.getElementById("seats")
+  // for(var index in temp) {
+  //   var letter = temp[index];
+  //   container.innerHTML += letter + " DARRIN 308 " + used[letter] + "\n";
+  // }
+</script>
+
+        <!-- ! COPY ME -->
+
+    </body>
+</html>

@@ -99,7 +99,13 @@ class SimpleGraderController extends AbstractController  {
             return;
         }
         if ((isset($_GET['view']) && $_GET['view'] === "all") || (count($sections) === 0 && $this->core->getUser()->accessAdmin())) {
-            $students = $this->core->getQueries()->getAllUsers($section_key);
+            //Checks to see if the Grader has access to all users in the course,
+            //Will only show the sections that they are graders for if not TA or Instructor
+            if($this->core->getUser()->getGroup() < 3) {
+                $students = $this->core->getQueries()->getAllUsers($section_key);
+            } else {
+                $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
         }
         $student_ids = array_map(function(User $user) { return $user->getId(); }, $students);
         $rows = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids, $section_key, $sort_key);
@@ -197,7 +203,7 @@ class SimpleGraderController extends AbstractController  {
                 if($username === $data_array[$j][0]) {
                     $temp_array = array();
                     $temp_array['username'] = $username;
-                    $index1 = 0; 
+                    $index1 = 0;
                     $index2 = 3; //3 is the starting index of the grades in the csv
                     $value_str = "value_";
                     $status_str = "status_";
@@ -225,7 +231,7 @@ class SimpleGraderController extends AbstractController  {
                                     $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                     $temp_array[$status_temp_str] = "OK";
                                 }
-                                
+
                             }
                         }
                         $index1++;
