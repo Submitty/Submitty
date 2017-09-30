@@ -15,7 +15,16 @@ class HWReport extends AbstractModel {
     }
     
     private function generateReport($gradeable, $ldu) {
-        // Make sure we have a good directory
+
+    	// don't generate reports for things that aren't electronic gradeabls with TA grading
+    	//if (//!($gradeable->getType() === GradeableType::ELECTRONIC_FILE ||
+	    //  &&
+	  //  !$gradeable->useTAGrading()
+	   //{
+	   //return;
+	//}
+
+    	// Make sure we have a good directory
         if (!is_dir(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports")))) {
             mkdir(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports")));
         }
