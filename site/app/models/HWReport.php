@@ -5,6 +5,7 @@ use app\models\LateDaysCalculation;
 use app\libraries\DatabaseUtils;
 use app\libraries\Core;
 use app\libraries\FileUtils; 
+use app\libraries\GradeableType;
 
 class HWReport extends AbstractModel {
     /*var Core */
@@ -17,12 +18,9 @@ class HWReport extends AbstractModel {
     private function generateReport($gradeable, $ldu) {
 
     	// don't generate reports for things that aren't electronic gradeabls with TA grading
-    	//if (//!($gradeable->getType() === GradeableType::ELECTRONIC_FILE ||
-	    //  &&
-	  //  !$gradeable->useTAGrading()
-	   //{
-	   //return;
-	//}
+        if (!($gradeable->getType() === GradeableType::ELECTRONIC_FILE and $gradeable->useTAGrading())) {
+          return;
+        }
 
     	// Make sure we have a good directory
         if (!is_dir(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports")))) {
