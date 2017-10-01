@@ -51,7 +51,10 @@ class ElectronicGraderController extends AbstractController {
     public function showStatus() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        $this->core->getOutput()->addBreadcrumb("Status {$gradeable->getName()}");
+
+        $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
+        $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
+        
         $peer = false;
         if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
             if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == 4)) {
@@ -182,7 +185,12 @@ class ElectronicGraderController extends AbstractController {
     public function showDetails() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        $this->core->getOutput()->addBreadcrumb("Details {$gradeable->getName()}");
+
+        $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
+        $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
+
+        $this->core->getOutput()->addBreadcrumb('Student Index');
+
         $peer = false;
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
@@ -488,6 +496,10 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
+        $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
+        $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
+        $indexUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable_id));
+        $this->core->getOutput()->addBreadcrumb('Student Index', $indexUrl);
 
         $graded = 0;
         $total = 0;
@@ -575,6 +587,21 @@ class ElectronicGraderController extends AbstractController {
         $individual = $_REQUEST['individual'];
 
         $anon_ids = $this->core->getQueries()->getAnonId(array($prev_id, $next_id));
+
+        $nameBreadCrumb = '';
+
+
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+            foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+                $team_member = $this->core->getQueries()->getUserById($team_member);
+                $nameBreadCrumb .= $team_member->getId() . ', ';
+            }
+            $nameBreadCrumb = rtrim($nameBreadCrumb, ', ');
+        } else {
+            $nameBreadCrumb .= $gradeable->getUser()->getId();
+        }
+
+        $this->core->getOutput()->addBreadcrumb($nameBreadCrumb);
 
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual);
