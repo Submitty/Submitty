@@ -218,7 +218,7 @@ HTML;
                     <td $class align="center" style="padding:5px; border:thin solid black">{$submission['remaining_days']}</td>
                 </tr>
 HTML;
-	            $message .= " &".$submission['message'];
+	            $message = $submission['message'];
 	        }
             }
         }
