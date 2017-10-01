@@ -90,7 +90,9 @@ class LateDaysCalculation extends AbstractModel {
 		$val = count($submissions);
 		
 		$mycount++;
-		//$mymessage.=$submissions[$i]['g_title'];
+                //$mymessage='';
+                $thing=json_encode($submissions[$i]);
+                $mymessage.=(string)$mycount.' '.$submissions[$i]['g_title'].' '.$thing.'<br><br>';
 		
 		//Sort latedays by since_timestamp before calculating late day usage.
                 usort($latedays, function($a, $b) { return $a['since_timestamp'] > $b['since_timestamp']; });
