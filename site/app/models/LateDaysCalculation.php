@@ -1,7 +1,7 @@
 <?php 
 
 namespace app\models;
-
+use app\libraries\FileUtils; 
 use app\libraries\Core;
 use \app\models\User;
 
@@ -73,6 +73,18 @@ class LateDaysCalculation extends AbstractModel {
 
             $submissions = $student['submissions'];
 
+            $student_user_id = $student['user_id'];
+            
+            $foo_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "late_day_details");
+            FileUtils::createDir($foo_dir);
+            $foo_filename = FileUtils::joinPaths($foo_dir,$student_user_id.".txt");
+            
+            $foo = json_encode($submissions, JSON_PRETTY_PRINT);
+            if (file_put_contents($foo_filename,$foo) === false) {
+              print "error saving foo";
+            }
+              
+              
             //Sort submissions by due date before calculating late day usage.
             usort($submissions, function($a, $b) { return $a['eg_submission_due_date'] > $b['eg_submission_due_date']; });
 
