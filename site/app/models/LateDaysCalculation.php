@@ -80,11 +80,19 @@ class LateDaysCalculation extends AbstractModel {
 
             $late_day_usage = array();
 
+	    $mycount=0;
+	    $mymessage="";
+
             //Calculate per gradeable late day usage. Assumes submissions are in sorted order.
             for ($i = 0; $i < count($submissions); $i++) {
                 $submission_latedays = array();
 
-                //Sort latedays by since_timestamp before calculating late day usage.
+		$val = count($submissions);
+		
+		$mycount++;
+		//$mymessage.=$submissions[$i]['g_title'];
+		
+		//Sort latedays by since_timestamp before calculating late day usage.
                 usort($latedays, function($a, $b) { return $a['since_timestamp'] > $b['since_timestamp']; });
 
                 //Find all late day updates before this submission due date.
@@ -143,7 +151,8 @@ class LateDaysCalculation extends AbstractModel {
                 $submission_latedays['remaining_days'] = $curr_remaining_late;
                 $submission_latedays['total_late_used'] = $total_late_used;
                 $submission_latedays['eg_submission_due_date'] = $submissions[$i]['eg_submission_due_date'];
-
+		$submission_latedays['message'] = $mymessage; //(string)$val; //.' '.(string)$mycount;
+		
                 $late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
             }
 
@@ -152,62 +161,6 @@ class LateDaysCalculation extends AbstractModel {
         }
 
         return $all_latedays;
-    }
-    
-     /**
-     * For the given user id generate the late day usage HTML table.
-     * @param $user_id String. The user id of the user whose table you want.
-     * @return string. The string representation of the HTML table.
-     */
-    public function generateTableForUser($user_id){
-        //table header row.
-        $table = <<<HTML
-                <h3>Overall Late Day Usage</h3><br/>
-                <table>
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
-                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
-                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Late days used</th>
-                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
-                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
-                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
-                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-HTML;
-
-        //If user exists in list build their table. If user does not exist empty table is returned.
-        if(array_key_exists($user_id, $this->students)) {
-
-            $student = $this->all_latedays[$user_id];
-
-            //For each submission build a table row.
-            foreach ($student as $submission) {
-                $table .= <<<HTML
-                <tr>
-                    <th style="padding:5px; border:thin solid black">{$submission['g_title']}</th>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['allowed_per_term']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['allowed_per_assignment']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['late_days_used']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['extensions']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['status']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['late_days_charged']}</td>
-                    <td align="center" style="padding:5px; border:thin solid black">{$submission['remaining_days']}</td>
-                </tr>
-HTML;
-            }
-        }
-
-        //Close HTML tags for table.
-        $table .= <<<HTML
-                </tbody>
-            </table>
-HTML;
-
-        return $table;
     }
     
      /**
@@ -225,15 +178,18 @@ HTML;
                             <th></th>
                             <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
                             <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
-                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Late days used</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
                             <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
                             <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
                             <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
+                            <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
                             <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
                         </tr>
                     </thead>
                     <tbody>
 HTML;
+
+	$message="";
 
         //If user exists in list build their table. If user does not exist empty table is returned.
         if(array_key_exists($user_id, $this->students)) {
@@ -256,18 +212,24 @@ HTML;
                     <td $class align="center" style="padding:5px; border:thin solid black">{$submission['extensions']}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$submission['status']}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$submission['late_days_charged']}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$submission['total_late_used']}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$submission['remaining_days']}</td>
                 </tr>
 HTML;
-                }
+	            $message .= " &".$submission['message'];
+	        }
             }
         }
+
+
 
         //Close HTML tags for table.
         $table .= <<<HTML
                 </tbody>
             </table>
 HTML;
+
+	$table.=$message;
 
         return $table;
     }
