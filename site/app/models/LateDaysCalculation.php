@@ -83,8 +83,15 @@ class LateDaysCalculation extends AbstractModel {
 	    $mycount=0;
 	    $mymessage="";
 
+            $last_g_id="";
+            
             //Calculate per gradeable late day usage. Assumes submissions are in sorted order.
             for ($i = 0; $i < count($submissions); $i++) {
+
+                $this_g_id=$submissions[$i]['g_id'];
+                if ($last_g_id == $this_g_id) { continue; }
+                $last_g_id = $this_g_id;
+                
                 $submission_latedays = array();
 
 		$val = count($submissions);
