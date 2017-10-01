@@ -10,7 +10,6 @@ class SimpleGraderController extends AbstractController  {
         if(!$this->core->getUser()->accessGrading()) {
             $this->core->getOutput()->showError("This account doesn't have access to grading");
         }
-        echo("SWITCH!");
         switch ($_REQUEST['action']) {
             case 'lab':
                 $this->grade('lab');
@@ -29,7 +28,6 @@ class SimpleGraderController extends AbstractController  {
                 break;
             case 'print_lab':
                 $this->printLab();
-                $this->grade('numeric');
                 break;
             default:
                 break;
@@ -37,18 +35,28 @@ class SimpleGraderController extends AbstractController  {
     }
 
     public function printLab(){
-        echo("MADE IT!");
-        $g_id = $section = $grade_by_reg_section = $sort_by = "";
+        $g_id = $section = $sort_by = "";
         if (!isset($_REQUEST['g_id'])) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable');
         }
         else{
             $g_id = $_REQUEST['g_id'];
         }
-   
+        if (isset($_REQUEST['sort'])) {
+          $sort_by = $_REQUEST['sort'];
+        }
+        if (!isset($_REQUEST['section'])) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable');
+        }
+        else{
+            $section = $_REQUEST['section'];
+        }
         $gradeable = $this->core->getQueries()->getGradeable($g_id);
-        var_dump($gradeable);
-        //printLab($g_id, $section, $grade_by_reg_section, $sort_by)
+        $students = $this->core->getQueries()->getUsersByRotatingSections(array($section));
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'displayPrintLab', $gradeable, $sort_by, $section, $students);
     }
 
     public function grade($action) {
@@ -256,4 +264,6 @@ class SimpleGraderController extends AbstractController  {
         $this->core->getOutput()->renderJson($response);
         return $response;
     }
+
+    
 }
