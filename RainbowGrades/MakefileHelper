@@ -73,10 +73,6 @@ compile:  remove_json_comments
 	mkdir -p individual_summary_html/
 	mkdir -p all_students_summary_html/
 
-
-
-
-
 clean:
 	rm process_grades.out
 

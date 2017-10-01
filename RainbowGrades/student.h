@@ -152,7 +152,7 @@ public:
   void setExamRoom(const std::string &s) { exam_room = s; }
   void setExamZone(const std::string &z, const std::string &r, const std::string &s) { exam_zone=z; exam_row=r; exam_seat=s; }
   void setExamTime(const std::string &s) { exam_time = s; }
-  void setExamZoneImage(const std::string &s) { exam_zone_image = s; std::cout << "SET ZONE IMAGE" << s << std::endl; }
+  void setExamZoneImage(const std::string &s) { exam_zone_image = s; }
 
   // per student notes
   void addWarning(const std::string &message) { early_warnings.push_back(message); }

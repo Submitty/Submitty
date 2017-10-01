@@ -45,6 +45,7 @@ public:
       r = "N/A";
       s = "N/A";
       count++;
+      return;
     }
     int random_seat = std::rand()%available_seats.size();
     std::vector<std::pair<std::string,std::string> >::iterator itr = available_seats.begin() + random_seat;
@@ -106,7 +107,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
       std::cout << "MISFORMATTED ZONE COUNTS" << std::endl; exit(1); }
     ss >> zi.image_url;
 
-    std::cout << "ZONE IMAGE " << zi.image_url << std::endl;
+    //std::cout << "ZONE IMAGE " << zi.image_url << std::endl;
     
     zi.count=0;
     zi.available_seats.clear();
