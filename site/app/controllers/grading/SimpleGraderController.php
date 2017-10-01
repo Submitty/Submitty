@@ -26,9 +26,37 @@ class SimpleGraderController extends AbstractController  {
             case 'upload_csv_numeric':
                 $this->UploadCSV('numeric');
                 break;
+            case 'print_lab':
+                $this->printLab();
+                break;
             default:
                 break;
         }
+    }
+
+    public function printLab(){
+        $g_id = $section = $sort_by = "";
+        if (!isset($_REQUEST['g_id'])) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable');
+        }
+        else{
+            $g_id = $_REQUEST['g_id'];
+        }
+        if (isset($_REQUEST['sort'])) {
+          $sort_by = $_REQUEST['sort'];
+        }
+        if (!isset($_REQUEST['section'])) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable');
+        }
+        else{
+            $section = $_REQUEST['section'];
+        }
+        $gradeable = $this->core->getQueries()->getGradeable($g_id);
+        $students = $this->core->getQueries()->getUsersByRotatingSections(array($section));
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'displayPrintLab', $gradeable, $sort_by, $section, $students);
     }
 
     public function grade($action) {
@@ -236,4 +264,6 @@ class SimpleGraderController extends AbstractController  {
         $this->core->getOutput()->renderJson($response);
         return $response;
     }
+
+    
 }
