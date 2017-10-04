@@ -73,18 +73,6 @@ class LateDaysCalculation extends AbstractModel {
 
             $submissions = $student['submissions'];
 
-            $student_user_id = $student['user_id'];
-            
-            $foo_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "late_day_details");
-            FileUtils::createDir($foo_dir);
-            $foo_filename = FileUtils::joinPaths($foo_dir,$student_user_id.".txt");
-            
-            $foo = json_encode($submissions, JSON_PRETTY_PRINT);
-            if (file_put_contents($foo_filename,$foo) === false) {
-              print "error saving foo";
-            }
-              
-              
             //Sort submissions by due date before calculating late day usage.
             usort($submissions, function($a, $b) { return $a['eg_submission_due_date'] > $b['eg_submission_due_date']; });
 
@@ -92,26 +80,10 @@ class LateDaysCalculation extends AbstractModel {
 
             $late_day_usage = array();
 
-	    $mycount=0;
-	    $mymessage="";
-
-            $last_g_id="";
-            
             //Calculate per gradeable late day usage. Assumes submissions are in sorted order.
             for ($i = 0; $i < count($submissions); $i++) {
 
-                $this_g_id=$submissions[$i]['g_id'];
-                if ($last_g_id == $this_g_id) { continue; }
-                $last_g_id = $this_g_id;
-                
                 $submission_latedays = array();
-
-		$val = count($submissions);
-		
-		$mycount++;
-                //$mymessage='';
-                $thing=json_encode($submissions[$i]);
-                $mymessage.=(string)$mycount.' '.$submissions[$i]['g_title'].' '.$thing.'<br><br>';
 		
 		//Sort latedays by since_timestamp before calculating late day usage.
                 usort($latedays, function($a, $b) { return $a['since_timestamp'] > $b['since_timestamp']; });
@@ -172,8 +144,6 @@ class LateDaysCalculation extends AbstractModel {
                 $submission_latedays['remaining_days'] = $curr_remaining_late;
                 $submission_latedays['total_late_used'] = $total_late_used;
                 $submission_latedays['eg_submission_due_date'] = $submissions[$i]['eg_submission_due_date'];
-		$submission_latedays['message'] = $mymessage; //(string)$val; //.' '.(string)$mycount;
-		
                 $late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
             }
 
@@ -210,8 +180,6 @@ class LateDaysCalculation extends AbstractModel {
                     <tbody>
 HTML;
 
-	$message="";
-
         //If user exists in list build their table. If user does not exist empty table is returned.
         if(array_key_exists($user_id, $this->students)) {
 
@@ -237,7 +205,6 @@ HTML;
                     <td $class align="center" style="padding:5px; border:thin solid black">{$submission['remaining_days']}</td>
                 </tr>
 HTML;
-	            $message = $submission['message'];
 	        }
             }
         }
@@ -249,8 +216,6 @@ HTML;
                 </tbody>
             </table>
 HTML;
-
-	$table.=$message;
 
         return $table;
     }
