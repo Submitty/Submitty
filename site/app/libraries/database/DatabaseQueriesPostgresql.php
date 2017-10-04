@@ -86,9 +86,8 @@ ORDER BY u.registration_section, u.user_id");
         $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(), $user->getEmail(),
                        Utils::convertBooleanToString($user->isUserUpdated()), Utils::convertBooleanToString($user->isInstructorUpdated()));
 
-        $this->submitty_db->query("
-INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email, user_updated, instructor_updated)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $array);
+        $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email, user_updated, instructor_updated)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $array);
     }
 
     public function insertCourseUser(User $user, $semester, $course) {
@@ -134,6 +133,18 @@ WHERE semester=? AND course=? AND user_id=?", $params);
     INSERT INTO grading_registration (user_id, sections_registration_id) VALUES(?, ?)", array($user_id, $section));
             }
         }
+    }
+
+    /*  Gets the group that the user is in for each class they are in
+     *  @param $user_id - user id to be searched for
+     *  @return array - containing all of the groups for each course sequantially
+    */
+    public function getGroupForUserInClass($user_id){
+        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ?", array($user_id));
+        $return = array();
+        foreach ($this->submitty_db->rows() as $row) {
+            $return[] = $row['user_group'];
+          } return $return;
     }
 
     public function getAllGradeables($user_id = null) {
@@ -1092,6 +1103,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
 UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?, gcd_grader_id=? WHERE gc_id=? AND gd_id=?", $params);
     }
 
+
     // END FIXME
 
     public function replaceGradeableComponentData($gd_id, GradeableComponent $component) {
@@ -1582,7 +1594,7 @@ ORDER BY gt.{$section_key}", $params);
         $this->submitty_db->query("
 SELECT semester, course
 FROM courses_users u
-WHERE u.user_id=?", array($user_id));
+WHERE u.user_id=? ORDER BY course", array($user_id));
        $return = array();
         foreach ($this->submitty_db->rows() as $row) {
           $course = new Course($this->core, $row);
@@ -1736,4 +1748,3 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 }
-

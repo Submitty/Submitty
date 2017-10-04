@@ -98,20 +98,77 @@ HTML;
                     <tbody>
 HTML;
 
+                    $userPermission = $this->core->getQueries()->getGroupForUserInClass($user->getId());
+                    $userPermissionLength = count($userPermission);
+                    $header = "";
+                    $pos = 0;
+                    $rankWithCourse = array();
+
+                    for($i = 0; $i < 4; $i++){
+                        $rankWithCourse[$i] = array();
+                    }
+
+                    
                     foreach($courses as $course){
-                        $display_text = $course->getSemester() . " " . $course->getTitle();
-                        if($course->getDisplayName() !== "")
-                        {
-                            $display_text .= " " . $course->getDisplayName();
+
+                        array_push($rankWithCourse[$userPermission[$pos]-1], $course);
+
+                        $pos++;
+
+                    }
+
+                    $pos = 0;
+
+                    for($i = 0; $i < 4; $i++){
+                        if(count($rankWithCourse[$i]) == 0){
+                            continue;
                         }
-                        $return .= <<<HTML
+
+                        switch ($i+1) {
+                                case 1:
+                                   
+                                        $header = "<h3>Instructor:</h3>";
+
+                                    break;
+                                case 2:
+                                        $header = "<h3>TA:</h3>";
+                                break;
+                                case 3:
+                                        $header = "<h3>Grader:</h3>";
+                                break;
+                                default:
+                                        $header = "<h3>Student:</h3>";
+                                    break;
+                        }
+                            
+                            $return .= <<<HTML
                         <tr>
-                            <td colspan="8">
-                                <a class="btn btn-primary btn-block" style="width:95%;white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $course->getTitle(), 'semester' => $course->getSemester()))}"> {$display_text}</a>
+                            <td colspan="8">     
+                                {$header}
                             </td>
                         </tr>
 HTML;
+
+                        for($q = 0; $q < count($rankWithCourse[$i]); $q++){
+                            $display_text = $rankWithCourse[$i][$q]->getSemester() . " " . $rankWithCourse[$i][$q]->getTitle();
+                            if($course->getDisplayName() !== "") {
+                                $display_text .= " " . $course->getDisplayName();
+                            }
+                        
+                        $return .= <<<HTML
+                        
+                        <tr>
+                            <td colspan="8">
+                                <a class="btn btn-primary btn-block" style="width:95%;white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
+                            </td>
+                        </tr>
+HTML;
+                        }
+
+                        $pos++;
                     }
+
+
                     $return .= <<<HTML
                     </tbody>
                 </table>
