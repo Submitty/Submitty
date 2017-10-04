@@ -29,11 +29,13 @@ class LateDaysCalculation extends AbstractModel {
         $students = array();
 
         $submissions = $this->core->getQueries()->getLateDayInformation($user_id);
-        //For each submission ensure that an entry exists for that user and append the submission to their list of
-        //submissions.
-        for ($i = 0; $i < count($submissions); $i++) {
-            $curr_student = $submissions[$i]['user_id'];
 
+	//For each submission ensure that an entry exists for that user and append the submission to their list of
+        //submissions.
+	$my_count = count($submissions);
+	for ($i = 0; $i < $my_count; $i++) {
+            $submission = $submissions[$i];
+	    $curr_student = $submission['user_id'];
             if (!isset($students[$curr_student])) {
                 $students[$curr_student] = array(
                     'user_id' => $curr_student,
@@ -42,21 +44,22 @@ class LateDaysCalculation extends AbstractModel {
                 );
             }
 
-            $students[$curr_student]['submissions'][] = $submissions[$i];
-            unset($submissions[$i]);
+            $students[$curr_student]['submissions'][] = $submission;
+            unset($submission);
         }
 
         $latedays = $this->core->getQueries()->getLateDayUpdates($user_id);
+	$my_count2 = count($latedays);
         //For each lateDayUpdate append the lateDayUpdate to the appropriate user.
-        for ($i = 0; $i < count($latedays); $i++) {
+        for ($i = 0; $i < $my_count2; $i++) {
             $curr_student = $latedays[$i]['user_id'];
             if (isset($students[$curr_student])) {
                 $students[$curr_student]['latedays'][] = $latedays[$i];
             }
             //Else student got a late day exception but never turned in any assignments.
-
             unset($latedays[$i]);
         }
+	//	var_dump($submissions);
         return $students;
     }
     
@@ -76,8 +79,9 @@ class LateDaysCalculation extends AbstractModel {
             //Sort submissions by due date before calculating late day usage.
             usort($submissions, function($a, $b) { return $a['eg_submission_due_date'] > $b['eg_submission_due_date']; });
 
-	    $message = json_encode($submissions, JSON_PRETTY_PRINT);
-	    $message = str_replace("\n", "<br>", $message);
+	    //$message = json_encode($submissions, JSON_PRETTY_PRINT);
+	    //$message = str_replace("\n", "<br>", $message);
+	    $message = "";
 
             $latedays = $student['latedays'];
 
@@ -194,7 +198,7 @@ HTML;
 
             //For each submission build a table row.
             foreach ($student as $submission) {
-                if ($submission['eg_submission_due_date'] <= $endDate) {
+                if (true) { // $submission['eg_submission_due_date'] <= $endDate) {
                     $class = "";
                     if($submission['g_title'] == $current_hw){
                         $class = "class='yellow-background'";
@@ -215,7 +219,14 @@ HTML;
     $message = $submission['message'];
 	        }
             }
+
+	    //var_dump($student);
+
         }
+
+
+
+
 
 
         //Close HTML tags for table.
