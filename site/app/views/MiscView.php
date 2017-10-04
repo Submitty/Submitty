@@ -34,6 +34,7 @@ HTML;
 	    editor{$number}.setOption("theme", "eclipse");
 HTML;
         
+        
             $return .= <<<HTML
         editor{$number}.setOption("mode", "{$type}");
 HTML;
