@@ -191,8 +191,8 @@ class submitty_student_auto_feed {
                 case ($section > 0):
                     $this->log_it("Row {$index} failed validation for student section ({$section}).  Row discarded.");
                     break;
-                //Loose email address check for format of "address@domain" or "address@[ipv4]"
-                case (preg_match('~^("[^"]+"|[^"^(^)^,^:^;^<^>^@^\[^\\^\]]+)@{1}[a-zA-Z0-9:\.\-\[\]]+$~', $row[COLUMN_EMAIL])):
+	            //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
+                case (preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $row[COLUMN_EMAIL])):
                     $this->log_it("Row {$index} failed validation for student email ({$row[COLUMN_EMAIL]}).  Row discarded.");
                 default:
                 	//Check for mapped (merged) course.
@@ -431,17 +431,20 @@ LOCK TABLE courses_users IN EXCLUSIVE MODE;
 SQL;
 
         //This portion ensures that UPDATE will only occur when a record already exists.
+        //CASE WHEN clause checks user/instructor_updated flags for permission to change
+        //user_preferred_firstname column.
         $sql['users']['update'] = <<<SQL
 UPDATE users
 SET
     user_firstname=upsert_users.user_firstname,
     user_lastname=upsert_users.user_lastname,
-    user_preferred_firstname=upsert_users.user_preferred_firstname,
+    user_preferred_firstname=
+    	CASE WHEN user_updated=FALSE AND instructor_updated=FALSE
+    	THEN upsert_users.user_preferred_firstname
+    	ELSE users.user_preferred_firstname END,
     user_email=upsert_users.user_email
 FROM upsert_users
 WHERE users.user_id=upsert_users.user_id
-AND users.user_updated=FALSE
-AND users.instructor_updated=FALSE
 SQL;
 
         $sql['courses_users']['update'] = <<<SQL
@@ -457,6 +460,7 @@ FROM upsert_courses_users
 WHERE courses_users.user_id=upsert_courses_users.user_id
 AND courses_users.course=upsert_courses_users.course
 AND courses_users.semester=upsert_courses_users.semester
+AND courses_users.user_group=4
 AND courses_users.manual_registration=FALSE
 SQL;
 

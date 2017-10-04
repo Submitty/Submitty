@@ -342,6 +342,19 @@ function closeAll() {
     });
 }
 
+// expand all outputs in Auto-Grading Testcases section
+function openAllAutoGrading() {
+    // show all divs whose id starts with testcase_
+    $("[id^='testcase_']").show();
+}
+
+// close all outputs in Auto-Grading Testcases section
+function closeAllAutoGrading() {
+    // hide all divs whose id starts with testcase_
+    $("[id^='testcase_']").hide();
+}
+
+
 function openDiv(num) {
     var elem = $('#div_viewer_' + num);
     if (elem.hasClass('open')) {
@@ -403,10 +416,13 @@ function downloadZip(grade_id, user_id) {
 }
 
 function downloadFile(html_file, url_file) {
-    url_file = decodeURIComponent(url_file);  
-    directory = "";
-    if (url_file.includes("submissions")) directory = "submissions";
-    else if (url_file.includes("results")) directory = "results";      
+    var directory = "";
+    if (url_file.includes("submissions")) {
+      directory = "submissions";
+    }
+    else if (url_file.includes("results")) {
+      directory = "results";
+    }
     window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': directory, 'file': html_file, 'path': url_file});
     return false;
 }

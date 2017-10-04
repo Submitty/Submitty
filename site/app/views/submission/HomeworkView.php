@@ -72,6 +72,7 @@ HTML;
         $current_version_number = $gradeable->getCurrentVersionNumber();
         $student_page = false;
         $num_components = count($gradeable->getComponents());
+        $time = " @ H:i";
         $return .= <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 HTML;
@@ -79,7 +80,10 @@ HTML;
         if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
             $return .= <<<HTML
 <div class="content">
-    <h2>New submission for: {$gradeable->getName()}</h2>
+    <div class="upperinfo">
+        <h2 class="upperinfo-left">New submission for: {$gradeable->getName()}</h2>
+        <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format("m/d/Y{$time}")}</h2>
+    </div>
 HTML;
             if ($this->core->getUser()->accessAdmin()) {
                 $students = $this->core->getQueries()->getAllUsers();
@@ -552,10 +556,10 @@ HTML;
                         }
                         // get the full filename for PDF popout
                         // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
-                        $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path;
+                        $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path."&ta_grading=false";
                         $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
                         $path_full = str_replace("_cover.pdf", ".pdf", $path);
-                        $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full;
+                        $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full."&ta_grading=false";
                         $count_array[$count] = FileUtils::joinPaths($timestamp, $filename_full);
                         $return .= <<<HTML
             <tr class="tr tr-vertically-centered">

@@ -69,7 +69,7 @@ def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
 
 
 
-def get_vcs_info(top_dir,semester,course,gradeable,userid):
+def get_vcs_info(top_dir,semester,course,gradeable,userid,teamid):
 
     form_json_file = os.path.join(top_dir,"courses",semester,course,"config","form","form_"+gradeable+".json")
 
@@ -82,16 +82,16 @@ def get_vcs_info(top_dir,semester,course,gradeable,userid):
     vcs_subdirectory = ""
     if is_vcs:
         vcs_subdirectory = form_json["subdirectory"]
-
+    vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}",gradeable)
     vcs_subdirectory = vcs_subdirectory.replace("{$user_id}",userid)
-
+    vcs_subdirectory = vcs_subdirectory.replace("{$team_id}",teamid)
     return (is_vcs,vcs_type,vcs_base_url,vcs_subdirectory)
 
 # copy the files & directories from source to target
 # it will create directories as needed
 # it's ok if the target directory or subdirectories already exist
 # it will overwrite files with the same name if they exist
-def copy_contents_into(source,target):
+def copy_contents_into(source,target,tmp_logs):
     if not os.path.isdir(target):
         grade_items_logging.log_message("ERROR: the target directory does not exist " + target)
         raise SystemExit("ERROR: the target directory does not exist '", target, "'")
@@ -100,7 +100,7 @@ def copy_contents_into(source,target):
             if os.path.isdir(os.path.join(source,item)):
                 if os.path.isdir(os.path.join(target,item)):
                     # recurse
-                    copy_contents_into(os.path.join(source,item),os.path.join(target,item))
+                    copy_contents_into(os.path.join(source,item),os.path.join(target,item),tmp_logs)
                 elif os.path.isfile(os.path.join(target,item)):
                     grade_items_logging.log_message("ERROR: the target subpath is a file not a directory '" + os.path.join(target,item) + "'")
                     raise SystemExit("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
@@ -108,7 +108,15 @@ def copy_contents_into(source,target):
                     # copy entire subtree
                     shutil.copytree(os.path.join(source,item),os.path.join(target,item))
             else:
-                shutil.copy(os.path.join(source,item),target)
+                if os.path.exists(os.path.join(target,item)):
+                    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+                        print ("\nWARNING: REMOVING DESTINATION FILE" , os.path.join(target,item),
+                               " THEN OVERWRITING: ", os.path.join(source,item), "\n", file=f)
+                    os.remove(os.path.join(target,item))
+                try:
+                    shutil.copy(os.path.join(source,item),target)
+                except:
+                    raise SystemExit("ERROR COPYING FILE: " +  os.path.join(source,item) + " -> " + os.path.join(target,item))
 
 
 # copy files that match one of the patterns from the source directory
@@ -164,7 +172,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
     print ("pid",my_pid,"GRADE THIS", submission_path)
 
-    is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"])
+    is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
     is_batch_job = next_directory==BATCH_QUEUE
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
@@ -241,7 +249,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         # determine which version we need to checkout
         what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
         what_version = str(what_version.decode('utf-8')).rstrip()
-        print ("what version",what_version)
         if what_version == "":
             # oops, pressed the grade button before a valid commit
             shutil.rmtree(checkout_path,ignore_errors=True)
@@ -271,7 +278,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         pattern_copy("checkout_to_compilation",patterns_submission_to_compilation,checkout_subdir_path,tmp_compilation,tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
-    copy_contents_into(provided_code_path,tmp_compilation)
+    copy_contents_into(provided_code_path,tmp_compilation,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
@@ -335,7 +342,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
         
     # copy input files to tmp_work directory
-    copy_contents_into(test_input_path,tmp_work)
+    copy_contents_into(test_input_path,tmp_work,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
@@ -359,9 +366,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                           submission_string],
                                           stdout=logfile)
 
-
-
-
     if runner_success == 0:
         print ("pid",my_pid,"RUNNER OK")
     else:
@@ -384,15 +388,15 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         pattern_copy("checkout_to_validation",patterns_submission_to_validation,checkout_subdir_path,tmp_work,tmp_logs)
     patterns_compilation_to_validation = complete_config_obj["autograding"]["compilation_to_validation"]
     pattern_copy("compilation_to_validation",patterns_compilation_to_validation,tmp_compilation,tmp_work,tmp_logs)
-    
+
     # remove the compilation directory
     shutil.rmtree(tmp_compilation)
 
     # copy output files to tmp_work directory
-    copy_contents_into(test_output_path,tmp_work)
+    copy_contents_into(test_output_path,tmp_work,tmp_logs)
 
     # copy any instructor custom validation code into the tmp work directory
-    copy_contents_into(custom_validation_code_path,tmp_work)
+    copy_contents_into(custom_validation_code_path,tmp_work,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
@@ -461,9 +465,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         shutil.move(os.path.join(tmp,"OLD_RESULTS"),
                     os.path.join(results_path,"OLD"))
 
-    shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
-    shutil.copy(os.path.join(tmp_work,"results.json"),results_path)
-    shutil.copy(os.path.join(tmp_work,"grade.txt"),results_path)
     os.makedirs(os.path.join(results_path,"details"))
 
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
@@ -478,6 +479,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         
     grading_finished = dateutils.get_current_time()
 
+    shutil.copy(os.path.join(tmp_work,"results.json"),results_path)
+    shutil.copy(os.path.join(tmp_work,"grade.txt"),results_path)
+
     # -------------------------------------------------------------
     # create/append to the results history
 
@@ -491,9 +495,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     grading_began_longstring = dateutils.write_submitty_date(grading_began)
     grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
 
-
     gradingtime = int((grading_finished-grading_began).total_seconds())
-
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,
@@ -524,14 +526,17 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",gradingtime,grade_result)
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-        f.write("finished")
-            
-            
+        f.write("FINISHED GRADING!")
+
+    # save the logs!
+    shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
+
+
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
     shutil.rmtree(tmp)
 
-    
+
 # ==================================================================================
 # ==================================================================================
 if __name__ == "__main__":

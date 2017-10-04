@@ -270,7 +270,7 @@ HTML;
                         You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
                         <ul style="list-style-position: inside;">
                             <li>gradeable_id</li>
-                            <li>user_id OR repo_id, do not use both</li>
+                            <li>user_id OR team_id OR repo_id (only use one)</li>
                         </ul>
                         ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
                         <input style='width: 83%' type='text' name='subdirectory' value="" placeholder="(Optional)"/>
@@ -585,6 +585,13 @@ HTML;
 
         $peer_checked = $question->getIsPeer() ? ' checked="checked"' : "";
         $pdf_page = $question->getPage();
+        $pdf_page_display = 'style="display:none"';
+        if ($pdf_page >= 0 && $admin_gradeable->getPdfPage()===true) {
+            $pdf_page_display = "";
+        }
+        $html_output .= <<<HTML
+            <div id="pdf_page_{$num}" class="pdf_page_input" {$pdf_page_display}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{$num}" value="{$pdf_page}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
+HTML;
         /*
         $html_output .= <<<HTML
                 <div id="peer_checkbox_{$num}" class="peer_input" {$display_peer_checkboxes}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{$num}" value="on" class="peer_component" {$peer_checked} /></div>
@@ -2495,19 +2502,20 @@ $('#gradeable-form').on('submit', function(e){
                     return false;
                 }
                 // check that path is made up of valid variables
-                var allowed_variables = ["\$gradeable_id", "\$user_id", "\$repo_id"];
-                var used_user_id = false;
+                var allowed_variables = ["\$gradeable_id", "\$user_id", "\$team_id", "\$repo_id"];
+                var used_id = false;
                 for (x = 1; x < subdirectory_parts.length; x++) {
                     subdirectory_part = subdirectory_parts[x].substring(0, subdirectory_parts[x].lastIndexOf("}"));
                     if (allowed_variables.indexOf(subdirectory_part) === -1) {
                         alert("For the VCS path, '" + subdirectory_part + "' is not a valid variable name.")
                         return false;
                     }
-                    if (subdirectory_part === "\$user_id") {
-                        used_user_id = true;
+                    if (!used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id")))  {
+                        used_id = true;
+                        continue;
                     }
-                    if (used_user_id && subdirectory_part === "\$repo_id") {
-                        alert("You cannot use both \$user_id and \$repo_id");
+                    if (used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
+                        alert("You can only use one of \$user_id, \$team_id and \$repo_id in VCS path");
                         return false;
                     }
                 }
@@ -2581,7 +2589,7 @@ $('#gradeable-form').on('submit', function(e){
             var exists = true;
             var error = false;
             var error_message = ``;
-            while(exists){
+            while(exists){ //goes through questions
                 if($("#grade-"+index).length) {                   
                     var type = 0;
                     if ($('input[name=grade_by-'+index+']:radio:checked').val() === 'count_up') {
@@ -2594,7 +2602,7 @@ $('#gradeable-form').on('submit', function(e){
                     var temp_num = -1;
                     var exists2 = ($('#mark_id-'+index+'-0').length) ? true : false;
                     var index2 = 0;
-                    while (exists2) {
+                    while (exists2) { //goes through marks
                         temp_num = parseFloat($('#mark_id-'+index+'-'+index2).find('input[name=mark_points_'+index+'_'+index2+']').val());
                         if (type === 1) {
                             if (temp_num > 0) {
@@ -2609,7 +2617,8 @@ $('#gradeable-form').on('submit', function(e){
                         exists2 = ($('#mark_id-'+index+'-'+index2).length) ? true : false;
                     }
 
-                    if (temp_points < points) {
+                    //fun fact between caution and warning: http://www.stevensstrategic.com/technical-writing-the-difference-between-warnings-and-cautions/
+                    if (temp_points < points && index2 > 1) { //display caution message if points are not enough and more than 1 mark
                         if (error === false) {
                             error_message = error_message + `Caution! \n`;
                         } else {

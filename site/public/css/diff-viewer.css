@@ -30,6 +30,21 @@
 
 }
 
+.upperinfo {
+    clear: both;
+    margin-bottom: 40px;
+}
+
+.upperinfo-left {
+    float: left;
+    margin-bottom: 0px !important;
+}
+
+.upperinfo-right {
+    float: right;
+    margin-bottom: 0px !important;
+}
+
 .highlight-hover {
     background-color: #ddf !important;
 }
@@ -40,8 +55,10 @@
 
 .line_number {
     color: gray;
-    min-width: 20px;
     border-right: 1px solid lightgrey;
+    float: left;
+    text-align: right;
+    width: auto;
 }
 
 .line_number, .line_code {
@@ -51,7 +68,7 @@
     font-family: 'Inconsolata', monospace !important;
     font-size: 16px;
     line-height: 20px !important;
-    padding: 0 0 0 5px;
+    padding: 0 5px 0 5px;
 }
 
 .line_code_inner {

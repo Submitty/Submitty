@@ -593,9 +593,13 @@ class SubmissionController extends AbstractController {
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
      *
-     * @return boolean
+     * @return array
      */
     private function ajaxUploadSubmission() {
+        if (empty($_POST)) {
+            $max_size = ini_get('post_max_size');
+            return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
+        }
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
@@ -910,7 +914,8 @@ class SubmissionController extends AbstractController {
                     return $this->uploadResult("repository id input cannot be blank.", false);
                 }
                 $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
-                $vcs_path = str_replace("{\$user_id}",$user_id,$vcs_path);
+                $vcs_path = str_replace("{\$user_id}",$who_id,$vcs_path);
+                $vcs_path = str_replace("{\$team_id}",$who_id,$vcs_path);
                 $vcs_path = str_replace("{\$repo_id}",$repo_id,$vcs_path);
                 $vcs_full_path = $vcs_base_url.$vcs_path;
             }
