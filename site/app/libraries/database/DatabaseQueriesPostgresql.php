@@ -632,11 +632,11 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         return $this->course_db->rows();
     }
 
-    public function getUsersByRegistrationSections($sections) {
+    public function getUsersByRegistrationSections($sections, $orderBy="registration_section") {
         $return = array();
         if (count($sections) > 0) {
             $query = implode(",", array_fill(0, count($sections), "?"));
-            $this->course_db->query("SELECT * FROM users WHERE registration_section IN ({$query}) ORDER BY registration_section", $sections);
+            $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN ({$query}) ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
             }
@@ -845,7 +845,8 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
     }
 
     public function getRotatingSectionsForGradeableAndUser($g_id, $user) {
-        $this->course_db->query("SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
+        $this->course_db->query(
+          "SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
         $return = array();
         foreach ($this->course_db->rows() as $row) {
             $return[] = $row['sections_rotating_id'];
@@ -853,11 +854,11 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
         return $return;
     }
 
-    public function getUsersByRotatingSections($sections) {
+    public function getUsersByRotatingSections($sections, $orderBy="rotating_section") {
         $return = array();
         if (count($sections) > 0) {
             $query = implode(",", array_fill(0, count($sections), "?"));
-            $this->course_db->query("SELECT * FROM users WHERE rotating_section IN ({$query}) ORDER BY rotating_section", $sections);
+            $this->course_db->query("SELECT * FROM users AS u WHERE rotating_section IN ({$query}) ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
             }
