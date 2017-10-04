@@ -88,6 +88,19 @@ class HWReport extends AbstractModel {
 //	    $student_output_text_main .= "DEBUGGING LATE DAYS..  THE INFORMATION BELOW MAY BE INCORRECT - PLEASE CHECK BACK LATER".$nl;
     	    $student_output_text_main .= "DEBUGGING LATE DAYS..   THE INFO BELOW MAY BE INCORRECT -- PLEASE CHECK BACK LATER".$nl;
 
+$student_output_text_main .= " user_id                          ".$late_days['user_id'].$nl;
+$student_output_text_main .= " assignment title                 ".$late_days['g_title'].$nl;
+$student_output_text_main .= " allowed per term as of due date  ".$late_days['allowed_per_term'].$nl;
+$student_output_text_main .= " max allowed for this assignment  ".$late_days['allowed_per_assignment'].$nl;
+$student_output_text_main .= " days submitted after deadline    ".$late_days['late_days_used'].$nl;
+$student_output_text_main .= " extensions                       ".$late_days['extensions'].$nl;
+$student_output_text_main .= " status                           ".$late_days['status'].$nl;
+$student_output_text_main .= " late days charged                ".$late_days['late_days_charged'].$nl;
+$student_output_text_main .= " late days remaining              ".$late_days['remaining_days'].$nl;
+$student_output_text_main .= " total late days used             ".$late_days['total_late_used'].$nl;
+$student_output_text_main .= " assigment due date         	".$late_days['eg_submission_due_date'].$nl;
+
+
             if($late_days['late_days_used'] > 0) {
                 $student_output_text_main .= "This submission was submitted ".$late_days['late_days_used']." day(s) after the due date.".$nl;
             }

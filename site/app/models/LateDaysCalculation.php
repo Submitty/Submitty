@@ -76,6 +76,9 @@ class LateDaysCalculation extends AbstractModel {
             //Sort submissions by due date before calculating late day usage.
             usort($submissions, function($a, $b) { return $a['eg_submission_due_date'] > $b['eg_submission_due_date']; });
 
+	    $message = json_encode($submissions, JSON_PRETTY_PRINT);
+	    $message = str_replace("\n", "<br>", $message);
+
             $latedays = $student['latedays'];
 
             $late_day_usage = array();
@@ -90,7 +93,8 @@ class LateDaysCalculation extends AbstractModel {
 
                 //Find all late day updates before this submission due date.
                 foreach($latedays as $ld){
-                    if($ld['since_timestamp'] < $submissions[$i]['eg_submission_due_date']){
+                    if($ld['since_timestamp'] <= $submissions[$i]['eg_submission_due_date'] &&
+		       $curr_allowed_term < $ld['allowed_late_days']){
                         $curr_allowed_term = $ld['allowed_late_days'];
                     }
                 }
@@ -144,7 +148,8 @@ class LateDaysCalculation extends AbstractModel {
                 $submission_latedays['remaining_days'] = $curr_remaining_late;
                 $submission_latedays['total_late_used'] = $total_late_used;
                 $submission_latedays['eg_submission_due_date'] = $submissions[$i]['eg_submission_due_date'];
-                $late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
+		$submission_latedays['message'] = $message;
+		$late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
             }
 
             $all_latedays[$student['user_id']] = $late_day_usage;
@@ -180,6 +185,8 @@ class LateDaysCalculation extends AbstractModel {
                     <tbody>
 HTML;
 
+       $message="";
+
         //If user exists in list build their table. If user does not exist empty table is returned.
         if(array_key_exists($user_id, $this->students)) {
 
@@ -205,10 +212,10 @@ HTML;
                     <td $class align="center" style="padding:5px; border:thin solid black">{$submission['remaining_days']}</td>
                 </tr>
 HTML;
+    $message = $submission['message'];
 	        }
             }
         }
-
 
 
         //Close HTML tags for table.
@@ -216,7 +223,7 @@ HTML;
                 </tbody>
             </table>
 HTML;
-
+$table.=$message;
         return $table;
     }
     
