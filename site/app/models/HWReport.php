@@ -5,6 +5,7 @@ use app\models\LateDaysCalculation;
 use app\libraries\DatabaseUtils;
 use app\libraries\Core;
 use app\libraries\FileUtils; 
+use app\libraries\GradeableType;
 
 class HWReport extends AbstractModel {
     /*var Core */
@@ -15,7 +16,13 @@ class HWReport extends AbstractModel {
     }
     
     private function generateReport($gradeable, $ldu) {
-        // Make sure we have a good directory
+
+    	// don't generate reports for things that aren't electronic gradeabls with TA grading
+        if (!($gradeable->getType() === GradeableType::ELECTRONIC_FILE and $gradeable->useTAGrading())) {
+          return;
+        }
+
+    	// Make sure we have a good directory
         if (!is_dir(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports")))) {
             mkdir(implode(DIRECTORY_SEPARATOR, array($this->core->getConfig()->getCoursePath(), "reports")));
         }
@@ -77,27 +84,28 @@ class HWReport extends AbstractModel {
             // TODO: add functionality to choose who regrade requests will be sent to
             $student_output_text_main .= $nl;
             $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$name_and_emails.$nl;
-//            if($gradeable->getDaysLate() > 0) {
-//                $student_output_text_main .= "This submission was submitted ".$gradeable->getDaysLate()." day(s) after the due date.".$nl;
-//            }
 
 //	    $student_output_text_main .= "DEBUGGING LATE DAYS..  THE INFORMATION BELOW MAY BE INCORRECT - PLEASE CHECK BACK LATER".$nl;
-    	    $student_output_text_main .= "DEBUGGING LATE DAYS..   PLEASE CHECK BACK LATER".$nl;
+    	    $student_output_text_main .= "DEBUGGING LATE DAYS..   THE INFO BELOW MAY BE INCORRECT -- PLEASE CHECK BACK LATER".$nl;
 
+            if($late_days['late_days_used'] > 0) {
+                $student_output_text_main .= "This submission was submitted ".$late_days['late_days_used']." day(s) after the due date.".$nl;
+            }
+            
             if($late_days['extensions'] > 0) {
-//                $student_output_text_main .= "You have a ".$late_days['extensions']." day extension on this assignment.".$nl;
+                $student_output_text_main .= "You have a ".$late_days['extensions']." day extension on this assignment.".$nl;
             }
             if(substr($late_days['status'], 0, 3) == 'Bad') {
                 $student_output_text_main .= "NOTE: THIS ASSIGNMENT WILL BE RECORDED AS ZERO".$nl;
                 $student_output_text_main .= "  Contact your TA or instructor if you believe this is an error".$nl.$nl;
             }
-//            if($late_days['late_days_charged'] > 0) {
-//                $student_output_text_main .= "Number of late days used for this homework: " . $late_days['late_days_charged'] . $nl;
-//            }
-//            $student_output_text_main .= "Total late days used this semester: " . $late_days['total_late_used'] . " (up to and including this assignment)" . $nl;
-//            $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
+            if($late_days['late_days_charged'] > 0) {
+                $student_output_text_main .= "Number of late days used for this homework: " . $late_days['late_days_charged'] . $nl;
+            }
+            $student_output_text_main .= "Total late days used this semester: " . $late_days['total_late_used'] . " (up to and including this assignment)" . $nl;
+            $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
 
-//	    $student_output_text_main .= "END DEBUGGING LATE DAYS".$nl;
+	    $student_output_text_main .= "END DEBUGGING LATE DAYS".$nl;
 
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
 
