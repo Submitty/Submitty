@@ -34,11 +34,10 @@ HTML;
 	    editor{$number}.setOption("theme", "eclipse");
 HTML;
         
-        if ($mime_type != "text/plain") {
             $return .= <<<HTML
         editor{$number}.setOption("mode", "{$type}");
 HTML;
-        }
+        
         
         $return .= <<<HTML
 	    $("#myTab").find("a").click(function (e) {
