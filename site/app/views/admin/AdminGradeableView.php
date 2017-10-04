@@ -481,13 +481,16 @@ HTML;
             foreach ($marks as $mark) {
                 if($first === true) {
                     $first = false;
-                    $hidden = "display: none;";
+                    $hidden = "background-color:#EBEBE4";
+                    $read_only = "readonly";
+                    //$hidden = "display: none;";
                 }
                 else {
                     $hidden = "";
+                    $read_only = "";
                 }
                 $html_output .= <<<HTML
-                    <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
+                    <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}" {$read_only}>
                     <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                     <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 80.5%;">{$mark->getNote()}</textarea> 
                     <!--
