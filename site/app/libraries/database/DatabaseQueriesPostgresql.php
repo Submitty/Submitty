@@ -616,7 +616,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                         ON
                           egv.active_version = egd.g_version
                           AND egv.g_id = egd.g_id
-                          AND egv.user_id = egv.user_id
+                          AND egv.user_id = egd.user_id
                         GROUP BY  egv.g_id,egv.user_id, active_version, g_version, submission_time
                         --End Details--
                     ) as details
