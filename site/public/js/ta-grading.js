@@ -29,8 +29,8 @@ $(document).ready(function(){
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-    $('#header').css({'position':'fixed', 'z-index':'1'});
-    $('#footer').css({'position':'fixed', 'z-index':'1'});
+    $('#header').css({'position':'fixed', 'z-index':'-1'});
+    $('#footer').css({'position':'fixed', 'z-index':'-1'});
 
     calculatePercentageTotal();
     var progressbar = $(".progressbar"),
