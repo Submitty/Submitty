@@ -59,7 +59,6 @@ class LateDaysCalculation extends AbstractModel {
             //Else student got a late day exception but never turned in any assignments.
             unset($latedays[$i]);
         }
-	//	var_dump($submissions);
         return $students;
     }
     
@@ -78,10 +77,6 @@ class LateDaysCalculation extends AbstractModel {
 
             //Sort submissions by due date before calculating late day usage.
             usort($submissions, function($a, $b) { return $a['eg_submission_due_date'] > $b['eg_submission_due_date']; });
-
-	    //$message = json_encode($submissions, JSON_PRETTY_PRINT);
-	    //$message = str_replace("\n", "<br>", $message);
-	    $message = "";
 
             $latedays = $student['latedays'];
 
@@ -152,7 +147,6 @@ class LateDaysCalculation extends AbstractModel {
                 $submission_latedays['remaining_days'] = $curr_remaining_late;
                 $submission_latedays['total_late_used'] = $total_late_used;
                 $submission_latedays['eg_submission_due_date'] = $submissions[$i]['eg_submission_due_date'];
-		$submission_latedays['message'] = $message;
 		$late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
             }
 
@@ -188,9 +182,6 @@ class LateDaysCalculation extends AbstractModel {
                     </thead>
                     <tbody>
 HTML;
-
-       $message="";
-
         //If user exists in list build their table. If user does not exist empty table is returned.
         if(array_key_exists($user_id, $this->students)) {
 
@@ -198,7 +189,6 @@ HTML;
 
             //For each submission build a table row.
             foreach ($student as $submission) {
-                if (true) { // $submission['eg_submission_due_date'] <= $endDate) {
                     $class = "";
                     if($submission['g_title'] == $current_hw){
                         $class = "class='yellow-background'";
@@ -216,25 +206,14 @@ HTML;
                     <td $class align="center" style="padding:5px; border:thin solid black">{$submission['remaining_days']}</td>
                 </tr>
 HTML;
-    $message = $submission['message'];
-	        }
             }
-
-	    //var_dump($student);
-
         }
-
-
-
-
-
 
         //Close HTML tags for table.
         $table .= <<<HTML
                 </tbody>
             </table>
 HTML;
-$table.=$message;
         return $table;
     }
     

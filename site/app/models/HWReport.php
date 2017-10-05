@@ -17,7 +17,7 @@ class HWReport extends AbstractModel {
     
     private function generateReport($gradeable, $ldu) {
 
-    	// don't generate reports for things that aren't electronic gradeabls with TA grading
+    	// don't generate reports for things that aren't electronic gradeables with TA grading
         if (!($gradeable->getType() === GradeableType::ELECTRONIC_FILE and $gradeable->useTAGrading())) {
           return;
         }
