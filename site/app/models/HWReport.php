@@ -33,9 +33,15 @@ class HWReport extends AbstractModel {
         $rubric_total = 0;
         $ta_max_score = 0;
         // Gather student info, set output filename, reset output
-        $student_output_text_main = "";
-        $student_output_text = "";
+
         $student_final_output = "";
+	$student_output_total = "";
+	$student_output_header = "";
+	$student_output_auto = "";
+	$student_output_ta_header = "";
+	$student_output_ta = "";
+	$student_output_separator = "----------------------------------------------------------------------------------------------" . $nl;
+
         $student_grade = 0;
         $grade_comment = "";
         
@@ -45,8 +51,6 @@ class HWReport extends AbstractModel {
         
         // Only generate full report when the TA has graded the work, may want to change
         if($gradeable->beenTAgraded()) {
-            $student_output_text_main .= strtoupper($gradeable->getName())." GRADE".$nl;
-            $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             $names = array();
             $name_and_emails = array();
             $peer_component_count = 0;
@@ -77,50 +81,35 @@ class HWReport extends AbstractModel {
             $name_and_emails = array_unique($name_and_emails);
             $name_and_emails = implode(", ", $name_and_emails);
 
-            $student_output_text_main .= "Graded by : " . $names;
+            $student_output_header .= "Graded by : " . $names;
 
             // Calculate late days for this gradeable
             $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $g_id);
             // TODO: add functionality to choose who regrade requests will be sent to
-            $student_output_text_main .= $nl;
-            $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: ".$name_and_emails.$nl;
-
-//	    $student_output_text_main .= "DEBUGGING LATE DAYS..  THE INFORMATION BELOW MAY BE INCORRECT - PLEASE CHECK BACK LATER".$nl;
-    	    $student_output_text_main .= "DEBUGGING LATE DAYS..   THE INFO BELOW MAY BE INCORRECT -- PLEASE CHECK BACK LATER".$nl;
-
-$student_output_text_main .= " user_id                          ".$late_days['user_id'].$nl;
-$student_output_text_main .= " assignment title                 ".$late_days['g_title'].$nl;
-$student_output_text_main .= " allowed per term as of due date  ".$late_days['allowed_per_term'].$nl;
-$student_output_text_main .= " max allowed for this assignment  ".$late_days['allowed_per_assignment'].$nl;
-$student_output_text_main .= " days submitted after deadline    ".$late_days['late_days_used'].$nl;
-$student_output_text_main .= " extensions                       ".$late_days['extensions'].$nl;
-$student_output_text_main .= " status                           ".$late_days['status'].$nl;
-$student_output_text_main .= " late days charged                ".$late_days['late_days_charged'].$nl;
-$student_output_text_main .= " late days remaining              ".$late_days['remaining_days'].$nl;
-$student_output_text_main .= " total late days used             ".$late_days['total_late_used'].$nl;
-$student_output_text_main .= " assigment due date         	".$late_days['eg_submission_due_date'].$nl;
-
-
-            if($late_days['late_days_used'] > 0) {
-                $student_output_text_main .= "This submission was submitted ".$late_days['late_days_used']." day(s) after the due date.".$nl;
+            $student_output_header .= $nl;
+            $student_output_header .= "Any regrade requests are due within 7 days of posting to: ".$name_and_emails.$nl;
+            $student_output_header .= $nl.$student_output_separator;
+            $student_output_header .= "Submission Deadline and Late Day Information".$nl;
+            $student_output_header .= "  Total late days available as of this assignment's due date: ".$late_days['allowed_per_term'].$nl;
+            $prev_late_days_used = $late_days['total_late_used']-$late_days['late_days_charged'];
+            $student_output_header .= "  Late days used on previous assignments: ".$prev_late_days_used.$nl;
+            $student_output_header .= "  Maximum late days allowed on this assignment: ".$late_days['allowed_per_assignment'].$nl;
+            if ($late_days['late_days_used'] > 0) {
+              $student_output_header .= "  Assignment was submitted ".$late_days['late_days_used']." day(s) after the due date.".$nl;
             }
-            
-            if($late_days['extensions'] > 0) {
-                $student_output_text_main .= "You have a ".$late_days['extensions']." day extension on this assignment.".$nl;
+            if ($late_days['extensions'] > 0) {
+              $student_output_header .= "  You have a ".$late_days['extensions']." day extension on this assignment.".$nl;
             }
+            $student_output_header .= "  Submission Status: ".$late_days['status'].$nl;
+            if ($late_days['late_days_used'] > 0 || $late_days['late_days_charged'] > 0) {
+              $student_output_header .= "  Number of late days charged for this homework: " . $late_days['late_days_charged'] . $nl;
+            }
+            $student_output_header .= "  Total late days used this semester: " . $late_days['total_late_used'] . " (up to and including this assignment)" . $nl;
+            $student_output_header .= "  Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this assignment)" . $nl;
             if(substr($late_days['status'], 0, 3) == 'Bad') {
-                $student_output_text_main .= "NOTE: THIS ASSIGNMENT WILL BE RECORDED AS ZERO".$nl;
-                $student_output_text_main .= "  Contact your TA or instructor if you believe this is an error".$nl.$nl;
+              $student_output_header .= $nl."NOTE: DUE TO LATE SUBMISSION, THIS ASSIGNMENT WILL BE RECORDED AS ZERO".$nl;
+              $student_output_header .= "  Contact your TA or instructor if you believe this is an error".$nl.$nl;
             }
-            if($late_days['late_days_charged'] > 0) {
-                $student_output_text_main .= "Number of late days used for this homework: " . $late_days['late_days_charged'] . $nl;
-            }
-            $student_output_text_main .= "Total late days used this semester: " . $late_days['total_late_used'] . " (up to and including this assignment)" . $nl;
-            $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
-
-	    $student_output_text_main .= "END DEBUGGING LATE DAYS".$nl;
-
-            $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
 
             if($gradeable->validateVersions()) {
                 $active_version = $gradeable->getActiveVersion();
@@ -128,15 +117,15 @@ $student_output_text_main .= " assigment due date         	".$late_days['eg_subm
                 $auto_grading_awarded = 0;
                 $auto_grading_max_score = 0;
                 if(!file_exists($submit_file)) {
-                    $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
+                    $student_output_auto .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
                 }
                 else {
                     $auto_grading_awarded = $gradeable->getGradedAutograderPoints();
                     $auto_grading_max_score = $gradeable->getTotalAutograderNonExtraCreditPoints();
-                    $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
+                    $student_output_auto .= "AUTO-GRADING SUBTOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
                     $gradefilecontents = file_get_contents($submit_file);
-                    $student_output_text .= "submission version #" . $active_version .$nl;
-                    $student_output_text .= $nl.$gradefilecontents.$nl;
+                    $student_output_auto .= "submission version #" . $active_version .$nl;
+                    $student_output_auto .= $nl.$gradefilecontents.$nl;
                 }
 
                 foreach($gradeable->getComponents() as $component) {
@@ -146,7 +135,7 @@ $student_output_text_main .= " assigment due date         	".$late_days['eg_subm
                     //     $grading_units = $gradeable->getPeerGradeSet() * $peer_component_count;
                     //     $completed_components = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
                     //     $score = $gradeable->roundToPointPrecision($completed_components * $component->getMaxValue() / $grading_units);
-                    //     $student_output_text .= "Points for Grading Completion: [". $score. " / ".$component->getMaxValue()."]".$nl;
+                    //     $student_output_ta .= "Points for Grading Completion: [". $score. " / ".$component->getMaxValue()."]".$nl;
                     //     continue;
                     // }
 
@@ -173,42 +162,50 @@ $student_output_text_main .= " assigment due date         	".$late_days['eg_subm
                         $temp_notes = $component->getGradedTAComments($nl) . $nl;
                     }
                     
-                    $student_output_text .= $title . "[" . $temp_score . "/" . $max_value . "] ";
+                    $student_output_ta .= $title . " [ " . $temp_score . " / " . $max_value . " ] ";
                     if (!is_array($component) && $component->getGrader() !== null && $component->getGrader()->accessFullGrading()) {
-                        $student_output_text .= "(Graded by {$component->getGrader()->getId()})".$nl;
+                        $student_output_ta .= "(Graded by {$component->getGrader()->getId()})".$nl;
                     } else {
-                        $student_output_text .= $nl;
+                        $student_output_ta .= $nl;
                     }
                     
                     if($student_comment != "") {
-                        $student_output_text .= "Rubric: " . $student_comment . $nl;
+                        $student_output_ta .= "Rubric: " . $student_comment . $nl;
                     }
 
-                    $student_output_text .= $temp_notes;
+                    $student_output_ta .= $temp_notes;
 
-                    $student_output_text .= $nl;
+                    $student_output_ta .= $nl;
                     
                     $student_grade += $temp_score;
                     $rubric_total += $max_value;
                     $ta_max_score += $max_value;
                 }
-                $student_output_text .= "TA GRADING TOTAL [ " . $student_grade . " / " . $ta_max_score . " ]". $nl;
-                $student_output_text .= "----------------------------------------------------------------------" . $nl;
+                $student_output_ta_header .= "TA GRADING SUBTOTAL [ " . $student_grade . " / " . $ta_max_score . " ]". $nl . $nl;
+                $student_output_ta_header .= "OVERALL NOTE FROM TA: " . ($gradeable->getOverallComment() != "" ? $gradeable->getOverallComment() . $nl : "No Note") . $nl . $nl;
+
                 $rubric_total += $auto_grading_max_score;
                 $student_grade += $auto_grading_awarded;
                 
                 $student_final_grade = max(0,$student_grade);
-                $student_output_last = strtoupper($gradeable->getName()) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
-                $student_output_last .= $nl;
-                $student_output_last .= "OVERALL NOTE FROM TA: " . ($gradeable->getOverallComment() != "" ? $gradeable->getOverallComment() . $nl : "No Note") . $nl;
-                $student_output_last .= "----------------------------------------------------------------------" . $nl;
+
+                if(substr($late_days['status'], 0, 3) == 'Bad') {
+                  $student_final_grade = 0;
+                }
+
+                $student_output_total .= strtoupper($gradeable->getName()) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
+
             }
             else {
-                $student_output_text_main .= "NOTE: THIS ASSIGNMENT WILL BE RECORDED AS ZERO".$nl;
-                $student_output_last = "[ THERE ARE GRADING VERSION CONFLICTS WITH THIS ASSIGNMENT. PLEASE CONTACT YOUR INSTRUCTOR OR TA TO RESOLVE THE ISSUE]".$nl;
+                $student_output_header .= "NOTE: THIS ASSIGNMENT WILL BE RECORDED AS ZERO".$nl;
+                $student_output_total = "[ THERE ARE GRADING VERSION CONFLICTS WITH THIS ASSIGNMENT. PLEASE CONTACT YOUR INSTRUCTOR OR TA TO RESOLVE THE ISSUE]".$nl;
             }
 
-            $student_final_output = $student_output_text_main . $student_output_text. $student_output_last;
+            $student_final_output .= $student_output_separator . $student_output_total;
+            $student_final_output .= $student_output_separator . $student_output_header;
+            $student_final_output .= $student_output_separator . $student_output_auto;
+            $student_final_output .= $student_output_separator . $student_output_ta_header . $student_output_ta;
+            $student_final_output .= $student_output_separator;
         }
         else {
             $student_final_output = "[ TA HAS NOT GRADED ASSIGNMENT, CHECK BACK LATER ]";
