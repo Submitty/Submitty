@@ -62,14 +62,11 @@ std::ostream& operator<<(std::ostream &ostr, const TableCell &c) {
     ostr << "<div style=\"position:relative\"><p class=\"rotate\">";
   }
   ostr << "<font size=-1>";
-  
-
-  if ((c.data == "" && c.note=="") 
+  std::string mynote = c.getNote();
+  if ((c.data == "" && mynote=="")
       || c.visible==CELL_CONTENTS_HIDDEN
       || (c.visible==CELL_CONTENTS_VISIBLE_INSTRUCTOR && GLOBAL_instructor_output == false) 
       || (c.visible==CELL_CONTENTS_VISIBLE_STUDENT    && GLOBAL_instructor_output == true)) {
-
-
     ostr << "<div></div>";
   } else {
     ostr << c.data; 
@@ -77,15 +74,16 @@ std::ostream& operator<<(std::ostream &ostr, const TableCell &c) {
       if (c.late_days_used > 3) { ostr << " (" << std::to_string(c.late_days_used) << "*)"; }
       else { ostr << " " << std::string(c.late_days_used,'*'); }
     }
-    if (c.note.length() > 0 &&
-        c.note != " " && 
+    if (mynote.length() > 0 &&
+        mynote != " " &&
         (global_details 
          /*
         || 
         c.visible==CELL_CONTENTS_HIDDEN
-         */)
+         */
+         )
         ) {
-      ostr << "<br><em>" << c.note << "</em>";
+      ostr << "<br><em>" << mynote << "</em>";
     }
   }
   ostr << "</font>";
@@ -106,6 +104,7 @@ void Table::output(std::ostream& ostr,
                    std::string last_update) const {
 
   global_details = show_details;
+  global_details = true;
 
   ostr << "<style>\n";
   ostr << ".rotate {\n";

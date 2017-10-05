@@ -1550,7 +1550,7 @@ void load_student_grades(std::vector<Student*> &students) {
       std::string gradeable_id = (*itr2).value("id","ERROR BAD ID");
       std::string gradeable_name = (*itr2).value("name",gradeable_id);
       std::string status;
-      if (itr2 != (itr.value()).end() && (*itr2).is_string()) {
+      if ((*itr2)["status"].is_string()) {
         status = (*itr2).value("status","NOT ELECTRONIC");
       } else {
         status = "NO SUBMISSION";
@@ -1609,32 +1609,22 @@ void load_student_grades(std::vector<Student*> &students) {
       if (!invalid) {
       assert (which >= 0);
       assert (score >= 0.0);
-                        //int ldu = 0;
-                        //nlohmann::json::iterator itr3 = itr2->find("days_late");
-                        nlohmann::json::iterator itr3 = itr2->find("late_days_charged");
-                        int late_days_charged = itr2->value("late_days_charged",0);
-                        int days_after_deadline = itr2->value("days_after_deadline",0);
-                        late_days_charged = days_after_deadline;
+                        int late_days_charged = itr2->value("days_charged",0);
                         if (itr3 != itr2->end()) {
                           if (score <= 0) {
                             if (s->getUserName() != "") {
-                              std::cout << "Should not be Charged a late day  " << s->getUserName() << " " << gradeable_name << " " << score << std::endl;
-                              late_days_charged = 0;
+                              assert (late_days_charged == 0);
                             }
-                            //} else {
-                            //ldu = itr3->get<int>();
                           }
                         }
-                        if (late_days_charged != 0) {
-                          std::cout << "late days charged = " << late_days_charged << std::endl;
-                        }
-                        
                         float clamp = -1;
                         clamp = GRADEABLES[g].getClamp(gradeable_id);
                         if (clamp > 0) {
                           score = std::min(clamp,score);
                         }
-
+                        if (status.find("Bad") != std::string::npos) {
+                          assert (late_days_charged == 0);
+                        }
                         if (GRADEABLES[g].isReleased(gradeable_id)) {
                           s->setGradeableItemGrade(g,which,score,late_days_charged,other_note,status);
                         }
