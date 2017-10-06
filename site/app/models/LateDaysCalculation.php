@@ -28,14 +28,12 @@ class LateDaysCalculation extends AbstractModel {
     private function parseStudents($user_id) {
         $students = array();
 
-        $submissions = $this->core->getQueries()->getLateDayInformation($user_id);
-
-	//For each submission ensure that an entry exists for that user and append the submission to their list of
+        //For each submission ensure that an entry exists for that user and append the submission to their list of
         //submissions.
-	$my_count = count($submissions);
-	for ($i = 0; $i < $my_count; $i++) {
-            $submission = $submissions[$i];
-	    $curr_student = $submission['user_id'];
+        $submissions = $this->core->getQueries()->getLateDayInformation($user_id);
+        $count = count($submissions);
+        for ($i = 0; $i < $count; $i++) {
+            $curr_student = $submissions[$i]['user_id'];
             if (!isset($students[$curr_student])) {
                 $students[$curr_student] = array(
                     'user_id' => $curr_student,
@@ -44,14 +42,14 @@ class LateDaysCalculation extends AbstractModel {
                 );
             }
 
-            $students[$curr_student]['submissions'][] = $submission;
-            unset($submission);
+            $students[$curr_student]['submissions'][] = $submissions[$i];
+            unset($submissions[$i]);
         }
 
-        $latedays = $this->core->getQueries()->getLateDayUpdates($user_id);
-	$my_count2 = count($latedays);
         //For each lateDayUpdate append the lateDayUpdate to the appropriate user.
-        for ($i = 0; $i < $my_count2; $i++) {
+        $latedays = $this->core->getQueries()->getLateDayUpdates($user_id);
+        $count = count($latedays);
+        for ($i = 0; $i < $count; $i++) {
             $curr_student = $latedays[$i]['user_id'];
             if (isset($students[$curr_student])) {
                 $students[$curr_student]['latedays'][] = $latedays[$i];
@@ -86,14 +84,14 @@ class LateDaysCalculation extends AbstractModel {
             for ($i = 0; $i < count($submissions); $i++) {
 
                 $submission_latedays = array();
-		
-		//Sort latedays by since_timestamp before calculating late day usage.
+        
+        //Sort latedays by since_timestamp before calculating late day usage.
                 usort($latedays, function($a, $b) { return $a['since_timestamp'] > $b['since_timestamp']; });
 
                 //Find all late day updates before this submission due date.
                 foreach($latedays as $ld){
                     if($ld['since_timestamp'] <= $submissions[$i]['eg_submission_due_date'] &&
-		       $curr_allowed_term < $ld['allowed_late_days']){
+               $curr_allowed_term < $ld['allowed_late_days']){
                         $curr_allowed_term = $ld['allowed_late_days'];
                     }
                 }
@@ -147,7 +145,7 @@ class LateDaysCalculation extends AbstractModel {
                 $submission_latedays['remaining_days'] = $curr_remaining_late;
                 $submission_latedays['total_late_used'] = $total_late_used;
                 $submission_latedays['eg_submission_due_date'] = $submissions[$i]['eg_submission_due_date'];
-		$late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
+        $late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
             }
 
             $all_latedays[$student['user_id']] = $late_day_usage;
