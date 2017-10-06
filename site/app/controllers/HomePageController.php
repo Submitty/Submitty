@@ -57,7 +57,7 @@ class HomePageController extends AbstractController {
         if(isset($_POST['user_name_change']))
         {
             $newName = trim($_POST['user_name_change']);
-            if ($user->validateUserData('user_preferred_firstname', $newName) === true) {
+            if (User::validateUserData('user_preferred_firstname', $newName) === true) {
                 if(strlen($newName) <= 30)
                 {
                     $user->setPreferredFirstName($newName);

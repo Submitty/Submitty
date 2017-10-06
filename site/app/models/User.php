@@ -238,7 +238,7 @@ class User extends AbstractModel {
      * Checks $data to make sure it is acceptable for $field.
      *
      * @param string $field
-     * @param string $data
+     * @param mixed $data
      * @return bool
      */
     static public function validateUserData($field, $data) {
@@ -262,7 +262,10 @@ class User extends AbstractModel {
 	        //Database password cannot be blank, no check on format
 			return $data !== "";
 		default:
-			trigger_error("validateUserData() called with unknown field: " . var_export(htmlentities($field), true) . "; data: " . var_export(htmlentities($data), true), E_USER_ERROR);
+			//$data can't be validated since $field is unknown.  Notify developer with a stop error (also protectes data record integrity).
+			$field = var_export(htmlentities($field), true);
+			$data = var_export(htmlentities($data), true);
+			trigger_error('User::validateUserData() called with unknown $field '.$field.' and $data '.$data, E_USER_ERROR);
     	}
     }
 }
