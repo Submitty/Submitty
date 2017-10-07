@@ -586,8 +586,9 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        $overwrite = "false";//$_POST['overwrite'];
+        $overwrite = "false";//$_POST['overwrite']; temporarly broken
 
+        //checks if user has permission
         if ($this->core->getUser()->getGroup() === 4) {
             if(!$gradeable->getPeerGrading()) {
                 $this->core->addErrorMessage("You do not have permission to grade this");
@@ -616,6 +617,8 @@ class ElectronicGraderController extends AbstractController {
                 return;
             }
         }
+
+        //save the component
         foreach ($gradeable->getComponents() as $component) {
             if(is_array($component)) {
                 if($component[0]->getId() != $_POST['gradeable_component_id']) {
@@ -727,7 +730,7 @@ class ElectronicGraderController extends AbstractController {
                 $mark->setId($mark_id);
                 $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                 if($all_false === false) {
-                    $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $this->core->getUser()->getId());
+                    $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
                 }
             }
         }
