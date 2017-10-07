@@ -586,7 +586,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        $overwrite = "false";//$_POST['overwrite']; temporarly broken
+        $overwrite = $_POST['overwrite'];
 
         //checks if user has permission
         if ($this->core->getUser()->getGroup() === 4) {

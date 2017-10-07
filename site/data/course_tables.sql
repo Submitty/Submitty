@@ -739,7 +739,7 @@ ALTER TABLE ONLY gradeable_component_mark_data
 --
 
 ALTER TABLE ONLY gradeable_component_mark_data
-    ADD CONSTRAINT gradeable_component_mark_data_gd_id_and_gc_id_fkey FOREIGN KEY (gd_id, gc_id, gcd_grader_id) REFERENCES gradeable_component_data(gd_id, gc_id, gcd_grader_id) ON DELETE CASCADE;
+    ADD CONSTRAINT gradeable_component_mark_data_gd_id_and_gc_id_fkey FOREIGN KEY (gd_id, gc_id, gcd_grader_id) REFERENCES gradeable_component_data(gd_id, gc_id, gcd_grader_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --
 -- Name: gradeable_data_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
