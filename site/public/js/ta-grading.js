@@ -2,8 +2,7 @@
 var cookie_version = 1;
 
 //Set positions and visibility of configurable ui elements
-$(document).ready(function(){
-
+$(function() {
     //Check each cookie and test for 'undefined'. If any cookie is undefined
     $.each(document.cookie.split(/; */), function(){
         var cookie = this.split("=")
@@ -28,9 +27,9 @@ $(document).ready(function(){
         updateCookies();
     }
 
-    $('body').css({'position':'fixed', 'width':'100%'});
-    $('#header').css({'position':'fixed', 'z-index':'-1'});
-    $('#footer').css({'position':'fixed', 'z-index':'-1'});
+    $('body').css({'position': 'fixed', 'width': '100%'});
+    $('#header').css({'position': 'fixed', 'z-index': '0'});
+    $('#footer').css({'position': 'fixed', 'z-index': '0'});
 
     calculatePercentageTotal();
     var progressbar = $(".progressbar"),
