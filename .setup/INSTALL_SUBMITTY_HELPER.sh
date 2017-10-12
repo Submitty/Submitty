@@ -499,7 +499,7 @@ echo -e "Compile and install analysis tools"
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-for b in "count plagiarism diagnostics";
+for b in count plagiarism diagnostics;
     do wget "https://github.com/Submitty/AnalysisTools/releases/download/v0.3.0/$b"
 done
 popd
