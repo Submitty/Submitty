@@ -29,8 +29,14 @@ $(document).ready(function(){
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-    $('#header').css({'position':'fixed', 'z-index':'-1'});
-    $('#footer').css({'position':'fixed', 'z-index':'-1'});
+    $('#header').css({'position':'fixed', 'z-index':'10'});
+    $('.grading_toolbar').css({'z-index':'20'});
+    $('.progress_bar').css({'z-index':'20'});
+    $('#autograding_results').css({'z-index':'30'});
+    $('#submission_browser').css({'z-index':'30'});
+    $('#student_info').css({'z-index':'30'});
+    $('#grading_rubric').css({'z-index':'30'});
+    $('#footer').css({'position':'fixed', 'z-index':'10'});
 
     calculatePercentageTotal();
     var progressbar = $(".progressbar"),
