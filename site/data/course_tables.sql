@@ -206,6 +206,7 @@ CREATE TABLE gradeable_component_mark (
     gc_id integer NOT NULL,
     gcm_points numeric NOT NULL,
     gcm_note character varying NOT NULL,
+    gcm_publish boolean DEFAULT false,
     gcm_order integer NOT NULL
 );
 
