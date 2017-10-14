@@ -86,9 +86,8 @@ ORDER BY u.registration_section, u.user_id");
         $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(), $user->getEmail(),
                        Utils::convertBooleanToString($user->isUserUpdated()), Utils::convertBooleanToString($user->isInstructorUpdated()));
 
-        $this->submitty_db->query("
-INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email, user_updated, instructor_updated)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $array);
+        $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email, user_updated, instructor_updated)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $array);
     }
 
     public function insertCourseUser(User $user, $semester, $course) {
@@ -134,6 +133,18 @@ WHERE semester=? AND course=? AND user_id=?", $params);
     INSERT INTO grading_registration (user_id, sections_registration_id) VALUES(?, ?)", array($user_id, $section));
             }
         }
+    }
+
+    /*  Gets the group that the user is in for each class they are in
+     *  @param $user_id - user id to be searched for
+     *  @return array - containing all of the groups for each course sequantially
+    */
+    public function getGroupForUserInClass($user_id){
+        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ?", array($user_id));
+        $return = array();
+        foreach ($this->submitty_db->rows() as $row) {
+            $return[] = $row['user_group'];
+          } return $return;
     }
 
     public function getAllGradeables($user_id = null) {
@@ -605,7 +616,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                         ON
                           egv.active_version = egd.g_version
                           AND egv.g_id = egd.g_id
-                          AND egv.user_id = egv.user_id
+                          AND egv.user_id = egd.user_id
                         GROUP BY  egv.g_id,egv.user_id, active_version, g_version, submission_time
                         --End Details--
                     ) as details
@@ -632,11 +643,11 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         return $this->course_db->rows();
     }
 
-    public function getUsersByRegistrationSections($sections) {
+    public function getUsersByRegistrationSections($sections, $orderBy="registration_section") {
         $return = array();
         if (count($sections) > 0) {
             $query = implode(",", array_fill(0, count($sections), "?"));
-            $this->course_db->query("SELECT * FROM users WHERE registration_section IN ({$query}) ORDER BY registration_section", $sections);
+            $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN ({$query}) ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
             }
@@ -845,7 +856,8 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
     }
 
     public function getRotatingSectionsForGradeableAndUser($g_id, $user) {
-        $this->course_db->query("SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
+        $this->course_db->query(
+          "SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
         $return = array();
         foreach ($this->course_db->rows() as $row) {
             $return[] = $row['sections_rotating_id'];
@@ -853,11 +865,11 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
         return $return;
     }
 
-    public function getUsersByRotatingSections($sections) {
+    public function getUsersByRotatingSections($sections, $orderBy="rotating_section") {
         $return = array();
         if (count($sections) > 0) {
             $query = implode(",", array_fill(0, count($sections), "?"));
-            $this->course_db->query("SELECT * FROM users WHERE rotating_section IN ({$query}) ORDER BY rotating_section", $sections);
+            $this->course_db->query("SELECT * FROM users AS u WHERE rotating_section IN ({$query}) ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
             }
@@ -1090,6 +1102,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
         $this->course_db->query("
 UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?, gcd_grader_id=? WHERE gc_id=? AND gd_id=?", $params);
     }
+
 
     // END FIXME
 
@@ -1581,7 +1594,7 @@ ORDER BY gt.{$section_key}", $params);
         $this->submitty_db->query("
 SELECT semester, course
 FROM courses_users u
-WHERE u.user_id=?", array($user_id));
+WHERE u.user_id=? ORDER BY course", array($user_id));
        $return = array();
         foreach ($this->submitty_db->rows() as $row) {
           $course = new Course($this->core, $row);
@@ -1735,4 +1748,3 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 }
-

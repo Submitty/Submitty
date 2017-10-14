@@ -56,8 +56,8 @@ class HomePageController extends AbstractController {
         $user = $this->core->getUser();
         if(isset($_POST['user_name_change']))
         {
-            $newName = $_POST['user_name_change'];
-            if (ctype_alpha(str_replace(' ', '', $newName)) === true) {
+            $newName = trim($_POST['user_name_change']);
+            if (User::validateUserData('user_preferred_firstname', $newName) === true) {
                 if(strlen($newName) <= 30)
                 {
                     $user->setPreferredFirstName($newName);
@@ -72,7 +72,7 @@ class HomePageController extends AbstractController {
             }
             else
             {
-                $this->core->addErrorMessage("Invalid Username. Please use only letters and spaces.");
+                $this->core->addErrorMessage("Invalid Username.  Letters, spaces, hyphens, apostrophes, periods, and backquotes permitted.");
             }
         }
     }

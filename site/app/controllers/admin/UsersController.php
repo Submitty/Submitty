@@ -121,19 +121,19 @@ class UsersController extends AbstractController {
 
         $error_message = "";
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
-        $error_message .= preg_match("~^[a-z0-9_\-]+$~", trim($_POST['user_id'])) ? "" : "Error in username: \"{$_POST['user_id']}\"<br>";
+        $error_message .= User::validateUserData('user_id', trim($_POST['user_id'])) ? "" : "Error in username: \"".strip_tags($_POST['user_id'])."\"<br>";
         //First and Last name must be alpha characters, white-space, or certain punctuation.
-        $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_firstname'])) ? "" : "Error in first name: \"{$_POST['user_firstname']}\"<br>";
-        $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_lastname'])) ? "" : "Error in last name: \"{$_POST['user_lastname']}\"<br>";
+        $error_message .= User::validateUserData('user_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"".strip_tags($_POST['user_firstname'])."\"<br>";
+        $error_message .= User::validateUserData('user_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"".strip_tags($_POST['user_lastname'])."\"<br>";
 		//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-		$error_message .= preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", trim($_POST['user_email'])) ? "" : "Error in email: \"{$_POST['user_email']}\"<br>";
+		$error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"".strip_tags($_POST['user_email'])."\"<br>";
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
         if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) != "") {
-            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"{$_POST['user_preferred_firstname']}\"<br>";
+            $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"".strip_tags($_POST['user_preferred_firstname'])."\"<br>";
         }
         //Database password cannot be blank, no check on format
         if ($use_database) {
-            $error_message .= $_POST['user_password'] != "" ? "" : "Error must enter password for user<br>";
+            $error_message .= User::validateUserData('user_password', $_POST['user_password']) ? "" : "Error must enter password for user<br>";
         }
 
         if (!empty($error_message)) {
@@ -419,26 +419,26 @@ class UsersController extends AbstractController {
             if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
 
             //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= preg_match("~^[a-z0-9_\-]+$~", $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"{$vals[0]}\"<br>";
+            $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[1]) ? "" : "ERROR on row {$row_num}, Last Name \"{$vals[1]}\"<br>";
-            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[2]) ? "" : "ERROR on row {$row_num}, Firs tName \"{$vals[2]}\"<br>";
+            $error_message .= User::validateUserData('user_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"".strip_tags($vals[1])."\"<br>";
+            $error_message .= User::validateUserData('user_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
 
             //Check email address for appropriate format. e.g. "grader@university.edu", "grader@cs.university.edu", etc.
-            $error_message .= preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $vals[3]) ? "" : "ERROR on row {$row_num}, email \"{$vals[3]}\"<br>";
+            $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
 
             //grader-level check is a digit between 1 - 4.
-            $error_message .= preg_match("~^[1-4]{1}$~", $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"{$vals[4]}\"<br>";
+            $error_message .= User::validateUserData('user_group', $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($vals[4])."\"<br>";
 
             //Preferred first name must be alpha characters, white-space, or certain punctuation.
             if (isset($vals[$pref_name_idx]) && ($vals[$pref_name_idx] != "")) {
-                $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[$pref_name_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"{$vals[$pref_name_idx]}\"<br>";
+                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_name_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_name_idx])."\"<br>";
             }
 
             //Database password cannot be blank, no check on format
             if ($use_database) {
-                $error_message .= $vals[5] != "" ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
+                $error_message .= User::validateUserData('user_password', $vals[5]) ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
             }
 
             $graders_data[] = $vals;
@@ -541,26 +541,26 @@ class UsersController extends AbstractController {
             }
 
             //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= preg_match("~^[a-z0-9_\-]+$~", $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"{$vals[0]}\"<br>";
+            $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[1]) ? "" : "ERROR on row {$row_num}, Last Name \"{$vals[1]}\"<br>";
-            $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[2]) ? "" : "ERROR on row {$row_num}, First Name \"{$vals[2]}\"<br>";
+            $error_message .= User::validateUserData('user_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"{$vals[1]}\"<br>";
+            $error_message .= User::validateUserData('user_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
 
             //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-            $error_message .= preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $vals[3]) ? "" : "ERROR on row {$row_num}, email \"{$vals[3]}\"<br>";
+            $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
 
             //Student section must be greater than zero (intval($str) returns zero when $str is not integer)
-            $error_message .= (($vals[4] > 0 && $vals[4] <= $num_reg_sections) || $vals[4] === null) ? "" : "ERROR on row {$row_num}, Registration Section \"{$vals[4]}\"<br>";
+            $error_message .= (($vals[4] > 0 && $vals[4] <= $num_reg_sections) || $vals[4] === null) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"<br>";
 
             //Preferred first name must be alpha characters, white-space, or certain punctuation.
             if (isset($vals[$pref_name_idx]) && ($vals[$pref_name_idx] != "")) {
-                $error_message .= preg_match("~^[a-zA-Z'`\-\. ]+$~", $vals[$pref_name_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"{$vals[$pref_name_idx]}\"<br>";
+                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_name_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_name_idx])."\"<br>";
             }
 
             //Database password cannot be blank, no check on format
             if ($use_database) {
-                $error_message .= $vals[5] != "" ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
+                $error_message .= User::validateUserData('user_password', $vals[5]) ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
             }
 
             $students_data[] = $vals;
