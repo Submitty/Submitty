@@ -270,7 +270,7 @@ HTML;
                         You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
                         <ul style="list-style-position: inside;">
                             <li>gradeable_id</li>
-                            <li>user_id OR repo_id, do not use both</li>
+                            <li>user_id OR team_id OR repo_id (only use one)</li>
                         </ul>
                         ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
                         <input style='width: 83%' type='text' name='subdirectory' value="" placeholder="(Optional)"/>
@@ -2502,19 +2502,20 @@ $('#gradeable-form').on('submit', function(e){
                     return false;
                 }
                 // check that path is made up of valid variables
-                var allowed_variables = ["\$gradeable_id", "\$user_id", "\$repo_id"];
-                var used_user_id = false;
+                var allowed_variables = ["\$gradeable_id", "\$user_id", "\$team_id", "\$repo_id"];
+                var used_id = false;
                 for (x = 1; x < subdirectory_parts.length; x++) {
                     subdirectory_part = subdirectory_parts[x].substring(0, subdirectory_parts[x].lastIndexOf("}"));
                     if (allowed_variables.indexOf(subdirectory_part) === -1) {
                         alert("For the VCS path, '" + subdirectory_part + "' is not a valid variable name.")
                         return false;
                     }
-                    if (subdirectory_part === "\$user_id") {
-                        used_user_id = true;
+                    if (!used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id")))  {
+                        used_id = true;
+                        continue;
                     }
-                    if (used_user_id && subdirectory_part === "\$repo_id") {
-                        alert("You cannot use both \$user_id and \$repo_id");
+                    if (used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
+                        alert("You can only use one of \$user_id, \$team_id and \$repo_id in VCS path");
                         return false;
                     }
                 }

@@ -126,7 +126,9 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'modified' => true,
-            'anon_id' => "TestAnonymous"
+            'anon_id' => "TestAnonymous",
+            'user_updated' => false,
+            'instructor_updated' => false
         );
         $this->assertEquals($expected, $actual);
     }

@@ -8,6 +8,12 @@ use app\libraries\Utils;
 
 class MiscController extends AbstractController {
     public function run() {
+        foreach (array('path', 'file') as $key) {
+            if (isset($_REQUEST[$key])) {
+                $_REQUEST[$key] = htmlspecialchars_decode(urldecode($_REQUEST[$key]));
+            }
+        }
+
         switch($_REQUEST['page']) {
             case 'display_file':
                 $this->displayFile();
@@ -45,7 +51,17 @@ class MiscController extends AbstractController {
             return false;
         }
 
-        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout");
+
+	// TEMPORARY HACK PUT THIS HERE
+	// INSTRUCTORS ARE UNABLE TO VIEW VCS CHECKOUT FILES WITHOUT THIS
+	// if instructor or grader, then it's okay
+	if ($this->core->getUser()->accessGrading()) {
+            return true;
+        }
+	// END HACK
+
+
+	$possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout");
         if (!in_array($dir, $possible_directories)) {
             return false;
         }
@@ -62,7 +78,7 @@ class MiscController extends AbstractController {
         if ($dir === "config_upload" || $dir === "uploads") {
             return ($this->core->getUser()->accessAdmin());
         }
-        else if ($dir === "submissions" || $dir === "results") {
+        else if ($dir === "submissions" || $dir === "results" || $dir === "checkout") {
             // if instructor or grader, then it's okay
             if ($this->core->getUser()->accessGrading()) {
                 return true;
@@ -141,9 +157,8 @@ class MiscController extends AbstractController {
     private function displayFile() {
         // security check
         if (!$this->checkValidAccess(false)) {
-            $message = "You do not have access to that page.";
-            $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->getOutput()->showError("You do not have access to this file");
+            return false;
         }
 
         $mime_type = FileUtils::getMimeType($_REQUEST['path']);
@@ -178,11 +193,10 @@ class MiscController extends AbstractController {
         
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        $file_url = $_REQUEST['path'];
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
-        header("Content-disposition: attachment; filename=\"" . basename($file_url) . "\""); 
-        readfile($file_url);
+        header("Content-disposition: attachment; filename=\"{$_REQUEST['file']}\"");
+        readfile($_REQUEST['path']);
     }
 
     private function downloadZip() {

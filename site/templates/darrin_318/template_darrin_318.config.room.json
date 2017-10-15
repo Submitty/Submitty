@@ -1,0 +1,63 @@
+{
+  "title": "Darrin 318",
+  "note": "skip every other seat",
+
+  "colors": {
+    "red": "#d00000",
+    "blue": "#0400d0",
+    "green": "#0b8f0a",
+    "yellow": "#e4c012",
+    "important": "#d000d0"
+  },
+
+  "zones" : {
+    "left": {
+      "A": {
+        "rows": [7,8,9,10,11],
+        "color": "red",
+        "density": 0.5
+      },
+      "B": {
+        "rows": [1,2,3,4,5],
+        "color": "green",
+        "density": 0.5
+      }
+    },
+
+    "middle": {
+      "C": {
+        "rows": [10,11],
+        "color": "blue",
+        "density": 0.5
+      },
+      "D": {
+        "rows": [7,8],
+        "color": "green",
+        "density": 0.5
+      },
+      "E": {
+        "rows": [4,5],
+        "color": "yellow",
+        "density": 0.5
+      },
+      "F": {
+        "rows": [1,2],
+        "color": "red",
+        "density": 0.5
+      }
+    },
+
+    "right": {
+      "G": {
+        "rows": [7,8,9,10,11],
+        "color": "yellow",
+        "density": 0.5
+      },
+      "H": {
+        "rows": [1,2,3,4,5],
+        "color": "blue",
+        "density": 0.5
+      }
+    }
+  }
+}

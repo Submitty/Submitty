@@ -362,7 +362,7 @@ function openClose(row_id, num_questions = -1) {
                         else {
                             src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
                         }
-                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='600px' style='border: 0'></iframe>");
+                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='1200px' style='border: 0'></iframe>");
 
                         if (!pdf_div.hasClass('open')) {
                             pdf_div.addClass('open');
@@ -685,9 +685,11 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                 if (data['modified'] === true) {
                     if (all_false === true) {
                         $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
+                        $('#summary-' + num)[0].style.backgroundColor = "initial";
                     } else {
                         if($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || (overwrite === "true")) {
                             $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
+                            $('#summary-' + num)[0].style.backgroundColor = "#eebb77";
                         }
                     }
                 }

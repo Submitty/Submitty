@@ -203,7 +203,7 @@ private:
 bool by_name(const Student* s1, const Student* s2) {
   return (s1->getLastName() < s2->getLastName() ||
           (s1->getLastName() == s2->getLastName() &&
-           s1->getFirstName() < s2->getFirstName()));
+           s1->getPreferredName() < s2->getPreferredName()));
 }
 
 
@@ -623,17 +623,17 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
           GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = value;
         } else if (token2 == "exam_seating") {
           std::cout << "TOKEN IS EXAM SEATING" << std::endl;
-                      std::string value = itr2.value();
-                      GLOBAL_EXAM_SEATING = value;
-                    } else if (token2 == "exam_seating_count") {
+          std::string value = itr2.value();
+          GLOBAL_EXAM_SEATING = value;
+        } else if (token2 == "exam_seating_count") {
           std::cout << "TOKEN IS EXAM SEATING COUNT" << std::endl;
-                      std::string value = itr2.value();
-                      GLOBAL_EXAM_SEATING_COUNT = value;
-                    }
+          std::string value = itr2.value();
+          GLOBAL_EXAM_SEATING_COUNT = value;
+        }
         }
     }
     }
-  }
+    }
   }
   students.push_back(perfect);
   students.push_back(student_average);
@@ -745,7 +745,7 @@ void MakeRosterFile(std::vector<Student*> &students) {
 #if 0
     ostr 
       << std::left << std::setw(15) << students[i]->getLastName() 
-      << std::left << std::setw(13) << students[i]->getFirstName() 
+      << std::left << std::setw(13) << students[i]->getPreferredName() 
       << std::left << std::setw(12) << students[i]->getUserName()
       << std::left << std::setw(12) << room
       << std::left << std::setw(10) << zone
@@ -753,7 +753,7 @@ void MakeRosterFile(std::vector<Student*> &students) {
 
     ostr 
       << students[i]->getLastName() << ","
-      << students[i]->getFirstName() << ","
+      << students[i]->getPreferredName() << ","
       << students[i]->getUserName() << std::endl;
 
 #else
@@ -761,7 +761,7 @@ void MakeRosterFile(std::vector<Student*> &students) {
     ostr 
       << students[i]->getSection()   << "\t"
       << students[i]->getLastName()     << "\t"
-      << students[i]->getFirstName() << "\t"
+      << students[i]->getPreferredName() << "\t"
       << students[i]->getUserName()  << "\t"
       //<< foo 
       << std::endl;
@@ -1547,9 +1547,14 @@ void load_student_grades(std::vector<Student*> &students) {
       for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
       int which;
       bool invalid = false;
-                  std::string gradeable_id = (*itr2).value("id","ERROR BAD ID");
-                  std::string gradeable_name = (*itr2).value("name",gradeable_id);
-                  std::string status = (*itr2).value("status","NOT ELECTRONIC");
+      std::string gradeable_id = (*itr2).value("id","ERROR BAD ID");
+      std::string gradeable_name = (*itr2).value("name",gradeable_id);
+      std::string status;
+      if ((*itr2)["status"].is_string()) {
+        status = (*itr2).value("status","NOT ELECTRONIC");
+      } else {
+        status = "NO SUBMISSION";
+      }
       float score = (*itr2).value("score",0.0);
                   if (status.find("Bad") != std::string::npos) {
                     assert (score == 0);
@@ -1604,29 +1609,24 @@ void load_student_grades(std::vector<Student*> &students) {
       if (!invalid) {
       assert (which >= 0);
       assert (score >= 0.0);
-                        int ldu = 0;
-                        nlohmann::json::iterator itr3 = itr2->find("days_late");
+                        int late_days_charged = itr2->value("days_charged",0);
                         if (itr3 != itr2->end()) {
                           if (score <= 0) {
                             if (s->getUserName() != "") {
-                              std::cout << "Should not be Charged a late day  " << s->getUserName() << " " << gradeable_name << " " << score << std::endl;
+                              assert (late_days_charged == 0);
                             }
-                          } else {
-                            ldu = itr3->get<int>();
                           }
                         }
-                        if (ldu != 0) {
-                          //std::cout << "ldu=" << ldu << std::endl;
-                        }
-                        
                         float clamp = -1;
                         clamp = GRADEABLES[g].getClamp(gradeable_id);
                         if (clamp > 0) {
                           score = std::min(clamp,score);
                         }
-
+                        if (status.find("Bad") != std::string::npos) {
+                          assert (late_days_charged == 0);
+                        }
                         if (GRADEABLES[g].isReleased(gradeable_id)) {
-                          s->setGradeableItemGrade(g,which,score,ldu,other_note,status);
+                          s->setGradeableItemGrade(g,which,score,late_days_charged,other_note,status);
                         }
       }
 
@@ -1740,7 +1740,7 @@ void output_helper(std::vector<Student*> &students,  std::string &GLOBAL_sort_or
       ostr2 << "<h3>PRIORITY HELP QUEUE</h3>" << std::endl;
       priority_stream << std::left << std::setw(15) << students[S]->getSection()
                       << std::left << std::setw(15) << students[S]->getUserName() 
-                      << std::left << std::setw(15) << students[S]->getFirstName() 
+                      << std::left << std::setw(15) << students[S]->getPreferredName() 
                       << std::left << std::setw(15) << students[S]->getLastName() << std::endl;
       
       
