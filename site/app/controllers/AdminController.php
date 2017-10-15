@@ -20,7 +20,7 @@ class AdminController extends AbstractController {
             $this->core->getOutput()->showError("This account cannot access admin pages");
         }
 
-        $this->core->getOutput()->addBreadcrumb('Admin');
+        //$this->core->getOutput()->addBreadcrumb('Admin');
         $controller = null;
         switch ($_REQUEST['page']) {
             case 'users':
