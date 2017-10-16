@@ -509,37 +509,6 @@ ORDER BY gc_order
     }
 
     public function getAverageForGradeable($g_id) {
-        $return = array();
-        $this->course_db->query("
-SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
-  SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
-  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
-  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
-  ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
-    SELECT gcd.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
-    CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
-    FROM gradeable_component_data AS gcd
-    LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
-    LEFT JOIN(
-      SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
-      FROM gradeable_component_mark_data AS gcmd
-      LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
-      GROUP BY gcmd.gc_id, gcmd.gd_id
-      )AS marks
-    ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
-    WHERE g_id=?
-  )AS parts_of_comp
-)AS comp
-GROUP BY gc_id, gc_title, gc_max_value, gc_is_peer, gc_order
-ORDER BY gc_order
-        ", array($g_id));
-        foreach ($this->course_db->rows() as $row) {
-            $return[] = new SimpleStat($this->core, $row);
-        }
-        return $return;
-    }
-
-    public function getAverageForGradeable($g_id) {
         $this->course_db->query("
 SELECT COUNT(*) FROM gradeable_component WHERE g_id=?
           ", array($g_id));
@@ -578,8 +547,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 )AS individual
           ", array($g_id, $count));
         if (count($this->course_db->rows()) == 0) {
-            echo("why");
-            return;
+            return null;
         }
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
