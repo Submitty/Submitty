@@ -749,18 +749,21 @@ class ElectronicGraderController extends AbstractController {
                 $index++;
             }
             // create new marks
+            $order_counter = $this->core->getQueries()->getGreatestGradeableComponentMarkOrder($component);
+            $order_counter++;
             for ($i = $index; $i < $_POST['num_mark']; $i++) {
                 $mark = new GradeableComponentMark($this->core);
                 $mark->setGcId($component->getId());
                 $mark->setPoints($_POST['marks'][$i]['points']);
                 $mark->setNote($_POST['marks'][$i]['note']);
-                $mark->setOrder($_POST['marks'][$i]['order']);
+                $mark->setOrder($order_counter);
                 $mark_id = $mark->save();
                 $mark->setId($mark_id);
                 $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                 if($all_false === false) {
                     $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
                 }
+                $order_counter++;
             }
         }
         //generates the HW Report each time a mark is saved

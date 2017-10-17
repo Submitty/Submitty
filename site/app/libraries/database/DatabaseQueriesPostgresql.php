@@ -1241,6 +1241,15 @@ WHERE gcm_id=?", $params);
         $this->course_db->query("DELETE FROM gradeable_component_mark WHERE gcm_id=?", array($mark->getId()));
     }
 
+    public function getGreatestGradeableComponentMarkOrder(GradeableComponent $component) {
+    	$this->course_db->query("
+    		SELECT MAX(gcm_order) FROM gradeable_component_mark WHERE gcm_id=? 
+    		", array($component->getId()));
+    	$row = $this->course_db->row();
+        return $row['max'];
+
+    }
+
     public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template=false) {
         $this->course_db->query("SELECT * FROM gradeable WHERE g_id=?",array($gradeable_id));
         $admin_gradeable->setGradeableInfo($this->course_db->row(), $template);
