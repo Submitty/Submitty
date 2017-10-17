@@ -60,8 +60,11 @@ LEFT JOIN (
 ) as sr ON u.user_id=sr.user_id
 ORDER BY u.{$section_key}, u.user_id");
         $return = array();
-        foreach ($this->course_db->rows() as $row) {
-            $return[] = new User($this->core, $row);
+        foreach ($this->course_db->rows() as $user) {
+            if (isset($user['grading_registration_sections'])) {
+                $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+            }
+            $return[] = new User($this->core, $user);
         }
         return $return;
     }
@@ -78,16 +81,21 @@ LEFT JOIN (
 WHERE u.user_group < 4
 ORDER BY u.registration_section, u.user_id");
         $return = array();
-        foreach ($this->course_db->rows() as $row) {
-            $return[] = new User($this->core, $row);
+        foreach ($this->course_db->rows() as $user) {
+            if (isset($user['grading_registration_sections'])) {
+                $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+            }
+            $return[] = new User($this->core, $user);
         }
         return $return;
     }
 
 
     public function insertSubmittyUser(User $user) {
-        $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(), $user->getEmail(),
-                       Utils::convertBooleanToString($user->isUserUpdated()), Utils::convertBooleanToString($user->isInstructorUpdated()));
+        $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
+                       $user->getLastName(), $user->getEmail(),
+                       Utils::convertBooleanToDB($user->isUserUpdated()),
+                       Utils::convertBooleanToDB($user->isInstructorUpdated()));
 
         $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email, user_updated, instructor_updated)
                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $array);
@@ -95,7 +103,7 @@ ORDER BY u.registration_section, u.user_id");
 
     public function insertCourseUser(User $user, $semester, $course) {
         $params = array($semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
-                        Utils::convertBooleanToString($user->isManualRegistration()));
+                        Utils::convertBooleanToDB($user->isManualRegistration()));
         $this->submitty_db->query("
 INSERT INTO courses_users (semester, course, user_id, user_group, registration_section, manual_registration)
 VALUES (?,?,?,?,?,?)", $params);
@@ -106,17 +114,22 @@ VALUES (?,?,?,?,?,?)", $params);
     }
 
     public function updateUser(User $user, $semester=null, $course=null) {
-        $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(), $user->getLastName(), $user->getEmail(),
-                       Utils::convertBooleanToString($user->isUserUpdated()), Utils::convertBooleanToString($user->isInstructorUpdated()),
+        $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
+                       $user->getLastName(), $user->getEmail(),
+                       Utils::convertBooleanToDB($user->isUserUpdated()),
+                       Utils::convertBooleanToDB($user->isInstructorUpdated()),
                        $user->getId());
         $this->submitty_db->query("
-UPDATE users SET user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?, user_updated=?, instructor_updated=?
+UPDATE users 
+SET 
+  user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, 
+  user_email=?, user_updated=?, instructor_updated=?
 WHERE user_id=?", $array);
 
 
         if (!empty($semester) && !empty($course)) {
             $params = array($user->getGroup(), $user->getRegistrationSection(),
-                            Utils::convertBooleanToString($user->isManualRegistration()), $semester, $course,
+                            Utils::convertBooleanToDB($user->isManualRegistration()), $semester, $course,
                             $user->getId());
             $this->submitty_db->query("
 UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?
@@ -129,6 +142,23 @@ WHERE semester=? AND course=? AND user_id=?", $params);
     }
 
     public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
+        $return = array();
+        $g_ids_query = "";
+        $users_query = "";
+        $g_type_query = "";
+        $params = array();
+        if ($g_ids !== null) {
+            if (!is_array($g_ids)) {
+                $g_ids = array($g_ids);
+            }
+            if (count($g_ids) > 0) {
+                $g_ids_query = implode(",", array_fill(0, count($g_ids), "?"));
+                $params = $g_ids;
+            }
+            else {
+                return $return;
+            }
+        }
         if ($user_ids !== null) {
             if (!is_array($user_ids)) {
                 $user_ids = array($user_ids);
@@ -160,8 +190,10 @@ WHERE semester=? AND course=? AND user_id=?", $params);
         $sort_key = (in_array($sort_key, $sort_keys)) ? $sort_key : "u.user_id";
         $sort = array();
         switch ($sort_key) {
+            /** @noinspection PhpMissingBreakStatementInspection */
             case 'u.user_firstname':
                 $sort[] = 'u.user_firstname';
+            /** @noinspection PhpMissingBreakStatementInspection */
             case 'u.user_lastname':
                 $sort[] = 'u.user_lastname';
             case 'u.user_id':
@@ -398,6 +430,21 @@ ORDER BY u.{$section_key}, {$sort_key}";
 
         return $this->course_db->queryIterator($query, $params, function ($row) {
             $user = (isset($row['user_id']) && $row['user_id'] !== null) ? new User($this->core, $row) : null;
+            if (isset($row['array_gc_id'])) {
+                $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp',
+                                'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_text', 'gc_is_peer',
+                                'gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id',
+                                'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score',
+                                'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version', 'gcd_grade_time',
+                                'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
+                                'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
+                $bools = array('gc_is_text', 'gc_is_peer');
+                foreach ($fields as $key) {
+                    if (isset($row['array_' . $key])) {
+                        $row['array_' . $key] = $this->core->getCourseDB()->fromDatabaseToPHPArray($row['array_' . $key], in_array($key, $bools));
+                    }
+                }
+            }
             return new Gradeable($this->core, $row, $user);
         });
     }
@@ -481,16 +528,16 @@ ORDER BY u.{$section_key}, {$sort_key}";
         $return = array();
         $this->course_db->query("
 SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
-  SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, 
-  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp 
-  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp 
+  SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
+  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
+  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
   ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
     SELECT gcd.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
     CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
     FROM gradeable_component_data AS gcd
     LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
     LEFT JOIN(
-      SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id 
+      SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
       FROM gradeable_component_mark_data AS gcmd
       LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
       GROUP BY gcmd.gc_id, gcmd.gd_id
@@ -509,10 +556,8 @@ ORDER BY gc_order
     }
 
     public function getAverageForGradeable($g_id) {
-        $this->course_db->query("
-SELECT COUNT(*) FROM gradeable_component WHERE g_id=?
-          ", array($g_id));
-        $count = $this->course_db->rows()[0][0];
+        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
+        $count = $this->course_db->row()['cnt'];
         $this->course_db->query("
 SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
   SELECT * FROM(
@@ -546,33 +591,35 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
   )g WHERE count=?
 )AS individual
           ", array($g_id, $count));
-        if (count($this->course_db->rows()) == 0) {
-            return null;
-        }
-        return new SimpleStat($this->core, $this->course_db->rows()[0]);
+
+        return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
 
     public function getGradeablesPastAndSection() {
         $this->course_db->query("
-SELECT
-gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating_id, g_grade_start_date
-FROM (SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
-      FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u CROSS JOIN (
-        SELECT
-          DISTINCT g.g_id,
-          g_grade_start_date
-        FROM gradeable AS g
-        LEFT JOIN
-          grading_rotating AS gr ON g.g_id = gr.g_id
-        WHERE g_grade_by_registration = 'f') AS g ) as gu
-    LEFT JOIN (
-          SELECT
-            g_id, user_id, array_agg(sections_rotating_id) as sections_rotating_id
-          FROM
-            grading_rotating
-          GROUP BY
-          g_id, user_id) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id
-          ORDER BY user_group, user_id, g_grade_start_date");
+  SELECT
+    gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating_id, g_grade_start_date
+  FROM (
+    SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
+    FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u 
+    CROSS JOIN (
+      SELECT
+        DISTINCT g.g_id,
+        g_grade_start_date
+      FROM gradeable AS g
+      LEFT JOIN
+        grading_rotating AS gr ON g.g_id = gr.g_id
+      WHERE g_grade_by_registration = 'f'
+    ) AS g 
+  ) as gu
+  LEFT JOIN (
+    SELECT
+      g_id, user_id, array_agg(sections_rotating_id) as sections_rotating_id
+    FROM
+      grading_rotating
+    GROUP BY g_id, user_id
+  ) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id
+  ORDER BY user_group, user_id, g_grade_start_date");
         return $this->course_db->rows();
     }
 
@@ -595,7 +642,6 @@ FROM (SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
     public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template=false) {
         $this->course_db->query("SELECT * FROM gradeable WHERE g_id=?",array($gradeable_id));
         $admin_gradeable->setGradeableInfo($this->course_db->row(), $template);
-
         $this->course_db->query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
         $admin_gradeable->setOldComponentsJson(json_encode($this->course_db->rows()));
         $components = array();
@@ -614,7 +660,6 @@ FROM (SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
                 }
             }
         }
-
         //2 is numeric/text
         if($admin_gradeable->getGGradeableType() == 2) {
             $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc
@@ -625,21 +670,36 @@ FROM (SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
             $num['num_text'] = $this->course_db->row()['cnt'];
             $admin_gradeable->setNumericTextInfo($num);
         }
-
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id
                     INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($gradeable_id));
         $has_grades= $this->course_db->row()['cnt'];
         $admin_gradeable->setHasGrades($has_grades);
-
         //0 is electronic
         if($admin_gradeable->getGGradeableType() == 0) {
             //get the electronic file stuff
             $this->course_db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
             $admin_gradeable->setElectronicGradeableInfo($this->course_db->row(), $template);
-
         }
-
         return $admin_gradeable;
+    }
+
+    public function getUsersWithLateDays() {
+        $this->course_db->query("
+        SELECT u.user_id, user_firstname, user_preferred_firstname,
+          user_lastname, allowed_late_days, since_timestamp::timestamp::date
+        FROM users AS u
+        FULL OUTER JOIN late_days AS l
+          ON u.user_id=l.user_id
+        WHERE allowed_late_days IS NOT NULL
+          AND allowed_late_days>0
+        ORDER BY
+          user_email ASC, since_timestamp DESC;");
+
+        $return = array();
+        foreach($this->course_db->rows() as $row){
+            $return[] = new SimpleLateUser($this->core, $row);
+        }
+        return $return;
     }
 }
 

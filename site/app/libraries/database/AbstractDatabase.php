@@ -368,4 +368,17 @@ abstract class AbstractDatabase {
     public function getLastInsertId($name = null) {
         return $this->link->lastInsertId($name);
     }
+
+    /**
+     * This converts a Boolean to our DB representation and for how we represent bool. For DBs that don't support
+     * booleans, we generally use a tinyint(1) and just use 0/1 to represent it else we convert it to whatever
+     * works for that given database.
+     *
+     * @param $value
+     *
+     * @return string
+     */
+    public function convertBoolean($value) {
+        return ($value === true) ? 1 : 0;
+    }
 }

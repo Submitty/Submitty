@@ -183,4 +183,8 @@ class PostgresqlDatabase extends AbstractDatabase {
         $text = "{".implode(", ", $elements)."}";
         return $text;
     }
+
+    public function convertBoolean($value) {
+        return ($value === true) ? 'true' : 'false';
+    }
 }

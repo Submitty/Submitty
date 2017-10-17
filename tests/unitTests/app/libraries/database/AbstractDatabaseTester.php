@@ -310,4 +310,25 @@ SELECT * FROM test ORDER BY pid");
         $database->connect();
         $database->query("SELECT * FROM invalid_table");
     }
+
+    public function booleanConverts() {
+        return array(
+            array(true, 1),
+            array(1, 0),
+            array(false, 0),
+            array(null, 0),
+            array("a", 0)
+        );
+    }
+
+    /**
+     * @dataProvider booleanConverts
+     *
+     * @param $value
+     * @param $expected
+     */
+    public function testConvertBooleanFalseString($value, $expected) {
+        $database = new SqliteDatabase(array('memory' => true));
+        $this->assertEquals($expected, $database->convertBoolean($value));
+    }
 }

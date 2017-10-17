@@ -124,4 +124,25 @@ class PostgresqlDatabaseTester extends \PHPUnit_Framework_TestCase {
         $database = new PostgresqlDatabase();
         $this->assertEquals(array(null, null, null), $database->fromDatabaseToPHPArray('{null, NULL, NuLl}'));
     }
+
+    public function booleanConverts() {
+        return array(
+            array(true, 'true'),
+            array(1, 'false'),
+            array(false, 'false'),
+            array(null, 'false'),
+            array("a", 'false')
+        );
+    }
+
+    /**
+     * @dataProvider booleanConverts
+     *
+     * @param $value
+     * @param $expected
+     */
+    public function testConvertBooleanFalseString($value, $expected) {
+        $database = new PostgresqlDatabase();
+        $this->assertEquals($expected, $database->convertBoolean($value));
+    }
 }
