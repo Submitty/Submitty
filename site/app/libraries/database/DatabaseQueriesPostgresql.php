@@ -1243,7 +1243,7 @@ WHERE gcm_id=?", $params);
 
     public function getGreatestGradeableComponentMarkOrder(GradeableComponent $component) {
     	$this->course_db->query("
-    		SELECT MAX(gcm_order) FROM gradeable_component_mark WHERE gcm_id=? 
+    		SELECT MAX(gcm_order) as max FROM gradeable_component_mark WHERE gc_id=? 
     		", array($component->getId()));
     	$row = $this->course_db->row();
         return $row['max'];

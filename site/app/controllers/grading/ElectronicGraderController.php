@@ -738,6 +738,9 @@ class ElectronicGraderController extends AbstractController {
             $index = 0;
             // save existing marks
             foreach ($component->getMarks() as $mark) {
+                if ($index >= $_POST['num_existing_marks']) {
+                    break;
+                }
                 $mark->setPoints($_POST['marks'][$index]['points']);
                 $mark->setNote($_POST['marks'][$index]['note']);
                 $mark->setOrder($_POST['marks'][$index]['order']);
@@ -759,7 +762,7 @@ class ElectronicGraderController extends AbstractController {
                 $mark->setOrder($order_counter);
                 $mark_id = $mark->save();
                 $mark->setId($mark_id);
-                $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
+                $_POST['marks'][$i]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                 if($all_false === false) {
                     $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
                 }

@@ -555,7 +555,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
     else {
         var arr_length = $('tr[name=mark_'+num+']').length;
         var mark_data = new Array(arr_length);
-
+        var existing_marks_num = 0;
         for (var i = 0; i < arr_length; i++) {
             var current_row = $('#mark_id-'+num+'-'+i);
             var info_mark = $('#mark_info_id-'+num+'-'+i);
@@ -574,8 +574,14 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             };
             mark_data[i] = mark;
             info_mark[0].style.display = '';
+            if(delete_mark.length) {
+
+            } else {
+                existing_marks_num++;
+            }
             delete_mark.remove();
         }
+
         current_row = $('#mark_custom_id-'+num);
         var custom_points = current_row.find('input[name=mark_points_custom_'+num+']').val();
         var custom_message = current_row.find('textarea[name=mark_text_custom_'+num+']').val();
@@ -677,6 +683,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                 'custom_message' : custom_message,
                 'overwrite' : overwrite,
                 'marks' : mark_data,
+                'num_existing_marks' : existing_marks_num,
             },
             success: function(data) {
                 console.log("success for saving a mark");
