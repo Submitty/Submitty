@@ -602,9 +602,9 @@ HTML;
 HTML;*/
         if ($num > 1){
         $html_output .= <<<HTML
-                <!--
                 <a id="delete-{$num}" class="question-icon" onclick="deleteQuestion({$num});">
                 <i class="fa fa-times" aria-hidden="true"></i></a>
+                <!--
                 <a id="down-{$num}" class="question-icon" onclick="moveQuestionDown({$num});">
                 <i class="fa fa-arrow-down" aria-hidden="true"></i></a>       
                 <a id="up-{$num}" class="question-icon" onclick="moveQuestionUp({$num});">
@@ -2204,9 +2204,9 @@ $('#gradeable-form').on('submit', function(e){
                 <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
                 -->\
                 <div id="pdf_page_'+newQ+'" class="pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_'+newQ+'" value="1" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div> \
-                <!--\
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <i class="fa fa-times" aria-hidden="true"></i></a> \
+                    <!--\
                 <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \
                     <i class="fa fa-arrow-down" aria-hidden="true"></i></a> \
                 <a id="up-'+newQ+'" class="question-icon" onclick="moveQuestionUp('+newQ+');"> \
