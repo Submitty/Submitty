@@ -2,8 +2,7 @@
 var cookie_version = 1;
 
 //Set positions and visibility of configurable ui elements
-$(document).ready(function(){
-
+$(function() {
     //Check each cookie and test for 'undefined'. If any cookie is undefined
     $.each(document.cookie.split(/; */), function(){
         var cookie = this.split("=")

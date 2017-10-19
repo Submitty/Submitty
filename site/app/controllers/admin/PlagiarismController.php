@@ -15,7 +15,7 @@ class PlagiarismController extends AbstractController {
                 $this->plagiarismIndex();
                 break;
             default:
-                $this->core->getOutput()->addBreadcrumb('Plagiarism');
+                $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
                 $this->plagiarismTree();
                 break;
         }
