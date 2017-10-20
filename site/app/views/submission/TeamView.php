@@ -54,7 +54,7 @@ HTML;
         foreach ($team->getMembers() as $teammate) {
             $teammate = $this->core->getQueries()->getUserById($teammate);
             $return .= <<<HTML
-        <span>&emsp;{$teammate->getFirstName()} {$teammate->getLastName()} ({$teammate->getId()}) - {$teammate->getEmail()}</span> <br />
+        <span>&emsp;{$teammate->getDisplayedFirstName()} {$teammate->getLastName()} ({$teammate->getId()}) - {$teammate->getEmail()}</span> <br />
 HTML;
         }
         //Team invitations status
