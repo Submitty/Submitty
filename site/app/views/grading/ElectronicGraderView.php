@@ -584,10 +584,15 @@ HTML;
                     $btn_class = "btn-default";
                     if($row->validateVersions()) {
                         $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-			$graded += $row->getGradedTAPoints();
+			            $graded += $row->getGradedTAPoints();
                     }
                     else{
-                        $contents = "Version Conflict";
+                        if(!$row->isFullyGraded()){
+                            $contents = "Not Fully Graded";
+                        }
+                        else{
+                            $contents = "Version Conflict";
+                        }
                     }
                 }
                 else {
