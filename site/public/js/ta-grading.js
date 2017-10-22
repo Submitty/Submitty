@@ -314,14 +314,14 @@ function handleKeyPress(key) {
             break;
         case "KeyR":
             $('.fa-list-alt').addClass('icon-selected');
-            $("#autograding_results").attr("style", "left:15px; top:175px; width:48%; height:37%; display:block;");
+            $("#autograding_results").attr("style", "z-index:30; left:15px; top:175px; width:48%; height:37%; display:block;");
             $('.fa-pencil-square-o').addClass('icon-selected');
-            $("#grading_rubric").attr("style", "right:15px; top:175px; width:48%; height:37%; display:block;");
+            $("#grading_rubric").attr("style", "right:15px; z-index:30; top:175px; width:48%; height:37%; display:block;");
             $('.fa-folder-open').addClass('icon-selected');
-            $("#submission_browser").attr("style", "left:15px; bottom:40px; width:48%; height:30%; display:block;");
+            $("#submission_browser").attr("style", "left:15px; z-index:30; bottom:40px; width:48%; height:30%; display:block;");
             $('.fa-user').addClass('icon-selected');
             $('.grading_toolbar').attr("style", "position:fixed; z-index:40; top: 125px; left: 0px; height: 41px; width: 290px; display:block;");
-            $("#student_info").attr("style", "right:15px; bottom:40px; width:48%; height:30%; display:block;");
+            $("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
             updateHandle("#autograding_results");
             updateHandle("#grading_rubric");
             updateHandle("#submission_browser");
