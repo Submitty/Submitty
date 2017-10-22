@@ -4,7 +4,9 @@
     left: 0px;
     height: 41px;
     width: 290px;
-    z-index: 1;
+    z-index: 40;
+    cursor: move;
+    border-bottom: solid 9px #757575;
     background-color: #edf6f6;
 }
 
@@ -101,7 +103,7 @@
     left: 290px;
     height: 31px;
     width: 250px;
-    z-index: 1;
+    z-index: 20;
     background-color: #edf6f6;
     border: 5px solid #edf6f6;
 }
@@ -123,6 +125,7 @@ progress::-webkit-progress-value {
     position: absolute;
     background-color: #E9EFEF;
     display: none;
+    z-index: 30;
     overflow:auto;
     opacity: 0.95;
 }
