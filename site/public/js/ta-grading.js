@@ -35,6 +35,7 @@ $(function() {
     $('#submission_browser').css({'z-index':'30'});
     $('#student_info').css({'z-index':'30'});
     $('#grading_rubric').css({'z-index':'30'});
+    $('.grading_toolbar').css({'z-index':'40'});
     $('#footer').css({'position':'fixed', 'z-index':'10'});
 
     calculatePercentageTotal();
@@ -43,6 +44,8 @@ $(function() {
     $(".progress-value").html("<b>" + value + '%</b>');
 
     $( ".draggable" ).draggable({snap:false, grid:[2, 2], stack:".draggable"}).resizable();
+
+    $(".grading_toolbar").resizable("destroy"); //We don't want the toolbar to be resizable
 
     $(".draggable").on("dragstop", function(){
         updateCookies();
@@ -104,6 +107,12 @@ function readCookies(){
     var status_height = document.cookie.replace(/(?:(?:^|.*;\s*)status_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var status_visible = document.cookie.replace(/(?:(?:^|.*;\s*)status_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
+    var grading_toolbar_top = document.cookie.replace(/(?:(?:^|.*;\s*)grading_toolbar_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var grading_toolbar_left = document.cookie.replace(/(?:(?:^|.*;\s*)grading_toolbar_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var grading_toolbar_width = document.cookie.replace(/(?:(?:^|.*;\s*)grading_toolbar_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var grading_toolbar_height = document.cookie.replace(/(?:(?:^|.*;\s*)grading_toolbar_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var grading_toolbar_visible = document.cookie.replace(/(?:(?:^|.*;\s*)grading_toolbar_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
     var overwrite = document.cookie.replace(/(?:(?:^|.*;\s*)overwrite\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -137,6 +146,12 @@ function readCookies(){
     (status_width) ? $("#student_info").css("width", status_width):{};
     (status_height) ? $("#student_info").css("height", status_height):{};
     (status_visible) ? $("#student_info").css("display", status_visible):{};
+
+    (grading_toolbar_top) ? $(".grading_toolbar").css("top", grading_toolbar_top):{};
+    (grading_toolbar_left) ? $(".grading_toolbar").css("left", grading_toolbar_left):{};
+    (grading_toolbar_width) ? $(".grading_toolbar").css("width", grading_toolbar_width):{};
+    (grading_toolbar_height) ? $(".grading_toolbar").css("height", grading_toolbar_height):{};
+    (grading_toolbar_visible) ? $(".grading_toolbar").css("display", grading_toolbar_visible):{};
 
     (output_visible) ? ((output_visible) == "none" ? $(".fa-list-alt").removeClass("icon-selected") : $(".fa-list-alt").addClass("icon-selected")) : {};
     (files_visible) ? ((files_visible) == "none" ? $(".fa-folder-open").removeClass("icon-selected") : $(".fa-folder-open").addClass("icon-selected")) : {};
@@ -221,6 +236,12 @@ function updateCookies(){
     document.cookie = "status_height=" + $("#student_info").css("height") + "; path=/;";
     document.cookie = "status_visible=" + $("#student_info").css("display") + "; path=/;";
 
+    document.cookie = "grading_toolbar_top=" + $(".grading_toolbar").css("top") + "; path=/;";
+    document.cookie = "grading_toolbar_left=" + $(".grading_toolbar").css("left") + "; path=/;";
+    document.cookie = "grading_toolbar_width=" + $(".grading_toolbar").css("width") + "; path=/;";
+    document.cookie = "grading_toolbar_height=" + $(".grading_toolbar").css("height") + "; path=/;";
+    document.cookie = "grading_toolbar_visible=" + $(".grading_toolbar").css("display") + "; path=/;";
+
     var overwrite = "on";
     if ($('#overwrite-id').is(":checked")) {
         overwrite = "on";
@@ -299,6 +320,7 @@ function handleKeyPress(key) {
             $('.fa-folder-open').addClass('icon-selected');
             $("#submission_browser").attr("style", "left:15px; bottom:40px; width:48%; height:30%; display:block;");
             $('.fa-user').addClass('icon-selected');
+            $('.grading_toolbar').attr("style", "position:fixed; z-index:40; top: 125px; left: 0px; height: 41px; width: 290px; display:block;");
             $("#student_info").attr("style", "right:15px; bottom:40px; width:48%; height:30%; display:block;");
             updateHandle("#autograding_results");
             updateHandle("#grading_rubric");
