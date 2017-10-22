@@ -29,7 +29,6 @@ $(function() {
 
     $('body').css({'position':'fixed', 'width':'100%'});
     $('#header').css({'position':'fixed', 'z-index':'10'});
-    $('.grading_toolbar').css({'z-index':'20'});
     $('.progress_bar').css({'z-index':'20'});
     $('#autograding_results').css({'z-index':'30'});
     $('#submission_browser').css({'z-index':'30'});
