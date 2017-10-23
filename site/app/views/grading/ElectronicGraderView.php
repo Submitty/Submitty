@@ -588,7 +588,7 @@ HTML;
                     }
                     else{
                         if(!$row->isFullyGraded()){
-                            $contents = "Not Fully Graded";
+                            $contents = "Grading Incomplete";
                         }
                         else{
                             $contents = "Version Conflict";
