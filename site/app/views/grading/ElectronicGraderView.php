@@ -968,13 +968,13 @@ HTML;
                 foreach ($gradeable->getTeam()->getMembers() as $team_member) {
                     $team_member = $this->core->getQueries()->getUserById($team_member);
                     $return .= <<<HTML
-                &emsp;{$team_member->getFirstName()} {$team_member->getLastName()} ({$team_member->getId()})<br/>
+                &emsp;{$team_member->getDisplayedFirstName()} {$team_member->getLastName()} ({$team_member->getId()})<br/>
 HTML;
                 }
             }
             else {
                 $return .= <<<HTML
-                <b>{$user->getFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
+                <b>{$user->getDisplayedFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
 HTML;
             }
 
