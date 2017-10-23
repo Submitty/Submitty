@@ -132,7 +132,7 @@ class GradeableComponent extends AbstractModel {
         }
 
         if (isset($details['array_gcm_id'])) {
-            $mark_fields = array('gcm_id', 'gc_id', 'gcm_points',
+            $mark_fields = array('gcm_id', 'gc_id', 'gcm_points', 'gcm_publish',
                                     'gcm_note', 'gcm_order');
             foreach ($mark_fields as $key) {
                 $details["array_{$key}"] = explode(',', $details["array_{$key}"]);
@@ -183,24 +183,40 @@ class GradeableComponent extends AbstractModel {
         return $points;
     }
 
-    public function getGradedTAComments($nl) {
+    public function getGradedTAComments($nl, $show_students) {
         $text = "";
         $first_text = true;
         foreach ($this->marks as $mark) {
             if($mark->getHasMark() === true) {
                 if ($first_text === true) {
                     if (floatval($mark->getPoints()) == 0) {
-                        $text .= "* " . $mark->getNote();
+                        $text .= "(*) " . $mark->getNote();
                     } else {
-                        $text .= "* (" . $mark->getPoints() . ") " . $mark->getNote();
+                        $text .= "(*) (" . $mark->getPoints() . ") " . $mark->getNote();
                     }
                     $first_text = false;
                 }
                 else {
                     if (floatval($mark->getPoints()) == 0) {
-                        $text .= $nl . "* " . $mark->getNote();
+                        $text .= $nl . "(*) " . $mark->getNote();
                     } else {
-                        $text .= $nl . "* (" . $mark->getPoints() . ") " . $mark->getNote();
+                        $text .= $nl . "(*) (" . $mark->getPoints() . ") " . $mark->getNote();
+                    }
+                }
+            } else if ($show_students === true && $mark->getPublish() === 't') {
+                if ($first_text === true) {
+                    if (floatval($mark->getPoints()) == 0) {
+                        $text .= "( ) " . $mark->getNote();
+                    } else {
+                        $text .= "( ) (" . $mark->getPoints() . ") " . $mark->getNote();
+                    }
+                    $first_text = false;
+                }
+                else {
+                    if (floatval($mark->getPoints()) == 0) {
+                        $text .= $nl . "( ) " . $mark->getNote();
+                    } else {
+                        $text .= $nl . "( ) (" . $mark->getPoints() . ") " . $mark->getNote();
                     }
                 }
             }

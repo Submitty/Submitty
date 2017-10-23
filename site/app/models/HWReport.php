@@ -147,7 +147,7 @@ class HWReport extends AbstractModel {
                         foreach($component as $peer_comp){
                             $stu_count++;
                             $peer_score += $peer_comp->getGradedTAPoints();
-                            $temp_notes .= "Student " . $stu_count . "'s score: " . $peer_comp->getGradedTAPoints() . $nl . $peer_comp->getGradedTAComments($nl) . $nl;
+                            $temp_notes .= "Student " . $stu_count . "'s score: " . $peer_comp->getGradedTAPoints() . $nl . $peer_comp->getGradedTAComments($nl, true) . $nl;
                         }
                         $temp_score = $peer_score/$stu_count;
                         $title = $component[0]->getTitle();
@@ -159,7 +159,7 @@ class HWReport extends AbstractModel {
                         $max_value = $component->getMaxValue();
                         $student_comment = $component->getStudentComment();
                         $temp_score = $component->getGradedTAPoints();
-                        $temp_notes = $component->getGradedTAComments($nl) . $nl;
+                        $temp_notes = $component->getGradedTAComments($nl, true) . $nl;
                     }
                     
                     $student_output_ta .= $title . " [ " . $temp_score . " / " . $max_value . " ] ";

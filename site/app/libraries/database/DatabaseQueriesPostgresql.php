@@ -265,6 +265,7 @@ SELECT";
   gc.array_array_gc_id,
   gc.array_array_gcm_points,
   gc.array_array_gcm_note,
+  gc.array_array_gcm_publish,
   gc.array_array_gcm_order";
         if ($user_ids !== null) {
             $query .= ",
@@ -328,9 +329,10 @@ LEFT JOIN (
     array_agg(array_gc_id) AS array_array_gc_id,
     array_agg(array_gcm_points) AS array_array_gcm_points,
     array_agg(array_gcm_note) AS array_array_gcm_note,
+    array_agg(array_gcm_publish) AS array_array_gcm_publish,
     array_agg(array_gcm_order) AS array_array_gcm_order
   FROM
-  (SELECT gc.*, gcm.array_gcm_id, gcm.array_gc_id, gcm.array_gcm_points, array_gcm_note, array_gcm_order
+  (SELECT gc.*, gcm.array_gcm_id, gcm.array_gc_id, gcm.array_gcm_points, array_gcm_note, array_gcm_order, array_gcm_publish
   FROM gradeable_component AS gc
   LEFT JOIN(
     SELECT
@@ -339,6 +341,7 @@ LEFT JOIN (
       array_to_string(array_agg(gc_id), ',') as array_gc_id,
       array_to_string(array_agg(gcm_points), ',') as array_gcm_points,
       array_to_string(array_agg(gcm_note), ',') as array_gcm_note,
+      array_to_string(array_agg(gcm_publish), ',') as array_gcm_publish,
       array_to_string(array_agg(gcm_order), ',') as array_gcm_order
     FROM gradeable_component_mark
     GROUP BY gc_id
@@ -1220,19 +1223,32 @@ UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?
     }
 
     public function createGradeableComponentMark(GradeableComponentMark $mark) {
-        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder());
+        $bool_value = var_export($mark->getPublish(), true);
+        if ($bool_value == "'t'") {
+            $bool_value = 'true';
+        }
+        if ($bool_value == "'f'") {
+            $bool_value = 'false';
+        }
+        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder(), $bool_value);
 
         $this->course_db->query("
-INSERT INTO gradeable_component_mark (gc_id, gcm_points, gcm_note, gcm_order)
-VALUES (?, ?, ?, ?)", $params);
+INSERT INTO gradeable_component_mark (gc_id, gcm_points, gcm_note, gcm_order, gcm_publish)
+VALUES (?, ?, ?, ?, ?)", $params);
         return $this->course_db->getLastInsertId();
     }
 
     public function updateGradeableComponentMark(GradeableComponentMark $mark) {
-        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder(), $mark->getId());
-
+        $bool_value = var_export($mark->getPublish(), true);
+        if ($bool_value == "'t'") {
+            $bool_value = 'true';
+        }
+        if ($bool_value == "'f'") {
+            $bool_value = 'false';
+        }
+        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder(), $bool_value, $mark->getId());
         $this->course_db->query("
-UPDATE gradeable_component_mark SET gc_id=?, gcm_points=?, gcm_note=?, gcm_order=?
+UPDATE gradeable_component_mark SET gc_id=?, gcm_points=?, gcm_note=?, gcm_order=?, gcm_publish=?
 WHERE gcm_id=?", $params);
     }
 

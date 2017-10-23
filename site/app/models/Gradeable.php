@@ -354,13 +354,13 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp', 'gc_default', 'gc_max_value', 'gc_upper_clamp', 
-                'gc_is_text', 'gc_is_peer','gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 
+                'gc_is_text', 'gc_is_peer','gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_publish',
                 'array_gcm_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version','gcd_grade_time', 
                 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname', 'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
 
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp',
                                       'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_peer', 'gc_is_text', 'gc_order', 'gc_page', 'array_gcm_id', 
-                                      'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
+                                      'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_publish', 'array_gcm_order');
             $user_fields = array('user_id', 'anon_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
