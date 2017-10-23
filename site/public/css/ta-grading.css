@@ -8,7 +8,7 @@
     background-color: #edf6f6;
 }
 
-.grading_toolbar i:not(.icon-disabled):hover{
+.grading_toolbar i:not(.icon-disabled):hover {
     cursor: pointer;
     box-shadow: 0px 0px 5px 5px yellow;
     background-color: yellow;
@@ -96,7 +96,7 @@
 }
 
 .progress_bar {
-    position:fixed;
+    position: fixed;
     top: 125px;
     left: 290px;
     height: 31px;

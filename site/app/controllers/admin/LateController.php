@@ -9,9 +9,11 @@ class LateController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'view_late':
+                $this->core->getOutput()->addBreadcrumb('Late Days Allowed');
                 $this->viewLateDays();
                 break;
             case 'view_extension':
+                $this->core->getOutput()->addBreadcrumb('Excused Absense Extensions');
                 $this->viewExtensions();
                 break;
             case 'update_late':
