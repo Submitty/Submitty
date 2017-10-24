@@ -1269,7 +1269,6 @@ HTML;
                             Add New Common Mark</span>
                         </td>
                     </tr>
-
 HTML;
             }
             $return .= <<<HTML
