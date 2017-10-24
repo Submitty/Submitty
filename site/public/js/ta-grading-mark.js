@@ -687,6 +687,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             },
             success: function(data) {
                 console.log("success for saving a mark");
+                console.log(existing_marks_num);
                 console.log(data);
                 data = JSON.parse(data);
                 if (data['modified'] === true) {
