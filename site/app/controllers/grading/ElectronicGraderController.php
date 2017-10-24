@@ -738,8 +738,10 @@ class ElectronicGraderController extends AbstractController {
             $index = 0;
             // save existing marks
             foreach ($component->getMarks() as $mark) {
-                if ($index >= $_POST['num_existing_marks']) {
-                    break;
+                if (isset($_POST['num_existing_marks'])) {
+                    if ($index >= $_POST['num_existing_marks']) {
+                        break;
+                    }   
                 }
                 $mark->setPoints($_POST['marks'][$index]['points']);
                 $mark->setNote($_POST['marks'][$index]['note']);
