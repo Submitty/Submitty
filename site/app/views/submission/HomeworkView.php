@@ -104,8 +104,16 @@ HTML;
                     $student_without_ids[] = $student->getId();
                 }
 
+                $student_without_full = array();
+                foreach ($students_without as $student) {
+                    $student_without_full[] = array('value' => $student->getId(),
+                                                    'label' => $student->getDisplayedFirstName().' '.$student->getLastName().' <'.$student->getId().'>');
+                }
+
                 $student_ids = json_encode($student_ids);
                 $student_without_ids = json_encode($student_without_ids);
+                $student_without_full = json_encode($student_without_full);
+
                 $return .= <<<HTML
     <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
         <div >
@@ -140,10 +148,11 @@ HTML;
 HTML;
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             var cookie = document.cookie;
             student_ids = {$student_ids};
             student_without_ids = {$student_without_ids};
+            student_without_full = {$student_without_full};
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
@@ -386,7 +395,7 @@ HTML;
                     && $current_version_number > 0 && $this->core->getConfig()->keepPreviousFiles()) {
                     $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             setUsePrevious();
             {$old_files}
         });
@@ -395,7 +404,7 @@ HTML;
                 }
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             setButtonStatus();
         });
     </script>
@@ -479,7 +488,7 @@ HTML;
                                 {$num_components});
             }
         }
-        $(document).ready(function() {
+        $(function() {
             $("#submit").click(function(e){ // Submit button
                 var user_id = "";
                 var repo_id = "";
@@ -592,11 +601,11 @@ HTML;
                 }
                 $return .= <<<HTML
 <script type="text/javascript">
-    $(document).ready(function() {
+    $(function() {
         $("#bulkForm input").autocomplete({
-            source: student_without_ids
+            source: student_without_full
         });
-        $("#bulkForm button").click(function(e){
+        $("#bulkForm button").click(function(e) {
             var btn = $(document.activeElement);
             var id = btn.attr("id");
             var count = btn.parent().parent().index()+1;
@@ -706,7 +715,7 @@ HTML;
             if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentSubmit()) {
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             $("#do_not_grade").prop("disabled", true);
             $("#version_change").prop("disabled", true);
         });
@@ -717,7 +726,7 @@ HTML;
             if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentAnyVersion()) {
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             $('select[name=submission_version]').hide();
             $('#do_not_grade').hide();
             $('#version_change').hide();
@@ -928,7 +937,7 @@ HTML;
                                     $version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
                                 $return.= <<<HTML
             <script type="text/javascript">
-                $(document).ready(function() {
+                $(function() {
                     $('#incentive_message').show();
                 });
             </script>
