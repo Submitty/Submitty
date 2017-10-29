@@ -94,8 +94,8 @@ ORDER BY u.registration_section, u.user_id");
     public function insertSubmittyUser(User $user) {
         $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
                        $user->getLastName(), $user->getEmail(),
-                       Utils::convertBooleanToDB($user->isUserUpdated()),
-                       Utils::convertBooleanToDB($user->isInstructorUpdated()));
+                       $this->submitty_db->convertBoolean($user->isUserUpdated()),
+                       $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
 
         $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email, user_updated, instructor_updated)
                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $array);
@@ -103,7 +103,7 @@ ORDER BY u.registration_section, u.user_id");
 
     public function insertCourseUser(User $user, $semester, $course) {
         $params = array($semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
-                        Utils::convertBooleanToDB($user->isManualRegistration()));
+                        $this->submitty_db->convertBoolean($user->isManualRegistration()));
         $this->submitty_db->query("
 INSERT INTO courses_users (semester, course, user_id, user_group, registration_section, manual_registration)
 VALUES (?,?,?,?,?,?)", $params);
@@ -116,8 +116,8 @@ VALUES (?,?,?,?,?,?)", $params);
     public function updateUser(User $user, $semester=null, $course=null) {
         $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
                        $user->getLastName(), $user->getEmail(),
-                       Utils::convertBooleanToDB($user->isUserUpdated()),
-                       Utils::convertBooleanToDB($user->isInstructorUpdated()),
+                       $this->submitty_db->convertBoolean($user->isUserUpdated()),
+                       $this->submitty_db->convertBoolean($user->isInstructorUpdated()),
                        $user->getId());
         $this->submitty_db->query("
 UPDATE users 
@@ -129,7 +129,7 @@ WHERE user_id=?", $array);
 
         if (!empty($semester) && !empty($course)) {
             $params = array($user->getGroup(), $user->getRegistrationSection(),
-                            Utils::convertBooleanToDB($user->isManualRegistration()), $semester, $course,
+                            $this->submitty_db->convertBoolean($user->isManualRegistration()), $semester, $course,
                             $user->getId());
             $this->submitty_db->query("
 UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?
