@@ -984,6 +984,37 @@ class Gradeable extends AbstractModel {
         
     }
 
+    public function isFullyGraded()
+    {
+        if($this->peer_grading) {
+            foreach($this->components as $cmpt) {
+                if(is_array($cmpt)) {
+                    foreach($cmpt as $graded_by) {
+                        if($graded_by->getGradedVersion() == -1) {
+                            return false;
+                        }
+                    }
+                }
+                else {
+                    if($cmpt->getGradedVersion() == -1) {
+                        if($cmpt->getTitle() != "Grading Complete"){
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        else {
+            foreach($this->components as $component) {
+                if($component->getGradedVersion() == -1) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
     //save all the information in this gradeable and the gradeable components. Used in tests and text/numeric where the whole gradeable is saved at the same time rather than by component
     public function saveData() {
         $this->core->getCourseDB()->beginTransaction();
