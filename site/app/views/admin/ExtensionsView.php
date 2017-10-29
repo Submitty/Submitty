@@ -21,7 +21,7 @@ class ExtensionsView extends AbstractView {
 HTML;
         foreach($g_ids as $index => $value) {
             $return .= <<<HTML
-                    <option value="$value[0]">$value[0]</option>
+                    <option value="{$value['g_id']}">{$value['g_title']}</option>
 HTML;
         }
         $return .= <<<HTML

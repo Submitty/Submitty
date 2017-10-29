@@ -1258,6 +1258,8 @@ ORDER BY gt.{$section_key}", $params);
 
     /**
      * Return an array of users with late days
+     *
+     * @return array
      */
     public function getUsersWithLateDays() {
       throw new NotImplementedException();
