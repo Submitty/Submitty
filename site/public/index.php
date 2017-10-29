@@ -42,6 +42,7 @@ $core = new Core();
 function exception_handler($throwable) {
     global $core;
     $message = ExceptionHandler::handleException($throwable);
+
     // Any exceptions that always get shown we need to make sure to escape, especially for production
     if (is_a($throwable, '\app\exceptions\BaseException')) {
         /** @var BaseException $throwable */
@@ -89,25 +90,28 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
  * and then we initialize our Output engine (as it requires Core to run) and then set the
  * paths for the Logger and ExceptionHandler
  */
+
+/** @noinspection PhpUnhandledExceptionInspection */
 $core->loadConfig($semester, $course);
+/** @noinspection PhpUnhandledExceptionInspection */
 $core->loadAuthentication();
 
-    if($core->getConfig()->getInstitutionName() !== ""){
-        $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), "");
-        $core->getOutput()->addBreadcrumb("", $core->getConfig()->getInstitutionHomepage(),false, true);
-    }
-    $core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
-    if($core->getConfig()->isCourseLoaded()){
-        $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildUrl());
-        $core->getOutput()->addBreadcrumb("", $core->getConfig()->getCourseHomeUrl(),false, true);
-    }
-
+if($core->getConfig()->getInstitutionName() !== ""){
+    $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), "");
+    $core->getOutput()->addBreadcrumb("", $core->getConfig()->getInstitutionHomepage(),false, true);
+}
+$core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
+if($core->getConfig()->isCourseLoaded()){
+    $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildUrl());
+    $core->getOutput()->addBreadcrumb("", $core->getConfig()->getCourseHomeUrl(),false, true);
+}
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 
+/** @noinspection PhpUnhandledExceptionInspection */
 $core->loadDatabases();
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
