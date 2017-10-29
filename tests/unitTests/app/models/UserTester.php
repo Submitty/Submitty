@@ -24,7 +24,7 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => "{1,2}"
+            'grading_registration_sections' => array(1, 2)
         );
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
@@ -58,7 +58,7 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => "{1,2}"
+            'grading_registration_sections' => array(1,2)
         );
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
@@ -81,7 +81,7 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => "{1,2}"
+            'grading_registration_sections' => array(1,2)
         );
         $user = new User($this->core, $details);
         $this->assertTrue(password_verify("test", $user->getPassword()));
@@ -105,7 +105,7 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => "{1,2}"
+            'grading_registration_sections' => array(1,2)
         );
         $user = new User($this->core, $details);
         $actual = $user->toArray();
