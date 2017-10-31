@@ -209,6 +209,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $students = array();
+        //If we are peer grading, load in all students to be graded by this peer.
         if ($peer) {
             $student_ids = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
             $graders = array();
@@ -485,6 +486,7 @@ class ElectronicGraderController extends AbstractController {
     }
 
     public function showGrading() {
+        $time_delta = microtime();
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $peer = false;
@@ -513,27 +515,31 @@ class ElectronicGraderController extends AbstractController {
         }
         else if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
-            $sections = $this->core->getUser()->getGradingRegistrationSections();
             if ($this->core->getUser()->accessAdmin() && $sections == null) {
                 $sections = $this->core->getQueries()->getRegistrationSections();
                 for ($i = 0; $i < count($sections); $i++) {
                     $sections[$i] = $sections[$i]['sections_registration_id'];
                 }
             }
-            $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            else{
+                $sections = $this->core->getUser()->getGradingRegistrationSections();
+            }
+            $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections,$orderBy="registration_section,user_id;");
             $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section'));
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section'));
         }
         else {
             $section_key = "rotating_section";
-            $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
             if ($this->core->getUser()->accessAdmin() && $sections == null) {
                 $sections = $this->core->getQueries()->getRotatingSections();
                 for ($i = 0; $i < count($sections); $i++) {
                     $sections[$i] = $sections[$i]['sections_rotating_id'];
                 }
             }
-            $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            else{
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+            }
+            $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections,$orderBy="registration_section,user_id;");
             $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
         }
@@ -549,7 +555,7 @@ class ElectronicGraderController extends AbstractController {
         if(!$peer) {
             $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
         }
-        $gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
+        //$gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
         $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
         //$who_id = isset($who_id[$_REQUEST['who_id']]) ? $who_id[$_REQUEST['who_id']] : "";
@@ -565,24 +571,57 @@ class ElectronicGraderController extends AbstractController {
         $prev_id = "";
         $next_id = "";
         $break_next = false;
-        foreach ($gradeables_to_grade as $g) {
-            $id = $g->getUser()->getId();
-            if ($break_next) {
-                $next_id = $id;
-                break;
-            }
-            if (($who_id === "" && !$g->beenTAgraded()) || $who_id === $id) {
-                $who_id = $id;
-                $break_next = true;
-            }
-            else {
-                $prev_id = $id;
+        if($who_id === ""){
+            $this->core->addMessage("Finished grading for {$gradeable->getName()}");
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 
+                'gradeable_id' => $gradeable_id)));
+        }
+        else{
+            $index = array_search($who_id, $user_ids_to_grade);
+            if($index === false){
+                //If we couldn't find the student in our sections, see if they're in the null section.
+                $null_section = $this->core->getQueries()->getUsersInNullSection();
+                $null_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $null_section);
+                $index = array_search($who_id, $null_ids_to_grade);
+
+                //If they are not in the null section, error.
+                if($index === false){
+                    $this->core->addErrorMessage("ERROR: student ({$who_id}) not found.");
+                    $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+                }
+                else{
+                    //otherwise, access the null section.
+                    $user_ids_to_grade = $null_ids_to_grade;
+                }
+
+                
             }
         }
-        if ($who_id === "") {
-            $this->core->addSuccessMessage("Finished grading for {$gradeable->getName()}");
-            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+
+        if($index > 0){
+            $prev_id = $user_ids_to_grade[$index-1];
         }
+        if($index < count($user_ids_to_grade)-1){
+            $next_id = $user_ids_to_grade[$index+1];
+        }
+        // echo("Searching for " . $who_id);
+        // var_dump($index);
+         // var_dump($user_ids_to_grade);
+         // exit(1);
+        // foreach ($gradeables_to_grade as $g) {
+        //     $id = $g->getUser()->getId();
+        //     if ($break_next) {
+        //         $next_id = $id;
+        //         break;
+        //     }
+        //     if (($who_id === "" && !$g->beenTAgraded()) || $who_id === $id) {
+        //         $who_id = $id;
+        //         $break_next = true;
+        //     }
+        //     else {
+        //         $prev_id = $id;
+        //     }
+        // }
 
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
         $gradeable->loadResultDetails();
@@ -604,6 +643,9 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $this->core->getOutput()->addBreadcrumb($nameBreadCrumb);
+
+        $time_delta = microtime() - $time_delta;
+        var_dump($time_delta);        
 
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual);
