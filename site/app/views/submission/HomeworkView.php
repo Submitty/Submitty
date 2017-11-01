@@ -924,7 +924,10 @@ HTML;
                 else {
                     if ($gradeable->hasIncentiveMessage() && $gradeable->getActiveVersion() > 0) {
                         foreach ($gradeable->getVersions() as $version) {
-                            if ($version->getNonHiddenTotal() >= $gradeable->getMinimumPoints() && 
+//		     $return .= <<<HTML
+//		"select total=".{$version->getSelectTotal()}
+//HTML;
+                            if ($version->getSelectTotal() >= $gradeable->getMinimumPoints() && 
                                     $version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
                                 $return.= <<<HTML
             <script type="text/javascript">

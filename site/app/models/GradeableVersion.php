@@ -34,6 +34,8 @@ class GradeableVersion extends AbstractModel {
     protected $hidden_non_extra_credit = 0;
     /** @property @var float */
     protected $hidden_extra_credit = 0;
+    /** @property @var float */
+    protected $early_incentive_total = 0;
     /** @property
      * @var \DateTime
      */
@@ -64,6 +66,7 @@ class GradeableVersion extends AbstractModel {
         $this->hidden_non_extra_credit = $details['autograding_hidden_non_extra_credit'];
         $this->hidden_extra_credit = $details['autograding_hidden_extra_credit'];
         $this->submission_time = $details['submission_time'];
+	//$this->early_incentive_total = $details['early_incentive_total'];
         // We add a 5 minute buffer for submissions before they're considered "late"
         $extended_due_date = clone $due_date;
         $this->days_late = DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);
@@ -76,6 +79,10 @@ class GradeableVersion extends AbstractModel {
         }
         
         $this->active = isset($details['active_version']) && $details['active_version'] === true;
+    }
+
+    public function getEarlyIncentiveTotal() {
+    	return $early_incentive_total;
     }
 
     public function getNonHiddenTotal() {

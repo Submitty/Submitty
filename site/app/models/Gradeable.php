@@ -205,6 +205,8 @@ class Gradeable extends AbstractModel {
     protected $minimum_days_early = 0;
     /** @property @var int Minimum points that a submission must have to get the incentive message */
     protected $minimum_points = 0;
+    /** @property @var int[] test cases that should be summed when determining if student has achieved early submission threshold */
+    protected $early_submission_test_cases = array();
 
     /** @property @var string[] */
     protected $part_names = array();
@@ -481,6 +483,7 @@ class Gradeable extends AbstractModel {
             $this->incentive_message = Utils::prepareHtmlString($details['early_submission_incentive']['message']);
             $this->minimum_days_early = intval($details['early_submission_incentive']['minimum_days_early']);
             $this->minimum_points = intval($details['early_submission_incentive']['minimum_points']);
+	    $this->early_submission_test_cases = $details['early_submission_incentive']['test_cases'];
         }
 
         $num_parts = 1;
