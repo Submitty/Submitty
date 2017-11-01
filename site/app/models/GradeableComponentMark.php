@@ -6,6 +6,10 @@ use app\libraries\Core;
 /**
  * Class GradeableComponentMark
  *
+ * @method int getId()
+ * @method int getGcId()
+ * @method int getOrder()
+ * @method float getPoints()
  */
 
 class GradeableComponentMark extends AbstractModel {

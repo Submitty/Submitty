@@ -1,0 +1,57 @@
+{
+    // 2 mb maximum submission size
+    "max_submission_size" : 2000000,
+
+    "resource_limits" : {
+	"RLIMIT_FSIZE" : 200000000
+    },
+
+    "autograding" : {
+	"submission_to_compilation" : [ "*.pdf" ],
+	"submission_to_runner" : [ "*.pdf" ],
+	"submission_to_validation" : [ "*.pdf" ],
+	"work_to_details" : [
+	    "*test_template.pdf", "*student_file.pdf" ]
+    },
+
+    "assignment_message" : "Prepare a 2 page, black & white, 8.5x11”, portrait orientation, max size = 2MB .pdf of notes you would like to have during the test.",
+    "testcases" : [
+	{
+	    "title" : "Did you submit .pdf file?",
+	    "command" : [ "mv *.pdf student_file.pdf" ],
+	    "points" : 1,
+	    "validation": [
+		{
+                    "actual_file": "student_file.pdf",
+                    "deduction": 1.0,
+                    "description": "uploaded file",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                }
+	    ]
+	},
+        {
+	    "title" : "Can we attach your notes page to a sample test?",
+	    "command" : [ //"mv *.pdf student_file.pdf",
+			  "pdflatex test_template.tex" ],
+	    "points" : 1,
+	    "validation": [
+                {
+                    "actual_file": "test_template.pdf",
+                    "deduction": 1.0,
+                    "description": "Test with your notes attached at the back",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                }
+	    ]
+	}
+    ] 
+}
