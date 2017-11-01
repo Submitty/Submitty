@@ -28,14 +28,6 @@ $(function() {
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-    $('#header').css({'position':'fixed', 'z-index':'10'});
-    $('.progress_bar').css({'z-index':'20'});
-    $('#autograding_results').css({'z-index':'30'});
-    $('#submission_browser').css({'z-index':'30'});
-    $('#student_info').css({'z-index':'30'});
-    $('#grading_rubric').css({'z-index':'30'});
-    $('.grading_toolbar').css({'z-index':'40'});
-    $('#footer').css({'position':'fixed', 'z-index':'10'});
 
     calculatePercentageTotal();
     var progressbar = $(".progressbar"),
@@ -44,7 +36,7 @@ $(function() {
 
     $( ".draggable" ).draggable({snap:false, grid:[2, 2], stack:".draggable"}).resizable();
 
-    $(".grading_toolbar").resizable("destroy"); //We don't want the toolbar to be resizable
+    $("#bar_wrapper").resizable("destroy"); //We don't want the toolbar to be resizable
 
     $(".draggable").on("dragstop", function(){
         updateCookies();
@@ -106,11 +98,11 @@ function readCookies(){
     var status_height = document.cookie.replace(/(?:(?:^|.*;\s*)status_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var status_visible = document.cookie.replace(/(?:(?:^|.*;\s*)status_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-    var grading_toolbar_top = document.cookie.replace(/(?:(?:^|.*;\s*)grading_toolbar_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    var grading_toolbar_left = document.cookie.replace(/(?:(?:^|.*;\s*)grading_toolbar_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    var grading_toolbar_width = document.cookie.replace(/(?:(?:^|.*;\s*)grading_toolbar_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    var grading_toolbar_height = document.cookie.replace(/(?:(?:^|.*;\s*)grading_toolbar_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    var grading_toolbar_visible = document.cookie.replace(/(?:(?:^|.*;\s*)grading_toolbar_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var bar_wrapper_top = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var bar_wrapper_left = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var bar_wrapper_width = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var bar_wrapper_height = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var bar_wrapper_visible = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var overwrite = document.cookie.replace(/(?:(?:^|.*;\s*)overwrite\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
@@ -146,11 +138,11 @@ function readCookies(){
     (status_height) ? $("#student_info").css("height", status_height):{};
     (status_visible) ? $("#student_info").css("display", status_visible):{};
 
-    (grading_toolbar_top) ? $(".grading_toolbar").css("top", grading_toolbar_top):{};
-    (grading_toolbar_left) ? $(".grading_toolbar").css("left", grading_toolbar_left):{};
-    (grading_toolbar_width) ? $(".grading_toolbar").css("width", grading_toolbar_width):{};
-    (grading_toolbar_height) ? $(".grading_toolbar").css("height", grading_toolbar_height):{};
-    (grading_toolbar_visible) ? $(".grading_toolbar").css("display", grading_toolbar_visible):{};
+    (bar_wrapper_top) ? $("#bar_wrapper").css("top", bar_wrapper_top):{};
+    (bar_wrapper_left) ? $("#bar_wrapper").css("left", bar_wrapper_left):{};
+    (bar_wrapper_width) ? $("#bar_wrapper").css("width", bar_wrapper_width):{};
+    (bar_wrapper_height) ? $("#bar_wrapper").css("height", bar_wrapper_height):{};
+    (bar_wrapper_visible) ? $("#bar_wrapper").css("display", bar_wrapper_visible):{};
 
     (output_visible) ? ((output_visible) == "none" ? $(".fa-list-alt").removeClass("icon-selected") : $(".fa-list-alt").addClass("icon-selected")) : {};
     (files_visible) ? ((files_visible) == "none" ? $(".fa-folder-open").removeClass("icon-selected") : $(".fa-folder-open").addClass("icon-selected")) : {};
@@ -235,11 +227,11 @@ function updateCookies(){
     document.cookie = "status_height=" + $("#student_info").css("height") + "; path=/;";
     document.cookie = "status_visible=" + $("#student_info").css("display") + "; path=/;";
 
-    document.cookie = "grading_toolbar_top=" + $(".grading_toolbar").css("top") + "; path=/;";
-    document.cookie = "grading_toolbar_left=" + $(".grading_toolbar").css("left") + "; path=/;";
-    document.cookie = "grading_toolbar_width=" + $(".grading_toolbar").css("width") + "; path=/;";
-    document.cookie = "grading_toolbar_height=" + $(".grading_toolbar").css("height") + "; path=/;";
-    document.cookie = "grading_toolbar_visible=" + $(".grading_toolbar").css("display") + "; path=/;";
+    document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
+    document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
+    document.cookie = "bar_wrapper_width=" + $("#bar_wrapper").css("width") + "; path=/;";
+    document.cookie = "bar_wrapper_height=" + $("#bar_wrapper").css("height") + "; path=/;";
+    document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
 
     var overwrite = "on";
     if ($('#overwrite-id').is(":checked")) {
@@ -319,7 +311,7 @@ function handleKeyPress(key) {
             $('.fa-folder-open').addClass('icon-selected');
             $("#submission_browser").attr("style", "left:15px; z-index:30; bottom:40px; width:48%; height:30%; display:block;");
             $('.fa-user').addClass('icon-selected');
-            $('.grading_toolbar').attr("style", "position:fixed; z-index:40; top: 125px; left: 0px; height: 41px; width: 290px; display:block;");
+            $('#bar_wrapper').attr("style", "top: -90px;left: 45%; z-index:40;");
             $("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
             updateHandle("#autograding_results");
             updateHandle("#grading_rubric");
