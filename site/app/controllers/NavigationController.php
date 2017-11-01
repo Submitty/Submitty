@@ -30,7 +30,7 @@ class NavigationController extends AbstractController {
     }
 
     private function noAccess() {
-        $this->core->getOUtput()->renderOutput('Navigation', 'noAccessCourse');
+        $this->core->getOutput()->renderOutput('Navigation', 'noAccessCourse');
     }
 
     private function navigationPage() {

@@ -15,6 +15,7 @@ class DiffViewer {
      */
     private $has_actual = false;
     private $actual_file_image = "";
+    private $actual_file_name = "";
 
     /**
      * @var bool
@@ -107,6 +108,7 @@ class DiffViewer {
 		$this->actual_file_image = $actual_file;
 	      }
             else {
+		$this->actual_file_name = $actual_file;
                 $this->actual = file_get_contents($actual_file);
                 $this->has_actual = trim($this->actual) !== "" ? true: false;
                 $this->actual = explode("\n", $this->actual);
@@ -260,6 +262,12 @@ class DiffViewer {
 
     }
 
+    /**
+     * @return the file name for a non-image.
+     */
+    public function getActualFilename() {
+    	return $this->actual_file_name;
+    }
 
     public function getActualImageFilename() {
     	return $this->actual_file_image;

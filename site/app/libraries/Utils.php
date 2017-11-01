@@ -102,18 +102,6 @@ class Utils {
         return (count($temp) > 0) ? array_pop($temp) : null;
     }
 
-    /**
-     * This converts a Boolean to a Sting representation. We use this as by default the String representations are that
-     * TRUE is "1" and FALSE is "" (empty string) which we generally do not want (especially if concatating booleans
-     * to a string or using it within PDO).
-     *
-     * @param $value
-     * @return string
-     */
-    public static function convertBooleanToString($value) {
-        return ($value === true) ? "true" : "false";
-    }
-
 
     /**
      * Checks if string $haystack begins with the string $needle, returning TRUE if it does or FALSE otherwise.
