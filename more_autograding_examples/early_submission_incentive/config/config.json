@@ -2,15 +2,16 @@
     // This is for assignments where students who reached x amounts of points y days before the submission deadline receive some kind of reward
     // such as another late day. This will not award the late days, it simply shows the given message to the student.
     "early_submission_incentive" : {
-        "message" : "Successfully reached the point minimum by the due date. You get another late day.",
-        "minimum_days_early" : 7,
-        "minimum_points" : 2
+        "message" : "Successfully reached the point minimum at least one day before the due date. You get another late day.",
+        "minimum_days_early" : 1,
+        "minimum_points" : 5,
+	"test_cases" : [2,3]
     },
 
     "autograding" : {
         "submission_to_compilation" : [ "*.pdf" ],
         "submission_to_runner" : [ "*.pdf" ],
-        "submission_to_validation" : [ "*.pdf" ]
+        "submission_to_validation" : [ "*.pdf", "*.txt" ]
     },        
 
     "testcases" : 
@@ -19,13 +20,19 @@
             "type" : "FileCheck",
             "title" : "README",
             "actual_file" : "README.txt",
-            "points" : 2
+            "points" : 1
         },
         {
             "type" : "FileCheck",
             "title" : "Submitted a .pdf file",
             "actual_file" : "*.pdf",
             "points" : 2
+        },
+        {
+            "type" : "FileCheck",
+            "title" : "Submitted a output.txt file",
+            "actual_file" : "output.txt",
+            "points" : 3
         }
     ]
 }

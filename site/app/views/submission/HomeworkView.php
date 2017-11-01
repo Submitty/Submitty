@@ -923,12 +923,10 @@ HTML;
                 }
                 else {
                     if ($gradeable->hasIncentiveMessage() && $gradeable->getActiveVersion() > 0) {
-                        foreach ($gradeable->getVersions() as $version) {
-//		     $return .= <<<HTML
-//		"select total=".{$version->getSelectTotal()}
-//HTML;
-                            if ($version->getSelectTotal() >= $gradeable->getMinimumPoints() && 
-                                    $version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
+                        // FIXME:  Only doing this for the current version, not looking to see if any prior version meets the criteria
+                        //foreach ($gradeable->getVersions() as $version) {
+                            if ($gradeable->getEarlyTotal() >= $gradeable->getMinimumPoints() && 
+                                    $current_version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
                                 $return.= <<<HTML
             <script type="text/javascript">
                 $(document).ready(function() {
@@ -936,9 +934,9 @@ HTML;
                 });
             </script>
 HTML;
-                                break;
+                               // break;
                             }
-                        }
+                        //}
                     }
                     $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable);
                 }
