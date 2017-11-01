@@ -4,8 +4,8 @@
     "early_submission_incentive" : {
         "message" : "Successfully reached the point minimum at least one day before the due date. You get another late day.",
         "minimum_days_early" : 1,
-        "minimum_points" : 5,
-	"test_cases" : [2,3]
+        "minimum_points" : 3,
+        "test_cases" : [2,3]
     },
 
     "autograding" : {
@@ -20,7 +20,7 @@
             "type" : "FileCheck",
             "title" : "README",
             "actual_file" : "README.txt",
-            "points" : 1
+            "points" : 3
         },
         {
             "type" : "FileCheck",
@@ -32,7 +32,7 @@
             "type" : "FileCheck",
             "title" : "Submitted a output.txt file",
             "actual_file" : "output.txt",
-            "points" : 3
+            "points" : 1
         }
     ]
 }
