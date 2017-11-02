@@ -139,17 +139,14 @@ class DatabaseQueries {
         }
     }
 
-    /**
-     *  Gets the group that the user is in for each class they are in
-     *  @param string $user_id - user id to be searched for
-     *  @return array - containing all of the groups for each course sequantially
-     */
-    public function getGroupForUserInClass($user_id){
-        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ?", array($user_id));
-        $return = array();
-        foreach ($this->submitty_db->rows() as $row) {
-            $return[] = $row['user_group'];
-          } return $return;
+    /*  Gets the group that the user is in for a given class (used on homepage)
+     *  as the user isn't within a class yet.
+     *  @param $user_id - user id to be searched for
+     *  @return group of user in the given class
+    */
+    public function getGroupForUserInClass($course_name, $user_id){
+        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ? AND course = ?", array($user_id, $course_name));
+        return intval($this->submitty_db->row()['user_group']);
     }
 
     public function getAllGradeables($user_id = null) {
