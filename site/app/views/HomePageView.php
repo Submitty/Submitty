@@ -133,7 +133,7 @@ HTML;
                                         $header = "<h3>Instructor:</h3>";
                                 break;
                                 case 2:
-                                        $header = "<h3>TA:</h3>";
+                                        $header = "<h3>Full Access Grader:</h3>";
                                 break;
                                 case 3:
                                         $header = "<h3>Grader:</h3>";
