@@ -118,6 +118,7 @@ HTML;
             Graders:
             <div style="margin-left: 20px">
 HTML;
+
                 foreach ($sections as $key => $section) {
                     if ($key === "NULL") {
                         continue;
@@ -581,12 +582,13 @@ HTML;
                     $box_background = "late-box";
                 }
                 if ($row->beenTAgraded()) {
-                    $btn_class = "btn-default";
                     if($row->validateVersions()) {
+                        $btn_class = "btn-default";
                         $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
 			            $graded += $row->getGradedTAPoints();
                     }
                     else{
+                        $btn_class = "btn-primary";
                         if(!$row->isFullyGraded()){
                             $contents = "Grading Incomplete";
                         }
@@ -594,6 +596,14 @@ HTML;
                             $contents = "Version Conflict";
                         }
                     }
+                }
+                else if (!($row->hasSubmitted())) {
+                    $btn_class = "btn-default";
+                    $contents = "No Submission";
+                }
+                else if ($active_version === 0) {
+                    $btn_class = "btn-default";
+                    $contents = "Cancelled Submission";
                 }
                 else {
                     $btn_class = "btn-primary";

@@ -144,11 +144,13 @@ abstract class AbstractDatabaseQueries {
 
     abstract public function getTotalUserCountByGradingSections($sections, $section_key);
 
+    abstract public function getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key);
+
     abstract public function getTotalComponentCount($g_id);
 
     abstract public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key);
 
-    abstract public function getAverageComponentScores($g_id);
+    abstract public function getAverageComponentScores($g_id, $section_key);
 
     abstract public function getGradersForRegistrationSections($sections);
 

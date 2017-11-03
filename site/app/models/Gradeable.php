@@ -804,6 +804,10 @@ class Gradeable extends AbstractModel {
     public function getSubmissionCount() {
         return $this->submissions;
     }
+    
+    public function hasSubmitted() {
+        return $this->getHighestVersion() > 0;
+    }
 
     public function getAllowedLateDays() {
         return $this->late_days;
