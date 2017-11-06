@@ -1,9 +1,10 @@
 #bar_wrapper {
      position:relative;
      height: 41px;
-     width: 530px;
+     width: 533px;
      top: -90px;
      left: 45%;
+     background-color: #edf6f6;
      cursor: move;
      z-index:40;
      border: solid 6px #FFD700;
