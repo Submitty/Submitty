@@ -1306,7 +1306,7 @@ ORDER BY gt.{$section_key}", $params);
           SET allowed_late_days=?
           WHERE user_id=?
             AND since_timestamp=?", array($days, $user_id, $timestamp));
-        if(count($this->course_db->rows())==0){
+        if ($this->course_db->getRowCount() === 0) {
             $this->course_db->query("
             INSERT INTO late_days
             (user_id, since_timestamp, allowed_late_days)
@@ -1326,7 +1326,7 @@ ORDER BY gt.{$section_key}", $params);
           SET late_day_exceptions=?
           WHERE user_id=?
             AND g_id=?;", array($days, $user_id, $g_id));
-        if(count($this->course_db->rows())==0){
+        if ($this->course_db->getRowCount() === 0) {
             $this->course_db->query("
             INSERT INTO late_day_exceptions
             (user_id, g_id, late_day_exceptions)
