@@ -886,16 +886,6 @@ function loadHomeworkExtensions(g_id) {
     });
 }
 
-/*function checkIfUserExists(json_obj){
-    var exists = false
-    $.map(JSONObject.users, function(elem, index) {
-        if (elem.name == "dog") { 
-            exists = true;
-            break;
-        }
-    });
-}*/
-
 function updateLateDays(data) {
     var fd = new FormData($('#lateDayForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late'});
