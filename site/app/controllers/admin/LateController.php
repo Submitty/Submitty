@@ -190,7 +190,7 @@ class LateController extends AbstractController {
     private function validateHomework($id) {
         $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
         foreach($g_ids as $index => $value) {
-            if($id == $value["g_id"]){
+            if($id == $value[0]){
                 return true;
             }
         }
