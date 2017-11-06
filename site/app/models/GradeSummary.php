@@ -169,7 +169,7 @@ class GradeSummary extends AbstractModel {
          * There isn't any memory advantage right now to doing smaller chunks of users, but
          * that isn't to say that there might not be a benefit in the future to user chunking.
          */
-        $size_of_user_id_chunks = 150; //ceil(count($user_ids) / 2);
+        $size_of_user_id_chunks = 75; //ceil(count($user_ids) / 2);
         $size_of_gradeable_id_chunks = 5;
 
         $student_output_json = array();
