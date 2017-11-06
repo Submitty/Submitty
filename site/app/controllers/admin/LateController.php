@@ -46,7 +46,7 @@ class LateController extends AbstractController {
         $data = array();
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, $type))) {
-                $error = "Something is wrong with the CSV. Try again.";
+                $error = "Something is wrong with the CSV you have chosen. Try again.";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
