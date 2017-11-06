@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\DatabaseUtils;
 
 class SimpleLateUser extends AbstractModel {
     

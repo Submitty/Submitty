@@ -3,12 +3,10 @@
 namespace tests\unitTests;
 
 use app\libraries\Core;
-use app\libraries\database\AbstractDatabaseQueries;
-use app\libraries\GradeableType;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\Output;
 use app\libraries\Utils;
 use app\models\Config;
-use app\models\Gradeable;
 use app\models\User;
 
 class BaseUnitTest extends \PHPUnit_Framework_TestCase {
@@ -57,7 +55,7 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
             $core->method('isTesting')->willReturn(true);
         }
 
-        $queries = $this->createMock(AbstractDatabaseQueries::class);
+        $queries = $this->createMock(DatabaseQueries::class);
         $core->method('getQueries')->willReturn($queries);
 
         $user = $this->createMockModel(User::class);
@@ -99,11 +97,12 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
 
         $reflection = new \ReflectionClass($class);
         $methods = array();
-        $reflection->getDocComment();
         $matches = array();
         preg_match_all("/@method.* (.*)\(.*\)/", $reflection->getDocComment(), $matches);
         foreach ($matches[1] as $match) {
-            $methods[] = $match;
+            if (strlen($match) > 0) {
+                $methods[] = $match;
+            }
         }
         foreach ($reflection->getMethods() as $method) {
             if (!Utils::startsWith($method->getName(), "__")) {
