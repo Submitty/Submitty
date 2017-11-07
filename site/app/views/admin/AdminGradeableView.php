@@ -463,7 +463,7 @@ HTML;
 
         if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
             $html_output .= <<<HTML
-                <div id="mark_id-{$num}-0" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
+                <div id="mark_id-{$num}-0" name="mark_{$num}" data-gcm_id="NEW" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
                 <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{$num}_0" value="0" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                 <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_0" style="resize: none; width: 80.5%;">Full Credit</textarea> 
                 <!--
@@ -487,7 +487,7 @@ HTML;
                     $hidden = "";
                 }
                 $html_output .= <<<HTML
-                    <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
+                    <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" data-gcm_id="{$mark->getId()}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
                     <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                     <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 80.5%;">{$mark->getNote()}</textarea> 
                     <!--
@@ -2213,7 +2213,7 @@ $('#gradeable-form').on('submit', function(e){
         </tr>');
         $("#rubric_add_mark_" + newQ).before(' \
             <div id="mark_id-'+newQ+'-0" name="mark_'+newQ+'" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;"> \
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" data-gcm_id="NEW" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
             <textarea rows="1" placeholder="Comment" name="mark_text_'+newQ+'_0" style="resize: none; width: 80.5%;">No Credit</textarea> \
             <!--\
             <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
@@ -2332,7 +2332,7 @@ $('#gradeable-form').on('submit', function(e){
         }
         var new_num = last_num + 1;
         $("#rubric_add_mark_" + num).before('\
-<div id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
+<div id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'" data-gcm_id="NEW" style="text-align: left; font-size: 8px; padding-left: 5px;">\
 <i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="mark_points_'+num+'_'+new_num+'" value="0" step="'+precision+'" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
 <textarea rows="1" placeholder="Comment" name="mark_text_'+num+'_'+new_num+'" style="resize: none; width: 80.5%;"></textarea> \
 <!--\
