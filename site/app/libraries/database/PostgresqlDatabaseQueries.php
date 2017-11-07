@@ -244,6 +244,7 @@ SELECT";
   gc.array_array_gc_id,
   gc.array_array_gcm_points,
   gc.array_array_gcm_note,
+  gc.array_array_gcm_publish,
   gc.array_array_gcm_order";
         if ($user_ids !== null) {
             $query .= ",
@@ -307,9 +308,10 @@ LEFT JOIN (
     array_agg(array_gc_id) AS array_array_gc_id,
     array_agg(array_gcm_points) AS array_array_gcm_points,
     array_agg(array_gcm_note) AS array_array_gcm_note,
+    array_agg(array_gcm_publish) AS array_array_gcm_publish,
     array_agg(array_gcm_order) AS array_array_gcm_order
   FROM
-  (SELECT gc.*, gcm.array_gcm_id, gcm.array_gc_id, gcm.array_gcm_points, array_gcm_note, array_gcm_order
+  (SELECT gc.*, gcm.array_gcm_id, gcm.array_gc_id, gcm.array_gcm_points, array_gcm_note, array_gcm_publish, array_gcm_order
   FROM gradeable_component AS gc
   LEFT JOIN(
     SELECT
@@ -318,6 +320,7 @@ LEFT JOIN (
       array_to_string(array_agg(gc_id), ',') as array_gc_id,
       array_to_string(array_agg(gcm_points), ',') as array_gcm_points,
       array_to_string(array_agg(gcm_note), ',') as array_gcm_note,
+      array_to_string(array_agg(gcm_publish), ',') as array_gcm_publish,
       array_to_string(array_agg(gcm_order), ',') as array_gcm_order
     FROM gradeable_component_mark
     GROUP BY gc_id
@@ -434,7 +437,7 @@ ORDER BY u.{$section_key}, {$sort_key}";
                 $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp',
                                 'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_text', 'gc_is_peer',
                                 'gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id',
-                                'array_gcm_points', 'array_gcm_note', 'array_gcm_order', 'gcd_gc_id', 'gcd_score',
+                                'array_gcm_points', 'array_gcm_note', 'array_gcm_publish', 'array_gcm_order', 'gcd_gc_id', 'gcd_score',
                                 'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version', 'gcd_grade_time',
                                 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                                 'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');

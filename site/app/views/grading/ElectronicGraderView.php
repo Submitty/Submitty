@@ -1194,7 +1194,7 @@ HTML;
             }
             else if($show_graded_info) {
                 $nl = "<br>";
-                $initial_text = $question->getGradedTAComments($nl);
+                $initial_text = $question->getGradedTAComments($nl, false);
             }
             
             
@@ -1270,7 +1270,6 @@ HTML;
                             Add New Common Mark</span>
                         </td>
                     </tr>
-
 HTML;
             }
             $return .= <<<HTML
