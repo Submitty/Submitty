@@ -825,11 +825,10 @@ function updateHomeworkExtensions(data) {
         cache: false,
         contentType: false,
         success: function(data) {
-            //Will be a syntax error exception thrown if the user can't be found (<anonymous>)
             try { 
                 var json = JSON.parse(data);
             } catch(err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Invalid Student ID</div>';
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
                 $('#messages').append(message);
                 return;
             }
