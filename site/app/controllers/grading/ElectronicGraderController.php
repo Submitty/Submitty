@@ -38,6 +38,8 @@ class ElectronicGraderController extends AbstractController {
             case 'get_marked_users':
                 $this->getUsersThatGotTheMark();
                 break;
+            case 'add_one_new_mark':
+                $this->addOneMark();
             default:
                 $this->showStatus();
                 break;
@@ -615,8 +617,9 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        $overwrite = "false";//$_POST['overwrite'];
+        $overwrite = $_POST['overwrite'];
 
+        //checks if user has permission
         if ($this->core->getUser()->getGroup() === 4) {
             if(!$gradeable->getPeerGrading()) {
                 $this->core->addErrorMessage("You do not have permission to grade this");
@@ -645,6 +648,8 @@ class ElectronicGraderController extends AbstractController {
                 return;
             }
         }
+
+        //save the component
         foreach ($gradeable->getComponents() as $component) {
             if(is_array($component)) {
                 if($component[0]->getId() != $_POST['gradeable_component_id']) {
@@ -666,7 +671,7 @@ class ElectronicGraderController extends AbstractController {
                 if(!$found){
                     $component = $this->core->getQueries()->getGradeableComponents($gradeable->getId())[$component[0]->getId()];
                     $marks = $this->core->getQueries()->getGradeableComponentsMarks($component->getId());
-                    $component->setMarks($marks);
+                    $component->setMarks($marks); //I think this does nothing
                 }
             }
             else if ($component->getId() != $_POST['gradeable_component_id']) {
@@ -680,6 +685,11 @@ class ElectronicGraderController extends AbstractController {
             $debug = "";
             $mark_modified = false;
             foreach ($component->getMarks() as $mark) {
+                if (isset($_POST['num_existing_marks'])) {
+                    if ($index >= $_POST['num_existing_marks']) {
+                        break;
+                    }   
+                }
                 $temp_mark_selected = ($_POST['marks'][$index]['selected'] == 'true') ? true : false;
                 if($all_false === true && $temp_mark_selected === true) {
                     $all_false = false;
@@ -735,6 +745,11 @@ class ElectronicGraderController extends AbstractController {
             $index = 0;
             // save existing marks
             foreach ($component->getMarks() as $mark) {
+                if (isset($_POST['num_existing_marks'])) {
+                    if ($index >= $_POST['num_existing_marks']) {
+                        break;
+                    }   
+                }
                 $mark->setPoints($_POST['marks'][$index]['points']);
                 $mark->setNote($_POST['marks'][$index]['note']);
                 $mark->setOrder($_POST['marks'][$index]['order']);
@@ -746,19 +761,24 @@ class ElectronicGraderController extends AbstractController {
                 $index++;
             }
             // create new marks
+            /*
+            $order_counter = $this->core->getQueries()->getGreatestGradeableComponentMarkOrder($component);
+            $order_counter++;
             for ($i = $index; $i < $_POST['num_mark']; $i++) {
                 $mark = new GradeableComponentMark($this->core);
                 $mark->setGcId($component->getId());
                 $mark->setPoints($_POST['marks'][$i]['points']);
                 $mark->setNote($_POST['marks'][$i]['note']);
-                $mark->setOrder($_POST['marks'][$i]['order']);
+                $mark->setOrder($order_counter);
                 $mark_id = $mark->save();
                 $mark->setId($mark_id);
-                $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
+                $_POST['marks'][$i]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                 if($all_false === false) {
-                    $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $this->core->getUser()->getId());
+                    $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
                 }
+                $order_counter++;
             }
+            */
         }
         //generates the HW Report each time a mark is saved
         $hwReport = new HWReport($this->core);
@@ -771,6 +791,35 @@ class ElectronicGraderController extends AbstractController {
         $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite);
         $this->core->getOutput()->renderJson($response);
         return $response;
+    }
+
+    public function addOneMark() {
+
+        $gradeable_id = $_POST['gradeable_id'];
+        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        foreach ($gradeable->getComponents() as $component) {
+            if(is_array($component)) {
+                if($component[0]->getId() != $_POST['gradeable_component_id']) {
+                    continue;
+                }
+            } else if ($component->getId() != $_POST['gradeable_component_id']) {
+                continue;
+            }
+            $order_counter = $this->core->getQueries()->getGreatestGradeableComponentMarkOrder($component);
+            $order_counter++;
+            $mark = new GradeableComponentMark($this->core);
+            $mark->setGcId($component->getId());
+            $mark->setPoints(0);
+            $mark->setNote("");
+            $mark->setOrder($order_counter);
+            $mark_id = $mark->save();
+            $mark->setId($mark_id);
+            $_POST['marks'][$i]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
+            if($all_false === false) {
+                $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
+            }
+        }
     }
 
     public function saveGradeableComment() {

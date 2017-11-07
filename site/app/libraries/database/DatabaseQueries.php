@@ -892,25 +892,33 @@ UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?
     }
 
     public function createGradeableComponentMark(GradeableComponentMark $mark) {
-        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder());
+        $bool_value = $this->course_db->convertBoolean($mark->getPublish());
+        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder(), $bool_value);
 
         $this->course_db->query("
-INSERT INTO gradeable_component_mark (gc_id, gcm_points, gcm_note, gcm_order)
-VALUES (?, ?, ?, ?)", $params);
+INSERT INTO gradeable_component_mark (gc_id, gcm_points, gcm_note, gcm_order, gcm_publish)
+VALUES (?, ?, ?, ?, ?)", $params);
         return $this->course_db->getLastInsertId();
     }
 
     public function updateGradeableComponentMark(GradeableComponentMark $mark) {
-        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder(), $mark->getId());
-
+        $bool_value = $this->course_db->convertBoolean($mark->getPublish());
+        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder(), $bool_value, $mark->getId());
         $this->course_db->query("
-UPDATE gradeable_component_mark SET gc_id=?, gcm_points=?, gcm_note=?, gcm_order=?
+UPDATE gradeable_component_mark SET gc_id=?, gcm_points=?, gcm_note=?, gcm_order=?, gcm_publish=?
 WHERE gcm_id=?", $params);
     }
 
     public function deleteGradeableComponentMark(GradeableComponentMark $mark) {
         $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id=?",array($mark->getId()));
         $this->course_db->query("DELETE FROM gradeable_component_mark WHERE gcm_id=?", array($mark->getId()));
+    }
+
+    public function getGreatestGradeableComponentMarkOrder(GradeableComponent $component) {
+    	$this->course_db->query("SELECT MAX(gcm_order) as max FROM gradeable_component_mark WHERE gc_id=? ", array($component->getId()));
+    	$row = $this->course_db->row();
+        return $row['max'];
+
     }
 
     /**

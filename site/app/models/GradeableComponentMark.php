@@ -10,6 +10,7 @@ use app\libraries\Core;
  * @method int getGcId()
  * @method int getOrder()
  * @method float getPoints()
+ * @method boolean getPublish()
  */
 
 class GradeableComponentMark extends AbstractModel {
@@ -25,6 +26,8 @@ class GradeableComponentMark extends AbstractModel {
     protected $note = "";
     /** @property @var bool This person earned this mark*/
     protected $has_mark = false;
+    /** @property @var bool If this mark should be published*/
+    protected $publish = false;
     /** @property @var bool What the database says about if this person earned this mark*/
     protected $original_has_mark = false;
 
@@ -38,6 +41,7 @@ class GradeableComponentMark extends AbstractModel {
         $this->points = $details['gcm_points'];
         $this->order = $details['gcm_order'];
         $this->note = $details['gcm_note'];
+        $this->publish = $details['gcm_publish'];
         if (isset($details['gcm_has_mark']) && $details['gcm_has_mark'] !== null) {
             $this->has_mark = true;
             $this->original_has_mark = true;
