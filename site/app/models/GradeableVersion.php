@@ -74,7 +74,7 @@ class GradeableVersion extends AbstractModel {
         else if ($this->days_early < 0) {
             $this->days_early = 0;
         }
-        
+
         $this->active = isset($details['active_version']) && $details['active_version'] === true;
     }
 

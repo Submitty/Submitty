@@ -327,6 +327,11 @@ class AdminGradeableController extends AbstractController {
                         $mark->setGcId($comp->getId());
                         $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
                         $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
+                        if (isset($_POST['mark_publish_' . $index . '_' . $y])) {
+                            $mark->setPublish(true);
+                        } else {
+                            $mark->setPublish(false);
+                        }
                         $mark->setOrder($y);
                         $this->core->getQueries()->createGradeableComponentMark($mark);
                     }                    
@@ -362,6 +367,11 @@ class AdminGradeableController extends AbstractController {
                             $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
                             $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                             $mark->setOrder($y);
+                            if (isset($_POST['mark_publish_' . $index . '_' . $y])) {
+                                $mark->setPublish(true);
+                            } else {
+                                $mark->setPublish(false);
+                            }
                             $this->core->getQueries()->updateGradeableComponentMark($mark);
                         } else if($num_old_mark > $num_marks) {
                             $this->core->getQueries()->deleteGradeableComponentMark($mark);
@@ -374,6 +384,11 @@ class AdminGradeableController extends AbstractController {
                         $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
                         $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
                         $mark->setOrder($y);
+                        if (isset($_POST['mark_publish_' . $index . '_' . $y])) {
+                            $mark->setPublish(true);
+                        } else {
+                            $mark->setPublish(false);
+                        }
                         $this->core->getQueries()->createGradeableComponentMark($mark);
                     }             
                     $index++;

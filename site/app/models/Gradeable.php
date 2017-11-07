@@ -204,6 +204,9 @@ class Gradeable extends AbstractModel {
     protected $minimum_days_early = 0;
     /** @property @var int Minimum points that a submission must have to get the incentive message */
     protected $minimum_points = 0;
+    /** @property @var int[] test cases that should be summed when determining if student has achieved early submission threshold */
+    protected $early_submission_test_cases = array();
+    protected $early_total = 0;
 
     /** @property @var string[] */
     protected $part_names = array();
@@ -354,7 +357,7 @@ class Gradeable extends AbstractModel {
         if (isset($details['array_gc_id'])) {
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp',
                                       'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_peer', 'gc_is_text', 'gc_order', 'gc_page', 'array_gcm_id', 
-                                      'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_order');
+                                      'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_publish', 'array_gcm_order');
             $user_fields = array('user_id', 'anon_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
 
@@ -469,6 +472,7 @@ class Gradeable extends AbstractModel {
             $this->incentive_message = Utils::prepareHtmlString($details['early_submission_incentive']['message']);
             $this->minimum_days_early = intval($details['early_submission_incentive']['minimum_days_early']);
             $this->minimum_points = intval($details['early_submission_incentive']['minimum_points']);
+	    $this->early_submission_test_cases = $details['early_submission_incentive']['test_cases'];
         }
 
         $num_parts = 1;
@@ -746,8 +750,13 @@ class Gradeable extends AbstractModel {
                 }
                 $this->result_details = array_merge($this->result_details, $last_results_timestamp);
                 $this->result_details['num_autogrades'] = count($history);
+                $this->early_total = 0;
                 for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
                     $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current_version));
+                    $pts = $this->testcases[$i]->getPointsAwarded();
+                    if ( in_array ($i+1,$this->early_submission_test_cases) ) {
+                        $this->early_total += $pts;
+                    }
                 }
             }
         }

@@ -139,17 +139,14 @@ class DatabaseQueries {
         }
     }
 
-    /**
-     *  Gets the group that the user is in for each class they are in
-     *  @param string $user_id - user id to be searched for
-     *  @return array - containing all of the groups for each course sequantially
-     */
-    public function getGroupForUserInClass($user_id){
-        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ?", array($user_id));
-        $return = array();
-        foreach ($this->submitty_db->rows() as $row) {
-            $return[] = $row['user_group'];
-          } return $return;
+    /*  Gets the group that the user is in for a given class (used on homepage)
+     *  as the user isn't within a class yet.
+     *  @param $user_id - user id to be searched for
+     *  @return group of user in the given class
+    */
+    public function getGroupForUserInClass($course_name, $user_id){
+        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ? AND course = ?", array($user_id, $course_name));
+        return intval($this->submitty_db->row()['user_group']);
     }
 
     public function getAllGradeables($user_id = null) {
@@ -895,25 +892,33 @@ UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?
     }
 
     public function createGradeableComponentMark(GradeableComponentMark $mark) {
-        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder());
+        $bool_value = $this->course_db->convertBoolean($mark->getPublish());
+        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder(), $bool_value);
 
         $this->course_db->query("
-INSERT INTO gradeable_component_mark (gc_id, gcm_points, gcm_note, gcm_order)
-VALUES (?, ?, ?, ?)", $params);
+INSERT INTO gradeable_component_mark (gc_id, gcm_points, gcm_note, gcm_order, gcm_publish)
+VALUES (?, ?, ?, ?, ?)", $params);
         return $this->course_db->getLastInsertId();
     }
 
     public function updateGradeableComponentMark(GradeableComponentMark $mark) {
-        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder(), $mark->getId());
-
+        $bool_value = $this->course_db->convertBoolean($mark->getPublish());
+        $params = array($mark->getGcId(), $mark->getPoints(), $mark->getNoteNoDecode(), $mark->getOrder(), $bool_value, $mark->getId());
         $this->course_db->query("
-UPDATE gradeable_component_mark SET gc_id=?, gcm_points=?, gcm_note=?, gcm_order=?
+UPDATE gradeable_component_mark SET gc_id=?, gcm_points=?, gcm_note=?, gcm_order=?, gcm_publish=?
 WHERE gcm_id=?", $params);
     }
 
     public function deleteGradeableComponentMark(GradeableComponentMark $mark) {
         $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id=?",array($mark->getId()));
         $this->course_db->query("DELETE FROM gradeable_component_mark WHERE gcm_id=?", array($mark->getId()));
+    }
+
+    public function getGreatestGradeableComponentMarkOrder(GradeableComponent $component) {
+    	$this->course_db->query("SELECT MAX(gcm_order) as max FROM gradeable_component_mark WHERE gc_id=? ", array($component->getId()));
+    	$row = $this->course_db->row();
+        return $row['max'];
+
     }
 
     /**
@@ -1301,7 +1306,7 @@ ORDER BY gt.{$section_key}", $params);
           SET allowed_late_days=?
           WHERE user_id=?
             AND since_timestamp=?", array($days, $user_id, $timestamp));
-        if(count($this->course_db->rows())==0){
+        if ($this->course_db->getRowCount() === 0) {
             $this->course_db->query("
             INSERT INTO late_days
             (user_id, since_timestamp, allowed_late_days)
@@ -1321,7 +1326,7 @@ ORDER BY gt.{$section_key}", $params);
           SET late_day_exceptions=?
           WHERE user_id=?
             AND g_id=?;", array($days, $user_id, $g_id));
-        if(count($this->course_db->rows())==0){
+        if ($this->course_db->getRowCount() === 0) {
             $this->course_db->query("
             INSERT INTO late_day_exceptions
             (user_id, g_id, late_day_exceptions)

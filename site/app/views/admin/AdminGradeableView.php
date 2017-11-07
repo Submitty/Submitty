@@ -466,6 +466,7 @@ HTML;
                 <div id="mark_id-{$num}-0" name="mark_{$num}" data-gcm_id="NEW" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
                 <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{$num}_0" value="0" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                 <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_0" style="resize: none; width: 80.5%;">Full Credit</textarea> 
+                <input type="checkbox" name="mark_publish_{$num}_0"> Publish
                 <!--
                 <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -479,17 +480,25 @@ HTML;
             $marks = $this->core->getQueries()->getGradeableComponentsMarks($question->getId());
             $first = true;
             foreach ($marks as $mark) {
+            	if ($mark->getPublish()) {
+            		$publish_checked = "checked";
+            	} else {
+            		$publish_checked = "";
+            	}
                 if($first === true) {
                     $first = false;
-                    $hidden = "display: none;";
-                }
-                else {
+                    $hidden = "background-color:#EBEBE4";
+                    $read_only = "readonly";
+                    //$hidden = "display: none;";
+                } else {
                     $hidden = "";
+                    $read_only = "";
                 }
                 $html_output .= <<<HTML
                     <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" data-gcm_id="{$mark->getId()}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
                     <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                     <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 80.5%;">{$mark->getNote()}</textarea> 
+                    <input type="checkbox" name="mark_publish_{$num}_{$mark->getOrder()}" {$publish_checked}> Publish
                     <!--
                     <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                     <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -2215,6 +2224,7 @@ $('#gradeable-form').on('submit', function(e){
             <div id="mark_id-'+newQ+'-0" name="mark_'+newQ+'" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;"> \
             <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" data-gcm_id="NEW" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
             <textarea rows="1" placeholder="Comment" name="mark_text_'+newQ+'_0" style="resize: none; width: 80.5%;">No Credit</textarea> \
+            <input type="checkbox" name="mark_publish_'+newQ+'_0"> Publish \
             <!--\
             <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
@@ -2335,6 +2345,7 @@ $('#gradeable-form').on('submit', function(e){
 <div id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'" data-gcm_id="NEW" style="text-align: left; font-size: 8px; padding-left: 5px;">\
 <i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="mark_points_'+num+'_'+new_num+'" value="0" step="'+precision+'" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
 <textarea rows="1" placeholder="Comment" name="mark_text_'+num+'_'+new_num+'" style="resize: none; width: 80.5%;"></textarea> \
+<input type="checkbox" name="mark_publish_'+num+'_'+new_num+'"> Publish \
 <!--\
 <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
