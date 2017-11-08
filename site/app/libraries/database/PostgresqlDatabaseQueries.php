@@ -114,18 +114,23 @@ VALUES (?,?,?,?,?,?)", $params);
     }
 
     public function updateUser(User $user, $semester=null, $course=null) {
-        $array = array($user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
+        $params = array($user->getFirstName(), $user->getPreferredFirstName(),
                        $user->getLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
-                       $this->submitty_db->convertBoolean($user->isInstructorUpdated()),
-                       $user->getId());
+                       $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
+        $extra = "";
+        if (!empty($user->getPassword())) {
+            $params[] = $user->getPassword();
+            $extra = ", user_password=?";
+        }
+        $params[] = $user->getId();
+
         $this->submitty_db->query("
 UPDATE users 
 SET 
-  user_password=?, user_firstname=?, user_preferred_firstname=?, user_lastname=?, 
-  user_email=?, user_updated=?, instructor_updated=?
-WHERE user_id=?", $array);
-
+  user_firstname=?, user_preferred_firstname=?, user_lastname=?, 
+  user_email=?, user_updated=?, instructor_updated=?{$extra}
+WHERE user_id=?", $params);
 
         if (!empty($semester) && !empty($course)) {
             $params = array($user->getGroup(), $user->getRegistrationSection(),
