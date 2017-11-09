@@ -797,7 +797,7 @@ HTML;
     }
     else{
         $return .= <<< HTML
-        <i title="Go to the previous student" class="fa fa-step-backward icon-header"></i>
+        <i title="Go to the previous student" class="fa fa-chevron-left icon-header" style="color:grey"></i>
 HTML;
     }
     $return .= <<< HTML
@@ -811,7 +811,7 @@ HTML;
     }
     else{
         $return .= <<< HTML
-        <i title="Go to the next student" class="fa fa-step-forward icon-header"></i>
+        <i title="Go to the next student" class="fa fa-chevron-right icon-header" style="color:grey"></i>
 HTML;
     }
     $return .= <<< HTML

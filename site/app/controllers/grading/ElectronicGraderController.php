@@ -514,14 +514,12 @@ class ElectronicGraderController extends AbstractController {
         }
         else if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
+            $sections = $this->core->getUser()->getGradingRegistrationSections();
             if ($this->core->getUser()->accessAdmin() && $sections == null) {
                 $sections = $this->core->getQueries()->getRegistrationSections();
                 for ($i = 0; $i < count($sections); $i++) {
                     $sections[$i] = $sections[$i]['sections_registration_id'];
                 }
-            }
-            else{
-                $sections = $this->core->getUser()->getGradingRegistrationSections();
             }
             $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections,$orderBy="registration_section,user_id;");
             $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section'));
@@ -529,14 +527,12 @@ class ElectronicGraderController extends AbstractController {
         }
         else {
             $section_key = "rotating_section";
+            $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
             if ($this->core->getUser()->accessAdmin() && $sections == null) {
                 $sections = $this->core->getQueries()->getRotatingSections();
                 for ($i = 0; $i < count($sections); $i++) {
                     $sections[$i] = $sections[$i]['sections_rotating_id'];
                 }
-            }
-            else{
-                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
             }
             $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections,$orderBy="rotating_section,user_id;");
             $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
