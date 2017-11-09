@@ -787,6 +787,7 @@ HTML;
         $prev_href = "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id, 'individual'=>$individual))}\"";
         $next_href = "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual))}\"";
         $return = <<<HTML
+<div id="bar_wrapper" class="draggable">
 <div class="grading_toolbar">
 HTML;
     //If the student is in our section, add a clickable previous arrow, else add a grayed out one.
@@ -830,10 +831,10 @@ HTML;
 </div>
 
 <div class="progress_bar">
-    <progress class="progressbar" max="100" value="{$progress}" style="width:80%; height: 100%;"></progress>
+    <progress class="progressbar" max="100" value="{$progress}" style="width:70%; height: 100%;"></progress>
     <div class="progress-value" style="display:inline;"></div>
 </div>
-
+</div>
 
 
 <div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
@@ -1220,7 +1221,7 @@ HTML;
             }
             else if($show_graded_info) {
                 $nl = "<br>";
-                $initial_text = $question->getGradedTAComments($nl);
+                $initial_text = $question->getGradedTAComments($nl, false);
             }
             
             
@@ -1296,7 +1297,6 @@ HTML;
                             Add New Common Mark</span>
                         </td>
                     </tr>
-
 HTML;
             }
             $return .= <<<HTML
