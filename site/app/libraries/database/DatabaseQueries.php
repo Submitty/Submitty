@@ -324,6 +324,15 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         return $return;
     }
 
+    public function getUsersInNullSection($orderBy="user_id"){
+      $return = array();
+      $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IS NULL ORDER BY {$orderBy}");
+      foreach ($this->course_db->rows() as $row) {
+        $return[] = new User($this->core, $row);
+      }
+      return $return;
+    }
+
     public function getTotalUserCountByGradingSections($sections, $section_key) {
         $return = array();
         $params = array();
