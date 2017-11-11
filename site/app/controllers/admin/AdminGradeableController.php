@@ -304,25 +304,28 @@ class AdminGradeableController extends AbstractController {
 
             //remake the gradeable to update all the data
             $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
+            $components = $gradeable->getComponents();
+            //Adds/Edits/Deletes the Marks
+            $index = 1;
+            foreach ($components as $comp) {
+                $marks = $comp->getMarks();
+                if(is_array($comp)) {
+                    $comp = $comp[0];
+                }
+                if($comp->getOrder() == -1) {
+                    continue;
+                }
 
-            if ($edit_gradeable === 0) {
-                $components = $gradeable->getComponents();
-                $index = 1;
-                foreach ($components as $comp) {
-                    if(is_array($comp)) {
-                        $comp = $comp[0];
+                $num_marks = 0;
+                foreach($_POST as $k=>$v){
+                    if(strpos($k,'mark_points_' . $index) !== false){
+                        $num_marks++;
                     }
-                    if($comp->getOrder() == -1) {
-                        continue;
-                    }
-                    $num_marks = 0;
-                    foreach($_POST as $k=>$v){
-                        if(strpos($k,'mark_points_' . $index) !== false){
-                            $num_marks++;
-                        }
-                    }
+                }
 
-                    for ($y = 0; $y < $num_marks; $y++) {
+                for ($y = 0; $y < $num_marks; $y++) {
+                    //adds the mark if it is new
+                    if($_POST['mark_gcmid_' . $index . '_' . $y] == "NEW") {
                         $mark = new GradeableComponentMark($this->core);
                         $mark->setGcId($comp->getId());
                         $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
@@ -334,66 +337,58 @@ class AdminGradeableController extends AbstractController {
                         }
                         $mark->setOrder($y);
                         $this->core->getQueries()->createGradeableComponentMark($mark);
-                    }                    
-                    $index++;
-                }            
-            }
-            else if ($edit_gradeable === 1) {
-                $components = $gradeable->getComponents();
-                $index = 1;
-                foreach ($components as $comp) {
-                    if(is_array($comp)) {
-                        $comp = $comp[0];
-                    }
-                    if($comp->getOrder() == -1) {
-                        continue;
-                    }
-                    $num_marks = 0; //current number of marks
-                    foreach($_POST as $k=>$v){
-                        if(strpos($k,'mark_points_' . $index) !== false){
-                            $num_marks++;
-                        }
-                    }
-
-                    $marks = $comp->getMarks();
-                    $num_old_mark = count($marks); //old number of marks
-                    //if old > new, delete old
-                    //if old < new, create more
-
-                    $y = 0;
-                    foreach($marks as $mark) {
-                        if($y < $num_marks && $y < $num_old_mark) {
-                            $mark->setGcId($comp->getId());
-                            $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
-                            $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
-                            $mark->setOrder($y);
-                            if (isset($_POST['mark_publish_' . $index . '_' . $y])) {
-                                $mark->setPublish(true);
-                            } else {
-                                $mark->setPublish(false);
+                    } else { //edits existing marks
+                        foreach($marks as $mark) {
+                            if($_POST['mark_gcmid_' . $index . '_' . $y] == $mark->getId()) {
+                                $mark->setGcId($comp->getId());
+                                $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
+                                $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
+                                $mark->setOrder($y);
+                                if (isset($_POST['mark_publish_' . $index . '_' . $y])) {
+                                	$mark->setPublish(true);
+                                } else {
+                                	$mark->setPublish(false);
+                                }
+                                $this->core->getQueries()->updateGradeableComponentMark($mark);
                             }
-                            $this->core->getQueries()->updateGradeableComponentMark($mark);
-                        } else if($num_old_mark > $num_marks) {
-                            $this->core->getQueries()->deleteGradeableComponentMark($mark);
                         }
-                        $y++; 
                     }
-                    for($y = $num_old_mark; $y < $num_marks; $y++) {
-                        $mark = new GradeableComponentMark($this->core);
-                        $mark->setGcId($comp->getId());
-                        $mark->setPoints(floatval($_POST['mark_points_' . $index . '_' . $y]));
-                        $mark->setNote($_POST['mark_text_' . $index . '_' . $y]);
-                        $mark->setOrder($y);
-                        if (isset($_POST['mark_publish_' . $index . '_' . $y])) {
-                            $mark->setPublish(true);
-                        } else {
-                            $mark->setPublish(false);
-                        }
-                        $this->core->getQueries()->createGradeableComponentMark($mark);
-                    }             
-                    $index++;
-                }               
-            }                
+
+                    //delete marks marked for deletion
+                    $is_there_deleted = false;
+                    $gcm_ids_deletes = explode(",", $_POST['component_deleted_marks_' . $index]);
+                    foreach($gcm_ids_deletes as $gcm_id_to_delete) {
+                    	foreach($marks as $mark) {
+                    		if ($gcm_id_to_delete == $mark->getId()) {
+								$this->core->getQueries()->deleteGradeableComponentMark($mark);
+								$is_there_deleted = true;
+                    		}
+                    	}
+                    }
+
+                    //since we delete some marks, we must now reorder them. Also it is important to note that 
+                    //$marks is sorted by gcm_order in increasing order
+                    if($is_there_deleted === true) {
+                    	$temp_order = 0;
+                    	foreach ($marks as $mark) {
+                    		//if the mark's id is a deleted id, skip it
+                    		$is_deleted = false;
+                    		foreach ($gcm_ids_deletes as $gcm_id_to_delete) {
+                    			if ($gcm_id_to_delete == $mark->getId()) {
+                    				$is_deleted = true;
+                    				break;
+                    			}
+                    		}
+                    		if(!$is_deleted) {
+                    			$mark->setOrder($temp_order);
+                    			$this->core->getQueries()->updateGradeableComponentMark($mark);
+                    			$temp_order++;
+                    		}
+                    	}
+                    }
+                }
+                $index++;
+            }       
         } else if($gradeable->getType() === GradeableType::CHECKPOINTS) { 
             if ($edit_gradeable === 1) {
                 $x = 0;
