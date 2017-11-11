@@ -211,6 +211,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $students = array();
+        //If we are peer grading, load in all students to be graded by this peer.
         if ($peer) {
             $student_ids = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
             $graders = array();
@@ -522,7 +523,7 @@ class ElectronicGraderController extends AbstractController {
                     $sections[$i] = $sections[$i]['sections_registration_id'];
                 }
             }
-            $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections,$orderBy="registration_section,user_id;");
             $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section'));
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section'));
         }
@@ -535,7 +536,7 @@ class ElectronicGraderController extends AbstractController {
                     $sections[$i] = $sections[$i]['sections_rotating_id'];
                 }
             }
-            $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections,$orderBy="rotating_section,user_id;");
             $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
         }
@@ -551,7 +552,7 @@ class ElectronicGraderController extends AbstractController {
         if(!$peer) {
             $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
         }
-        $gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
+        //$gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
         $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
         //$who_id = isset($who_id[$_REQUEST['who_id']]) ? $who_id[$_REQUEST['who_id']] : "";
@@ -567,26 +568,46 @@ class ElectronicGraderController extends AbstractController {
         $prev_id = "";
         $next_id = "";
         $break_next = false;
-        foreach ($gradeables_to_grade as $g) {
-            $id = $g->getUser()->getId();
-            if ($break_next) {
-                $next_id = $id;
-                break;
-            }
-            if (($who_id === "" && !$g->beenTAgraded()) || $who_id === $id) {
-                $who_id = $id;
-                $break_next = true;
-            }
-            else {
-                $prev_id = $id;
-            }
+        if($who_id === ""){
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 
+                'gradeable_id' => $gradeable_id)));
         }
-        if ($who_id === "") {
-            $this->core->addSuccessMessage("Finished grading for {$gradeable->getName()}");
-            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+        
+        $index = array_search($who_id, $user_ids_to_grade);
+        $not_in_my_section = false;
+        //If the student isn't in our list of students to grade.
+        if($index === false){
+          //If we are a full access grader, let us access the student anyway (but don't set next and previous)
+          if($this->core->getUser()->accessFullGrading()){
+            $prev_id = "";
+            $next_id = "";
+            $not_in_my_section = true;
+          }
+          else{
+             //If we are not a full access grader and the student isn't in our list, send us back to the index page.
+             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
+             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+          }
+        }
+        else{
+          //If the student is in our list of students to grade, set next and previous index appropriately
+          if($index > 0){
+            $prev_id = $user_ids_to_grade[$index-1];
+          }
+          if($index < count($user_ids_to_grade)-1){
+              $next_id = $user_ids_to_grade[$index+1];
+          }
         }
 
+        
+
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
+        if ($gradeable === NULL){
+          //This will trigger if a full access grader attempts to specifically access a non-existant student.
+          $this->core->addErrorMessage("ERROR: The requested student does not exist.");
+          $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+        }
+
         $gradeable->loadResultDetails();
         $individual = $_REQUEST['individual'];
 
@@ -603,12 +624,10 @@ class ElectronicGraderController extends AbstractController {
             $nameBreadCrumb = rtrim($nameBreadCrumb, ', ');
         } else {
             $nameBreadCrumb .= $gradeable->getUser()->getId();
-        }
-
-        $this->core->getOutput()->addBreadcrumb($nameBreadCrumb);
+        }       
 
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual, $not_in_my_section);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
     }
 
