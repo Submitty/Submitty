@@ -98,20 +98,21 @@ HTML;
                     <tbody>
 HTML;
 
-                    $userPermission = $this->core->getQueries()->getGroupForUserInClass($user->getId());
-                    $userPermissionLength = count($userPermission);
+                    $userPermissionLength = count($courses);
                     $header = "";
                     $pos = 0;
                     $rankWithCourse = array();
 
-                    for($i = 0; $i < 4; $i++){
+                    for($i = 0; $i < 5; $i++){
                         $rankWithCourse[$i] = array();
                     }
 
                     
                     foreach($courses as $course){
 
-                        array_push($rankWithCourse[$userPermission[$pos]-1], $course);
+                        $rank = $this->core->getQueries()->getGroupForUserInClass($course->getTitle(), $user->getId());
+
+                        array_push($rankWithCourse[$rank], $course);
 
                         $pos++;
 
@@ -119,26 +120,27 @@ HTML;
 
                     $pos = 0;
 
-                    for($i = 0; $i < 4; $i++){
+                    for($i = 0; $i < 5; $i++){
                         if(count($rankWithCourse[$i]) == 0){
                             continue;
                         }
 
-                        switch ($i+1) {
+                        switch ($i) {
+                                case 0:
+                                        $header = "<h3>Developer:</h3>";
+                                break;
                                 case 1:
-                                   
                                         $header = "<h3>Instructor:</h3>";
-
-                                    break;
+                                break;
                                 case 2:
-                                        $header = "<h3>TA:</h3>";
+                                        $header = "<h3>Full Access Grader:</h3>";
                                 break;
                                 case 3:
                                         $header = "<h3>Grader:</h3>";
                                 break;
                                 default:
                                         $header = "<h3>Student:</h3>";
-                                    break;
+                                break;
                         }
                             
                             $return .= <<<HTML

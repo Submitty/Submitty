@@ -775,20 +775,48 @@ HTML;
         return $return;
     }
 
-    public function hwGradingPage($gradeable, $progress, $prev_id, $next_id, $individual) {
+    //The student not in section variable indicates that an full access grader is viewing a student that is not in their
+    //assigned section.
+    public function hwGradingPage($gradeable, $progress, $prev_id, $next_id, $individual, $studentNotInSection=false) {
         $peer = false;
         if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
             $peer = true;
         }
         $user = $gradeable->getUser();
         $your_user_id = $this->core->getUser()->getId();
-        $prev_href = $prev_id == '' ? '' : "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id, 'individual'=>$individual))}\"";
-        $next_href = $next_id == '' ? '' : "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual))}\"";
+        $prev_href = "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id, 'individual'=>$individual))}\"";
+        $next_href = "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual))}\"";
         $return = <<<HTML
+<div id="bar_wrapper" class="draggable">
 <div class="grading_toolbar">
-    <a onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);" {$prev_href}><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
+HTML;
+    //If the student is in our section, add a clickable previous arrow, else add a grayed out one.
+    if(!$studentNotInSection){
+    $return .= <<< HTML
+        <a onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);" {$prev_href}><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
+HTML;
+    }
+    else{
+        $return .= <<< HTML
+        <i title="Go to the previous student" class="fa fa-chevron-left icon-header" style="color:grey"></i>
+HTML;
+    }
+    $return .= <<< HTML
     <a onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
+HTML;
+    //If the student is in our section, add a clickable next arrow, else add a grayed out one.
+    if(!$studentNotInSection){
+    $return .= <<<HTML
     <a onclick="saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);" {$next_href}><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
+HTML;
+    }
+    else{
+        $return .= <<< HTML
+        <i title="Go to the next student" class="fa fa-chevron-right icon-header" style="color:grey"></i>
+HTML;
+    }
+    $return .= <<< HTML
+
     <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="handleKeyPress('KeyR');"></i>
     <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="handleKeyPress('KeyA');"></i>
     <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="handleKeyPress('KeyG');"></i>
@@ -803,10 +831,10 @@ HTML;
 </div>
 
 <div class="progress_bar">
-    <progress class="progressbar" max="100" value="{$progress}" style="width:80%; height: 100%;"></progress>
+    <progress class="progressbar" max="100" value="{$progress}" style="width:70%; height: 100%;"></progress>
     <div class="progress-value" style="display:inline;"></div>
 </div>
-
+</div>
 
 
 <div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
@@ -1193,7 +1221,7 @@ HTML;
             }
             else if($show_graded_info) {
                 $nl = "<br>";
-                $initial_text = $question->getGradedTAComments($nl);
+                $initial_text = $question->getGradedTAComments($nl, false);
             }
             
             
@@ -1269,7 +1297,6 @@ HTML;
                             Add New Common Mark</span>
                         </td>
                     </tr>
-
 HTML;
             }
             $return .= <<<HTML

@@ -41,7 +41,7 @@ class HomePageController extends AbstractController {
 
     public function changePassword(){
         $user = $this->core->getUser();
-        if(isset($_POST['new_password']) && isset($_POST['confirm_new_password'])
+        if(!empty($_POST['new_password']) && !empty($_POST['confirm_new_password'])
             && $_POST['new_password'] == $_POST['confirm_new_password']) {
             $user->setPassword($_POST['new_password']);
             $this->core->getQueries()->updateUser($user);
