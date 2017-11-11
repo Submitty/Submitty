@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\DatabaseUtils;
 
 /**
  * Class User
@@ -11,11 +10,9 @@ use app\libraries\DatabaseUtils;
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
  * @method void setAnonId(string $anon_id)
- * @method string getAnonId()
  * @method string getPassword()
  * @method string getFirstName() Get the first name of the loaded user
  * @method string getPreferredFirstName() Get the preferred name of the loaded user
- * @method string setPreferredFirstName() Set the preferred name of the loaded user (does not affect db. call updateUser.)
  * @method string getDisplayedFirstName() Returns the preferred name if one exists and is not null or blank,
  *                                        otherwise return the first name field for the user.
  * @method string getLastName() Get the last name of the loaded user
@@ -112,9 +109,11 @@ class User extends AbstractModel {
         if (isset($details['user_password'])) {
             $this->setPassword($details['user_password']);
         }
-        if (isset($details['anon_id'])) {
+
+        if (!empty($details['anon_id'])) {
             $this->anon_id = $details['anon_id'];
         }
+
         $this->setFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {
             $this->setPreferredFirstName($details['user_preferred_firstname']);
@@ -134,7 +133,7 @@ class User extends AbstractModel {
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
-            $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
+            $this->setGradingRegistrationSections($details['grading_registration_sections']);
         }
     }
 
@@ -171,12 +170,14 @@ class User extends AbstractModel {
     }
 
     public function setPassword($password) {
-        $info = password_get_info($password);
-        if ($info['algo'] === 0) {
-            $this->password = password_hash($password, PASSWORD_DEFAULT);
-        }
-        else {
-            $this->password = $password;
+        if (!empty($password)) {
+            $info = password_get_info($password);
+            if ($info['algo'] === 0) {
+                $this->password = password_hash($password, PASSWORD_DEFAULT);
+            }
+            else {
+                $this->password = $password;
+            }
         }
     }
 
@@ -185,6 +186,10 @@ class User extends AbstractModel {
         $this->setDisplayedFirstName();
     }
 
+    /**
+     * Set the preferred name of the loaded user (does not affect db. call updateUser.)
+     * @param string $name
+     */
     public function setPreferredFirstName($name) {
         $this->preferred_first_name = $name;
         $this->setDisplayedFirstName();
@@ -216,21 +221,56 @@ class User extends AbstractModel {
     public function getAnonId() {
         if($this->anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-            $random = "";
-            while(strlen($random) < 15) {
-                $random .= $alpha[rand(0, strlen($alpha)-1)];
-                if(strlen($random) == 15) {
-                    $check = $this->core->getQueries()->getUserFromAnon($random);
-                    if(strlen($check) == 0) {
-                        $this->anon_id = $random;
-                        $this->core->getQueries()->updateUser($this);
-                    }
-                    else {
-                        $random = "";
-                    }
+            $anon_ids = $this->core->getQueries()->getAllAnonIds();
+            $alpha_length = strlen($alpha) - 1;
+            do {
+                $random = "";
+                for ($i = 0; $i < 15; $i++) {
+                    // this throws an exception if there's no avaiable source for generating
+                    // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
+                    // so just ignore this fact
+                    /** @noinspection PhpUnhandledExceptionInspection */
+                    $random .= $alpha[random_int(0, $alpha_length)];
                 }
-            }
+            } while(in_array($random, $anon_ids));
+            $this->anon_id = $random;
+            $this->core->getQueries()->updateUser($this, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
         }
         return $this->anon_id;
+    }
+
+    /**
+     * Checks $data to make sure it is acceptable for $field.
+     *
+     * @param string $field
+     * @param mixed $data
+     * @return bool
+     */
+    static public function validateUserData($field, $data) {
+
+    	switch($field) {
+		case 'user_id':
+			//Username / useer_id must contain only lowercase alpha, numbers, underscores, hyphens
+			return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
+		case 'user_firstname':
+		case 'user_lastname':
+		case 'user_preferred_firstname':
+			//First, Last, Preferred name must be alpha characters, white-space, or certain punctuation.
+        	return preg_match("~^[a-zA-Z'`\-\.\(\) ]+$~", $data) === 1;
+		case 'user_email':
+			//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
+			return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
+		case 'user_group':
+            //user_group check is a digit between 1 - 4.
+			return preg_match("~^[1-4]{1}$~", $data) === 1;
+		case 'user_password':
+	        //Database password cannot be blank, no check on format
+			return $data !== "";
+		default:
+			//$data can't be validated since $field is unknown.  Notify developer with a stop error (also protectes data record integrity).
+			$field = var_export(htmlentities($field), true);
+			$data = var_export(htmlentities($data), true);
+			trigger_error('User::validateUserData() called with unknown $field '.$field.' and $data '.$data, E_USER_ERROR);
+    	}
     }
 }

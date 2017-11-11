@@ -26,9 +26,80 @@ class SimpleGraderController extends AbstractController  {
             case 'upload_csv_numeric':
                 $this->UploadCSV('numeric');
                 break;
+            case 'print_lab':
+                $this->printLab();
+                break;
             default:
                 break;
         }
+    }
+
+    public function printLab(){
+        $g_id = $section = $sort_by = $sectionType = "";
+
+        //Get the id for the current gradeable. Later used to get gradeable object from db.
+        if (!isset($_REQUEST['g_id'])) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable');
+        }
+        else{
+            $g_id = $_REQUEST['g_id'];
+        }
+
+        //Figure out what order we are supposed to be sorting the students in.
+        if (isset($_REQUEST['sort'])) {
+          $sort_by = $_REQUEST['sort'];
+        }
+        else{
+            $sort_by = "registration_section";
+        }
+
+        //convert from id --> u.user_id etc for use by the database.
+        if($sort_by === "id"){
+            $sort_by = "u.user_id";
+        }
+        else if($sort_by === "first"){
+            $sort_by = "u.user_firstname";
+        }
+        else if($sort_by === "last"){
+            $sort_by = "u.user_lastname";
+        }
+
+        //Figure out what section we are supposed to print
+        if (isset($_REQUEST['section'])) {
+            $section = $_REQUEST['section'];
+        }
+        else{
+            $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
+            return;    
+        }
+
+        //Figure out if we are getting users by rotating or registration section.
+        if (!isset($_REQUEST['sectionType'])) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable');
+        }
+        else{
+            $sectionType = $_REQUEST['sectionType'];
+        }
+
+        //Grab the students in section, sectiontype.
+        if($sectionType === "rotating_section"){
+            $students = $this->core->getQueries()->getUsersByRotatingSections(array($section), $sort_by);
+        }
+        else if($sectionType === "registration_section"){
+            $students = $this->core->getQueries()->getUsersByRegistrationSections(array($section), $sort_by);
+        }
+        else{
+            $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
+            return;
+        }
+
+        $gradeable = $this->core->getQueries()->getGradeable($g_id);
+        
+        //Turn off header/footer so that we are using simple html.
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        //display the lab to be printed (in SimpleGraderView's displayPrintLab function)
+        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'displayPrintLab', $gradeable, $sort_by, $section, $students);
     }
 
     public function grade($action) {
@@ -75,7 +146,7 @@ class SimpleGraderController extends AbstractController  {
             $sort_key = "u.user_lastname";
         }
         if(count($sections) === 0 && (!isset($_GET['view']) || $_GET['view'] !== "all") && !$this->core->getUser()->accessAdmin()){
-            $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $sections, $graders);
+            $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $sections, $graders, $section_key);
             return;
         }
         if ((isset($_GET['view']) && $_GET['view'] === "all") || (count($sections) === 0 && $this->core->getUser()->accessAdmin())) {
@@ -89,7 +160,7 @@ class SimpleGraderController extends AbstractController  {
         }
         $student_ids = array_map(function(User $user) { return $user->getId(); }, $students);
         $rows = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids, $section_key, $sort_key);
-        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $graders);
+        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $graders, $section_key);
     }
 
     public function save($action) {
@@ -236,4 +307,6 @@ class SimpleGraderController extends AbstractController  {
         $this->core->getOutput()->renderJson($response);
         return $response;
     }
+
+    
 }

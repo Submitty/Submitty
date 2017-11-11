@@ -21,7 +21,7 @@ class ExtensionsView extends AbstractView {
 HTML;
         foreach($g_ids as $index => $value) {
             $return .= <<<HTML
-                    <option value="$value[0]">$value[0]</option>
+                    <option value="{$value['g_id']}">{$value['g_title']}</option>
 HTML;
         }
         $return .= <<<HTML
@@ -31,10 +31,10 @@ HTML;
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
         <div class="option-title">Single Student Entry<br></div>
         <div class="option" style="width:25%; display:inline-block;">Student ID:<br><input class="option-input" type="text" name="user_id" id="user_id" style="float:left"></div>
-        <div class="option" style="width:25%; display:inline-block;">Late Days:<br><input class="option-input" type="text" name="late_days" id="late_days" style="float:left"></div>
+        <div class="option" style="width:25%; display:inline-block;">Number of Days of Extension:<br><input class="option-input" type="text" name="late_days" id="late_days" style="float:left"></div>
         <div class="option" style="width:10%; display:inline-block; vertical-align: bottom;"><input class="btn btn-primary" type="submit" style="float:left"></div>
         <div class="option-title">Multiple Student Entry Via CSV Upload</div>
-        <div>Do not use column headers. CSV must be of the following form: student_id, gradeable_id, late_days</div>
+        <div>Do not use column headers. CSV must be of the following form: student_id, gradeable_id, days_of_extension</div>
         <div style="padding-bottom:20px;"><input type="file" name="csv_upload" id="csv_upload" onchange="return updateHomeworkExtensions($(this));"></div>
     </form>
     </div>
@@ -46,7 +46,7 @@ HTML;
             <td>Student ID</td>
             <td>First Name</td>
             <td>Last Name</td>
-            <td>Late Day Exceptions</td>
+            <td>Number of Days of Extension</td>
         </thead>
         </div>
     </table>

@@ -21,15 +21,15 @@ public:
 
   std::string color;
   std::string data;
-  std::string note;
   int late_days_used;
   std::string align;
   enum CELL_CONTENTS_STATUS visible;
   int span;
   int rotate;
-
   friend std::ostream& operator<<(std::ostream &ostr, const TableCell &c);
-
+  const std::string& getNote() const { return note; }
+private:
+  std::string note;
 };
 
 

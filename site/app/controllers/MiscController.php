@@ -195,7 +195,7 @@ class MiscController extends AbstractController {
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
-        header("Content-disposition: attachment; filename='{$_REQUEST['file']}'");
+        header("Content-disposition: attachment; filename=\"{$_REQUEST['file']}\"");
         readfile($_REQUEST['path']);
     }
 

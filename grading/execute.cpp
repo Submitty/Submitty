@@ -58,6 +58,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "grep",                    "/bin/grep" },
     { "sed",                     "/bin/sed" },
     { "pdftotext",               "/usr/bin/pdftotext" },
+    { "pdflatex",                "/usr/bin/pdflatex" },
     { "wc",                      "/usr/bin/wc" },
     { "head",                    "/usr/bin/head" },
     { "tail",                    "/usr/bin/tail" },
@@ -103,6 +104,12 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "mpicc.openmpi",           "/usr/bin/mpicc.openmpi" },
     { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
 
+    // for LLVM / Compiler class
+    { "lex",                     "/usr/bin/lex" },
+    { "flex",                    "/usr/bin/flex" },
+    { "yacc",                    "/usr/bin/yacc" },
+    { "bison",                   "/usr/bin/bison" },
+    
     // for graphics/window interaction
     { "scrot",                   "/usr/bin/scrot"}, //screenshot utility
     { "xdotool",                 "/usr/bin/xdotool"}, //keyboard/mouse input
