@@ -74,6 +74,15 @@ public:
 };
 
 
+int CountLefties(std::vector<Student*> &students) {
+  int count = 0;
+  for (int i = 0; i < students.size(); i++) {
+    Student* s = students[i];
+    
+  }
+  return count;
+}
+
 void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::string &zone_assignments_filename, std::vector<Student*> &students) {
 
   std::cout << "zone counts filename '" << zone_counts_filename << "'" << std::endl;
@@ -82,6 +91,10 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
   assert (zone_counts_filename != "");
   assert (zone_assignments_filename != "");
 
+
+  int num_lefties = CountLefties(students);
+        
+  
   // ============================================================
   // read in the desired zone counts
 
@@ -119,7 +132,9 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
 
     bool read_another_zone = false;
     while (istr_zone_counts >> token) {
-      if (token == "row") {
+      if (token[0] == "#") {
+        std::getline(istr_zone_counts,line);
+      } else if (token == "row") {
         std::getline(istr_zone_counts,line);
         std::stringstream ss(line);
         std::string row,seat;
@@ -128,11 +143,12 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
         while (ss >> seat) {
           zi.available_seats.push_back(std::make_pair(row,seat));
         }
+      } else if (token == "zone") {
+        read_another_zone = true; break;
       }
-      if (token == "zone") { read_another_zone = true; break; }
     }
     if (zi.available_seats.size() != 0 &&
-        zi.max != zi.available_seats.size()) {
+        zi.max > zi.available_seats.size()) {
       std::cout << "AVAILABLE SEATS FOR ZONE " << zi.zone << " are incorrect " <<
         zi.max << " max    vs " << zi.available_seats.size() << " available" << std::endl;
       exit(1);

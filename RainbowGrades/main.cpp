@@ -707,7 +707,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   } else if (token == "test_improvement_averaging_adjustment") {
     TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT = true;
   } else if (token == "quiz_normalize_and_drop") {
-          QUIZ_NORMALIZE_AND_DROP = itr.value();
+    QUIZ_NORMALIZE_AND_DROP = itr.value();
   } else if (token == "lowest_test_counts_half") {
     LOWEST_TEST_COUNTS_HALF = true;
   } else {
