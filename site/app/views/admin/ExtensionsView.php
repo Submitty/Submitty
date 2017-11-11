@@ -16,7 +16,7 @@ class ExtensionsView extends AbstractView {
         <div class="option">
             <p> Use this form to grant an extension (e.g., for an excused absense) to a user on a specific assignment.<br><br><br></p>
             <div class="option">Select Rubric:<br>
-                <select name="g_id" onchange="loadHomeworkExtensions($(this).val());" style="margin-top: 10px; width:50%">
+                <select name="g_id" onchange="loadHomeworkExtensions($(this).val());" style="margin-top: 10px; width: 50%">
                     <option disabled selected value> -- select an option -- </option>
 HTML;
         foreach($g_ids as $index => $value) {
@@ -53,6 +53,23 @@ HTML;
     </div>
 </div>
 HTML;
+
+        $students = $this->core->getQueries()->getAllUsers();
+        $student_full = array();
+        foreach ($students as $student) {
+            $student_full[] = array('value' => $student->getId(),
+                                    'label' => $student->getDisplayedFirstName().' '.$student->getLastName().' <'.$student->getId().'>');
+        }
+        $student_full = json_encode($student_full);
+
+        $return .= <<<HTML
+<script>
+    $("#user_id").autocomplete({
+        source: {$student_full}
+    });
+</script>
+HTML;
+
         return $return;
     }
 }

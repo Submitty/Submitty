@@ -60,7 +60,7 @@ HTML;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
-        if($extensions > 0){
+        if ($extensions > 0) {
             $return .= <<<HTML
 <div class="content">
     <h4>You have a {$extensions} day extension for this homework</h4>
@@ -92,27 +92,21 @@ HTML;
                     $student_ids[] = $student->getId();
                 }
 
-                $students_without = array();
-                $student_without_ids = array();
                 $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
+                $students_without = array();
                 foreach ($gradeables as $g) {
                     if ($g->getActiveVersion() == 0) {
                         $students_without[] = $g->getUser();
                     }
                 }
-                foreach ($students_without as $student) {
-                    $student_without_ids[] = $student->getId();
-                }
 
-                $student_without_full = array();
+                $students_without_full = array();
                 foreach ($students_without as $student) {
-                    $student_without_full[] = array('value' => $student->getId(),
+                    $students_without_full[] = array('value' => $student->getId(),
                                                     'label' => $student->getDisplayedFirstName().' '.$student->getLastName().' <'.$student->getId().'>');
                 }
 
-                $student_ids = json_encode($student_ids);
-                $student_without_ids = json_encode($student_without_ids);
-                $student_without_full = json_encode($student_without_full);
+                $students_without_full = json_encode($students_without_full);
 
                 $return .= <<<HTML
     <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
@@ -150,9 +144,7 @@ HTML;
     <script type="text/javascript">
         $(function() {
             var cookie = document.cookie;
-            student_ids = {$student_ids};
-            student_without_ids = {$student_without_ids};
-            student_without_full = {$student_without_full};
+            students_without_full = {$students_without_full};
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
@@ -179,8 +171,8 @@ HTML;
                 $('#pdf_submit_button').show();
                 $('#user_id').val('');
             });
-            $( "#user_id" ).autocomplete({
-                source: student_ids
+            $("#user_id").autocomplete({
+                source: students_without_full
             });
         });
     </script>
