@@ -79,7 +79,8 @@ public:
   const std::string& getPreferredName() const { if (preferred_first != "") return preferred_first; return legal_first; }
   const std::string& getLastName()      const { return last; }
   const std::string& getLastUpdate()    const { return lastUpdate; }
-
+  bool getLefty() const { return lefty; }
+  
   // registration status
   int getSection()           const { return section; }
   bool getAudit()            const { return audit; }
@@ -127,7 +128,7 @@ public:
   void setLegalFirstName(const std::string &s)     { legal_first=s; }
   void setPreferredFirstName(const std::string &s) { preferred_first=s; }
   void setLastName(const std::string &s)      { last=s; }
-
+  void setLefty() { lefty = true; }
   void setLastUpdate(const std::string &s)    { lastUpdate = s; }
 
   // registration status
@@ -152,7 +153,7 @@ public:
   void setExamRoom(const std::string &s) { exam_room = s; }
   void setExamZone(const std::string &z, const std::string &r, const std::string &s) { exam_zone=z; exam_row=r; exam_seat=s; }
   void setExamTime(const std::string &s) { exam_time = s; }
-  void setExamZoneImage(const std::string &s) { exam_zone_image = s; std::cout << "SET ZONE IMAGE" << s << std::endl; }
+  void setExamZoneImage(const std::string &s) { exam_zone_image = s; }
 
   // per student notes
   void addWarning(const std::string &message) { early_warnings.push_back(message); }
@@ -195,7 +196,8 @@ private:
   std::string legal_first;
   std::string preferred_first;
   std::string last;
-
+  bool lefty;
+  
   std::string lastUpdate;
 
   int current_allowed_late_days;

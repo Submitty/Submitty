@@ -108,7 +108,9 @@ std::string GLOBAL_EXAM_DATE = "exam date uninitialized";
 std::string GLOBAL_EXAM_TIME = "exam time uninitialized";
 std::string GLOBAL_EXAM_DEFAULT_ROOM = "exam default room uninitialized";
 std::string GLOBAL_EXAM_SEATING = "";
+std::string GLOBAL_SEATING_SPACING = "";
 std::string GLOBAL_EXAM_SEATING_COUNT = "";
+std::string GLOBAL_LEFT_RIGHT_HANDEDNESS = "";
 
 float GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = 0.1;
 
@@ -625,10 +627,18 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
           std::cout << "TOKEN IS EXAM SEATING" << std::endl;
           std::string value = itr2.value();
           GLOBAL_EXAM_SEATING = value;
+        } else if (token2 == "seating_spacing") {
+          std::cout << "TOKEN IS SEATING SPACING" << std::endl;
+          std::string value = itr2.value();
+          GLOBAL_SEATING_SPACING = value;
         } else if (token2 == "exam_seating_count") {
           std::cout << "TOKEN IS EXAM SEATING COUNT" << std::endl;
           std::string value = itr2.value();
           GLOBAL_EXAM_SEATING_COUNT = value;
+        } else if (token2 == "left_right_handedness") {
+          std::cout << "TOKEN IS LEFT RIGHT HANDEDNESS" << std::endl;
+          std::string value = itr2.value();
+          GLOBAL_LEFT_RIGHT_HANDEDNESS = value;
         }
         }
     }
@@ -773,7 +783,11 @@ void MakeRosterFile(std::vector<Student*> &students) {
 
 
 // defined in zone.cpp
-void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::string &zone_assignments_filename, std::vector<Student*> &students);
+void LoadExamSeatingFile(const std::string &zone_counts_filename,
+                         const std::string &zone_assignments_filename,
+                         const std::string &seating_spacing,
+                         const std::string &left_right_handedness,
+                         std::vector<Student*> &students);
 
 void load_student_grades(std::vector<Student*> &students);
 
@@ -1451,7 +1465,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
   }
   
   if (GLOBAL_EXAM_SEATING_COUNT != "" && GLOBAL_EXAM_SEATING != "") {
-    LoadExamSeatingFile(GLOBAL_EXAM_SEATING_COUNT,GLOBAL_EXAM_SEATING,students);
+    LoadExamSeatingFile(GLOBAL_EXAM_SEATING_COUNT,GLOBAL_EXAM_SEATING,GLOBAL_SEATING_SPACING,GLOBAL_LEFT_RIGHT_HANDEDNESS,students);
   }
   MakeRosterFile(students);
   MatchClickerRemotes(students, iclicker_remotes_filename);

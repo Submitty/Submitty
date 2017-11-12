@@ -10,7 +10,8 @@ Student::Student() {
 
   // personal data
   // (defaults to empty string)
-
+  lefty = false;
+  
   // registration status
   section = 0;  
   audit = false;
