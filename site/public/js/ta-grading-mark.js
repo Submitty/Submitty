@@ -780,6 +780,10 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                         }
                     }
                 }
+
+                if(data['version_updated'] === "true") {
+                    $('#wrong_version_' + num)[0].innerHTML = "";
+                }
             },
             error: function() {
                 console.log("Something went wront with saving marks...");

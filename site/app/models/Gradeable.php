@@ -960,6 +960,7 @@ class Gradeable extends AbstractModel {
     }
     
     public function validateVersions($active_check = null) {
+        //active check is the gradeable version this gradeable has
         if($active_check === null) {
             $active_check = $this->active_version;
         }
