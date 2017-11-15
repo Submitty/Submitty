@@ -276,4 +276,5 @@ class GradeableComponent extends AbstractModel {
             $this->marks = $marks;
         }
     }
+
 }
