@@ -151,6 +151,8 @@ abstract class AbstractDatabaseQueries {
     abstract public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key);
 
     abstract public function getAverageComponentScores($g_id, $section_key);
+    
+    abstract public function getAverageForGradeable($g_id, $section_key)
 
     abstract public function getGradersForRegistrationSections($sections);
 
