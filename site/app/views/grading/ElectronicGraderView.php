@@ -1154,7 +1154,7 @@ HTML;
             $message = htmlentities($question->getTitle());
             $message = "<b>{$message}</b>";  // {$num_peer_components}</b>";
             if ($question->getGradedVersion() != -1 && $gradeable->getActiveVersion() != $question->getGradedVersion()) {
-                $message .= "  " . "Please edit or ensure that comments from version " . $question->getGradedVersion() . " still apply.";
+                $message .= "<span id='wrong_version_{$c}' style='color:rgb(200, 0, 0); font-weight: bold; font-size:medium;'>  " . "Please edit or ensure that comments from version " . $question->getGradedVersion() . " still apply.</span>";
             }
             $note = htmlentities($question->getTaComment());
             if ($note != "") {

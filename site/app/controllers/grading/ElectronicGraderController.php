@@ -637,6 +637,7 @@ class ElectronicGraderController extends AbstractController {
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $overwrite = $_POST['overwrite'];
+        $version_updated = "false"; //if the version is updated
 
         //checks if user has permission
         if ($this->core->getUser()->getGroup() === 4) {
@@ -748,11 +749,13 @@ class ElectronicGraderController extends AbstractController {
                 $component->deleteData($gradeable->getGdId());
                 $debug = 'delete';
             } else {
-                if($mark_modified === true) { //only change the component information is the mark was modified
+                //only change the component information is the mark was modified or componet and its gradeable are out of sync.
+                if($mark_modified === true || ($component->getGradedVersion() !== $gradeable->getActiveVersion())) {
                     if ($component->getGrader() === null || $overwrite === "true") {
                         $component->setGrader($this->core->getUser());
                     }
 
+                    $version_updated = "true";
                     $component->setGradedVersion($_POST['active_version']);
                     $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                     $component->setComment($_POST['custom_message']);
@@ -807,7 +810,7 @@ class ElectronicGraderController extends AbstractController {
             $hwReport->generateSingleReport($this->core->getUser()->getId(), $gradeable_id);
         }
 
-        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite);
+        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite, 'version_updated' => $version_updated);
         $this->core->getOutput()->renderJson($response);
         return $response;
     }
