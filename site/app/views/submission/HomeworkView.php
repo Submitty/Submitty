@@ -93,20 +93,26 @@ HTML;
                 }
 
                 $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
-                $students_without = array();
+                $students_version = array();
                 foreach ($gradeables as $g) {
-                    if ($g->getActiveVersion() == 0) {
-                        $students_without[] = $g->getUser();
+                    $students_version[] = array($g->getUser(), $g->getActiveVersion());
+                }
+
+                $students_full = array();
+                foreach ($students_version as $student_pair) {
+                    $student = $student_pair[0];
+
+                    $student_entry = array('value' => $student->getId(),
+                                           'label' => $student->getDisplayedFirstName().' '.$student->getLastName().' <'.$student->getId().'>');
+
+                    if ($student_pair[1] !== 0) {
+                        $student_entry['label'] .= ' ('.$student_pair[1].' Prev Submission)';
                     }
+
+                    $students_full[] = $student_entry;
                 }
 
-                $students_without_full = array();
-                foreach ($students_without as $student) {
-                    $students_without_full[] = array('value' => $student->getId(),
-                                                    'label' => $student->getDisplayedFirstName().' '.$student->getLastName().' <'.$student->getId().'>');
-                }
-
-                $students_without_full = json_encode($students_without_full);
+                $students_full = json_encode($students_full);
 
                 $return .= <<<HTML
     <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
@@ -144,7 +150,7 @@ HTML;
     <script type="text/javascript">
         $(function() {
             var cookie = document.cookie;
-            students_without_full = {$students_without_full};
+            students_full = {$students_full};
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
@@ -172,7 +178,7 @@ HTML;
                 $('#user_id').val('');
             });
             $("#user_id").autocomplete({
-                source: students_without_full
+                source: students_full
             });
         });
     </script>
@@ -587,15 +593,15 @@ HTML;
                 </td>
             </tr>
 HTML;
-                    $count++;
+                        $count++;
                     }
-                $count_array_json = json_encode($count_array);
+                    $count_array_json = json_encode($count_array);
                 }
                 $return .= <<<HTML
 <script type="text/javascript">
     $(function() {
         $("#bulkForm input").autocomplete({
-            source: student_without_full
+            source: students_full
         });
         $("#bulkForm button").click(function(e) {
             var btn = $(document.activeElement);
@@ -611,8 +617,7 @@ HTML;
                 }
                 deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
                 moveNextInput(count);
-            }
-            else {
+            } else {
                 validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, "", makeSubmission);
             }
             e.preventDefault();
@@ -885,8 +890,7 @@ HTML;
             This submission is currently being regraded. It is one of {$gradeable->getNumberOfGradingTotal()} grading.
         </p>
 HTML;
-                    }
-                    else {
+                    } else {
                         $return .= <<<HTML
         <p class="red-message">
             This submission is currently in the queue to be regraded.
@@ -903,8 +907,7 @@ HTML;
             This submission is currently being graded. It is one of {$gradeable->getNumberOfGradingTotal()} grading.
         </p>
 HTML;
-                    }
-                    else {
+                    } else {
                         $return .= <<<HTML
         <p class="red-message">
             This submission is currently in the queue to be graded. Your submission is number {$gradeable->getInteractiveQueuePosition()} out of {$gradeable->getInteractiveQueueTotal()}.
@@ -953,13 +956,12 @@ HTML;
             $return .= <<<HTML
 <div class="content">
 HTML;
-            if($gradeable->hasGradeFile()) {
+            if ($gradeable->hasGradeFile()) {
                 $return .= <<<HTML
     <h3 class="label">TA grade</h3>
     <pre>{$gradeable->getGradeFile()}</pre>
 HTML;
-            }
-            else {
+            } else {
                 $return .= <<<HTML
     <h3 class="label">TA grade not available</h3>
 HTML;
