@@ -140,7 +140,7 @@ abstract class AbstractDatabaseQueries {
 
     abstract public function getLateDayInformation($user_id);
 
-    abstract public function getUsersByRegistrationSections($sections);
+    // abstract public function getUsersByRegistrationSections($sections);
 
     abstract public function getTotalUserCountByGradingSections($sections, $section_key);
 
@@ -156,11 +156,38 @@ abstract class AbstractDatabaseQueries {
 
     abstract public function getGradersForRegistrationSections($sections);
 
-    abstract public function getRotatingSectionsForGradeableAndUser($g_id, $user_id);
+    // abstract public function getRotatingSectionsForGradeableAndUser($g_id, $user_id);
 
-    abstract public function getUsersByRotatingSections($sections);
+    // abstract public function getUsersByRotatingSections($sections);
 
     abstract public function getGradersForRotatingSections($g_id, $sections);
+
+    // abstract public function deleteGradeableComponentData($gd_id, $grader_id, GradeableComponent $component);
+    // abstract public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark);
+    // abstract public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark);
+    abstract public function getAllGradeablesIds();
+    abstract public function getDataFromGCMD($gc_id, GradeableComponentMark $mark);
+    // abstract public function getGradeable($g_id, $user_id);
+    abstract public function getGradeableComponentMarksData($gc_id, $gd_id, $gcd_grader_id);
+    // abstract public function getGradeableComponents($g_id, $gd_id);
+    // abstract public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template);
+    // abstract public function getGradeables($g_ids, $user_ids, $section_key, $sort_key, $g_type);
+    abstract public function getGradeablesIterator($g_ids, $user_ids, $section_key, $sort_key, $g_type);
+    abstract public function getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
+    abstract public function getGradedPeerComponentsByRotatingSection($gradeable_id, $sections);
+    abstract public function getGreatestGradeableComponentMarkOrder(GradeableComponent $component);
+    abstract public function getGroupForUserInClass($course_name, $user_id);
+    abstract public function getNumGradedPeerComponents($gradeable_id, $grader);
+    abstract public function getNumPeerComponents($g_id);
+    abstract public function getPeerAssignment($gradeable_id, $grader);
+    abstract public function getPeerGradingAssignNumber($g_id);
+    abstract public function getRotatingSectionsForGradeableAndUser($g_id, $user_id);
+    abstract public function getStudentCoursesById($user_id, $submitty_path);
+    abstract public function getUsersByRegistrationSections($sections, $orderBy);
+    abstract public function getUsersByRotatingSections($sections, $orderBy);
+    abstract public function getUsersInNullSection($orderBy);
+    abstract public function replaceGradeableComponentData($gd_id, GradeableComponent $component);
+
 
     /**
      * Gets all registration sections from the sections_registration table
