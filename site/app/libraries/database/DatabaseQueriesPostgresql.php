@@ -686,10 +686,11 @@ ORDER BY {$section_key}", $params);
             // Expand out where clause
             $sections_keys = array_keys($sections);
             $where = "WHERE {$section_key} IN (";
-            foreach($sections_keys as $section)
-                $where .= ($section+1) . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
+            foreach($sections_keys as $section) {
+                $where .= "?" . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
+                array_push($params, $section+1);
+            }
             $where .= ")";
-            $params = $sections;
         }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
@@ -702,7 +703,7 @@ AND electronic_gradeable_version.active_version>0
 AND electronic_gradeable_version.g_id='{$g_id}'
 {$where}
 GROUP BY {$section_key}
-ORDER BY {$section_key}");
+ORDER BY {$section_key}", $params);
 
         foreach ($this->course_db->rows() as $row) {
             $return[$row[$section_key]] = intval($row['cnt']);
