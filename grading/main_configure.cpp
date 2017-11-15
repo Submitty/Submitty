@@ -122,6 +122,7 @@ int main(int argc, char *argv[]) {
     incentive["message"] = early_submission_incentive.value("message","");
     incentive["minimum_days_early"] = early_submission_incentive.value("minimum_days_early",0);
     incentive["minimum_points"] = early_submission_incentive.value("minimum_points",0);
+    incentive["test_cases"] = early_submission_incentive.value("test_cases",std::vector<int>());
     j["early_submission_incentive"] = incentive; 
   }
   j["max_submissions"] = max_submissions;
