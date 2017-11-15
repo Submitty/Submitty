@@ -39,9 +39,9 @@ for course in os.scandir(os.path.join(settings['submitty_data_dir'], "courses", 
     os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY gradeable_component_mark_data ADD CONSTRAINT gradeable_component_mark_data_gd_id_and_gc_id_fkey FOREIGN KEY (gd_id, gc_id, gcd_grader_id) REFERENCES gradeable_component_data(gd_id, gc_id, gcd_grader_id) ON UPDATE CASCADE ON DELETE CASCADE'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
 
     # edits to migrate v.1.0.2 to v.1.0.3
-    os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component ALTER COLUMN gc_lower_clamp SET DATA TYPE numeric NOT NULL'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
-    os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component ALTER COLUMN gc_default SET DATA TYPE numeric NOT NULL'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
-    os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component ALTER COLUMN gc_upper_clamp SET DATA TYPE numeric NOT NULL'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+    os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component ALTER COLUMN gc_lower_clamp SET DATA TYPE numeric'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+    os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component ALTER COLUMN gc_default SET DATA TYPE numeric'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+    os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component ALTER COLUMN gc_upper_clamp SET DATA TYPE numeric'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
     
     print ("\n")
     
