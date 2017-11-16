@@ -44,7 +44,13 @@ class HWReport extends AbstractModel {
         $student_grade = 0;
         $grade_comment = "";
         
-        $student_id = $gradeable->isTeamAssignment() ? $gradeable->getTeam()->getId() : $gradeable->getUser()->getId();
+        $student_id = "";
+        if ($gradeable->isTeamAssignment() && 
+            $gradeable->getTeam() != NULL) {
+          $student_id = $gradeable->getTeam()->getId();
+        } else {
+          $student_id = $gradeable->getUser()->getId();
+        }
         $student_output_filename = $student_id.".txt";
         $late_days_used_overall = 0;
         
