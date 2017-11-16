@@ -188,56 +188,34 @@ class GradeableComponent extends AbstractModel {
         $text = "";
         $first_text = true;
         foreach ($this->marks as $mark) {
+            $points_string = "    ";
+            if ($mark->getPoints() != 0) {
+              $points_string = sprintf("%4.1f",$mark->getPoints());
+            }
+            $hasmark = "( ) ";
             if($mark->getHasMark() === true) {
-                if ($first_text === true) {
-                    if (floatval($mark->getPoints()) == 0) {
-                        $text .= "(*) " . $mark->getNote();
-                    } else {
-                        $text .= "(*) (" . $mark->getPoints() . ") " . $mark->getNote();
-                    }
-                    $first_text = false;
-                }
-                else {
-                    if (floatval($mark->getPoints()) == 0) {
-                        $text .= $nl . "(*) " . $mark->getNote();
-                    } else {
-                        $text .= $nl . "(*) (" . $mark->getPoints() . ") " . $mark->getNote();
-                    }
-                }
-            } else if ($show_students === true && $mark->getPublish() === 't') {
-                if ($first_text === true) {
-                    if (floatval($mark->getPoints()) == 0) {
-                        $text .= "( ) " . $mark->getNote();
-                    } else {
-                        $text .= "( ) (" . $mark->getPoints() . ") " . $mark->getNote();
-                    }
-                    $first_text = false;
-                }
-                else {
-                    if (floatval($mark->getPoints()) == 0) {
-                        $text .= $nl . "( ) " . $mark->getNote();
-                    } else {
-                        $text .= $nl . "( ) (" . $mark->getPoints() . ") " . $mark->getNote();
-                    }
-                }
+              $hasmark = "(*) ";
+            } else if (!($show_students === true && $mark->getPublish() === 't')) {
+              continue;
             }
-        }
-        if($this->comment != "") {
+            $newline=$nl;
             if ($first_text === true) {
-                if (floatval($this->score) == 0) {
-                    $text .= "* " . $this->comment;
-                } else {
-                    $text .= "* (" . $this->score . ") ". $this->comment;
-                }
-                $first_text = false;
+              $newline = "";
+              $first_text = false;
             }
-            else {
-                if (floatval($this->score) == 0) {
-                    $text .= $nl . "* " . $this->comment;
-                } else {
-                    $text .= $nl . "* (" . $this->score . ") " . $this->comment;
-                }
+            $text .= $newline . $hasmark . $points_string . "  " . $mark->getNote();
+        }
+        if($this->score != 0 || $this->comment != "") {
+            $newline=$nl;
+            if ($first_text === true) {
+              $newline = "";
+              $first_text = false;
             }
+            $score_string = "    ";
+            if (floatval($this->score) != 0) {
+                $score_string = sprintf("%4.1f",$this->score);
+            }
+            $text .= $newline . "(*) " . $score_string . "  " . $this->comment;
         }
         return $text;
     }
