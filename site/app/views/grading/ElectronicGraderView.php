@@ -14,7 +14,7 @@ class ElectronicGraderView extends AbstractView {
      * @param array     $sections
      * @return string
      */
-    public function statusPage($gradeable, $sections, $component_averages, $overall_average) {
+    public function statusPage($gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_students) {
         $peer = false;
         if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true; 
@@ -65,9 +65,13 @@ HTML;
                 $show_graded = $graded/$change_value;
                 $show_total = $total/$change_value;
             }
+            $submitted_percentage = round(($show_total / $total_students) * 100);
             $return .= <<<HTML
     <div class="sub">
         <div class="box half">
+            Submitted students: {$submitted_percentage}% ({$show_total} / {$total_students})
+            <br />
+            <br />
             Current percentage of grading done: {$percentage}% ({$show_graded}/{$show_total})
 HTML;
             if ($gradeable->isTeamAssignment() && $no_team_total > 0) {
@@ -164,6 +168,28 @@ HTML;
                 Count: {$overall_average->getCount()} <br/>
             </div>
 HTML;
+                    }
+                    if($gradeable->getTotalAutograderNonExtraCreditPoints() == 0) {
+                        // Don't display any autograding statistics since this gradeable has none
+                    } else {
+                        $return .= <<<HTML
+            <br/><b>Statistics for Auto-Graded Components: </b><br/>
+            <div style="margin-left: 20px">
+HTML;
+                        if($autograded_average->getCount() == 0) {
+                            $return .= <<<HTML
+                There are no submitted assignments yet.
+            </div>
+HTML;
+                        }
+                        else {
+                            $return .= <<<HTML
+                Average: {$autograded_average->getAverageScore()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()} <br/>
+                Standard Deviation: {$autograded_average->getStandardDeviation()} <br/>
+                Count: {$autograded_average->getCount()} <br/>
+            </div>
+HTML;
+                        }
                     }
                     $return .= <<<HTML
             <br/><b>Statistics of Graded Components: </b><br/>
