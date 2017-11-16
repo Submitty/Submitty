@@ -203,20 +203,19 @@ class GradeableComponent extends AbstractModel {
               $newline = "";
               $first_text = false;
             }
-            $text .= $newline . $hasmark . $points_string . " " . $mark->getNote();
+            $text .= $newline . $hasmark . $points_string . "  " . $mark->getNote();
         }
         if($this->score != 0 || $this->comment != "") {
+            $newline=$nl;
+            if ($first_text === true) {
+              $newline = "";
+              $first_text = false;
+            }
             $score_string = "    ";
             if (floatval($this->score) != 0) {
                 $score_string = sprintf("%4.1f",$this->score);
             }
-            if ($first_text === true) {
-                $text .= "(*) " . $score_string . " " . $this->comment;
-                $first_text = false;
-            }
-            else {
-                $text .= $nl . "(*) " . $score_string . " " . $this->comment;
-            }
+            $text .= $newline . "(*) " . $score_string . "  " . $this->comment;
         }
         return $text;
     }
