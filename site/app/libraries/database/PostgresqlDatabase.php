@@ -185,6 +185,6 @@ class PostgresqlDatabase extends AbstractDatabase {
     }
 
     public function convertBoolean($value) {
-        return ($value === true) ? 'true' : 'false';
+        return ($value === true || $value == "t" || $value == "true") ? 'true' : 'false';
     }
 }
