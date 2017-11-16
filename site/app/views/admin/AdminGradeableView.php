@@ -27,7 +27,7 @@ class AdminGradeableView extends AbstractView {
         if ($type_of_action === "edit") {
             $have_old = true;
             $action = "upload_edit_gradeable";
-            $button_string = "Edit";
+            $button_string = "Save changes to";
             $extra = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
         }
 
