@@ -105,7 +105,7 @@ HTML;
                     else {
                         $percentage = round(($section['graded_components'] / $section['total_components']) * 100);
                     }
-                    $show_graded = $section['graded_components']/$change_value;
+                    $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
                     $return .= <<<HTML
                 Section {$key}: {$percentage}% ({$show_graded} / {$show_total})<br />
