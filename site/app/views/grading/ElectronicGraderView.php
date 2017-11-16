@@ -69,10 +69,10 @@ HTML;
             $return .= <<<HTML
     <div class="sub">
         <div class="box half">
-            Submitted students: {$submitted_percentage}% ({$show_total} / {$total_students})
+            Students who have submitted: {$show_total} / {$total_students} ({$submitted_percentage}%)
             <br />
             <br />
-            Current percentage of grading done: {$percentage}% ({$show_graded}/{$show_total})
+            Current percentage of grading done: {$show_graded}/{$show_total} ({$percentage}%)
 HTML;
             if ($gradeable->isTeamAssignment() && $no_team_total > 0) {
                 $return .= <<<HTML
@@ -108,7 +108,7 @@ HTML;
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
                     $return .= <<<HTML
-                Section {$key}: {$percentage}% ({$show_graded} / {$show_total})<br />
+                Section {$key}: {$show_graded} / {$show_total} ({$percentage}%)<br />
 HTML;
                     if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
                         $return .= <<<HTML
@@ -218,7 +218,7 @@ HTML;
                         if($overall_max !=0){
                             $percentage = round($overall_score / $overall_max *100);
                             $return .= <<<HTML
-                <br/>Overall Average:  {$percentage}% ({$overall_score} / {$overall_max})
+                <br/>Overall Average:  {$overall_score} / {$overall_max} ({$percentage}%)
 HTML;
                         }
                     }
