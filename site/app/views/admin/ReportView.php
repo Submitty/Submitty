@@ -17,7 +17,7 @@ class ReportView extends AbstractView {
                 </td>
                 <td width="5%"> </td>
                 <td width="45%" style="position:relative">
-                    <button onclick="location.href='{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'hwreport'))}'" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate Homework Reports</button>
+                    <button onclick="location.href='{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'hwreport'))}'" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate Gradeable Reports</button>
                 <td>
             </tr>
             <tr class="bar"></tr>
