@@ -162,8 +162,12 @@ HTML;
                         else {
                             $total = $overall_average->getMaxValue() + $gradeable->getTotalAutograderNonExtraCreditPoints();                    
                         }
+                        $percentage = 0;
+                        if ($total != 0) {
+                            $percentage = round($overall_average->getAverageScore()/$total*100);
+                        }
                         $return .= <<< HTML
-                Average: {$overall_average->getAverageScore()} / {$total} <br/>
+                Average: {$overall_average->getAverageScore()} / {$total} ({$percentage}%)<br/>
                 Standard Deviation: {$overall_average->getStandardDeviation()} <br/>
                 Count: {$overall_average->getCount()} <br/>
             </div>
@@ -173,7 +177,7 @@ HTML;
                         // Don't display any autograding statistics since this gradeable has none
                     } else {
                         $return .= <<<HTML
-            <br/><b>Statistics for Auto-Graded Components: </b><br/>
+            <br/><b>Statistics for Auto-Grading: </b><br/>
             <div style="margin-left: 20px">
 HTML;
                         if($autograded_average->getCount() == 0) {
@@ -183,8 +187,12 @@ HTML;
 HTML;
                         }
                         else {
+			    $percentage = 0;
+                            if($gradeable->getTotalAutograderNonExtraCreditPoints() != 0) {
+                                $percentage = round($autograded_average->getAverageScore()/$gradeable->getTotalAutograderNonExtraCreditPoints()*100);
+			    }
                             $return .= <<<HTML
-                Average: {$autograded_average->getAverageScore()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()} <br/>
+                Average: {$autograded_average->getAverageScore()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()} ({$percentage}%)<br/>
                 Standard Deviation: {$autograded_average->getStandardDeviation()} <br/>
                 Count: {$autograded_average->getCount()} <br/>
             </div>
@@ -192,7 +200,7 @@ HTML;
                         }
                     }
                     $return .= <<<HTML
-            <br/><b>Statistics of Graded Components: </b><br/>
+            <br/><b>Statistics for Manually Graded Components: </b><br/>
             <div style="margin-left: 20px">
 HTML;
                     if(count($component_averages) == 0) {
@@ -206,10 +214,14 @@ HTML;
                         foreach($component_averages as $comp) {
                             $overall_score += $comp->getAverageScore();
                             $overall_max += $comp->getMaxValue();
+                            $percentage = 0;
+			    if ($comp->getMaxValue() != 0) {
+			        $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
+                            }
                             $return .= <<<HTML
                 {$comp->getTitle()}:<br/>
                 <div style="margin-left: 40px">
-                    Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} <br/>
+                    Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} ({$percentage}%)<br/>
                     Standard Deviation: {$comp->getStandardDeviation()} <br/>
                     Count: {$comp->getCount()} <br/>
                 </div>
