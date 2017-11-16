@@ -12,7 +12,7 @@ class ReportView extends AbstractView {
         <tbody>
             <tr>
                 <td width="50%">
-                    <p>Pushing this button will update or create Homework Reports for all students for all Gradeables, regardless of grades. This happens on an individual basis whenever a TA or instructor enters a grade for a student. This action shouldn't be necessary, except to update late day information that effects other electronic gradeables.
+                    <p>Pushing this button will update or create Reports for all students for all Gradeables, regardless of grades. This happens on an individual basis whenever a TA or instructor enters a grade for a student. This action shouldn't be necessary, except to update late day information that effects other electronic gradeables.
                     </p>
                 </td>
                 <td width="5%"> </td>
