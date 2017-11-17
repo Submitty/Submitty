@@ -535,6 +535,28 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
+    //gets ids of students with non null registration section and null rotating section
+    public function getRegisteredUsersWithNoRotatingSection(){
+       $this->course_db->query("
+SELECT user_id
+FROM users AS u
+WHERE registration_section IS NOT NULL
+AND rotating_section IS NULL;");
+
+       return $this->course_db->rows();
+    }
+
+    //gets ids of students with non null rotating section and null registration section
+    public function getUnregisteredStudentsWithRotatingSection(){
+    $this->course_db->query("
+SELECT user_id
+FROM users AS u
+WHERE registration_section IS NULL
+AND rotating_section IS NOT NULL;");
+
+       return $this->course_db->rows();
+    }
+
     public function getGradersForRegistrationSections($sections) {
         $return = array();
         $params = array();

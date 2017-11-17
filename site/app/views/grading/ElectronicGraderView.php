@@ -14,7 +14,17 @@ class ElectronicGraderView extends AbstractView {
      * @param array     $sections
      * @return string
      */
-    public function statusPage($gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_students) {
+    public function statusPage(
+        $gradeable,
+        $sections,
+        $component_averages,
+        $autograded_average,
+        $overall_average,
+        $total_students,
+        $registered_but_not_rotating,
+        $rotating_but_not_registered,
+        $section_type) {
+
         $peer = false;
         if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true; 
@@ -66,9 +76,37 @@ HTML;
                 $show_total = $total/$change_value;
             }
             $submitted_percentage = round(($show_total / $total_students) * 100);
+
+            //Add warnings to the warnings array to display them to the instructor.
+            $warnings = array();
+            if($section_type === "rotating_section" && $this->core->getUser()->accessFullGrading()){
+                if ($registered_but_not_rotating > 0){
+                    array_push($warnings, "There are ".$registered_but_not_rotating." registered students without a rotating section.");
+                }
+                if($rotating_but_not_registered > 0){
+                    array_push($warnings, "There are ".$rotating_but_not_registered." unregistered students with a rotating section.");
+                }
+            }
+
             $return .= <<<HTML
     <div class="sub">
         <div class="box half">
+HTML;
+            if(count($warnings) > 0){
+                $return .= <<<HTML
+                <ul>
+HTML;
+                foreach ($warnings as $warning){
+                    $return .= <<<HTML
+                    <li style="color:red; margin-left:1em">{$warning}</li>
+HTML;
+                }
+                $return .= <<<HTML
+                </ul>
+                <br/>
+HTML;
+            }
+            $return .= <<<HTML
             Students who have submitted: {$show_total} / {$total_students} ({$submitted_percentage}%)
             <br />
             <br />
@@ -215,13 +253,14 @@ HTML;
                             $overall_score += $comp->getAverageScore();
                             $overall_max += $comp->getMaxValue();
                             $percentage = 0;
-			    if ($comp->getMaxValue() != 0) {
-			        $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
+			                if ($comp->getMaxValue() != 0) {
+			                    $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
                             }
+                            $average_string = ($comp->getMaxValue() > 0 ? "{$comp->getAverageScore()} / {$comp->getMaxValue()} ({$percentage}%)" : "{$comp->getAverageScore()}");
                             $return .= <<<HTML
                 {$comp->getTitle()}:<br/>
                 <div style="margin-left: 40px">
-                    Average: {$comp->getAverageScore()} / {$comp->getMaxValue()} ({$percentage}%)<br/>
+                    Average: {$average_string}<br/>
                     Standard Deviation: {$comp->getStandardDeviation()} <br/>
                     Count: {$comp->getCount()} <br/>
                 </div>
