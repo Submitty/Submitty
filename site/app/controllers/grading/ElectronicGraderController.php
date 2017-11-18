@@ -79,6 +79,7 @@ class ElectronicGraderController extends AbstractController {
         $sections = array();
         $total_users = array();
         $component_averages = array();
+        $autograded_average = array();
         $overall_average = array();
         $num_submitted = array();
         if ($peer) {
@@ -88,8 +89,9 @@ class ElectronicGraderController extends AbstractController {
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
             $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
             $component_averages = array();
+            $autograded_average = array();
             $overall_average = array();
-            $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable->getId(), $sections, 'registration_section');
+            $section_key='registration_section';
         }
         else if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getUser()->accessFullGrading()){
@@ -107,6 +109,7 @@ class ElectronicGraderController extends AbstractController {
             }
             $num_components = $gradeable->getNumTAComponents();
         }
+        //grading by rotating section
         else {
             if(!$this->core->getUser()->accessFullGrading()){
                 $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
@@ -123,6 +126,8 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
+         $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable->getId(), $sections, $section_key);
+
         if (count($sections) > 0) {
             if ($gradeable->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
@@ -134,13 +139,20 @@ class ElectronicGraderController extends AbstractController {
                 $no_team_users = array();
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key);
                 $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key);
+                $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key);
                 $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key);
             }
             $num_components = $gradeable->getNumTAComponents();
-            $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable->getId(), $sections, 'registration_section');
         }
         $sections = array();
+        $total_students = 0;
         if (count($total_users) > 0) {
+            // Get total number of students (submitted and unsubmitted)
+            foreach ($total_users as $key => $value) {
+                if ($key == 'NULL') continue;
+                $total_students += $value;
+            }
+            
             if ($peer) {
                 $sections['stu_grad'] = array(
                     'total_components' => $num_components * $peer_grade_set,
@@ -180,7 +192,11 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
         }
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $overall_average);
+
+        $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
+        $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
+
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_students, $registered_but_not_rotating, $rotating_but_not_registered, $section_key);
     }
 
     /**

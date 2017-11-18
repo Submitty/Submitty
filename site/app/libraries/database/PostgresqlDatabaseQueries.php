@@ -577,6 +577,20 @@ ORDER BY gc_order
         }
         return $return;
     }
+    
+    public function getAverageAutogradedScores($g_id, $section_key) {
+        $this->course_db->query("
+SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
+   SELECT * FROM (
+      SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
+      FROM electronic_gradeable_data AS egv 
+      INNER JOIN users AS u ON u.user_id = egv.user_id
+      WHERE egv.g_id=? AND u.{$section_key} IS NOT NULL
+   )g
+) as individual;
+          ", array($g_id));
+        return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
+    }
 
     public function getAverageForGradeable($g_id, $section_key) {
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
