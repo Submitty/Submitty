@@ -470,6 +470,24 @@ ORDER BY gc_order
         }
         return $return;
     }
+    
+    public function getAverageAutogradedScores($g_id, $section_key) {
+        $this->course_db->query("
+SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
+   SELECT * FROM (
+      SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
+      FROM electronic_gradeable_data AS egv 
+      INNER JOIN users AS u ON u.user_id = egv.user_id
+      WHERE egv.g_id=? AND u.{$section_key} IS NOT NULL
+   )g
+) as individual;
+          ", array($g_id));
+        if(count($this->course_db->rows()) == 0){
+          echo("why");
+          return;
+        }
+        return new SimpleStat($this->core, $this->course_db->rows()[0]);
+    }
 
     public function getAverageForGradeable($g_id, $section_key) {
         $this->course_db->query("
@@ -515,6 +533,28 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
           return;
         }
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
+    }
+
+    //gets ids of students with non null registration section and null rotating section
+    public function getRegisteredUsersWithNoRotatingSection(){
+       $this->course_db->query("
+SELECT user_id
+FROM users AS u
+WHERE registration_section IS NOT NULL
+AND rotating_section IS NULL;");
+
+       return $this->course_db->rows();
+    }
+
+    //gets ids of students with non null rotating section and null registration section
+    public function getUnregisteredStudentsWithRotatingSection(){
+    $this->course_db->query("
+SELECT user_id
+FROM users AS u
+WHERE registration_section IS NULL
+AND rotating_section IS NOT NULL;");
+
+       return $this->course_db->rows();
     }
 
     public function getGradersForRegistrationSections($sections) {
