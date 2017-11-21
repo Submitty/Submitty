@@ -1354,6 +1354,7 @@ HTML;
                     $mark_text = $mark->getNote();
                 }
                 $icon_mark = ($mark->getHasMark() === true && $show_graded_info) ? "fa-square" : "fa-square-o";
+                $mark_name = "mark_text_{$c}_{$d}";
                 $return .= <<<HTML
                     <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
                         <td colspan="1" style="text-align: center; width: 12%; white-space: nowrap;"> 
@@ -1361,7 +1362,7 @@ HTML;
                             <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none; min-width: 50px;" {$noChange}>
                         </td>
                         <td colspan="3" style="white-space: nowrap;">
-                                <textarea name="mark_text_{$c}_{$d}" onkeyup="" rows="1" style="width: 90%; resize:none;" {$noChange}>{$mark_text}</textarea>
+                                <textarea id = "{$mark_name}" name="{$mark_name}" onkeyup="" rows="1" style="width: 90%; resize:none;" oninput="adjustSize(name)" {$noChange}>{$mark_text} </textarea>
                                 <span id="mark_info_id-{$c}-{$d}" onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); getMarkInfo(this, '{$gradeable->getId()}');"> <i class="fa fa-users icon-got-this-mark"></i> </span>
                         </td>
                     </tr>
@@ -1463,6 +1464,7 @@ HTML;
             </form>
         </div>
     </div>
+
 HTML;
         }
         $return .= <<<HTML
@@ -1562,6 +1564,13 @@ HTML;
         window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
+</script>
+<script type="text/javascript">
+        function adjustSize(name) {
+          var textarea = document.getElementById(name);
+          textarea.style.height = "";
+          textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
+        };
 </script>
 HTML;
         return $return;
