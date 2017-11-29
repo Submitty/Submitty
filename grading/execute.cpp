@@ -64,6 +64,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
+    { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
 
     // for Computer Science I
     { "python",                  "/usr/bin/python" },
