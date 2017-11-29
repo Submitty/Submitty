@@ -143,4 +143,18 @@ class Utils {
         $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
         return setcookie($name, $data, $expire, "/", "", $secure);
     }
+
+    /**
+     * Given a filename, determine if it is an image.
+     * TOOD: Make this a stronger check than just on the appended file extension to the naem
+     *
+     * @param string $filename
+     *
+     * @return bool true if filename references an image else false
+     */
+    public static function isImage($filename) {
+        return (substr($filename,strlen($filename)-4,4) == ".png") ||
+            (substr($filename,strlen($filename)-4,4) == ".jpg") ||
+            (substr($filename,strlen($filename)-4,4) == ".jpeg");
+    }
 }

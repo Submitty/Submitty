@@ -938,7 +938,15 @@ HTML;
                             }
                         //}
                     }
+                    if (!$this->core->getOutput()->bufferOutput()) {
+                        echo $return;
+                        $return = "";
+                    }
                     $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable);
+                    if (!$this->core->getOutput()->bufferOutput()) {
+                        echo $return;
+                        $return = "";
+                    }
                 }
                 $return .= <<<HTML
     </div>

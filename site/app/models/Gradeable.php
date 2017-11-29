@@ -58,7 +58,7 @@ use app\libraries\Utils;
  * @method bool getGradeByRegistration()
  * @method array getSubmittedFiles()
  * @method array getVcsFiles()
- * @method array getTestcases()
+ * @method GradeableTestcase[] getTestcases()
  * @method bool getIsRepository()
  * @method string getSubdirectory()
  * @method string getConfigPath()
