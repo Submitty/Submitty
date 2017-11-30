@@ -39,6 +39,7 @@ $(function() {
     $("#bar_wrapper").resizable("destroy"); //We don't want the toolbar to be resizable
 
     $(".draggable").on("dragstop", function(){
+        $('#bar_wrapper').css({'z-index':'40'}); //Reset z-index after jquery drag
         updateCookies();
     });
 

@@ -887,7 +887,7 @@ HTML;
                     if ($gradeable->beingGradedBatchQueue()) {
                         $return .= <<<HTML
         <p class="red-message">
-            This submission is currently being regraded. It is one of {$gradeable->getNumberOfGradingTotal()} grading.
+            This submission is currently being regraded.
         </p>
 HTML;
                     } else {
@@ -904,7 +904,7 @@ HTML;
                         (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
                         $return .= <<<HTML
         <p class="red-message">
-            This submission is currently being graded. It is one of {$gradeable->getNumberOfGradingTotal()} grading.
+            This submission is currently being graded.
         </p>
 HTML;
                     } else {
