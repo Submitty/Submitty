@@ -94,6 +94,7 @@ class SubmissionController extends AbstractController {
                 $loc = array('component' => 'student',
                              'gradeable_id' => $gradeable->getId());
                 $this->core->getOutput()->addBreadcrumb($gradeable->getName(), $this->core->buildUrl($loc));
+                $this->core->getOutput()->disableBuffer();
                 if (!$gradeable->hasConfig()) {
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
                                                            'showGradeableError', $gradeable);
