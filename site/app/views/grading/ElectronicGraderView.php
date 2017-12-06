@@ -451,8 +451,9 @@ HTML;
             }
             else {
                 $show_auto_grading_points = false;
-                $cols += 4;
+                $cols += 5;
                 $return .= <<<HTML
+                <td width="8%">Graded Questions</td>
                 <td width="12%">TA Grading</td>
                 <td width="12%">Total</td>
                 <td width="10%">Active Version</td>
@@ -697,7 +698,10 @@ HTML;
                 <td>
 HTML;
                 $temp_counter = 1;
+
+                //prints the graded questions
                 foreach ($row->getComponents() as $component) {
+                	$first = true;
                     if(is_array($component)) {
                         foreach($component as $cmpt) {
                             if($cmpt->getGrader() == null) {
@@ -718,9 +722,16 @@ HTML;
                     }
                     if($question->getGrader() === null || $question === null) {
                     } else {
-                        $return .= <<<HTML
-                            {$temp_counter}, 
+                    	if ($first == true) {
+                    		$first = false;
+                    		$return .= <<<HTML
+                            {$temp_counter} 
 HTML;
+                    	} else {
+                    		$return .= <<<HTML
+                           , {$temp_counter} 
+HTML;
+                    	}                        
                     }
                     $temp_counter++;
                 }
