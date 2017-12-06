@@ -469,8 +469,6 @@ HTML;
                 <input type="hidden" name="mark_gcmid_{$num}_0" value="NEW">
                 <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{$num}_0" value="0" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
                 <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_0" class="comment_display">Full Credit</textarea> 
-                <input type="checkbox" name="mark_publish_{$num}_0"> Publish
-                <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <!--
                 <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -484,6 +482,7 @@ HTML;
             $first = true;
             $hide_icons = "";
             foreach ($marks as $mark) {
+            	$first_publish = false;
             	if ($mark->getPublish()) {
             		$publish_checked = "checked";
             	} else {
@@ -494,6 +493,7 @@ HTML;
                     $hidden = "background-color:#EBEBE4";
                     $read_only = "readonly";
                     $hide_icons = "hidden";
+                    $first_publish = true;
                     //$hidden = "display: none;";
                 } else {
                     $hidden = "";
@@ -504,8 +504,15 @@ HTML;
                     <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" data-gcm_id="{$mark->getId()}" class="gradeable_display" style="{$hidden}">
                     <input type="hidden" name="mark_gcmid_{$num}_{$mark->getOrder()}" value="{$mark->getId()}">
                     <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-                    <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_{$mark->getOrder()}" class="comment_display">{$mark->getNote()}</textarea> 
-                    <input type="checkbox" name="mark_publish_{$num}_{$mark->getOrder()}" {$publish_checked}> Publish
+                    <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_{$mark->getOrder()}" class="comment_display">{$mark->getNote()}</textarea>
+HTML;
+				if($first_publish === false) {
+					$html_output .= <<<HTML
+						<input type="checkbox" name="mark_publish_{$num}_{$mark->getOrder()}" {$publish_checked}> Publish
+HTML;
+				}
+
+                $html_output .= <<<HTML
                     <a onclick="deleteMark(this)" {$hide_icons}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <!-- 
                     <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
@@ -2234,7 +2241,6 @@ $('#gradeable-form').on('submit', function(e){
             <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" data-gcm_id="NEW" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
             <input type="hidden" name="mark_gcmid_'+newQ+'_0" value="NEW"> \
             <textarea rows="1" placeholder="Comment" name="mark_text_'+newQ+'_0" class="comment_display">No Credit</textarea> \
-            <input type="checkbox" name="mark_publish_'+newQ+'_0"> Publish \
             <a onclick="deleteMark(this)" hidden> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <!--\
             <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
