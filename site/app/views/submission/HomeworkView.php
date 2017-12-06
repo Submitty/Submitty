@@ -60,7 +60,7 @@ HTML;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
-        if($extensions > 0){
+        if ($extensions > 0) {
             $return .= <<<HTML
 <div class="content">
     <h4>You have a {$extensions} day extension for this homework</h4>
@@ -92,20 +92,28 @@ HTML;
                     $student_ids[] = $student->getId();
                 }
 
-                $students_without = array();
-                $student_without_ids = array();
                 $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
+                $students_version = array();
                 foreach ($gradeables as $g) {
-                    if ($g->getActiveVersion() == 0) {
-                        $students_without[] = $g->getUser();
-                    }
-                }
-                foreach ($students_without as $student) {
-                    $student_without_ids[] = $student->getId();
+                    $students_version[] = array($g->getUser(), $g->getActiveVersion());
                 }
 
-                $student_ids = json_encode($student_ids);
-                $student_without_ids = json_encode($student_without_ids);
+                $students_full = array();
+                foreach ($students_version as $student_pair) {
+                    $student = $student_pair[0];
+
+                    $student_entry = array('value' => $student->getId(),
+                                           'label' => $student->getDisplayedFirstName().' '.$student->getLastName().' <'.$student->getId().'>');
+
+                    if ($student_pair[1] !== 0) {
+                        $student_entry['label'] .= ' ('.$student_pair[1].' Prev Submission)';
+                    }
+
+                    $students_full[] = $student_entry;
+                }
+
+                $students_full = json_encode($students_full);
+
                 $return .= <<<HTML
     <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
         <div >
@@ -140,10 +148,9 @@ HTML;
 HTML;
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             var cookie = document.cookie;
-            student_ids = {$student_ids};
-            student_without_ids = {$student_without_ids};
+            students_full = {$students_full};
             if (cookie.indexOf("student_checked=") !== -1) {
                 var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                 $("#radio_student").prop("checked", cookieValue==1);
@@ -170,8 +177,8 @@ HTML;
                 $('#pdf_submit_button').show();
                 $('#user_id').val('');
             });
-            $( "#user_id" ).autocomplete({
-                source: student_ids
+            $("#user_id").autocomplete({
+                source: students_full
             });
         });
     </script>
@@ -386,7 +393,7 @@ HTML;
                     && $current_version_number > 0 && $this->core->getConfig()->keepPreviousFiles()) {
                     $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             setUsePrevious();
             {$old_files}
         });
@@ -395,7 +402,7 @@ HTML;
                 }
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             setButtonStatus();
         });
     </script>
@@ -479,7 +486,7 @@ HTML;
                                 {$num_components});
             }
         }
-        $(document).ready(function() {
+        $(function() {
             $("#submit").click(function(e){ // Submit button
                 var user_id = "";
                 var repo_id = "";
@@ -586,17 +593,17 @@ HTML;
                 </td>
             </tr>
 HTML;
-                    $count++;
+                        $count++;
                     }
-                $count_array_json = json_encode($count_array);
+                    $count_array_json = json_encode($count_array);
                 }
                 $return .= <<<HTML
 <script type="text/javascript">
-    $(document).ready(function() {
+    $(function() {
         $("#bulkForm input").autocomplete({
-            source: student_without_ids
+            source: students_full
         });
-        $("#bulkForm button").click(function(e){
+        $("#bulkForm button").click(function(e) {
             var btn = $(document.activeElement);
             var id = btn.attr("id");
             var count = btn.parent().parent().index()+1;
@@ -610,8 +617,7 @@ HTML;
                 }
                 deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
                 moveNextInput(count);
-            }
-            else {
+            } else {
                 validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, "", makeSubmission);
             }
             e.preventDefault();
@@ -706,7 +712,7 @@ HTML;
             if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentSubmit()) {
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             $("#do_not_grade").prop("disabled", true);
             $("#version_change").prop("disabled", true);
         });
@@ -717,7 +723,7 @@ HTML;
             if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentAnyVersion()) {
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             $('select[name=submission_version]').hide();
             $('#do_not_grade').hide();
             $('#version_change').hide();
@@ -884,8 +890,7 @@ HTML;
             This submission is currently being regraded.
         </p>
 HTML;
-                    }
-                    else {
+                    } else {
                         $return .= <<<HTML
         <p class="red-message">
             This submission is currently in the queue to be regraded.
@@ -902,8 +907,7 @@ HTML;
             This submission is currently being graded.
         </p>
 HTML;
-                    }
-                    else {
+                    } else {
                         $return .= <<<HTML
         <p class="red-message">
             This submission is currently in the queue to be graded. Your submission is number {$gradeable->getInteractiveQueuePosition()} out of {$gradeable->getInteractiveQueueTotal()}.
@@ -929,7 +933,7 @@ HTML;
                                     $current_version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
                                 $return.= <<<HTML
             <script type="text/javascript">
-                $(document).ready(function() {
+                $(function() {
                     $('#incentive_message').show();
                 });
             </script>
@@ -960,13 +964,12 @@ HTML;
             $return .= <<<HTML
 <div class="content">
 HTML;
-            if($gradeable->hasGradeFile()) {
+            if ($gradeable->hasGradeFile()) {
                 $return .= <<<HTML
     <h3 class="label">TA grade</h3>
     <pre>{$gradeable->getGradeFile()}</pre>
 HTML;
-            }
-            else {
+            } else {
                 $return .= <<<HTML
     <h3 class="label">TA grade not available</h3>
 HTML;
