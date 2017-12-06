@@ -27,6 +27,7 @@ use app\libraries\Utils;
  * @method string getTestcaseMessage()
  */
 class GradeableTestcase extends AbstractModel {
+    /** @var Core */
     protected $core;
 
     /** @property @var string */
@@ -99,14 +100,15 @@ class GradeableTestcase extends AbstractModel {
             $this->points_awarded = floatval($testcase['points_awarded']);
             if ($this->points > 0) {
                 // POSITIVE POINTS TESTCASE
+                // TODO: ADD ERROR
+                /*
                 if ($this->points_awarded < 0) {
-                  // TODO: ADD ERROR
-                  //$this->points_awarded = 0;
+                  $this->points_awarded = 0;
                 }
                 if ($this->points_awarded > $this->points) {
-                  // TODO: ADD ERROR
-                  //$this->points_awarded = $this->points;
+                  $this->points_awarded = $this->points;
                 }
+                */
             }
             else if ($this->points < 0) {
                 // PENALTY TESTCASE
