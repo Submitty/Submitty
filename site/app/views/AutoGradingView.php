@@ -7,8 +7,14 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class AutogradingView extends AbstractView {
-
-    public function showResults($gradeable, $show_hidden=false) {
+    /**
+     * @param Gradeable $gradeable
+     * @param bool      $show_hidden
+     *
+     * @return string
+     * @throws \Exception
+     */
+    public function showResults(Gradeable $gradeable, $show_hidden=false) {
         $return = "";
         $current_version = $gradeable->getCurrentVersion();
         $popup_css_file = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
@@ -356,6 +362,7 @@ HTML;
         <div class="clear"></div>
 HTML;
                     }
+                    $diff_viewer->destroyViewer();
                 }
                 $return .= <<<HTML
     </div>
