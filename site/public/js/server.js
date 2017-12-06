@@ -923,3 +923,7 @@ function updateLateDays(data) {
     })
     return false;
 }
+
+function escapeHTML(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
