@@ -442,11 +442,12 @@ HTML;
                         }
                         
                         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable_id);
+                        $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
                         $sections = array();
                         if (count($total_users) > 0) {
-                            foreach ($total_users as $key => $value) {
+                            foreach ($num_submitted as $key => $value) {
                                 $sections[$key] = array(
-                                    'total_components' => $value * $num_components,                        
+                                    'total_components' => $value * $num_components,
                                     'graded_components' => 0,
                                     'graders' => array()
                                 );
@@ -454,7 +455,8 @@ HTML;
                                     $sections[$key]['no_team'] = $no_team_users[$key];
                                 }
                                 if (isset($graded_components[$key])) {
-                                    $sections[$key]['graded_components'] = intval($graded_components[$key]);
+                                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                                    $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                                 }
                                 if (isset($graders[$key])) {
                                     $sections[$key]['graders'] = $graders[$key];

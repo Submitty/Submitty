@@ -532,7 +532,7 @@ ORDER BY u.{$section_key}, {$sort_key}";
         return $this->course_db->rows();
     }
 
-    public function getAverageComponentScores($g_id) {
+    public function getAverageComponentScores($g_id, $section_key) {
         $return = array();
         $this->course_db->query("
 SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
@@ -551,19 +551,48 @@ SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score
       GROUP BY gcmd.gc_id, gcmd.gd_id
       )AS marks
     ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
+    LEFT JOIN(
+      SELECT gd.gd_user_id, gd.gd_id
+      FROM gradeable_data AS gd
+      WHERE gd.g_id=?
+    ) AS gd ON gcd.gd_id=gd.gd_id
+    INNER JOIN(
+      SELECT u.user_id, u.{$section_key}
+      FROM users AS u
+      WHERE u.{$section_key} IS NOT NULL
+    ) AS u ON gd.gd_user_id=u.user_id
+    INNER JOIN(
+      SELECT egv.user_id, egv.active_version
+      FROM electronic_gradeable_version AS egv
+      WHERE egv.g_id=? AND egv.active_version>0
+    ) AS egv ON egv.user_id=u.user_id
     WHERE g_id=?
   )AS parts_of_comp
 )AS comp
 GROUP BY gc_id, gc_title, gc_max_value, gc_is_peer, gc_order
 ORDER BY gc_order
-        ", array($g_id));
+        ", array($g_id, $g_id, $g_id));
         foreach ($this->course_db->rows() as $row) {
             $return[] = new SimpleStat($this->core, $row);
         }
         return $return;
     }
+    
+    public function getAverageAutogradedScores($g_id, $section_key) {
+        $this->course_db->query("
+SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
+   SELECT * FROM (
+      SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
+      FROM electronic_gradeable_data AS egv 
+      INNER JOIN users AS u ON u.user_id = egv.user_id
+      WHERE egv.g_id=? AND u.{$section_key} IS NOT NULL
+   )g
+) as individual;
+          ", array($g_id));
+        return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
+    }
 
-    public function getAverageForGradeable($g_id) {
+    public function getAverageForGradeable($g_id, $section_key) {
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
         $count = $this->course_db->row()['cnt'];
         $this->course_db->query("
@@ -591,8 +620,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
           FROM electronic_gradeable_version AS egv
           LEFT JOIN electronic_gradeable_data AS egd ON egv.g_id=egd.g_id AND egv.user_id=egd.user_id AND active_version=g_version
           )AS auto
-        ON gd.g_id=auto.g_id AND gd_user_id=user_id
-        WHERE gc.g_id=?
+        ON gd.g_id=auto.g_id AND gd_user_id=auto.user_id
+        INNER JOIN users AS u ON u.user_id = auto.user_id
+        WHERE gc.g_id=? AND u.{$section_key} IS NOT NULL
       )AS parts_of_comp
     )AS comp
     GROUP BY gd_id, autograding

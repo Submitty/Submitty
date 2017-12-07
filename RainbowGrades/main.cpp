@@ -1413,16 +1413,16 @@ void processcustomizationfile(std::vector<Student*> &students) {
         assert (s != NULL);
         s->ManualGrade(grade,note);
     }
-  } else if (token == "moss") {
+  } else if (token == "plagiarism") {
     for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-      std::string username = itr2.key();
-    int hw = (itr2.value())["hw"].get<int>();
-    float penalty = (itr2.value())["penalty"].get<float>();
-    assert (hw >= 1 && hw <= 10);
-        assert (penalty >= -0.01 && penalty <= 1.01);
-    Student *s = GetStudent(students,username);
-        assert (s != NULL);
-        s->mossify(hw,penalty);
+      std::string username = (itr2.value())["user"].get<std::string>();
+      std::string hw = (itr2.value())["gradeable"].get<std::string>();
+      float penalty = (itr2.value())["penalty"].get<float>();
+      //assert (hw >= 1 && hw <= 10);
+      assert (penalty >= -0.01 && penalty <= 1.01);
+      Student *s = GetStudent(students,username);
+      assert (s != NULL);
+      s->mossify(hw,penalty);
     }
   } else if (token == "final_cutoff") {
     for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
