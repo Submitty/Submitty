@@ -13,7 +13,7 @@
 #define TEST_RESULT_DIFF_SIZE 1000000
 #define TEST_RESULT_MESSAGES_SIZE 10000
 
-#define TEST_RESULT_NUM_MESSAGES 10
+#define TEST_RESULT_NUM_MESSAGES 20
 
 
 enum TEST_RESULTS_MESSAGE_TYPE { MESSAGE_NONE, MESSAGE_FAILURE, MESSAGE_WARNING, MESSAGE_SUCCESS, MESSAGE_INFORMATION };
@@ -49,6 +49,14 @@ public:
     } else {
       assert (d.size() < TEST_RESULT_DIFF_SIZE-1);
       strcpy(diff,d.c_str());
+    }
+    if (m.size() > TEST_RESULT_NUM_MESSAGES) {
+      std::cout << "ERROR! NUM TEST RESULTS MESSAGES = " << m.size() << " (limit is " << TEST_RESULT_NUM_MESSAGES << ")" << std::endl;
+      for (int i = 0; i < m.size(); i++) {
+        std::cout << "MESSAGE " << m[i].second << std::endl;
+      }
+      m.resize(TEST_RESULT_NUM_MESSAGES);
+      m[TEST_RESULT_NUM_MESSAGES-1].second = "WARNING: TRUNCATED ERROR MESSAGES";
     }
     assert (m.size() <= TEST_RESULT_NUM_MESSAGES);
     for (unsigned int i = 0; i < m.size(); i++) {
