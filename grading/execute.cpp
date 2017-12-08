@@ -833,6 +833,14 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // symbol) are not interpreted as ascii
   setenv("LC_ALL", "en_US.UTF-8", 1);
 
+
+  // Set a default for OpenMP desired threads
+  // Can be overridden by student to be higher or lower.
+  // Instructor still controls the RLIMIT_NPROC max threads.
+  // (without this, default desired threads may be based on the system specs)
+  setenv("OMP_NUM_THREADS","4",1);
+
+  
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {
   std::cout << "going to install syscall filter for " << my_program << std::endl;
@@ -860,6 +868,8 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     dup2(new_stderrfd, stderrfd);
   }
 
+
+
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
     std::cout << "seccomp filter install failed" << std::endl;
@@ -867,6 +877,8 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
   // END SECCOMP
 
+
+  
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here
 
