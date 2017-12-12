@@ -829,29 +829,29 @@ HTML;
 
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
     <span class="grading_label">Submissions and Results Browser</span>
-    <button class="btn btn-default expand-button" data-linked-type="Submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open Submissions</button>
+    <button class="btn btn-default expand-button" data-linked-type="Submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 HTML;
 
     if(count($gradeable->getVcsFiles()) != 0) { //check if there are vcs files, if yes display the toggle button, else don't display it
         $return .= <<<HTML
-        <button class="btn btn-default expand-button" data-linked-type="Checkouts" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open Checkouts</button>
+        <button class="btn btn-default expand-button" data-linked-type="Checkouts" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkouts</button>
 HTML;
     }
 
 $return .= <<<HTML
-    <button class="btn btn-default expand-button" data-linked-type="Results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open Results</button> 
+    <button class="btn btn-default expand-button" data-linked-type="Results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button> 
     <script type="text/javascript">
-        code to enable name change when 
         $(document).ready(function(){
+            //note the commented out code here along with the code where files are displayed that is commented out
+            //is intended to allow open and close to change dynamically on click
+            //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
             $(".expand-button").on('click', function(){
-                /*
-                Code to help change the name from Open to close as clicked. Note when clicking on the folders below there is a bug with the current code.
-                console.log('hi!!!!');
-                $(this).attr('clicked-state', "clicked");
-                updateValue($(this), "Open", "Close");*/
-                $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
-                    console.log('HELLLO');
-                });
+                // $(this).attr('clicked-state', "clicked");
+                // updateValue($(this), "Open", "Close");
+                openAll( 'openable-element-', $(this).data('linked-type'))
+                // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
+                //     console.log('HELLLO');
+                // });
             })
         });
     </script>
@@ -955,7 +955,6 @@ HTML;
 
         $return .= <<<HTML
         <script type="text/javascript">
-            //code to enable the text on the expand button to change
             // $(document).ready(function(){
             //     $(".openAllDiv").on('click', function(){
             //         if($(this).attr('id') == 'Results' || $(this).attr('id') == 'Submissions' || $(this).attr('id') =='Checkouts'){
