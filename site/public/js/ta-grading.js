@@ -309,37 +309,23 @@ function handleKeyPress(key) {
 };
 
 // expand all files in Submissions and Results section
-function openAll() {
-    // click on all with the class openAllDiv that hasn't been expanded yet
-    $(".openAllDiv").each(function() {
-        if ($(this).parent().find('span').hasClass('fa-folder')) {
-            $(this).click();
-        }
-    });
-
-    // click on all with the class openAllFile that hasn't been expanded yet
-    $(".openAllFile").each(function() {
-        if($(this).find('span').hasClass('fa-plus-circle')) {
-            $(this.click());
-        }
+function openAll(click_class, class_modifier) {
+    $("."+click_class + class_modifier).each(function(){
+        $(this).click();
     });
 }
-
-// close all files in Submission and results section
-function closeAll() {
-    // click on all with the class openAllFile that is expanded
-    $(".openAllFile").each(function() {
-        if($(this).find('span').hasClass('fa-minus-circle')) {
-            $(this.click());
+function updateValue(obj, option1, option2) {
+    // Switches the value of an element between option 1 and two
+    console.log('hi');
+    obj.text(function(i, oldText){
+        if(oldText.indexOf(option1) >= 0){
+            newText = oldText.replace(option1, option2);
+        } else{
+            newText = oldText.replace(option2, option1);
         }
+        return newText;
     });
 
-    // click on all with the class openAllDiv that is expanded
-    $(".openAllDiv").each(function() {
-        if ($(this).parent().find('span').hasClass('fa-folder-open')) {
-            $(this).click();
-        }
-    });
 }
 
 // expand all outputs in Auto-Grading Testcases section

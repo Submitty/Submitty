@@ -829,8 +829,32 @@ HTML;
 
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
     <span class="grading_label">Submissions and Results Browser</span>
-    <button class="btn btn-default" onclick="openAll()">Expand All</button>
-    <button class="btn btn-default" onclick="closeAll()">Close All</button>
+    <button class="btn btn-default expand-button" data-linked-type="Submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open Submissions</button>
+HTML;
+
+    if(count($gradeable->getVcsFiles()) != 0) { //check if there are vcs files, if yes display the toggle button, else don't display it
+        $return .= <<<HTML
+        <button class="btn btn-default expand-button" data-linked-type="Checkouts" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open Checkouts</button>
+HTML;
+    }
+
+$return .= <<<HTML
+    <button class="btn btn-default expand-button" data-linked-type="Results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open Results</button> 
+    <script type="text/javascript">
+        code to enable name change when 
+        $(document).ready(function(){
+            $(".expand-button").on('click', function(){
+                /*
+                Code to help change the name from Open to close as clicked. Note when clicking on the folders below there is a bug with the current code.
+                console.log('hi!!!!');
+                $(this).attr('clicked-state', "clicked");
+                updateValue($(this), "Open", "Close");*/
+                $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
+                    console.log('HELLLO');
+                });
+            })
+        });
+    </script>
 HTML;
         if(!$peer) {
         $return .= <<<HTML
@@ -856,8 +880,9 @@ HTML;
                 $working_dir[$file['name']] = $file['path'];
             }
         }
-        function display_files($files, &$count, $indent, &$return) {
-            foreach ($files as $dir => $path) {
+        function display_files($files, &$count, $indent, &$return, $filename) {
+            $name = "a" . $filename;
+            foreach ($files as $dir => $path) { 
                 if (!is_array($path)) {
                     $name = htmlentities($dir);
                     $dir = urlencode(htmlspecialchars($dir));
@@ -866,7 +891,7 @@ HTML;
                     $return .= <<<HTML
                 <div>
                     <div class="file-viewer">
-                        <a class='openAllFile' onclick='openFrame("{$dir}", "{$path}", {$count}); updateCookies();'>
+                        <a class='openAllFile{$filename} openable-element-{$filename}' onclick='openFrame("{$dir}", "{$path}", {$count}); updateCookies();'>
                             <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
                         {$name}</a> &nbsp;
                         <a onclick='openFile("{$dir}", "{$path}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
@@ -885,14 +910,14 @@ HTML;
                     $return .= <<<HTML
             <div>
                 <div class="div-viewer">
-                    <a class='openAllDiv' onclick='openDiv({$count}); updateCookies();'>
-                        <span class="fa fa-folder" style='vertical-align:text-top;'></span>
+                    <a class='openAllDiv openAllDiv{$filename} openable-element-{$filename}' id={$dir} onclick='openDiv({$count}); updateCookies();'>
+                        <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                     {$dir}</a> 
                 </div><br/>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none' data-file_name="{$dir}">
 HTML;
                     $count++;
-                    display_files($contents, $count, $indent+1, $return);
+                    display_files($contents, $count, $indent+1, $return, $filename);
                     $return .= <<<HTML
                 </div>
             </div>
@@ -901,11 +926,47 @@ HTML;
             }
         }
         $files = array();
-        add_files($files, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles(), $gradeable->getVcsFiles()), 'submissions');
-        add_files($files, $gradeable->getResultsFiles(), 'results');
-        $count = 1;
-        display_files($files,$count,1,$return);
+        $submissions = array();
+        $results = array();
+        $checkout = array();
+
+        // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names, 
+        // if you change here, then change there as well
+        // order of these statements matter I believe
+
+        add_files($submissions, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'Submissions');
+
+        $vcsFiles = $gradeable->getVcsFiles();
+        if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
+            add_files($checkout,  $vcsFiles, 'Checkouts');
+        }
+
+        add_files($results, $gradeable->getResultsFiles(), 'Results');
+
+        $count = 1; 
+        display_files($submissions,$count,1,$return, "Submissions"); //modifies the count var here within display_files
+
+        if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
+            display_files($checkout,$count,1,$return, "Checkouts");
+        }
+
+        display_files($results,$count,1,$return, "Results"); //uses the modified count variable b/c old code did this not sure if needed
+        $files = array_merge($submissions, $checkout, $results );
+
         $return .= <<<HTML
+        <script type="text/javascript">
+            //code to enable the text on the expand button to change
+            // $(document).ready(function(){
+            //     $(".openAllDiv").on('click', function(){
+            //         if($(this).attr('id') == 'Results' || $(this).attr('id') == 'Submissions' || $(this).attr('id') =='Checkouts'){
+            //             var elem = $('[data-linked-type="' + $(this).attr('id') + '"]');
+            //             if(elem.data('clicked-state') == "wasntClicked"){
+            //                 updateValue(elem, "Open", "Close");
+            //             }
+            //         }
+            //     });
+            // });
+        </script>
     </div>
 </div>
 HTML;
