@@ -10,11 +10,20 @@ namespace app\libraries;
  * HTML or plain-text)
  */
 class DiffViewer {
+
+    private $actual_file;
+    private $expected_file;
+    private $diff_file;
+    private $image_difference;
+
+    private $built = false;
+
     /**
      * @var bool
      */
     private $has_actual = false;
     private $actual_file_image = "";
+    private $actual_file_name = "";
 
     /**
      * @var bool
@@ -78,7 +87,6 @@ class DiffViewer {
         $this->diff = array();
         $this->add = array();
         $this->link = array();
-        $this->id = "id";
     }
     
     /**
@@ -88,25 +96,45 @@ class DiffViewer {
      * @param $actual_file
      * @param $expected_file
      * @param $diff_file
+     * @param $image_difference
      * @param $id_prepend
      *
      * @throws \Exception
      */
     public function __construct($actual_file, $expected_file, $diff_file, $image_difference, $id_prepend="id") {
+        $this->id = rtrim($id_prepend, "_")."_";
+        $this->actual_file = $actual_file;
+        $this->expected_file = $expected_file;
+        $this->diff_file = $diff_file;
+        $this->image_difference = $image_difference;
+    }
+
+    public function destroyViewer() {
         $this->reset();
-        $this->id = rtrim($id_prepend,"_")."_";
+        $this->built = false;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function buildViewer() {
+        if ($this->built) {
+            return;
+        }
+        $actual_file = $this->actual_file;
+        $expected_file = $this->expected_file;
+        $diff_file = $this->diff_file;
+        $image_difference = $this->image_difference;
         if (!file_exists($actual_file) && $actual_file != "") {
             throw new \Exception("'{$actual_file}' could not be found.");
         }
         else if ($actual_file != "") {
             // TODO: fix this hacky way to deal with images
-	    if ( (substr($actual_file,strlen($actual_file)-4,4) == ".png") ||
-		 (substr($actual_file,strlen($actual_file)-4,4) == ".jpg") ||
-		 (substr($actual_file,strlen($actual_file)-4,4) == ".jpeg") )
-	      {
-		$this->actual_file_image = $actual_file;
-	      }
+            if (Utils::isImage($actual_file)) {
+                $this->actual_file_image = $actual_file;
+            }
             else {
+                $this->actual_file_name = $actual_file;
                 $this->actual = file_get_contents($actual_file);
                 $this->has_actual = trim($this->actual) !== "" ? true: false;
                 $this->actual = explode("\n", $this->actual);
@@ -118,13 +146,9 @@ class DiffViewer {
             throw new \Exception("'{$expected_file}' could not be found.");
         }
         else if ($expected_file != "") {
-            //TODO: fix this hacky way to deal with images.
-            if ( (substr($expected_file,strlen($expected_file)-4,4) == ".png") ||
-		 (substr($expected_file,strlen($expected_file)-4,4) == ".jpg") ||
-		 (substr($expected_file,strlen($expected_file)-4,4) == ".jpeg") )
-	      {
+            if (Utils::isImage($expected_file)) {
                 $this->expected_file_image = $expected_file;
-	      }
+            }
             else{
                 $this->expected = file_get_contents($expected_file);
                 $this->has_expected = trim($this->expected) !== "" ? true : false;
@@ -137,12 +161,9 @@ class DiffViewer {
             throw new \Exception("'{$expected_file}' could not be found.");
         }
         else if ($image_difference != "") {
-            //TODO: fix this hacky way to deal with images.
-	  if ( (substr($image_difference,strlen($image_difference)-4,4) == ".png") ||
-	       (substr($image_difference,strlen($image_difference)-4,4) == ".jpg") ||
-	       (substr($image_difference,strlen($image_difference)-4,4) == ".jpeg") ){
-	    $this->difference_file_image = $image_difference;
-	  }
+            if (Utils::isImage($image_difference)) {
+                $this->difference_file_image = $image_difference;
+            }
         }
 
         if (!file_exists($diff_file) && $diff_file != "") {
@@ -208,15 +229,18 @@ class DiffViewer {
                 }
             }
         }
+        $this->built = true;
     }
-    
+
     /**
      * @return bool
+     * @throws \Exception
      */
     public function hasDisplayActual() {
+        $this->buildViewer();
         return $this->display_actual;
     }
-    
+
     /**
      * Boolean flag to indicate whether or not the actual file had any contents to display (or was
      * blank/empty lines). Assuming we do not have a difference file, we can use this flag to indicate
@@ -224,24 +248,30 @@ class DiffViewer {
      * empty in most cases).
      *
      * @return bool
+     * @throws \Exception
      */
     public function hasActualOutput() {
+        $this->buildViewer();
         return $this->has_actual;
     }
     
     /**
      * Was there a given expected file and were we able to successfully read from it
      * @return bool
+     * @throws \Exception
      */
     public function hasDisplayExpected() {
+        $this->buildViewer();
         return $this->display_expected;
     }
     
     /**
      * Returns boolean indicating whether or not there is any input in the expected.
      * @return bool
+     * @throws \Exception
      */
     public function hasExpectedOutput() {
+        $this->buildViewer();
         return $this->has_expected;
     }
 
@@ -249,8 +279,10 @@ class DiffViewer {
      * Return the output HTML for the actual display
      *
      * @return string actual html
+     * @throws \Exception
      */
     public function getDisplayActual() {
+        $this->buildViewer();
         if ($this->display_actual) {
             return $this->getDisplay($this->actual, "actual");
         }
@@ -260,16 +292,39 @@ class DiffViewer {
 
     }
 
+    /**
+     * @return string the file name for a non-image.
+     * @throws \Exception
+     */
+    public function getActualFilename() {
+        $this->buildViewer();
+        return $this->actual_file_name;
+    }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function getActualImageFilename() {
+        $this->buildViewer();
     	return $this->actual_file_image;
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function getExpectedImageFilename() {
+        $this->buildViewer();
         return $this->expected_file_image;
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function getDifferenceFilename() {
+        $this->buildViewer();
         return $this->difference_file_image;
     }
 
@@ -277,8 +332,10 @@ class DiffViewer {
      * Return the HTML for the expected display
      *
      * @return string expected html
+     * @throws \Exception
      */
     public function getDisplayExpected() {
+        $this->buildViewer();
         if ($this->display_expected) {
             return $this->getDisplay($this->expected, "expected");
         }
@@ -298,8 +355,10 @@ class DiffViewer {
      * @param string $type which diff we use while printing
      *
      * @return string html to be displayed to user
+     * @throws \Exception
      */
     private function getDisplay($lines, $type="expected") {
+        $this->buildViewer();
         $start = null;
         $html = "<div class='diff-container'><div class='diff-code'>\n";
 
@@ -407,8 +466,10 @@ class DiffViewer {
      * return false
      *
      * @return bool
+     * @throws \Exception
      */
     public function existsDifference() {
+        $this->buildViewer();
         $return = false;
         foreach(array("expected", "actual") as $key) {
             if(count($this->diff[$key]) > 0 || count($this->add[$key]) > 0) {

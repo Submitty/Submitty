@@ -12,6 +12,9 @@ use app\exceptions\OutputException;
  */
 
 class Output {
+    /** @var bool Should we  */
+    private $buffer_output = true;
+
     private $output_buffer = "";
     private $breadcrumbs = array();
     private $loaded_views = array();
@@ -40,7 +43,12 @@ class Output {
      * rendering another View
      */
     public function renderOutput() {
-        $this->output_buffer .= call_user_func_array('self::renderTemplate', func_get_args());
+        if ($this->buffer_output) {
+            $this->output_buffer .= call_user_func_array('self::renderTemplate', func_get_args());
+        }
+        else {
+            echo call_user_func_array('self::renderTemplate', func_get_args());
+        }
     }
 
     /**
@@ -114,15 +122,34 @@ class Output {
 
     public function getOutput() {
         $return = "";
-        if ($this->use_header) {
-            $return .= $this->renderTemplate("Global", 'header', implode(" > ", $this->breadcrumbs), $this->css);
-        }
+        $return .= $this->renderHeader();
         $return .= $this->output_buffer;
-        if ($this->use_footer) {
-            $return .= $this->renderTemplate("Global", 'footer', (microtime(true) - $this->start_time));
-        }
+        $return .= $this->renderFooter();
         return $return;
     }
+
+    private function renderHeader() {
+        return ($this->use_header) ? $this->renderTemplate('Global', 'header', implode(' > ', $this->breadcrumbs), $this->css) : "";
+    }
+
+    private function renderFooter() {
+        return ($this->use_footer) ? $this->renderTemplate('Global', 'footer', (microtime(true) - $this->start_time)) : "";
+    }
+
+    public function bufferOutput() {
+        return $this->buffer_output;
+    }
+
+    public function disableBuffer() {
+        if (!$this->buffer_output) {
+            return;
+        }
+        $this->buffer_output = false;
+        echo $this->renderHeader();
+        $this->use_header = false;
+        echo $this->output_buffer;
+    }
+
     /**
      * Returns the stored output buffer that we've been building
      *
@@ -212,17 +239,17 @@ class Output {
                     $string = "<a href='{$url}'>{$string}</a>";
                 }
             }
-            else{
+            else {
                 $string = '<a class="external" href="'.$url.'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
             }   
         }
-        if(empty($url) && empty($string))
-        {
+        if(empty($url) && empty($string)) {
             return;
         }
         if($icon){
             $this->breadcrumbs[count($this->breadcrumbs)-1].= $string;
-        }else{
+        }
+        else {
            $this->breadcrumbs[] = $string;
         }
     }

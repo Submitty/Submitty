@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\DatabaseUtils;
 
 /**
  * Class User
@@ -134,7 +133,7 @@ class User extends AbstractModel {
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
-            $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
+            $this->setGradingRegistrationSections($details['grading_registration_sections']);
         }
     }
 
@@ -171,12 +170,14 @@ class User extends AbstractModel {
     }
 
     public function setPassword($password) {
-        $info = password_get_info($password);
-        if ($info['algo'] === 0) {
-            $this->password = password_hash($password, PASSWORD_DEFAULT);
-        }
-        else {
-            $this->password = $password;
+        if (!empty($password)) {
+            $info = password_get_info($password);
+            if ($info['algo'] === 0) {
+                $this->password = password_hash($password, PASSWORD_DEFAULT);
+            }
+            else {
+                $this->password = $password;
+            }
         }
     }
 
@@ -185,6 +186,10 @@ class User extends AbstractModel {
         $this->setDisplayedFirstName();
     }
 
+    /**
+     * Set the preferred name of the loaded user (does not affect db. call updateUser.)
+     * @param string $name
+     */
     public function setPreferredFirstName($name) {
         $this->preferred_first_name = $name;
         $this->setDisplayedFirstName();

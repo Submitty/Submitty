@@ -133,6 +133,7 @@ CREATE TABLE electronic_gradeable (
     eg_submission_open_date timestamp(6) with time zone NOT NULL,
     eg_submission_due_date timestamp(6) with time zone NOT NULL,
     eg_late_days integer DEFAULT (-1) NOT NULL,
+    eg_allow_late_submission boolean DEFAULT true NOT NULL,
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
@@ -206,6 +207,7 @@ CREATE TABLE gradeable_component_mark (
     gc_id integer NOT NULL,
     gcm_points numeric NOT NULL,
     gcm_note character varying NOT NULL,
+    gcm_publish boolean DEFAULT false,
     gcm_order integer NOT NULL
 );
 
@@ -230,10 +232,10 @@ CREATE TABLE gradeable_component (
     gc_title character varying(255) NOT NULL,
     gc_ta_comment character varying NOT NULL,
     gc_student_comment character varying NOT NULL,
-    gc_lower_clamp integer NOT NULL,
-    gc_default integer NOT NULL,
+    gc_lower_clamp numeric NOT NULL,
+    gc_default numeric NOT NULL,
     gc_max_value numeric NOT NULL,
-    gc_upper_clamp integer NOT NULL,
+    gc_upper_clamp numeric NOT NULL,
     gc_is_text boolean NOT NULL,
     gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL,
@@ -252,7 +254,7 @@ CREATE TABLE gradeable_component_data (
     gcd_component_comment character varying NOT NULL,
     gcd_grader_id character varying(255) NOT NULL,
     gcd_graded_version integer,
-    gcd_grade_time timestamp(6) without time zone NOT NULL
+    gcd_grade_time timestamp(6) with time zone NOT NULL
     -- CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id)) -
 );
 
@@ -739,7 +741,7 @@ ALTER TABLE ONLY gradeable_component_mark_data
 --
 
 ALTER TABLE ONLY gradeable_component_mark_data
-    ADD CONSTRAINT gradeable_component_mark_data_gd_id_and_gc_id_fkey FOREIGN KEY (gd_id, gc_id, gcd_grader_id) REFERENCES gradeable_component_data(gd_id, gc_id, gcd_grader_id) ON DELETE CASCADE;
+    ADD CONSTRAINT gradeable_component_mark_data_gd_id_and_gc_id_fkey FOREIGN KEY (gd_id, gc_id, gcd_grader_id) REFERENCES gradeable_component_data(gd_id, gc_id, gcd_grader_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --
 -- Name: gradeable_data_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

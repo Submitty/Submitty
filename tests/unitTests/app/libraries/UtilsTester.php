@@ -79,25 +79,6 @@ class UtilsTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(Utils::endsWith($haystack, $needle), $result);
     }
 
-    public function booleanConverts() {
-        return array(
-            array(true, "true"),
-            array(false, "false"),
-            array(null, "false"),
-            array("a", "false")
-        );
-    }
-
-    /**
-     * @dataProvider booleanConverts
-     *
-     * @param $value
-     * @param $expected
-     */
-    public function testConvertBooleanFalseString($value, $expected) {
-        $this->assertEquals($expected, Utils::convertBooleanToString($value));
-    }
-
     public function testPrepareHtmlString() {
         $string = "<test\n\ntest>";
         $this->assertEquals("&lt;test<br />\n<br />\ntest&gt;", Utils::prepareHtmlString($string));

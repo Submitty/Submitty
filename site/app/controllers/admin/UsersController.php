@@ -23,10 +23,11 @@ class UsersController extends AbstractController {
                 $this->updateUser('graders');
                 break;
             case 'graders':
-                $this->core->getOutput()->addBreadcrumb("Graders");
+                $this->core->getOutput()->addBreadcrumb('View Graders');
                 $this->listGraders();
                 break;
             case 'rotating_sections':
+                $this->core->getOutput()->addBreadcrumb('Setup Rotating Sections');
                 $this->rotatingSectionsForm();
                 break;
             case 'update_rotating_sections':
@@ -40,7 +41,7 @@ class UsersController extends AbstractController {
                 break;
             case 'students':
             default:
-                $this->core->getOutput()->addBreadcrumb("Students");
+                $this->core->getOutput()->addBreadcrumb('View Students');
                 $this->listStudents();
                 break;
         }
@@ -132,7 +133,7 @@ class UsersController extends AbstractController {
             $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"".strip_tags($_POST['user_preferred_firstname'])."\"<br>";
         }
         //Database password cannot be blank, no check on format
-        if ($use_database) {
+        if ($use_database && (($_POST['edit_user'] == 'true' && !empty($_POST['user_password'])) || $_POST['edit_user'] != 'true')) {
             $error_message .= User::validateUserData('user_password', $_POST['user_password']) ? "" : "Error must enter password for user<br>";
         }
 
@@ -163,7 +164,8 @@ class UsersController extends AbstractController {
 
         $user->setLastName(trim($_POST['user_lastname']));
         $user->setEmail(trim($_POST['user_email']));
-        if (isset($_POST['user_password'])) {
+
+        if (!empty($_POST['user_password'])) {
             $user->setPassword($_POST['user_password']);
         }
 
