@@ -14,7 +14,8 @@
 	    "*test_template.pdf", "*student_file.pdf" ]
     },
 
-    "assignment_message" : "Prepare a 2 page, black & white, 8.5x11”, portrait orientation, max size = 2MB .pdf of notes you would like to have during the test.",
+    "assignment_message" : "Prepare a 2 page, black & white, 8.5x11”, portrait orientation, max size = 2MB .pdf of notes you would like to have during the test.<br>NOTE:  If you submit a 1 page .pdf, the attachment test below will fail.  Please make a 2 page pdf to ensure the test below will pass.<br>Be sure to inspect the produced sample test pdf to make sure that your notes are legible.",
+
     "testcases" : [
 	{
 	    "title" : "Did you submit .pdf file?",
