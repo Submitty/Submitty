@@ -54,10 +54,23 @@ def main():
                 # GRAB THE ICLICKER FROM THE SUBMISSION
                 clickerfile = userdir + '/'+str(active) + '/textbox_0.txt'
                 with open(clickerfile) as f:
-                    iclicker = f.read()
+                    iclicker_string = f.read()
 
-                    # WRITE TO EXPECTED FORMAT (matches iclicker.com format)
-                    remote_ids.write('#{0},"{1}"\n'.format(iclicker.upper(),username))
+                    iclicker_ids = iclicker_string.split(',')
+
+                    if len(iclicker_ids) > 1:
+                        print ("NOTE: user '{0}' has entered '{1}' Remote IDs".format(username,len(iclicker_ids)))
+                        
+                    for iclicker in iclicker_ids:
+                    
+                        if len(iclicker) != 8:
+                            print ("WARNING! iclicker id '{0}' for user '{1}' is not 8 characters".format(iclicker,username))
+
+                        if 'T24' in iclicker or 't24' in iclicker:
+                            print ("WARNING! iclicker id '{0}' for user '{1}' is likely incorrect (model # not id #)".format(iclicker,username))
+                    
+                        # WRITE TO EXPECTED FORMAT (matches iclicker.com format)
+                        remote_ids.write('#{0},"{1}"\n'.format(iclicker.upper(),username))
 
 if __name__ == "__main__":
     main()
