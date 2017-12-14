@@ -1,7 +1,7 @@
 {
-    
+
     "assignment_message" : "Locate the 8 digit iClicker Remote ID near the battery access panel on the back of your iClicker.<br>Note: This number does not begin with 'T24', that's the model number.<br>If you lost your original remote and purchased a replacement, enter BOTH remote IDs in the box below, separated by a comma.",
-    
+
     "textboxes" : [
         {
             "label": "Enter your 8 digit iClicker ID:"

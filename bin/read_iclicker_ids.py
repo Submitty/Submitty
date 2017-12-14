@@ -60,15 +60,14 @@ def main():
 
                     if len(iclicker_ids) > 1:
                         print ("NOTE: user '{0}' has entered '{1}' Remote IDs".format(username,len(iclicker_ids)))
-                        
+
                     for iclicker in iclicker_ids:
-                    
                         if len(iclicker) != 8:
                             print ("WARNING! iclicker id '{0}' for user '{1}' is not 8 characters".format(iclicker,username))
 
                         if 'T24' in iclicker or 't24' in iclicker:
                             print ("WARNING! iclicker id '{0}' for user '{1}' is likely incorrect (model # not id #)".format(iclicker,username))
-                    
+
                         # WRITE TO EXPECTED FORMAT (matches iclicker.com format)
                         remote_ids.write('#{0},"{1}"\n'.format(iclicker.upper(),username))
 
