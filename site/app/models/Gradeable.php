@@ -58,7 +58,7 @@ use app\libraries\Utils;
  * @method bool getGradeByRegistration()
  * @method array getSubmittedFiles()
  * @method array getVcsFiles()
- * @method array getTestcases()
+ * @method GradeableTestcase[] getTestcases()
  * @method bool getIsRepository()
  * @method string getSubdirectory()
  * @method string getConfigPath()
@@ -801,6 +801,10 @@ class Gradeable extends AbstractModel {
     public function getSubmissionCount() {
         return $this->submissions;
     }
+    
+    public function hasSubmitted() {
+        return $this->getHighestVersion() > 0;
+    }
 
     public function getAllowedLateDays() {
         return $this->late_days;
@@ -960,6 +964,7 @@ class Gradeable extends AbstractModel {
     }
     
     public function validateVersions($active_check = null) {
+        //active check is the gradeable version this gradeable has
         if($active_check === null) {
             $active_check = $this->active_version;
         }

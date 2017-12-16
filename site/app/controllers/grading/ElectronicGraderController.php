@@ -79,7 +79,9 @@ class ElectronicGraderController extends AbstractController {
         $sections = array();
         $total_users = array();
         $component_averages = array();
+        $autograded_average = array();
         $overall_average = array();
+        $num_submitted = array();
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
@@ -87,7 +89,9 @@ class ElectronicGraderController extends AbstractController {
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
             $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
             $component_averages = array();
+            $autograded_average = array();
             $overall_average = array();
+            $section_key='registration_section';
         }
         else if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getUser()->accessFullGrading()){
@@ -105,6 +109,7 @@ class ElectronicGraderController extends AbstractController {
             }
             $num_components = $gradeable->getNumTAComponents();
         }
+        //grading by rotating section
         else {
             if(!$this->core->getUser()->accessFullGrading()){
                 $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
@@ -121,6 +126,8 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
+         $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable->getId(), $sections, $section_key);
+
         if (count($sections) > 0) {
             if ($gradeable->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
@@ -131,13 +138,21 @@ class ElectronicGraderController extends AbstractController {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                 $no_team_users = array();
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key);
-                $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id);
-                $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id);
+                $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key);
+                $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key);
+                $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key);
             }
             $num_components = $gradeable->getNumTAComponents();
         }
         $sections = array();
+        $total_students = 0;
         if (count($total_users) > 0) {
+            // Get total number of students (submitted and unsubmitted)
+            foreach ($total_users as $key => $value) {
+                if ($key == 'NULL') continue;
+                $total_students += $value;
+            }
+            
             if ($peer) {
                 $sections['stu_grad'] = array(
                     'total_components' => $num_components * $peer_grade_set,
@@ -158,29 +173,30 @@ class ElectronicGraderController extends AbstractController {
                 $sections['all']['graded_components'] -= $my_grading;
             }
             else {
-
-                foreach ($total_users as $key => $value) {
+                foreach ($num_submitted as $key => $value) {
                     $sections[$key] = array(
                         'total_components' => $value * $num_components,
                         'graded_components' => 0,
                         'graders' => array()
                     );
+                    if ($gradeable->isTeamAssignment()) {
+                        $sections[$key]['no_team'] = $no_team_users[$key];
+                    }
                     if (isset($graded_components[$key])) {
-                        $sections[$key]['graded_components'] = intval($graded_components[$key]);
+                        // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                        $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                     }
                     if (isset($graders[$key])) {
                         $sections[$key]['graders'] = $graders[$key];
                     }
-                    if ($gradeable->isTeamAssignment()) {
-                    $sections[$key]['no_team'] = $no_team_users[$key];
-                    }
-                    if (isset($graded_components[$key])) {
-                        $sections[$key]['graded_components'] = intval($graded_components[$key]);
-                    }
                 }
             }
         }
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $overall_average);
+
+        $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
+        $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
+
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_students, $registered_but_not_rotating, $rotating_but_not_registered, $section_key);
     }
 
     /**
@@ -637,6 +653,7 @@ class ElectronicGraderController extends AbstractController {
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $overwrite = $_POST['overwrite'];
+        $version_updated = "false"; //if the version is updated
 
         //checks if user has permission
         if ($this->core->getUser()->getGroup() === 4) {
@@ -748,11 +765,13 @@ class ElectronicGraderController extends AbstractController {
                 $component->deleteData($gradeable->getGdId());
                 $debug = 'delete';
             } else {
-                if($mark_modified === true) { //only change the component information is the mark was modified
+                //only change the component information is the mark was modified or componet and its gradeable are out of sync.
+                if($mark_modified === true || ($component->getGradedVersion() !== $gradeable->getActiveVersion())) {
                     if ($component->getGrader() === null || $overwrite === "true") {
                         $component->setGrader($this->core->getUser());
                     }
 
+                    $version_updated = "true";
                     $component->setGradedVersion($_POST['active_version']);
                     $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                     $component->setComment($_POST['custom_message']);
@@ -807,7 +826,7 @@ class ElectronicGraderController extends AbstractController {
             $hwReport->generateSingleReport($this->core->getUser()->getId(), $gradeable_id);
         }
 
-        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite);
+        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite, 'version_updated' => $version_updated);
         $this->core->getOutput()->renderJson($response);
         return $response;
     }

@@ -43,8 +43,7 @@ HTML;
             $return .= <<<HTML
     <tr><td colspan="4">No late days are currently entered.</td></tr>
 HTML;
-        }
-        else{
+        } else {
             foreach ($users as $user) {
                 $return .= <<<HTML
             <tr>
@@ -62,6 +61,22 @@ HTML;
     </table>
     </div>
 </div>
+HTML;
+
+                $students = $this->core->getQueries()->getAllUsers();
+                $student_full = array();
+                foreach ($students as $student) {
+                    $student_full[] = array('value' => $student->getId(),
+                                            'label' => $student->getDisplayedFirstName().' '.$student->getLastName().' <'.$student->getId().'>');
+                }
+                $student_full = json_encode($student_full);
+
+$return .= <<<HTML
+<script>
+    $("#user_id").autocomplete({
+        source: {$student_full}
+    });
+</script>
 HTML;
         return $return;
     }

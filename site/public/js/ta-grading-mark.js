@@ -679,6 +679,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             if(mark_data[i].selected === true) {
                 all_false = false;
                 current_points += parseFloat(mark_data[i].points);
+                mark_data[i].note = escapeHTML(mark_data[i].note);
                 if(first_text === true) {
                     if (parseFloat(mark_data[i].points) == 0) {
                         new_text += "* " + mark_data[i].note;
@@ -709,6 +710,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             all_false = false;
         }
         if(custom_message != "") {
+            custom_message = escapeHTML(custom_message);
             if(first_text === true) {
                 if (parseFloat(custom_points) == 0) {
                     new_text += "* " + custom_message;
@@ -737,7 +739,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         }
         
         current_question_num[0].innerHTML = (all_false === false) ? current_points : "";
-        current_question_text[0].innerHTML = new_text;
+        current_question_text.html(new_text);
 
         calculatePercentageTotal();
 
@@ -779,6 +781,10 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                             $('#summary-' + num)[0].style.backgroundColor = "#eebb77";
                         }
                     }
+                }
+
+                if(data['version_updated'] === "true") {
+                    $('#wrong_version_' + num)[0].innerHTML = "";
                 }
             },
             error: function() {
