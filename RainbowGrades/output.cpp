@@ -551,9 +551,9 @@ void start_table_output( bool for_instructor,
   int counter = 0;
   table.set(0,counter++,TableCell("ffffff","#"));
   table.set(0,counter++,TableCell("ffffff","SECTION"));
-  //table.set(0,counter++,TableCell("ffffff","part."));
-  //table.set(0,counter++,TableCell("ffffff","under."));
   if (DISPLAY_INSTRUCTOR_NOTES) {
+    table.set(0,counter++,TableCell("ffffff","part."));
+    table.set(0,counter++,TableCell("ffffff","under."));
     table.set(0,counter++,TableCell("ffffff","notes"));
   }
   student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","USERNAME"));
@@ -736,9 +736,13 @@ void start_table_output( bool for_instructor,
     assert (section_color.size()==6);
     table.set(myrow,counter++,TableCell(section_color,section_label));
 
-    //table.set(myrow,counter++,TableCell(default_color,"part"));
-    //table.set(myrow,counter++,TableCell(default_color,"under"));
     if (DISPLAY_INSTRUCTOR_NOTES) {
+      float participation = this_student->getParticipation();
+      std::string color = coloritcolor(participation,5,4,3,2,1);
+      table.set(myrow,counter++,TableCell(color,participation,1));
+      float understanding = this_student->getUnderstanding();
+      color = coloritcolor(understanding,5,4,3,2,1);
+      table.set(myrow,counter++,TableCell(color,understanding,1));
       std::string notes;
       std::vector<std::string> ews = this_student->getEarlyWarnings();
       for (std::size_t i = 0; i < ews.size(); i++) {

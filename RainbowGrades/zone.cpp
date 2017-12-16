@@ -187,8 +187,10 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename,
       std::cerr << "\nERROR: duplicate zone " << zi.zone << " in " << zone_counts_filename << std::endl;
       exit(0);
     }
-    assert (zi.max >= 0);
-    total_seats += zi.max;
+    if (zi.max != -1) {
+      assert (zi.max >= 0);
+      total_seats += zi.max;
+    }
 
     bool read_another_zone = false;
     while (istr_zone_counts >> token) {
@@ -238,6 +240,10 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename,
         read_another_zone = true;
         break;
       }
+    }
+    if (zi.max == -1) {
+      zi.max = zi.num_available_seats();
+      total_seats += zi.max;
     }
     if (zi.num_available_seats() != 0 &&
         zi.max != zi.num_available_seats()) {
@@ -365,7 +371,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename,
         ZoneInfo &next_zi = zones.find(randomized_lefty_available[next_lefty_za])->second;
         s->setExamRoom(next_zi.building+std::string(" ")+next_zi.room);
         std::string row,seat;
-        std::cout << "ASSIGN student " << s->getUserName() << std::endl;
+        //std::cout << "ASSIGN student " << s->getUserName() << std::endl;
         next_zi.assign_seat(row,seat,s->getLefty());
         s->setExamZone(next_zi.zone,row,seat);
         s->setExamZoneImage(next_zi.image_url);
@@ -379,7 +385,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename,
         ZoneInfo &next_zi = zones.find(randomized_nonlefty_available[next_nonlefty_za])->second;
         s->setExamRoom(next_zi.building+std::string(" ")+next_zi.room);
         std::string row,seat;
-        std::cout << "ASSIGN student " << s->getUserName() << std::endl;
+        //std::cout << "ASSIGN student " << s->getUserName() << std::endl;
         next_zi.assign_seat(row,seat,s->getLefty());
         s->setExamZone(next_zi.zone,row,seat);
         s->setExamZoneImage(next_zi.image_url);

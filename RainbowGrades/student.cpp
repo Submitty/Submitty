@@ -348,7 +348,7 @@ void Student::mossify(const std::string &gradeable, float penalty) {
   moss_penalty += -0.0000001;
   moss_penalty += -average_letter_grade * penalty;
 
-  other_note += "[MOSS PENALTY " + std::to_string(penalty) + "]";
+  addWarning("[MOSS PENALTY " + std::to_string(penalty) + "]");
 }
 
 
