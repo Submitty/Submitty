@@ -26,15 +26,23 @@ class ForumController extends AbstractController {
     public function run() {
         switch ($_REQUEST['page']) {
             case 'create_thread':
-                $this->showHomepage();
+                $this->showCreateThread();
                 break;
             case 'view_thread':
-                $this->showHomepage();
-                break;
             case 'home_page':
             default:
-                $this->showHomepage();
+                $this->showThreads();
                 break;
+        }
+    }
+
+    public function showThreads(){
+        if(isset($_POST["thread_id"])){
+            
+        } else {
+            //We are at the "Home page"
+            //Show the first post
+            
         }
     }
 
