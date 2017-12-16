@@ -965,7 +965,7 @@ void start_table_output( bool for_instructor,
     // ICLICKER
     if (DISPLAY_ICLICKER && ICLICKER_QUESTION_NAMES.size() > 0) {
 
-      if (this_student->getRemoteID() != "") { // && this_student->hasPriorityHelpStatus()) {
+      if (this_student->getRemoteID().size() != 0) { // && this_student->hasPriorityHelpStatus()) {
         table.set(myrow,counter++,TableCell("ccccff","registered"));
         //} else if (this_student->getRemoteID() != "") {
         //table.set(myrow,counter++,TableCell("ffffff","registered"));

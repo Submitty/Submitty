@@ -1,3 +1,4 @@
+
 #ifndef _STUDENT_H_
 #define _STUDENT_H_
 
@@ -102,7 +103,7 @@ public:
   void add_bonus_late_day(int which_lecture) { bonus_late_days_which_lecture.push_back(which_lecture); }
 
   // other grade-like data
-  const std::string& getRemoteID() const { return remote_id; }
+  const std::vector<std::string>& getRemoteID() const { return remote_id; }
   bool getAcademicIntegrityForm()  const { return academic_integrity_form; }
   int getParticipation()           const { return participation; }
   int getUnderstanding()           const { return understanding; }
@@ -144,7 +145,7 @@ public:
   void mossify(const std::string &gradeable, float penalty);
 
   // other grade-like data
-  void setRemoteID(const std::string& r_id) { remote_id = r_id; }
+  void setRemoteID(const std::string& r_id) { remote_id.push_back(r_id); }
   void setAcademicIntegrityForm() { academic_integrity_form = true; }
   void setParticipation(int x) { participation = x; }
   void setUnderstanding(int x) { understanding = x; }
@@ -218,7 +219,7 @@ private:
   float cached_hw;
 
   // other grade-like data
-  std::string remote_id;
+  std::vector<std::string> remote_id;
   bool academic_integrity_form;
   int participation;
   int understanding;

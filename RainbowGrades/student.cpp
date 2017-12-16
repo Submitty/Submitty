@@ -33,7 +33,7 @@ Student::Student() {
   cached_hw = -1;
 
   // other grade-like data
-  // (remote id defaults to empty string)
+  // (remote id defaults to empty vector)
   academic_integrity_form = false;
   participation = 0;
   understanding = 0;
