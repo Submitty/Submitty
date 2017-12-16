@@ -252,6 +252,10 @@ switch($_REQUEST['component']) {
         $control = new app\controllers\NavigationController($core);
         $control->run();
         break;
+    case 'forum':
+        $control = new app\controllers\forum\ForumHomeController($core);
+        $control->run();
+        break;
     default:
         $control = new app\controllers\AuthenticationController($core, $logged_in);
         $control->run();
