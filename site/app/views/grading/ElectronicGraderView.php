@@ -1355,6 +1355,15 @@ HTML;
             $first = true;
             $noChange = "";
             foreach ($question->getMarks() as $mark) {
+
+            	//Makes the mark blue if they're publish marks
+            	if ($mark->getPublish() === 't') {
+            		$is_publish = "is_publish";
+            	}
+     			else {
+     				$is_publish = "";
+     			}
+
                 if ($first === true) {
                     $first = false;
                     $noChange = "readonly";
@@ -1367,7 +1376,7 @@ HTML;
                 $icon_mark = ($mark->getHasMark() === true && $show_graded_info) ? "fa-square" : "fa-square-o";
                 $mark_name = "mark_text_{$c}_{$d}";
                 $return .= <<<HTML
-                    <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
+                    <tr id="mark_id-{$c}-{$d}" name="mark_{$c}" class="{$is_publish}">
                         <td colspan="1" style="text-align: center; width: 12%; white-space: nowrap;"> 
                             <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                             <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none; min-width: 50px;" {$noChange}>

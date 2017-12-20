@@ -348,6 +348,10 @@ progress::-webkit-progress-value {
     background-color: #b3b3b3;
 }
 
+tr.is_publish {
+    background-color: #81D4FA;
+}
+
 .btn-large {
     width: 96%;
     margin-left: 2%;
