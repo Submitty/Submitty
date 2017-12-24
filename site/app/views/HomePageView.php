@@ -160,8 +160,12 @@ HTML;
                         $return .= <<<HTML
                         
                         <tr>
-                            <td colspan="8">
-                                <a class="btn btn-primary btn-block" style="width:95%;white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
+                            <td style="width:85%" colspan="30">
+                                <a class="btn btn-primary btn-block" style=" white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
+                               
+                            </td>
+                            <td style="width: 15%" colspan="4">
+                                 <a class="btn btn-primary btn-block" href="{$this->core->buildUrl(array('component' => 'forum', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> Forum {$user->accessAdmin()}</a>
                             </td>
                         </tr>
 HTML;
