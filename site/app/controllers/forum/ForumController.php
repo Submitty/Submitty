@@ -3,6 +3,7 @@
 namespace app\controllers\forum;
 
 use app\libraries\Core;
+use app\controllers\AbstractController;
 use app\libraries\Output;
 use app\libraries\Utils;
 
@@ -37,13 +38,18 @@ class ForumController extends AbstractController {
     }
 
     public function showThreads(){
+        $user = $this->core->getUser();
+        $threads = 0;//$this->core->getQueries()->loadThreads();
+        $posts = null;
         if(isset($_POST["thread_id"])){
-            
+            $posts = $this->core->getQueries()->getPostsForThread($threads);
         } else {
             //We are at the "Home page"
             //Show the first post
+            $posts = $this->core->getQueries()->getPostsForThread($threads);
             
         }
+        $this->core->getOutput()->renderOutput('ForumThread', 'showForumThreads', $user, $posts, $threads);
     }
 
 }
