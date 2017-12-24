@@ -39,7 +39,7 @@ class ForumController extends AbstractController {
 
     public function showThreads(){
         $user = $this->core->getUser();
-        $threads = 0;//$this->core->getQueries()->loadThreads();
+        $threads = $this->core->getQueries()->loadThreads();
         $posts = null;
         if(isset($_POST["thread_id"])){
             $posts = $this->core->getQueries()->getPostsForThread($threads);
