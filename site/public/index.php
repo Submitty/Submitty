@@ -253,7 +253,7 @@ switch($_REQUEST['component']) {
         $control->run();
         break;
     case 'forum':
-        $control = new app\controllers\forum\ForumHomeController($core);
+        $control = new app\controllers\forum\ForumController($core);
         $control->run();
         break;
     default:
