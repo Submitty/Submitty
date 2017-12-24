@@ -17,15 +17,15 @@ class ForumThreadView extends AbstractView {
 	public function showForumThreads($user, $posts, $threads) {
 		$return = <<<HTML
 			<div id="forum_wrapper">
-				<div style="width:30%; float: left;" class="content">
+				<div style="width:30%; float: left;" class="content">{$threads}
 HTML;
-				foreach($threads as $thread){
+				//foreach($threads as $thread){
 					$return .= <<<HTML
 					<div class="box">
 					<p>Thread</p>
 					</div>
 HTML;
-				}
+				//}
 		$return .= <<< HTML
 				</div>
 				<div style="width:65%; float: right;" class="content">

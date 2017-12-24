@@ -49,7 +49,7 @@ class ForumController extends AbstractController {
             $posts = $this->core->getQueries()->getPostsForThread($threads);
             
         }
-        $this->core->getOutput()->renderOutput('ForumThread', 'showForumThreads', $user, $posts, $threads);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads);
     }
 
 }
