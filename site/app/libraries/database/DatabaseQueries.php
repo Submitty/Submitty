@@ -106,6 +106,11 @@ class DatabaseQueries {
         throw new NotImplementedException();
     }
 
+    public function loadThreads(){
+        $this->course_db->query("SELECT * FROM threads LIMIT 25");
+        return $this->course_db->rows();
+    }
+
     /**
      * @param User $user
      * @param string $semester
@@ -1635,6 +1640,11 @@ AND gc_id IN (
             $return[$row['rotating_section']] = intval($row['count']);
         }
         return $return;
+    }
+
+    public function getPostsForThread($thread_id){
+        $this->course_db->query("SELECT * FROM posts WHERE thread_id=0");
+        return $this->course_db->rows();
     }
 
     public function getAnonId($user_id) {
