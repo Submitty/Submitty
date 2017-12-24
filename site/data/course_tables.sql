@@ -464,7 +464,7 @@ CREATE TABLE "posts" (
 	"parent_id" int DEFAULT '-1',
 	"author_user_id" character varying NOT NULL,
 	"content" TEXT NOT NULL,
-	"timestamp" DATE NOT NULL,
+	"timestamp" timestamp with time zone NOT NULL,
 	"anonymous" BOOLEAN NOT NULL,
 	"deleted" BOOLEAN NOT NULL DEFAULT '0',
 	"endorsed_by" varchar,
