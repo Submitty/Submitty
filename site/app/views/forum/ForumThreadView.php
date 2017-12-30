@@ -16,23 +16,46 @@ class ForumThreadView extends AbstractView {
 	*/
 	public function showForumThreads($user, $posts, $threads) {
 		$return = <<<HTML
-			<div id="forum_wrapper">
-				<div style="width:24%; margin-right:3px; float: left;" class="content">
+
+		<div style="background-color:transparent; margin: !important auto;padding:3px;" class="content">
+
+		<div style="margin-bottom:10px; height:50px; " id="forum_bar">
+			<div style="float:right; height:50px;width:50px;" class="create_thread_button"><a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}">LINK</a>
+			</div>
+		</div>
+			<div style="clear:both;" id="forum_wrapper">
+				<div style="display:inline-block;width:25%; margin-right:2px; height:100%; float: left;" class="thread_list">
 HTML;
+				$used_active = false; //used for the first one if there is not thread_id set
 				foreach($threads as $thread){
+					$class = "box";
+					if(!isset($_REQUEST["thread_id"]) && !$used_active){
+						$class .= " active";
+						$used_active = true;
+					} else if(isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"])
+						$class .= " active";
 					$return .= <<<HTML
-					<div class="box">
-					<b>{$thread["title"]}</b>
+					<div class="{$class}" style="height:100%;margin-left:0px;">
+					<b><a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">{$thread["title"]}</a></b>
 					</div>
 HTML;
 				}
+
+		$thread_id = -1;
 		$return .= <<< HTML
 				</div>
-				<div style="width:65%; margin-left: 3px; float: right;" class="content">
+				<div style="display:inline-block;width:70%; margin-left: 2px; float: right;" class="posts_list">
 HTML;
 				foreach($posts as $post){
+					
+					if($thread_id == -1) {
+						$thread_id = $post["thread_id"];
+					}
 					$return .= <<<HTML
-					<div class="box">
+
+
+
+					<div class="box" style="margin-left:0;">
 					<p>{$post["content"]}</p>
 					<p>{$post["timestamp"]}</p>
 					<p>{$post["author_user_id"]}</p>
@@ -40,8 +63,60 @@ HTML;
 HTML;
 				}
 		$return .= <<<HTML
+				
+				<form style="margin:10px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}">
+				<input type="hidden" name="thread_id" value="{$thread_id}" />
+            	<br/>
+            	<div class="form-group row">
+            		<textarea name="post_content" style="resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+            	</div>
+
+            	<br/>
+
+            	<div style="margin-bottom:10px;float:right;" class="form-group row">
+            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
+            	</div>
+            	</form>
+            	<br/>
+
 				</div>
+
 			</div>
+			</div>
+HTML;
+		return $return;
+	}
+
+	public function createThread() {
+		$return = <<<HTML
+
+		<div style="margin-bottom:10px; height:50px; " id="forum_bar">
+			<div style="float:right; height:50px;width:50px;" class="create_thread_button"><a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">LINK</a>
+			</div>
+		</div>
+
+		<div style="margin: !important auto; padding:20px;" class="content">
+
+			<form style="margin:10px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}">
+
+            	<div class="form-group row">
+            		Title: <input type="text" placeholder="Title" name="title" required/>
+            	</div>
+            	<br/>
+            	<div class="form-group row">
+            		<textarea name="thread_content" style="resize:none;height:500px;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+            	</div>
+
+            	<br/>
+
+            	<div style="margin-bottom:10px;float:right;" class="form-group row">
+            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
+            	</div>
+
+            	<br/>
+
+            </form>
+		</div>
 HTML;
 		return $return;
 	}
