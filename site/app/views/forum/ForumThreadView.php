@@ -15,6 +15,7 @@ class ForumThreadView extends AbstractView {
 		that have been created to be displayed in the left panel.
 	*/
 	public function showForumThreads($user, $posts, $threads) {
+		$this->core->getOutput()->addBreadcrumb("Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$return = <<<HTML
 
 		<div style="background-color:transparent; margin: !important auto;padding:3px;" class="content">
@@ -103,6 +104,8 @@ HTML;
 	}
 
 	public function createThread() {
+		$this->core->getOutput()->addBreadcrumb("Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
 
 		<div style="margin-bottom:10px; height:50px; " id="forum_bar">
