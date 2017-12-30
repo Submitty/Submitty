@@ -107,8 +107,28 @@ class DatabaseQueries {
     }
 
     public function loadThreads(){
-        $this->course_db->query("SELECT * FROM threads LIMIT 25");
+        $this->course_db->query("SELECT * FROM threads ORDER BY id DESC LIMIT 25");
         return $this->course_db->rows();
+    }
+
+    public function createPost($user, $content, $thread_id, $anonymous, $type){
+        $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($thread_id, -1, $user, $content, $anonymous, 0, NULL, 0, $type));
+    }
+
+    public function createThread($user, $title, $content, $prof_pinned = 0){
+
+        //insert data
+        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, 0, 0, -1, true));
+
+        //retrieve generated thread_id
+        $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
+
+        //Max id will be the most recent post
+        $id = $this->course_db->rows()[0]["max_id"];
+
+        $this->createPost($user, $content, $id, 0, 0);
+
+        return $id;
     }
 
     /**
@@ -1643,8 +1663,13 @@ AND gc_id IN (
     }
 
     public function getPostsForThread($thread_id){
-        $this->course_db->query("SELECT * FROM posts WHERE thread_id=0");
-        return $this->course_db->rows();
+
+      if($thread_id != -1) {
+        $this->course_db->query("SELECT * FROM posts WHERE thread_id=?", array($thread_id));
+      } else {
+        $this->course_db->query("SELECT * FROM posts WHERE thread_id= (SELECT MAX(id) from threads)"); 
+      }
+      return $this->course_db->rows();
     }
 
     public function getAnonId($user_id) {
