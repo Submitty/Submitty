@@ -570,6 +570,10 @@ table tr.table-header {
     padding: 5px 5px 10px;
 }
 
+.active {
+    background-color: #21C2F6;
+}
+
 .box-title > h4 {
     margin-left: 20px;
 }
@@ -662,6 +666,18 @@ table tr.table-header {
 .gradeable_list tr:nth-child(odd),
 .gradeable_list tr:nth-child(even) {
 /*    background-color: #E9EFEF*/
+}
+
+
+.create_thread_button {
+    border-radius: 3px;
+    width: 100%;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    position: relative;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 2px 2px 4px -3px #dddddd;
+    padding: 5px 5px 10px;
 }
 
 table .colspan{
