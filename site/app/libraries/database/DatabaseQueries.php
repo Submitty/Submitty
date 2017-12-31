@@ -115,6 +115,11 @@ class DatabaseQueries {
         $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($thread_id, -1, $user, $content, $anonymous, 0, NULL, 0, $type));
     }
 
+    public function getFirstPostForThread($thread_id) {
+        $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id = ?", array($thread_id));
+        return $this->course_db->rows()[0];
+    }
+
     public function createThread($user, $title, $content, $prof_pinned = 0){
 
         //insert data
