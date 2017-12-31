@@ -108,12 +108,16 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
 
-		<div style="margin-bottom:10px; height:50px; " id="forum_bar">
-			<div style="float:right; height:50px;width:50px;" class="create_thread_button"><a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">LINK</a>
+		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
+
+		<div style="margin-top:10px; margin-bottom:10px; height:50px;  " id="forum_bar">
+			<div style="margin-left:20px; height:50px; width:50px;" class="create_thread_button"><a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i style="vertical-align: middle; position: absolute; margin-top: 8px; margin-left: 10px;" class="fa fa-arrow-left fa-2x" aria-hidden="true"></i></a>
 			</div>
 		</div>
 
-		<div style="margin: !important auto; padding:20px;" class="content">
+		<div style="margin-top:10px; margin-right: 20px; margin-left: 20px; padding:20px;" class="content">
+
+		<h3> Create Thread </h3>
 
 			<form style="margin:10px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}">
 
@@ -134,6 +138,7 @@ HTML;
             	<br/>
 
             </form>
+		</div>
 		</div>
 HTML;
 		return $return;
