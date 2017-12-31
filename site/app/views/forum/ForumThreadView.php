@@ -16,12 +16,15 @@ class ForumThreadView extends AbstractView {
 	*/
 	public function showForumThreads($user, $posts, $threads) {
 		$this->core->getOutput()->addBreadcrumb("Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+		
+		//Body Style is necessary to make sure that the forum is still readable...
 		$return = <<<HTML
+		<style>body {min-width: 925px;}</style>
 
-		<div style="background-color:transparent; margin: !important auto;padding:3px;" class="content">
+		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
-		<div style="margin-bottom:10px; height:50px; " id="forum_bar">
-			<div style="float:right; height:50px;width:50px;" class="create_thread_button"><a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}">Create Thread</a>
+		<div style="margin-top:10px; margin-bottom:10px; height:50px;  " id="forum_bar">
+			<div style="margin-left:20px; height: 50px; width:50px;" class="create_thread_button"><a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i style="vertical-align: middle; position: absolute; margin-top: 9px; margin-left: 11px;" class="fa fa-plus-circle fa-2x" aria-hidden="true"></i></a>
 			</div>
 		</div>
 
@@ -29,7 +32,7 @@ HTML;
 		if(count($threads) == 0){
 			//throw new Exception("dfks");
 		$return .= <<<HTML
-					<div style="margin: !important auto;padding:25px; text-align:center;" class="content">
+					<div style="margin-left:20px;margin-top:10px;margin-right:20px;padding:25px; text-align:center;" class="content">
 						<h4>A thread hasn't been created yet. Be the first to do so!</h4>
 					</div>
 				</div>
@@ -38,42 +41,55 @@ HTML;
 
 
 			$return .= <<<HTML
-				<div style="clear:both;" id="forum_wrapper">
-					<div style="display:inline-block;width:25%; margin-right:2px; height:100%; float: left;" class="thread_list">
+				<div id="forum_wrapper">
+					<div class="thread_list">
 HTML;
 					$used_active = false; //used for the first one if there is not thread_id set
+					$function_date = 'date_format';
+					$function_substr = 'substr';
+					$start = 0;
+					$end = 10;
 					foreach($threads as $thread){
-						$class = "box";
+						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
+						$date = date_create($first_post['timestamp']);
+						$class = "thread_box";
 						if(!isset($_REQUEST["thread_id"]) && !$used_active){
 							$class .= " active";
 							$used_active = true;
 						} else if(isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"])
 							$class .= " active";
 						$return .= <<<HTML
-						<div class="{$class}" style="height:100%;margin-left:0px;">
-						<b><a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">{$thread["title"]}</a></b>
+						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
+						<div class="{$class}">
+						<h3>{$thread["title"]}</h3>
+						<h4 style="font-weight: normal;">{$function_substr($first_post["content"], 0, 50)}...</h4>
+						<h7 style="float:right;margin-top:5px">{$function_date($date,"m/d/Y g:i A")}</h7>
 						</div>
+						</a>
+						<hr style="margin-top: 0px;margin-bottom:0px;">
 HTML;
 					}
 
 			$thread_id = -1;
+			$function_content = 'nl2br';
 			$return .= <<< HTML
 					</div>
-					<div style="display:inline-block;width:70%; margin-left: 2px; float: right;" class="posts_list">
+					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
 HTML;
 					foreach($posts as $post){
 						
 						if($thread_id == -1) {
 							$thread_id = $post["thread_id"];
 						}
+						$date = date_create($post["timestamp"]);
 						$return .= <<<HTML
 
 
 
-						<div class="box" style="margin-left:0;">
-						<p>{$post["content"]}</p>
-						<p>{$post["timestamp"]}</p>
-						<p>{$post["author_user_id"]}</p>
+						<div class="post_box" style="margin-left:0;">
+						<p>{$function_content($post["content"])}</p>
+						<h7 style="float:right;"><strong>{$post["author_user_id"]}</strong> {$function_date($date,"m/d/Y g:i A")}</h7>
+						
 						</div>
 HTML;
 					}
@@ -83,7 +99,7 @@ HTML;
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>
 	            	<div class="form-group row">
-	            		<textarea name="post_content" style="resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+	            		<textarea name="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
 	            	</div>
 
 	            	<br/>
@@ -115,18 +131,18 @@ HTML;
 			</div>
 		</div>
 
-		<div style="margin-top:10px; margin-right: 20px; margin-left: 20px; padding:20px;" class="content">
+		<div style="padding-left:20px;padding-top:1vh;height:69vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
 
 		<h3> Create Thread </h3>
 
-			<form style="margin:10px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}">
+			<form style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}">
 
             	<div class="form-group row">
             		Title: <input type="text" placeholder="Title" name="title" required/>
             	</div>
             	<br/>
             	<div class="form-group row">
-            		<textarea name="thread_content" style="resize:none;height:500px;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+            		<textarea name="thread_content" style="white-space: pre-wrap;resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
             	</div>
 
             	<br/>
