@@ -72,6 +72,7 @@ HTML;
 
 			$thread_id = -1;
 			$function_content = 'nl2br';
+			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$return .= <<< HTML
 					</div>
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
@@ -82,16 +83,40 @@ HTML;
 							$thread_id = $post["thread_id"];
 						}
 						$date = date_create($post["timestamp"]);
+
+						if($post["anonymous"] == true){
+							if($userAccessToAnon){
+								$visible_username = "<a onClick=\"changeName(this, '{$post["author_user_id"]}')\" id=\"anonUser\">Anonymous</a>";
+								$return .= <<<HTML
+								<script>
+								function changeName(element, user){
+									if(element.innerHTML.indexOf("Anonymous") != -1) {
+										element.innerHTML = user;
+									} else {
+										element.innerHTML = 'Anonymous';
+									}
+									
+								}
+								</script>
+HTML;
+							} else {
+								$visible_username = "Anonymous";
+							}
+						} else {
+							$visible_username = $post["author_user_id"];
+						}
+
 						$return .= <<<HTML
 
 
 
-						<div class="post_box" style="margin-left:0;">
-						<p>{$function_content($post["content"])}</p>
-						<h7 style="float:right;"><strong>{$post["author_user_id"]}</strong> {$function_date($date,"m/d/Y g:i A")}</h7>
-						
-						</div>
+							<div class="post_box" style="margin-left:0;">
+							<p>{$function_content($post["content"])}</p>
+							<h7 style="float:right;"><strong>{$visible_username}</a></strong> {$function_date($date,"m/d/Y g:i A")}</h7>
+							
+							</div>
 HTML;
+						
 					}
 			$return .= <<<HTML
 					
@@ -105,7 +130,7 @@ HTML;
 	            	<br/>
 
 	            	<div style="margin-bottom:10px;float:right;" class="form-group row">
-	            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
+	            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
 	            	</div>
 	            	</form>
 	            	<br/>
