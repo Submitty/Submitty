@@ -173,7 +173,7 @@ HTML;
             	<br/>
 
             	<div style="margin-bottom:10px;float:right;" class="form-group row">
-            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
+            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
             	</div>
 
             	<br/>

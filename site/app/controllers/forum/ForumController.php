@@ -35,6 +35,9 @@ class ForumController extends AbstractController {
             case 'publish_post':
                 $this->publishPost();
                 break;
+            case 'delete_post':
+                $this->deletePost();
+                break;
             case 'view_thread':
             default:
                 $this->showThreads();
@@ -45,11 +48,12 @@ class ForumController extends AbstractController {
     public function publishThread(){
         $title = htmlentities($_POST["title"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $thread_content = htmlentities($_POST["thread_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($title) || empty($thread_content)){
             $this->core->addErrorMessage("One of the fields was empty. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
-            $id = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, 0);
+            $id = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, 0);
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id)));
         }
     }

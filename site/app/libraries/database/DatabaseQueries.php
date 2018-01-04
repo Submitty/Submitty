@@ -120,7 +120,7 @@ class DatabaseQueries {
         return $this->course_db->rows()[0];
     }
 
-    public function createThread($user, $title, $content, $prof_pinned = 0){
+    public function createThread($user, $title, $content, $anon, $prof_pinned = 0){
 
         //insert data
         $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, 0, 0, -1, true));
@@ -131,7 +131,7 @@ class DatabaseQueries {
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
 
-        $this->createPost($user, $content, $id, 0, 0);
+        $this->createPost($user, $content, $id, $anon, 0);
 
         return $id;
     }
