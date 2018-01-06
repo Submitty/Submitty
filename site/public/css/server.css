@@ -712,7 +712,8 @@ table tr.table-header {
     padding:5px;
     overflow-y: auto;
     word-wrap: break-word;
-    max-height: 70px;
+    max-height: 85px;
+    
 }
 
 .create_thread_button {

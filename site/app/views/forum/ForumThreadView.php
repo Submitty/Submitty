@@ -56,13 +56,14 @@ HTML;
 						if(!isset($_REQUEST["thread_id"]) && !$used_active){
 							$class .= " active";
 							$used_active = true;
+							$activeThreadTitle = $thread["title"];
 						} else if(isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) {
 							$class .= " active";
 							$activeThreadTitle = $thread["title"];
 						}
-						$contentDisplay = substr($first_post["content"], 0, 60);
+						$contentDisplay = substr($first_post["content"], 0, 80);
 						$titleDisplay = substr($thread["title"], 0, 30);
-						if(strlen($first_post["content"]) > 60){
+						if(strlen($first_post["content"]) > 80){
 							$contentDisplay .= "...";
 						}
 						if(strlen($thread["title"]) > 30){
@@ -86,7 +87,7 @@ HTML;
 			$return .= <<< HTML
 					</div>
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
-					<h3 style="margin-top:20px;">{$activeThreadTitle}</h3>
+					<h3 style="word-wrap: break-word;margin-top:20px;">{$activeThreadTitle}</h3>
 HTML;
 					foreach($posts as $post){
 						
@@ -181,7 +182,7 @@ HTML;
 			<form style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}">
 
             	<div class="form-group row">
-            		Title: <input type="text" placeholder="Title" name="title" required/>
+            		Title: <input type="text" maxlength="50" size="40" placeholder="Title" name="title" required/>
             	</div>
             	<br/>
             	<div class="form-group row">
