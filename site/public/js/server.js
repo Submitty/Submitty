@@ -815,10 +815,9 @@ function openPopUp(css, title, count, testcase_num, side) {
 }
 
 function deletePost(thread_id, post_id, author, time){
-    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time);
+    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note:  If you are deleting the first post in a thread this will delete the entire thread.");
     if(confirm){
         var url = buildUrl({'component': 'forum', 'page': 'delete_post'});
-        console.log('We in');
         $.ajax({
             url: url,
             type: "POST",
@@ -827,7 +826,6 @@ function deletePost(thread_id, post_id, author, time){
                 thread_id: thread_id
             },
             success: function(data){
-                console.log(data);
                 try {
                     var json = JSON.parse(data);
                 } catch (err){

@@ -144,15 +144,20 @@ class DatabaseQueries {
     public function deletePost($post_id, $thread_id){
         $this->course_db->query("SELECT parent_id from posts where id=?", array($post_id));
 
-        //STILL NEED TO IMPLEMENT cascading parent_id when a post gets deleted.
-        //doesn't need to be implemented until replying to individual posts is implemented.
+        //If you delete the first post in a thread it deletes all posts in thread
 
-        //This means that we must delete thread as you are deleting first post
-        if($this->course_db->rows()[0]["parent_id"] == -1){
+        $parent_id = $this->course_db->rows()[0]["parent_id"];
+
+        if($parent_id == -1){
             $this->course_db->query("UPDATE threads SET deleted = true WHERE id = ?", array($thread_id));
             $this->course_db->query("UPDATE posts SET deleted = true WHERE thread_id = ?", array($thread_id));
             return true;
         } else {
+            $this->course_db->query("SELECT id from posts where parent_id = ?", array($post_id));
+            $row = $this->course_db->rows();
+            if(count($row) > 0){
+                $this->course_db->query("UPDATE posts SET parent_id = ? WHERE id = ?", array($parent_id, $row[0]["id"]));
+            }
             $this->course_db->query("UPDATE posts SET deleted = true WHERE id = ?", array($post_id));
         } return false;
     }
