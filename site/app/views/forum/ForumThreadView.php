@@ -46,7 +46,7 @@ HTML;
 HTML;
 					$used_active = false; //used for the first one if there is not thread_id set
 					$function_date = 'date_format';
-					$function_substr = 'substr';
+					$activeThreadTitle = "";
 					$start = 0;
 					$end = 10;
 					foreach($threads as $thread){
@@ -56,14 +56,24 @@ HTML;
 						if(!isset($_REQUEST["thread_id"]) && !$used_active){
 							$class .= " active";
 							$used_active = true;
-						} else if(isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"])
+						} else if(isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) {
 							$class .= " active";
+							$activeThreadTitle = $thread["title"];
+						}
+						$contentDisplay = substr($first_post["content"], 0, 60);
+						$titleDisplay = substr($thread["title"], 0, 30);
+						if(strlen($first_post["content"]) > 60){
+							$contentDisplay .= "...";
+						}
+						if(strlen($thread["title"]) > 30){
+							$titleDisplay .= "...";
+						}
 						$return .= <<<HTML
 						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
 						<div class="{$class}">
-						<h3>{$thread["title"]}</h3>
-						<h4 style="font-weight: normal;">{$function_substr($first_post["content"], 0, 50)}...</h4>
-						<h7 style="float:right;margin-top:5px">{$function_date($date,"m/d/Y g:i A")}</h7>
+						<h4>{$titleDisplay}</h4>
+						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
+						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"m/d/Y g:i A")}</h5>
 						</div>
 						</a>
 						<hr style="margin-top: 0px;margin-bottom:0px;">
@@ -76,6 +86,7 @@ HTML;
 			$return .= <<< HTML
 					</div>
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
+					<h3 style="margin-top:20px;">{$activeThreadTitle}</h3>
 HTML;
 					foreach($posts as $post){
 						

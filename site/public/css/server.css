@@ -702,6 +702,7 @@ table tr.table-header {
     box-shadow: 0 2px 15px -5px #888888;
     padding:5px;
     margin-top: 20px;
+    word-wrap: break-word;
     border-radius: 3px;
     background-color:white;
     overflow: auto;
@@ -710,6 +711,8 @@ table tr.table-header {
 .thread_box {
     padding:5px;
     overflow-y: auto;
+    word-wrap: break-word;
+    max-height: 70px;
 }
 
 .create_thread_button {
