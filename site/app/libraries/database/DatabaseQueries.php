@@ -1698,7 +1698,7 @@ AND gc_id IN (
       if($thread_id != -1) {
         $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false", array($thread_id));
       } else {
-        $this->course_db->query("SELECT * FROM posts WHERE thread_id= (SELECT MAX(id) from threads) AND deleted = false"); 
+        $this->course_db->query("SELECT * FROM posts WHERE thread_id = (SELECT MAX(id) from threads WHERE deleted = false)"); 
       }
       return $this->course_db->rows();
     }
