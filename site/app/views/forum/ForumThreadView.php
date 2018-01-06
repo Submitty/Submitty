@@ -127,7 +127,7 @@ HTML;
 					}
 			$return .= <<<HTML
 					
-					<form style="margin:10px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}">
+					<form style="margin:20px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}">
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>
 	            	<div class="form-group row">
@@ -136,7 +136,7 @@ HTML;
 
 	            	<br/>
 
-	            	<div style="margin-bottom:10px;float:right;" class="form-group row">
+	            	<div style="margin-bottom:20px;float:right;" class="form-group row">
 	            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
 	            	</div>
 	            	</form>
