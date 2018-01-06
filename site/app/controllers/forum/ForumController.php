@@ -66,9 +66,21 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
-            $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0);
+            $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false);
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
+    }
+
+    public function deletePost(){
+        $thread_id = $_POST["thread_id"];
+        $post_id = $_POST["post_id"];
+        $type = "";
+        if($this->core->getQueries()->deletePost($post_id, $thread_id)){
+            $type = "thread";
+        } else {
+            $type = "post";
+        }
+        $this->core->getOutput()->renderJson(array('type' => $type));
     }
 
     public function showThreads(){

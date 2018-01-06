@@ -107,12 +107,17 @@ class DatabaseQueries {
     }
 
     public function loadThreads(){
-        $this->course_db->query("SELECT * FROM threads ORDER BY id DESC LIMIT 25");
+        $this->course_db->query("SELECT * FROM threads WHERE deleted = false ORDER BY id DESC");
         return $this->course_db->rows();
     }
 
-    public function createPost($user, $content, $thread_id, $anonymous, $type){
-        $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($thread_id, -1, $user, $content, $anonymous, 0, NULL, 0, $type));
+    public function createPost($user, $content, $thread_id, $anonymous, $type, $first){
+        $parent_post = -1;
+        if(!$first){
+            $this->course_db->query("SELECT id FROM posts where timestamp = (SELECT MAX(timestamp) from posts where thread_id = ? and deleted=false)", array($thread_id));
+            $parent_post = $this->course_db->rows()[0]["id"];
+        }
+        $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, 0, $type));
     }
 
     public function getFirstPostForThread($thread_id) {
@@ -131,9 +136,25 @@ class DatabaseQueries {
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
 
-        $this->createPost($user, $content, $id, $anon, 0);
+        $this->createPost($user, $content, $id, $anon, 0, true);
 
         return $id;
+    }
+
+    public function deletePost($post_id, $thread_id){
+        $this->course_db->query("SELECT parent_id from posts where id=?", array($post_id));
+
+        //STILL NEED TO IMPLEMENT cascading parent_id when a post gets deleted.
+        //doesn't need to be implemented until replying to individual posts is implemented.
+
+        //This means that we must delete thread as you are deleting first post
+        if($this->course_db->rows()[0]["parent_id"] == -1){
+            $this->course_db->query("UPDATE threads SET deleted = true WHERE id = ?", array($thread_id));
+            $this->course_db->query("UPDATE posts SET deleted = true WHERE thread_id = ?", array($thread_id));
+            return true;
+        } else {
+            $this->course_db->query("UPDATE posts SET deleted = true WHERE id = ?", array($post_id));
+        } return false;
     }
 
     /**
@@ -1670,9 +1691,9 @@ AND gc_id IN (
     public function getPostsForThread($thread_id){
 
       if($thread_id != -1) {
-        $this->course_db->query("SELECT * FROM posts WHERE thread_id=?", array($thread_id));
+        $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false", array($thread_id));
       } else {
-        $this->course_db->query("SELECT * FROM posts WHERE thread_id= (SELECT MAX(id) from threads)"); 
+        $this->course_db->query("SELECT * FROM posts WHERE thread_id= (SELECT MAX(id) from threads) AND deleted = false"); 
       }
       return $this->course_db->rows();
     }

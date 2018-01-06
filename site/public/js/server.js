@@ -814,6 +814,53 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
+function deletePost(thread_id, post_id, author, time){
+    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time);
+    if(confirm){
+        var url = buildUrl({'component': 'forum', 'page': 'delete_post'});
+        console.log('We in');
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id,
+                thread_id: thread_id
+            },
+            success: function(data){
+                console.log(data);
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var new_url = "";
+                switch(json['type']){
+                    case "thread":
+                    default:
+                        new_url = buildUrl({'component': 'forum', 'page': 'view_thread'});
+                    break;
+
+                    
+                    case "post":
+                        new_url = buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id});
+                    break;
+                }
+                window.location.replace(new_url);
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to delete post. Please try again.");
+            }
+        })
+    } 
+}
+
 function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenseForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});

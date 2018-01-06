@@ -111,6 +111,13 @@ HTML;
 
 
 							<div class="post_box" style="margin-left:0;">
+HTML;
+						if($this->core->getUser()->accessAdmin()){
+							$return .= <<<HTML
+							<a style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )"><i class="fa fa-times" aria-hidden="true"></i></a>
+HTML;
+						}
+						$return .= <<<HTML
 							<p>{$function_content($post["content"])}</p>
 							<h7 style="float:right;"><strong>{$visible_username}</a></strong> {$function_date($date,"m/d/Y g:i A")}</h7>
 							
