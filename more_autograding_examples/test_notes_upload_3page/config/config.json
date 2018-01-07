@@ -1,6 +1,6 @@
 {
-    // 2 mb maximum submission size
-    "max_submission_size" : 2000000,
+    // 3 mb maximum submission size
+    "max_submission_size" : 3000000,
 
     "resource_limits" : {
 	"RLIMIT_FSIZE" : 200000000
@@ -14,7 +14,7 @@
 	    "*test_template.pdf", "*student_file.pdf" ]
     },
 
-    "assignment_message" : "Prepare a 2 page, black & white, 8.5x11”, portrait orientation, max size = 2MB .pdf of notes you would like to have during the test.<br>NOTE:  If you submit a 1 page .pdf, the attachment test below will fail.  Please make a 2 page pdf to ensure the test below will pass.<br>Be sure to inspect the produced sample test pdf to make sure that your notes are legible.",
+    "assignment_message" : "Prepare a 3 page, black & white, 8.5x11”, portrait orientation, max size = 3MB .pdf of notes you would like to have during the test.<br>NOTE:  If you submit a 1 or 2 page .pdf, the attachment test below will fail.  Please make a 3 page pdf to ensure the test below will pass.<br>Be sure to inspect the produced sample test pdf to make sure that your notes are legible.",
 
     "testcases" : [
 	{

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Takes in a submission directory full of textbox answers that should have iClicker IDs for 
-students, and then writes that to an external file such that each row of that file is
-#<iClicker_ID>,<Student_ID>
+Takes in a submission directory full of textbox answers that should
+have left vs right handedness for students, and then writes a file for
+use with Rainbow Grades exam seating.
 """
 
 import argparse
@@ -14,11 +14,11 @@ def parse_args():
     """
     Parse the arguments for this script and return the namespace from argparse.
     """
-    parser = argparse.ArgumentParser(description="Reads in iClicker data from the submission "
+    parser = argparse.ArgumentParser(description="Reads in left right handedness from the submission "
                                                  "directory, and then writes it to the given "
                                                  "remote file.")
     parser.add_argument("submission_directory", type=str, help="Directory of submissions that "
-                        "contain a 'textbox_0.txt' file that references iClicker ID")
+                        "contain a 'textbox_0.txt' file that references left right handedness")
     parser.add_argument("remote_id_file", type=str)
     return parser.parse_args()
 
@@ -51,25 +51,26 @@ def main():
                 if active < 1:
                     continue
 
-                # GRAB THE ICLICKER FROM THE SUBMISSION
-                clickerfile = userdir + '/'+str(active) + '/textbox_0.txt'
-                with open(clickerfile) as f:
-                    iclicker_string = f.read()
+                # GRAB THE FILE FROM THE SUBMISSION
+                myfile = userdir + '/'+str(active) + '/left_right.txt'
+                with open(myfile) as f:
+                    handedness = f.read()
 
-                    iclicker_ids = iclicker_string.split(',')
+                    handedness = handedness.lower()
+                    l = "left" in handedness
+                    r = "right" in handedness
 
-                    if len(iclicker_ids) > 1:
-                        print ("NOTE: user '{0}' has entered '{1}' Remote IDs".format(username,len(iclicker_ids)))
-
-                    for iclicker in iclicker_ids:
-                        if len(iclicker) != 8:
-                            print ("WARNING! iclicker id '{0}' for user '{1}' is not 8 characters".format(iclicker,username))
-
-                        if 'T24' in iclicker or 't24' in iclicker:
-                            print ("WARNING! iclicker id '{0}' for user '{1}' is likely incorrect (model # not id #)".format(iclicker,username))
-
-                        # WRITE TO EXPECTED FORMAT (matches iclicker.com format)
-                        remote_ids.write('#{0},"{1}"\n'.format(iclicker.upper(),username))
+                    if l and not r:
+                        handedness="left"
+                    elif r and not l:
+                        handedness="right"
+                    else:
+                        handedness="unknown"
+                        print ("UNKNOWN",handedness,username)
+                    
+                    # WRITE TO EXPECTED FORMAT
+                    remote_ids.write('{0} {1}\n'.format(username,handedness))
+                    
 
 if __name__ == "__main__":
     main()
