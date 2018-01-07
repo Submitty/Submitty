@@ -127,7 +127,7 @@ public:
   // personal data
   void setUserName(const std::string &s)      { username=s; }
   void setLegalFirstName(const std::string &s)     { legal_first=s; }
-  void setPreferredFirstName(const std::string &s) { preferred_first=s; }
+  void setPreferredFirstName(const std::string &s) { preferred_first=s.substr(0,10);  }
   void setLastName(const std::string &s)      { last=s; }
   void setLefty() { lefty = true; }
   void setLastUpdate(const std::string &s)    { lastUpdate = s; }

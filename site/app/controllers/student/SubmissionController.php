@@ -253,10 +253,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getMaxSize();
-        // FIX ME:
-        // hard coded for now. in the future, should be obtained from the exam
-        // upload max for server seems to be 10mb
-        $max_size = 10000000;
+        if ($max_size < 10000000) {
+          $max_size = 10000000;
+        }
 
         // Error checking of file name
         $file_size = 0;

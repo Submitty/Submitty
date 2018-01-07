@@ -559,7 +559,7 @@ void start_table_output( bool for_instructor,
   student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","USERNAME"));
   int last_name_counter=counter; table.set(0,counter++,TableCell("ffffff","LAST"));
 
-  if (DISPLAY_INSTRUCTOR_NOTES) {
+  if (DISPLAY_INSTRUCTOR_NOTES || DISPLAY_FINAL_GRADE) {
     table.set(0,counter++,TableCell("ffffff","FIRST (LEGAL)"));
   }
   student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","FIRST"));
@@ -582,6 +582,10 @@ void start_table_output( bool for_instructor,
     std::cout << "DISPLAY FINAL GRADE" << std::endl;
     student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","FINAL GRADE"));
     student_data.push_back(counter); table.set(0,counter++,TableCell(grey_divider));
+    if (DISPLAY_MOSS_DETAILS) {
+      table.set(0,counter++,TableCell("ffffff","RAW GRADE"));
+      table.set(0,counter++,TableCell(grey_divider));
+    }
   } 
 
   // ----------------------------
@@ -609,6 +613,7 @@ void start_table_output( bool for_instructor,
         std::string gradeable_name = "";
         if (GRADEABLES[g].hasCorrespondence(gradeable_id)) {
           gradeable_name = GRADEABLES[g].getCorrespondence(gradeable_id).second;
+          //gradeable_name = spacify(gradeable_name);
         }
         table.set(0,counter++,TableCell("ffffff",gradeable_name));
       }
@@ -693,7 +698,7 @@ void start_table_output( bool for_instructor,
   for (unsigned int stu= 0; stu < students.size(); stu++) {
 
     Student *this_student = students[stu];
-
+    
     std::string default_color="ffffff";
 
     myrow++;
@@ -762,7 +767,7 @@ void start_table_output( bool for_instructor,
     assert (default_color.size()==6);
     table.set(myrow,counter++,TableCell(default_color,this_student->getUserName()));
     table.set(myrow,counter++,TableCell(default_color,this_student->getLastName()));
-    if (DISPLAY_INSTRUCTOR_NOTES) {
+    if (DISPLAY_INSTRUCTOR_NOTES || DISPLAY_FINAL_GRADE) {
       table.set(myrow,counter++,TableCell(default_color,this_student->getFirstName()));
     }
     table.set(myrow,counter++,TableCell(default_color,this_student->getPreferredName()));
@@ -844,11 +849,21 @@ void start_table_output( bool for_instructor,
 
 
     if (DISPLAY_FINAL_GRADE) {
-      std::string g = this_student->grade(false,sd);
+      std::string g = this_student->grade(false,sd);      
       color = GradeColor(g);
+      if (this_student->getMossPenalty() < -0.01) {
+        g += "@";
+      }
       assert (color.size()==6);
       table.set(myrow,counter++,TableCell(color,g,"",0,CELL_CONTENTS_VISIBLE,"center"));
       table.set(myrow,counter++,TableCell(grey_divider));
+
+      if (DISPLAY_MOSS_DETAILS) {
+        std::string g2 = this_student->grade(true,sd);
+        color = GradeColor(g2);
+        table.set(myrow,counter++,TableCell(color,g2,"",0,CELL_CONTENTS_VISIBLE,"center"));
+        table.set(myrow,counter++,TableCell(grey_divider));
+      }
     }
 
     // ----------------------------

@@ -304,6 +304,9 @@ std::string Student::grade(bool flag_b4_moss, Student *lowest_d) const {
       ( failed_testA +
         failed_testB +
         failed_testC ) > 1) {
+    //std::cout << "SHOULD AUTO FAIL";
+
+    //((Student*)this)->other_note += "SHOULD AUTO FAIL";
     return "F";
   }
   

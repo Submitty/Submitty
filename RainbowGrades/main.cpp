@@ -1406,12 +1406,14 @@ void processcustomizationfile(std::vector<Student*> &students) {
     }
   } else if (token == "manual_grade") {
     for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-      std::string username = itr2.key();
-    std::string grade = (itr2.value())["grade"].get<std::string>();
-    std::string note = (itr2.value())["note"].get<std::string>();
-    Student *s = GetStudent(students,username);
-        assert (s != NULL);
-        s->ManualGrade(grade,note);
+
+      std::string username = (itr2.value())["user"].get<std::string>();
+      std::string grade = (itr2.value())["grade"].get<std::string>();
+      std::string note = (itr2.value())["note"].get<std::string>();
+
+      Student *s = GetStudent(students,username);
+      assert (s != NULL);
+      s->ManualGrade(grade,note);
     }
   } else if (token == "plagiarism") {
     for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
@@ -1709,7 +1711,11 @@ void load_student_grades(std::vector<Student*> &students) {
         nlohmann::json values = notes[x]["text"];
         for (int y = 0; y < values.size(); y++) {
           if (values[y].find(recommendation_text) != values[y].end()) {
-            recommendation = values[y][recommendation_text].get<std::string>();
+            if (values[y][recommendation_text].is_string()) {
+              recommendation = values[y][recommendation_text].get<std::string>();
+            } else {
+              std::cout << "error in recommendation text type for " << s->getUserName() << std::endl;
+            }
           }
         }
       }
