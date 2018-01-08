@@ -121,9 +121,15 @@ class DiffViewer {
         if ($this->built) {
             return;
         }
+
+        //TODO: Implement a better way to deal with large files
+        //.25MB (TEMP VALUE)
+        $size_limit = 262144;
+
         $actual_file = $this->actual_file;
         $expected_file = $this->expected_file;
         $diff_file = $this->diff_file;
+        $can_diff = true;
         $image_difference = $this->image_difference;
         if (!file_exists($actual_file) && $actual_file != "") {
             throw new \Exception("'{$actual_file}' could not be found.");
@@ -134,11 +140,22 @@ class DiffViewer {
                 $this->actual_file_image = $actual_file;
             }
             else {
-                $this->actual_file_name = $actual_file;
-                $this->actual = file_get_contents($actual_file);
-                $this->has_actual = trim($this->actual) !== "" ? true: false;
-                $this->actual = explode("\n", $this->actual);
-                $this->display_actual = true;
+                if(filesize($actual_file) < $size_limit){
+                    $this->actual_file_name = $actual_file;
+                    $this->actual = file_get_contents($actual_file);
+                    $this->has_actual = trim($this->actual) !== "" ? true: false;
+                    $this->actual = explode("\n", $this->actual);
+                    $this->display_actual = true;
+                }
+                else{
+                    $this->actual_file_name = $actual_file;
+                    $can_diff = false;
+                    //load in the first sizelimit characters of the file (TEMP VALUE)
+                    $this->actual = file_get_contents($actual_file, NULL, NULL, 0, $size_limit);
+                    $this->has_actual = trim($this->actual) !== "" ? true: false;
+                    $this->actual = explode("\n", $this->actual);
+                    $this->display_actual = true;
+                }
 	        }
         }
 
@@ -150,10 +167,20 @@ class DiffViewer {
                 $this->expected_file_image = $expected_file;
             }
             else{
-                $this->expected = file_get_contents($expected_file);
-                $this->has_expected = trim($this->expected) !== "" ? true : false;
-                $this->expected = explode("\n", $this->expected);
-                $this->display_expected = true;
+                 if(filesize($actual_file) < $size_limit){
+                    $this->expected = file_get_contents($expected_file);
+                    $this->has_expected = trim($this->expected) !== "" ? true : false;
+                    $this->expected = explode("\n", $this->expected);
+                    $this->display_expected = true;
+                }
+                else{
+                    $can_diff = false;
+                    //load in the first sizelimit characters of the file (TEMP VALUE)
+                    $this->expected = file_get_contents($expected_file, NULL, NULL, 0, $size_limit);
+                    $this->has_expected = trim($this->expected) !== "" ? true : false;
+                    $this->expected = explode("\n", $this->expected);
+                    $this->display_expected = true;
+                }
             }
         }
 
@@ -176,7 +203,7 @@ class DiffViewer {
         $this->diff = array("expected" => array(), "actual" => array());
         $this->add = array("expected" => array(), "actual" => array());
 
-        if (isset($diff['differences'])) {
+        if (isset($diff['differences']) && $can_diff) {
             $diffs = $diff['differences'];
             /*
              * Types of things we need to worry about:
