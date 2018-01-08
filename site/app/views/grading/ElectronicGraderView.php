@@ -960,17 +960,17 @@ HTML;
 
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
     <span class="grading_label">Submissions and Results Browser</span>
-    <button class="btn btn-default expand-button" data-linked-type="Submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
+    <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 HTML;
 
     if(count($gradeable->getVcsFiles()) != 0) { //check if there are vcs files, if yes display the toggle button, else don't display it
         $return .= <<<HTML
-        <button class="btn btn-default expand-button" data-linked-type="Checkouts" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkouts</button>
+        <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
 HTML;
     }
 
 $return .= <<<HTML
-    <button class="btn btn-default expand-button" data-linked-type="Results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button> 
+    <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
     <script type="text/javascript">
         $(document).ready(function(){
             //note the commented out code here along with the code where files are displayed that is commented out
@@ -1065,30 +1065,30 @@ HTML;
         // if you change here, then change there as well
         // order of these statements matter I believe
 
-        add_files($submissions, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'Submissions');
+        add_files($submissions, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'submissions');
 
         $vcsFiles = $gradeable->getVcsFiles();
         if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
-            add_files($checkout,  $vcsFiles, 'Checkouts');
+            add_files($checkout,  $vcsFiles, 'checkout');
         }
 
-        add_files($results, $gradeable->getResultsFiles(), 'Results');
+        add_files($results, $gradeable->getResultsFiles(), 'results');
 
         $count = 1; 
-        display_files($submissions,$count,1,$return, "Submissions"); //modifies the count var here within display_files
+        display_files($submissions,$count,1,$return, "submissions"); //modifies the count var here within display_files
 
         if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
-            display_files($checkout,$count,1,$return, "Checkouts");
+            display_files($checkout,$count,1,$return, "checkout");
         }
 
-        display_files($results,$count,1,$return, "Results"); //uses the modified count variable b/c old code did this not sure if needed
+        display_files($results,$count,1,$return, "results"); //uses the modified count variable b/c old code did this not sure if needed
         $files = array_merge($submissions, $checkout, $results );
 
         $return .= <<<HTML
         <script type="text/javascript">
             // $(document).ready(function(){
             //     $(".openAllDiv").on('click', function(){
-            //         if($(this).attr('id') == 'Results' || $(this).attr('id') == 'Submissions' || $(this).attr('id') =='Checkouts'){
+            //         if($(this).attr('id') == 'results' || $(this).attr('id') == 'submissions' || $(this).attr('id') =='checkout'){
             //             var elem = $('[data-linked-type="' + $(this).attr('id') + '"]');
             //             if(elem.data('clicked-state') == "wasntClicked"){
             //                 updateValue(elem, "Open", "Close");
