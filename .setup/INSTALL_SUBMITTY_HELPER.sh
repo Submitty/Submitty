@@ -500,7 +500,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 for b in count plagiarism diagnostics;
-    do wget "https://github.com/Submitty/AnalysisTools/releases/download/v0.3.2/$b"
+    do wget "https://github.com/Submitty/AnalysisTools/releases/download/v0.3.3/$b"
 done
 popd
 
