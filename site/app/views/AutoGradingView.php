@@ -210,12 +210,14 @@ HTML;
                     $return .= <<<HTML
             <div class='diff-element'>
 HTML;
+                    $display_actual = "";
                     if ($diff_viewer->hasDisplayExpected() || $diff_viewer->getActualImageFilename() != "") {
                         $title = "Student ";
                     }
                     if ($diff_viewer->hasDisplayActual()) {
+                        $display_actual = $diff_viewer->getDisplayActual();
                         $visible = "visible";
-                        $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayActual())), "\xC2\xA0\t")); 
+                        $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($display_actual)), "\xC2\xA0\t"));
                         $less_than_30 = true;
                         $arr_count = count($tmp_array_string);
                         for ($x = 0; $x < $arr_count; $x++) {
@@ -224,7 +226,7 @@ HTML;
                                 $x = $arr_count;
                             }
                         }
-                        if (substr_count($diff_viewer->getDisplayActual(), 'line_number') < 10 && $less_than_30) {
+                        if (substr_count($display_actual, 'line_number') < 10 && $less_than_30) {
                             $visible = "hidden";
                         }
                     } else {
@@ -261,7 +263,7 @@ HTML;
                     }
                     else if ($diff_viewer->hasDisplayActual()) {
                         $return .= <<<HTML
-                    {$diff_viewer->getDisplayActual()}
+                    $display_actual
 HTML;
                     }
                     $return .= <<<HTML
