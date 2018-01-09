@@ -40,6 +40,10 @@ class ElectronicGraderController extends AbstractController {
                 break;
             case 'add_one_new_mark':
                 $this->addOneMark();
+                break;
+             case 'load_student_file':
+                $this->ajaxGetStudentOutput();
+                break;
             default:
                 $this->showStatus();
                 break;
@@ -831,6 +835,33 @@ class ElectronicGraderController extends AbstractController {
         return $response;
     }
 
+    
+
+    public function ajaxGetStudentOutput() {
+        var_dump("MADE IT TO AJAX!");
+        $file_name = $_REQUEST['file_name'];
+        var_dump($file_name);
+        //TODO: Implement a better way to deal with large files
+        //.25MB (TEMP VALUE)
+        $size_limit = 262144;
+
+        $text = "";
+        var_dump(filesize($file_name));
+
+        if(filesize($file_name) < $size_limit){
+            var_dump("inside");
+            $text = file_get_contents($actual_file);
+        }
+        else{
+            var_dump("else");
+            $text = file_get_contents($actual_file, NULL, NULL, 0, $size_limit);
+        }
+        var_dump($text);
+        $this->core->getOutput()->renderJson(array(
+            'text' => $text
+        ));
+    }
+
     public function addOneMark() {
 
         $gradeable_id = $_POST['gradeable_id'];
@@ -1021,3 +1052,6 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 }
+
+
+

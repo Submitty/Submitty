@@ -26,6 +26,35 @@ function buildUrl(parts) {
     return url + constructed;
 }
 
+function secondFunction(filename, div_name, gradeable_id, who_id){
+    console.log(filename);
+    console.log(div_name);
+
+    var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file', 'gradeable_id': gradeable_id, 'file_name' : filename, 'who_id' : who_id});
+    console.log(url);
+    $.ajax({
+        url: url,
+        success: function(data) {
+            alert(data);
+            var json = JSON.parse(data);
+            $(div_name).empty();
+            $(div_name).append($("<p>").text(json["text"]));
+        },
+        error: function() {
+            alert("Could not load user data, please refresh the page and try again.");
+        }
+    })
+}
+
+/**
+ * Takes in a file to load and the div to put it in.
+ */
+function loadStudentFile(filename, div_name) {
+    
+}
+
+
+
 /**
  *
  */
@@ -806,7 +835,7 @@ function setupNumericTextCells() {
 
 function openPopUp(css, title, count, testcase_num, side) {
     var element_id = "container_" + count + "_" + testcase_num + "_" + side;
-    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
+    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />";
     elem_html += title + document.getElementById(element_id).innerHTML;
     my_window = window.open("", "_blank", "status=1,width=750,height=500");
     my_window.document.write(elem_html);
