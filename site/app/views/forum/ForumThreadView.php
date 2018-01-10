@@ -72,6 +72,14 @@ HTML;
 						$return .= <<<HTML
 						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
 						<div class="{$class}">
+HTML;
+						if($thread["pinned"] == true){
+							$return .= <<<HTML
+							<i class="fa fa-star" style="position:relative; float:right; display:inline-block; color:yellow; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+						}
+						$return .= <<<HTML
 						<h4>{$titleDisplay}</h4>
 						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
 						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"m/d/Y g:i A")}</h5>
@@ -192,7 +200,20 @@ HTML;
             	<br/>
 
             	<div style="margin-bottom:10px;float:right;" class="form-group row">
-            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
+HTML;
+
+				if($this->core->getUser()->getGroup() >= 3){
+					$return .= <<<HTML
+					<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
+HTML;
+
+				} else {
+						$return .= <<<HTML
+						<label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" /><input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
+HTML;
+
+				}
+				$return .= <<<HTML
             	</div>
 
             	<br/>

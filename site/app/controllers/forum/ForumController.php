@@ -49,6 +49,8 @@ class ForumController extends AbstractController {
         $title = htmlentities($_POST["title"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $thread_content = htmlentities($_POST["thread_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
+        $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+        echo(var_dump($announcment));
         if(empty($title) || empty($thread_content)){
             $this->core->addErrorMessage("One of the fields was empty. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
@@ -56,7 +58,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("Title must be under 50 characters. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
-            $id = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, 0);
+            $id = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment);
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id)));
         }
     }
@@ -88,7 +90,16 @@ class ForumController extends AbstractController {
 
     public function showThreads(){
         $user = $this->core->getUser()->getId();
-        $threads = $this->core->getQueries()->loadThreads();
+
+
+        //NOTE: This section of code is neccesary until I find a better query 
+        //To link the two sets together as the query function doesn't
+        //support parenthesis starting a query 
+        $announce_threads = $this->core->getQueries()->loadThreads(1);
+        $reg_threads = $this->core->getQueries()->loadThreads(0);
+        $threads = array_merge($announce_threads, $reg_threads);
+        //END
+
         $posts = null;
         if(isset($_REQUEST["thread_id"])){
             $posts = $this->core->getQueries()->getPostsForThread($_REQUEST["thread_id"]);

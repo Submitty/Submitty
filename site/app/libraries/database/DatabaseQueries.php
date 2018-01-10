@@ -106,8 +106,8 @@ class DatabaseQueries {
         throw new NotImplementedException();
     }
 
-    public function loadThreads(){
-        $this->course_db->query("SELECT * FROM threads WHERE deleted = false ORDER BY id DESC");
+    public function loadThreads($announcements){
+        $this->course_db->query("SELECT * FROM threads WHERE deleted = false and pinned = ? ORDER BY id DESC", array($announcements));
         return $this->course_db->rows();
     }
 
@@ -125,10 +125,10 @@ class DatabaseQueries {
         return $this->course_db->rows()[0];
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned = 0){
+    public function createThread($user, $title, $content, $anon, $prof_pinned){
 
         //insert data
-        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, 0, 0, -1, true));
+        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, true));
 
         //retrieve generated thread_id
         $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
