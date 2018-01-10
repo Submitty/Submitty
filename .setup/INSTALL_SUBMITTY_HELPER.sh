@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ########################################################################################################################
 ########################################################################################################################
@@ -466,6 +466,20 @@ fi
 
 ################################################################################################################
 ################################################################################################################
+# COPY THE DB Migrations
+
+echo -e 'Copy the DB migrations'
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin
+chmod 755 ${SUBMITTY_INSTALL_DIR}/migrations
+
+rsync -rtz  ${SUBMITTY_REPOSITORY}/migrations   ${SUBMITTY_INSTALL_DIR}
+find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 550 {} \;
+
+
+################################################################################################################
+################################################################################################################
 # GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
 #
 
@@ -641,7 +655,7 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
     # pass any additional command line arguments to the run test suite
     rainbow_total=$((rainbow_total+1))
     ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
-    
+
     if [[ $? -ne 0 ]]; then
         echo -e "\n[ FAILED ] sample test\n"
     else
