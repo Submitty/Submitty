@@ -13,7 +13,7 @@ class ConfigurationView extends AbstractView {
         $vcs_type_git = ($fields['vcs_type'] === 'git') ? 'checked' : '';
         $vcs_type_svn = ($fields['vcs_type'] === 'svn') ? 'checked' : '';
         $vcs_type_mer = ($fields['vcs_type'] === 'mer') ? 'checked' : '';
-
+        $forum_enabled = ($fields['forum_enabled'] === true) ? 'checked': '';
 
         return <<<HTML
 <div class="content">
@@ -130,6 +130,14 @@ class ConfigurationView extends AbstractView {
             <div class="option-desc">
                 <div class="option-title">Version Control System (VCS) Type</div>
                 <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
+            </div>
+        </div>
+
+        <div class="option">
+            <div class="option-input"><input type="checkbox" name="forum_enabled" value="true" {$forum_enabled} /></div>
+            <div class="option-desc">
+                <div class="option-title">Forum</div>
+                <div class="option-alt">Choose whether to enable a forum for this course.</div>
             </div>
         </div>
 

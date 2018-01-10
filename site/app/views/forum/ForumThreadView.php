@@ -9,12 +9,21 @@ use app\models\Course;
 
 class ForumThreadView extends AbstractView {
 
+
+	public function forumAccess(){
+        return $this->core->getConfig()->isForumEnabled();
+    }
 	
 	/** Shows Forums thread splash page, including all posts
 		for a specific thread, in addition to all of the threads
 		that have been created to be displayed in the left panel.
 	*/
 	public function showForumThreads($user, $posts, $threads) {
+		if(!$this->forumAccess()){
+			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+			return;
+		}
+
 		$this->core->getOutput()->addBreadcrumb("Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		
 		//Body Style is necessary to make sure that the forum is still readable...
@@ -30,7 +39,6 @@ class ForumThreadView extends AbstractView {
 
 HTML;
 		if(count($threads) == 0){
-			//throw new Exception("dfks");
 		$return .= <<<HTML
 					<div style="margin-left:20px;margin-top:10px;margin-right:20px;padding:25px; text-align:center;" class="content">
 						<h4>A thread hasn't been created yet. Be the first to do so!</h4>
@@ -172,6 +180,12 @@ HTML;
 	}
 
 	public function createThread() {
+
+		if(!$this->forumAccess()){
+			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+			return;
+		}
+
 		$this->core->getOutput()->addBreadcrumb("Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
