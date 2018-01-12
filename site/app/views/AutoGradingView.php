@@ -16,6 +16,7 @@ class AutogradingView extends AbstractView {
      * @throws \Exception
      */
     public function showResults(Gradeable $gradeable, $show_hidden=false) {
+        var_dump($show_hidden);
         $return = "";
         $current_version = $gradeable->getCurrentVersion();
         $has_badges = false;
@@ -100,12 +101,14 @@ HTML;
                 $background = "style=\"background-color:#D3D3D3;\"";
                 $hidden_title = "HIDDEN: ";
             }
-            $div_click = "";
-            if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
+            // $div_click = "";
+            // if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
                 $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
-            }
+            // }
+            $div_to_populate = "testcase_".$count;
+
             $return .= <<<HTML
-<div class="box" {$background}>
+<div class="box" {$background} onclick="loadTestcaseOutput('$div_to_populate', '$gradeable_name', '$who_id', '$count')";>
     <div class="box-title" {$div_click}>
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
@@ -185,16 +188,18 @@ HTML;
 HTML;
             }
             $return .= <<<HTML
-            <h4>{$hidden_title}{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}&nbsp;&nbsp;{$testcase_message}</h4>
+            <h4>
+            {$hidden_title}{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}&nbsp;&nbsp;{$testcase_message}</h4>
     </div>
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
+                //This is the div which will house the test output (filled by script above.)
                $return .= <<<HTML
     <div id="testcase_{$count}" style="display: {$display_box};">
 HTML;
-                $return .= $this->loadAutoChecks($testcase, $show_hidden);
                 $return .= <<<HTML
     </div>
+
 HTML;
             }
             $return .= <<<HTML
@@ -207,14 +212,13 @@ HTML;
 
 
 
-
-
-public function loadAutoChecks(GradeableTestcase $testcase, $count, $show_hidden=false) {
+public static function loadAutoChecks(Gradeable $gradeable, $count, $who_id, $show_hidden=false) {
+    $gradeable->loadResultDetails();
+    $testcase = $gradeable->getTestcases()[$count];
     $autocheck_cnt = 0;
     $autocheck_len = count($testcase->getAutochecks());
-    $popup_css_file = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
+   // $popup_css_file = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
     $return = "";
-
     foreach ($testcase->getAutochecks() as $autocheck) {
         $description = $autocheck->getDescription();
         $diff_viewer = $autocheck->getDiffViewer();
@@ -258,9 +262,9 @@ HTML;
                 $visible = "hidden";
             }
             $title .= $description;
-            $div_to_populate = "div_" . $count . "_" .$autocheck_cnt;
             $return .= <<<HTML
-            <h4>{$title} <span onclick="alert('HEY');  openPopUp('{$popup_css_file}', '{$title}', {$count}, {$autocheck_cnt}, 0); secondFunction('$actual_name', '$div_to_populate', 'gradeable_name', '$who_id');" style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
+             <h4>{$title} <span onclick="openPopUp('{$popup_css_file}', '{$title}', {$count}, {$autocheck_cnt}, 0);" 
+             style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
 
                         
 
@@ -293,7 +297,7 @@ HTML;
             else if ($diff_viewer->hasDisplayActual()) {
                 $return .= <<<HTML
             <div id=div_{$count}_{$autocheck_cnt}>
-                $display_actual
+            $display_actual
             </div>
 HTML;
             }

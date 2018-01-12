@@ -10,8 +10,11 @@ use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
 use app\libraries\FileUtils;
+use app\views\AutoGradingView;
+use app\controllers\GradingController;
 
-class ElectronicGraderController extends AbstractController {
+
+class ElectronicGraderController extends GradingController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'details':
@@ -647,7 +650,8 @@ class ElectronicGraderController extends AbstractController {
         }       
 
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual, $not_in_my_section);
+        $canViewWholeGradeable = canIViewThis($gradeable, true);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual, $not_in_my_section, $canViewWholeGradeable);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
     }
 
@@ -838,28 +842,29 @@ class ElectronicGraderController extends AbstractController {
     
 
     public function ajaxGetStudentOutput() {
-        var_dump("MADE IT TO AJAX!");
-        $file_name = $_REQUEST['file_name'];
-        var_dump($file_name);
-        //TODO: Implement a better way to deal with large files
-        //.25MB (TEMP VALUE)
-        $size_limit = 262144;
 
-        $text = "";
-        var_dump(filesize($file_name));
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $who_id = $_REQUEST['who_id'];
+        $count = $_REQUEST['count'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
+        
 
-        if(filesize($file_name) < $size_limit){
-            var_dump("inside");
-            $text = file_get_contents($actual_file);
+        //Turns off the header and footer so that it isn't displayed in the testcase output
+        //Don't re-enable. 
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        $return = "";
+
+        //display hidden testcases only if the user can view the entirety of this gradeable.
+        if($this->canIViewThis($gradeable, true)){
+            $return = asdf; //AutogradingView::loadAutoChecks($gradeable, $count, $who_id, true);
         }
         else{
-            var_dump("else");
-            $text = file_get_contents($actual_file, NULL, NULL, 0, $size_limit);
+            $return = AutogradingView::loadAutoChecks($gradeable, $count, $who_id, false);
         }
-        var_dump($text);
-        $this->core->getOutput()->renderJson(array(
-            'text' => $text
-        ));
+      
+        echo($return);
     }
 
     public function addOneMark() {

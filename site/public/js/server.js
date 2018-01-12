@@ -26,19 +26,22 @@ function buildUrl(parts) {
     return url + constructed;
 }
 
-function secondFunction(filename, div_name, gradeable_id, who_id){
-    console.log(filename);
-    console.log(div_name);
+function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
 
-    var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file', 'gradeable_id': gradeable_id, 'file_name' : filename, 'who_id' : who_id});
+
+    div_name = "#" + div_name;
+
+
+
+    console.log("count " + count);
+    var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file', 'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count});
     console.log(url);
     $.ajax({
         url: url,
         success: function(data) {
-            alert(data);
-            var json = JSON.parse(data);
+            // var json = JSON.parse(data);
             $(div_name).empty();
-            $(div_name).append($("<p>").text(json["text"]));
+            $(div_name).html(data);
         },
         error: function() {
             alert("Could not load user data, please refresh the page and try again.");
@@ -46,12 +49,6 @@ function secondFunction(filename, div_name, gradeable_id, who_id){
     })
 }
 
-/**
- * Takes in a file to load and the div to put it in.
- */
-function loadStudentFile(filename, div_name) {
-    
-}
 
 
 

@@ -167,7 +167,7 @@ class DiffViewer {
                 $this->expected_file_image = $expected_file;
             }
             else{
-                 if(filesize($actual_file) < $size_limit){
+                 if(filesize($expected_file) < $size_limit){
                     $this->expected = file_get_contents($expected_file);
                     $this->has_expected = trim($this->expected) !== "" ? true : false;
                     $this->expected = explode("\n", $this->expected);

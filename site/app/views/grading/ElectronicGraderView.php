@@ -874,8 +874,8 @@ HTML;
     }
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
-    //assigned section.
-    public function hwGradingPage($gradeable, $progress, $prev_id, $next_id, $individual, $studentNotInSection=false) {
+    //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
+    public function hwGradingPage($gradeable, $progress, $prev_id, $next_id, $individual, $studentNotInSection=false, $canViewWholeGradeable=false) {
         $peer = false;
         if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
             $peer = true;
@@ -952,7 +952,7 @@ HTML;
 HTML;
         }
         else{
-            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, true);
+            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, $canViewWholeGradeable);
         }
         $return .= <<<HTML
     </div>
