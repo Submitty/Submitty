@@ -139,13 +139,18 @@ class DatabaseQueries {
         }
     }
 
-    /*  Gets the group that the user is in for a given class (used on homepage)
-     *  as the user isn't within a class yet.
-     *  @param $user_id - user id to be searched for
-     *  @return group of user in the given class
-    */
-    public function getGroupForUserInClass($course_name, $user_id){
-        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ? AND course = ?", array($user_id, $course_name));
+    /**
+     * Gets the group that the user is in for a given class (used on homepage)
+     *
+     * Classes are distinct for each semester *and* course
+     *
+     * @param string $semester - class's working semester
+     * @param string $course_name - class's course name
+     * @param string $user_id - user id to be searched for
+     * @return integer - group number of user in the given class
+     */
+    public function getGroupForUserInClass($semester, $course_name, $user_id) {
+        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ? AND course = ? AND semester = ?", array($user_id, $course_name, $semester));
         return intval($this->submitty_db->row()['user_group']);
     }
 
@@ -1520,7 +1525,7 @@ ORDER BY gt.{$section_key}", $params);
     }
 
 	/**
-	 * Retrieves all courses and their relevant details accessible by $user_id
+	 * Retrieves all courses (and details) that are accessible by $user_id
 	 *
 	 * (u.user_id=? AND u.user_group=1) checks if $user_id is an instructor
 	 * Instructors may access all of their courses
@@ -1530,7 +1535,7 @@ ORDER BY gt.{$section_key}", $params);
 	 *
 	 * @param string $user_id
 	 * @param string $submitty_path
-	 * @return array courses (and details) accessible by $user_id
+	 * @return array - courses (and their details) accessible by $user_id
 	 */
     public function getStudentCoursesById($user_id, $submitty_path) {
         $this->submitty_db->query("
