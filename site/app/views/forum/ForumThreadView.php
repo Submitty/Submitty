@@ -55,6 +55,7 @@ HTML;
 					$used_active = false; //used for the first one if there is not thread_id set
 					$function_date = 'date_format';
 					$activeThreadTitle = "";
+					$current_user = $this->core->getUser()->getId();
 					$start = 0;
 					$end = 10;
 					foreach($threads as $thread){
@@ -68,6 +69,9 @@ HTML;
 						} else if(isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) {
 							$class .= " active";
 							$activeThreadTitle = $thread["title"];
+						}
+						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
+							$class .= " viewed";
 						}
 						$contentDisplay = substr($first_post["content"], 0, 80);
 						$titleDisplay = substr($thread["title"], 0, 30);

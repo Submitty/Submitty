@@ -574,6 +574,10 @@ table tr.table-header {
     background-color: #21C2F6;
 }
 
+.viewed {
+    color: #888888;
+}
+
 .box-title > h4 {
     margin-left: 20px;
 }

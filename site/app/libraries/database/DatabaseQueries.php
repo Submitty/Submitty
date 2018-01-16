@@ -1693,13 +1693,30 @@ AND gc_id IN (
         return $return;
     }
 
-    public function getPostsForThread($thread_id){
+    public function existsAnnouncements(){
+        $this->course_db->query("SELECT MAX(id) as id FROM threads where deleted = false AND pinned = true");
+        $result = $this->course_db->rows();
+        return count($result) > 0 ? $result[0]["id"] : -1;
+    }
 
-      if($thread_id != -1) {
-        $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false", array($thread_id));
-      } else {
-        $this->course_db->query("SELECT * FROM posts WHERE thread_id = (SELECT MAX(id) from threads WHERE deleted = false)"); 
+    public function viewedThread($user, $thread_id){
+      $this->course_db->query("SELECT * from viewed_responses where thread_id = ? and user_id = ?", array($thread_id, $user));
+      return count($this->course_db->rows()) > 0;
+    }
+
+    public function getPostsForThread($current_user, $thread_id){
+
+      if($thread_id == -1) {
+        $announcement_id = $this->existsAnnouncements();
+        if($announcement_id == -1){
+          $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and pinned = false"); 
+          $thread_id = $this->course_db->rows()[0]["max"];
+        } else {
+          $thread_id = $announcement_id;
+        }
       }
+      $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM viewed_responses WHERE thread_id=? AND user_id=?)", array($thread_id, $current_user, $thread_id, $current_user));
+      $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false", array($thread_id));
       return $this->course_db->rows();
     }
 

@@ -100,13 +100,15 @@ class ForumController extends AbstractController {
         $threads = array_merge($announce_threads, $reg_threads);
         //END
 
+        $current_user = $this->core->getUser()->getId();
+
         $posts = null;
         if(isset($_REQUEST["thread_id"])){
-            $posts = $this->core->getQueries()->getPostsForThread($_REQUEST["thread_id"]);
+            $posts = $this->core->getQueries()->getPostsForThread($current_user, $_REQUEST["thread_id"]);
         } else {
             //We are at the "Home page"
             //Show the first post
-            $posts = $this->core->getQueries()->getPostsForThread(-1);
+            $posts = $this->core->getQueries()->getPostsForThread($current_user, -1);
             
         }
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads);
