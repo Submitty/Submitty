@@ -184,7 +184,7 @@ HTML;
 					}
 
 			$return .= <<<HTML
-					<form style="margin:20px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}">
+					<form style="margin:20px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>
 	            	<div class="form-group row">
@@ -192,6 +192,14 @@ HTML;
 	            	</div>
 
 	            	<br/>
+
+	           		<span style="float:left;display:inline-block;">
+            			<label class="btn btn-primary" for="file_input">
+    					<input id="file_input" name="file_input" accept="image/*" type="file" style="display:none" onchange="$('#file_name').html(this.files[0].name)">
+    					Upload Attachment
+						</label>
+						<span class='label label-info' id="file_name"></span>
+					</span>
 
 	            	<div style="margin-bottom:20px;float:right;" class="form-group row">
 	            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
@@ -246,8 +254,7 @@ HTML;
 
             	<span style="float:left;display:inline-block;">
             	<label class="btn btn-primary" for="file_input">
-    				<input id="file_input" name="file_input" accept="image/*" type="file" style="display:none" 
-    				onchange="$('#file_name').html(this.files[0].name)">
+    				<input id="file_input" name="file_input" accept="image/*" type="file" style="display:none" onchange="$('#file_name').html(this.files[0].name)">
     				Upload Attachment
 				</label>
 				<span class='label label-info' id="file_name"></span>
