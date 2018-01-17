@@ -112,13 +112,13 @@ class DatabaseQueries {
         return $this->course_db->rows();
     }
 
-    public function createPost($user, $content, $thread_id, $anonymous, $type, $first){
+    public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment){
         $parent_post = -1;
         if(!$first){
             $this->course_db->query("SELECT id FROM posts where timestamp = (SELECT MAX(timestamp) from posts where thread_id = ? and deleted=false)", array($thread_id));
             $parent_post = $this->course_db->rows()[0]["id"];
         }
-        $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, 0, $type));
+        $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, 0, $type, $hasAttachment));
 
         //retrieve generated thread_id
         $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
@@ -131,9 +131,7 @@ class DatabaseQueries {
         return $this->course_db->rows()[0];
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned){
-
-        
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment){
 
         //insert data
         $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, true));
@@ -144,7 +142,7 @@ class DatabaseQueries {
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
 
-        $post_id = $this->createPost($user, $content, $id, $anon, 0, true);
+        $post_id = $this->createPost($user, $content, $id, $anon, 0, true, $hasAttachment);
 
         return array("thread_id" => $id, "post_id" => $post_id);
     }

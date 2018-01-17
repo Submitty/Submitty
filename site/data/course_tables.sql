@@ -470,6 +470,7 @@ CREATE TABLE "posts" (
 	"endorsed_by" varchar,
 	"resolved" BOOLEAN NOT NULL,
 	"type" int NOT NULL,
+    "has_attachment" BOOLEAN NOT NULL,
 	CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
@@ -506,12 +507,6 @@ CREATE TABLE "viewed_responses" (
 	"thread_id" int NOT NULL,
 	"user_id" character varying NOT NULL,
 	"timestamp" timestamp with time zone NOT NULL
-);
-
-CREATE TABLE "attachment" (
-	"attach_id" serial NOT NULL,
-	"post_id" int NOT NULL,
-	CONSTRAINT attachment_pk PRIMARY KEY ("attach_id")
 );
 
 
