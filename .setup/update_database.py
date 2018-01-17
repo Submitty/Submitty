@@ -38,7 +38,7 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         name = course.name
         db = "submitty_" + term.name + "_" + name
         
-        print ("updating course database " + db + "\n")
+        print ("updating course database " + db)
 
         # edits to migrate v.1.0.1 to v.1.0.2
         os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY gradeable_component_mark ADD COLUMN gcm_publish boolean DEFAULT false NOT NULL'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
@@ -72,3 +72,4 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
     
 
+        print ("\n")
