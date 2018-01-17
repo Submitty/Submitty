@@ -27,44 +27,43 @@ def main():
     with open(os.path.join(dir_path, '..', '.setup', 'submitty_conf.json')) as conf:
         config = json.load(conf)
 
-    connection = psycopg2.connect(dbname='submitty', host=config['database_host'], user=config['database_user'],
-                                  password=config['database_password'])
-    migrate_connection(connection, migrations_path, 'core', args.direction)
+    with psycopg2.connect(dbname='submitty', host=config['database_host'], user=config['database_user'],
+                          password=config['database_password']) as connection:
+        migrate_connection(connection, migrations_path, 'core', args.direction)
 
     for semester in os.listdir(os.path.join(config['submitty_data_dir'], 'courses')):
         for course in os.listdir(os.path.join(config['submitty_data_dir'], 'courses', semester)):
-            connection = psycopg2.connect(dbname='submitty_{}_{}'.format(semester, course),
-                                          host=config['database_host'],
-                                          user=config['database_user'], password=config['database_password'])
-            migrate_connection(connection, migrations_path, 'course', args.direction)
+            with psycopg2.connect(dbname='submitty_{}_{}'.format(semester, course), host=config['database_host'],
+                                  user=config['database_user'], password=config['database_password']) as connection:
+                migrate_connection(connection, migrations_path, 'course', args.direction)
 
 
 def migrate_connection(connection, migrations_path, mig_type, direction):
-    cursor = connection.cursor()
-    cursor.execute("SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND "
-                   "table_name='database_migrations')")
-    exists = cursor.fetchone()[0]
-    cursor.close()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND "
+                       "table_name='database_migrations')")
+        exists = cursor.fetchone()[0]
+
     if not exists:
-        cursor = connection.cursor()
-        cursor.execute("""
-CREATE TABLE database_migrations (
-  id NUMERIC(20) PRIMARY KEY NOT NULL,
-  migration VARCHAR(100) NOT NULL,
-  commit_time TIMESTAMP NOT NULL,
-  status NUMERIC(1) DEFAULT 0 NOT NULL
-);
-""")
-        cursor.close()
-    cursor = connection.cursor()
+        with connection.cursor() as cursor:
+            cursor.execute("""
+    CREATE TABLE database_migrations (
+      id NUMERIC(20) PRIMARY KEY NOT NULL,
+      migration VARCHAR(100) NOT NULL,
+      commit_time TIMESTAMP NOT NULL,
+      status NUMERIC(1) DEFAULT 0 NOT NULL
+    );
+    """)
+        connection.commit()
 
     migrations = load_migrations(migrations_path, mig_type)
 
-    cursor.execute('SELECT id, migration, commit_time, status FROM database_migrations ORDER BY id')
-    for migration in cursor.fetchall():
-        if migration['id'] in migrations:
-            migrations[migration['id']]['commit_time'] = migration['commit_time']
-            migrations[migration['id']]['status'] = migration['status']
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT id, migration, commit_time, status FROM database_migrations ORDER BY id')
+        for migration in cursor.fetchall():
+            if migration['id'] in migrations:
+                migrations[migration['id']]['commit_time'] = migration['commit_time']
+                migrations[migration['id']]['status'] = migration['status']
 
     if direction == 'up':
         up_migrations(connection, migrations)
@@ -80,9 +79,9 @@ def up_migrations(connection, migrations):
     for key in migrations:
         if migrations[key]['status'] == 0:
             getattr(migrations[key]['module'], 'up', noop)(connection)
-            cursor = connection.cursor()
-            cursor.execute('UPDATE database_migrations SET commit_time=CURRENT_TIMESTAMP, status=1 WHERE id=%s', (key,))
-            cursor.close()
+            with connection.cursor() as cursor:
+                cursor.execute('UPDATE database_migrations SET commit_time=CURRENT_TIMESTAMP, status=1 WHERE id=%s', (key,))
+            connection.commit()
 
 
 def down_migrations(connection, migrations):
@@ -90,8 +89,9 @@ def down_migrations(connection, migrations):
         if migrations[key]['status'] == 1:
             getattr(migrations[key]['module'], 'down', noop)(connection)
             cursor = connection.cursor()
-            cursor.execute('UPDATE database_migrations SET commit_time=CURRENT_TIMESTAMP, status=0 WHERE id=%s', (key,))
-            cursor.close()
+            with connection.cursor() as cursor:
+                cursor.execute('UPDATE database_migrations SET commit_time=CURRENT_TIMESTAMP, status=0 WHERE id=%s', (key,))
+            connection.commit()
             break
 
 
