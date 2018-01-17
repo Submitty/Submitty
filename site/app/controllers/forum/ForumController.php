@@ -58,13 +58,13 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("Title must be under 50 characters. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
-            $hasGoodAttachment = Utils::checkUploadedImageFile('file_input');
+            $hasGoodAttachment = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
             $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment);
             $id = $result["thread_id"];
             $post_id = $result["post_id"];
             $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id);
             FileUtils::createDir($thread_dir);
-            if($hasGoodAttachment) {
+            if($hasGoodAttachment == 1) {
                     $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                     FileUtils::createDir($post_dir);
                     $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"]);
@@ -82,7 +82,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
-            $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false);
+            $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, 0);
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
     }
