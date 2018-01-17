@@ -77,4 +77,17 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
     
 
+        # create the forum attachments directory and set the owner, group, and permissions
+        course_dir = os.path.join(settings['submitty_data_dir'],"courses",term.name,course.name)
+        forum_dir = os.path.join(course_dir,"forum_attachments")
+        print (forum_dir)
+        if not os.path.exists(forum_dir):
+            os.makedirs(forum_dir)
+            stat_info = os.stat(course_dir)
+            uid = stat_info.st_uid
+            gid = stat_info.st_gid
+            os.chown(forum_dir,uid,gid)
+            os.chmod(forum_dir,0o770)
+
+            
         print ("\n")
