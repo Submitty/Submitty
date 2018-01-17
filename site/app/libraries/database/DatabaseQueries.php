@@ -4,6 +4,7 @@ namespace app\libraries\database;
 
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\GradeableType;
 use app\models\AdminGradeable;
@@ -126,6 +127,9 @@ class DatabaseQueries {
     }
 
     public function createThread($user, $title, $content, $anon, $prof_pinned){
+
+        
+
         //insert data
         $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, true));
 
@@ -135,6 +139,7 @@ class DatabaseQueries {
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
 
+        FileUtils::createDir(FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id));
         $this->createPost($user, $content, $id, $anon, 0, true);
 
         return $id;
@@ -1693,9 +1698,9 @@ AND gc_id IN (
     }
 
     public function existsAnnouncements(){
-        $this->course_db->query("SELECT MAX(id) as id FROM threads where deleted = false AND pinned = true");
+        $this->course_db->query("SELECT MAX(id) FROM threads where deleted = false AND pinned = true");
         $result = $this->course_db->rows();
-        return count($result) > 0 ? $result[0]["id"] : -1;
+        return empty($result[0]["max"]) ? -1 : $result[0]["max"];
     }
 
     public function viewedThread($user, $thread_id){
