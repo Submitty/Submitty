@@ -126,7 +126,6 @@ class DatabaseQueries {
     }
 
     public function createThread($user, $title, $content, $anon, $prof_pinned){
-
         //insert data
         $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, true));
 
@@ -1715,9 +1714,13 @@ AND gc_id IN (
           $thread_id = $announcement_id;
         }
       }
-      $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM viewed_responses WHERE thread_id=? AND user_id=?)", array($thread_id, $current_user, $thread_id, $current_user));
+
       $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false", array($thread_id));
-      return $this->course_db->rows();
+      $result_rows = $this->course_db->rows();
+      if(count($result_rows) > 0){
+        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM viewed_responses WHERE thread_id=? AND user_id=?)", array($thread_id, $current_user, $thread_id, $current_user));
+      }
+      return $result_rows;
     }
 
     public function getAnonId($user_id) {
