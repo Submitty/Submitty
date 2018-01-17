@@ -52,6 +52,11 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component ALTER COLUMN gc_default SET DATA TYPE numeric'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
         os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component ALTER COLUMN gc_upper_clamp SET DATA TYPE numeric'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
 
+        # edits to make timestamps consistent
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE late_days ALTER COLUMN since_timestamp SET DATA TYPE timestamp(6) with time zone'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE sessions ALTER COLUMN session_expires SET DATA TYPE timestamp(6) with time zone'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE users ALTER COLUMN last_updated SET DATA TYPE timestamp(6) with time zone'".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+
         # edits to migrate forum
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "viewed_responses" ("thread_id" int NOT NULL, "user_id" character varying NOT NULL, "timestamp" timestamp with time zone NOT NULL)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "student_favorites" ("id" serial NOT NULL, "user_id" character varying NOT NULL, "thread_id" int, CONSTRAINT student_favorites_pk PRIMARY KEY ("id"))'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
