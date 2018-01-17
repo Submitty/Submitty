@@ -80,7 +80,6 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         # create the forum attachments directory and set the owner, group, and permissions
         course_dir = os.path.join(settings['submitty_data_dir'],"courses",term.name,course.name)
         forum_dir = os.path.join(course_dir,"forum_attachments")
-        print (forum_dir)
         if not os.path.exists(forum_dir):
             os.makedirs(forum_dir)
             stat_info = os.stat(course_dir)
@@ -88,6 +87,7 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
             gid = stat_info.st_gid
             os.chown(forum_dir,uid,gid)
             os.chmod(forum_dir,0o770)
+            print ("created directory:" + forum_dir)
 
             
         print ("\n")

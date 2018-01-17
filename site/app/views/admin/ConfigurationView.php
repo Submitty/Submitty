@@ -136,7 +136,7 @@ class ConfigurationView extends AbstractView {
         <div class="option">
             <div class="option-input"><input type="checkbox" name="forum_enabled" value="true" {$forum_enabled} /></div>
             <div class="option-desc">
-                <div class="option-title">Forum</div>
+                <div class="option-title">Discussion Forum</div>
                 <div class="option-alt">Choose whether to enable a forum for this course.</div>
             </div>
         </div>
