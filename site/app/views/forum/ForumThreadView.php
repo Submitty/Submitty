@@ -4,7 +4,7 @@ namespace app\views\forum;
 use app\authentication\DatabaseAuthentication;
 use app\views\AbstractView;
 use app\models\Course;
-
+use app\libraries\FileUtils;
 
 
 class ForumThreadView extends AbstractView {
@@ -29,6 +29,12 @@ class ForumThreadView extends AbstractView {
 		//Body Style is necessary to make sure that the forum is still readable...
 		$return = <<<HTML
 		<style>body {min-width: 925px;}</style>
+
+		<script>
+		function openFile(directory, file, path ){
+			window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + file + "&path=" + path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+		}
+		</script>
 
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
@@ -113,6 +119,7 @@ HTML;
 						
 						if($thread_id == -1) {
 							$thread_id = $post["thread_id"];
+							$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 						}
 						$date = date_create($post["timestamp"]);
 
@@ -151,14 +158,30 @@ HTML;
 						}
 						$return .= <<<HTML
 							<p>{$function_content($post["content"])}</p>
-							<h7 style="float:right;"><strong>{$visible_username}</a></strong> {$function_date($date,"m/d/Y g:i A")}</h7>
 							
-							</div>
+							
+							
+HTML;
+
+						if($post["has_attachment"]){
+							$post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
+							$files = FileUtils::getAllFiles($post_dir);
+							foreach($files as $file){
+								$return .= <<<HTML
+							<a href="#" onclick="openFile('forum_attachments', '{$file['name']}', '{$file['path']}')" > View attachment </a>
+HTML;
+
+							}
+							
+						}
+			$return .= <<<HTML
+<h7 style="float:right;"><strong>{$visible_username}</a></strong> {$function_date($date,"m/d/Y g:i A")}</h7>
+</div>
 HTML;
 						
 					}
+
 			$return .= <<<HTML
-					
 					<form style="margin:20px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}">
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>

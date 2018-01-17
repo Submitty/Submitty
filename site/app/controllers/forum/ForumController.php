@@ -58,14 +58,13 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("Title must be under 50 characters. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
-            $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment);
+            $hasGoodAttachment = Utils::checkUploadedImageFile('file_input');
+            $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment);
             $id = $result["thread_id"];
             $post_id = $result["post_id"];
             $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id);
             FileUtils::createDir($thread_dir);
-            if (isset($_FILES['file_input']) && (file_exists($_FILES['file_input']['tmp_name']))) {
-                $mime_type = FileUtils::getMimeType($_FILES["file_input"]["tmp_name"]); 
-                if(getimagesize($_FILES["file_input"]["tmp_name"]) !== false && substr($mime_type, 0, strrpos($mime_type, "/")) === "image") {
+            if($hasGoodAttachment) {
                     $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                     FileUtils::createDir($post_dir);
                     $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"]);
@@ -74,9 +73,8 @@ class ForumController extends AbstractController {
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id)));
         }
-    }
 
-    private function publishPost(){
+    public function publishPost(){
         $post_content = htmlentities($_POST["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
