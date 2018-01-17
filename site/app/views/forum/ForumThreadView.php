@@ -167,8 +167,10 @@ HTML;
 							$post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
 							$files = FileUtils::getAllFiles($post_dir);
 							foreach($files as $file){
+								$path = urlencode(htmlspecialchars($file['path']));
+								$name = urlencode(htmlspecialchars($file['name']));
 								$return .= <<<HTML
-							<a href="#" onclick="openFile('forum_attachments', '{$file['name']}', '{$file['path']}')" > View attachment </a>
+							<a href="#" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > View attachment </a>
 HTML;
 
 							}
