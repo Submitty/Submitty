@@ -119,6 +119,11 @@ class DatabaseQueries {
             $parent_post = $this->course_db->rows()[0]["id"];
         }
         $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, 0, $type));
+
+        //retrieve generated thread_id
+        $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
+
+        return $this->course_db->rows()[0]["max_id"];
     }
 
     public function getFirstPostForThread($thread_id) {
@@ -139,10 +144,9 @@ class DatabaseQueries {
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
 
-        FileUtils::createDir(FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id));
-        $this->createPost($user, $content, $id, $anon, 0, true);
+        $post_id = $this->createPost($user, $content, $id, $anon, 0, true);
 
-        return $id;
+        return array("thread_id" => $id, "post_id" => $post_id);
     }
 
     public function deletePost($post_id, $thread_id){

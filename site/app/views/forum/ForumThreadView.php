@@ -205,7 +205,7 @@ HTML;
 
 		<h3> Create Thread </h3>
 
-			<form style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}">
+			<form style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 
             	<div class="form-group row">
             		Title: <input type="text" maxlength="50" size="40" placeholder="Title" name="title" required/>
@@ -217,21 +217,29 @@ HTML;
 
             	<br/>
 
-            	<div style="margin-bottom:10px;float:right;" class="form-group row">
-HTML;
+            	<div style="margin-bottom:10px;" class="form-group row">
 
-				if($this->core->getUser()->getGroup() >= 3){
-					$return .= <<<HTML
-					<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
-HTML;
+            	<span style="float:left;display:inline-block;">
+            	<label class="btn btn-primary" for="file_input">
+    				<input id="file_input" name="file_input" accept="image/*" type="file" style="display:none" 
+    				onchange="$('#file_name').html(this.files[0].name)">
+    				Upload Attachment
+				</label>
+				<span class='label label-info' id="file_name"></span>
+				</span>
 
-				} else {
+				<span style="display:inline-block;float:right;">
+            	<label for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" />
+HTML;
+				
+				if($this->core->getUser()->getGroup() < 4){
 						$return .= <<<HTML
 						<label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" /><input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
 HTML;
 
 				}
 				$return .= <<<HTML
+				</span>
             	</div>
 
             	<br/>
