@@ -159,3 +159,6 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 apt-get -qqy autoremove
+
+# miscellaneous usability
+apt-get install -qqy emacs

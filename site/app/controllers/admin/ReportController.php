@@ -4,6 +4,7 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\Core;
+use app\libraries\GradeableType;
 use app\libraries\Output;
 use app\models\HWReport;
 use app\models\GradeSummary;
@@ -52,20 +53,39 @@ class ReportController extends AbstractController {
                 $results[$student_id] = array('First'=>$gradeable->getUser()->getDisplayedFirstName(), 'Last' => $gradeable->getUser()->getLastName(), 'reg_section' => $gradeable->getUser()->getRegistrationSection());
             }
             $g_id = $gradeable->getId();
+            $is_electronic_gradeable = ($gradeable->getType() == GradeableType::ELECTRONIC_FILE);
+            $use_ta_grading = !$is_electronic_gradeable || $gradeable->useTAGrading();
+
             if(!isset($results['header_model'][$g_id])) {
-                $results['header_model'][$g_id] = $g_id.": ".($gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints());
+              $max = 0;
+              if ($is_electronic_gradeable) {
+                $max = $max + $gradeable->getTotalAutograderNonExtraCreditPoints();
+              }
+              if ($use_ta_grading) {
+                $max = $max + $gradeable->getTotalTANonExtraCreditPoints();
+              }
+              $results['header_model'][$g_id] = $g_id.": ".$max;
             }
 
-            $autograding_score = $gradeable->getGradedAutograderPoints();
-            $ta_grading_score = $gradeable->getGradedTAPoints();
+            $total_score = 0;
+            if ($is_electronic_gradeable) {
+              $total_score = $total_score + $gradeable->getGradedAutograderPoints();
+            }
+            if ($use_ta_grading) {
+              $total_score = $total_score + $gradeable->getGradedTAPoints();
+            }
             
             $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
-            if(substr($late_days['status'], 0, 3) == 'Bad' || !$gradeable->validateVersions()) {
-                $results[$student_id][$g_id] = 0;
+            // if this assignment exceeds the allowed late day policy or
+            // if the student has switched versions after the ta graded,
+            // then they should receive an automatic zero for this gradeable
+            if( $is_electronic_gradeable &&
+                ( (array_key_exists('status',$late_days) && substr($late_days['status'], 0, 3) == 'Bad') ||
+                  ($use_ta_grading && !$gradeable->validateVersions()))) {
+              $total_score = 0;
             }
-            else{
-                $results[$student_id][$g_id] = $autograding_score + $ta_grading_score;
-            }
+
+            $results[$student_id][$g_id] = $total_score;
         }
         
         $nl = "\n";

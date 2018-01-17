@@ -201,13 +201,18 @@ class DatabaseQueries {
         }
     }
 
-    /*  Gets the group that the user is in for a given class (used on homepage)
-     *  as the user isn't within a class yet.
-     *  @param $user_id - user id to be searched for
-     *  @return group of user in the given class
-    */
-    public function getGroupForUserInClass($course_name, $user_id){
-        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ? AND course = ?", array($user_id, $course_name));
+    /**
+     * Gets the group that the user is in for a given class (used on homepage)
+     *
+     * Classes are distinct for each semester *and* course
+     *
+     * @param string $semester - class's working semester
+     * @param string $course_name - class's course name
+     * @param string $user_id - user id to be searched for
+     * @return integer - group number of user in the given class
+     */
+    public function getGroupForUserInClass($semester, $course_name, $user_id) {
+        $this->submitty_db->query("SELECT user_group FROM courses_users WHERE user_id = ? AND course = ? AND semester = ?", array($user_id, $course_name, $semester));
         return intval($this->submitty_db->row()['user_group']);
     }
 
@@ -417,7 +422,7 @@ ORDER BY {$section_key}", $params);
         }
         return $return;
     }
-    
+
     public function getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key) {
         $return = array();
         $params = array();
@@ -532,13 +537,13 @@ ORDER BY gc_order
         }
         return $return;
     }
-    
+
     public function getAverageAutogradedScores($g_id, $section_key) {
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
    SELECT * FROM (
       SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
-      FROM electronic_gradeable_data AS egv 
+      FROM electronic_gradeable_data AS egv
       INNER JOIN users AS u ON u.user_id = egv.user_id
       WHERE egv.g_id=? AND u.{$section_key} IS NOT NULL
    )g
@@ -975,10 +980,10 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
         $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(),
                         $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $component->getId(), $gd_id);
         $this->course_db->query("
-UPDATE gradeable_component_data 
-SET 
-  gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?, 
-  gcd_grader_id=? 
+UPDATE gradeable_component_data
+SET
+  gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?,
+  gcd_grader_id=?
 WHERE gc_id=? AND gd_id=?", $params);
     }
 
@@ -1562,7 +1567,7 @@ ORDER BY gt.{$section_key}", $params);
             VALUES(?,?,?)", array($user_id, $g_id, $days));
         }
     }
-    
+
     /**
      * Removes peer grading assignment if instructor decides to change the number of people each person grades for assignment
      * @param string $gradeable_id
@@ -1570,27 +1575,42 @@ ORDER BY gt.{$section_key}", $params);
     public function clearPeerGradingAssignments($gradeable_id) {
         $this->course_db->query("DELETE FROM peer_assign WHERE g_id=?", array($gradeable_id));
     }
-    
+
     /**
      * Adds an assignment for someone to grade another person for peer grading
      * @param string $student
      * @param string $grader
      * @param string $gradeable_id
-    */
+     */
     public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
     }
 
+	/**
+	 * Retrieves all courses (and details) that are accessible by $user_id
+	 *
+	 * (u.user_id=? AND u.user_group=1) checks if $user_id is an instructor
+	 * Instructors may access all of their courses
+	 * (u.user_id=? AND c.status=1) checks if a course is active
+	 * An active course may be accessed by all users
+	 * Inactive courses may only be accessed by the instructor
+	 *
+	 * @param string $user_id
+	 * @param string $submitty_path
+	 * @return array - courses (and their details) accessible by $user_id
+	 */
     public function getStudentCoursesById($user_id, $submitty_path) {
         $this->submitty_db->query("
-SELECT semester, course
+SELECT u.semester, u.course
 FROM courses_users u
-WHERE u.user_id=? ORDER BY course", array($user_id));
-       $return = array();
+INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
+WHERE (u.user_id=? AND u.user_group=1) OR (u.user_id=? AND c.status=1)
+ORDER BY u.course", array($user_id, $user_id));
+        $return = array();
         foreach ($this->submitty_db->rows() as $row) {
-          $course = new Course($this->core, $row);
-          $course->loadDisplayName($submitty_path);
-          $return[] = $course;
+            $course = new Course($this->core, $row);
+            $course->loadDisplayName($submitty_path);
+            $return[] = $course;
         }
         return $return;
     }

@@ -376,7 +376,7 @@ CREATE TABLE late_day_exceptions (
 CREATE TABLE late_days (
     user_id character varying(255) NOT NULL,
     allowed_late_days integer NOT NULL,
-    since_timestamp timestamp with time zone NOT NULL
+    since_timestamp timestamp(6) with time zone NOT NULL
 );
 
 
@@ -406,7 +406,7 @@ CREATE TABLE sessions (
     session_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
-    session_expires timestamp with time zone NOT NULL
+    session_expires timestamp(6) with time zone NOT NULL
 );
 
 
@@ -425,7 +425,7 @@ CREATE TABLE users (
     registration_section integer,
     rotating_section integer,
     manual_registration boolean DEFAULT false,
-    last_updated TIMESTAMP WITH time zone,
+    last_updated timestamp(6) with time zone,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 0) AND (user_group <= 4)))
 );
 
