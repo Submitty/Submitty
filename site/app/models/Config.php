@@ -316,6 +316,13 @@ class Config extends AbstractModel {
             // END TEMPORARY WORKAROUND
 
 
+            // DEFAULT FOR FORUM
+            if (!isset($config[$section][$key]) &&
+                $key == "forum_enabled") {
+              $config[$section][$key] = false;
+            }
+
+
             if (!isset($config[$section][$key])) {
               throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
             }

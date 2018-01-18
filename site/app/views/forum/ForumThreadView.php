@@ -24,7 +24,7 @@ class ForumThreadView extends AbstractView {
 			return;
 		}
 
-		$this->core->getOutput()->addBreadcrumb("Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		
 		//Body Style is necessary to make sure that the forum is still readable...
 		$return = <<<HTML
@@ -223,7 +223,7 @@ HTML;
 			return;
 		}
 
-		$this->core->getOutput()->addBreadcrumb("Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
 

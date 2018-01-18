@@ -64,7 +64,7 @@ HTML;
         
         if($this->core->getConfig()->isForumEnabled()) {
             $return .= <<<HTML
-            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Forum</a>
+            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Discussion Forum</a>
 HTML;
         }
 
