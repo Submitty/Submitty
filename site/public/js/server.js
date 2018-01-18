@@ -32,7 +32,9 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
     div_name = "#" + div_name;
 
 
-
+    console.log(who_id);
+    console.log(gradeable_id);
+    
     console.log("count " + count);
     var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file', 'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count});
     console.log(url);

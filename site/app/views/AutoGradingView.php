@@ -16,12 +16,11 @@ class AutogradingView extends AbstractView {
      * @throws \Exception
      */
     public function showResults(Gradeable $gradeable, $show_hidden=false) {
-        var_dump($show_hidden);
         $return = "";
         $current_version = $gradeable->getCurrentVersion();
         $has_badges = false;
         $num_visible_testcases = 0;
-        $gradeable_name = $gradeable->getName();
+        $gradeable_name = $gradeable->getId();
         $who_id = $gradeable->getUser()->getId();
 
         foreach ($gradeable->getTestcases() as $testcase) {
@@ -212,12 +211,11 @@ HTML;
 
 
 
-public static function loadAutoChecks(Gradeable $gradeable, $count, $who_id, $show_hidden=false) {
+public static function loadAutoChecks(Gradeable $gradeable, $count, $who_id, $popup_css_file, $show_hidden=false) {
     $gradeable->loadResultDetails();
     $testcase = $gradeable->getTestcases()[$count];
     $autocheck_cnt = 0;
     $autocheck_len = count($testcase->getAutochecks());
-   // $popup_css_file = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
     $return = "";
     foreach ($testcase->getAutochecks() as $autocheck) {
         $description = $autocheck->getDescription();
