@@ -54,9 +54,6 @@ class ForumController extends AbstractController {
         if(empty($title) || empty($thread_content)){
             $this->core->addErrorMessage("One of the fields was empty. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
-        } else if(strlen($title) > 50) {
-            $this->core->addErrorMessage("Title must be under 50 characters. Please re-submit your thread.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
             $hasGoodAttachment = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
             $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment);

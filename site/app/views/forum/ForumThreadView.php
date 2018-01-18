@@ -241,7 +241,7 @@ HTML;
 			<form style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 
             	<div class="form-group row">
-            		Title: <input type="text" maxlength="50" size="40" placeholder="Title" name="title" required/>
+            		Title: <input type="text" size="45" placeholder="Title" name="title" required/>
             	</div>
             	<br/>
             	<div class="form-group row">
