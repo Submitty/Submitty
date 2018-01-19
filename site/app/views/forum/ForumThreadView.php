@@ -266,11 +266,12 @@ HTML;
 				
 				if($this->core->getUser()->getGroup() < 4){
 						$return .= <<<HTML
-						<label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" /><input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
+						<label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" />
 HTML;
 
 				}
 				$return .= <<<HTML
+				<input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
 				</span>
             	</div>
 
