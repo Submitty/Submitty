@@ -160,6 +160,7 @@ HTML;
 							<p>{$function_content($post["content"])}</p>
 							
 							
+							<hr style="margin-bottom:3px;">
 							
 HTML;
 
