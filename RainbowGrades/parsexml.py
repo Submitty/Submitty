@@ -139,7 +139,6 @@ if __name__ == '__main__':
             for line in json_file:
                 # Extract just the filenames of the session data
                 files += [x.strip()[1:-1] for x in line.split("[")[1].split("]")[0].split(",")]
-                print(files)
     except IOError as e:
         print("Error reading JSON excerpt: {}".format(e))
 

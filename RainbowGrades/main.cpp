@@ -1205,7 +1205,8 @@ void processcustomizationfile(std::vector<Student*> &students) {
   //float p_score,a_score,b_score,c_score,d_score;
 
   std::string iclicker_remotes_filename;
-  std::vector<std::vector<iClickerQuestion> > iclicker_questions(MAX_LECTURES+1);
+  //std::vector<std::vector<iClickerQuestion> > iclicker_questions(MAX_LECTURES+1);
+  std::vector<std::map<unsigned int, std::vector<iClickerQuestion> > > iclicker_questions(MAX_LECTURES+1);
 
   
   for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
@@ -1350,6 +1351,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
     for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
       std::string temp = itr2.key();
       std::vector<nlohmann::json> iclickerLectures = j[token][temp];
+      int which_line = 0;
       for (std::size_t i = 0; i < iclickerLectures.size(); i++) {
         nlohmann::json iclickerLecture = iclickerLectures[i];
         int which_lecture = std::stoi(temp);
@@ -1366,8 +1368,9 @@ void processcustomizationfile(std::vector<Student*> &students) {
         }
 
         for (std::size_t k=0; k<filenames.size(); k++) {
-          iclicker_questions[which_lecture].push_back(iClickerQuestion(filenames[k], which_column, correct_answer));
+          iclicker_questions[which_lecture][which_line].push_back(iClickerQuestion(filenames[k], which_column, correct_answer));
         }
+        which_line++;
       }
     }
   } else if (token == "audit") {

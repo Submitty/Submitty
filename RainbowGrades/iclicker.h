@@ -64,6 +64,6 @@ private:
 // ==========================================================
 
 void MatchClickerRemotes(std::vector<Student*> &students, const std::string &remotes_filename);
-void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<iClickerQuestion> > iclicker_questions);
+void AddClickerScores(std::vector<Student*> &students, std::vector<std::map<unsigned int, std::vector<iClickerQuestion> > > iclicker_questions);
 
 #endif

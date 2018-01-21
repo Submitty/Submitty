@@ -133,81 +133,90 @@ std::string getItem(const std::string &line, int which) {
 }
 
 
-void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<iClickerQuestion> > iclicker_questions) {
+void AddClickerScores(std::vector<Student*> &students, std::vector<std::map<unsigned int, std::vector<iClickerQuestion> > > iclicker_questions) {
 
   for (unsigned int which_lecture = 0; which_lecture < iclicker_questions.size(); which_lecture++) {
     //std::cout << "which lecture = " << which_lecture << std::endl;
-    std::vector<iClickerQuestion>& lecture = iclicker_questions[which_lecture];
-    for (unsigned int which_question = 0; which_question < lecture.size(); which_question++) {
-      iClickerQuestion& question = lecture[which_question];
+    std::map<unsigned int, std::vector<iClickerQuestion> >& lecture = iclicker_questions[which_lecture];
+    //for (unsigned int which_question = 0; which_question < lecture.size(); which_question++) {
+    for (std::map<unsigned int, std::vector<iClickerQuestion > >::iterator it = lecture.begin(); it != lecture.end(); it++){
+      unsigned int which_question = it->first;
+      //iClickerQuestion& question = lecture[which_question];
 
       std::stringstream ss;
       ss << which_lecture << "." << which_question+1;
 
-      ICLICKER_QUESTION_NAMES.push_back(ss.str());
-      MAX_ICLICKER_TOTAL += 1.0;
+      for(unsigned int i=0; i<it->second.size(); i++) {
+        iClickerQuestion &question = it->second[i];
 
-      std::ifstream istr(question.getFilename());
-      if (!istr.good()) {
-        std::cerr << "ERROR: cannot open file: " << question.getFilename() << std::endl;
-      }
-
-      if (LECTURE_DATE_CORRESPONDENCES.find(which_lecture) ==
-          LECTURE_DATE_CORRESPONDENCES.end()) {
-        Date date = dateFromFilename(question.getFilename());
-        LECTURE_DATE_CORRESPONDENCES[which_lecture] = date;
-      }
-
-
-      char line_helper[5000];
-      while (istr.getline(line_helper,5000)) {
-
-        std::string line = line_helper;
-
-        // ignore lines that don't begin with a clicker id
-        // all clicker id's start with '#'
-        if (line[0] != '#') continue;
-
-        std::string remoteid = getItem(line,0);
-        std::string item = getItem(line,question.getColumn()-1);
-        bool participate = (item != "");
-        
-        if (!participate) continue;
-
-        //std::cout << "ITEM " << item << " " << item.size() << std::endl;
-        
-        assert (item.size() == 1);
-
-        //bool correct = question.participationQuestion() || question.isCorrectAnswer(item[0]);
-
-        //std::cout << "ITEM " << remoteid << " " << item << "  " << participate << " " << correct << std::endl;
-        std::map<std::string,std::string>::iterator itr = GLOBAL_CLICKER_MAP.find(remoteid);
-        if (itr == GLOBAL_CLICKER_MAP.end()) {
-          //std::cout << "UNKNOWN CLICKER: " << remoteid << "  " << std::endl;
-          std::cout << " " << remoteid;
-          continue;
+        if(i==0) {
+          ICLICKER_QUESTION_NAMES.push_back(ss.str());
+          MAX_ICLICKER_TOTAL += 1.0;
         }
-        assert (itr != GLOBAL_CLICKER_MAP.end());
-        std::string username = itr->second;
-        Student *s = GetStudent(students,username);
-        assert (s != NULL);
 
-        iclicker_answer_enum grade = ICLICKER_NOANSWER;
-        if (question.participationQuestion()) 
-          grade = ICLICKER_PARTICIPATED;
-        else {
-          if (question.isCorrectAnswer(item[0])) {
-            grade = ICLICKER_CORRECT;
-          } else {
-            grade = ICLICKER_INCORRECT;
+
+        std::ifstream istr(question.getFilename());
+        if (!istr.good()) {
+          std::cerr << "ERROR: cannot open file: " << question.getFilename() << std::endl;
+        }
+
+        if (LECTURE_DATE_CORRESPONDENCES.find(which_lecture) ==
+            LECTURE_DATE_CORRESPONDENCES.end()) {
+          Date date = dateFromFilename(question.getFilename());
+          LECTURE_DATE_CORRESPONDENCES[which_lecture] = date;
+        }
+
+
+        char line_helper[5000];
+        while (istr.getline(line_helper, 5000)) {
+
+          std::string line = line_helper;
+
+          // ignore lines that don't begin with a clicker id
+          // all clicker id's start with '#'
+          if (line[0] != '#') continue;
+
+          std::string remoteid = getItem(line, 0);
+          std::string item = getItem(line, question.getColumn() - 1);
+          bool participate = (item != "");
+
+          if (!participate) continue;
+
+          //std::cout << "ITEM " << item << " " << item.size() << std::endl;
+
+          assert(item.size() == 1);
+
+          //bool correct = question.participationQuestion() || question.isCorrectAnswer(item[0]);
+
+          //std::cout << "ITEM " << remoteid << " " << item << "  " << participate << " " << correct << std::endl;
+          std::map<std::string, std::string>::iterator itr = GLOBAL_CLICKER_MAP.find(remoteid);
+          if (itr == GLOBAL_CLICKER_MAP.end()) {
+            //std::cout << "UNKNOWN CLICKER: " << remoteid << "  " << std::endl;
+            std::cout << " " << remoteid;
+            continue;
           }
+          assert(itr != GLOBAL_CLICKER_MAP.end());
+          std::string username = itr->second;
+          Student *s = GetStudent(students, username);
+          assert(s != NULL);
+
+          iclicker_answer_enum grade = ICLICKER_NOANSWER;
+          if (question.participationQuestion())
+            grade = ICLICKER_PARTICIPATED;
+          else {
+            if (question.isCorrectAnswer(item[0])) {
+              grade = ICLICKER_CORRECT;
+            } else {
+              grade = ICLICKER_INCORRECT;
+            }
+          }
+
+          s->addIClickerAnswer(ss.str(), item[0], grade);
+          //s.seti
+
         }
-
-        s->addIClickerAnswer(ss.str(),item[0],grade);
-        //s.seti
-
+        std::cout << std::endl;
       }
-      std::cout << std::endl;
     }
   }
 }
