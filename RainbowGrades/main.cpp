@@ -1349,16 +1349,26 @@ void processcustomizationfile(std::vector<Student*> &students) {
   } else if (token == "iclicker") {
     for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
       std::string temp = itr2.key();
-    std::vector<nlohmann::json> iclickerLectures = j[token][temp];
-    for (std::size_t i = 0; i < iclickerLectures.size(); i++) {
-      nlohmann::json iclickerLecture = iclickerLectures[i];
-      int which_lecture = std::stoi(temp);
-      std::string clicker_file = iclickerLecture["file"].get<std::string>();
-      int which_column = iclickerLecture["column"].get<int>();
-      std::string correct_answer = iclickerLecture["answer"].get<std::string>();
-      assert (which_lecture >= 1 && which_lecture <= MAX_LECTURES);
-      iclicker_questions[which_lecture].push_back(iClickerQuestion(clicker_file,which_column,correct_answer));
-    }
+      std::vector<nlohmann::json> iclickerLectures = j[token][temp];
+      for (std::size_t i = 0; i < iclickerLectures.size(); i++) {
+        nlohmann::json iclickerLecture = iclickerLectures[i];
+        int which_lecture = std::stoi(temp);
+        int which_column = iclickerLecture["column"].get<int>();
+        std::string correct_answer = iclickerLecture["answer"].get<std::string>();
+        assert (which_lecture >= 1 && which_lecture <= MAX_LECTURES);
+
+        //std::string clicker_file = iclickerLecture["file"].get<std::string>();
+        //TODO: Add code here to support multiple iClicker files. Should be exciting!
+        nlohmann::json j_filenames = iclickerLecture["file"];
+        std::vector<std::string> filenames;
+        for (std::size_t k = 0; k < j_filenames.size(); k++) {
+          filenames.push_back(j_filenames[k].get<std::string>());
+        }
+
+        for (std::size_t k=0; k<filenames.size(); k++) {
+          iclicker_questions[which_lecture].push_back(iClickerQuestion(filenames[k], which_column, correct_answer));
+        }
+      }
     }
   } else if (token == "audit") {
     std::vector<nlohmann::json> audit_list = itr.value();
