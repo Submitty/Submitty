@@ -39,6 +39,9 @@ class ForumController extends AbstractController {
             case 'delete_post':
                 $this->deletePost();
                 break;
+            case 'remove_announcement':
+                $this->removeAnnouncement();
+                break;
             case 'view_thread':
             default:
                 $this->showThreads();
@@ -92,16 +95,29 @@ class ForumController extends AbstractController {
         }
     }
 
-    public function deletePost(){
-        $thread_id = $_POST["thread_id"];
-        $post_id = $_POST["post_id"];
-        $type = "";
-        if($this->core->getQueries()->deletePost($post_id, $thread_id)){
-            $type = "thread";
+    public function removeAnnouncement(){
+        if($this->core->getUser()->accessAdmin()){
+            $thread_id = $_POST["thread_id"];
+            $this->core->getQueries()->setAnnouncement($thread_id, 0);
         } else {
-            $type = "post";
+            $this->core->addErrorMessage("You do not have permissions to do that.");
         }
-        $this->core->getOutput()->renderJson(array('type' => $type));
+    }
+
+    public function deletePost(){
+        if($this->core->getUser()->accessAdmin()){
+            $thread_id = $_POST["thread_id"];
+            $post_id = $_POST["post_id"];
+            $type = "";
+            if($this->core->getQueries()->deletePost($post_id, $thread_id)){
+                $type = "thread";
+            } else {
+                $type = "post";
+            }
+            $this->core->getOutput()->renderJson(array('type' => $type));
+        } else {
+            $this->core->addErrorMessage("You do not have permissions to do that.");
+        }
     }
 
     public function showThreads(){

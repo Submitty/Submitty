@@ -39,7 +39,7 @@ class ForumThreadView extends AbstractView {
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
 		<div style="margin-top:10px; margin-bottom:10px; height:50px;  " id="forum_bar">
-			<div style="margin-left:20px; height: 50px; width:50px;" class="create_thread_button"><a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i style="vertical-align: middle; position: absolute; margin-top: 9px; margin-left: 11px;" class="fa fa-plus-circle fa-2x" aria-hidden="true"></i></a>
+			<div style="margin-left:20px; height: 50px; width:50px;" class="create_thread_button"><a title="Create thread" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i style="vertical-align: middle; position: absolute; margin-top: 9px; margin-left: 11px;" class="fa fa-plus-circle fa-2x" aria-hidden="true"></i></a>
 			</div>
 		</div>
 
@@ -61,20 +61,29 @@ HTML;
 					$used_active = false; //used for the first one if there is not thread_id set
 					$function_date = 'date_format';
 					$activeThreadTitle = "";
+					$activeThread = array();
 					$current_user = $this->core->getUser()->getId();
+					$activeThreadAnnouncement = false;
 					$start = 0;
 					$end = 10;
 					foreach($threads as $thread){
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
 						$date = date_create($first_post['timestamp']);
 						$class = "thread_box";
+						//Needs to be refactored to rid duplicated code
 						if(!isset($_REQUEST["thread_id"]) && !$used_active){
 							$class .= " active";
 							$used_active = true;
+							$activeThread = $thread;
 							$activeThreadTitle = $thread["title"];
+							if($thread["pinned"])
+								$activeThreadAnnouncement = true;
 						} else if(isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) {
 							$class .= " active";
 							$activeThreadTitle = $thread["title"];
+							$activeThread = $thread;
+							if($thread["pinned"])
+								$activeThreadAnnouncement = true;
 						}
 						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
@@ -113,8 +122,24 @@ HTML;
 			$return .= <<< HTML
 					</div>
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
-					<h3 style="word-wrap: break-word;margin-top:20px;">{$activeThreadTitle}</h3>
+					<h3 style="display:inline-block;word-wrap: break-word;margin-top:20px;">
 HTML;
+					if($this->core->getUser()->accessAdmin() && $activeThreadAnnouncement){
+						$return .= <<<HTML
+							<a style="position:relative; display:inline-block; color:orange; " onClick="removeAnnouncement({$activeThread['id']})" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'yellow')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:yellow; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+HTML;
+					} else if($activeThreadAnnouncement){
+						$return .= <<<HTML
+						 <i class="fa fa-star" style="position:relative; display:inline-block; color:yellow; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+					}
+					$return .= <<< HTML
+					{$activeThreadTitle}</h3>
+
+HTML;
+
+
 					foreach($posts as $post){
 						
 						if($thread_id == -1) {
@@ -153,7 +178,7 @@ HTML;
 HTML;
 						if($this->core->getUser()->accessAdmin()){
 							$return .= <<<HTML
-							<a style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )"><i class="fa fa-times" aria-hidden="true"></i></a>
+							<a style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
 HTML;
 						}
 						$return .= <<<HTML

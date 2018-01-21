@@ -255,6 +255,10 @@ function check_server(url) {
     );
 }
 
+function changeColor(div, hexColor){
+    div.style.color = hexColor;
+}
+
 function openDiv(id) {
     var elem = $('#' + id);
     if (elem.hasClass('open')) {
@@ -857,6 +861,26 @@ function deletePost(thread_id, post_id, author, time){
             }
         })
     } 
+}
+
+function removeAnnouncement(thread_id){
+    var confirm = window.confirm("Are you sure you would like to remove this thread as an announcement?");
+    if(confirm){
+        var url = buildUrl({'component': 'forum', 'page': 'remove_announcement'});
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                thread_id: thread_id
+            },
+            success: function(data){
+                window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to remove announcement. Please try again.");
+            }
+        })
+    }
 }
 
 function updateHomeworkExtensions(data) {

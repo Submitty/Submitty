@@ -147,6 +147,10 @@ class DatabaseQueries {
         return array("thread_id" => $id, "post_id" => $post_id);
     }
 
+    public function setAnnouncement($thread_id, $onOff){
+        $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($onOff, $thread_id));
+    }
+
     public function deletePost($post_id, $thread_id){
         $this->course_db->query("SELECT parent_id from posts where id=?", array($post_id));
 
