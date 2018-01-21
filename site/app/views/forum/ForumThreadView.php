@@ -167,7 +167,7 @@ HTML;
 								$visible_username = "Anonymous";
 							}
 						} else {
-							$visible_username = $post["author_user_id"];
+							$visible_username = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 						}
 
 						$return .= <<<HTML

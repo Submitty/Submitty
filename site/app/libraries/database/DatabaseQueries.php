@@ -1734,6 +1734,19 @@ AND gc_id IN (
       return count($this->course_db->rows()) > 0;
     }
 
+    public function getDisplayUserNameFromUserId($user_id){
+      $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname from users where user_id = ?", array($user_id));
+      $name_rows = $this->course_db->rows()[0];
+      $last_name_initial =  " " . substr($name_rows["user_lastname"], 0, 1) . ".";
+      if(empty($name_rows["user_preferred_firstname"])){
+        $name = $name_rows["user_firstname"];
+      } else {
+        $name = $name_rows["user_preferred_firstname"];
+      }
+      $name .= $last_name_initial;
+      return $name;
+    }
+
     public function getPostsForThread($current_user, $thread_id){
 
       if($thread_id == -1) {
@@ -1748,6 +1761,7 @@ AND gc_id IN (
 
       $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false", array($thread_id));
       $result_rows = $this->course_db->rows();
+
       if(count($result_rows) > 0){
         $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM viewed_responses WHERE thread_id=? AND user_id=?)", array($thread_id, $current_user, $thread_id, $current_user));
       }
