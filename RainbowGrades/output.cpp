@@ -1212,14 +1212,16 @@ void end_table(std::ofstream &ostr,  bool for_instructor, Student *s) {
     if (s != NULL) {
       ostr << "<b>Initial number of allowed late days: </b>" << s->getDefaultAllowedLateDays() <<  "<br>" << std::endl;
     }
-    ostr << "<b>Extra late days earned after iclicker points:</b> ";
-    for (std::size_t i = 0; i < GLOBAL_earned_late_days.size(); i++) {
-      ostr << GLOBAL_earned_late_days[i];
-      if (i < GLOBAL_earned_late_days.size()-1) {
-        ostr << ", ";
+    if(!GLOBAL_earned_late_days.empty()) {
+      ostr << "<b>Extra late days earned after iclicker points:</b> ";
+      for (std::size_t i = 0; i < GLOBAL_earned_late_days.size(); i++) {
+        ostr << GLOBAL_earned_late_days[i];
+        if (i < GLOBAL_earned_late_days.size() - 1) {
+          ostr << ", ";
+        }
       }
+      ostr << "<br>" << std::endl;
     }
-    ostr << "<br>" << std::endl;
     ostr << "</p>" << std::endl;
 
 
