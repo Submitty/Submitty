@@ -1206,7 +1206,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 
   std::string iclicker_remotes_filename;
   //std::vector<std::vector<iClickerQuestion> > iclicker_questions(MAX_LECTURES+1);
-  std::vector<std::map<unsigned int, std::vector<iClickerQuestion> > > iclicker_questions(MAX_LECTURES+1);
+  std::vector<std::vector<std::vector<iClickerQuestion> > > iclicker_questions(MAX_LECTURES+1);
 
   
   for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
@@ -1351,16 +1351,20 @@ void processcustomizationfile(std::vector<Student*> &students) {
     for (nlohmann::json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
       std::string temp = itr2.key();
       std::vector<nlohmann::json> iclickerLectures = j[token][temp];
-      int which_line = 0;
+      int which_lecture = std::stoi(temp);
+
+      //Each step through this loop is one {} line inside a lecture, the naming of lecture vs lectures here is confusing
       for (std::size_t i = 0; i < iclickerLectures.size(); i++) {
         nlohmann::json iclickerLecture = iclickerLectures[i];
-        int which_lecture = std::stoi(temp);
+        iclicker_questions[which_lecture].push_back(std::vector<iClickerQuestion>());
+
+
         int which_column = iclickerLecture["column"].get<int>();
         std::string correct_answer = iclickerLecture["answer"].get<std::string>();
         assert (which_lecture >= 1 && which_lecture <= MAX_LECTURES);
 
-        //std::string clicker_file = iclickerLecture["file"].get<std::string>();
-        //TODO: Add code here to support multiple iClicker files. Should be exciting!
+
+        //Code to support multiple iClicker files for one question
         nlohmann::json j_filenames = iclickerLecture["file"];
         std::vector<std::string> filenames;
         for (std::size_t k = 0; k < j_filenames.size(); k++) {
@@ -1368,9 +1372,9 @@ void processcustomizationfile(std::vector<Student*> &students) {
         }
 
         for (std::size_t k=0; k<filenames.size(); k++) {
-          iclicker_questions[which_lecture][which_line].push_back(iClickerQuestion(filenames[k], which_column, correct_answer));
+          iclicker_questions[which_lecture].back().push_back(iClickerQuestion(filenames[k], which_column, correct_answer));
         }
-        which_line++;
+
       }
     }
   } else if (token == "audit") {

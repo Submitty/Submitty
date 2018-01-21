@@ -133,21 +133,21 @@ std::string getItem(const std::string &line, int which) {
 }
 
 
-void AddClickerScores(std::vector<Student*> &students, std::vector<std::map<unsigned int, std::vector<iClickerQuestion> > > iclicker_questions) {
+void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<std::vector<iClickerQuestion> > > iclicker_questions) {
 
   for (unsigned int which_lecture = 0; which_lecture < iclicker_questions.size(); which_lecture++) {
     //std::cout << "which lecture = " << which_lecture << std::endl;
-    std::map<unsigned int, std::vector<iClickerQuestion> >& lecture = iclicker_questions[which_lecture];
+    std::vector<std::vector<iClickerQuestion> >& lecture = iclicker_questions[which_lecture];
     //for (unsigned int which_question = 0; which_question < lecture.size(); which_question++) {
-    for (std::map<unsigned int, std::vector<iClickerQuestion > >::iterator it = lecture.begin(); it != lecture.end(); it++){
-      unsigned int which_question = it->first;
+    for (std::size_t which_question = 0; which_question < lecture.size(); which_question++){
+      //unsigned int which_question = it->first;
       //iClickerQuestion& question = lecture[which_question];
 
       std::stringstream ss;
       ss << which_lecture << "." << which_question+1;
 
-      for(unsigned int i=0; i<it->second.size(); i++) {
-        iClickerQuestion &question = it->second[i];
+      for(unsigned int i=0; i<lecture[which_question].size(); i++) {
+        iClickerQuestion &question = lecture[which_question][i];
 
         if(i==0) {
           ICLICKER_QUESTION_NAMES.push_back(ss.str());
