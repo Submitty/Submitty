@@ -56,6 +56,19 @@ HTML;
         <!--<button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
 HTML;
         }
+
+
+        // ======================================================================================
+        // FORUM BUTTON
+        // ====================================================================================== 
+        
+        if($this->core->getConfig()->isForumEnabled()) {
+            $return .= <<<HTML
+            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Discussion Forum</a>
+HTML;
+        }
+
+
         // ======================================================================================
         // GRADES SUMMARY BUTTON
         // ======================================================================================

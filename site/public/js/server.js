@@ -255,6 +255,10 @@ function check_server(url) {
     );
 }
 
+function changeColor(div, hexColor){
+    div.style.color = hexColor;
+}
+
 function openDiv(id) {
     var elem = $('#' + id);
     if (elem.hasClass('open')) {
@@ -812,6 +816,71 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.document.write(elem_html);
     my_window.document.close(); 
     my_window.focus();
+}
+
+function deletePost(thread_id, post_id, author, time){
+    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note:  If you are deleting the first post in a thread this will delete the entire thread.");
+    if(confirm){
+        var url = buildUrl({'component': 'forum', 'page': 'delete_post'});
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id,
+                thread_id: thread_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var new_url = "";
+                switch(json['type']){
+                    case "thread":
+                    default:
+                        new_url = buildUrl({'component': 'forum', 'page': 'view_thread'});
+                    break;
+
+                    
+                    case "post":
+                        new_url = buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id});
+                    break;
+                }
+                window.location.replace(new_url);
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to delete post. Please try again.");
+            }
+        })
+    } 
+}
+
+function removeAnnouncement(thread_id){
+    var confirm = window.confirm("Are you sure you would like to remove this thread as an announcement?");
+    if(confirm){
+        var url = buildUrl({'component': 'forum', 'page': 'remove_announcement'});
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                thread_id: thread_id
+            },
+            success: function(data){
+                window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to remove announcement. Please try again.");
+            }
+        })
+    }
 }
 
 function updateHomeworkExtensions(data) {

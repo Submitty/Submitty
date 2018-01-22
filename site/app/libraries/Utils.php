@@ -157,4 +157,13 @@ class Utils {
             (substr($filename,strlen($filename)-4,4) == ".jpg") ||
             (substr($filename,strlen($filename)-4,4) == ".jpeg");
     }
+
+    public static function checkUploadedImageFile($id){
+        if (isset($_FILES[$id]) && (file_exists($_FILES[$id]['tmp_name']))) {
+            $mime_type = FileUtils::getMimeType($_FILES[$id]["tmp_name"]); 
+            if(getimagesize($_FILES[$id]["tmp_name"]) !== false && substr($mime_type, 0, strrpos($mime_type, "/")) === "image") {
+                return true;
+            }
+        } return false;
+    }
 }
