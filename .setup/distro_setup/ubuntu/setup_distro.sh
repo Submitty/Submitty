@@ -46,8 +46,8 @@ if [ ${VAGRANT} == 1 ]; then
     # discarding and recreating networking interfaces everytime the VM is restarted.
     # ep0s8 is statically bound to 192.168.56.101.
     # Note: I think they switched back to the eth# scheme (hence this fix)
-    echo -e "auto eth1\niface enp0s8 inet static\naddress ${SUBMISSION_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
-    echo -e "auto eth1:1\niface enp0s8:1 inet static\naddress ${GIT_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    echo -e "auto eth1\niface eth1 inet static\naddress ${SUBMISSION_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    echo -e "auto eth1:1\niface eth1:1 inet static\naddress ${GIT_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
 
     # Turn them on.
     ifup eth1 eth1:1
