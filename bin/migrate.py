@@ -88,7 +88,6 @@ def down_migrations(connection, migrations):
     for key in reversed(migrations.keys()):
         if migrations[key]['status'] == 1:
             getattr(migrations[key]['module'], 'down', noop)(connection)
-            cursor = connection.cursor()
             with connection.cursor() as cursor:
                 cursor.execute('UPDATE database_migrations SET commit_time=CURRENT_TIMESTAMP, status=0 WHERE id=%s', (key,))
             connection.commit()
