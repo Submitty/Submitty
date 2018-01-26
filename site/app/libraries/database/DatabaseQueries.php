@@ -1759,7 +1759,7 @@ AND gc_id IN (
         }
       }
 
-      $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false", array($thread_id));
+      $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false ORDER BY timestamp ASC", array($thread_id));
       $result_rows = $this->course_db->rows();
 
       if(count($result_rows) > 0){
