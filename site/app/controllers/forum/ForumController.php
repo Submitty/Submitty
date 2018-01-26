@@ -59,6 +59,14 @@ class ForumController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
             $hasGoodAttachment = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
+            if($hasGoodAttachment == 0 && !empty($_FILES['file_input']['tmp_name'])){
+                $this->core->addErrorMessage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)");
+                $_SESSION["thread_content"] = $_POST["thread_content"];
+                $_SESSION["thread_title"] = $_POST["title"];
+                $_SESSION["thread_recover_active"] = true;  
+                $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
+                return;
+            }
             $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment);
             $id = $result["thread_id"];
             $post_id = $result["post_id"];
