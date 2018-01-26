@@ -288,7 +288,7 @@ HTML;
             	</div>
             	<br/>
             	<div class="form-group row">
-            		<textarea name="thread_content" id="thread_content" value="{$_SESSION['thread_title']}" style="white-space: pre-wrap;resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+            		<textarea name="thread_content" id="thread_content" style="white-space: pre-wrap;resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
             	</div>
 
             	<br/>
