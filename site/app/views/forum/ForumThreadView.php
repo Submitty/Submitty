@@ -333,7 +333,7 @@ if(isset($_SESSION["thread_title"]) && isset($_SESSION["thread_content"]) && iss
 	$return .= <<<HTML
 			<script>
 				var titleBox = document.getElementById('title');
-				titleBox.value = "{$title}";
+				titleBox.value = `{$title}`;
 				var contentBox = document.getElementById('thread_content');
 				contentBox.innerHTML = `{$thread_content}`;
 				document.getElementById('file_input').value = null;
