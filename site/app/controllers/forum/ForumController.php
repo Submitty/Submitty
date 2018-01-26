@@ -49,6 +49,8 @@ class ForumController extends AbstractController {
         }
     }
 
+    //CODE WILL BE CONSOLIDATED IN FUTURE
+
     public function publishThread(){
         $title = htmlentities($_POST["title"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $thread_content = htmlentities($_POST["thread_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -61,8 +63,8 @@ class ForumController extends AbstractController {
             $hasGoodAttachment = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
             if($hasGoodAttachment == 0 && !empty($_FILES['file_input']['tmp_name'])){
                 $this->core->addErrorMessage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)");
-                $_SESSION["thread_content"] = $_POST["thread_content"];
-                $_SESSION["thread_title"] = $_POST["title"];
+                $_SESSION["thread_content"] = $thread_content;
+                $_SESSION["thread_title"] = $title;
                 $_SESSION["thread_recover_active"] = true;  
                 $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
                 return;
@@ -91,6 +93,13 @@ class ForumController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
             $hasGoodAttachment = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
+            if($hasGoodAttachment == 0 && !empty($_FILES['file_input']['tmp_name'])){
+                $this->core->addErrorMessage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)");
+                $_SESSION["post_content"] = $post_content;
+                $_SESSION["post_recover_active"] = true;  
+                $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+                return;
+            }
             $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment);
             $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
             if($hasGoodAttachment == 1) {
