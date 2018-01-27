@@ -214,7 +214,7 @@ HTML;
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>
 	            	<div class="form-group row">
-	            		<textarea name="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+	            		<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
 	            	</div>
 
 	            	<br/>
@@ -239,6 +239,23 @@ HTML;
 				</div>
 HTML;
 		}
+
+if(isset($_SESSION["post_content"]) && isset($_SESSION["post_recover_active"])){
+			
+	$post_content = html_entity_decode($_SESSION["post_content"]);
+
+	$return .= <<<HTML
+			<script>
+				var contentBox = document.getElementById('post_content');
+				contentBox.innerHTML = `{$post_content}`;
+				document.getElementById('file_input').value = null;
+				var box = $('.posts_list');
+				box.scrollTop(box.prop('scrollHeight'));
+			</script>
+HTML;
+		$_SESSION["post_recover_active"] = null;
+}
+
 		return $return;
 	}
 
@@ -267,11 +284,11 @@ HTML;
 			<form style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 
             	<div class="form-group row">
-            		Title: <input type="text" size="45" placeholder="Title" name="title" required/>
+            		Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
             	</div>
             	<br/>
             	<div class="form-group row">
-            		<textarea name="thread_content" style="white-space: pre-wrap;resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+            		<textarea name="thread_content" id="thread_content" style="white-space: pre-wrap;resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
             	</div>
 
             	<br/>
@@ -307,6 +324,23 @@ HTML;
 		</div>
 		</div>
 HTML;
+
+if(isset($_SESSION["thread_title"]) && isset($_SESSION["thread_content"]) && isset($_SESSION["thread_recover_active"])){
+	$title = html_entity_decode($_SESSION["thread_title"]);
+			
+	$thread_content = html_entity_decode($_SESSION["thread_content"]);
+
+	$return .= <<<HTML
+			<script>
+				var titleBox = document.getElementById('title');
+				titleBox.value = `{$title}`;
+				var contentBox = document.getElementById('thread_content');
+				contentBox.innerHTML = `{$thread_content}`;
+				document.getElementById('file_input').value = null;
+			</script>
+HTML;
+		$_SESSION["thread_recover_active"] = null;
+}
 		return $return;
 	}
 
