@@ -53,6 +53,25 @@ class ForumController extends AbstractController {
     }
 
     private function checkGoodAttachment($isThread, $content, $title = ""){
+        if(count($_FILES['file_input']) > 5) {
+
+            //Notify User
+            $this->core->addErrorMessage("Max file upload size is 5. Please try again.");
+
+            //Save post content to repopulate
+            if($isThread){
+                $_SESSION["thread_content"] = $content;
+                $_SESSION["thread_title"] = $title;
+                $_SESSION["thread_recover_active"] = true;  
+                $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
+            } else {
+                $_SESSION["post_content"] = $content;
+                $_SESSION["post_recover_active"] = true; 
+                $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
+            }
+            $this->core->redirect($url);
+            return -1;
+        }
         $imageCheck = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
         if($imageCheck == 0 && !empty($_FILES['file_input']['tmp_name'])){
            
