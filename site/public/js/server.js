@@ -863,10 +863,10 @@ function deletePost(thread_id, post_id, author, time){
     } 
 }
 
-function removeAnnouncement(thread_id){
-    var confirm = window.confirm("Are you sure you would like to remove this thread as an announcement?");
+function alterAnnouncement(thread_id, confirmString, url){
+    var confirm = window.confirm(confirmString);
     if(confirm){
-        var url = buildUrl({'component': 'forum', 'page': 'remove_announcement'});
+        var url = buildUrl({'component': 'forum', 'page': url});
         $.ajax({
             url: url,
             type: "POST",

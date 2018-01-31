@@ -33,6 +33,9 @@ class ForumController extends AbstractController {
             case 'publish_thread':
                 $this->publishThread();
                 break;
+            case 'make_announcement':
+                $this->alterAnnouncement(1);
+                break;
             case 'publish_post':
                 $this->publishPost();
                 break;
@@ -40,13 +43,38 @@ class ForumController extends AbstractController {
                 $this->deletePost();
                 break;
             case 'remove_announcement':
-                $this->removeAnnouncement();
+                $this->alterAnnouncement(0);
                 break;
             case 'view_thread':
             default:
                 $this->showThreads();
                 break;
         }
+    }
+
+    private function checkGoodAttachment($isThread, $content, $title = ""){
+        $imageCheck = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
+        if($imageCheck == 0 && !empty($_FILES['file_input']['tmp_name'])){
+           
+            //Notify User
+            $this->core->addErrorMessage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)");
+           
+            //Save post content to repopulate
+            if($isThread){
+                $_SESSION["thread_content"] = $content;
+                $_SESSION["thread_title"] = $title;
+                $_SESSION["thread_recover_active"] = true;  
+                $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
+            } else {
+                $_SESSION["post_content"] = $content;
+                $_SESSION["post_recover_active"] = true; 
+                $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
+            }
+
+            $this->core->redirect($url);
+            return -1;
+        
+        } return $imageCheck;
     }
 
     //CODE WILL BE CONSOLIDATED IN FUTURE
@@ -60,26 +88,30 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("One of the fields was empty. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
-            $hasGoodAttachment = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
-            if($hasGoodAttachment == 0 && !empty($_FILES['file_input']['tmp_name'])){
-                $this->core->addErrorMessage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)");
-                $_SESSION["thread_content"] = $_POST["thread_content"];
-                $_SESSION["thread_title"] = $_POST["title"];
-                $_SESSION["thread_recover_active"] = true;  
-                $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
+            $hasGoodAttachment = $this->checkGoodAttachment(true, $_POST["thread_content"], $_POST["title"]);
+            if($hasGoodAttachment == -1){
                 return;
             }
+            
             $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment);
             $id = $result["thread_id"];
             $post_id = $result["post_id"];
-            $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id);
-            FileUtils::createDir($thread_dir);
+
             if($hasGoodAttachment == 1) {
+
+                $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id);
+                FileUtils::createDir($thread_dir);
+
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                 FileUtils::createDir($post_dir);
-                $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"]);
-                move_uploaded_file($_FILES["file_input"]["tmp_name"], $target_file);
+
+                for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
+                    $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
+                    move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
+                }
+                
             }
+            
         }
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id)));
     }
@@ -92,12 +124,8 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
-            $hasGoodAttachment = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
-            if($hasGoodAttachment == 0 && !empty($_FILES['file_input']['tmp_name'])){
-                $this->core->addErrorMessage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)");
-                $_SESSION["post_content"] = $_POST["post_content"];
-                $_SESSION["post_recover_active"] = true;  
-                $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+            $hasGoodAttachment = $this->checkGoodAttachment(true, $_POST["post_content"]);
+            if($hasGoodAttachment == -1){
                 return;
             }
             $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment);
@@ -105,17 +133,19 @@ class ForumController extends AbstractController {
             if($hasGoodAttachment == 1) {
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                 FileUtils::createDir($post_dir);
-                $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"]);
-                move_uploaded_file($_FILES["file_input"]["tmp_name"], $target_file);
+                for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
+                    $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
+                    move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
+                }
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
     }
 
-    public function removeAnnouncement(){
-        if($this->core->getUser()->accessAdmin()){
+    public function alterAnnouncement($type){
+        if($this->core->getUser()->getGroup() <= 2){
             $thread_id = $_POST["thread_id"];
-            $this->core->getQueries()->setAnnouncement($thread_id, 0);
+            $this->core->getQueries()->setAnnouncement($thread_id, $type);
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }

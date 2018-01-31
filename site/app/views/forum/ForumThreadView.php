@@ -124,14 +124,19 @@ HTML;
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
 					<h3 style="display:inline-block;word-wrap: break-word;margin-top:20px;">
 HTML;
-					if($this->core->getUser()->accessAdmin() && $activeThreadAnnouncement){
+					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
 						$return .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="removeAnnouncement({$activeThread['id']})" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'yellow')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:yellow; -webkit-text-stroke-width: 1px;
+							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'yellow')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:yellow; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
 					} else if($activeThreadAnnouncement){
 						$return .= <<<HTML
 						 <i class="fa fa-star" style="position:relative; display:inline-block; color:yellow; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+					} else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
+						$return .= <<<HTML
+							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fa fa-star" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'yellow')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
 					}
 					$return .= <<< HTML
@@ -221,7 +226,7 @@ HTML;
 
 	           		<span style="float:left;display:inline-block;">
             			<label class="btn btn-primary" for="file_input">
-    					<input id="file_input" name="file_input" accept="image/*" type="file" style="display:none" onchange="$('#file_name').html(this.files[0].name)">
+    					<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="$('#file_name').html(this.files.length + ' files selected.')" multiple>
     					Upload Attachment
 						</label>
 						<span class='label label-info' id="file_name"></span>
@@ -297,7 +302,7 @@ HTML;
 
             	<span style="float:left;display:inline-block;">
             	<label class="btn btn-primary" for="file_input">
-    				<input id="file_input" name="file_input" accept="image/*" type="file" style="display:none" onchange="$('#file_name').html(this.files[0].name)">
+    				<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="$('#file_name').html(this.files.length + ' files selected.')" multiple>
     				Upload Attachment
 				</label>
 				<span class='label label-info' id="file_name"></span>
@@ -339,7 +344,7 @@ if(isset($_SESSION["thread_title"]) && isset($_SESSION["thread_content"]) && iss
 				document.getElementById('file_input').value = null;
 			</script>
 HTML;
-		$_SESSION["thread_recover_active"] = null;
+		unset($_SESSION["thread_recover_active"]);
 }
 		return $return;
 	}
