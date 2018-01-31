@@ -585,7 +585,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
       SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
       FROM electronic_gradeable_data AS egv
       INNER JOIN users AS u ON u.user_id = egv.user_id, electronic_gradeable_version AS egd
-      WHERE egv.g_id=? AND u.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0
+      WHERE egv.g_id=? AND u.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.user_id=egv.user_id
    )g
 ) as individual;
           ", array($g_id));
