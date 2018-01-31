@@ -155,39 +155,51 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
         }
 
+        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         $gradeable_id = $_REQUEST['gradeable_id'];
+        $gradeable = $gradeable_list[$gradeable_id];
         $user_id = $_POST['user_id'];
-        $user = $this->core->getQueries()->getUserById($user_id);
 
-        if ($user === null) {
-            $msg = "Invalid user id '{$_POST['user_id']}'";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
-        if (!$user->isLoaded()) {
-            $msg = "Invalid user id '{$_POST['user_id']}'";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         if ($gradeable === null) {
             $msg = "Invalid gradeable id '{$_POST['gradeable_id']}'";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
-        
-        $gradeable->loadResultDetails();
-        if ($gradeable->isTeamAssignment()) {
-            if ($gradeable->getTeam() === null) {
+
+        if(!$gradeable->isTeamAssignment()){
+            $user = $this->core->getQueries()->getUserById($user_id);
+            if ($user === null) {
+                $msg = "Invalid user id '{$_POST['user_id']}'";
+                $return = array('success' => false, 'message' => $msg);
+                $this->core->getOutput()->renderJson($return);
+                return $return;
+            }
+            if (!$user->isLoaded()) {
+                $msg = "Invalid user id '{$_POST['user_id']}'";
+                $return = array('success' => false, 'message' => $msg);
+                $this->core->getOutput()->renderJson($return);
+                return $return;
+            }
+            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        }
+        else{
+            $team = $this->core->getQueries()->getTeamById($user_id);
+            if ($team === null) {
                 $msg = "Student '{$_POST['user_id']}' is not part of a team.";
                 $return = array('success' => false, 'message' => $msg);
                 $this->core->getOutput()->renderJson($return);
                 return $return;
             }
         }
+        
+
+        
+        
+        
+        
+        // $gradeable->loadResultDetails();
+       
         $highest_version = $gradeable->getHighestVersion();
         $return = array('success' => true, 'highest_version' => $highest_version);
         $this->core->getOutput()->renderJson($return);
@@ -393,6 +405,7 @@ class SubmissionController extends AbstractController {
         else {
             $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $user_id);
         }
+
         $gradeable->loadResultDetails();
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
