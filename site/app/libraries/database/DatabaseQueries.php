@@ -131,6 +131,12 @@ class DatabaseQueries {
         return $this->course_db->rows()[0];
     }
 
+    public function isInstructorPost($t_id){
+        $firstpost_id = $this->core->getQueries()->getFirstPostForThread($t_id)['author_user_id'];
+        $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", array($firstpost_id));
+        return intval($this->course_db->rows()[0]['user_group']) <= 2;
+    }
+
     public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment){
 
         //insert data

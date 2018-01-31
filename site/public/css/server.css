@@ -574,6 +574,11 @@ table tr.table-header {
     background-color: #21C2F6;
 }
 
+.important {
+    /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
+    background-color: rgba(255, 57, 57, 0.5);;
+}
+
 .viewed {
     color: #888888;
 }

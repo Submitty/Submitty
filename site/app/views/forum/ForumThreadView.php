@@ -85,6 +85,10 @@ HTML;
 							if($thread["pinned"])
 								$activeThreadAnnouncement = true;
 						}
+						
+						if($this->core->getQueries()->isInstructorPost($thread["id"])){
+							$class .= " important";
+						}
 						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
 						}
