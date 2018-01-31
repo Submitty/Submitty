@@ -54,6 +54,12 @@ HTML;
      */
     public function showGradeable($gradeable, $late_days_use, $extensions, $canViewWholeGradeable=false) {
         $return = "";
+        if($canViewWholeGradeable){
+            var_dump("CAN VIEW");
+        }
+        else{
+            var_dump("CAN'T VIEW");
+        }
         // hiding entire page if user is not a grader and student cannot view
         if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
             $message = "Students cannot view that gradeable.";

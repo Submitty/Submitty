@@ -17,6 +17,12 @@ class AutogradingView extends AbstractView {
      */
     public function showResults(Gradeable $gradeable, $show_hidden=false) {
         $return = "";
+        if($show_hidden){
+            $return.="true";
+        }
+        else{
+            $return.="false";
+        }
         $current_version = $gradeable->getCurrentVersion();
         $has_badges = false;
         $num_visible_testcases = 0;
@@ -100,10 +106,10 @@ HTML;
                 $background = "style=\"background-color:#D3D3D3;\"";
                 $hidden_title = "HIDDEN: ";
             }
-            // $div_click = "";
-            // if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
+            $div_click = "";
+            if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
                 $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
-            // }
+            }
             $div_to_populate = "testcase_".$count;
 
             $return .= <<<HTML
@@ -212,6 +218,7 @@ HTML;
 
 
 public static function loadAutoChecks(Gradeable $gradeable, $count, $who_id, $popup_css_file, $show_hidden=false) {
+    var_dump($show_hidden);
     $gradeable->loadResultDetails();
     $testcase = $gradeable->getTestcases()[$count];
     $autocheck_cnt = 0;
