@@ -200,14 +200,16 @@ HTML;
 							foreach($files as $file){
 								$path = urlencode(htmlspecialchars($file['path']));
 								$name = urlencode(htmlspecialchars($file['name']));
+								$name_display = htmlentities($file['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 								$return .= <<<HTML
-							<a href="#" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > View attachment </a>
+							<a href="#" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
 HTML;
 
 							}
 							
 						}
 			$return .= <<<HTML
+			
 <h7 style="float:right;"><strong>{$visible_username}</a></strong> {$function_date($date,"m/d/Y g:i A")}</h7>
 </div>
 HTML;
@@ -302,7 +304,7 @@ HTML;
 
             	<span style="float:left;display:inline-block;">
             	<label class="btn btn-primary" for="file_input">
-    				<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="$('#file_name').html(this.files.length + ' files selected.')" multiple>
+    				<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
     				Upload Attachment
 				</label>
 				<span class='label label-info' id="file_name"></span>

@@ -818,6 +818,18 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
+function checkNumFilesForumUpload(input){
+    if(input.files.length > 5){
+        $('#file_name').html('');
+        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Max file upload size is 5. Please try again.</div>';
+        $('#messages').append(message);
+        document.getElementById('file_input').value = null;
+    } else {
+        $('#file_name').html(input.files.length + ' files selected.');
+    }
+            
+}
+
 function deletePost(thread_id, post_id, author, time){
     var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note:  If you are deleting the first post in a thread this will delete the entire thread.");
     if(confirm){
