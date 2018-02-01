@@ -821,11 +821,14 @@ function openPopUp(css, title, count, testcase_num, side) {
 function checkNumFilesForumUpload(input){
     if(input.files.length > 5){
         $('#file_name').html('');
+        document.getElementById('file_input_label').style.border = "2px solid red";
         var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Max file upload size is 5. Please try again.</div>';
         $('#messages').append(message);
         document.getElementById('file_input').value = null;
     } else {
         $('#file_name').html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
+        $('#messages').fadeOut();
+        document.getElementById('file_input_label').style.border = "";
     }
             
 }

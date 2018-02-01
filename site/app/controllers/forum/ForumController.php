@@ -53,7 +53,7 @@ class ForumController extends AbstractController {
     }
 
 
-    private function returnUserContentToPage($error, $isThread){
+    private function returnUserContentToPage($error, $isThread, $content, $thread_id, $title=""){
         //Notify User
             $this->core->addErrorMessage($error);
            
@@ -73,14 +73,14 @@ class ForumController extends AbstractController {
     }
 
 
-    private function checkGoodAttachment($isThread, $content, $title = ""){
+    private function checkGoodAttachment($isThread, $content, $thread_id, $title = ""){
         if(count($_FILES['file_input']) > 5) {
-            returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread);
+            $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $content, $thread_id, $title);
             return -1;
         }
         $imageCheck = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
         if($imageCheck == 0 && !empty($_FILES['file_input']['tmp_name'])){
-            returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread);
+            $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $content, $thread_id, $title);
             return -1;
         
         } return $imageCheck;
@@ -97,7 +97,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("One of the fields was empty. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
-            $hasGoodAttachment = $this->checkGoodAttachment(true, $_POST["thread_content"], $_POST["title"]);
+            $hasGoodAttachment = $this->checkGoodAttachment(true, $_POST["thread_content"], -1, $_POST["title"]);
             if($hasGoodAttachment == -1){
                 return;
             }
@@ -133,7 +133,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
-            $hasGoodAttachment = $this->checkGoodAttachment(false, $_POST["post_content"]);
+            $hasGoodAttachment = $this->checkGoodAttachment(false, $_POST["post_content"], $thread_id);
             if($hasGoodAttachment == -1){
                 return;
             }

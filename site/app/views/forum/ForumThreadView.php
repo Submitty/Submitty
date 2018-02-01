@@ -227,7 +227,7 @@ HTML;
 	            	<br/>
 
 	           		<span style="float:left;display:inline-block;">
-            			<label class="btn btn-primary" for="file_input">
+            			<label id="file_input_label" class="btn btn-primary" for="file_input">
     					<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
     					Upload Attachment
 						</label>
@@ -303,7 +303,7 @@ HTML;
             	<div style="margin-bottom:10px;" class="form-group row">
 
             	<span style="float:left;display:inline-block;">
-            	<label class="btn btn-primary" for="file_input">
+            	<label id="file_input_label" class="btn btn-primary" for="file_input">
     				<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
     				Upload Attachment
 				</label>
