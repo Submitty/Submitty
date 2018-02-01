@@ -86,7 +86,7 @@ HTML;
 								$activeThreadAnnouncement = true;
 						}
 						
-						if($this->core->getQueries()->isInstructorPost($thread["id"])){
+						if($this->core->getQueries()->isStaffPost($thread["id"])){
 							$class .= " important";
 						}
 						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
