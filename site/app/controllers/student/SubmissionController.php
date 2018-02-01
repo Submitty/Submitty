@@ -263,7 +263,6 @@ class SubmissionController extends AbstractController {
 	if ($max_size < 10000000) {
 	    $max_size = 10000000;
 	}
-	 
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
