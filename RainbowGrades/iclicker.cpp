@@ -187,15 +187,16 @@ void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<s
           // all clicker id's start with '#'
           if (line[0] != '#') continue;
 
+          std::string remoteid = getItem(line, 0);
+          std::string item = getItem(line, question.getColumn() - 1);
+          bool participate = (item != "");
+
           //std::cout << "ITEM " << item << " " << item.size() << std::endl;
           if (item.size() != 1) {
             std::cout << "iclicker " << question.getFilename() << " " << question.getColumn() << std::endl;
           }
           assert (item.size() == 1);
 
-          std::string remoteid = getItem(line, 0);
-          std::string item = getItem(line, question.getColumn() - 1);
-          bool participate = (item != "");
 
           if (!participate) continue;
 
