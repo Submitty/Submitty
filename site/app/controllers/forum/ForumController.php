@@ -143,7 +143,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
-            $hasGoodAttachment = $this->checkGoodAttachment(true, $_POST["post_content"]);
+            $hasGoodAttachment = $this->checkGoodAttachment(false, $_POST["post_content"]);
             if($hasGoodAttachment == -1){
                 return;
             }

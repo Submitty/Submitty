@@ -825,7 +825,7 @@ function checkNumFilesForumUpload(input){
         $('#messages').append(message);
         document.getElementById('file_input').value = null;
     } else {
-        $('#file_name').html(input.files.length + ' files selected.');
+        $('#file_name').html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
     }
             
 }
