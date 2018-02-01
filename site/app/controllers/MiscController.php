@@ -61,7 +61,7 @@ class MiscController extends AbstractController {
 	// END HACK
 
 
-	$possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout");
+	$possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout", "forum_attachments");
         if (!in_array($dir, $possible_directories)) {
             return false;
         }
@@ -77,8 +77,10 @@ class MiscController extends AbstractController {
 
         if ($dir === "config_upload" || $dir === "uploads") {
             return ($this->core->getUser()->accessAdmin());
-        }
-        else if ($dir === "submissions" || $dir === "results" || $dir === "checkout") {
+        } else if($dir === "forum_attachments"){
+            //Might need to be revisted but for now fixes the problem where students can't view attachments...
+            return true;
+        } else if ($dir === "submissions" || $dir === "results" || $dir === "checkout") {
             // if instructor or grader, then it's okay
             if ($this->core->getUser()->accessGrading()) {
                 return true;

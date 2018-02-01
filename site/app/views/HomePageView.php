@@ -107,15 +107,10 @@ HTML;
                         $rankWithCourse[$i] = array();
                     }
 
-                    
-                    foreach($courses as $course){
-
-                        $rank = $this->core->getQueries()->getGroupForUserInClass($course->getTitle(), $user->getId());
-
+                    foreach($courses as $course) {
+                        $rank = $this->core->getQueries()->getGroupForUserInClass($course->getSemester(), $course->getTitle(), $user->getId());
                         array_push($rankWithCourse[$rank], $course);
-
                         $pos++;
-
                     }
 
                     $pos = 0;
@@ -142,10 +137,10 @@ HTML;
                                         $header = "<h3>Student:</h3>";
                                 break;
                         }
-                            
+
                             $return .= <<<HTML
                         <tr>
-                            <td colspan="8">     
+                            <td colspan="8">
                                 {$header}
                             </td>
                         </tr>
@@ -156,12 +151,13 @@ HTML;
                             if($rankWithCourse[$i][$q]->getDisplayName() !== "") {
                                 $display_text .= " " . $rankWithCourse[$i][$q]->getDisplayName();
                             }
-                        
+
                         $return .= <<<HTML
-                        
+
                         <tr>
-                            <td colspan="8">
-                                <a class="btn btn-primary btn-block" style="width:95%;white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
+                            <td style="width:85%" colspan="30">
+                                <a class="btn btn-primary btn-block" style=" white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
+                               
                             </td>
                         </tr>
 HTML;
