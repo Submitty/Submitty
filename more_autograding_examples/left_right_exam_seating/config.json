@@ -1,0 +1,23 @@
+{
+    "assignment_message" : "To better accomodate students for the upcoming exam, please let us know if you left-handed or right-handed.<br>We will use this information to make the seating assignments.",
+    "autograding" : {
+	"submission_to_runner" : [ "*.txt" ],
+	"work_to_details" : [ "*.txt" ]
+    },
+    "textboxes" :
+    [
+	{
+	    "label" : "Write \"left-handed\" or \"right-handed\":",
+	    "filename" : "left_right.txt"
+	}
+    ],
+    "testcases":
+    [
+	{
+	    "type" : "FileCheck",
+	    "title" : "Review",
+	    "actual_file" : "left_right.txt",
+	    "points" : 0
+	}
+    ]
+}
