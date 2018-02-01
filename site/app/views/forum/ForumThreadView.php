@@ -85,10 +85,7 @@ HTML;
 							if($thread["pinned"])
 								$activeThreadAnnouncement = true;
 						}
-						
-						if($this->core->getQueries()->isStaffPost($thread["id"])){
-							$class .= " important";
-						}
+
 						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
 						}
@@ -174,12 +171,17 @@ HTML;
 							$visible_username = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 						}
 
-						$return .= <<<HTML
-
-
-
+						if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
+							$return .= <<<HTML
+							<div class="post_box important" style="margin-left:0;">
+HTML;
+						} else {
+							$return .= <<<HTML
 							<div class="post_box" style="margin-left:0;">
 HTML;
+						}
+
+
 						if($this->core->getUser()->accessAdmin()){
 							$return .= <<<HTML
 							<a style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
