@@ -68,6 +68,10 @@ std::string ReadRemote(std::istream &istr) {
     if (c == ',') break;
     answer.push_back(c);
   }
+  if (answer == "#T24RLR15") {
+    std::cerr << "ERROR!  " << answer << " is not a valid remote ID, this is the clicker model #" << std::endl;
+    return "";
+  }
   return answer;
 }
 
@@ -102,7 +106,11 @@ void MatchClickerRemotes(std::vector<Student*> &students, const std::string &rem
   while (1) {
     std::string remote = ReadRemote(istr);
     std::string username = ReadQuoted(istr);
-    if (remote == "" || username == "") break;
+    if (username == "") break;
+    if (remote == "") {
+      std::cerr << "ERROR! blank remoteid for " << username << std::endl;
+      continue;
+    }
     //std::cout << "tokens: " << remote << " " << username << std::endl;
     Student *s = GetStudent(students,username);
     if (s == NULL) {
@@ -111,6 +119,9 @@ void MatchClickerRemotes(std::vector<Student*> &students, const std::string &rem
       continue;
     }
     assert (s != NULL);
+    if (s->getRemoteID().size() != 0) {
+      std::cout << "student " << username << " has multiple remotes (replacing a lost remote)" << std::endl;
+    }
     s->setRemoteID(remote);
     //std::cout << "MATCH " << username << " " << remote << std::endl;
     if (GLOBAL_CLICKER_MAP.find(remote) != GLOBAL_CLICKER_MAP.end()) {
@@ -179,6 +190,13 @@ void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<s
           std::string remoteid = getItem(line, 0);
           std::string item = getItem(line, question.getColumn() - 1);
           bool participate = (item != "");
+
+          //std::cout << "ITEM " << item << " " << item.size() << std::endl;
+          if (item.size() != 1) {
+            std::cout << "iclicker " << question.getFilename() << " " << question.getColumn() << std::endl;
+          }
+          assert (item.size() == 1);
+
 
           if (!participate) continue;
 
