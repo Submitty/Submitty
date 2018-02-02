@@ -128,7 +128,7 @@ class DatabaseQueries {
             if($this->course_db->inTransaction()){
                 $this->course_db->rollback();
             }
-        } 
+        }
 
         return $this->course_db->rows()[0]["max_id"];
     }
@@ -150,7 +150,7 @@ class DatabaseQueries {
         $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
         } catch(DatabaseException $dbException) {
             $this->course_db->rollback();
-        } 
+        }
 
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
@@ -843,7 +843,7 @@ ORDER BY user_id ASC");
     }
 
     public function setNonRegisteredUsersRotatingSectionNull() {
-        $this->course_db->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL AND NOT manual_registration");
+        $this->course_db->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL");
     }
 
     public function deleteAllRotatingSections() {
@@ -1767,7 +1767,7 @@ AND gc_id IN (
       if($thread_id == -1) {
         $announcement_id = $this->existsAnnouncements();
         if($announcement_id == -1){
-          $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and pinned = false"); 
+          $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and pinned = false");
           $thread_id = $this->course_db->rows()[0]["max"];
         } else {
           $thread_id = $announcement_id;
