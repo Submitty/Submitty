@@ -576,7 +576,9 @@ table tr.table-header {
 
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
-    background-color: rgba(255, 57, 57, 0.5) !important;
+    border-style: solid;
+    border-width: 3px;
+    border-color:rgba(236, 9, 9, 0.5);
 }
 
 .viewed {
