@@ -124,14 +124,19 @@ HTML;
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
 					<h3 style="display:inline-block;word-wrap: break-word;margin-top:20px;">
 HTML;
-					if($this->core->getUser()->accessAdmin() && $activeThreadAnnouncement){
+					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
 						$return .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="removeAnnouncement({$activeThread['id']})" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'yellow')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:yellow; -webkit-text-stroke-width: 1px;
+							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'yellow')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:yellow; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
 					} else if($activeThreadAnnouncement){
 						$return .= <<<HTML
 						 <i class="fa fa-star" style="position:relative; display:inline-block; color:yellow; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+					} else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
+						$return .= <<<HTML
+							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fa fa-star" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'yellow')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
 					}
 					$return .= <<< HTML
@@ -195,15 +200,17 @@ HTML;
 							foreach($files as $file){
 								$path = urlencode(htmlspecialchars($file['path']));
 								$name = urlencode(htmlspecialchars($file['name']));
+								$name_display = htmlentities($file['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 								$return .= <<<HTML
-							<a href="#" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > View attachment </a>
+							<a href="#" style="display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
 HTML;
 
 							}
 							
 						}
 			$return .= <<<HTML
-<h7 style="float:right;"><strong>{$visible_username}</a></strong> {$function_date($date,"m/d/Y g:i A")}</h7>
+			
+<h7 style="margin-top:5px;float:right;"><strong>{$visible_username}</a></strong> {$function_date($date,"m/d/Y g:i A")}</h7>
 </div>
 HTML;
 						
@@ -214,14 +221,14 @@ HTML;
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>
 	            	<div class="form-group row">
-	            		<textarea name="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+	            		<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
 	            	</div>
 
 	            	<br/>
 
 	           		<span style="float:left;display:inline-block;">
-            			<label class="btn btn-primary" for="file_input">
-    					<input id="file_input" name="file_input" accept="image/*" type="file" style="display:none" onchange="$('#file_name').html(this.files[0].name)">
+            			<label id="file_input_label" class="btn btn-primary" for="file_input">
+    					<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
     					Upload Attachment
 						</label>
 						<span class='label label-info' id="file_name"></span>
@@ -239,6 +246,23 @@ HTML;
 				</div>
 HTML;
 		}
+
+if(isset($_SESSION["post_content"]) && isset($_SESSION["post_recover_active"])){
+			
+	$post_content = html_entity_decode($_SESSION["post_content"]);
+
+	$return .= <<<HTML
+			<script>
+				var contentBox = document.getElementById('post_content');
+				contentBox.innerHTML = `{$post_content}`;
+				document.getElementById('file_input').value = null;
+				var box = $('.posts_list');
+				box.scrollTop(box.prop('scrollHeight'));
+			</script>
+HTML;
+		$_SESSION["post_recover_active"] = null;
+}
+
 		return $return;
 	}
 
@@ -267,11 +291,11 @@ HTML;
 			<form style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 
             	<div class="form-group row">
-            		Title: <input type="text" size="45" placeholder="Title" name="title" required/>
+            		Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
             	</div>
             	<br/>
             	<div class="form-group row">
-            		<textarea name="thread_content" style="white-space: pre-wrap;resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+            		<textarea name="thread_content" id="thread_content" style="white-space: pre-wrap;resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
             	</div>
 
             	<br/>
@@ -279,8 +303,8 @@ HTML;
             	<div style="margin-bottom:10px;" class="form-group row">
 
             	<span style="float:left;display:inline-block;">
-            	<label class="btn btn-primary" for="file_input">
-    				<input id="file_input" name="file_input" accept="image/*" type="file" style="display:none" onchange="$('#file_name').html(this.files[0].name)">
+            	<label id="file_input_label" class="btn btn-primary" for="file_input">
+    				<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
     				Upload Attachment
 				</label>
 				<span class='label label-info' id="file_name"></span>
@@ -307,6 +331,23 @@ HTML;
 		</div>
 		</div>
 HTML;
+
+if(isset($_SESSION["thread_title"]) && isset($_SESSION["thread_content"]) && isset($_SESSION["thread_recover_active"])){
+	$title = html_entity_decode($_SESSION["thread_title"]);
+			
+	$thread_content = html_entity_decode($_SESSION["thread_content"]);
+
+	$return .= <<<HTML
+			<script>
+				var titleBox = document.getElementById('title');
+				titleBox.value = `{$title}`;
+				var contentBox = document.getElementById('thread_content');
+				contentBox.innerHTML = `{$thread_content}`;
+				document.getElementById('file_input').value = null;
+			</script>
+HTML;
+		unset($_SESSION["thread_recover_active"]);
+}
 		return $return;
 	}
 

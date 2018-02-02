@@ -118,10 +118,17 @@ class DatabaseQueries {
             $this->course_db->query("SELECT id FROM posts where timestamp = (SELECT MAX(timestamp) from posts where thread_id = ? and deleted=false)", array($thread_id));
             $parent_post = $this->course_db->rows()[0]["id"];
         }
-        $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, 0, $type, $hasAttachment));
 
+        try {
+        $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, 0, $type, $hasAttachment));
+        $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = ?", array($thread_id));
         //retrieve generated thread_id
         $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
+        } catch (DatabaseException $dbException){
+            if($this->course_db->inTransaction()){
+                $this->course_db->rollback();
+            }
+        }
 
         return $this->course_db->rows()[0]["max_id"];
     }
@@ -133,16 +140,24 @@ class DatabaseQueries {
 
     public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment){
 
+        $this->course_db->beginTransaction();
+
+        try {
         //insert data
         $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, true));
 
         //retrieve generated thread_id
         $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
+        } catch(DatabaseException $dbException) {
+            $this->course_db->rollback();
+        }
 
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
 
         $post_id = $this->createPost($user, $content, $id, $anon, 0, true, $hasAttachment);
+
+        $this->course_db->commit();
 
         return array("thread_id" => $id, "post_id" => $post_id);
     }
@@ -828,7 +843,7 @@ ORDER BY user_id ASC");
     }
 
     public function setNonRegisteredUsersRotatingSectionNull() {
-        $this->course_db->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL AND NOT manual_registration");
+        $this->course_db->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL");
     }
 
     public function deleteAllRotatingSections() {
@@ -1752,14 +1767,14 @@ AND gc_id IN (
       if($thread_id == -1) {
         $announcement_id = $this->existsAnnouncements();
         if($announcement_id == -1){
-          $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and pinned = false"); 
+          $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and pinned = false");
           $thread_id = $this->course_db->rows()[0]["max"];
         } else {
           $thread_id = $announcement_id;
         }
       }
 
-      $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false", array($thread_id));
+      $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false ORDER BY timestamp ASC", array($thread_id));
       $result_rows = $this->course_db->rows();
 
       if(count($result_rows) > 0){
