@@ -138,6 +138,11 @@ class DatabaseQueries {
         return $this->course_db->rows()[0];
     }
 
+    public function isStaffPost($author_id){
+        $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", array($author_id));
+        return intval($this->course_db->rows()[0]['user_group']) <= 3; 
+    }
+
     public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment){
 
         $this->course_db->beginTransaction();
