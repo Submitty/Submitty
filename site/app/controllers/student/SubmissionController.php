@@ -85,7 +85,7 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
                 return array('error' => true, 'message' => 'No gradeable with that id.');
             }
-            else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) {
+            else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null && !$this->core->getUser()->accessAdmin()) {
                 $this->core->addErrorMessage('Must be on a team to access submission');
                 $this->core->redirect($this->core->getConfig()->getSiteUrl());
                 return array('error' => true, 'message' => 'Must be on a team to access submission.');                
