@@ -318,7 +318,7 @@ HTML;
                         /> No 
                         <br /> <br />
 
-                        Should students be able to download files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
+                        Should students be able to download submitted files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
                         <input type="radio" id="yes_student_download" name="student_download" value="true"
 HTML;
                         if ($admin_gradeable->getEgStudentDownload()===true) { $html_output .= ' checked="checked"'; }
