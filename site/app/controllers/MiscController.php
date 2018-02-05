@@ -133,8 +133,8 @@ class MiscController extends AbstractController {
             }
 
             // if gradeable student view or download false, don't allow anything
-            if (!$path_gradeable->getStudentView() || !$path_gradeable->getStudentDownload()) {
-		 $error_string="students can't view downloads for this gradeable";
+            if ($dir == "submissions" && (!$path_gradeable->getStudentView() || !$path_gradeable->getStudentDownload())) {
+		 $error_string="students can't view / download submissions for this gradeable";
                  return false;
             }
 
