@@ -810,7 +810,7 @@ HTML;
                     else {
                         $size = number_format(-1);
                     }
-                    $return .= "{$file['relative_name']} ({$size}kb)";
+                    $return .= urldecode( $file ['relative_name']) . " ({$size}kb)";
                     // download icon if student can download files
                     if (!$gradeable->useVcsCheckout() && $gradeable->getStudentDownload()) {
                         // if not active version and student cannot see any more than active version
