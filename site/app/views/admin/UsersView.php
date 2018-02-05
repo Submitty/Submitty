@@ -351,7 +351,7 @@ $(function() {
         <div class="box half">
             <h2>Student Counts in Rotating Sections</h2>
             <div class="half">
-                <h3>Registered Students</h3>
+                <h3>Registered Students (non NULL registration section)</h3>
                 <table class="table table-bordered table-striped">
 HTML;
         foreach($not_null_counts as $row) {
@@ -368,7 +368,7 @@ HTML;
                 </table>
             </div>
             <div class="half">
-                <h3>Non-registered Students</h3>
+                <h3>Students with Registration Section=NULL</h3>
                 <table class="table table-bordered table-striped">
 HTML;
         foreach ($null_counts as $row) {
