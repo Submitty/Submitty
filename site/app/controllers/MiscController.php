@@ -1,11 +1,7 @@
 <?php
-
 namespace app\controllers;
-
-
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-
 class MiscController extends AbstractController {
     public function run() {
         foreach (array('path', 'file') as $key) {
@@ -13,7 +9,6 @@ class MiscController extends AbstractController {
                 $_REQUEST[$key] = htmlspecialchars_decode(urldecode($_REQUEST[$key]));
             }
         }
-
         switch($_REQUEST['page']) {
             case 'display_file':
                 $this->displayFile();
@@ -29,7 +24,6 @@ class MiscController extends AbstractController {
                 break;
         }
     }
-
     // function to check that this is a valid access request
     private function checkValidAccess($is_zip, &$error_string) {
         $error_string="";
@@ -42,7 +36,6 @@ class MiscController extends AbstractController {
         // do path and permissions checking
         $dir = $_REQUEST['dir'];
         $path = $_REQUEST['path'];
-
         foreach (explode(DIRECTORY_SEPARATOR, $path) as $part) {
             if ($part == ".." || $part == ".") {
                  $error_string=".. or . in path";
@@ -54,8 +47,6 @@ class MiscController extends AbstractController {
             $error_string="not valid filename";
             return false;
         }
-
-
         // TEMPORARY HACK PUT THIS HERE
         // INSTRUCTORS ARE UNABLE TO VIEW VCS CHECKOUT FILES WITHOUT THIS
         // if instructor or grader, then it's okay
@@ -63,14 +54,11 @@ class MiscController extends AbstractController {
             return true;
         }
         // END HACK
-
-
         $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout", "forum_attachments");
         if (!in_array($dir, $possible_directories)) {
             $error_string="not in possible directories list";
             return false;
         }
-
         $course_path = $this->core->getConfig()->getCoursePath();
         $check = FileUtils::joinPaths($course_path, $dir);
         if (!Utils::startsWith($path, $check)) {
@@ -81,7 +69,6 @@ class MiscController extends AbstractController {
             $error_string="path does not exist";
             return false;
         }
-
         if ($dir === "config_upload" || $dir === "uploads") {
             $error_string="only admin can access uploads";
             return ($this->core->getUser()->accessAdmin());
@@ -93,9 +80,7 @@ class MiscController extends AbstractController {
             if ($this->core->getUser()->accessGrading()) {
                 return true;
             }
-
             // FIXME: need to make this work for peer grading
-
             $current_user_id = $this->core->getUser()->getId();
             // get the information from the path
             $path_folder = FileUtils::joinPaths($course_path, $dir);
@@ -105,7 +90,6 @@ class MiscController extends AbstractController {
             $path_user_id = substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR));
             $path_rest = substr($path_rest, strlen($path_user_id)+1);
             $path_version = intval(substr($path_rest, 0, strpos($path_rest, DIRECTORY_SEPARATOR)));
-
             // gradeable to get temporary info from
             // if team, get one of the user ids via the team id
             $current_gradeable = $this->core->getQueries()->getGradeable($path_gradeable_id, $current_user_id);
@@ -124,26 +108,22 @@ class MiscController extends AbstractController {
                 }
                 $path_user_id = $path_team_members[0];
             }
-
             // use the current user id to get the gradeable specified in the path
             $path_gradeable = $this->core->getQueries()->getGradeable($path_gradeable_id, $path_user_id);
             if ($path_gradeable === null) {
                  $error_string="something wrong with gradeable path";
                  return false;
             }
-
             // if gradeable student view or download false, don't allow anything
             if ($dir == "submissions" && (!$path_gradeable->getStudentView() || !$path_gradeable->getStudentDownload())) {
                  $error_string="students can't view / download submissions for this gradeable";
                  return false;
             }
-
             // make sure that version is active version if student any version is false
             if (!$path_gradeable->getStudentAnyVersion() && $path_version !== $path_gradeable->getActiveVersion()) {
                  $error_string="you are only allowed only view the active submission version";
                  return false;
             }
-
             // if team assignment, check that team id matches the team of the current user
             if ($path_gradeable->isTeamAssignment()) {
                 $current_team = $this->core->getQueries()->getTeamByGradeableAndUser($path_gradeable_id,$current_user_id);
@@ -170,14 +150,13 @@ class MiscController extends AbstractController {
             return false;
         }
     }
-
     private function displayFile() {
         // security check
-        if (!$this->checkValidAccess(false)) {
-            $this->core->getOutput()->showError("You do not have access to this file");
+        $error_string="";
+        if (!$this->checkValidAccess(false,$error_string)) {
+            $this->core->getOutput()->showError("You do not have access to this file ".$error_string);
             return false;
         }
-
         $corrected_name = pathinfo($_REQUEST['path'], 1) . "/" . urlencode( basename($_REQUEST['path']));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
@@ -199,17 +178,17 @@ class MiscController extends AbstractController {
             }
         }
     }
-
     private function downloadFile() {
         
         // security check
-        if (!$this->checkValidAccess(false)) {
-            $message = "You do not have access to that page.";
+        $error_string="";
+        if (!$this->checkValidAccess(false,$error_string)) {
+            $message = "You do not have access to that page. ".$error_string;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
         
-        $this->core->getOutput()->useHeader(false);
+       $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
@@ -224,7 +203,6 @@ class MiscController extends AbstractController {
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
-
         $zip_file_name = $_REQUEST['gradeable_id'] . "_" . $_REQUEST['user_id'] . "_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -263,14 +241,12 @@ class MiscController extends AbstractController {
                         // Get real and relative path for current file
                         $filePath = $file->getRealPath();
                         $relativePath = substr($filePath, strlen($paths[$x]) + 1);
-
                         // Add current file to archive
                         $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
                     }
                 }
             }    
         }
-
         $zip->close();
         header("Content-type: application/zip"); 
         header("Content-Disposition: attachment; filename=$zip_file_name");
@@ -280,7 +256,6 @@ class MiscController extends AbstractController {
         readfile("$zip_name");
         unlink($zip_name); //deletes the random zip file
     }
-
     private function downloadAssignedZips() { 
         // security check
         if (!($this->core->getUser()->accessGrading())) {
@@ -288,7 +263,6 @@ class MiscController extends AbstractController {
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
-
         $zip_file_name = $_REQUEST['gradeable_id'] . "_section_students_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -303,7 +277,6 @@ class MiscController extends AbstractController {
         {
             $type = "";
         }
-
         $temp_dir = "/tmp";
         //makes a random zip file name on the server
         $temp_name = uniqid($this->core->getUser()->getId(), true);
@@ -318,7 +291,6 @@ class MiscController extends AbstractController {
                 new \RecursiveDirectoryIterator($gradeable_path),
                 \RecursiveIteratorIterator::LEAVES_ONLY
             );
-
             foreach ($files as $name => $file)
             {
                 // Skip directories (they would be added automatically)
@@ -327,7 +299,6 @@ class MiscController extends AbstractController {
                     // Get real and relative path for current file
                     $filePath = $file->getRealPath();
                     $relativePath = substr($filePath, strlen($gradeable_path) + 1);
-
                     // Add current file to archive
                     $zip->addFile($filePath, $relativePath);
                 }
@@ -359,10 +330,8 @@ class MiscController extends AbstractController {
                             new \RecursiveDirectoryIterator($temp_path),
                             \RecursiveIteratorIterator::LEAVES_ONLY
                         );
-
                         //makes a new directory in the zip to add the files in
                         $zip -> addEmptyDir($file); 
-
                         foreach ($files_in_folder as $name => $file_in_folder)
                         {
                             // Skip directories (they would be added automatically)
