@@ -173,25 +173,25 @@ class MiscController extends AbstractController {
 
     private function displayFile() {
         // security check
-        $error_string="";
-        if (!$this->checkValidAccess(false,$error_string)) {
-            $this->core->getOutput()->showError("You do not have access to this file ".$error_string);
+        if (!$this->checkValidAccess(false)) {
+            $this->core->getOutput()->showError("You do not have access to this file");
             return false;
         }
 
-        $mime_type = FileUtils::getMimeType($_REQUEST['path']);
+        $corrected_name = pathinfo($_REQUEST['path'], 1) . "/" . urlencode( basename($_REQUEST['path']));
+        $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
             header('Content-Disposition: inline; filename="' .  basename($_REQUEST['path']) . '"');
-            readfile($_REQUEST['path']);
+            readfile($corrected_name);
             $this->core->getOutput()->renderString($_REQUEST['path']);
         }
         else {
-            $contents = htmlentities(file_get_contents($_REQUEST['path']), ENT_SUBSTITUTE);
+            $contents = htmlentities(file_get_contents($corrected_name), ENT_SUBSTITUTE);
             if ($_REQUEST['ta_grading'] === "true") {
-                $filename = htmlentities($_REQUEST['file'], ENT_SUBSTITUTE);
+                $filename = htmlentities($corrected_name, ENT_SUBSTITUTE);
                 $this->core->getOutput()->renderOutput('Misc', 'displayCode', $mime_type, $filename, $contents);
             }
             else {
@@ -203,9 +203,8 @@ class MiscController extends AbstractController {
     private function downloadFile() {
         
         // security check
-        $error_string="";
-        if (!$this->checkValidAccess(false,$error_string)) {
-            $message = "You do not have access to that page. ".$error_string;
+        if (!$this->checkValidAccess(false)) {
+            $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
@@ -215,9 +214,8 @@ class MiscController extends AbstractController {
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
         header("Content-disposition: attachment; filename=\"{$_REQUEST['file']}\"");
-        readfile($_REQUEST['path']);
+        readfile(pathinfo($_REQUEST['path'], 1) . "/" . urlencode( basename($_REQUEST['path'])));
     }
-
     private function downloadZip() {
         // security check
         $error_string="";
