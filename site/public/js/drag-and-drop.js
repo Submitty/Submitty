@@ -672,7 +672,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                     alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                     return;
                 }
-                formData.append('files' + (i + 1) + '[]', file_array[i][j]);
+                formData.append('files' + (i + 1) + '[]', file_array[i][j], encodeURIComponent(file_array[i][j].name));
             }
         }
         // Files from previous submission
