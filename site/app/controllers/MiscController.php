@@ -179,7 +179,7 @@ class MiscController extends AbstractController {
             return false;
         }
 
-		$corrected_name = pathinfo($_REQUEST['path'], 1) . "/" . urlencode( basename($_REQUEST['path']));
+		$corrected_name = pathinfo($_REQUEST['path'], 1) . "/" . rawurlencode( basename($_REQUEST['path']));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -216,7 +216,7 @@ class MiscController extends AbstractController {
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
         header("Content-disposition: attachment; filename=\"{$_REQUEST['file']}\"");
-		readfile(pathinfo($_REQUEST['path'], 1) . "/" . urlencode( basename($_REQUEST['path'])));
+		readfile(pathinfo($_REQUEST['path'], 1) . "/" . rawurlencode( basename($_REQUEST['path'])));
     }
 
     private function downloadZip() {
