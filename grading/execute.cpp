@@ -239,14 +239,18 @@ std::string validate_option(const std::string &program, const std::string &optio
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
         { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
+        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
       }
     },
     { "/usr/bin/java",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
         { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
+        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
       }
     },
     { "/usr/bin/mono",

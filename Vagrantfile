@@ -25,13 +25,15 @@ Vagrant.configure(2) do |config|
   config.vm.define 'ubuntu', primary: true do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-16.04'
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 15432
-    ubuntu.vm.network 'private_network', ip: '192.168.56.101', auto_config: false
+    ubuntu.vm.network 'private_network', ip: '192.168.56.101'
+    ubuntu.vm.network 'private_network', ip: '192.168.56.102'
   end
 
   config.vm.define 'debian', autostart: false do |debian|
     debian.vm.box = 'bento/debian-8.8'
     debian.vm.network 'forwarded_port', guest: 5432, host: 25432
-    debian.vm.network 'private_network', ip: '192.168.56.102', auto_config: false
+    debian.vm.network 'private_network', ip: '192.168.56.201'
+    debian.vm.network 'private_network', ip: '192.168.56.202'
   end
 
   config.vm.provider 'virtualbox' do |vb|

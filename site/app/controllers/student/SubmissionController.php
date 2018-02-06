@@ -155,10 +155,21 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
         }
 
+
         $gradeable_id = $_REQUEST['gradeable_id'];
         $user_id = $_POST['user_id'];
-        $user = $this->core->getQueries()->getUserById($user_id);
 
+        //TODO: support entering team names rather than single user ids.
+        //This code will be useful for the case above, but is currently redundant
+        // $gradeable = $gradeable_list[$gradeable_id];
+        // if ($gradeable === null) {
+        //     $msg = "Invalid gradeable id '{$_POST['gradeable_id']}'";
+        //     $return = array('success' => false, 'message' => $msg);
+        //     $this->core->getOutput()->renderJson($return);
+        //     return $return;
+        // }
+
+        $user = $this->core->getQueries()->getUserById($user_id);
         if ($user === null) {
             $msg = "Invalid user id '{$_POST['user_id']}'";
             $return = array('success' => false, 'message' => $msg);
@@ -171,26 +182,22 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
+
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        if ($gradeable === null) {
-            $msg = "Invalid gradeable id '{$_POST['gradeable_id']}'";
+
+        if($gradeable === null){
+            $msg = "Gradeable not found.";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
-        
+
         $gradeable->loadResultDetails();
-        if ($gradeable->isTeamAssignment()) {
-            if ($gradeable->getTeam() === null) {
-                $msg = "Student '{$_POST['user_id']}' is not part of a team.";
-                $return = array('success' => false, 'message' => $msg);
-                $this->core->getOutput()->renderJson($return);
-                return $return;
-            }
-        }
+
         $highest_version = $gradeable->getHighestVersion();
         $return = array('success' => true, 'highest_version' => $highest_version);
         $this->core->getOutput()->renderJson($return);
+
         return $return;
     }
 
@@ -256,7 +263,6 @@ class SubmissionController extends AbstractController {
 	if ($max_size < 10000000) {
 	    $max_size = 10000000;
 	}
-	 
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
@@ -387,12 +393,20 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         $path = $_POST['path'];
-        if ($user_id == $original_user_id) {
+        if ($user_id === $original_user_id) {
             $gradeable = $gradeable_list[$gradeable_id];
         }
         else {
-            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $user_id);
+            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         }
+
+        if($gradeable === null){
+            $msg = "Gradeable not found.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+
         $gradeable->loadResultDetails();
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
@@ -411,7 +425,7 @@ class SubmissionController extends AbstractController {
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByUserId($gradeable->getId(), $user_id);
+            $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
             if ($team !== null) {
                 $team_id = $team->getId();
                 $who_id = $team_id;
