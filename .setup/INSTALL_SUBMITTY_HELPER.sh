@@ -508,13 +508,23 @@ rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_I
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/plagiarism ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #copying commonAST scripts 
+mkdir -p ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/astMatcher.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/commonast.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/CMakeLists.txt ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/ASTMatcher.cpp ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
 
 #building commonAST excecutable
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/commonASTCount.out
 popd
+
+#building clang ASTMatcher.cpp
+pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
+ninja
+popd
+chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
+
 
 #copying commonAST test
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/tests/commonASTtests ${SUBMITTY_INSTALL_DIR}/test_suite/commonAST
@@ -527,7 +537,7 @@ chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 echo -e "\nCompleted installation of the Submitty homework submission server\n"
 
 #install ASTMatcher 
-python3 ${SUBMITTY_INSTALL_DIR}/.setup/ASTMatcherInstall.py
+python3 ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Submitty/.setup/ASTMatcherInstall.py
 
 
 ################################################################################################################

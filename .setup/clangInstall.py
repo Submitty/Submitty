@@ -3,9 +3,11 @@ import sys
 import os
 from shutil import copyfile
 
+
 cwd = os.getcwd()
 
 clangDir = os.path.expanduser("/usr/local/submitty/clang-llvm/")
+'''
 
 
 if not os.path.exists(clangDir):
@@ -41,8 +43,14 @@ subprocess.call(["cmake", "-G", "Ninja", "../llvm", "-DCMAKE_BUILD_TYPE=Release"
 
 subprocess.call(["ninja"])
 subprocess.call(["ninja", "install"])
+'''
 
-cmd = "echo 'add_subdirectory(ASTMatcher)' >> ~/clang-llvm/llvm/tools/clang/tools/extra/CMakeLists.txt"
+cmd = "echo 'add_subdirectory(ASTMatcher)' >> /usr/local/submitty/clang-llvm/llvm/tools/clang/tools/extra/CMakeLists.txt"
 os.system(cmd)
+
+astMatcherDir = os.path.expanduser(clangDir + "llvm/tools/clang/tools/extra/ASTMatcher/")
+
+if not os.path.exists(astMatcherDir):
+        os.mkdir(astMatcherDir)
 
 os.chdir(cwd)
