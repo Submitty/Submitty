@@ -4,6 +4,7 @@ namespace app\libraries\database;
 
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\GradeableType;
 use app\models\AdminGradeable;
@@ -104,6 +105,91 @@ class DatabaseQueries {
      */
     public function insertSubmittyUser(User $user) {
         throw new NotImplementedException();
+    }
+
+    public function loadThreads($announcements){
+        $this->course_db->query("SELECT * FROM threads WHERE deleted = false and pinned = ? ORDER BY id DESC", array($announcements));
+        return $this->course_db->rows();
+    }
+
+    public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment){
+        $parent_post = -1;
+        if(!$first){
+            $this->course_db->query("SELECT id FROM posts where timestamp = (SELECT MAX(timestamp) from posts where thread_id = ? and deleted=false)", array($thread_id));
+            $parent_post = $this->course_db->rows()[0]["id"];
+        }
+
+        try {
+        $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, 0, $type, $hasAttachment));
+        $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = ?", array($thread_id));
+        //retrieve generated thread_id
+        $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
+        } catch (DatabaseException $dbException){
+            if($this->course_db->inTransaction()){
+                $this->course_db->rollback();
+            }
+        }
+
+        return $this->course_db->rows()[0]["max_id"];
+    }
+
+    public function getFirstPostForThread($thread_id) {
+        $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id = ?", array($thread_id));
+        return $this->course_db->rows()[0];
+    }
+
+    public function isStaffPost($author_id){
+        $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", array($author_id));
+        return intval($this->course_db->rows()[0]['user_group']) <= 3; 
+    }
+
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment){
+
+        $this->course_db->beginTransaction();
+
+        try {
+        //insert data
+        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, true));
+
+        //retrieve generated thread_id
+        $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
+        } catch(DatabaseException $dbException) {
+            $this->course_db->rollback();
+        }
+
+        //Max id will be the most recent post
+        $id = $this->course_db->rows()[0]["max_id"];
+
+        $post_id = $this->createPost($user, $content, $id, $anon, 0, true, $hasAttachment);
+
+        $this->course_db->commit();
+
+        return array("thread_id" => $id, "post_id" => $post_id);
+    }
+
+    public function setAnnouncement($thread_id, $onOff){
+        $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($onOff, $thread_id));
+    }
+
+    public function deletePost($post_id, $thread_id){
+        $this->course_db->query("SELECT parent_id from posts where id=?", array($post_id));
+
+        //If you delete the first post in a thread it deletes all posts in thread
+
+        $parent_id = $this->course_db->rows()[0]["parent_id"];
+
+        if($parent_id == -1){
+            $this->course_db->query("UPDATE threads SET deleted = true WHERE id = ?", array($thread_id));
+            $this->course_db->query("UPDATE posts SET deleted = true WHERE thread_id = ?", array($thread_id));
+            return true;
+        } else {
+            $this->course_db->query("SELECT id from posts where parent_id = ?", array($post_id));
+            $row = $this->course_db->rows();
+            if(count($row) > 0){
+                $this->course_db->query("UPDATE posts SET parent_id = ? WHERE id = ?", array($parent_id, $row[0]["id"]));
+            }
+            $this->course_db->query("UPDATE posts SET deleted = true WHERE id = ?", array($post_id));
+        } return false;
     }
 
     /**
@@ -482,8 +568,8 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
    SELECT * FROM (
       SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
       FROM electronic_gradeable_data AS egv
-      INNER JOIN users AS u ON u.user_id = egv.user_id
-      WHERE egv.g_id=? AND u.{$section_key} IS NOT NULL
+      INNER JOIN users AS u ON u.user_id = egv.user_id, electronic_gradeable_version AS egd
+      WHERE egv.g_id=? AND u.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.user_id=egv.user_id
    )g
 ) as individual;
           ", array($g_id));
@@ -762,7 +848,7 @@ ORDER BY user_id ASC");
     }
 
     public function setNonRegisteredUsersRotatingSectionNull() {
-        $this->course_db->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL AND NOT manual_registration");
+        $this->course_db->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL");
     }
 
     public function deleteAllRotatingSections() {
@@ -1655,6 +1741,51 @@ AND gc_id IN (
             $return[$row['rotating_section']] = intval($row['count']);
         }
         return $return;
+    }
+
+    public function existsAnnouncements(){
+        $this->course_db->query("SELECT MAX(id) FROM threads where deleted = false AND pinned = true");
+        $result = $this->course_db->rows();
+        return empty($result[0]["max"]) ? -1 : $result[0]["max"];
+    }
+
+    public function viewedThread($user, $thread_id){
+      $this->course_db->query("SELECT * from viewed_responses where thread_id = ? and user_id = ?", array($thread_id, $user));
+      return count($this->course_db->rows()) > 0;
+    }
+
+    public function getDisplayUserNameFromUserId($user_id){
+      $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname from users where user_id = ?", array($user_id));
+      $name_rows = $this->course_db->rows()[0];
+      $last_name_initial =  " " . substr($name_rows["user_lastname"], 0, 1) . ".";
+      if(empty($name_rows["user_preferred_firstname"])){
+        $name = $name_rows["user_firstname"];
+      } else {
+        $name = $name_rows["user_preferred_firstname"];
+      }
+      $name .= $last_name_initial;
+      return $name;
+    }
+
+    public function getPostsForThread($current_user, $thread_id){
+
+      if($thread_id == -1) {
+        $announcement_id = $this->existsAnnouncements();
+        if($announcement_id == -1){
+          $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and pinned = false");
+          $thread_id = $this->course_db->rows()[0]["max"];
+        } else {
+          $thread_id = $announcement_id;
+        }
+      }
+
+      $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false ORDER BY timestamp ASC", array($thread_id));
+      $result_rows = $this->course_db->rows();
+
+      if(count($result_rows) > 0){
+        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM viewed_responses WHERE thread_id=? AND user_id=?)", array($thread_id, $current_user, $thread_id, $current_user));
+      }
+      return $result_rows;
     }
 
     public function getAnonId($user_id) {
