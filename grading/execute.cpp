@@ -72,6 +72,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "python2.7",               "/usr/bin/python2.7" },
     { "python3",                 "/usr/bin/python3" },
     { "python3.5",               "/usr/bin/python3.5" },
+    { "pylint",                  "/usr/local/bin/pylint" },
 
     // for Data Structures
     { "g++",                     "/usr/bin/g++" },
@@ -86,6 +87,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // for Principles of Software
     { "java",                    "/usr/bin/java" },
     { "javac",                   "/usr/bin/javac" },
+    { "mono",                    "/usr/bin/mono" },   // should put more checks here, only run with "mono dafny/Dafny.exe "
 
     // for Operating Systems
     { "gcc",                     "/usr/bin/gcc" },
@@ -223,22 +225,39 @@ void validate_filename(const std::string &filename) {
 
 
 std::string validate_option(const std::string &program, const std::string &option) {
+
+  // TODO: update this with the option to junit5
+
+  //{ "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
+  //{ "submitty_junit_5.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-5xx.jar" },
+  //{ "submitty_junit_4.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
+
+  // also for hamcrest 2.0
+
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
         { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
+        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
       }
     },
     { "/usr/bin/java",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
         { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
+        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
+      }
+    },
+    { "/usr/bin/mono",
+      { { "submitty_dafny",         SUBMITTY_INSTALL_DIRECTORY+"/Dafny/dafny/Dafny.exe" }
       }
     }
-    };
+  };
 
   // see if this program has option replacements
   std::map<std::string,std::map<std::string,std::string> >::const_iterator itr = option_replacements.find(program);
@@ -833,6 +852,14 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // symbol) are not interpreted as ascii
   setenv("LC_ALL", "en_US.UTF-8", 1);
 
+
+  // Set a default for OpenMP desired threads
+  // Can be overridden by student to be higher or lower.
+  // Instructor still controls the RLIMIT_NPROC max threads.
+  // (without this, default desired threads may be based on the system specs)
+  setenv("OMP_NUM_THREADS","4",1);
+
+  
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {
   std::cout << "going to install syscall filter for " << my_program << std::endl;
@@ -860,6 +887,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     dup2(new_stderrfd, stderrfd);
   }
 
+
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
     std::cout << "seccomp filter install failed" << std::endl;
@@ -867,6 +895,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
   // END SECCOMP
 
+  
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here
 

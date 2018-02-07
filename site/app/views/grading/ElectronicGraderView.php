@@ -451,8 +451,9 @@ HTML;
             }
             else {
                 $show_auto_grading_points = false;
-                $cols += 4;
+                $cols += 5;
                 $return .= <<<HTML
+                <td width="8%">Graded Questions</td>
                 <td width="12%">TA Grading</td>
                 <td width="12%">Total</td>
                 <td width="10%">Active Version</td>
@@ -697,7 +698,10 @@ HTML;
                 <td>
 HTML;
                 $temp_counter = 1;
+
+                //prints the graded questions
                 foreach ($row->getComponents() as $component) {
+                	$first = true;
                     if(is_array($component)) {
                         foreach($component as $cmpt) {
                             if($cmpt->getGrader() == null) {
@@ -718,9 +722,16 @@ HTML;
                     }
                     if($question->getGrader() === null || $question === null) {
                     } else {
-                        $return .= <<<HTML
-                            {$temp_counter}, 
+                    	if ($first == true) {
+                    		$first = false;
+                    		$return .= <<<HTML
+                            {$temp_counter} 
 HTML;
+                    	} else {
+                    		$return .= <<<HTML
+                           , {$temp_counter} 
+HTML;
+                    	}                        
                     }
                     $temp_counter++;
                 }
@@ -949,8 +960,32 @@ HTML;
 
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
     <span class="grading_label">Submissions and Results Browser</span>
-    <button class="btn btn-default" onclick="openAll()">Expand All</button>
-    <button class="btn btn-default" onclick="closeAll()">Close All</button>
+    <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
+HTML;
+
+    if(count($gradeable->getVcsFiles()) != 0) { //check if there are vcs files, if yes display the toggle button, else don't display it
+        $return .= <<<HTML
+        <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
+HTML;
+    }
+
+$return .= <<<HTML
+    <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            //note the commented out code here along with the code where files are displayed that is commented out
+            //is intended to allow open and close to change dynamically on click
+            //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
+            $(".expand-button").on('click', function(){
+                // $(this).attr('clicked-state', "clicked");
+                // updateValue($(this), "Open", "Close");
+                openAll( 'openable-element-', $(this).data('linked-type'))
+                // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
+                //     console.log('HELLLO');
+                // });
+            })
+        });
+    </script>
 HTML;
         if(!$peer) {
         $return .= <<<HTML
@@ -976,8 +1011,9 @@ HTML;
                 $working_dir[$file['name']] = $file['path'];
             }
         }
-        function display_files($files, &$count, $indent, &$return) {
-            foreach ($files as $dir => $path) {
+        function display_files($files, &$count, $indent, &$return, $filename) {
+            $name = "a" . $filename;
+            foreach ($files as $dir => $path) { 
                 if (!is_array($path)) {
                     $name = htmlentities($dir);
                     $dir = urlencode(htmlspecialchars($dir));
@@ -986,7 +1022,7 @@ HTML;
                     $return .= <<<HTML
                 <div>
                     <div class="file-viewer">
-                        <a class='openAllFile' onclick='openFrame("{$dir}", "{$path}", {$count}); updateCookies();'>
+                        <a class='openAllFile{$filename} openable-element-{$filename}' onclick='openFrame("{$dir}", "{$path}", {$count}); updateCookies();'>
                             <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
                         {$name}</a> &nbsp;
                         <a onclick='openFile("{$dir}", "{$path}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
@@ -1005,14 +1041,14 @@ HTML;
                     $return .= <<<HTML
             <div>
                 <div class="div-viewer">
-                    <a class='openAllDiv' onclick='openDiv({$count}); updateCookies();'>
-                        <span class="fa fa-folder" style='vertical-align:text-top;'></span>
+                    <a class='openAllDiv openAllDiv{$filename} openable-element-{$filename}' id={$dir} onclick='openDiv({$count}); updateCookies();'>
+                        <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                     {$dir}</a> 
                 </div><br/>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none' data-file_name="{$dir}">
 HTML;
                     $count++;
-                    display_files($contents, $count, $indent+1, $return);
+                    display_files($contents, $count, $indent+1, $return, $filename);
                     $return .= <<<HTML
                 </div>
             </div>
@@ -1021,11 +1057,46 @@ HTML;
             }
         }
         $files = array();
-        add_files($files, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles(), $gradeable->getVcsFiles()), 'submissions');
-        add_files($files, $gradeable->getResultsFiles(), 'results');
-        $count = 1;
-        display_files($files,$count,1,$return);
+        $submissions = array();
+        $results = array();
+        $checkout = array();
+
+        // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names, 
+        // if you change here, then change there as well
+        // order of these statements matter I believe
+
+        add_files($submissions, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'submissions');
+
+        $vcsFiles = $gradeable->getVcsFiles();
+        if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
+            add_files($checkout,  $vcsFiles, 'checkout');
+        }
+
+        add_files($results, $gradeable->getResultsFiles(), 'results');
+
+        $count = 1; 
+        display_files($submissions,$count,1,$return, "submissions"); //modifies the count var here within display_files
+
+        if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
+            display_files($checkout,$count,1,$return, "checkout");
+        }
+
+        display_files($results,$count,1,$return, "results"); //uses the modified count variable b/c old code did this not sure if needed
+        $files = array_merge($submissions, $checkout, $results );
+
         $return .= <<<HTML
+        <script type="text/javascript">
+            // $(document).ready(function(){
+            //     $(".openAllDiv").on('click', function(){
+            //         if($(this).attr('id') == 'results' || $(this).attr('id') == 'submissions' || $(this).attr('id') =='checkout'){
+            //             var elem = $('[data-linked-type="' + $(this).attr('id') + '"]');
+            //             if(elem.data('clicked-state') == "wasntClicked"){
+            //                 updateValue(elem, "Open", "Close");
+            //             }
+            //         }
+            //     });
+            // });
+        </script>
     </div>
 </div>
 HTML;
@@ -1344,6 +1415,15 @@ HTML;
             $first = true;
             $noChange = "";
             foreach ($question->getMarks() as $mark) {
+
+            	//Makes the mark blue if they're publish marks
+            	if ($mark->getPublish() === 't') {
+            		$is_publish = "is_publish";
+            	}
+     			else {
+     				$is_publish = "";
+     			}
+
                 if ($first === true) {
                     $first = false;
                     $noChange = "readonly";
@@ -1356,7 +1436,7 @@ HTML;
                 $icon_mark = ($mark->getHasMark() === true && $show_graded_info) ? "fa-square" : "fa-square-o";
                 $mark_name = "mark_text_{$c}_{$d}";
                 $return .= <<<HTML
-                    <tr id="mark_id-{$c}-{$d}" name="mark_{$c}">
+                    <tr id="mark_id-{$c}-{$d}" name="mark_{$c}" class="{$is_publish}">
                         <td colspan="1" style="text-align: center; width: 12%; white-space: nowrap;"> 
                             <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                             <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none; min-width: 50px;" {$noChange}>

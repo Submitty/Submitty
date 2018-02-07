@@ -531,10 +531,19 @@ HTML;
             $all_directories = $gradeable->getUploadsFiles();
 
             if (count($all_directories) > 0) {
-
-                $return .= <<<HTML
+                if($gradeable->isTeamAssignment()){
+                    $return .= <<<HTML
+<div class="content">
+    <h2>Unassigned Team PDF Uploads (Please Enter the User Id of One Team Member)</h2>
+HTML;
+                }
+                else{
+                    $return .= <<<HTML
 <div class="content">
     <h2>Unassigned PDF Uploads</h2>
+HTML;
+                }
+                $return .= <<<HTML
     <form id="bulkForm" method="post">
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
@@ -661,7 +670,7 @@ HTML;
             }
         }
         $team_header = '';
-        if ($gradeable->isTeamAssignment()) {
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
             $team_header = <<<HTML
     <h3>Team: {$gradeable->getTeam()->getMemberList()}</h3><br />
 HTML;

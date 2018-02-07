@@ -20,60 +20,32 @@
     "blue": "#0400d0",
     "green": "#0b8f0a",
     "yellow": "#e4c012",
+    "cyan":   "#12d0d0",
+    "magenta": "#e400e4",
     "important": "#d000d0"
   },
 
   "zones" : {
     "left": {
-      "A": {
-        "rows": [1,2,3,4,5],
-        "color": "red",
-        "density": 0.5
-      },
-      "B": {
-        "rows": [7,8,9,10,11],
-        "color": "green",
+      "YELLOW": {
+        "rows": [1,2,3,4,5,6,7,8,9,10,11],
+        "color": "yellow",
         "density": 0.5
       }
     },
 
     "middle": {
-      "C": {
-        "rows": [1,2],
-        "color": "blue",
-        "density": 0.5
-      },
-      "D": {
-        "rows": [3,4],
-        "color": "yellow",
-        "density": 0.5
-      },
-      "E": {
-        "rows": [5,6],
-        "color": "red",
-        "density": 0.5
-      },
-      "F": {
-        "rows": [8,9],
-        "color": "green",
-        "density": 0.5
-      },
-      "G": {
-        "rows": [10,11],
-        "color": "blue",
+      "MAGENTA": {
+        "rows": [2,3,5,6,8,9,11,12],
+        "color": "magenta",
         "density": 0.5
       }
     },
 
     "right": {
-      "H": {
-        "rows": [1,2,3,4,5],
-        "color": "yellow",
-        "density": 0.5
-      },
-      "I": {
-        "rows": [7,8,9,10,11],
-        "color": "red",
+      "CYAN": {
+        "rows": [1,2,3,4,5,6,7,8,9,10,11],
+        "color": "cyan",
         "density": 0.5
       }
     }
@@ -95,9 +67,9 @@
   var config = JSON.parse(document.getElementById("config-room").innerHTML)
 
   var seats = {
-    "left" : [4,4,4,4,4,4,4,4,4,4,4],
-    "middle" : [14,14,14,14,14,14,14,14,14,14,14],
-    "right" : [4,4,4,4,4,4,4,4,4,4,4],
+    "left" : [3,3,3,3,3,3,3,3,3,3,3],
+    "middle" : [13,13,13,13,13,13,13,13,13,13,13,13,13],
+    "right" : [3,3,3,3,3,3,3,3,3,3,3],
   }
   var used = {};
 
@@ -160,7 +132,7 @@
   }
 
   function render_arrow(section) {
-    row = 12
+    row = 14
 
     if(section == "left") {
       var center_x = BASE_ROW_CENTER + 320;
@@ -229,6 +201,7 @@
     }
 
     if(section == "left") {
+      if (row > 11) return;
       var center_x = BASE_ROW_CENTER + 320;
       var width = 70;
     }
@@ -237,6 +210,7 @@
       var width = 450;
     }
     else if(section == "right") {
+      if (row > 11) return;
       var center_x = BASE_ROW_CENTER - 320;
       var width = 70;
     }
@@ -448,7 +422,7 @@
   ctx.textAlign = "center";
 
   var EXPANDED = expand_config(config);
-  var BASE_NUM_ROWS = 11
+  var BASE_NUM_ROWS = 13
   var BASE_ROW_START = 140
   var BASE_ROW_CENTER = document.getElementById("diagram").offsetWidth / 2.0;
   var BASE_ROW_HEIGHT = 6
@@ -492,7 +466,7 @@
 
   // Render back of room legend
   ctx.font = "italic 10pt sans-serif";
-  ctx.fillText("Back of Room", BASE_ROW_CENTER, 400);
+  ctx.fillText("Back of Room", BASE_ROW_CENTER, 440);
 
   // Render arrows
   render_arrow("left");

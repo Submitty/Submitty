@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import csv
 import xml.etree.ElementTree as ET
 import sys
@@ -137,8 +137,8 @@ if __name__ == '__main__':
     try:
         with open(sys.argv[1]) as json_file:
             for line in json_file:
-                # Extract just the filename of the session data
-                files.append(line.split(",")[0].split(":")[1].strip()[1:-1])
+                # Extract just the filenames of the session data
+                files += [x.strip()[1:-1] for x in line.split("[")[1].split("]")[0].split(",")]
     except IOError as e:
         print("Error reading JSON excerpt: {}".format(e))
 
