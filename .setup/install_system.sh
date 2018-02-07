@@ -141,7 +141,7 @@ sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
 pushd /tmp > /dev/null
 
 # -----------------------------------------
-echo "Getting JUnit 4.12 & Hamcrest 1.3..."
+echo "Getting JUnit & Hamcrest..."
 JUNIT_VER=4.12
 HAMCREST_VER=1.3
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
@@ -153,6 +153,11 @@ wget http://search.maven.org/remotecontent?filepath=junit/junit/${JUNIT_VER}/jun
 mv remotecontent?filepath=junit%2Fjunit%2F${JUNIT_VER}%2Fjunit-${JUNIT_VER}.jar junit-${JUNIT_VER}.jar
 wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F${HAMCREST_VER}%2Fhamcrest-core-${HAMCREST_VER}.jar hamcrest-core-${HAMCREST_VER}.jar
+
+
+# TODO:  Want to Install JUnit 5.0
+# And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
+
 
 popd > /dev/null
 
