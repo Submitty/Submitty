@@ -27,7 +27,7 @@ as highly sensitive data with very prohibitive file access permissions.
 
 Please configure options near the top of the code.
 
-DB_HOST: Hostname of the Submitty databases.  You can use localhost if
+DB_HOST: Hostname of the Submitty databases.  You can use 'localhost' if
          PostgreSQL is on the same machine as the Submitty system.
 
 DB_USER: The username that interacts with Submitty course databases.  Typically
