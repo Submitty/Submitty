@@ -1933,7 +1933,7 @@ int main(int argc, char* argv[]) {
     assert (argc == 2);
     GLOBAL_sort_order = argv[1];
   }
-  
+
   std::vector<Student*> students;  
   processcustomizationfile(students);
   //processcustomizationfile(students,false);
