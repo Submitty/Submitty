@@ -815,7 +815,7 @@ ORDER BY rotating_section");
         $this->course_db->query("
 SELECT rotating_section, count(*) as count
 FROM users
-WHERE registration_section IS NULL AND rotating_section IS NOT NULL
+WHERE registration_section IS NULL
 GROUP BY rotating_section
 ORDER BY rotating_section");
         return $this->course_db->rows();
