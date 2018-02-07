@@ -316,7 +316,7 @@ HTML;
 						if ($points_percent > 100) { 
                             $points_percent = 100; 
                         }
-                        if ($g_data->isTeamAssignment() && $g_data->getTeam() === null) {
+                        if (($g_data->isTeamAssignment() && $g_data->getTeam() === null) && (!$this->core->getUser()->accessAdmin())){
                             $gradeable_open_range = <<<HTML
                 <a class="btn {$title_to_button_type_submission[$title]} btn-nav" disabled>
                      MUST BE ON A TEAM TO SUBMIT<br>{$display_date}
