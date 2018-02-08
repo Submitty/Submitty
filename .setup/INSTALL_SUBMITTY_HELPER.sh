@@ -121,6 +121,12 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 fi
 
+if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
+    export HEADLESS=1
+else
+    export HEADLESS=0
+fi
+
 
 # set the permissions of the top level directory
 chown  root:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_INSTALL_DIR}
@@ -138,22 +144,34 @@ mkdir -p ${SUBMITTY_DATA_DIR}/courses
 mkdir -p ${SUBMITTY_DATA_DIR}/vcs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
+
+#EVAN: Get rid of site logs
+if [ ${HEADLESS} == 0]; then
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
-
+fi
 
 # set the permissions of these directories
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
 chmod  751                                        ${SUBMITTY_DATA_DIR}
+
+#EVAN: Get rid of site permissions
+if [ ${HEADLESS} == 0]; then
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
 chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
 chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
 chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
+fi
+#EVAN: get rid of hwphp
+if [ ${HEADLESS} == 0]; then
 chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
 chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
+fi
 chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
+#EVAN: We are not currently using these directories.
+if [ ${HEADLESS} == 0]; then
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_interactive
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_batch
@@ -171,7 +189,8 @@ chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_
 #hwphp will write items to this list, hwcron will remove them
 chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
 chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
-
+#EVAN: endif
+fi
 
 
 ########################################################################################################################
@@ -223,6 +242,9 @@ find ${SUBMITTY_INSTALL_DIR}/src -type d -exec chmod 555 {} \;
 find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
 
 
+
+#EVAN: Child doesn't need more_autograding_examples
+if [ ${HEADLESS} == 0]; then
 ########################################################################################################################
 ########################################################################################################################
 # COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
@@ -237,8 +259,8 @@ chown -R  root:root ${SUBMITTY_INSTALL_DIR}/more_autograding_examples
 # but everyone can read all that files & directories, and cd into all the directories
 find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type d -exec chmod 555 {} \;
 find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type f -exec chmod 444 {} \;
-
-
+#Evan: Endif
+fi
 ########################################################################################################################
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file)

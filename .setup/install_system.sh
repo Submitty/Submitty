@@ -40,6 +40,17 @@ else
   export VAGRANT=0
 fi
 
+if [[ $2 == "--headless" ]]; then
+  echo "Non-interactive headless script..."
+  export HEADLESS=1
+  shift
+else
+  export HEADLESS=0
+fi
+
+#EVAN: TEMPORARY, FIX BEFORE COMMITING
+export HEADLESS=1
+
 #################################################################
 # DISTRO SETUP
 #################
@@ -88,32 +99,40 @@ fi
 sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
 grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && exit)
 
+# EVAN: Get rid of below on child 
+if [ ${HEADLESS} == 0]; then
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwphp hwcronphp
 
 adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcgi hwphp
 adduser hwcgi www-data
+adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 # NOTE: hwcgi must be in the shadow group so that it has access to the
 # local passwords for pam authentication
 adduser hwcgi shadow
-
-adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwcron hwcronphp
 
 # FIXME:  umask setting above not complete
 # might need to also set USERGROUPS_ENAB to "no", and manually create
 # the hwphp and hwcron single user groups.  See also /etc/login.defs
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
+#EVAN: ENDIF
+fi
 
-adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwcron hwcronphp
+
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
 
 if [ ${VAGRANT} == 1 ]; then
 	# add these users so that they can write to .vagrant/logs folder
+    #EVAN Again, remove if headless
+    if [ ${HEADLESS} == 0]; then
 	adduser hwphp vagrant
 	adduser hwcgi vagrant
+    fi
+    #EVAN: ENDIF
 	adduser hwcron vagrant
 fi
 
@@ -163,7 +182,6 @@ popd > /dev/null
 
 
 # EMMA is a tool for computing code coverage of Java programs
-
 echo "Getting emma..."
 
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
@@ -204,6 +222,7 @@ popd > /dev/null
 # APACHE SETUP
 #################
 
+if [ ${HEADLESS} == 0]; then
 a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
 
 # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
@@ -273,8 +292,14 @@ fi
 
 sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/7.0/fpm/php.ini
 
+fi
+#EVAN: REALLY LONG ENDIF
+
 # create directories and fix permissions
 mkdir -p ${SUBMITTY_DATA_DIR}
+
+#EVAN: Remove database and instructors
+if [ ${HEADLESS} == 0]; then
 
 # create a list of valid userids and put them in /var/local/submitty/instructors
 # one way to create your list is by listing all of the userids in /home
@@ -316,6 +341,8 @@ else
     popd
 fi
 
+#EVAN: ENDIF
+fi
 
 #################################################################
 # ANALYSIS TOOLS SETUP
@@ -335,32 +362,40 @@ fi
 #################
 
 
-if [ ${VAGRANT} == 1 ]; then
+
+#EVAN: Check on configure and install submitty.
+if [ ${HEADLESS} == 1] then
+    ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --headless
+else
+    if [ ${VAGRANT} == 1 ]; then
     # This should be set by setup_distro.sh for whatever distro we have, but
     # in case it is not, default to our primary URL
     if [ -z "${SUBMISSION_URL}" ]; then
         SUBMISSION_URL='http://192.168.56.101'
     fi
     echo -e "/var/run/postgresql
-hsdbu
-hsdbu
-${SUBMISSION_URL}
+    hsdbu
+    hsdbu
+    ${SUBMISSION_URL}
 
-1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+    1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
-else
-	${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
+    else
+        ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
+    fi
 fi
+
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
-
+#Evan: Check on grading scheduler
 # (re)start the submitty grading scheduler daemon
 systemctl restart submitty_grading_scheduler
 # also, set it to automatically start on boot
 sudo systemctl enable submitty_grading_scheduler
 
-
+#Evan: Remove user authentication for website
+if [ ${HEADLESS} == 0]; then
 
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
 mkdir -p ${SUBMITTY_DATA_DIR}/bin
@@ -380,6 +415,11 @@ hsdbu_password=`cat /usr/local/submitty/.setup/submitty_conf.json | jq .database
 
 PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
 PGPASSWORD=${hsdbu_password} psql -d submitty -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/submitty_db.sql
+
+fi
+#EVAN: Endif
+
+if [ ${HEADLESS} == 0]; then
 
 if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much
@@ -427,6 +467,13 @@ service apache2 restart
 service php7.0-fpm restart
 service postgresql restart
 
+#Evan: set up headless folder
+else
+    rm -rf ${SUBMITTY_DATA_DIR}/logs/*
+    mkdir ${SUBMITTY_REPOSITORY}/incoming
+    mkdir ${SUBMITTY_REPOSITORY}/outgoing
+    mkdir ${SUBMITTY_REPOSITORY}/test_input
+fi
 
 echo "Done."
 exit 0
