@@ -25,14 +25,13 @@ import re
 import subprocess
 import sys
 
-# CONFIGURATION ----------------------------------------------------------------
+# CONFIGURATION 
 DB_HOST    = 'submitty.cs.myuniversity.edu'
 DB_USER    = 'hsdbu'
 DB_PASS    = 'DB.p4ssw0rd'  # CHANGE THIS!  DO NOT USE 'DB.p4ssw0rd'
 DUMP_PATH  = '/var/local/submitty-dumps'
 EXPIRATION = 7
 
-# RECURSIVE FUNCTION -----------------------------------------------------------
 def delete_obsolete_dumps(working_path, expiration_stamp):
 	"""
 	Recurse through folders/files and delete any obsolete dump file
@@ -59,9 +58,9 @@ def delete_obsolete_dumps(working_path, expiration_stamp):
 			if file[-26:-20] < expiration_stamp:
 				os.remove(file)
 
-# MAIN 
-if __name__ == "__main__":
-
+def main():
+	""" Main """
+	
 	# ROOT required
 	if os.getuid() != 0:
 		raise SystemExit('Root required. Please contact your sysadmin for assistance.')
@@ -76,18 +75,19 @@ if __name__ == "__main__":
 	# if month <= 5: ... elif month >=8: ... else: ...
 	semester = 's' + year if today.month <= 5 else ('f' + year if today.month >= 8 else 'm' + year)
 
-	# GET FOLDER LIST (determines active courses)
-	courses_dir = '/var/local/submitty/courses/' + semester
-
-	# Force lowercase and filter out all entries starting with '.'
-	regex = re.compile('^(?!\.)')
-	folder_list = filter(regex.match, [x.lower() for x in os.listdir(courses_dir)])
-	re.purge()
+	# GET ACTIVE COURSES FROM 'MASTER' DB
+	try:
+		sql = "select course from courses where semester='{}'".format(semester)
+		# psql postgresql://user:password@host/dbname?sslmode=prefer -c "COPY (SQL code) TO STDOUT"
+		process = "psql postgresql://{}:{}@{}/submitty?sslmode=prefer -c \"COPY ({}) TO STDOUT\"".format(DB_USER, DB_PASS, DB_HOST, sql)
+		course_list = list(subprocess.check_output(process, shell=True).decode('utf-8').split(os.linesep))[:-1]
+	except subprocess.CalledProcessError as e:
+		raise SystemExit("psql returned error {}", format(e.returncode)
 
 	# BUILD LISTS AND PATH
-	db_list     = []
-	dump_list   = []
-	course_list = []
+	db_list     = list()
+	dump_list   = list()
+	course_list = list()
 
 	for course in folder_list:
 
@@ -101,20 +101,20 @@ if __name__ == "__main__":
 		try:
 			os.mkdir(dump_path, 0o700)
 			os.chown(dump_path, 0, 0)
-		except OSError:
+		except OSError as e:
 			if not os.path.isdir(dump_path):
-				raise
+				raise SystemExit("Failed to prepare DB dump path '{}'{}OS error: '{}'".format(e.filename, os.linesep, e.strerror))
 
 	# DUMP
 	for i in range(len(course_list)):
-		# e.g. "pg_dump postgresql://user:password@host/dbname > /var/local/submitty-dump/course/dump_file.dbdump"
-		process = 'pg_dump postgresql://{}:{}@{}/{} > {}/{}/{}'.format(DB_USER, DB_PASS, DB_HOST, db_list[i], DUMP_PATH, course_list[i], dump_list[i])
-		return_code = subprocess.call(process, shell=True)
-
-		# If pg_dump doesn't return 0, display pg_dump return code and related course being dumped.
-		if return_code != 0:
-			print ('{}: pg_dump exited with error {}.'.format(course_list[i], return_code), file=sys.stderr)
-
+		try:
+			# pg_dump postgresql://user:password@host/dbname?sslmode=prefer > /var/local/submitty-dump/course/dump_file.dbdump
+			process = 'pg_dump postgresql://{}:{}@{}/{}?sslmode=prefer > {}/{}/{}'.format(DB_USER, DB_PASS, DB_HOST, db_list[i], DUMP_PATH, course_list[i], dump_list[i])
+			return_code = subprocess.check_call(process, shell=True)
+		except subprocess.CalledProcessError as e:
+			print("Error while dumping {}".format(db_list[i]))
+			print(e.output.decode('utf-8'))
+			
 	# DETERMINE EXPIRATION DATE (to delete obsolete dump files)
 	# (do this BEFORE recursion so it is not calculated recursively n times)
 	expiration       = datetime.date.fromordinal(today.toordinal() - EXPIRATION)
@@ -122,3 +122,6 @@ if __name__ == "__main__":
 
 	# RECURSIVELY CULL OBSOLETE DUMPS
 	delete_obsolete_dumps(DUMP_PATH, expiration_stamp)
+
+if __name__ == "__main__":
+	main()
