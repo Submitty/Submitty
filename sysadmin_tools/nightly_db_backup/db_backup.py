@@ -81,8 +81,8 @@ def main():
 		# psql postgresql://user:password@host/dbname?sslmode=prefer -c "COPY (SQL code) TO STDOUT"
 		process = "psql postgresql://{}:{}@{}/submitty?sslmode=prefer -c \"COPY ({}) TO STDOUT\"".format(DB_USER, DB_PASS, DB_HOST, sql)
 		course_list = list(subprocess.check_output(process, shell=True).decode('utf-8').split(os.linesep))[:-1]
-	except subprocess.CalledProcessError as e:
-		raise SystemExit("psql returned error {}", format(e.returncode)
+	except subprocess.CalledProcessError:
+		raise SystemExit("Communication error with Submitty 'master' DB")
 
 	# BUILD LISTS AND PATH
 	db_list     = list()
