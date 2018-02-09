@@ -151,16 +151,10 @@ def untrusted_grant_rwx_access(which_untrusted,my_dir):
                      ";"])
 
 
+    
 # ==================================================================================
 # ==================================================================================
-def just_grade_item(next_directory,next_to_grade,which_untrusted):
-
-    my_pid = os.getpid()
-
-    # verify the hwcron user is running this script
-    if not int(os.getuid()) == int(HWCRON_UID):
-        grade_items_logging.log_message("ERROR: must be run by hwcron")
-        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+def prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_untrusted):
 
     # --------------------------------------------------------
     # figure out what we're supposed to grade & error checking
@@ -170,7 +164,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     if not os.path.isdir(submission_path):
         grade_items_logging.log_message("ERROR: the submission directory does not exist" + submission_path)
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
-    print ("pid",my_pid,"GRADE THIS", submission_path)
+    print ("pid",os.getpid(),"GRADE THIS", submission_path)
 
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
@@ -233,7 +227,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     
     submission_datetime = dateutils.read_submitty_date(submission_string)
 
-
     # --------------------------------------------------------------------
     # CHECKOUT THE STUDENT's REPO
     if is_vcs:
@@ -258,7 +251,27 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         os.chdir(tmp)
         subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
+    # zip up tmp/autograding folder
 
+    # zip up tmp/submission folder
+        
+        
+    # ==================================================================================
+    # ==================================================================================
+    # ==================================================================================
+    # ==================================================================================
+    # ==================================================================================
+    # ==================================================================================
+    #def grade_from_zip(autograding_zip,submission_zip,which_untrusted):
+    # ==================================================================================
+    # ==================================================================================
+    # ==================================================================================
+    # ==================================================================================
+
+    # unzip tmp/autograding folder
+
+    # unzip tmp/submission folder
+    
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
 
@@ -305,9 +318,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                           stdout=logfile)
 
     if compile_success == 0:
-        print ("pid",my_pid,"COMPILATION OK")
+        print ("pid",os.getpid(),"COMPILATION OK")
     else:
-        print ("pid",my_pid,"COMPILATION FAILURE")
+        print ("pid",os.getpid(),"COMPILATION FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
 
 
@@ -367,9 +380,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                           stdout=logfile)
 
     if runner_success == 0:
-        print ("pid",my_pid,"RUNNER OK")
+        print ("pid",os.getpid(),"RUNNER OK")
     else:
-        print ("pid",my_pid,"RUNNER FAILURE")
+        print ("pid",os.getpid(),"RUNNER FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","RUNNER FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
@@ -423,9 +436,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                             stdout=logfile)
 
     if validator_success == 0:
-        print ("pid",my_pid,"VALIDATOR OK")
+        print ("pid",os.getpid(),"VALIDATOR OK")
     else:
-        print ("pid",my_pid,"VALIDATOR FAILURE")
+        print ("pid",os.getpid(),"VALIDATOR FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","VALIDATION FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
@@ -439,7 +452,15 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
             if line.startswith("Automatic grading total:"):
                 grade_result = line
 
+
+    # ==================================================================================
+    # ==================================================================================
+    #def unpack_grading_result_zip(next_directory,next_to_grade,result_zip):
+    # ==================================================================================
+    # ==================================================================================
+    # ==================================================================================
     # --------------------------------------------------------------------
+    
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
@@ -521,7 +542,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         True if obj["is_team"] else False,
         str(obj["version"]))
 
-    print ("pid",my_pid,"finished grading ", next_to_grade, " in ", gradingtime, " seconds")
+    print ("pid",os.getpid(),"finished grading ", next_to_grade, " in ", gradingtime, " seconds")
 
     grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",gradingtime,grade_result)
 
@@ -536,6 +557,26 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # REMOVE TEMP DIRECTORY
     shutil.rmtree(tmp)
 
+
+
+
+
+# ==================================================================================
+# ==================================================================================
+def just_grade_item(next_directory,next_to_grade,which_untrusted):
+
+    # verify the hwcron user is running this script
+    if not int(os.getuid()) == int(HWCRON_UID):
+        grade_items_logging.log_message("ERROR: must be run by hwcron")
+        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+
+
+    prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_untrusted)
+    
+    #autograding_zip,submission_zip = prepare_autograding_and_submission_zip(next_directory,next_to_grade)
+    #    result_zip = grade_from_zip(autograding_zip,submission_zip,which_untrusted)
+    #    unpack_grading_result_zip(result_zip)
+    
 
 # ==================================================================================
 # ==================================================================================
