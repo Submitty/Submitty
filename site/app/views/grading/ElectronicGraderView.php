@@ -1225,13 +1225,33 @@ HTML;
 HTML;
         $break_onclick = "";
         $disabled = '';
-        if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion() || $gradeable->getCurrentVersionNumber() == 0){
+        if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
             $disabled='disabled';
             $break_onclick = "return false; ";
             $return .= <<<HTML
     <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
         }
+        if($gradeable->getActiveVersion() == 0){
+            $disabled='disabled';
+            $break_onclick = "return false; ";
+            if($gradeable->hasSubmitted()){
+                $return .= <<<HTML
+                <script>
+                    $('body').css('background', 'brown');
+                </script>
+                <div class="red-message" style="text-align: center">This student chose not to be graded</div>
+HTML;
+            } else {
+                $return .= <<<HTML
+                <script>
+                    $('body').css('background', 'purple');
+                </script>
+                <div class="red-message" style="text-align: center">This student did not submit anything</div>
+HTML;
+            }
+        }        
+
         $num_questions = count($gradeable->getComponents());
 
         // if use student components, get the values for pages from the student's submissions
