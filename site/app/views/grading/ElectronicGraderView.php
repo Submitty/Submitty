@@ -51,7 +51,7 @@ class ElectronicGraderView extends AbstractView {
             $percentage = 0;
         }
         else{
-            $percentage = floor(($graded / $total) * 100);
+            $percentage = round(($graded / $total) * 100, 1);
         }
         $return = <<<HTML
 <div class="content">
@@ -75,7 +75,7 @@ HTML;
                 $show_graded = $graded/$change_value;
                 $show_total = $total/$change_value;
             }
-            $submitted_percentage = floor(($show_total / $total_students) * 100);
+            $submitted_percentage = round(($show_total / $total_students) * 100, 1);
 
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = array();
@@ -124,7 +124,7 @@ HTML;
             if ($peer) {
                 $show_total = floor($sections['stu_grad']['total_components']/$gradeable->getNumPeerComponents());
                 $show_graded = floor($sections['stu_grad']['graded_components']/$gradeable->getNumPeerComponents());
-                $percentage = floor(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100);
+                $percentage = round(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
                 $return .= <<<HTML
             Current percentage of students grading done: {$percentage}% ({$show_graded}/{$show_total})
         </div>
@@ -141,7 +141,7 @@ HTML;
                         $percentage = 0;
                     }
                     else {
-                        $percentage = floor(($section['graded_components'] / $section['total_components']) * 100);
+                        $percentage = round(($section['graded_components'] / $section['total_components']) * 100, 1);
                     }
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
