@@ -53,7 +53,8 @@ class ForumController extends AbstractController {
 
     public function publishThread(){
         $title = htmlentities($_POST["title"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $thread_content = htmlentities($_POST["thread_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $thread_content = htmlentities(str_replace("\r", "", $_POST["thread_content"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $thread_content = $this->displayUrl($thread_content);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         if(empty($title) || empty($thread_content)){
@@ -122,7 +123,7 @@ class ForumController extends AbstractController {
     }
 
     public function deletePost(){
-        if($this->core->getUser()->accessAdmin()){
+        if($this->core->getUser()->getRank() < 3){
             $thread_id = $_POST["thread_id"];
             $post_id = $_POST["post_id"];
             $type = "";
@@ -131,7 +132,11 @@ class ForumController extends AbstractController {
             } else {
                 $type = "post";
             }
-            $this->core->getOutput()->renderJson(array('type' => $type));
+            $response = array('type' => $type);
+            $this->core->getOutput()->renderJson($response);
+            var_dump($response);
+            throw new Exception();
+            return $response;
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
@@ -165,6 +170,18 @@ class ForumController extends AbstractController {
 
     public function showCreateThread(){
          $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread');
+    }
+
+    private function displayUrl($content){
+        $pos = 0;
+        $positions = array();
+        while(($pos = strpos($content, "&lbrack;url&equals;", $pos)) !== false){
+            $end_pos = strpos($content, "&lbrack;&sol;url&rsqb;", $pos);
+            $end_bracket = strpos($content, "&rsqb;", $pos);
+            $line = html_entity_decode(substr($content, $pos, $end_bracket) , ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $replacement = "<a href='" . substr($line, 5, strpos($line, "]")-5) . "'>" . htmlentities(substr($content, $end_bracket+6, $end_pos-$end_bracket-6), ENT_QUOTES | ENT_HTML5, 'UTF-8'). "</a>";
+            $content = str_replace(substr($content, $pos, $end_pos+22), $replacement, $content);
+        } return $content;
     }
 
 }

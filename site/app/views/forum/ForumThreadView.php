@@ -28,7 +28,17 @@ class ForumThreadView extends AbstractView {
 		
 		//Body Style is necessary to make sure that the forum is still readable...
 		$return = <<<HTML
-		<style>body {min-width: 925px;}</style>
+
+		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
+    <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
+    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/jquery-2.0.3.min.map.js"></script>
+    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
+    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/clike.js"></script>
+    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/python.js"></script>
+    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
+		<style>body {min-width: 925px;} pre { font-family: inherit; }</style>
+
+
 
 		<script>
 		function openFile(directory, file, path ){
@@ -117,7 +127,6 @@ HTML;
 					}
 
 			$thread_id = -1;
-			$function_content = 'nl2br';
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$return .= <<< HTML
 					</div>
@@ -148,6 +157,8 @@ HTML;
 						}
 						$date = date_create($post["timestamp"]);
 
+						$post_content = str_replace('&lbrack;&sol;code&rsqb;', '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code0">', $post["content"]));
+
 						if($post["anonymous"] == true){
 							if($userAccessToAnon){
 								$visible_username = "<a onClick=\"changeName(this, '{$post["author_user_id"]}')\" id=\"anonUser\">Anonymous</a>";
@@ -176,13 +187,13 @@ HTML;
 
 							<div class="post_box" style="margin-left:0;">
 HTML;
-						if($this->core->getUser()->accessAdmin()){
+						if($this->core->getUser()->getGroup() < 3){
 							$return .= <<<HTML
 							<a style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
 HTML;
 						}
 						$return .= <<<HTML
-							<p>{$function_content($post["content"])}</p>
+							<pre><p style="white-space: pre-wrap; ">{$post_content}</p></pre>
 							
 							
 							<hr style="margin-bottom:3px;">
@@ -256,6 +267,27 @@ HTML;
 		$_SESSION["post_recover_active"] = null;
 }
 
+	$return .= <<<HTML
+	<script>
+			var editor0 = CodeMirror.fromTextArea(document.getElementById('code0'), {
+            lineNumbers: true,
+            readOnly: true,
+            cursorHeight: 0.0,
+            lineWrapping: true
+	    });
+
+	    var lineCount = editor0.lineCount();
+	    if (lineCount == 1) {
+	        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+	    }
+	    else {
+	        editor0.setSize("100%", "auto");
+	    }
+	    editor0.setOption("theme", "eclipse");
+	    editor0.refresh(); 
+	    </script>
+HTML;
+
 		return $return;
 	}
 
@@ -269,6 +301,20 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
+
+		<script>
+			function addBBCode(type){
+				var cursor = $('#thread_content').prop('selectionStart');
+				var text = $('#thread_content').val();
+				var insert = "";
+				if(type == 1) {
+					insert = "[url=http://example.com]display text[/url]";
+				} else if(type == 0){
+					insert = "[code][/code]";
+				}
+				$('#thread_content').val(text.substring(0, cursor) + insert + text.substring(cursor));
+			}
+		</script>
 
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
@@ -287,8 +333,11 @@ HTML;
             		Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
             	</div>
             	<br/>
+            	<div style="margin-bottom:10px;" class="form-group row">
+            		<button type="button" title="Insert a link" onclick="addBBCode(1)" style="margin-right:10px;" class="btn btn-primary"><i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0)" class="btn btn-primary"><i class="fa fa-code fa-1x"></i></button>
+            	</div>
             	<div class="form-group row">
-            		<textarea name="thread_content" id="thread_content" style="white-space: pre-wrap;resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+            		<textarea name="thread_content" id="thread_content" style="resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
             	</div>
 
             	<br/>
