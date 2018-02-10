@@ -16,7 +16,7 @@ def log_message(is_batch,which_untrusted,jobname,timelabel,elapsed_time,message)
     now = dateutils.get_current_time()
     datefile=datetime.strftime(now,"%Y%m%d")+".txt"
     autograding_log_file=os.path.join(AUTOGRADING_LOG_PATH,datefile)
-    easy_to_read_date=dateutils.write_submitty_date(now)
+    easy_to_read_date=dateutils.write_submitty_date(now,True)
     my_pid = os.getpid()
     parent_pid = os.getppid()
     batch_string = "BATCH" if is_batch else ""
@@ -24,7 +24,7 @@ def log_message(is_batch,which_untrusted,jobname,timelabel,elapsed_time,message)
     time_unit = "" if elapsed_time=="" else "sec"
     with open(autograding_log_file,'a') as myfile:
         fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
-        print ("%s | %6s | %5s | %11s | %-75s | %-6s %5s %3s | %s"
+        print ("%s | %6s | %5s | %11s | %-75s | %-6s %7s %3s | %s"
                % (easy_to_read_date,my_pid,batch_string,which_untrusted,
                   abbrev_jobname,timelabel,elapsed_time,time_unit,message),
                file=myfile)

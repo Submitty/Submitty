@@ -174,8 +174,8 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_un
     queue_time = get_queue_time(next_directory,next_to_grade)
     queue_time_longstring = dateutils.write_submitty_date(queue_time)
     grading_began = dateutils.get_current_time()
-    waittime = int((grading_began-queue_time).total_seconds())
-    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"wait:",waittime,"")
+    waittime = (grading_began-queue_time).total_seconds()
+    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"wait:",'{0:.3f}'.format(waittime),"")
 
     # --------------------------------------------------------
     # various paths
@@ -516,7 +516,7 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_un
     grading_began_longstring = dateutils.write_submitty_date(grading_began)
     grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
 
-    gradingtime = int((grading_finished-grading_began).total_seconds())
+    gradingtime = (grading_finished-grading_began).total_seconds()
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,
@@ -525,9 +525,9 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_un
                                                  queue_time_longstring,
                                                  is_batch_job_string,
                                                  grading_began_longstring,
-                                                 waittime,
+                                                 int(waittime),
                                                  grading_finished_longstring,
-                                                 gradingtime,
+                                                 int(gradingtime),
                                                  grade_result)
 
     #---------------------------------------------------------------------
@@ -542,9 +542,9 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_un
         True if obj["is_team"] else False,
         str(obj["version"]))
 
-    print ("pid",os.getpid(),"finished grading ", next_to_grade, " in ", gradingtime, " seconds")
+    print ("pid",os.getpid(),"finished grading ", next_to_grade, " in ", int(gradingtime), " seconds")
 
-    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",gradingtime,grade_result)
+    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",'{0:.3f}'.format(gradingtime),grade_result)
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("FINISHED GRADING!")
