@@ -140,7 +140,7 @@ class DatabaseQueries {
 
     public function isStaffPost($author_id){
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", array($author_id));
-        return intval($this->course_db->rows()[0]['user_group']) <= 3; 
+        return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
     public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment){
@@ -789,7 +789,7 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
         $this->course_db->query("
 SELECT rotating_section, count(*) as count
 FROM users
-WHERE (registration_section IS NOT NULL OR manual_registration)
+WHERE registration_section IS NOT NULL
 GROUP BY rotating_section
 ORDER BY rotating_section");
         return $this->course_db->rows();
@@ -815,7 +815,7 @@ ORDER BY rotating_section");
         $this->course_db->query("
 SELECT rotating_section, count(*) as count
 FROM users
-WHERE (registration_section IS NULL and NOT manual_registration) AND rotating_section IS NOT NULL
+WHERE registration_section IS NULL
 GROUP BY rotating_section
 ORDER BY rotating_section");
         return $this->course_db->rows();
@@ -825,9 +825,7 @@ ORDER BY rotating_section");
         $this->course_db->query("
 SELECT user_id
 FROM users
-WHERE
-    (rotating_section IS NULL) and
-    (registration_section IS NOT NULL or manual_registration)
+WHERE rotating_section IS NULL AND registration_section IS NOT NULL
 ORDER BY user_id ASC");
         return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
     }
@@ -836,9 +834,7 @@ ORDER BY user_id ASC");
         $this->course_db->query("
 SELECT user_id
 FROM users
-WHERE
-    (registration_section IS NOT NULL) OR
-    (manual_registration)
+WHERE registration_section IS NOT NULL
 ORDER BY user_id ASC");
         return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
     }
