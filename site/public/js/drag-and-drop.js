@@ -557,8 +557,7 @@ function handleBulk(gradeable_id, num_pages) {
             }
             var newName = file_array[i][j].name;
             newName = newName.split('+').join(' ');
-            formData.append('files' + (i + 1) + '[]', file_array[i][j], encodeURIComponent(newName)
-            .replace(/\!/g, "%21").replace(/\(/g, "%28").replace(/\)/g, "%29"));
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], encodeURIComponent(newName).replace(/\!/g, "%21").replace(/\(/g, "%28").replace(/\)/g, "%29"));
         }
     }
 
@@ -675,8 +674,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                     alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                     return;
                 }
-                formData.append('files' + (i + 1) + '[]', file_array[i][j], encodeURIComponent(file_array[i][j].name)
-                .replace(/\!/g, "%21").replace(/\(/g, "%28").replace(/\)/g, "%29"));
+                formData.append('files' + (i + 1) + '[]', file_array[i][j], encodeURIComponent(file_array[i][j].name).replace(/\!/g, "%21").replace(/\(/g, "%28").replace(/\)/g, "%29"));
             }
         }
         // Files from previous submission
