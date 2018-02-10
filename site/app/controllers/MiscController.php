@@ -179,21 +179,21 @@ class MiscController extends AbstractController {
             return false;
         }
 
-		$corrected_name = pathinfo($_REQUEST['path'], 1) . "/" . rawurlencode( basename($_REQUEST['path']));
+		$corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_GET['path']));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
-            header('Content-Disposition: inline; filename="' .  basename($_REQUEST['path']) . '"');
+            header('Content-Disposition: inline; filename="' . rawurlencode(basename($_REQUEST['path'])) . '"');
             readfile($corrected_name);
-            $this->core->getOutput()->renderString($_REQUEST['path']);
+            $this->core->getOutput()->renderString(rawurlencode($_REQUEST['path']));
         }
         else {
             $contents = htmlentities(file_get_contents($corrected_name), ENT_SUBSTITUTE);
             if ($_REQUEST['ta_grading'] === "true") {
                 $filename = htmlentities($corrected_name, ENT_SUBSTITUTE);
-                $this->core->getOutput()->renderOutput('Misc', 'displayCode', $mime_type, $filename, $contents);
+               $this->core->getOutput()->renderOutput('Misc', 'displayCode', $mime_type, $corrected_name, $contents);
             }
             else {
                 $this->core->getOutput()->renderOutput('Misc', 'displayFile', $contents);

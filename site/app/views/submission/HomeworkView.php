@@ -577,6 +577,8 @@ HTML;
                         $path_full = str_replace("_cover.pdf", ".pdf", $path);
                         $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full."&ta_grading=false";
                         $count_array[$count] = FileUtils::joinPaths($timestamp, $filename_full);
+                        //decode the filename after to display correctly for users
+                        $filename_full = rawurldecode($filename_full);
                         $return .= <<<HTML
             <tr class="tr tr-vertically-centered">
                 <td>{$count}</td>
