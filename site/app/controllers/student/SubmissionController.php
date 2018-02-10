@@ -431,6 +431,10 @@ class SubmissionController extends AbstractController {
                 $who_id = $team_id;
                 $user_id = "";
             }
+            //if the student isn't on a team, build the team.
+            else{
+
+            }
         }
         
         $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
