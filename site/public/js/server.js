@@ -830,6 +830,7 @@ function deletePost(thread_id, post_id, author, time){
                 thread_id: thread_id
             },
             success: function(data){
+                console.log(data);
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
@@ -952,6 +953,18 @@ function loadHomeworkExtensions(g_id) {
             window.alert("Something went wrong. Please try again.");
         }
     });
+}
+
+function addBBCode(type, divTitle){
+    var cursor = $(divTitle).prop('selectionStart');
+    var text = $(divTitle).val();
+    var insert = "";
+    if(type == 1) {
+        insert = "[url=http://example.com]display text[/url]";
+    } else if(type == 0){
+        insert = "[code][/code]";
+    }
+    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
 function updateLateDays(data) {

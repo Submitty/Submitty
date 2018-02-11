@@ -98,7 +98,7 @@ HTML;
 						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
 						}
-						$first_post_content = strip_tags($first_post["content"]);
+						$first_post_content = str_replace("&lbrack;&sol;code&rsqb;", "", str_replace("&lbrack;code&rsqb;", "", strip_tags($first_post["content"])));
 						$sizeOfContent = strlen($first_post_content);
 						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strpos($first_post_content, " ", 70));
 						
@@ -136,7 +136,7 @@ HTML;
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
 					<h3 style="display:inline-block;word-wrap: break-word;margin-top:20px;">
 HTML;
-					if($this->core->getUser()->accessAdmin() && $activeThreadAnnouncement){
+					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
 						$return .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="removeAnnouncement({$activeThread['id']})" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'yellow')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:yellow; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
@@ -160,7 +160,7 @@ HTML;
 						}
 						$date = date_create($post["timestamp"]);
 
-						$post_content = str_replace('&lbrack;&sol;code&rsqb;', '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code0">', $post["content"]));
+						$post_content = str_replace('&lbrack;&sol;code&rsqb;', '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post["content"]));
 
 						if($post["anonymous"] == true){
 							if($userAccessToAnon){
@@ -227,6 +227,9 @@ HTML;
 					<form style="margin:20px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>
+	            	<div style="margin-bottom:10px;" class="form-group row">
+            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content')" style="margin-right:10px;" class="btn btn-primary"><i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content')" class="btn btn-primary"><i class="fa fa-code fa-1x"></i></button>
+            		</div>
 	            	<div class="form-group row">
 	            		<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
 	            	</div>
@@ -272,7 +275,9 @@ HTML;
 
 	$return .= <<<HTML
 	<script>
-			var editor0 = CodeMirror.fromTextArea(document.getElementById('code0'), {
+		var codeSegments = document.querySelectorAll("[id=code]");
+		for (let element of codeSegments){
+			var editor0 = CodeMirror.fromTextArea(element, {
             lineNumbers: true,
             readOnly: true,
             cursorHeight: 0.0,
@@ -288,6 +293,8 @@ HTML;
 	    }
 	    editor0.setOption("theme", "eclipse");
 	    editor0.refresh(); 
+		}
+			
 	    </script>
 HTML;
 
@@ -304,20 +311,6 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
-
-		<script>
-			function addBBCode(type){
-				var cursor = $('#thread_content').prop('selectionStart');
-				var text = $('#thread_content').val();
-				var insert = "";
-				if(type == 1) {
-					insert = "[url=http://example.com]display text[/url]";
-				} else if(type == 0){
-					insert = "[code][/code]";
-				}
-				$('#thread_content').val(text.substring(0, cursor) + insert + text.substring(cursor));
-			}
-		</script>
 
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
@@ -337,7 +330,7 @@ HTML;
             	</div>
             	<br/>
             	<div style="margin-bottom:10px;" class="form-group row">
-            		<button type="button" title="Insert a link" onclick="addBBCode(1)" style="margin-right:10px;" class="btn btn-primary"><i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0)" class="btn btn-primary"><i class="fa fa-code fa-1x"></i></button>
+            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_content')" style="margin-right:10px;" class="btn btn-primary"><i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_content')" class="btn btn-primary"><i class="fa fa-code fa-1x"></i></button>
             	</div>
             	<div class="form-group row">
             		<textarea name="thread_content" id="thread_content" style="resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
@@ -359,7 +352,7 @@ HTML;
             	<label for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" />
 HTML;
 				
-				if($this->core->getUser()->getGroup() < 4){
+				if($this->core->getUser()->getGroup() <= 2){
 						$return .= <<<HTML
 						<label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" />
 HTML;
