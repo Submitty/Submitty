@@ -23,11 +23,6 @@ public:
   int count;
   bool take_seat(std::string r, std::string s) {
     assert (count < max);
-    if (r == "N/A" && s == "N/A") {
-      assert (num_available_seats() == 0);
-      count++;
-      return true;
-    }
     std::vector<std::pair<std::string,std::string> >* available_seats;
     if (is_lefty_seat(s)) {
       available_seats = &available_lefty_seats;
@@ -79,7 +74,7 @@ public:
   int num_lefty_seats() {
     return available_lefty_seats.size();
   }
-  void add_seat(std::string &r, std::string &s) {
+  void add_seat(const std::string &r, const std::string &s) {
     if (is_lefty_seat(s)) {
       available_lefty_seats.push_back(std::make_pair(r,s));
     } else {
@@ -179,8 +174,6 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename,
       std::cout << "MISFORMATTED ZONE COUNTS" << std::endl; exit(1); }
     ss >> zi.image_url;
 
-    //std::cout << "ZONE IMAGE " << zi.image_url << std::endl;
-    
     zi.count=0;
     zi.clear_seats();
     if (zones.find(zi.zone) != zones.end()) {
@@ -257,6 +250,17 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename,
   }
   std::cout << "TOTAL SEATS FOR EXAM " << total_seats << std::endl;
   std::cout << "LEFTY DESK COUNT " << lefty_desk_count << std::endl;
+
+  // if we don't have specific seating assignments in this zone,
+  // fill in with generic seats
+  for (std::map<std::string,ZoneInfo,ZoneSorter>::iterator itr = zones.begin(); itr != zones.end(); itr++) {
+    int max = itr->second.max;
+    int na = itr->second.num_available_seats();
+    assert (max >= na);
+    for (int i = 0; i < max-na; i++) {
+      itr->second.add_seat("N/A","N/A");
+    }
+  }
 
   // ============================================================
   // read in any existing assignments...

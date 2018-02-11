@@ -574,6 +574,13 @@ table tr.table-header {
     background-color: #21C2F6;
 }
 
+.important {
+    /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
+    border-style: solid;
+    border-width: 4px;
+    border-color: #ffd700; /* gold */
+}
+
 .viewed {
     color: #888888;
 }

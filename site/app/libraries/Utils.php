@@ -159,11 +159,15 @@ class Utils {
     }
 
     public static function checkUploadedImageFile($id){
-        if (isset($_FILES[$id]) && (file_exists($_FILES[$id]['tmp_name']))) {
-            $mime_type = FileUtils::getMimeType($_FILES[$id]["tmp_name"]); 
-            if(getimagesize($_FILES[$id]["tmp_name"]) !== false && substr($mime_type, 0, strrpos($mime_type, "/")) === "image") {
-                return true;
-            }
+        if(isset($_FILES[$id])){
+            foreach($_FILES[$id]['tmp_name'] as $file_name){
+                if(file_exists($file_name)){
+                    $mime_type = FileUtils::getMimeType($file_name); 
+                    if(getimagesize($file_name) === false  || substr($mime_type, 0, strrpos($mime_type, "/")) !== "image") {
+                        return false;
+                    }
+                }
+            } return true;
         } return false;
     }
 }

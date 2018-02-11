@@ -409,8 +409,12 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s, const nlohmann::
   ostr << "  <tr><td>" << GLOBAL_EXAM_DATE << "</td><td align=center>" << time << "</td></tr>\n";
   ostr << "  <tr><td>Your room assignment: </td><td align=center>" << room << "</td></tr>\n";
   ostr << "  <tr><td>Your zone assignment: </td><td align=center>" << zone << "</td></tr>\n";
-  ostr << "  <tr><td>Your row assignment: </td><td align=center>" << row << "</td></tr>\n";
-  ostr << "  <tr><td>Your seat assignment: </td><td align=center>" << seat << "</td></tr>\n";
+  if (row != "N/A" && row !="") {
+    ostr << "  <tr><td>Your row assignment: </td><td align=center>" << row << "</td></tr>\n";
+  }
+  if (seat != "N/A" && seat !="") {
+    ostr << "  <tr><td>Your seat assignment: </td><td align=center>" << seat << "</td></tr>\n";
+  }
   ostr << "</table>\n";
   ostr << "</tr></td>\n";
 
