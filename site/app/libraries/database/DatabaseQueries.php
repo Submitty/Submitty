@@ -453,11 +453,11 @@ ORDER BY {$section_key}", $params);
         $where = "";
         if (count($sections) > 0) {
             // Expand out where clause
-            $sections_keys = array_keys($sections);
+            $sections_keys = array_values($sections);
             $where = "WHERE {$section_key} IN (";
             foreach($sections_keys as $section) {
                 $where .= "?" . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
-                array_push($params, $section+1);
+                array_push($params, $section);
             }
             $where .= ")";
         }
