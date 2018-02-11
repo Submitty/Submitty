@@ -98,7 +98,10 @@ HTML;
 						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
 						}
-						$contentDisplay = substr($first_post["content"], 0, 80);
+						$first_post_content = strip_tags($first_post["content"]);
+						$sizeOfContent = strlen($first_post_content);
+						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strpos($first_post_content, " ", 70));
+						
 						$titleDisplay = substr($thread["title"], 0, 30);
 						if(strlen($first_post["content"]) > 80){
 							$contentDisplay .= "...";

@@ -712,6 +712,10 @@ table tr.table-header {
     overflow: auto;
 }
 
+.post_box a {
+    text-decoration: underline;
+}
+
 .thread_box {
     padding:5px;
     overflow-y: auto;
