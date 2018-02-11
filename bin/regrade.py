@@ -76,6 +76,7 @@ def main():
 
         # full pattern may include wildcards!
         pattern = os.path.join(data_dir,pattern_semester,pattern_course,"submissions",pattern_gradeable,pattern_who,pattern_version)
+
         print("pattern: ",pattern)
 
         # Find all matching submissions
@@ -88,6 +89,13 @@ def main():
                 my_semester=my_dirs[len(data_dirs)]
                 my_course=my_dirs[len(data_dirs)+1]
                 my_gradeable=my_dirs[len(data_dirs)+3]
+                gradeable_config = os.path.join(data_dir,my_semester,my_course,"config/build/"+"build_"+my_gradeable+".json")
+                with open(gradeable_config, 'r') as build_configuration:
+                    datastore = json.load(build_configuration)
+                    if "required_capabilities" in datastore:
+                        required_capabilities = datastore["required_capabilities"]
+                    else:
+                        required_capabilities = "General"
                 my_who=my_dirs[len(data_dirs)+4]
                 my_version=my_dirs[len(data_dirs)+5]
                 my_path=os.path.join(data_dir,my_semester,my_course,"submissions",my_gradeable,my_who,my_version)
@@ -104,8 +112,9 @@ def main():
                     my_team = my_who
                     my_is_team = True
 
-                grade_queue.append({"semester": my_semester, "course": my_course, "gradeable": my_gradeable,
-                                    "user": my_user, "team": my_team, "who": my_who, "is_team": my_is_team, "version": my_version})
+                grade_queue.append({"semester": my_semester, "course": my_course, "gradeable": my_gradeable, 
+                                    "user": my_user, "team": my_team, "who": my_who, "is_team": my_is_team, 
+                                    "version": my_version, "required_capabilities" : required_capabilities})
 
     # Check before adding a very large number of systems to the queue
     if len(grade_queue) > 50 and not args.no_input:

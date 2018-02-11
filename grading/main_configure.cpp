@@ -128,6 +128,9 @@ int main(int argc, char *argv[]) {
   j["max_submissions"] = max_submissions;
   j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
 
+  j["required_capabilities"] = config_json.value("required_capabilities","General");
+
+
   nlohmann::json::iterator parts = config_json.find("part_names");
   if (parts != config_json.end()) {
     j["part_names"] =  nlohmann::json::array();
