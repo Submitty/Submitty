@@ -42,7 +42,6 @@ def write_submitty_date(d=get_current_time(),microseconds=False):
     answer = d.strftime("%Y-%m-%d %H:%M:%S%z")
     if microseconds:
         mlsec = d.strftime("%f")
-        print("MICROSECONDS ",mlsec)
         mlsec = mlsec[0:3]
         answer = d.strftime("%Y-%m-%d %H:%M:%S.{} %z".format(mlsec))
     return answer
