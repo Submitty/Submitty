@@ -1225,13 +1225,6 @@ HTML;
 HTML;
         $break_onclick = "";
         $disabled = '';
-        if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
-            $disabled='disabled';
-            $break_onclick = "return false; ";
-            $return .= <<<HTML
-    <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
-HTML;
-        }
         if($gradeable->getActiveVersion() == 0){
             $disabled='disabled';
             $break_onclick = "return false; ";
@@ -1250,8 +1243,14 @@ HTML;
                 <div class="red-message" style="text-align: center">This student did not submit anything</div>
 HTML;
             }
-        }        
-
+        } else if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
+            $disabled='disabled';
+            $break_onclick = "return false; ";
+            $return .= <<<HTML
+            <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
+HTML;
+        }
+       
         $num_questions = count($gradeable->getComponents());
 
         // if use student components, get the values for pages from the student's submissions
