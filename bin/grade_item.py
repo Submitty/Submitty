@@ -176,16 +176,44 @@ def unzip_this_file(zipfilename,path):
     zip_ref.extractall(path)
     zip_ref.close()
 
-    
-# ==================================================================================
-# ==================================================================================
-def prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_untrusted):
 
+def unzip_queue_file(zipfilename):
+    # be sure the zip file is ok, and contains the queue file
+    if not os.path.exists(zipfilename):
+        raise SystemExit("ERROR: zip file does not exist '", zipfilename, "'")
+    zip_ref = zipfile.ZipFile(zipfilename,'r')
+    names = zip_ref.namelist()
+    if not 'queue_file.json' in names:
+        raise SystemExit("ERROR: zip file does not contain queue file '", zipfilename, "'")
+    # remember the current directory
+    cur_dir = os.getcwd()
+    # create a temporary directory and go to it
+    tmp_dir = tempfile.mkdtemp()
+    os.chdir(tmp_dir)
+    # extract the queue file
+    queue_file_name = "queue_file.json"
+    zip_ref.extract(queue_file_name)
+    # read it into a json object
+    with open(queue_file_name) as f:
+        queue_obj = json.load(f)
+    # clean up the file & tmp directory, return to the original directory
+    os.remove(queue_file_name)
+    os.chdir(cur_dir)
+    os.rmdir(tmp_dir)
+    return queue_obj
+
+
+# ==================================================================================
+# ==================================================================================
+def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
+    os.chdir(SUBMITTY_DATA_DIR)
     # --------------------------------------------------------
     # figure out what we're supposed to grade & error checking
     obj = load_queue_file_obj(next_directory,next_to_grade)
-    submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
-                                   "submissions",obj["gradeable"],obj["who"],str(obj["version"]))
+
+    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+    item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
     if not os.path.isdir(submission_path):
         grade_items_logging.log_message("ERROR: the submission directory does not exist" + submission_path)
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
@@ -198,14 +226,13 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_un
     queue_time_longstring = dateutils.write_submitty_date(queue_time)
     grading_began = dateutils.get_current_time()
     waittime = (grading_began-queue_time).total_seconds()
-    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"wait:",'{0:.3f}'.format(waittime),"")
 
+    grade_items_logging.log_message(is_batch_job,"zip",item_name,"wait:",'{0:.3f}'.format(waittime),"")
 
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
-    tmp = os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
-    shutil.rmtree(tmp,ignore_errors=True)
-    os.makedirs(tmp)
+
+    tmp = tempfile.mkdtemp()
 
     tmp_autograding = os.path.join(tmp,"TMP_AUTOGRADING")
     os.mkdir(tmp_autograding)
@@ -230,8 +257,8 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_un
     shutil.copy(form_json_config,os.path.join(tmp_autograding,"form.json"))
     shutil.copy(complete_config,os.path.join(tmp_autograding,"complete_config.json"))
 
-    checkout_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"checkout",obj["gradeable"],obj["who"],str(obj["version"]))
-    results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",obj["gradeable"],obj["who"],str(obj["version"]))
+    checkout_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"checkout",partial_path)
+    results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",partial_path)
 
     # grab a copy of the current history.json file (if it exists)
     history_file = os.path.join(results_path,"history.json")
@@ -296,19 +323,22 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_un
     obj["waittime"] = waittime
 
     with open(os.path.join(tmp_submission,"queue_file.json"),'w') as outfile:
-        json.dump(obj,outfile)
+        json.dump(obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
     grading_began_longstring = dateutils.write_submitty_date(grading_began)
     with open(os.path.join(tmp_submission,".grading_began"), 'w') as f:
         print (grading_began_longstring,file=f)
 
     # zip up autograding & submission folders
-    my_autograding_zip_file="my_autograding.zip"
-    my_submission_zip_file="my_submission.zip"
+    my_autograding_zip_file=tempfile.mkstemp()[1]
+    my_submission_zip_file=tempfile.mkstemp()[1]
     zip_my_directory(tmp_autograding,my_autograding_zip_file)
     zip_my_directory(tmp_submission,my_submission_zip_file)
+    # cleanup
     shutil.rmtree(tmp_autograding)
     shutil.rmtree(tmp_submission)
+    shutil.rmtree(tmp)
+
     return (my_autograding_zip_file,my_submission_zip_file)
 
 
@@ -320,9 +350,12 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_un
 # ==================================================================================
 
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
-
-    #FIXME, should eventually not exist...
+    os.chdir(SUBMITTY_DATA_DIR)
     tmp = os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
+
+    # clean up old usage of this directory
+    shutil.rmtree(tmp,ignore_errors=True)
+    os.makedirs(tmp)
 
     # unzip autograding and submission folders
     tmp_autograding = os.path.join(tmp,"TMP_AUTOGRADING")
@@ -333,7 +366,21 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     os.remove(my_submission_zip_file)
 
     tmp_logs = os.path.join(tmp,"TMP_SUBMISSION","tmp_logs")
-    
+
+    queue_file = os.path.join(tmp_submission,"queue_file.json")
+    with open(queue_file, 'r') as infile:
+        queue_obj = json.load(infile)
+
+    queue_time_longstring = queue_obj["queue_time"]
+    waittime = queue_obj["waittime"]
+    is_batch_job = queue_obj["is_batch_job"]
+    is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
+
+    partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
+    item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
+
+    grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"wait:",'{0:.3f}'.format(waittime),"")
+
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
 
@@ -389,10 +436,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH)
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
-    queue_file = os.path.join(tmp_submission,"queue_file.json")
-    with open(queue_file, 'r') as infile:
-        queue_obj = json.load(infile)
-
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp"), 'r') as submission_time_file:
         submission_string = submission_time_file.read().rstrip()
@@ -411,7 +454,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("pid",os.getpid(),"COMPILATION OK")
     else:
         print ("pid",os.getpid(),"COMPILATION FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"","","COMPILATION FAILURE")
 
 
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
@@ -473,7 +516,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("pid",os.getpid(),"RUNNER OK")
     else:
         print ("pid",os.getpid(),"RUNNER FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","RUNNER FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"","","RUNNER FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
@@ -529,7 +572,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("pid",os.getpid(),"VALIDATOR OK")
     else:
         print ("pid",os.getpid(),"VALIDATOR FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","VALIDATION FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"","","VALIDATION FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
 
@@ -600,14 +643,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     queue_obj["grade_result"]=grade_result
     queue_obj["which_untrusted"]=which_untrusted
 
-    queue_time_longstring = queue_obj["queue_time"]
-    waittime = queue_obj["waittime"]
 
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
-        json.dump(queue_obj,outfile)
-
-    is_batch_job = queue_obj["is_batch_job"]
-    is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
+        json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,
@@ -621,7 +659,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                  int(gradingtime),
                                                  grade_result)
 
-    os.chdir(tmp)
+    os.chdir(SUBMITTY_DATA_DIR)
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("FINISHED GRADING!\n")
@@ -630,12 +668,16 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     shutil.copytree(tmp_logs,os.path.join(tmp_results,"logs"))
 
     # zip up results folder
-    my_results_zip_file="my_results.zip"
+    my_results_zip_file=tempfile.mkstemp()[1]
     zip_my_directory(tmp_results,my_results_zip_file)
     shutil.rmtree(tmp_autograding)
     shutil.rmtree(tmp_submission)
     shutil.rmtree(tmp_results)
     shutil.rmtree(tmp_work)
+    shutil.rmtree(tmp)
+
+    grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"grade:",'{0:.3f}'.format(gradingtime),grade_result)
+
     return my_results_zip_file
 
 
@@ -643,68 +685,57 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 # ==================================================================================
 # ==================================================================================
 # ==================================================================================
-def unpack_grading_results_zip(next_directory,next_to_grade,my_results_zip_file):
+def unpack_grading_results_zip(my_results_zip_file):
+    os.chdir(SUBMITTY_DATA_DIR)
 
-    obj = load_queue_file_obj(next_directory,next_to_grade)
-    results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",obj["gradeable"],obj["who"],str(obj["version"]))
+    queue_obj = unzip_queue_file(my_results_zip_file)
+
+    partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
+    item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
+    results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results",partial_path)
 
     # clean out all of the old files if this is a re-run
     shutil.rmtree(results_path,ignore_errors=True)
-
     # create the directory (and the full path if it doesn't already exist)
     os.makedirs(results_path)
-
+    # unzip the file & clean up
     unzip_this_file(my_results_zip_file,results_path)
-
     os.remove(my_results_zip_file)
 
-    #---------------------------------------------------------------------
-    # WRITE OUT VERSION DETAILS
+    # add information to the database
     insert_database_version_data.insert_to_database(
-        obj["semester"],
-        obj["course"],
-        obj["gradeable"],
-        obj["user"],
-        obj["team"],
-        obj["who"],
-        True if obj["is_team"] else False,
-        str(obj["version"]))
+        queue_obj["semester"],
+        queue_obj["course"],
+        queue_obj["gradeable"],
+        queue_obj["user"],
+        queue_obj["team"],
+        queue_obj["who"],
+        True if queue_obj["is_team"] else False,
+        str(queue_obj["version"]))
 
-
-    with open(os.path.join(results_path,"queue_file.json"), 'r') as infile:
-        queue_obj = json.load(infile)
+    submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
 
     is_batch_job = queue_obj["is_batch_job"]
-    submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],
-                                   "submissions",queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
-
     gradingtime=queue_obj["gradingtime"]
-    which_untrusted=queue_obj["which_untrusted"]
     grade_result=queue_obj["grade_result"]
 
-    print ("pid",os.getpid(),"finished grading ", next_to_grade, " in ", int(gradingtime), " seconds")
+    print ("pid",os.getpid(),"finished grading ", item_name, " in ", int(gradingtime), " seconds")
 
-    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",'{0:.3f}'.format(gradingtime),grade_result)
+    grade_items_logging.log_message(is_batch_job,"unzip",item_name,"grade:",'{0:.3f}'.format(gradingtime),grade_result)
 
-
-
-    # --------------------------------------------------------------------
-    # REMOVE TEMP DIRECTORY
-    #shutil.rmtree(tmp)
 
 
 # ==================================================================================
 # ==================================================================================
 def just_grade_item(next_directory,next_to_grade,which_untrusted):
-
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
         grade_items_logging.log_message("ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
-    autograding_zip,submission_zip = prepare_autograding_and_submission_zip(next_directory,next_to_grade,which_untrusted)
+    autograding_zip,submission_zip = prepare_autograding_and_submission_zip(next_directory,next_to_grade)
     results_zip = grade_from_zip(autograding_zip,submission_zip,which_untrusted)
-    unpack_grading_results_zip(next_directory,next_to_grade,results_zip)
+    unpack_grading_results_zip(results_zip)
     
 
 # ==================================================================================

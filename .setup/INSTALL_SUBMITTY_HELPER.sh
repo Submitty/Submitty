@@ -498,11 +498,13 @@ echo -e "Compile and install analysis tools"
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
+if [ "1" == "0" ]; then
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 for b in count plagiarism diagnostics;
     do wget "https://github.com/Submitty/AnalysisTools/releases/download/v0.3.3/$b"
 done
 popd
+fi
 
 # change permissions
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
