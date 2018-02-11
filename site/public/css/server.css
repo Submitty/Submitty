@@ -223,7 +223,9 @@ table tr.table-header {
     left: 0;
     top: 0;
     z-index: 9999;
-
+    font-size: 15px;
+    font-weight: 600;
+    margin-left:-1px;
 }
 
 #nav ul {
@@ -236,6 +238,7 @@ table tr.table-header {
 }
 
 #nav li {
+    border-left: 1px solid #6e6e6ecc;
     float: left;
 }
 
@@ -709,6 +712,14 @@ table tr.table-header {
     border-radius: 3px;
 }
 
+.first_post .post_content{
+    padding-left:20px;
+}
+
+.first_post .remove_post_button {
+    margin-top:-40px;
+}
+
 .post_box {
     box-shadow: 0 2px 15px -5px #888888;
     padding:5px;
@@ -717,6 +728,15 @@ table tr.table-header {
     border-radius: 3px;
     background-color:white;
     overflow: auto;
+}
+
+.first_post{
+    padding-left: 20px !important;
+    margin-top: -43px !important;
+    margin-left: -20px !important;
+    margin-right: -20px !important;
+    padding-top: 45px !important;
+    border-radius: 0 !important;
 }
 
 .thread_box {
