@@ -15,10 +15,9 @@ USAGE:
 import argparse
 import json
 import os
-from submitty_utils import glob
+from submitty_utils import glob, dateutils
 
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
-
 
 def arg_parse():
     parser = argparse.ArgumentParser(description="Re-adds any submission folders found in the given path and adds"
@@ -95,7 +94,13 @@ def main():
                     if "required_capabilities" in datastore:
                         required_capabilities = datastore["required_capabilities"]
                     else:
-                        required_capabilities = "General"
+                        required_capabilities = "default"
+                    if "max_possible_grading_time" in datastore:
+                        max_grading_time = datastore["max_possible_grading_time"]
+                    else:
+                        max_grading_time = -1
+                #get the current time
+                queue_time = dateutils.write_submitty_date() + " " + str(dateutils.get_timezone())
                 my_who=my_dirs[len(data_dirs)+4]
                 my_version=my_dirs[len(data_dirs)+5]
                 my_path=os.path.join(data_dir,my_semester,my_course,"submissions",my_gradeable,my_who,my_version)
@@ -112,9 +117,10 @@ def main():
                     my_team = my_who
                     my_is_team = True
 
-                grade_queue.append({"semester": my_semester, "course": my_course, "gradeable": my_gradeable, 
-                                    "user": my_user, "team": my_team, "who": my_who, "is_team": my_is_team, 
-                                    "version": my_version, "required_capabilities" : required_capabilities})
+                grade_queue.append({"semester": my_semester, "course": my_course, "gradeable": my_gradeable,
+                                    "user": my_user, "team": my_team, "who": my_who, "is_team": my_is_team,
+                                    "version": my_version, "required_capabilities" : required_capabilities,
+                                    "queue_time":queue_time, "max_possible_grading_time" : max_grading_time})
 
     # Check before adding a very large number of systems to the queue
     if len(grade_queue) > 50 and not args.no_input:

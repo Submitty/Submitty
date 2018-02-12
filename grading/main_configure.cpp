@@ -60,10 +60,33 @@ int main(int argc, char *argv[]) {
 
   nlohmann::json all;
   int which_testcase = 0;
+
+  int total_time = 0;
+  //The base max time per testcase.
+  int base_time = default_limits.find(RLIMIT_CPU)->second;
+
+  int leeway = CPU_TO_WALLCLOCK_TIME_BUFFER;
+
+  nlohmann::json::iterator rl = config_json.find("resource_limits");
+  if (rl != config_json.end()){
+    base_time = rl->value("RLIMIT_CPU", base_time);
+  }
+  std::cerr << "BASE TIME " << base_time << std::endl;
+
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,which_testcase++) {
     int points = itr->value("points",0);
     bool extra_credit = itr->value("extra_credit",false);
     bool hidden = itr->value("hidden",false);
+
+    //Add this textcases worst case time to the total worst case time.
+    int cpu_time = base_time;
+    nlohmann::json::iterator rl = itr->find("resource_limits");
+    if (rl != itr->end()){
+      cpu_time = rl->value("RLIMIT_CPU", base_time);
+    }
+    cpu_time += leeway;
+    total_time += cpu_time;
+
     if (points > 0) {
       if (!extra_credit)
         total_nonec += points;
@@ -81,7 +104,7 @@ int main(int argc, char *argv[]) {
   std::cout << "processed " << all.size() << " test cases" << std::endl;
   j["num_testcases"] = all.size();
   j["testcases"] = all;
- 
+  j["max_possible_grading_time"] = total_time;
   std::string start_red_text = "\033[1;31m";
   std::string end_red_text   = "\033[0m";
 
@@ -128,8 +151,7 @@ int main(int argc, char *argv[]) {
   j["max_submissions"] = max_submissions;
   j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
 
-  j["required_capabilities"] = config_json.value("required_capabilities","General");
-
+  j["required_capabilities"] = config_json.value("required_capabilities","default");
 
   nlohmann::json::iterator parts = config_json.find("part_names");
   if (parts != config_json.end()) {

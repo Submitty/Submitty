@@ -52,7 +52,7 @@ SUBMITTY_REPOSITORY = os.path.dirname(SETUP_SCRIPT_DIRECTORY)
 SUBMITTY_INSTALL_DIR = '/usr/local/submitty'
 SUBMITTY_DATA_DIR = '/var/local/submitty'
 SUBMITTY_TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT_Tutorial')
-WORKERS_JSON = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config", "WORKERS.json")
+WORKERS_JSON = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config", "autograding_workers.json")
 
 TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs')
 AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
@@ -116,7 +116,6 @@ defaults = {'database_host': 'localhost',
             'database_user': 'hsdbu',
             'submission_url': '',
             'authentication_method': 1,
-            'capable_of_grading' : True,
             'institution_name' : '',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
             'institution_homepage' : ''}
@@ -158,33 +157,12 @@ if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'datab
     DATABASE_PASS = defaults['database_password']
 print()
 
-CAPABLE_OF_GRADING = get_input('Will this machine grade assignments? (Yes,No)', "Yes")
-if CAPABLE_OF_GRADING.lower() == "yes" or CAPABLE_OF_GRADING.lower() == "true":
-    CAPABLE_OF_GRADING = True
-else:
-    CAPABLE_OF_GRADING = False
-
-worker_dict = {}
-if os.path.exists(WORKERS_JSON):
-    with open(WORKERS_JSON, 'r') as workers_file:
-        worker_dict = json.load(workers_file)
-        if not "Primary" in worker_dict:
-            worker_dict["Primary"] = {}
-        if CAPABLE_OF_GRADING:
-            if not "General" in worker_dict["Primary"]["Capabilities"]:
-                worker_dict["Primary"]["Capabilities"].append("General")
-        else:
-            worker_dict["Primary"]["Capabilities"] = [""]
-else:
-    worker_dict["Primary"] = {}
-    worker_dict["Primary"]["Machine_id"] = "Primary"
-    if CAPABLE_OF_GRADING:
-        worker_dict["Primary"]["Capabilities"] = ["General"]
-    else:
-        worker_dict["Primary"]["Capabilities"] = [""]
-
-with open(WORKERS_JSON, 'w') as workers_file:
-    json.dump(worker_dict, workers_file, indent=4)
+if not os.path.exists(WORKERS_JSON):
+    worker_dict = {}
+    worker_dict["primary"] = {"capabilities" : ["default"], "address" : "", "username" : "",
+        "num_autograding_workers" : NUM_GRADING_SCHEDULER_WORKERS}
+    with open(WORKERS_JSON, 'w') as workers_file:
+        json.dump(worker_dict, workers_file, indent=4)
 
 SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
 print()
@@ -259,8 +237,6 @@ obj['hwphp_gid'] = HWPHP_GID
 obj['database_host'] = DATABASE_HOST
 obj['database_user'] = DATABASE_USER
 obj['database_password'] = DATABASE_PASS
-
-obj['capable_of_grading'] = CAPABLE_OF_GRADING
 
 obj['authentication_method'] = AUTHENTICATION_METHOD
 
