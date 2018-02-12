@@ -191,7 +191,7 @@ HTML;
 							<div class="$classes" style="margin-left:0;">
 HTML;
 
-						if($this->core->getUser()->accessAdmin()){
+						if($this->core->getUser()->getGroup() <= 2){
 							$return .= <<<HTML
 							<a class="remove_post_button" style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
 HTML;
