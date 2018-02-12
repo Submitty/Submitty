@@ -161,7 +161,7 @@ class ForumController extends AbstractController {
     }
 
     public function deletePost(){
-        if($this->core->getUser()->accessAdmin()){
+        if($this->core->getUser()->getGroup() <= 2){
             $thread_id = $_POST["thread_id"];
             $post_id = $_POST["post_id"];
             $type = "";
