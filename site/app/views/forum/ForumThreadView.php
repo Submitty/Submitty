@@ -145,7 +145,7 @@ HTML;
 
 HTML;
 
-
+                    $first = true;
 					foreach($posts as $post){
 						
 						if($thread_id == -1) {
@@ -176,24 +176,28 @@ HTML;
 							$visible_username = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 						}
 
+						$classes = "post_box";
+
+						if($first){
+						    $first = false;
+						    $classes .= " first_post";
+                        }
+
 						if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
-							$return .= <<<HTML
-							<div class="post_box important" style="margin-left:0;">
-HTML;
-						} else {
-							$return .= <<<HTML
-							<div class="post_box" style="margin-left:0;">
-HTML;
+							$classes .= " important";
 						}
 
+                        $return .= <<<HTML
+							<div class="$classes" style="margin-left:0;">
+HTML;
 
 						if($this->core->getUser()->getGroup() <= 2){
 							$return .= <<<HTML
-							<a style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+							<a class="remove_post_button" style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
 HTML;
 						}
 						$return .= <<<HTML
-							<p>{$function_content($post["content"])}</p>
+							<p class="post_content">{$function_content($post["content"])}</p>
 							
 							
 							<hr style="margin-bottom:3px;">
