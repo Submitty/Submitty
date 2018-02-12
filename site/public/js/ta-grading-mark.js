@@ -1,3 +1,5 @@
+console.log("ta-graingmark laoded");
+
 function fixMarkPointValue(me) {
     var max = parseFloat($(me).attr('max'));
     var min = parseFloat($(me).attr('min'));
@@ -35,15 +37,53 @@ function checkIfSelected(me) {
     checkMarks(question_num);
 }
 
-function updateMarksOnPage(current_row, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
+function getMarkView(num, x, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
+    return ' \
+<tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'"> \
+    <td colspan="1" style="'+background+'; text-align: center;"> \
+        <span onclick="selectMark(this);"> \
+            <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
+        </span> \
+        <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
+    </td> \
+    <td colspan="3" style="'+background+'"> \
+        <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;">'+note+'</textarea> \
+        <span id="mark_info_id-'+num+'-'+x+'" style="display: none" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\'); getMarkInfo(this,\''+gradeable_id+'\');"> \
+            <i class="fa fa-users icon-got-this-mark"></i> \
+        </span> \
+        <!--\
+        <span id="mark_remove_id-'+num+'-'+x+'" onclick="deleteMark(this,'+num+','+x+');"> <i class="fa fa-times" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
+        --!>\
+    </td> \
+</tr> \
+';
+}
 
-    var current = $('[name=mark_'+num+']').last().attr('id');
-    if (current == null) { //only happens if there are no previous marks
-        last_num = -1; // should never happen, since there always should be a full credit/ no credit
-    } 
-    else {
-        last_num = parseInt($('[name=mark_'+num+']').last().attr('id').split('-')[2]);
+function haveMarksChanged(num, data) {
+    var marks = $('[name=mark_'+num+']');
+    var mark_notes = $('[name^=mark_text_'+num+']');
+    var mark_scores = $('[name^=mark_points_'+num+']');
+
+    // Check if there were added/removed marks
+    //    data['data'].length-1 to account for custom mark
+    if (data['data'].length-1 != marks.length)
+        return true;
+
+    // Check to see if any note or score value is different
+    for (var x = 0; x < marks.length; x++) {
+        if (mark_notes[x].innerHTML != data['data'][x]['note'] ||
+              mark_scores[x].value != data['data'][x]['score'])
+            return true;
     }
+    
+    return false;
+}
+
+function updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
+    var parent = $('#extra-'+num);
+    if (parent[0].style.display == "none") // Don't unnecessarily update if invisible
+        return;
+        
     $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
@@ -54,91 +94,148 @@ function updateMarksOnPage(current_row, num, background, min, max, precision, gr
                 'gradeable_component_id' : question_id,
             },
             success: function(data) {
-                console.log("success for adding a new mark");
-                console.log(data);
                 data = JSON.parse(data);
-                console.log(last_num + 1);
-                //it is data['data'].length - 1, since we're ignoring the custom mark
-                for (var x = last_num + 1; x < data['data'].length - 1; x++) {
-                    var got_this_mark = "fa-square-o";
-                    if (data['data'][x]['has_mark'] === true) {
-                        got_this_mark = "fa-square";
-                    }
-                    current_row.before(' \
-<tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'"> \
-<td colspan="1" style="'+background+'; text-align: center;"> \
-    <span onclick="selectMark(this);"> <i class="fa '+got_this_mark+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
-    <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+data['data'][x]['score']+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
-</td> \
-<td colspan="3" style="'+background+'"> \
-    <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;">'+data['data'][x]['note']+'</textarea> \
-    <span id="mark_info_id-'+num+'-'+x+'" style="display: none" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\'); getMarkInfo(this,\''+gradeable_id+'\');"> <i class="fa fa-users icon-got-this-mark"></i> </span> \
-    <!--\
-    <span id="mark_remove_id-'+num+'-'+x+'" onclick="deleteMark(this,'+num+','+x+');"> <i class="fa fa-times" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
-    --!>\
-</td> \
-</tr> \
-    ');
-                    console.log(data['data'].length - 1);
+                
+                // If nothing has changed, then don't update
+                if (!haveMarksChanged(num, data))
+                    return;
+                
+                // Clear away all marks
+                var marks = $('[name=mark_'+num+']');
+                for (var x = 0; x < marks.length; x++)
+                    marks[x].remove();
+                
+                // Add all marks back
+                // data['data'].length - 2 to ignore the custom mark
+                for (var x = data['data'].length-2; x >= 0; x--) {
+                    var hasMark = data['data'][x]['has_mark'];
+                    var score   = data['data'][x]['score'];
+                    var note    = data['data'][x]['note'];
+                    
+                    parent.prepend(getMarkView(num, x, hasMark, note, score, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id));
                 }
-
             },
-            error: function() {
-                console.log("Something went wront with adding a mark...");
+            error: function(err) {
+                console.error("Something went wront with fetching marks!");
                 alert("There was an error with saving the grade. Please refresh the page and try agian.");
             }
     })
 }
 
+
+// addMark(this, 3, '', -10000, 10000, '0.5', 'grading_homework', 'Oh8sjRGrF44EvYf', 1, 23, 'ta');
+// addMark(this, 4, '', -10000, 10000, '0.5', 'grading_homework', 'Oh8sjRGrF44EvYf', 1, 24, 'ta');
 function addMark(me, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
-    var last_num = -10;
-    var current_row = $(me.parentElement.parentElement);
-    
-    //updates the component
-    updateMarksOnPage(current_row, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id)
-
-    var current = $('[name=mark_'+num+']').last().attr('id');
-    if (current == null) {
-        last_num = -1;
-    } 
-    else {
-        last_num = parseInt($('[name=mark_'+num+']').last().attr('id').split('-')[2]);
-    }
-
-    var new_num = last_num + 1;
-    current_row.before(' \
-<tr id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'"> \
-<td colspan="1" style="'+background+'; text-align: center;"> \
-    <span onclick="selectMark(this);"> <i class="fa fa-square-o mark fa-lg" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
-    <input name="mark_points_'+num+'_'+new_num+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
-</td> \
-<td colspan="3" style="'+background+'"> \
-    <textarea name="mark_text_'+num+'_'+new_num+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;"></textarea> \
-    <span id="mark_info_id-'+num+'-'+new_num+'" style="display: none" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\'); getMarkInfo(this,\''+gradeable_id+'\');"> <i class="fa fa-users icon-got-this-mark"></i> </span> \
-    <!--\
-    <span id="mark_remove_id-'+num+'-'+new_num+'" onclick="deleteMark(this,'+num+','+new_num+');"> <i class="fa fa-times" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
-    --!>\
-</td> \
-</tr> \
-    '); 
-
+    // Make sure there haven't been any changes to the marks before adding a new one
     $.ajax({
             type: "POST",
-            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'add_one_new_mark'}),
-            async: true,
+            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
+            async: false,
             data: {
                 'gradeable_id' : gradeable_id,
                 'anon_id' : user_id,
                 'gradeable_component_id' : question_id,
             },
-            success: function() {
-                console.log("success for adding a new mark");
+            success: function(data) {
+                data = JSON.parse(data);
+                
+                var add = true;
+                
+                // If marks have changed then ask the grader if they want to update before adding
+                if (haveMarksChanged(num, data))
+                    add = confirm("There have been changes to marks since the last refresh.\nContinue adding a new mark?");
+                
+                if (add) {
+                    $.ajax({
+                            type: "POST",
+                            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'add_one_new_mark'}),
+                            async: true,
+                            data: {
+                                'gradeable_id' : gradeable_id,
+                                'anon_id' : user_id,
+                                'gradeable_component_id' : question_id,
+                            },
+                            success: function() {
+                                updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id)
+                            },
+                            error: function() {
+                                console.error("Something went wrong with adding a mark...");
+                                alert("There was an error with saving the grade. Please refresh the page and try agian.");
+                            }
+                        })
+                } else {
+                    updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id)
+                }
             },
-            error: function() {
-                console.log("Something went wront with adding a mark...");
+            error: function(err) {
+                console.error("Something went wront with fetching marks!");
                 alert("There was an error with saving the grade. Please refresh the page and try agian.");
             }
-        })
+    })
+    
+//     var current_row = $(me.parentElement.parentElement);
+// //  updateMarksOnPage(current_row, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
+//     updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id)
+    
+    
+    // var last_num = -10;
+    // 
+    // console.log("ADD MARK!!!");
+    // console.log(me);
+    // console.log(me.parentElement);
+    // console.log(me.parentElement.parentElement);
+    // 
+    // var current_row = $(me.parentElement.parentElement);
+    // 
+    // console.log(current_row);
+    // 
+    // //updates the component
+    // updateMarksOnPage(current_row, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id)
+
+//     var current = $('[name=mark_'+num+']').last().attr('id');
+//     if (current == null) {
+//         last_num = -1;
+//     } 
+//     else {
+//         last_num = parseInt($('[name=mark_'+num+']').last().attr('id').split('-')[2]);
+//     }
+// 
+//     var new_num = last_num + 1;
+//     current_row.before(' \
+// <tr id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'"> \
+// <td colspan="1" style="'+background+'; text-align: center;"> \
+//     <span onclick="selectMark(this);"> <i class="fa fa-square-o mark fa-lg" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
+//     <input name="mark_points_'+num+'_'+new_num+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
+// </td> \
+// <td colspan="3" style="'+background+'"> \
+//     <textarea name="mark_text_'+num+'_'+new_num+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;"></textarea> \
+//     <span id="mark_info_id-'+num+'-'+new_num+'" style="display: none" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\'); getMarkInfo(this,\''+gradeable_id+'\');"> <i class="fa fa-users icon-got-this-mark"></i> </span> \
+//     <!--\
+//     <span id="mark_remove_id-'+num+'-'+new_num+'" onclick="deleteMark(this,'+num+','+new_num+');"> <i class="fa fa-times" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
+//     --!>\
+// </td> \
+// </tr> \
+//     ');
+    
+    // $.ajax({
+    //         type: "POST",
+    //         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'add_one_new_mark'}),
+    //         async: true,
+    //         data: {
+    //             'gradeable_id' : gradeable_id,
+    //             'anon_id' : user_id,
+    //             'gradeable_component_id' : question_id,
+    //         },
+    //         success: function() {
+    //             console.log("success for adding a new mark");
+    //             // updateMarksOnPage();
+    //             updateMarksOnPage(current_row, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id)
+    //         },
+    //         error: function() {
+    //             console.log("Something went wront with adding a mark...");
+    //             alert("There was an error with saving the grade. Please refresh the page and try agian.");
+    //         }
+    //     })
 }
 
 function deleteMark(me, num, last_num) {

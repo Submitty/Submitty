@@ -1341,7 +1341,7 @@ HTML;
             }
 
             $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} openClose({$c}, {$num_questions}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}');">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         {$message}
 HTML;
@@ -1358,7 +1358,6 @@ HTML;
             $student_note = htmlentities($question->getStudentComment());
             if ($student_note != ''){
                 $student_note = "<div style='margin-bottom:5px; color:#777;'><i><b>Note to Student: </b>" . $student_note . "</i></div>";
-        
             }
             $return .= <<<HTML
                         <span id="student_note-{$c}" style="display: none;">{$student_note}</span>
@@ -1398,7 +1397,7 @@ HTML;
             }
             
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="{$graded_color}" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
+                <tr id="summary-{$c}" style="{$graded_color}" onclick="{$break_onclick} openClose({$c}, {$num_questions}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}');">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
                         <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
@@ -1414,49 +1413,49 @@ HTML;
             $d = 0;
             $first = true;
             $noChange = "";
-            foreach ($question->getMarks() as $mark) {
-
-            	//Makes the mark blue if they're publish marks
-            	if ($mark->getPublish() === 't') {
-            		$is_publish = "is_publish";
-            	}
-     			else {
-     				$is_publish = "";
-     			}
-
-                if ($first === true) {
-                    $first = false;
-                    $noChange = "readonly";
-                    $mark_text = ($question->getDefault() == 0) ? "No Credit" : "Full Credit";
-                }
-                else {
-                    $noChange = "";
-                    $mark_text = $mark->getNote();
-                }
-                $icon_mark = ($mark->getHasMark() === true && $show_graded_info) ? "fa-square" : "fa-square-o";
-                $mark_name = "mark_text_{$c}_{$d}";
-                $return .= <<<HTML
-                    <tr id="mark_id-{$c}-{$d}" name="mark_{$c}" class="{$is_publish}">
-                        <td colspan="1" style="text-align: center; width: 12%; white-space: nowrap;"> 
-                            <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
-                            <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none; min-width: 50px;" {$noChange}>
-                        </td>
-                        <td colspan="3" style="white-space: nowrap;">
-                                <textarea id = "{$mark_name}" name="{$mark_name}" onkeyup="" rows="1" style="width: 90%; resize:none;" oninput="adjustSize(name)" {$noChange}>{$mark_text} </textarea>
-                                <span id="mark_info_id-{$c}-{$d}" onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); getMarkInfo(this, '{$gradeable->getId()}');"> <i class="fa fa-users icon-got-this-mark"></i> </span>
-                        </td>
-                    </tr>
-HTML;
-                $d++;
-            }
-            $has_mark = false;
+//             foreach ($question->getMarks() as $mark) {
+// 
+//             	//Makes the mark blue if they're publish marks
+//             	if ($mark->getPublish() === 't') {
+//             		$is_publish = "is_publish";
+//             	}
+//      			else {
+//      				$is_publish = "";
+//      			}
+// 
+//                 if ($first === true) {
+//                     $first = false;
+//                     $noChange = "readonly";
+//                     $mark_text = ($question->getDefault() == 0) ? "No Credit" : "Full Credit";
+//                 }
+//                 else {
+//                     $noChange = "";
+//                     $mark_text = $mark->getNote();
+//                 }
+//                 $icon_mark = ($mark->getHasMark() === true && $show_graded_info) ? "fa-square" : "fa-square-o";
+//                 $mark_name = "mark_text_{$c}_{$d}";
+//                 $return .= <<<HTML
+//                     <tr id="mark_id-{$c}-{$d}" name="mark_{$c}" class="{$is_publish}">
+//                         <td colspan="1" style="text-align: center; width: 12%; white-space: nowrap;"> 
+//                             <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+//                             <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none; min-width: 50px;" {$noChange}>
+//                         </td>
+//                         <td colspan="3" style="white-space: nowrap;">
+//                                 <textarea id = "{$mark_name}" name="{$mark_name}" onkeyup="" rows="1" style="width: 90%; resize:none;" oninput="adjustSize(name)" {$noChange}>{$mark_text} </textarea>
+//                                 <span id="mark_info_id-{$c}-{$d}" onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); getMarkInfo(this, '{$gradeable->getId()}');"> <i class="fa fa-users icon-got-this-mark"></i> </span>
+//                         </td>
+//                     </tr>
+// HTML;
+//                 $d++;
+//             }
+            $has_custom_mark = false;
             if (($question->getScore() == 0 && $question->getComment() == "") || !$show_graded_info) {
-                $has_mark = false;
+                $has_custom_mark = false;
             }
             else {
-                $has_mark = true;
+                $has_custom_mark = true;
             }
-            $icon_mark = ($has_mark === true) ? "fa-square" : "fa-square-o";
+            $icon_mark = ($has_custom_mark === true) ? "fa-square" : "fa-square-o";
             if(!$peer) {
                 $return .= <<<HTML
                     <tr>
@@ -1469,7 +1468,7 @@ HTML;
             }
             $return .= <<<HTML
                     <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                        <td colspan="1" style="text-align: center;; white-space: nowrap;"> 
+                        <td colspan="1" style="text-align: center; white-space: nowrap;"> 
                         <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
                         <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px;">
                         </td>
@@ -1477,7 +1476,16 @@ HTML;
                             Custom: <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
                         </td>
                     </tr>
+                    
+                    <!-- <script type="text/javascript">
+                        $('#extra-{$c}').ready(function() {
+                            console.log("readdy");
+                            updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}');
+                        });
+                    </script> -->
+                    
                 </tbody>
+                
 HTML;
             $c++;
         }
