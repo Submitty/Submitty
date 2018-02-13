@@ -260,10 +260,21 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
 
     # --------------------------------------------------------------------
+    # START DOCKER
+
+    container = subprocess.check_output(['docker', 'run', '-t', '-d',
+                                         '-v', tmp + ':' + tmp,
+                                         '-v', '/usr/local/submitty:/usr/local/submitty',
+                                         '-v', '/var/local/submitty:/var/local/submitty',
+                                         'ubuntu:custom']).decode('utf8').strip()
+    #print(container)
+    #time.sleep(5)
+
+    # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
 
-    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-        print ("====================================\nCOMPILATION STARTS", file=f)
+    with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
+        print("====================================\nCOMPILATION STARTS", file=f)
     
     # copy submitted files to the tmp compilation directory
     tmp_compilation = os.path.join(tmp,"TMP_COMPILATION")
@@ -295,6 +306,12 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
     with open(os.path.join(tmp_logs,"compilation_log.txt"), 'w') as logfile:
+        args = ['docker', 'exec', container,
+                os.path.join(tmp_compilation, 'my_compile.out'), obj['gradeable'],
+                obj['who'], str(obj['version']), submission_string]
+        print(' '.join([str(arg) for arg in args]))
+        compile_success = subprocess.call(args, stdout=logfile)
+        """
         compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
                                            which_untrusted,
                                            os.path.join(tmp_compilation,"my_compile.out"),
@@ -303,13 +320,14 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                            str(obj["version"]),
                                            submission_string],
                                           stdout=logfile)
+        """
 
     if compile_success == 0:
         print ("pid",my_pid,"COMPILATION OK")
     else:
         print ("pid",my_pid,"COMPILATION FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
-
+    #raise SystemExit()
 
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
         
@@ -357,6 +375,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # run the run.out as the untrusted user
     with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
+        runner_success = subprocess.call(['docker', 'exec', container,
+                                          os.path.join(tmp_work, 'my_runner.out'), obj['gradeable'],
+                                          obj['who'], str(obj['version']), submission_string], stdout=logfile)
+        """
         runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
                                           which_untrusted,
                                           os.path.join(tmp_work,"my_runner.out"),
@@ -365,6 +387,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                           str(obj["version"]),
                                           submission_string],
                                           stdout=logfile)
+        """
 
     if runner_success == 0:
         print ("pid",my_pid,"RUNNER OK")
@@ -413,6 +436,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
+        validator_success = subprocess.call(['docker', 'exec', container,
+                                             os.path.join(tmp_work, 'my_validator.out'), obj['gradeable'],
+                                             obj['who'], str(obj['version']), submission_string], stdout=logfile)
+        """
         validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
                                              which_untrusted,
                                              os.path.join(tmp_work,"my_validator.out"),
@@ -421,6 +448,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                                              str(obj["version"]),
                                              submission_string],
                                             stdout=logfile)
+        """
 
     if validator_success == 0:
         print ("pid",my_pid,"VALIDATOR OK")
@@ -531,10 +559,13 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # save the logs!
     shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
 
-
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
     shutil.rmtree(tmp)
+
+    # --------------------------------------------------------------------
+    # CLEAN UP DOCKER
+    subprocess.call(['docker', 'rm', '-f', container])
 
 
 # ==================================================================================

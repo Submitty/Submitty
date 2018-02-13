@@ -117,6 +117,8 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser hwcron vagrant
 fi
 
+usermod -aG docker hwcron
+
 pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
