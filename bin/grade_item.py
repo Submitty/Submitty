@@ -306,7 +306,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
     with open(os.path.join(tmp_logs,"compilation_log.txt"), 'w') as logfile:
-        args = ['docker', 'exec', container,
+        args = ['docker', 'exec', '-w', tmp_compilation, container,
                 os.path.join(tmp_compilation, 'my_compile.out'), obj['gradeable'],
                 obj['who'], str(obj['version']), submission_string]
         print(' '.join([str(arg) for arg in args]))
@@ -373,9 +373,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
+    # raise SystemExit()
     # run the run.out as the untrusted user
     with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
-        runner_success = subprocess.call(['docker', 'exec', container,
+        runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
                                           os.path.join(tmp_work, 'my_runner.out'), obj['gradeable'],
                                           obj['who'], str(obj['version']), submission_string], stdout=logfile)
         """
@@ -436,7 +437,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
-        validator_success = subprocess.call(['docker', 'exec', container,
+        validator_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
                                              os.path.join(tmp_work, 'my_validator.out'), obj['gradeable'],
                                              obj['who'], str(obj['version']), submission_string], stdout=logfile)
         """
