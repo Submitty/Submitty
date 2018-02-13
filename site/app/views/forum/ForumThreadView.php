@@ -53,6 +53,26 @@ HTML;
 HTML;
 		} else {
 
+			if($this->core->getUser()->getGroup() <= 2){
+				$return .= <<<HTML
+				<div class="popup-form" id="edit-user-post">
+
+				<h3 id="edit_user_prompt"></h3>
+
+				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
+						<input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" />
+    					<input type="hidden" id="edit_post_id" name="edit_post_id" id="edit_post_id" value="" />
+					
+	            		<textarea name="edit_post_content" id="edit_post_content" style="margin-right:10px;white-space: pre-wrap;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
+	            	
+					<div style="float: right; width: auto; margin-top: 10px">
+	        			<a onclick="$('#edit-user-post').css('display', 'none');" class="btn btn-danger">Cancel</a>
+	       			 	<input class="btn btn-primary" type="submit" value="Submit" />
+	    			</div>	
+	    			</form>
+				</div>
+HTML;
+			}
 
 			$return .= <<<HTML
 				<div id="forum_wrapper">
@@ -198,7 +218,9 @@ HTML;
 
 						if($this->core->getUser()->getGroup() <= 2){
 							$return .= <<<HTML
+
 							<a class="remove_post_button" style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+							<a class="remove_post_button" style="position:relative; display:inline-block; color:black; margin-right: 3px; float:right;" onClick="editPost( {$post['thread_id']}, {$post['id']}, `{$function_content($post['content'])}`, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Edit post"><i style="vertical-align: -5%;" class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 						}
 						$return .= <<<HTML

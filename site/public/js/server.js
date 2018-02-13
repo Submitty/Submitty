@@ -833,6 +833,16 @@ function checkNumFilesForumUpload(input){
             
 }
 
+function editPost(thread_id, post_id, content, user_id, time) {
+    var contentBox = document.getElementById('edit_post_content');
+    var editUserPrompt = document.getElementById('edit_user_prompt');
+    editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + time;
+    contentBox.innerHTML = content;
+    document.getElementById('edit_thread_id').value = thread_id;
+    document.getElementById('edit_post_id').value = post_id;
+    $('.popup-form').css('display', 'block');
+}
+
 function deletePost(thread_id, post_id, author, time){
     var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note:  If you are deleting the first post in a thread this will delete the entire thread.");
     if(confirm){

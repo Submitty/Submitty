@@ -40,7 +40,10 @@ class ForumController extends AbstractController {
                 $this->publishPost();
                 break;
             case 'delete_post':
-                $this->deletePost();
+                $this->alterPost(0);
+                break;
+            case 'edit_post':
+                $this->alterPost(1);
                 break;
             case 'remove_announcement':
                 $this->alterAnnouncement(0);
@@ -160,17 +163,28 @@ class ForumController extends AbstractController {
         }
     }
 
-    public function deletePost(){
+    public function alterPost($modifyType){
         if($this->core->getUser()->getGroup() <= 2){
-            $thread_id = $_POST["thread_id"];
-            $post_id = $_POST["post_id"];
-            $type = "";
-            if($this->core->getQueries()->deletePost($post_id, $thread_id)){
-                $type = "thread";
-            } else {
-                $type = "post";
+
+            if($modifyType == 0) { //delete post
+                $thread_id = $_POST["thread_id"];
+                $post_id = $_POST["post_id"];
+                $type = "";
+                if($this->core->getQueries()->deletePost($post_id, $thread_id)){
+                    $type = "thread";
+                } else {
+                    $type = "post";
+                }
+                $this->core->getOutput()->renderJson(array('type' => $type));
+            } else if($modifyType == 1) { //edit post
+                $thread_id = $_POST["edit_thread_id"];
+                $post_id = $_POST["edit_post_id"];
+                $new_post_content = htmlentities($_POST["edit_post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                if(!$this->core->getQueries()->editPost($thread_id, $post_id, $new_post_content)){
+                    $this->core->addErrorMessage("There was an error trying to modify the post. Please try again.");
+                } $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
             }
-            $this->core->getOutput()->renderJson(array('type' => $type));
+
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }

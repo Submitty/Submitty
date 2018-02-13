@@ -192,6 +192,14 @@ class DatabaseQueries {
         } return false;
     }
 
+    public function editPost($thread_id, $post_id, $content){
+        try {
+            $this->course_db->query("UPDATE posts SET content = ? where thread_id = ? and id = ?", array($content, $thread_id, $post_id));
+        } catch(DatabaseException $dbException) {
+            return false;
+        } return true;
+    }
+
     /**
      * @param User $user
      * @param string $semester
