@@ -223,7 +223,9 @@ table tr.table-header {
     left: 0;
     top: 0;
     z-index: 9999;
-
+    font-size: 15px;
+    font-weight: 600;
+    margin-left:-1px;
 }
 
 #nav ul {
@@ -236,6 +238,7 @@ table tr.table-header {
 }
 
 #nav li {
+    border-left: 1px solid #6e6e6ecc;
     float: left;
 }
 
@@ -709,7 +712,22 @@ table tr.table-header {
     border-radius: 3px;
 }
 
+.first_post .post_content{
+    padding-left:20px;
+    margin-top: 10px;
+}
+
+.first_post .remove_post_button {
+}
+
+.remove_post_button{
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
 .post_box {
+    position: relative;
     box-shadow: 0 2px 15px -5px #888888;
     padding:5px;
     margin-top: 20px;
@@ -717,6 +735,14 @@ table tr.table-header {
     border-radius: 3px;
     background-color:white;
     overflow: auto;
+}
+
+.first_post{
+    padding-left: 10px !important;
+    margin-top: 0px !important;
+    margin-left: -20px !important;
+    margin-right: -20px !important;
+    border-radius: 0 !important;
 }
 
 .thread_box {
