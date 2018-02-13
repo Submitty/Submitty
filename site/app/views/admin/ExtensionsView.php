@@ -9,12 +9,12 @@ class ExtensionsView extends AbstractView {
         $return = <<<HTML
 <div type="hidden" id="message"></div>
 <div class="content">
-    <h2>Excused Absense Extensions</h2>
-    <form id="excusedAbsenseForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateHomeworkExtensions($(this));">
+    <h2>Excused Absence Extensions</h2>
+    <form id="excusedAbsenceForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateHomeworkExtensions($(this));">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="panel">
         <div class="option">
-            <p> Use this form to grant an extension (e.g., for an excused absense) to a user on a specific assignment.<br><br><br></p>
+            <p> Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.<br><br><br></p>
             <div class="option">Select Rubric:<br>
                 <select name="g_id" onchange="loadHomeworkExtensions($(this).val());" style="margin-top: 10px; width: 50%">
                     <option disabled selected value> -- select an option -- </option>

@@ -900,7 +900,7 @@ function alterAnnouncement(thread_id, confirmString, url){
 }
 
 function updateHomeworkExtensions(data) {
-    var fd = new FormData($('#excusedAbsenseForm').get(0));
+    var fd = new FormData($('#excusedAbsenceForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
     $.ajax({
         url: url,

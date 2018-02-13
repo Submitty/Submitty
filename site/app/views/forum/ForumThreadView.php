@@ -132,32 +132,34 @@ HTML;
 
 			$thread_id = -1;
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
+			$title_html = '';
 			$return .= <<< HTML
 					</div>
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
-					<h3 style="display:inline-block;word-wrap: break-word;margin-top:20px;">
+HTML;
+
+            $title_html .= <<< HTML
+            <h3 style="max-width: 95%; display:inline-block;word-wrap: break-word;margin-top:10px; margin-left: 5px;">
 HTML;
 					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
-						$return .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+                        $title_html .= <<<HTML
+							<a style="display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
-					} else if($activeThreadAnnouncement){
-						$return .= <<<HTML
+                    } else if($activeThreadAnnouncement){
+                        $title_html .= <<<HTML
 						 <i class="fa fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
-					} else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
-						$return .= <<<HTML
+                    } else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
+                        $title_html .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fa fa-star" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
-					}
-					$return .= <<< HTML
+                    }
+                    $title_html .= <<< HTML
 					{$activeThreadTitle}</h3>
-
 HTML;
-
-
+                    $first = true;
 					foreach($posts as $post){
 						
 						if($thread_id == -1) {
@@ -190,7 +192,14 @@ HTML;
 							$visible_username = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 						}
 
+						$classes = "post_box";
+
+						if($first){
+						    $classes .= " first_post";
+                        }
+
 						if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
+<<<<<<< HEAD
 							$return .= <<<HTML
 							<div class="post_box important" style="margin-left:0;">
 HTML;
@@ -198,14 +207,30 @@ HTML;
 							$return .= <<<HTML
 							<div class="post_box" style="margin-left:0;">
 HTML;
+=======
+							$classes .= " important";
+						}
+
+                        $return .= <<<HTML
+							<div class="$classes" style="margin-left:0;">
+HTML;
+						if($first){
+                            $first = false;
+                            $return .= $title_html;
+                        }
+>>>>>>> master
 
 						if($this->core->getUser()->getGroup() <= 2){
 							$return .= <<<HTML
-							<a style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+							<a class="remove_post_button" style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
 HTML;
 						}
 						$return .= <<<HTML
+<<<<<<< HEAD
 							<pre><p style="white-space: pre-wrap; ">{$post_content}</p></pre>
+=======
+							<p class="post_content">{$function_content($post["content"])}</p>
+>>>>>>> master
 							
 							
 							<hr style="margin-bottom:3px;">
