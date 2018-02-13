@@ -601,10 +601,7 @@ HTML;
                                 $member_list = $member_list . ", ";
                             }
  	 
-                            $first_name = $this->core->getQueries()->getUserById($team_member)->getPreferredFirstName();
-                            if ($first_name === "") {
-                                $first_name = $this->core->getQueries()->getUserById($team_member)->getFirstName();
-                            }
+                            $first_name = $this->core->getQueries()->getUserById($team_member)->getDisplayedFirstName();
                             $last_name = $this->core->getQueries()->getUserById($team_member)->getLastName();
 
                             $member_list = $member_list . $first_name . " " . $last_name;
