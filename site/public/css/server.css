@@ -717,6 +717,10 @@ table tr.table-header {
     margin-top: 10px;
 }
 
+.post_content {
+    margin-right: 40px;
+}
+
 .first_post .remove_post_button {
 }
 
