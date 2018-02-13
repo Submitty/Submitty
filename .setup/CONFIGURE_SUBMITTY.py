@@ -52,6 +52,7 @@ SUBMITTY_REPOSITORY = os.path.dirname(SETUP_SCRIPT_DIRECTORY)
 SUBMITTY_INSTALL_DIR = '/usr/local/submitty'
 SUBMITTY_DATA_DIR = '/var/local/submitty'
 SUBMITTY_TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT_Tutorial')
+WORKERS_JSON = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config", "autograding_workers.json")
 
 TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs')
 AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
@@ -155,6 +156,13 @@ DATABASE_PASS = get_input('What is the database password for {}? {}'.format(DATA
 if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
     DATABASE_PASS = defaults['database_password']
 print()
+
+if not os.path.isfile(WORKERS_JSON):
+    worker_dict = {}
+    worker_dict["primary"] = {"capabilities" : ["default"], "address" : "", "username" : "",
+        "num_autograding_workers" : NUM_GRADING_SCHEDULER_WORKERS}
+    with open(WORKERS_JSON, 'w') as workers_file:
+        json.dump(worker_dict, workers_file, indent=4)
 
 SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
 print()
