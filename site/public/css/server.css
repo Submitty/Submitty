@@ -714,13 +714,20 @@ table tr.table-header {
 
 .first_post .post_content{
     padding-left:20px;
+    margin-top: 10px;
 }
 
 .first_post .remove_post_button {
-    margin-top:-40px;
+}
+
+.remove_post_button{
+    position: absolute;
+    top: 5px;
+    right: 5px;
 }
 
 .post_box {
+    position: relative;
     box-shadow: 0 2px 15px -5px #888888;
     padding:5px;
     margin-top: 20px;
@@ -731,11 +738,10 @@ table tr.table-header {
 }
 
 .first_post{
-    padding-left: 20px !important;
-    margin-top: -43px !important;
+    padding-left: 10px !important;
+    margin-top: 0px !important;
     margin-left: -20px !important;
     margin-right: -20px !important;
-    padding-top: 45px !important;
     border-radius: 0 !important;
 }
 
