@@ -199,15 +199,6 @@ HTML;
                         }
 
 						if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
-<<<<<<< HEAD
-							$return .= <<<HTML
-							<div class="post_box important" style="margin-left:0;">
-HTML;
-						} else {
-							$return .= <<<HTML
-							<div class="post_box" style="margin-left:0;">
-HTML;
-=======
 							$classes .= " important";
 						}
 
@@ -218,7 +209,6 @@ HTML;
                             $first = false;
                             $return .= $title_html;
                         }
->>>>>>> master
 
 						if($this->core->getUser()->getGroup() <= 2){
 							$return .= <<<HTML
@@ -226,11 +216,7 @@ HTML;
 HTML;
 						}
 						$return .= <<<HTML
-<<<<<<< HEAD
-							<pre><p style="white-space: pre-wrap; ">{$post_content}</p></pre>
-=======
-							<p class="post_content">{$function_content($post["content"])}</p>
->>>>>>> master
+							<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>
 							
 							
 							<hr style="margin-bottom:3px;">
