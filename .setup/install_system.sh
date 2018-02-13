@@ -118,6 +118,11 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 usermod -aG docker hwcron
+mkdir -p /tmp/docker
+cp cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+pushd /tmp/docker/Dockerfile
+docker build -t ubuntu:custom -f Dockerfile .
+popd
 
 pip3 install -U pip
 pip3 install python-pam
