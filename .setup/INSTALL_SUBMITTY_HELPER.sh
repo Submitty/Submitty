@@ -39,6 +39,8 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
     exit 1
 fi
 
+
+
 echo -e "\nBeginning installation of the Submitty homework submission server\n"
 
 
@@ -51,8 +53,10 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HWCGI_USER__|$HWCGI_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
+    if [ ${HEADLESS} == 0 ]; then
     sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
     sed -i -e "s|__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $1
+    fi
 
     sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $1
     sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $1
@@ -121,17 +125,17 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 fi
 
-if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
-    export HEADLESS=1
-else
-    export HEADLESS=0
-fi
+#Evan:Headless. Switch to arg later. 
+export HEADLESS=1
+
 
 
 # set the permissions of the top level directory
+if [ ${HEADLESS} == 0 ]; then
+
 chown  root:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_INSTALL_DIR}
 chmod  751                            ${SUBMITTY_INSTALL_DIR}
-
+fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -140,38 +144,41 @@ chmod  751                            ${SUBMITTY_INSTALL_DIR}
 echo -e "Make top level directores & set permissions"
 
 mkdir -p ${SUBMITTY_DATA_DIR}
+if [ ${HEADLESS} == 0 ]; then
 mkdir -p ${SUBMITTY_DATA_DIR}/courses
 mkdir -p ${SUBMITTY_DATA_DIR}/vcs
+fi
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 
 #EVAN: Get rid of site logs
-if [ ${HEADLESS} == 0]; then
+if [ ${HEADLESS} == 0 ]; then
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
-fi
+
 
 # set the permissions of these directories
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
 chmod  751                                        ${SUBMITTY_DATA_DIR}
-
+fi
 #EVAN: Get rid of site permissions
-if [ ${HEADLESS} == 0]; then
+if [ ${HEADLESS} == 0 ]; then
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
 chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
 chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
 chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
 fi
 #EVAN: get rid of hwphp
-if [ ${HEADLESS} == 0]; then
+if [ ${HEADLESS} == 0 ]; then
 chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
 chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
-fi
+
 chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
+fi
 
 #EVAN: We are not currently using these directories.
-if [ ${HEADLESS} == 0]; then
+if [ ${HEADLESS} == 0 ]; then
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_interactive
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_batch
@@ -244,7 +251,7 @@ find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
 
 
 #EVAN: Child doesn't need more_autograding_examples
-if [ ${HEADLESS} == 0]; then
+if [ ${HEADLESS} == 0 ]; then
 ########################################################################################################################
 ########################################################################################################################
 # COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
@@ -293,8 +300,10 @@ echo -e "Copy the scripts"
 
 # make the directory (has a different name)
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
+if [ ${HEADLESS} == 0 ]; then
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin
 chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
+fi
 
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
@@ -318,12 +327,16 @@ replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_dat
 # most of the scripts should be root only
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
+echo -e "EVAN: 1"
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
 chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
+
+if [ ${HEADLESS} == 0 ]; then
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
+
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
@@ -334,6 +347,9 @@ chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_
 chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+fi
+
+echo -e "EVAN: 2"
 
 # hwcron only things
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
@@ -348,6 +364,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
+echo -e "EVAN: 3"
 
 # root only things
 chown root:root ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
@@ -361,7 +378,11 @@ chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 # set the permissions
+echo -e "EVAN: 5"
+
+if [ ${HEADLESS} == 0 ]; then
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
+fi
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 
 
@@ -377,6 +398,7 @@ chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload_old_assignments.py
 
+echo -e "EVAN: 6"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -403,11 +425,13 @@ chgrp $HWCRON_USER  ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
 chmod 4550  ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
 popd > /dev/null
 
+echo -e "EVAN: 7"
 
 ################################################################################################################
 ################################################################################################################
 # COPY THE TA GRADING WEBSITE
-
+#EVAN: Not needed for headless.
+if [ ${HEADLESS} == 0 ]; then
 echo -e "Copy the ta grading website"
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
@@ -439,11 +463,13 @@ find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.gif -exec ch
 
 # "other" can read & execute all .js files
 find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.js -exec chmod o+rx {} \;
-
+#Evan: endif
+fi
 ################################################################################################################
 ################################################################################################################
 # COPY THE 1.0 Grading Website
-
+#Evan: not needed for headless.
+if [ ${HEADLESS} == 0 ]; then
 echo -e "Copy the submission website"
 
 # copy the website from the repo
@@ -485,6 +511,8 @@ if [ -f "$mytempcurrentcourses" ]; then
     mv ${mytempcurrentcourses} ${originalcurrentcourses}
 fi
 
+fi
+#Evan: Endif
 
 ################################################################################################################
 ################################################################################################################
@@ -527,7 +555,9 @@ done
 popd
 
 # change permissions
+if [ ${HEADLESS} == 0 ]; then
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+fi
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 ################################################################################################################
@@ -543,7 +573,9 @@ python3 setup.py -q install
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
+if [ ${HEADLESS} == 0 ]; then
 sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
+fi
 sudo chmod o+r /usr/local/lib/python*/dist-packages/submitty_utils*.egg
 sudo chmod o+r /usr/local/lib/python*/dist-packages/easy-install.pth
 
@@ -553,6 +585,7 @@ popd
 ################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 
+#Evan: TODO, fix the grading scheduler.
 
 # stop the scheduler (if it's running)
 systemctl is-active --quiet submitty_grading_scheduler
@@ -614,6 +647,8 @@ fi
 ################################################################################################################
 # INSTALL TEST SUITE
 
+#Evan: Remove tests from headless.
+if [ ${HEADLESS} == 0 ]; then
 
 # one optional argument installs & runs test suite
 if [[ "$#" -ge 1 && $1 == "test" ]]; then
@@ -636,12 +671,15 @@ if [[ "$#" -ge 1 && $1 == "test" ]]; then
 
     echo -e "\nCompleted Autograding Test Suite\n"
 fi
+fi
+#Evan: Endif
 
 ################################################################################################################
 ################################################################################################################
 
 # INSTALL RAINBOW GRADES TEST SUITE
-
+#Evan: Remove rainbow grades from headless
+if [ ${HEADLESS} == 0 ]; then
 
 # one optional argument installs & runs test suite
 if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
@@ -673,6 +711,8 @@ if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
 
     echo -e "\nCompleted Rainbow Grades Test Suite. $rainbow_counter of $rainbow_total tests succeeded.\n"
 fi
+fi
+#Evan: Endif
 
 ################################################################################################################
 ################################################################################################################

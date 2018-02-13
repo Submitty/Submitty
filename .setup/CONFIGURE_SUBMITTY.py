@@ -63,8 +63,9 @@ AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
 HWPHP_USER = 'hwphp'
 HWCGI_USER = 'hwcgi'
 HWCRON_USER = 'hwcron'
-HWPHP_UID, HWPHP_GID = get_ids(HWPHP_USER)
-HWCGI_UID, HWCGI_GID = get_ids(HWCGI_USER)
+if not args.headless:
+    HWPHP_UID, HWPHP_GID = get_ids(HWPHP_USER)
+    HWCGI_UID, HWCGI_GID = get_ids(HWCGI_USER)
 HWCRON_UID, HWCRON_GID = get_ids(HWCRON_USER)
 
 if not args.headless:
@@ -209,7 +210,9 @@ if not args.headless:
 if os.path.isdir(SETUP_INSTALL_DIR):
     shutil.rmtree(SETUP_INSTALL_DIR)
 os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
-shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
+
+if not args.headless:
+    shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(SETUP_INSTALL_DIR, 0o751)
 
 ##############################################################################
@@ -226,9 +229,9 @@ if not args.headless:
     obj['hwphp_user'] = HWPHP_USER
     obj['hwcgi_user'] = HWCGI_USER
     obj['hwcronphp_group'] = HWCRONPHP_GROUP
+    obj['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 obj['hwcron_user'] = HWCRON_USER
-obj['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 obj['num_untrusted'] = NUM_UNTRUSTED
 obj['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
@@ -291,10 +294,8 @@ with open(CONFIGURATION_FILE, 'w') as open_file:
             write('{}={}'.format(key, value))
     write()
     write('# Now actually run the installation script')
-    if not args.headless:
-        write('source '+SETUP_REPOSITORY_DIR+'/INSTALL_SUBMITTY_HELPER.sh  "$@"')
-    else:
-        write('source '+SETUP_REPOSITORY_DIR+'/INSTALL_SUBMITTY_HELPER.sh  HEADLESS')
+    #EVAN: fix to take the correct arg or something
+    write('source '+SETUP_REPOSITORY_DIR+'/INSTALL_SUBMITTY_HELPER.sh  "$@"')
 
 os.chmod(CONFIGURATION_FILE, 0o700)
 
