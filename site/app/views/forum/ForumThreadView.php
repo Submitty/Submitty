@@ -120,31 +120,33 @@ HTML;
 			$thread_id = -1;
 			$function_content = 'nl2br';
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
+			$title_html = '';
 			$return .= <<< HTML
 					</div>
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
-					<h3 style="display:inline-block;word-wrap: break-word;margin-top:20px;">
+HTML;
+
+            $title_html .= <<< HTML
+            <h3 style="max-width: 95%; display:inline-block;word-wrap: break-word;margin-top:10px; margin-left: 5px;">
 HTML;
 					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
-						$return .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+                        $title_html .= <<<HTML
+							<a style="display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
-					} else if($activeThreadAnnouncement){
-						$return .= <<<HTML
+                    } else if($activeThreadAnnouncement){
+                        $title_html .= <<<HTML
 						 <i class="fa fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
-					} else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
-						$return .= <<<HTML
+                    } else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
+                        $title_html .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fa fa-star" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
-					}
-					$return .= <<< HTML
+                    }
+                    $title_html .= <<< HTML
 					{$activeThreadTitle}</h3>
-
 HTML;
-
                     $first = true;
 					foreach($posts as $post){
 						
@@ -179,7 +181,6 @@ HTML;
 						$classes = "post_box";
 
 						if($first){
-						    $first = false;
 						    $classes .= " first_post";
                         }
 
@@ -190,6 +191,10 @@ HTML;
                         $return .= <<<HTML
 							<div class="$classes" style="margin-left:0;">
 HTML;
+						if($first){
+                            $first = false;
+                            $return .= $title_html;
+                        }
 
 						if($this->core->getUser()->getGroup() <= 2){
 							$return .= <<<HTML
