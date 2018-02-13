@@ -157,7 +157,7 @@ if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'datab
     DATABASE_PASS = defaults['database_password']
 print()
 
-if not os.path.exists(WORKERS_JSON):
+if not os.path.isfile(WORKERS_JSON):
     worker_dict = {}
     worker_dict["primary"] = {"capabilities" : ["default"], "address" : "", "username" : "",
         "num_autograding_workers" : NUM_GRADING_SCHEDULER_WORKERS}
