@@ -333,7 +333,8 @@ fi
 #################################################################
 # SUBMITTY SETUP
 #################
-
+#create the site/config folder for later use
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/config
 
 if [ ${VAGRANT} == 1 ]; then
     # This should be set by setup_distro.sh for whatever distro we have, but
@@ -353,7 +354,6 @@ else
 fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
-
 
 # (re)start the submitty grading scheduler daemon
 systemctl restart submitty_grading_scheduler
