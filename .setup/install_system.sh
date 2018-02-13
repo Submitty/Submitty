@@ -119,8 +119,8 @@ fi
 
 usermod -aG docker hwcron
 mkdir -p /tmp/docker
-cp cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-pushd /tmp/docker/Dockerfile
+cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+pushd /tmp/docker
 docker build -t ubuntu:custom -f Dockerfile .
 popd
 

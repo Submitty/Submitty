@@ -264,8 +264,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     container = subprocess.check_output(['docker', 'run', '-t', '-d',
                                          '-v', tmp + ':' + tmp,
-                                         '-v', '/usr/local/submitty:/usr/local/submitty',
-                                         '-v', '/var/local/submitty:/var/local/submitty',
                                          'ubuntu:custom']).decode('utf8').strip()
     #print(container)
     #time.sleep(5)
