@@ -91,14 +91,9 @@ def main():
                 gradeable_config = os.path.join(data_dir,my_semester,my_course,"config/build/"+"build_"+my_gradeable+".json")
                 with open(gradeable_config, 'r') as build_configuration:
                     datastore = json.load(build_configuration)
-                    if "required_capabilities" in datastore:
-                        required_capabilities = datastore["required_capabilities"]
-                    else:
-                        required_capabilities = "default"
-                    if "max_possible_grading_time" in datastore:
-                        max_grading_time = datastore["max_possible_grading_time"]
-                    else:
-                        max_grading_time = -1
+                    required_capabilities = datastore.get('required_capabilities', 'default')
+                    max_grading_time = datastore.get('max_possible_grading_time', -1)
+
                 #get the current time
                 queue_time = dateutils.write_submitty_date() + " " + str(dateutils.get_timezone())
                 my_who=my_dirs[len(data_dirs)+4]

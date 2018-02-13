@@ -491,20 +491,9 @@ class Gradeable extends AbstractModel {
           $num_textboxes = count($details['textboxes']);
         }
 
-        if (isset($details['required_capabilities'])){
-            $this->required_capabilities = $details['required_capabilities'];
-        }
-        else{
-            $this->required_capabilities = "default";
-        }
+        $this->required_capabilities = $details['required_capabilities'] ?? 'default';
 
-        if (isset($details['max_possible_grading_time'])){
-            $this->max_possible_grading_time = $details['max_possible_grading_time'];
-        }
-        else{
-           $this->max_possible_grading_time = -1;
-        }
-
+        $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
 
         for ($i = 1; $i <= $num_parts; $i++) {
             $this->previous_files[$i] = array();
