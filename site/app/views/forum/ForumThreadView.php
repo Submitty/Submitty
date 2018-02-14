@@ -40,17 +40,25 @@ HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		$return .= <<<HTML
 		<script>
-								function changeName(element, user, visible_username){
+								function changeName(element, user, visible_username, anon){
 									new_element = element.getElementsByTagName("strong")[0];
 									icon = element.getElementsByClassName("fa fa-eye");
 									if(icon.length == 0){
 										icon = element.getElementsByClassName("fa fa-eye-slash");
 									} icon = icon[0];
 									if(new_element.innerText == visible_username) {
+										if(anon) {
+											new_element.style.color = "grey";
+											new_element.style.fontStyle = "italic";
+										}
 										new_element.innerText = user;
 										icon.className = "fa fa-eye-slash";
 										icon.title = "Hide full user information";
 									} else {
+										if(anon) {
+											new_element.style.color = "black";
+											new_element.style.fontStyle = "normal";
+										}
 										new_element.innerText = visible_username;
 										icon.className = "fa fa-eye";
 										icon.title = "Show full user information";
@@ -207,23 +215,28 @@ HTML;
                         }
 
 						if($this->core->getUser()->getGroup() <= 2){
-							$info_name = $full_name . " (" . $post['author_user_id'] . ")";
 							$return .= <<<HTML
 							<a class="post_button" style="position:absolute; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
-							<a class="post_button" style="position:absolute; margin-right:18px;display:inline-block; color:black; float:right;" onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}'	)" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
-
 HTML;
-	
-								
-					
 							} 
 						
 						$return .= <<<HTML
 							<p class="post_content">{$function_content($post["content"])}</p>
 							
 							
-							<hr style="margin-bottom:3px;">
+							<hr style="margin-bottom:3px;"><span style="margin-top:5px;margin-left:10px;float:right;">
 							
+HTML;
+
+if($this->core->getUser()->getGroup() <= 2){
+						$info_name = $full_name . " (" . $post['author_user_id'] . ")";
+						$return .= <<<HTML
+						<a style=" margin-right:2px;display:inline-block; color:black; " onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}', {$post['anonymous']}	)" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
+HTML;
+}
+			$return .= <<<HTML
+			
+<h7><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")}</h7></span>
 HTML;
 
 						if($post["has_attachment"]){
@@ -240,15 +253,14 @@ HTML;
 							}
 							
 						}
-			$return .= <<<HTML
-			
-<h7 style="margin-top:5px;float:right;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")}</h7>
+						$return .= <<<HTML
 </div>
 HTML;
 						
 					}
 
 			$return .= <<<HTML
+			
 					<form style="margin:20px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>
