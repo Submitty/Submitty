@@ -396,7 +396,7 @@ class local_view {
 
 <div id="container-latedays">
 <div class="modal-header">
-<h3>Excused Absense Extensions</h3>
+<h3>Excused Absence Extensions</h3>
 </div>
 HTML;
 
@@ -407,7 +407,7 @@ HTML;
 		self::$view['no_gradeables'] = <<<HTML
 <div class="modal-body">
 <p><em style="color:red; font-weight:bold; font-style:normal;">
-{$this->utf8_styled_x} There are currently no gradeables.  A gradeable is required to enter an excused absense extension.</em>
+{$this->utf8_styled_x} There are currently no gradeables.  A gradeable is required to enter an excused absence extension.</em>
 </div>
 HTML;
 
@@ -454,9 +454,9 @@ HTML;
 
 		self::$view['form'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-<form action="{$BASE_URL}/account/admin-latedays-exceptions.php?course={$_GET['course']}&semester={$_GET['semester']}&this=Excused%20Absense%20Extensions" method="POST" enctype="multipart/form-data">
+<form action="{$BASE_URL}/account/admin-latedays-exceptions.php?course={$_GET['course']}&semester={$_GET['semester']}&this=Excused%20Absence%20Extensions" method="POST" enctype="multipart/form-data">
 <p>
-Use this form to grant an extension (e.g., for an excused absense)
+Use this form to grant an extension (e.g., for an excused absence)
 to a user on a specific assignment.
 </p>
 

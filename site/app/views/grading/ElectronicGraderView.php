@@ -593,10 +593,22 @@ HTML;
                 <td>{$row->getUser()->getId()}</td>
 HTML;
                     }
-                    else {
-                        $return .= <<<HTML
+                    // Construct a string containing the names of all team members
+                     else {
+                        $member_list = "";
+                        foreach($row->getTeam()->getMembers() as $team_member) {
+                            if ($member_list !== "") {
+                                $member_list = $member_list . ", ";
+                            }
+ 	 
+                            $first_name = $this->core->getQueries()->getUserById($team_member)->getDisplayedFirstName();
+                            $last_name = $this->core->getQueries()->getUserById($team_member)->getLastName();
 
-                <td>{$row->getTeam()->getMemberList()}</td>
+                            $member_list = $member_list . $first_name . " " . $last_name;
+                        }
+                        $return .= <<<HTML
+                <td>{$member_list}</td>
+        
 HTML;
                     }
                 }
