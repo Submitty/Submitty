@@ -316,12 +316,14 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 # hwcron only things
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
