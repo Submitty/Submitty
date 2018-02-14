@@ -566,7 +566,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # --------------------------------------------------------------------
     # CLEAN UP DOCKER
-    subprocess.call(['docker', 'rm', '-f', container])
+    if USE_DOCKER:
+        subprocess.call(['docker', 'rm', '-f', container])
 
 
 # ==================================================================================
