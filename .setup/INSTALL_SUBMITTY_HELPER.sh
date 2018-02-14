@@ -528,7 +528,7 @@ g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/Subm
 popd
 
 #building clang ASTMatcher.cpp
-if [ -d ${SUBMITTY_INSTALL_DIR}/clang-llvm/build]; then
+if [ -d ${SUBMITTY_INSTALL_DIR}/clang-llvm/build ]; then
 	pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
 	ninja
 	popd
