@@ -216,7 +216,7 @@ class MiscController extends AbstractController {
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
         header("Content-disposition: attachment; filename=\"{$_REQUEST['file']}\"");
-		readfile(pathinfo($_REQUEST['path'], 1) . "/" . rawurlencode( basename($_REQUEST['path'])));
+		readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_GET['path'])));
     }
 
     private function downloadZip() {
