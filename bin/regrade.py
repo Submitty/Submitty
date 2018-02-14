@@ -95,7 +95,7 @@ def main():
                     max_grading_time = datastore.get('max_possible_grading_time', -1)
 
                 #get the current time
-                queue_time = dateutils.write_submitty_date() + " " + str(dateutils.get_timezone())
+                queue_time = dateutils.write_submitty_date()
                 my_who=my_dirs[len(data_dirs)+4]
                 my_version=my_dirs[len(data_dirs)+5]
                 my_path=os.path.join(data_dir,my_semester,my_course,"submissions",my_gradeable,my_who,my_version)
