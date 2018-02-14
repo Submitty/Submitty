@@ -8,11 +8,9 @@ libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-
 javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
 g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils pdftk
-# install clang
-# RUN apk add --no-cache clang
 
-# install bash and ome other utils
-# RUN apk add --no-cache bash gawk sed grep bc coreutils
+COPY drmemory /usr/local/submitty/drmemory
+COPY SubmittyAnalysisTools /usr/local/submitty/SubmittyAnalysisTools
 
 RUN mkdir -p /var/local/submitty/autograding_tmp
 #RUN mkdir -p /var/local/submitty/autograding_tmp/untrustedtmp/TMP_COMPILATION

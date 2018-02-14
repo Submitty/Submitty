@@ -23,6 +23,9 @@ HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
 BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 
+USE_DOCKER = False
+WRITE_DATABASE = True
+
 # ==================================================================================
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -262,11 +265,11 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # --------------------------------------------------------------------
     # START DOCKER
 
-    container = subprocess.check_output(['docker', 'run', '-t', '-d',
-                                         '-v', tmp + ':' + tmp,
-                                         'ubuntu:custom']).decode('utf8').strip()
-    #print(container)
-    #time.sleep(5)
+    container = None
+    if USE_DOCKER:
+        container = subprocess.check_output(['docker', 'run', '-t', '-d',
+                                             '-v', tmp + ':' + tmp,
+                                             'ubuntu:custom']).decode('utf8').strip()
 
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
@@ -304,21 +307,19 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
     with open(os.path.join(tmp_logs,"compilation_log.txt"), 'w') as logfile:
-        args = ['docker', 'exec', '-w', tmp_compilation, container,
-                os.path.join(tmp_compilation, 'my_compile.out'), obj['gradeable'],
-                obj['who'], str(obj['version']), submission_string]
-        print(' '.join([str(arg) for arg in args]))
-        compile_success = subprocess.call(args, stdout=logfile)
-        """
-        compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                           which_untrusted,
-                                           os.path.join(tmp_compilation,"my_compile.out"),
-                                           obj["gradeable"],
-                                           obj["who"],
-                                           str(obj["version"]),
-                                           submission_string],
-                                          stdout=logfile)
-        """
+        if USE_DOCKER:
+            compile_success = subprocess.call(['docker', 'exec', '-w', tmp_compilation, container,
+                                               os.path.join(tmp_compilation, 'my_compile.out'), obj['gradeable'],
+                                               obj['who'], str(obj['version']), submission_string], stdout=logfile)
+        else:
+            compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                                               which_untrusted,
+                                               os.path.join(tmp_compilation,"my_compile.out"),
+                                               obj["gradeable"],
+                                               obj["who"],
+                                               str(obj["version"]),
+                                               submission_string],
+                                              stdout=logfile)
 
     if compile_success == 0:
         print ("pid",my_pid,"COMPILATION OK")
@@ -374,19 +375,19 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # raise SystemExit()
     # run the run.out as the untrusted user
     with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
-        runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
-                                          os.path.join(tmp_work, 'my_runner.out'), obj['gradeable'],
-                                          obj['who'], str(obj['version']), submission_string], stdout=logfile)
-        """
-        runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                          which_untrusted,
-                                          os.path.join(tmp_work,"my_runner.out"),
-                                          obj["gradeable"],
-                                          obj["who"],
-                                          str(obj["version"]),
-                                          submission_string],
-                                          stdout=logfile)
-        """
+        if USE_DOCKER:
+            runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
+                                              os.path.join(tmp_work, 'my_runner.out'), obj['gradeable'],
+                                              obj['who'], str(obj['version']), submission_string], stdout=logfile)
+        else:
+            runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                                              which_untrusted,
+                                              os.path.join(tmp_work,"my_runner.out"),
+                                              obj["gradeable"],
+                                              obj["who"],
+                                              str(obj["version"]),
+                                              submission_string],
+                                              stdout=logfile)
 
     if runner_success == 0:
         print ("pid",my_pid,"RUNNER OK")
@@ -435,19 +436,19 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
-        validator_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
-                                             os.path.join(tmp_work, 'my_validator.out'), obj['gradeable'],
-                                             obj['who'], str(obj['version']), submission_string], stdout=logfile)
-        """
-        validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                             which_untrusted,
-                                             os.path.join(tmp_work,"my_validator.out"),
-                                             obj["gradeable"],
-                                             obj["who"],
-                                             str(obj["version"]),
-                                             submission_string],
-                                            stdout=logfile)
-        """
+        if USE_DOCKER:
+            validator_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
+                                                 os.path.join(tmp_work, 'my_validator.out'), obj['gradeable'],
+                                                 obj['who'], str(obj['version']), submission_string], stdout=logfile)
+        else:
+            validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                                                 which_untrusted,
+                                                 os.path.join(tmp_work,"my_validator.out"),
+                                                 obj["gradeable"],
+                                                 obj["who"],
+                                                 str(obj["version"]),
+                                                 submission_string],
+                                                stdout=logfile)
 
     if validator_success == 0:
         print ("pid",my_pid,"VALIDATOR OK")
@@ -538,15 +539,16 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     #---------------------------------------------------------------------
     # WRITE OUT VERSION DETAILS
-    insert_database_version_data.insert_to_database(
-        obj["semester"],
-        obj["course"],
-        obj["gradeable"],
-        obj["user"],
-        obj["team"],
-        obj["who"],
-        True if obj["is_team"] else False,
-        str(obj["version"]))
+    if WRITE_DATABASE:
+        insert_database_version_data.insert_to_database(
+            obj["semester"],
+            obj["course"],
+            obj["gradeable"],
+            obj["user"],
+            obj["team"],
+            obj["who"],
+            True if obj["is_team"] else False,
+            str(obj["version"]))
 
     print ("pid",my_pid,"finished grading ", next_to_grade, " in ", gradingtime, " seconds")
 

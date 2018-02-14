@@ -118,11 +118,6 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 usermod -aG docker hwcron
-mkdir -p /tmp/docker
-cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-pushd /tmp/docker
-docker build -t ubuntu:custom -f Dockerfile .
-popd
 
 pip3 install -U pip
 pip3 install python-pam
@@ -425,6 +420,18 @@ if [[ ${VAGRANT} == 1 ]]; then
     ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
+
+#################################################################
+# DOCKER SETUP
+#################
+
+#mkdir -p /tmp/docker
+#cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+#cp -R ${SUBMITTY_INSTALL_DIR}/drmemory ./
+#cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools ./
+#pushd /tmp/docker
+#docker build -t ubuntu:custom -f Dockerfile .
+#popd
 
 #################################################################
 # RESTART SERVICES
