@@ -1190,6 +1190,9 @@ HTML;
                 $return .= <<<HTML
             <script>
                 $('body').css('background', 'red');
+                $('#bar_wrapper').append("<div id='bar_banner' class='banner'>The student submitted late</div>");
+                $('#bar_banner').css('background-color', 'red');
+                $('#bar_banner').css('color', 'lightcyan');
             </script>
 HTML;
             }
@@ -1232,6 +1235,9 @@ HTML;
                 $return .= <<<HTML
                 <script>
                     $('body').css('background', 'brown');
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>This student chose not to be graded</div>");
+                    $('#bar_banner').css('background-color', 'brown');
+                    $('#bar_banner').css('color', 'cornflowerblue');
                 </script>
                 <div class="red-message" style="text-align: center">This student chose not to be graded</div>
 HTML;
@@ -1239,6 +1245,9 @@ HTML;
                 $return .= <<<HTML
                 <script>
                     $('body').css('background', 'purple');
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>This student did not submit anything</div>");
+                    $('#bar_banner').css('background-color', 'purple');
+                    $('#bar_banner').css('color', 'salmon');
                 </script>
                 <div class="red-message" style="text-align: center">This student did not submit anything</div>
 HTML;
