@@ -431,9 +431,9 @@ fi
 
 #mkdir -p /tmp/docker
 #cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+#pushd /tmp/docker
 #cp -R ${SUBMITTY_INSTALL_DIR}/drmemory ./
 #cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools ./
-#pushd /tmp/docker
 #docker build -t ubuntu:custom -f Dockerfile .
 #popd
 
