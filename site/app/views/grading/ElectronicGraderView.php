@@ -51,7 +51,7 @@ class ElectronicGraderView extends AbstractView {
             $percentage = 0;
         }
         else{
-            $percentage = round(($graded / $total) * 100, 1);
+            $percentage = number_format(($graded / $total) * 100, 1);
         }
         $return = <<<HTML
 <div class="content">
@@ -124,7 +124,7 @@ HTML;
             if ($peer) {
                 $show_total = floor($sections['stu_grad']['total_components']/$gradeable->getNumPeerComponents());
                 $show_graded = floor($sections['stu_grad']['graded_components']/$gradeable->getNumPeerComponents());
-                $percentage = round(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
+                $percentage = number_format(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
                 $return .= <<<HTML
             Current percentage of students grading done: {$percentage}% ({$show_graded}/{$show_total})
         </div>
@@ -141,7 +141,7 @@ HTML;
                         $percentage = 0;
                     }
                     else {
-                        $percentage = round(($section['graded_components'] / $section['total_components']) * 100, 1);
+                        $percentage = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
                     }
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
