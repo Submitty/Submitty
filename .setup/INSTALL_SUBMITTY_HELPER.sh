@@ -495,13 +495,16 @@ rm ${HWCRON_CRONTAB_FILE}
 # COMPILE AND INSTALL ANALYSIS TOOLS
 
 echo -e "Compile and install analysis tools"
-
+ST_VERSION=v0.3.3
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-for b in count plagiarism diagnostics;
-    do wget "https://github.com/Submitty/AnalysisTools/releases/download/v0.3.3/$b"
-done
+if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
+    for b in count plagiarism diagnostics;
+        do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${ST_VERSION}/${b}" -O ${b}
+    done
+    echo ${ST_VERSION} > VERSION
+fi
 popd
 
 # change permissions
