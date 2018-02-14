@@ -528,10 +528,10 @@ popd
 
 #building clang ASTMatcher.cpp
 if [ -d ${SUBMITTY_INSTALL_DIR}/clang-llvm/build]; then
-pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
-ninja
-popd
-chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
+	pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
+	ninja
+	popd
+	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
 fi
 
 # change permissions
