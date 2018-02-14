@@ -44,11 +44,12 @@ try:
     course = os.path.basename(arguments['course'].value)
     g_id = os.path.basename(arguments['g_id'].value)
     ver = os.path.basename(arguments['ver'].value)
-
+    message = "Something went wrong:  just defined variables"
     current_path = os.path.dirname(os.path.realpath(__file__))
     uploads_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads")
     bulk_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/bulk_pdf",g_id,ver)
     split_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/split_pdf",g_id,ver)
+    message = "Something went wrong:  just defined more paths"
 
     # copy folder
     if not os.path.exists(split_path):
@@ -56,6 +57,7 @@ try:
 
     # adding write permissions for the PHP
     add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
+    message = "Something went wrong:  preparing split folder"
 
     # copy over files to new directory
     for filename in os.listdir(bulk_path):
@@ -63,6 +65,7 @@ try:
 
     # move to copy folder
     os.chdir(split_path)
+    message = "Something went wrong: preparing bulk folder"
 
     # check that all pages are divisible
     for filename in os.listdir(bulk_path):
@@ -99,18 +102,20 @@ try:
             stop = (j+1)*num
             subprocess.call(["pdftk", filename, "cat", str(start) + "-" + str(stop), "output", out_pdf])
             subprocess.call(['pdftk', filename, 'cat', str(start), 'output', out_cover_pdf])
+    message += "=> finished pdftk"
 
     # get rid of unnecessary copies
     for filename in os.listdir(bulk_path):
         os.remove(filename)
 
     os.chdir(current_path) #make sure this is in right place
-    
-except:
+    message += ",and finished"
+except Exception as e:
     valid = False
     # if copy exists, delete it... but relies on the fact that copy_path exists :(
     if os.path.exists(split_path):
         shutil.rmtree(split_path)
+    message += str(e)
         
 
 print(json.dumps({"valid": valid, "message": message}))

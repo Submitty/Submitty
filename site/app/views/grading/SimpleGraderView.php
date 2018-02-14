@@ -15,7 +15,11 @@ class SimpleGraderView extends AbstractView {
      *
      * @return string
      */
-    public function simpleDisplay($gradeable, $rows, $graders) {
+    public function simpleDisplay($gradeable, $rows, $graders, $section_type) {
+
+        $g_id = $gradeable->getId();
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
         $return = <<<HTML
 <div class="content">
@@ -206,8 +210,15 @@ HTML;
 HTML;
                 if($action == 'lab'){
                     $return .= <<<HTML
-                    <a target=_blank href="{$this->core->getConfig()->getTaBaseUrl()}/account/print/print_checkpoints_gradeable.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&g_id={$gradeable->getId()}&section_id={$display_section}&grade_by_reg_section={$gradeable->isGradeByRegistration()}&sort_by={$sort}">
-                        <i class="fa fa-print"></i>
+                    <a target=_blank href="{$this->core->buildUrl(array(
+                                                                  'component' => 'grading',
+                                                                  'page' => 'simple',
+                                                                  'action' => 'print_lab', 
+                                                                  'sort' => $sort,
+                                                                  'section' => $section,
+                                                                  'sectionType' => $section_type,
+                                                                  'g_id' => $g_id))}">
+                      <i class="fa fa-print"></i>
                     </a>
 HTML;
                 }
@@ -317,4 +328,80 @@ HTML;
 
         return $return;
     }
-}
+
+  public function displayPrintLab($gradeable, $sort_by, $section, $students){
+        // exit(1);
+        $g_id = $gradeable->getId();
+        $section_type = ($gradeable->isGradeByRegistration() ? "Registration": "Rotating");
+
+        $return = <<<HTML
+        Name: ________________________________________
+        <span style="float:right;">
+        Date: ____________________
+        </span>
+        <br />
+        {$gradeable->getName()}</b>
+        <span style="float:right;">
+        Section: <b>{$section}</b>
+        </span>
+        <br />
+        <br />
+        <table border="1" width="100%">
+            <tr>
+                <td style="width: 10%">User Id</td>
+                <td style="width: 20%">First Name</td>
+                <td style="width: 20%">Last Name</td>
+HTML;
+
+        //Get the names of all of the checkpoints
+        $checkpoints = array();
+        foreach($gradeable->getComponents() as $row){
+          array_push($checkpoints, $row->getTitle());
+        }
+
+        $width = (50/count($checkpoints));
+        for($i = 0; $i < count($checkpoints); $i++) {
+            $return .= <<<HTML
+                <td style="width: {$width}%">{$checkpoints[$i]}</td>
+HTML;
+        }
+
+        $return .= <<<HTML
+            </tr>
+HTML;
+        $j = 0;
+        foreach($students as $student) {
+            $color = ($j % 2 == 0) ? "white" : "lightgrey";
+            $return .= <<<HTML
+            <tr style="background-color: {$color}">
+                <td>
+                    {$student->getId()}
+                </td>
+HTML;
+            $return .= <<<HTML
+                <td>
+                    {$student->getDisplayedFirstName()}
+                </td>
+HTML;
+            $return .= <<<HTML
+                <td>
+                    {$student->getLastName()}
+                </td>
+HTML;
+            for($i = 0; $i < count($checkpoints); $i++) {
+                $return .= <<<HTML
+                <td></td>
+HTML;
+            }
+            $return .= <<<HTML
+            </tr>
+HTML;
+            $j++;
+        }
+
+        $return .= <<<HTML
+        </table>
+HTML;
+    return $return;
+
+    }}

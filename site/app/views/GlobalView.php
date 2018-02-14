@@ -107,7 +107,7 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late'))}">Late Days Allowed</a>
             </li>
             <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">Excused Absense Extensions</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">Excused Absence Extensions</a>
             </li>
             <li>
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">HWReports, CSV Reports, and Grade Summaries</a>
@@ -181,9 +181,9 @@ HTML;
         if ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) {
             $return .= <<<HTML
 <div id='page-info'>
-    Total Queries: {$this->core->getCourseDB()->totalQueries()}<br />
+    Total Queries: {$this->core->getCourseDB()->getQueryCount()}<br />
     Runtime: {$runtime}<br />
-    Queries: <br /> {$this->core->getCourseDB()->getQueries()}
+    Queries: <br /> {$this->core->getCourseDB()->getPrintQueries()}
 </div>
 HTML;
         }

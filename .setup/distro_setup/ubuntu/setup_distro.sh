@@ -37,7 +37,7 @@ if [ ${VAGRANT} == 1 ]; then
     # The VM’s host-only adapter provides a private connection to the VM,
     # but Ubuntu also needs to be configured to use this adapter.
 
-    echo "Binding static IPs to \"Host-Only\" virtual network interface."
+    # echo "Binding static IPs to \"Host-Only\" virtual network interface."
 
     # Note: Ubuntu 16.04 switched from the eth# scheme to ep0s# scheme.
     # enp0s3 is auto-configured by Vagrant as NAT.  enp0s8 is a host-only adapter and
@@ -45,11 +45,11 @@ if [ ${VAGRANT} == 1 ]; then
     # interface remains consistent among VM reboots as Vagrant has a bad habit of
     # discarding and recreating networking interfaces everytime the VM is restarted.
     # ep0s8 is statically bound to 192.168.56.101.
-    echo -e "auto enp0s8\niface enp0s8 inet static\naddress ${SUBMISSION_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
-    echo -e "auto enp0s8:1\niface enp0s8:1 inet static\naddress ${GIT_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    # echo -e "auto enp0s8\niface enp0s8 inet static\naddress ${SUBMISSION_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    # echo -e "auto enp0s8:1\niface enp0s8:1 inet static\naddress ${GIT_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
 
     # Turn them on.
-    ifup enp0s8 enp0s8:1
+    # ifup enp0s8 enp0s8:1
 
     chmod -x /etc/update-motd.d/*
     chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
@@ -154,8 +154,18 @@ apt-get install -qqy oracle-java8-set-default
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+apt-get update
+apt-get install -y docker-ce
+systemctl status docker
+
+
 if [ ${VAGRANT} == 1 ]; then
     apt-get install -qqy gitweb libcgi-session-perl
 fi
 
 apt-get -qqy autoremove
+
+# miscellaneous usability
+apt-get install -qqy emacs

@@ -9,9 +9,11 @@ class LateController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'view_late':
+                $this->core->getOutput()->addBreadcrumb('Late Days Allowed');
                 $this->viewLateDays();
                 break;
             case 'view_extension':
+                $this->core->getOutput()->addBreadcrumb('Excused Absence Extensions');
                 $this->viewExtensions();
                 break;
             case 'update_late':
@@ -44,22 +46,23 @@ class LateController extends AbstractController {
         $data = array();
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, $type))) {
-                $error = "Something is wrong with the CSV. Try again.";
+                $error = "Something is wrong with the CSV you have chosen. Try again.";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
-            } else {
-                for($i = 0; $i < count($data); $i++){
-                    if($type == "late"){
+            }
+            else {
+                for ($i = 0; $i < count($data); $i++){
+                    if ($type == "late"){
                         $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2]);
                     }
-                    else{
+                    else {
                         $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
                     }
                 }
-                if($type == "late"){
+                if ($type == "late"){
                     $this->getLateDays();
                 }
-                else{
+                else {
                     $this->getExtensions($data[0][1]);
                 }
             }
@@ -75,7 +78,8 @@ class LateController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $this->core->getQueries()->getUserById($_POST['user_id'])->getId() !== $_POST['user_id']) {
+            $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
+            if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || empty($user) || $user->getId() !== $_POST['user_id']) {
                 $error = "Invalid Student ID";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
@@ -116,7 +120,7 @@ class LateController extends AbstractController {
     public function getExtensions($g_id) {
         $users = $this->core->getQueries()->getUsersWithExtensions($g_id);
         $user_table = array();
-        foreach($users as $user){
+        foreach($users as $user) {
             $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getLastName(), 'late_day_exceptions' => $user->getLateDayExceptions());
         }
         $this->core->getOutput()->renderJson(array(
@@ -148,7 +152,6 @@ class LateController extends AbstractController {
             return false;
         }
         foreach($rows as $row) {
-
             $fields = explode(',', $row);
             //Remove any extraneous whitespace at beginning/end of all fields.
             $fields = array_map(function($k) { return trim($k); }, $fields);
@@ -158,7 +161,7 @@ class LateController extends AbstractController {
                 return false;
             }
             //$fields[0]: Verify student exists in class (check by student user ID)
-            if(count($this->core->getQueries()->getUserById($fields[0])) !== 1){
+            if ($this->core->getQueries()->getUserById($fields[0]) === null) {
                 $data = null;
                 return false;
             }
@@ -188,7 +191,7 @@ class LateController extends AbstractController {
     private function validateHomework($id) {
         $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
         foreach($g_ids as $index => $value) {
-            if($id == $value[0]){
+            if ($id === $value['g_id']) {
                 return true;
             }
         }

@@ -7,8 +7,14 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class AutogradingView extends AbstractView {
-
-    public function showResults($gradeable, $show_hidden=false) {
+    /**
+     * @param Gradeable $gradeable
+     * @param bool      $show_hidden
+     *
+     * @return string
+     * @throws \Exception
+     */
+    public function showResults(Gradeable $gradeable, $show_hidden=false) {
         $return = "";
         $current_version = $gradeable->getCurrentVersion();
         $popup_css_file = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
@@ -188,6 +194,14 @@ HTML;
                 foreach ($testcase->getAutochecks() as $autocheck) {
                     $description = $autocheck->getDescription();
                     $diff_viewer = $autocheck->getDiffViewer();
+                    $file_path = $diff_viewer->getActualFilename();
+                    if (substr($file_path,strlen($file_path)-4,4) == ".pdf" && isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
+                      $url = "http" . (isset($_SERVER['HTTPS']) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+                      $url = preg_replace('/&component.*/', '', $url);
+                      $file_name = preg_replace('|.*/|', '', $file_path);
+                      $file_path = urlencode($file_path);
+                      $return .= '<iframe src='.$url.'&component=misc&page=display_file&dir=results&file='.$file_name.'&path='.$file_path.' width="95%" height="1200px" style="border: 0"></iframe>';
+                    } else {
                     $return .= <<<HTML
         <div class="box-block">
         <!-- Readded css here so the popups have the css -->
@@ -196,12 +210,14 @@ HTML;
                     $return .= <<<HTML
             <div class='diff-element'>
 HTML;
+                    $display_actual = "";
                     if ($diff_viewer->hasDisplayExpected() || $diff_viewer->getActualImageFilename() != "") {
                         $title = "Student ";
                     }
                     if ($diff_viewer->hasDisplayActual()) {
+                        $display_actual = $diff_viewer->getDisplayActual();
                         $visible = "visible";
-                        $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayActual())), "\xC2\xA0\t")); 
+                        $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($display_actual)), "\xC2\xA0\t"));
                         $less_than_30 = true;
                         $arr_count = count($tmp_array_string);
                         for ($x = 0; $x < $arr_count; $x++) {
@@ -210,7 +226,7 @@ HTML;
                                 $x = $arr_count;
                             }
                         }
-                        if (substr_count($diff_viewer->getDisplayActual(), 'line_number') < 10 && $less_than_30) {
+                        if (substr_count($display_actual, 'line_number') < 10 && $less_than_30) {
                             $visible = "hidden";
                         }
                     } else {
@@ -247,7 +263,7 @@ HTML;
                     }
                     else if ($diff_viewer->hasDisplayActual()) {
                         $return .= <<<HTML
-                    {$diff_viewer->getDisplayActual()}
+                    $display_actual
 HTML;
                     }
                     $return .= <<<HTML
@@ -342,11 +358,13 @@ HTML;
                     $return .= <<<HTML
         </div>
 HTML;
+                    }
                     if (++$autocheck_cnt < $autocheck_len) {
                         $return .= <<<HTML
         <div class="clear"></div>
 HTML;
                     }
+                    $diff_viewer->destroyViewer();
                 }
                 $return .= <<<HTML
     </div>

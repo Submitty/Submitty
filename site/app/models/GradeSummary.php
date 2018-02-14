@@ -3,19 +3,21 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\DatabaseUtils;
-use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 //use app\libraries\Logger;
 
 class GradeSummary extends AbstractModel {
-    /**/
-    protected $core;
-    
-    public function __construct(Core $main_core) {
-        $this->core = $main_core;
+
+    public function __construct(Core $core) {
+        parent::__construct($core);
     }
 
+    /**
+     * @param $student_output_json
+     * @param $buckets
+     * @param Gradeable[] $summary_data
+     * @param $ldu
+     */
     public function generateSummariesFromQueryResults(&$student_output_json, &$buckets, $summary_data, $ldu) {
         /* Array of Students, indexed by user_id
             Each index contains an array indexed by syllabus
@@ -52,8 +54,13 @@ class GradeSummary extends AbstractModel {
         }
     }
 
-
-    
+    /**
+     * @param Gradeable $gradeable
+     * @param $ldu
+     * @param $student
+     *
+     * @return mixed
+     */
     private function generateSummary($gradeable, $ldu, $student) {
         $this_g = array();
         
@@ -94,7 +101,12 @@ class GradeSummary extends AbstractModel {
 
         return $student;
     }
-    
+
+    /**
+     * @param $this_g
+     * @param \app\models\LateDaysCalculation $ldu
+     * @param Gradeable $gradeable
+     */
     private function addLateDays(&$this_g, $ldu, $gradeable) {
         $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
 
@@ -118,7 +130,11 @@ class GradeSummary extends AbstractModel {
             $this_g['days_late'] = 0;
         }
     }
-    
+
+    /**
+     * @param $this_g
+     * @param Gradeable $gradeable
+     */
     private function addText(&$this_g, $gradeable) {
         $text_items = array();
         foreach($gradeable->getComponents() as $component) {
@@ -129,7 +145,11 @@ class GradeSummary extends AbstractModel {
             $this_g["text"] = $text_items;
         }
     }
-    
+
+    /**
+     * @param $this_g
+     * @param Gradeable $gradeable
+     */
     private function addProblemScores(&$this_g, $gradeable) {
         $component_scores = array();
         foreach($gradeable->getComponents() as $component) {
@@ -149,7 +169,7 @@ class GradeSummary extends AbstractModel {
          * There isn't any memory advantage right now to doing smaller chunks of users, but
          * that isn't to say that there might not be a benefit in the future to user chunking.
          */
-        $size_of_user_id_chunks = ceil(count($user_ids) / 2);
+        $size_of_user_id_chunks = 75; //ceil(count($user_ids) / 2);
         $size_of_gradeable_id_chunks = 5;
 
         $student_output_json = array();
@@ -174,13 +194,6 @@ class GradeSummary extends AbstractModel {
 
         }
 
-    }
-    
-    public function generateAllSummariesForStudent($student_id) {
-        $summary_data = $this->core->getQueries()->getGradeables(null, $student_id);
-        $ldu = new LateDaysCalculation($this->core);
-
-        $this->generateSummariesFromQueryResults($summary_data, $ldu);
     }
 }
 

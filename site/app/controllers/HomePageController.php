@@ -41,7 +41,7 @@ class HomePageController extends AbstractController {
 
     public function changePassword(){
         $user = $this->core->getUser();
-        if(isset($_POST['new_password']) && isset($_POST['confirm_new_password'])
+        if(!empty($_POST['new_password']) && !empty($_POST['confirm_new_password'])
             && $_POST['new_password'] == $_POST['confirm_new_password']) {
             $user->setPassword($_POST['new_password']);
             $this->core->getQueries()->updateUser($user);
@@ -56,11 +56,13 @@ class HomePageController extends AbstractController {
         $user = $this->core->getUser();
         if(isset($_POST['user_name_change']))
         {
-            $newName = $_POST['user_name_change'];
-            if (ctype_alpha(str_replace(' ', '', $newName)) === true) {
+            $newName = trim($_POST['user_name_change']);
+            if ($user->validateUserData('user_preferred_firstname', $newName) === true) {
                 if(strlen($newName) <= 30)
                 {
                     $user->setPreferredFirstName($newName);
+					//User updated flag tells auto feed to not clobber some of the users data.
+                    $user->setUserUpdated(true);
                     $this->core->getQueries()->updateUser($user);
                 }
                 else
@@ -70,7 +72,7 @@ class HomePageController extends AbstractController {
             }
             else
             {
-                $this->core->addErrorMessage("Invalid Username. Please use only letters and spaces.");
+                $this->core->addErrorMessage("Invalid Username.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
             }
         }
     }

@@ -3,7 +3,7 @@
 namespace tests\unitTests\app\models;
 
 use app\libraries\Core;
-use app\libraries\database\AbstractDatabaseQueries;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\GradeableType;
 use app\models\Config;
 use app\models\Gradeable;
@@ -251,7 +251,7 @@ class GreadeableListTester extends BaseUnitTest {
         $config->method('getTimezone')->willReturn(new \DateTimeZone('America/New_York'));
         $core->method('getConfig')->willReturn($config);
 
-        $queries = $this->createMock(AbstractDatabaseQueries::class);
+        $queries = $this->createMock(DatabaseQueries::class);
 
         $queries->method('getAllGradeables')->willReturn($gradeables);
         $core->method('getQueries')->willReturn($queries);

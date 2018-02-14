@@ -20,14 +20,14 @@ class AdminController extends AbstractController {
             $this->core->getOutput()->showError("This account cannot access admin pages");
         }
 
-        $this->core->getOutput()->addBreadcrumb("Admin");
+        //$this->core->getOutput()->addBreadcrumb('Admin');
         $controller = null;
         switch ($_REQUEST['page']) {
             case 'users':
                 $controller = new UsersController($this->core);
                 break;
             case 'configuration':
-                $this->core->getOutput()->addBreadcrumb("Course Settings");
+                $this->core->getOutput()->addBreadcrumb('Course Settings');
                 $controller = new ConfigurationController($this->core);
                 break;
             case 'gradeable':
@@ -40,6 +40,7 @@ class AdminController extends AbstractController {
                 $controller = new AdminGradeableController($this->core);
                 break;
             case 'reports':
+                $this->core->getOutput()->addBreadcrumb('Report');
                 $controller = new ReportController($this->core);
                 break;
             case 'plagiarism':

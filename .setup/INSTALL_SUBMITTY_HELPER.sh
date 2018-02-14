@@ -316,12 +316,14 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 # hwcron only things
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
@@ -496,16 +498,21 @@ rm ${HWCRON_CRONTAB_FILE}
 
 echo -e "Compile and install analysis tools"
 
-pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+ST_VERSION=v0.3.3
+mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
-# compile the tools
-./build.sh v0.2.7
-
+pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
+    for b in count plagiarism diagnostics;
+        do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${ST_VERSION}/${b}" -O ${b}
+    done
+    echo ${ST_VERSION} > VERSION
+fi
 popd
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/count ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/plagiarism ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+# change permissions
+chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #copying commonAST scripts 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
@@ -525,20 +532,11 @@ ninja
 popd
 chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
 
-
 #copying commonAST test
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/tests/commonASTtests ${SUBMITTY_INSTALL_DIR}/test_suite/commonAST
 
-
-# change permissions
-chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-
-echo -e "\nCompleted installation of the Submitty homework submission server\n"
-
 #install ASTMatcher 
 python3 ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Submitty/.setup/ASTMatcherInstall.py
-
 
 ################################################################################################################
 ################################################################################################################

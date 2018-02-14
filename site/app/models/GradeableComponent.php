@@ -44,6 +44,7 @@ use app\libraries\Core;
  * @method \DateTime getGradeTime()
  * @method void setGradeTime(\DateTime $date_time)
  * @method bool getHasGrade()
+ * @method int getPage()
  */
 class GradeableComponent extends AbstractModel {
     /** @property @var int Unique identifier for the component */
@@ -132,7 +133,7 @@ class GradeableComponent extends AbstractModel {
         }
 
         if (isset($details['array_gcm_id'])) {
-            $mark_fields = array('gcm_id', 'gc_id', 'gcm_points',
+            $mark_fields = array('gcm_id', 'gc_id', 'gcm_points', 'gcm_publish',
                                     'gcm_note', 'gcm_order');
             foreach ($mark_fields as $key) {
                 $details["array_{$key}"] = explode(',', $details["array_{$key}"]);
@@ -183,44 +184,38 @@ class GradeableComponent extends AbstractModel {
         return $points;
     }
 
-    public function getGradedTAComments($nl) {
+    public function getGradedTAComments($nl, $show_students) {
         $text = "";
         $first_text = true;
         foreach ($this->marks as $mark) {
+            $points_string = "    ";
+            if ($mark->getPoints() != 0) {
+              $points_string = sprintf("%4.1f",$mark->getPoints());
+            }
+            $hasmark = "( ) ";
             if($mark->getHasMark() === true) {
-                if ($first_text === true) {
-                    if (floatval($mark->getPoints()) == 0) {
-                        $text .= "* " . $mark->getNote();
-                    } else {
-                        $text .= "* (" . $mark->getPoints() . ") " . $mark->getNote();
-                    }
-                    $first_text = false;
-                }
-                else {
-                    if (floatval($mark->getPoints()) == 0) {
-                        $text .= $nl . "* " . $mark->getNote();
-                    } else {
-                        $text .= $nl . "* (" . $mark->getPoints() . ") " . $mark->getNote();
-                    }
-                }
+              $hasmark = "(*) ";
+            } else if (!($show_students === true && $mark->getPublish() === 't')) {
+              continue;
             }
-        }
-        if($this->comment != "") {
+            $newline=$nl;
             if ($first_text === true) {
-                if (floatval($this->score) == 0) {
-                    $text .= "* " . $this->comment;
-                } else {
-                    $text .= "* (" . $this->score . ") ". $this->comment;
-                }
-                $first_text = false;
+              $newline = "";
+              $first_text = false;
             }
-            else {
-                if (floatval($this->score) == 0) {
-                    $text .= $nl . "* " . $this->comment;
-                } else {
-                    $text .= $nl . "* (" . $this->score . ") " . $this->comment;
-                }
+            $text .= $newline . $hasmark . $points_string . "  " . $mark->getNote();
+        }
+        if($this->score != 0 || $this->comment != "") {
+            $newline=$nl;
+            if ($first_text === true) {
+              $newline = "";
+              $first_text = false;
             }
+            $score_string = "    ";
+            if (floatval($this->score) != 0) {
+                $score_string = sprintf("%4.1f",$this->score);
+            }
+            $text .= $newline . "(*) " . $score_string . "  " . $this->comment;
         }
         return $text;
     }
@@ -259,4 +254,5 @@ class GradeableComponent extends AbstractModel {
             $this->marks = $marks;
         }
     }
+
 }

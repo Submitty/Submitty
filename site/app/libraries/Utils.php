@@ -102,18 +102,6 @@ class Utils {
         return (count($temp) > 0) ? array_pop($temp) : null;
     }
 
-    /**
-     * This converts a Boolean to a Sting representation. We use this as by default the String representations are that
-     * TRUE is "1" and FALSE is "" (empty string) which we generally do not want (especially if concatating booleans
-     * to a string or using it within PDO).
-     *
-     * @param $value
-     * @return string
-     */
-    public static function convertBooleanToString($value) {
-        return ($value === true) ? "true" : "false";
-    }
-
 
     /**
      * Checks if string $haystack begins with the string $needle, returning TRUE if it does or FALSE otherwise.
@@ -154,5 +142,32 @@ class Utils {
         }
         $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
         return setcookie($name, $data, $expire, "/", "", $secure);
+    }
+
+    /**
+     * Given a filename, determine if it is an image.
+     * TOOD: Make this a stronger check than just on the appended file extension to the naem
+     *
+     * @param string $filename
+     *
+     * @return bool true if filename references an image else false
+     */
+    public static function isImage($filename) {
+        return (substr($filename,strlen($filename)-4,4) == ".png") ||
+            (substr($filename,strlen($filename)-4,4) == ".jpg") ||
+            (substr($filename,strlen($filename)-4,4) == ".jpeg");
+    }
+
+    public static function checkUploadedImageFile($id){
+        if(isset($_FILES[$id])){
+            foreach($_FILES[$id]['tmp_name'] as $file_name){
+                if(file_exists($file_name)){
+                    $mime_type = FileUtils::getMimeType($file_name); 
+                    if(getimagesize($file_name) === false  || substr($mime_type, 0, strrpos($mime_type, "/")) !== "image") {
+                        return false;
+                    }
+                }
+            } return true;
+        } return false;
     }
 }
