@@ -453,11 +453,11 @@ ORDER BY {$section_key}", $params);
         $where = "";
         if (count($sections) > 0) {
             // Expand out where clause
-            $sections_keys = array_keys($sections);
+            $sections_keys = array_values($sections);
             $where = "WHERE {$section_key} IN (";
             foreach($sections_keys as $section) {
                 $where .= "?" . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
-                array_push($params, $section+1);
+                array_push($params, $section);
             }
             $where .= ")";
         }
@@ -1753,13 +1753,13 @@ AND gc_id IN (
     public function getDisplayUserNameFromUserId($user_id){
       $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname from users where user_id = ?", array($user_id));
       $name_rows = $this->course_db->rows()[0];
-      $last_name_initial =  " " . substr($name_rows["user_lastname"], 0, 1) . ".";
+      $last_name =  " " . $name_rows["user_lastname"];
       if(empty($name_rows["user_preferred_firstname"])){
         $name = $name_rows["user_firstname"];
       } else {
         $name = $name_rows["user_preferred_firstname"];
       }
-      $name .= $last_name_initial;
+      $name .= $last_name;
       return $name;
     }
 

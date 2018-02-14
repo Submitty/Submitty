@@ -36,6 +36,39 @@ class ForumThreadView extends AbstractView {
 		}
 		</script>
 
+HTML;
+	if($this->core->getUser()->getGroup() <= 2){
+		$return .= <<<HTML
+		<script>
+								function changeName(element, user, visible_username, anon){
+									new_element = element.getElementsByTagName("strong")[0];
+									icon = element.getElementsByClassName("fa fa-eye");
+									if(icon.length == 0){
+										icon = element.getElementsByClassName("fa fa-eye-slash");
+									} icon = icon[0];
+									if(new_element.innerText == visible_username) {
+										if(anon) {
+											new_element.style.color = "grey";
+											new_element.style.fontStyle = "italic";
+										}
+										new_element.innerText = user;
+										icon.className = "fa fa-eye-slash";
+										icon.title = "Hide full user information";
+									} else {
+										if(anon) {
+											new_element.style.color = "black";
+											new_element.style.fontStyle = "normal";
+										}
+										new_element.innerText = visible_username;
+										icon.className = "fa fa-eye";
+										icon.title = "Show full user information";
+									}
+									
+								}
+		</script>
+HTML;
+	}
+	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
 		<div style="margin-top:10px; margin-bottom:10px; height:50px;  " id="forum_bar">
@@ -119,33 +152,34 @@ HTML;
 
 			$thread_id = -1;
 			$function_content = 'nl2br';
-			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
+			$title_html = '';
 			$return .= <<< HTML
 					</div>
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
-					<h3 style="display:inline-block;word-wrap: break-word;margin-top:20px;">
+HTML;
+
+            $title_html .= <<< HTML
+            <h3 style="max-width: 95%; display:inline-block;word-wrap: break-word;margin-top:10px; margin-left: 5px;">
 HTML;
 					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
-						$return .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+                        $title_html .= <<<HTML
+							<a style="display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
-					} else if($activeThreadAnnouncement){
-						$return .= <<<HTML
+                    } else if($activeThreadAnnouncement){
+                        $title_html .= <<<HTML
 						 <i class="fa fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
-					} else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
-						$return .= <<<HTML
+                    } else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
+                        $title_html .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fa fa-star" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
-					}
-					$return .= <<< HTML
+                    }
+                    $title_html .= <<< HTML
 					{$activeThreadTitle}</h3>
-
 HTML;
-
-
+                    $first = true;
 					foreach($posts as $post){
 						
 						if($thread_id == -1) {
@@ -154,50 +188,55 @@ HTML;
 						}
 						$date = date_create($post["timestamp"]);
 
-						if($post["anonymous"] == true){
-							if($userAccessToAnon){
-								$visible_username = "<a onClick=\"changeName(this, '{$post["author_user_id"]}')\" id=\"anonUser\">Anonymous</a>";
-								$return .= <<<HTML
-								<script>
-								function changeName(element, user){
-									if(element.innerHTML.indexOf("Anonymous") != -1) {
-										element.innerHTML = user;
-									} else {
-										element.innerHTML = 'Anonymous';
-									}
-									
-								}
-								</script>
-HTML;
-							} else {
-								$visible_username = "Anonymous";
-							}
+						$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
+
+						if($post["anonymous"]){
+							$visible_username = "Anonymous";
 						} else {
-							$visible_username = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
+							$visible_username = substr($full_name, 0, strpos($full_name, " ")+2) . ".";
 						}
+
+						$classes = "post_box";
+
+						if($first){
+						    $classes .= " first_post";
+                        }
 
 						if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
-							$return .= <<<HTML
-							<div class="post_box important" style="margin-left:0;">
-HTML;
-						} else {
-							$return .= <<<HTML
-							<div class="post_box" style="margin-left:0;">
-HTML;
+							$classes .= " important";
 						}
 
-
-						if($this->core->getUser()->accessAdmin()){
-							$return .= <<<HTML
-							<a style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+                        $return .= <<<HTML
+							<div class="$classes" style="margin-left:0;">
 HTML;
-						}
+						if($first){
+                            $first = false;
+                            $return .= $title_html;
+                        }
+
+						if($this->core->getUser()->getGroup() <= 2){
+							$return .= <<<HTML
+							<a class="post_button" style="position:absolute; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+HTML;
+							} 
+						
 						$return .= <<<HTML
-							<p>{$function_content($post["content"])}</p>
+							<p class="post_content">{$function_content($post["content"])}</p>
 							
 							
-							<hr style="margin-bottom:3px;">
+							<hr style="margin-bottom:3px;"><span style="margin-top:5px;margin-left:10px;float:right;">
 							
+HTML;
+
+if($this->core->getUser()->getGroup() <= 2){
+						$info_name = $full_name . " (" . $post['author_user_id'] . ")";
+						$return .= <<<HTML
+						<a style=" margin-right:2px;display:inline-block; color:black; " onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}', {$post['anonymous']}	)" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
+HTML;
+}
+			$return .= <<<HTML
+			
+<h7><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")}</h7></span>
 HTML;
 
 						if($post["has_attachment"]){
@@ -214,15 +253,14 @@ HTML;
 							}
 							
 						}
-			$return .= <<<HTML
-			
-<h7 style="margin-top:5px;float:right;"><strong>{$visible_username}</a></strong> {$function_date($date,"m/d/Y g:i A")}</h7>
+						$return .= <<<HTML
 </div>
 HTML;
 						
 					}
 
 			$return .= <<<HTML
+			
 					<form style="margin:20px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>
