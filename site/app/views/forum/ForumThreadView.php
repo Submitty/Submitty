@@ -144,7 +144,6 @@ HTML;
 
 			$thread_id = -1;
 			$function_content = 'nl2br';
-			$canToggleUser = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$title_html = '';
 			$return .= <<< HTML
 					</div>
