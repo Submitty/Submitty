@@ -520,25 +520,18 @@ g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/Subm
 popd
 
 #building clang ASTMatcher.cpp
+if [ -d ${SUBMITTY_INSTALL_DIR}/clang-llvm/build]; then
 pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
 ninja
 popd
 chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
-
-
-#copying commonAST test
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/tests/commonASTtests ${SUBMITTY_INSTALL_DIR}/test_suite/commonAST
-
+fi
 
 # change permissions
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 echo -e "\nCompleted installation of the Submitty homework submission server\n"
-
-#install ASTMatcher 
-python3 ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Submitty/.setup/ASTMatcherInstall.py
-
 
 ################################################################################################################
 ################################################################################################################

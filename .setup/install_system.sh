@@ -60,7 +60,7 @@ fi
 # BUILD CLANG SETUP
 #################
 
-python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
+#python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
 
 #################################################################
 # USERS SETUP
