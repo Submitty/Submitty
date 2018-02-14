@@ -209,8 +209,8 @@ HTML;
 						if($this->core->getUser()->getGroup() <= 2){
 							$info_name = $full_name . " (" . $post['author_user_id'] . ")";
 							$return .= <<<HTML
-							<a class="remove_post_button" style="position:absolute; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
-							<a class="remove_post_button" style="position:absolute; margin-right:18px;display:inline-block; color:black; float:right;" onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}'	)" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
+							<a class="post_button" style="position:absolute; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+							<a class="post_button" style="position:absolute; margin-right:18px;display:inline-block; color:black; float:right;" onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}'	)" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
 
 HTML;
 	

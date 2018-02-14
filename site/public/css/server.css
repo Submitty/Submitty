@@ -721,10 +721,10 @@ table tr.table-header {
     margin-right: 40px;
 }
 
-.first_post .remove_post_button {
+.first_post .post_button {
 }
 
-.remove_post_button{
+.post_button {
     position: absolute;
     top: 5px;
     right: 5px;
