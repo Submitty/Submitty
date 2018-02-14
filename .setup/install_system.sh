@@ -342,7 +342,6 @@ fi
 # SUBMITTY SETUP
 #################
 
-
 if [ ${VAGRANT} == 1 ]; then
     # This should be set by setup_distro.sh for whatever distro we have, but
     # in case it is not, default to our primary URL
@@ -361,7 +360,6 @@ else
 fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
-
 
 # (re)start the submitty grading scheduler daemon
 systemctl restart submitty_grading_scheduler

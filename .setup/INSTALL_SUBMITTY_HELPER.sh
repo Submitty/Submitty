@@ -458,12 +458,13 @@ find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini
 mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DIR}/site/config/master.ini
 
-
 # return the course index page (only necessary when 'clean' option is used)
 if [ -f "$mytempcurrentcourses" ]; then
     echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
     mv ${mytempcurrentcourses} ${originalcurrentcourses}
 fi
+
+
 
 
 ################################################################################################################
