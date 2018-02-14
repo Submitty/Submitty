@@ -497,6 +497,7 @@ rm ${HWCRON_CRONTAB_FILE}
 # COMPILE AND INSTALL ANALYSIS TOOLS
 
 echo -e "Compile and install analysis tools"
+
 ST_VERSION=v0.3.3
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
@@ -512,6 +513,32 @@ popd
 # change permissions
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+#copying commonAST scripts 
+mkdir -p ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/astMatcher.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/commonast.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/CMakeLists.txt ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/ASTMatcher.cpp ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
+
+#building commonAST excecutable
+pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/commonASTCount.out
+popd
+
+#building clang ASTMatcher.cpp
+if [ -d ${SUBMITTY_INSTALL_DIR}/clang-llvm/build]; then
+	pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
+	ninja
+	popd
+	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
+fi
+
+# change permissions
+chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+echo -e "\nCompleted installation of the Submitty homework submission server\n"
 
 ################################################################################################################
 ################################################################################################################
