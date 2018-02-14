@@ -10,7 +10,8 @@ Student::Student() {
 
   // personal data
   // (defaults to empty string)
-
+  lefty = false;
+  
   // registration status
   section = 0;  
   audit = false;
@@ -32,7 +33,7 @@ Student::Student() {
   cached_hw = -1;
 
   // other grade-like data
-  // (remote id defaults to empty string)
+  // (remote id defaults to empty vector)
   academic_integrity_form = false;
   participation = 0;
   understanding = 0;
@@ -303,6 +304,9 @@ std::string Student::grade(bool flag_b4_moss, Student *lowest_d) const {
       ( failed_testA +
         failed_testB +
         failed_testC ) > 1) {
+    //std::cout << "SHOULD AUTO FAIL";
+
+    //((Student*)this)->other_note += "SHOULD AUTO FAIL";
     return "F";
   }
   
@@ -325,17 +329,20 @@ std::string Student::grade(bool flag_b4_moss, Student *lowest_d) const {
 
 
 
-void Student::mossify(int hw, float penalty) {
+void Student::mossify(const std::string &gradeable, float penalty) {
 
   // if the penalty is "a whole or partial letter grade"....
   float average_letter_grade = (CUTOFFS["A"]-CUTOFFS["B"] +
                                  CUTOFFS["B"]-CUTOFFS["C"] +
                                  CUTOFFS["C"]-CUTOFFS["D"]) / 3.0;
 
-  if (!(getGradeableItemGrade(GRADEABLE_ENUM::HOMEWORK,hw-1).getValue() > 0)) {
+  assert (GRADEABLES[GRADEABLE_ENUM::HOMEWORK].hasCorrespondence(gradeable));
+  int which = GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCorrespondence(gradeable).first;
+
+  if (!(getGradeableItemGrade(GRADEABLE_ENUM::HOMEWORK,which).getValue() > 0)) {
     std::cerr << "WARNING:  the grade for this homework is already 0, moss penalty error?" << std::endl;
   }
-  setGradeableItemGrade(GRADEABLE_ENUM::HOMEWORK,hw-1,0);
+  setGradeableItemGrade(GRADEABLE_ENUM::HOMEWORK,which,0);
 
   // the penalty is positive
   // but it will be multiplied by a negative and added to the total;
@@ -344,7 +351,7 @@ void Student::mossify(int hw, float penalty) {
   moss_penalty += -0.0000001;
   moss_penalty += -average_letter_grade * penalty;
 
-  other_note += "[MOSS PENALTY " + std::to_string(penalty) + "]";
+  addWarning("[MOSS PENALTY " + std::to_string(penalty) + "]");
 }
 
 

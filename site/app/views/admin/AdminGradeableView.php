@@ -27,7 +27,7 @@ class AdminGradeableView extends AbstractView {
         if ($type_of_action === "edit") {
             $have_old = true;
             $action = "upload_edit_gradeable";
-            $button_string = "Edit";
+            $button_string = "Save changes to";
             $extra = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
         }
 
@@ -270,7 +270,7 @@ HTML;
                         You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
                         <ul style="list-style-position: inside;">
                             <li>gradeable_id</li>
-                            <li>user_id OR repo_id, do not use both</li>
+                            <li>user_id OR team_id OR repo_id (only use one)</li>
                         </ul>
                         ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
                         <input style='width: 83%' type='text' name='subdirectory' value="" placeholder="(Optional)"/>
@@ -318,7 +318,7 @@ HTML;
                         /> No 
                         <br /> <br />
 
-                        Should students be able to download files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
+                        Should students be able to download submitted files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
                         <input type="radio" id="yes_student_download" name="student_download" value="true"
 HTML;
                         if ($admin_gradeable->getEgStudentDownload()===true) { $html_output .= ' checked="checked"'; }
@@ -450,6 +450,8 @@ HTML;
 HTML;
         $html_output .= <<<HTML
                 <td style="overflow: hidden;">
+                	<input type="hidden" name="component_id_{$num}" value="{$question->getId()}">
+                	<input type="hidden" name="component_deleted_marks_{$num}" value="">
                     <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" 
                               placeholder="Rubric Item Title">{$question->getTitle()}</textarea>
                     <textarea name="ta_comment_{$num}" id="individual_{$num}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA/Grader (seen only by TAs/Graders)"  onkeyup="autoResizeComment(event);"
@@ -463,11 +465,11 @@ HTML;
 
         if(!($type_of_action === "edit" || $type_of_action === "add_template")) {
             $html_output .= <<<HTML
-                <div id="mark_id-{$num}-0" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;">
+                <div id="mark_id-{$num}-0" name="mark_{$num}" data-gcm_id="NEW" class="gradeable_display">
+                <input type="hidden" name="mark_gcmid_{$num}_0" value="NEW">
                 <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{$num}_0" value="0" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-                <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_0" style="resize: none; width: 80.5%;">Full Credit</textarea> 
+                <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_0" class="comment_display">Full Credit</textarea> 
                 <!--
-                <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                 -->
@@ -478,20 +480,41 @@ HTML;
         if (($type_of_action === "edit" || $type_of_action === "add_template") && $admin_gradeable->getGGradeableType() === 0 && $admin_gradeable->getEgUseTaGrading() === true) {
             $marks = $this->core->getQueries()->getGradeableComponentsMarks($question->getId());
             $first = true;
+            $hide_icons = "";
             foreach ($marks as $mark) {
+            	$first_publish = false;
+            	if ($mark->getPublish()) {
+            		$publish_checked = "checked";
+            	} else {
+            		$publish_checked = "";
+            	}
                 if($first === true) {
                     $first = false;
-                    $hidden = "display: none;";
-                }
-                else {
+                    $hidden = "background-color:#EBEBE4";
+                    $read_only = "readonly";
+                    $hide_icons = "hidden";
+                    $first_publish = true;
+                    //$hidden = "display: none;";
+                } else {
                     $hidden = "";
+                    $read_only = "";
+                    $hide_icons = "";
                 }
                 $html_output .= <<<HTML
-                    <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" style="text-align: left; font-size: 8px; padding-left: 5px; {$hidden}">
+                    <div id="mark_id-{$num}-{$mark->getOrder()}" name="mark_{$num}" data-gcm_id="{$mark->getId()}" class="gradeable_display" style="{$hidden}">
+                    <input type="hidden" name="mark_gcmid_{$num}_{$mark->getOrder()}" value="{$mark->getId()}">
                     <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{$num}_{$mark->getOrder()}" value="{$mark->getPoints()}" step="{$admin_gradeable->getEgPrecision()}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> 
-                    <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_{$mark->getOrder()}" style="resize: none; width: 80.5%;">{$mark->getNote()}</textarea> 
-                    <!--
-                    <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
+                    <textarea rows="1" placeholder="Comment" name="mark_text_{$num}_{$mark->getOrder()}" class="comment_display">{$mark->getNote()}</textarea>
+HTML;
+				if($first_publish === false) {
+					$html_output .= <<<HTML
+						<input type="checkbox" name="mark_publish_{$num}_{$mark->getOrder()}" {$publish_checked}> Publish
+HTML;
+				}
+
+                $html_output .= <<<HTML
+                    <a onclick="deleteMark(this)" {$hide_icons}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <!-- 
                     <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                     <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> 
                     -->
@@ -2169,6 +2192,8 @@ $('#gradeable-form').on('submit', function(e){
         }
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
             <td style="overflow: hidden; border-top: 5px solid #dddddd;"> \
+            <input type="hidden" name="component_id_'+newQ+'" value="NEW"> \
+            <input type="hidden" name="component_deleted_marks_'+newQ+'" value=""> \
                 <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" placeholder="Rubric Item Title"></textarea> \
                 <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA/Grader (seen only by TAs/Graders)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
@@ -2212,11 +2237,12 @@ $('#gradeable-form').on('submit', function(e){
             </td> \
         </tr>');
         $("#rubric_add_mark_" + newQ).before(' \
-            <div id="mark_id-'+newQ+'-0" name="mark_'+newQ+'" style="text-align: left; font-size: 8px; padding-left: 5px; display: none;"> \
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
-            <textarea rows="1" placeholder="Comment" name="mark_text_'+newQ+'_0" style="resize: none; width: 80.5%;">No Credit</textarea> \
+            <div id="mark_id-'+newQ+'-0" name="mark_'+newQ+'" class="gradeable_display" style="background-color:#EBEBE4"> \
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" data-gcm_id="NEW" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+            <input type="hidden" name="mark_gcmid_'+newQ+'_0" value="NEW"> \
+            <textarea rows="1" placeholder="Comment" name="mark_text_'+newQ+'_0" class="comment_display">No Credit</textarea> \
+            <a onclick="deleteMark(this)" hidden> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <!--\
-            <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             -->\
@@ -2229,6 +2255,7 @@ $('#gradeable-form').on('submit', function(e){
         var question_id = me.parentElement.id.split('-')[1];
         var current_id = me.parentElement.id.split('-')[2];
         var current_row = $('#mark_id-'+question_id+'-'+current_id);
+        var gcm_id = $('[name=mark_gcmid_'+question_id+'_'+current_id+']').attr("value");
         current_row.remove();
         var last_mark = $('[name=mark_'+question_id+']').last().attr('id');
         var totalD = -1;
@@ -2238,6 +2265,16 @@ $('#gradeable-form').on('submit', function(e){
         else {
             totalD = parseInt($('[name=mark_'+question_id+']').last().attr('id').split('-')[2]);
         }
+
+        var deleted_marks = $('[name=component_deleted_marks_'+question_id+']').attr("value");
+        if(deleted_marks == "") {
+        	deleted_marks = gcm_id;
+        } else {
+        	deleted_marks = deleted_marks + "," + gcm_id;
+        }
+        $('[name=component_deleted_marks_'+question_id+']').attr("value",deleted_marks);
+
+
         current_id = parseInt(current_id);
         for(var i=current_id+1; i<= totalD; ++i){
             updateMark(i,i-1, question_id);
@@ -2246,6 +2283,7 @@ $('#gradeable-form').on('submit', function(e){
 
     function updateMark(old_num, new_num, question_num) {
         var current_mark = $('#mark_id-'+question_num+'-'+old_num);
+        current_mark.find('input[name=mark_gcmid_'+question_num+'_'+old_num+']').attr('name', 'mark_gcmid_'+question_num+'_'+new_num);
         current_mark.find('input[name=mark_points_'+question_num+'_'+old_num+']').attr('name', 'mark_points_'+question_num+'_'+new_num);
         current_mark.find('textarea[name=mark_text_'+question_num+'_'+old_num+']').attr('name', 'mark_text_'+question_num+'_'+new_num);
         current_mark.attr('id', 'mark_id-'+question_num+'-'+new_num);
@@ -2332,11 +2370,13 @@ $('#gradeable-form').on('submit', function(e){
         }
         var new_num = last_num + 1;
         $("#rubric_add_mark_" + num).before('\
-<div id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'" style="text-align: left; font-size: 8px; padding-left: 5px;">\
+<div id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'" data-gcm_id="NEW" class="gradeable_display">\
+<input type="hidden" name="mark_gcmid_'+num+'_'+new_num+'" value="NEW"> \
 <i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="mark_points_'+num+'_'+new_num+'" value="0" step="'+precision+'" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
-<textarea rows="1" placeholder="Comment" name="mark_text_'+num+'_'+new_num+'" style="resize: none; width: 80.5%;"></textarea> \
-<!--\
+<textarea rows="1" placeholder="Comment" name="mark_text_'+num+'_'+new_num+'" class="comment_display"></textarea> \
+<input type="checkbox" name="mark_publish_'+num+'_'+new_num+'"> Publish \
 <a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<!--\
 <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up"  aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
 -->\
@@ -2502,19 +2542,20 @@ $('#gradeable-form').on('submit', function(e){
                     return false;
                 }
                 // check that path is made up of valid variables
-                var allowed_variables = ["\$gradeable_id", "\$user_id", "\$repo_id"];
-                var used_user_id = false;
+                var allowed_variables = ["\$gradeable_id", "\$user_id", "\$team_id", "\$repo_id"];
+                var used_id = false;
                 for (x = 1; x < subdirectory_parts.length; x++) {
                     subdirectory_part = subdirectory_parts[x].substring(0, subdirectory_parts[x].lastIndexOf("}"));
                     if (allowed_variables.indexOf(subdirectory_part) === -1) {
                         alert("For the VCS path, '" + subdirectory_part + "' is not a valid variable name.")
                         return false;
                     }
-                    if (subdirectory_part === "\$user_id") {
-                        used_user_id = true;
+                    if (!used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id")))  {
+                        used_id = true;
+                        continue;
                     }
-                    if (used_user_id && subdirectory_part === "\$repo_id") {
-                        alert("You cannot use both \$user_id and \$repo_id");
+                    if (used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
+                        alert("You can only use one of \$user_id, \$team_id and \$repo_id in VCS path");
                         return false;
                     }
                 }

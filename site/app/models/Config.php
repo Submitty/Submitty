@@ -24,11 +24,10 @@ use app\libraries\Utils;
  * @method string getSiteUrl()
  * @method string getSubmittyPath()
  * @method string getCoursePath()
- * @method string getDatabaseType()
- * @method string getDatabaseHost()
- * @method string getDatabaseUser()
- * @method string getDatabasePassword()
- * @method string getDatabaseName()
+ * @method string getDatabaseDriver()
+ * @method array getSubmittyDatabaseParams()
+ * @method array getCourseDatabaseParams()
+ * @method array getDatabaseParams()
  * @method string getCourseName()
  * @method string getCourseHomeUrl()
  * @method integer getDefaultHwLateDays()
@@ -43,6 +42,7 @@ use app\libraries\Utils;
  * @method string getInstitutionName()
  * @method string getInstitutionHomepage()
  * @method string getUsernameChangeText()
+ * @method bool isForumEnabled()
  */
 
 class Config extends AbstractModel {
@@ -65,6 +65,7 @@ class Config extends AbstractModel {
     protected $config_path;
     /** @property @var string path to the ini file that contains all the course specific settings */
     protected $course_ini_path;
+
     /** @property @var array */
     protected $course_ini;
 
@@ -97,14 +98,8 @@ class Config extends AbstractModel {
     /** @property @var bool */
     protected $log_exceptions;
 
-    /**
-     * Database host for PDO. The user does not need to set this
-     * explicitly in the config files, in which case we'll just default
-     * to PostgreSQL.
-     * @var string
-     * @property
-     */
-    protected $database_type = "pgsql";
+    /** @property @var string */
+    protected $database_driver = "pgsql";
 
     /**
      * The name of the institution that deployed Submitty. Added to the breadcrumb bar if non-empty.
@@ -127,38 +122,15 @@ class Config extends AbstractModel {
      */
     protected $username_change_text = "";
 
+    /** @property @var array */
+    protected $database_params = array();
 
+    /** @property @var array */
+    protected $submitty_database_params = array();
 
-    /**
-     * Database host for PDO
-     * @var string
-     * @property
-     */
-    protected $database_host;
+    /** @property @var array */
+    protected $course_database_params = array();
 
-    /**
-     * Database user for PDO
-     * @var string
-     * @property
-     */
-    protected $database_user;
-
-    /**
-     * Database password for PDO
-     * @var string
-     * @property
-     */
-    protected $database_password;
-
-    /*** COURSE SPECIFIC CONFIG ***/
-    /**
-     * Database name for PDO
-     * @var string
-     * @property
-     */
-    protected $database_name;
-
-    /*** COURSE DATABASE CONFIG ***/
     /** @property @var string */
     protected $course_name;
     /** @property @var string */
@@ -186,6 +158,8 @@ class Config extends AbstractModel {
     protected $vcs_type;
     /** @property @var array */
     protected $hidden_details;
+    /** @property @var bool */
+    protected $forum_enabled;
 
     /**
      * Config constructor.
@@ -204,11 +178,28 @@ class Config extends AbstractModel {
         }
         $this->config_path = dirname($master_ini_path);
         // Load config details from the master config file
-        $master = IniParser::readFile($master_ini_path);
+        try {
+            $master = IniParser::readFile($master_ini_path);
+        }
+        catch (\Throwable $throwable) {
+            throw new ConfigException($throwable->getMessage());
+        }
+
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
         $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
-        $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
+
+        if (!isset($master['database_details']) || !is_array($master['database_details'])) {
+            throw new ConfigException("Missing config section database_details in ini file");
+        }
+
+        if (!isset($master['submitty_database_details']) || !is_array($master['submitty_database_details'])) {
+            throw new ConfigException("Missing config section submitty_database_details in ini file");
+        }
+
+        $this->database_params = $master['database_details'];
+        $this->submitty_database_params = array_merge($master['database_details'], $master['submitty_database_details']);
+
         if (isset($master['site_details']['debug'])) {
            $this->debug = $master['site_details']['debug'] === true;
         }
@@ -234,8 +225,8 @@ class Config extends AbstractModel {
 
         $this->timezone = new \DateTimeZone($this->timezone);
 
-        if (isset($master['database_details']['database_type'])) {
-            $this->database_type = $master['database_details']['database_type'];
+        if (isset($master['database_details']['driver'])) {
+            $this->database_driver = $master['database_details']['driver'];
         }
         $this->base_url = rtrim($this->base_url, "/")."/";
         $this->cgi_url = rtrim($this->cgi_url, "/")."/";
@@ -268,19 +259,26 @@ class Config extends AbstractModel {
         $this->course_ini_path = $course_ini;
         $this->course_ini = IniParser::readFile($this->course_ini_path);
 
-        $this->setConfigValues($this->course_ini, 'hidden_details', array('database_name'));
-        $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
-            'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type');
-        $this->setConfigValues($this->course_ini, 'course_details', $array);
-
-        $this->hidden_details = $this->course_ini['hidden_details'];
-        if (isset($this->course_ini['hidden_details']['course_url'])) {
-            $this->base_url = rtrim($this->course_ini['hidden_details']['course_url'], "/")."/";
+        if (!isset($this->course_ini['database_details']) || !is_array($this->course_ini['database_details'])) {
+            throw new ConfigException("Missing config section 'database_details' in ini file");
         }
 
-        if (isset($this->course_ini['hidden_details']['ta_base_url'])) {
-            $this->ta_base_url = rtrim($this->course_ini['hidden_details']['ta_base_url'], "/")."/";
+        $this->course_database_params = array_merge($this->database_params, $this->course_ini['database_details']);
+
+        $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
+            'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
+            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'forum_enabled');
+        $this->setConfigValues($this->course_ini, 'course_details', $array);
+
+        if (isset($this->course_ini['hidden_details'])) {
+            $this->hidden_details = $this->course_ini['hidden_details'];
+            if (isset($this->course_ini['hidden_details']['course_url'])) {
+                $this->base_url = rtrim($this->course_ini['hidden_details']['course_url'], "/")."/";;
+            }
+
+            if (isset($this->course_ini['hidden_details']['ta_base_url'])) {
+                $this->ta_base_url = rtrim($this->course_ini['hidden_details']['ta_base_url'], "/")."/";
+            }
         }
         
         $this->upload_message = Utils::prepareHtmlString($this->upload_message);
@@ -290,7 +288,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message');
+            'display_custom_message', 'forum_enabled');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
@@ -316,6 +314,13 @@ class Config extends AbstractModel {
               $config[$section][$key] = $config[$section]["display_iris_grades_summary"];
             }
             // END TEMPORARY WORKAROUND
+
+
+            // DEFAULT FOR FORUM
+            if (!isset($config[$section][$key]) &&
+                $key == "forum_enabled") {
+              $config[$section][$key] = false;
+            }
 
 
             if (!isset($config[$section][$key])) {

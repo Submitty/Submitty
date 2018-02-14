@@ -92,7 +92,7 @@ class submitty_student_auto_feed {
 				break;
 			//Validate CSV data (anything pertinent is stored in self::$data property)
             case $this->validate_csv($csv_data):
-                $this->log_it("Student CSV data failed validation.");
+                $this->log_it("Student CSV data failed validation.  No data upsert performed.");
                 break;
             //Data upsert
             case $this->upsert_psql94():
@@ -124,8 +124,8 @@ class submitty_student_auto_feed {
 
     private function validate_csv($csv_data) {
     //IN:  No parameters
-    //OUT: No specific return, but self::$data property will contain csv data.
-    //PURPOSE: Run some error checks and set data to class property.
+    //OUT: true when all data passes validation, false otherwise.
+    //PURPOSE: Run some error checks and copy file data to class property.
 
         if (empty($csv_data)) {
             $this->log_it("No data read from student CSV file.");
@@ -141,6 +141,7 @@ class submitty_student_auto_feed {
 
         //Validate CSV
         $validate_num_fields = VALIDATE_NUM_FIELDS;
+        $validation_flag = true;
         foreach($csv_data as $index => $csv_row) {
             //Split each row by delim character so that individual fields are indexed.
             //Trim any extraneous whitespaces from all rows and fields.
@@ -165,7 +166,8 @@ class submitty_student_auto_feed {
             //Validate expected number of fields
             case ($num_fields === $validate_num_fields):
             //Log that row is invalid per number of columns
-                $this->log_it("Row {$index} has {$num_fields} columns.  {$validate_num_fields} expected.  Row discarded.");
+                $this->log_it("Row {$index} has {$num_fields} columns.  {$validate_num_fields} expected.");
+                $validation_flag = false;
                 break;
             //Check row columns
             default:
@@ -173,27 +175,33 @@ class submitty_student_auto_feed {
                 switch(false) {
                 //Check term code (skips when set to null).
                 case ((is_null(EXPECTED_TERM_CODE)) ? true : ($row[COLUMN_TERM_CODE] === EXPECTED_TERM_CODE)):
-                	$this->log_it("Row {$index} failed validation for mismatched term code.  Row discarded");
+                	$this->log_it("Row {$index} failed validation for mismatched term code.");
+                	$validation_flag = false;
                 	break;
-                //User ID may not have white spaces
-                case (preg_match("~^\S+$~", $row[COLUMN_USER_ID])):
-                	$this->log_it("Row {$index} failed validation for user id having a whitespace ({$row[COLUMN_USER_ID]}).  Row discarded.");
+                //User ID must contain only lowercase alpha, numbers, underscore, and hyphen
+                case (preg_match("~^[a-z0-9_\-]+$~", $row[COLUMN_USER_ID])):
+                	$this->log_it("Row {$index} failed user ID validation ({$row[COLUMN_USER_ID]}).");
+                	$validation_flag = false;
                 	break;
                 //First name must be alpha characters, white-space, or certain punctuation.
                 case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_FIRSTNAME])):
-                    $this->log_it("Row {$index} failed validation for student first name ({$row[COLUMN_FNAME]}).  Row discarded.");
+                    $this->log_it("Row {$index} failed validation for student first name ({$row[COLUMN_FNAME]}).");
+                    $validation_flag = false;
                     break;
                 //Last name must be alpha characters white-space, or certain punctuation.
                 case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_LASTNAME])):
-                    $this->log_it("Row {$index} failed validation for student last name ({$row[COLUMN_LNAME]}).  Row discarded.");
+                    $this->log_it("Row {$index} failed validation for student last name ({$row[COLUMN_LNAME]}).");
+                    $validation_flag = false;
                     break;
                 //Student section must be greater than zero.
                 case ($section > 0):
-                    $this->log_it("Row {$index} failed validation for student section ({$section}).  Row discarded.");
+                    $this->log_it("Row {$index} failed validation for student section ({$section}).");
+                    $validation_flag = false;
                     break;
 	            //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
                 case (preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $row[COLUMN_EMAIL])):
-                    $this->log_it("Row {$index} failed validation for student email ({$row[COLUMN_EMAIL]}).  Row discarded.");
+                    $this->log_it("Row {$index} failed validation for student email ({$row[COLUMN_EMAIL]}).");
+                    $validation_flag = false;
                 default:
                 	//Check for mapped (merged) course.
                 	if (array_key_exists($course, self::$course_mappings)) {
@@ -204,25 +212,26 @@ class submitty_student_auto_feed {
 							$section = intval(self::$course_mappings[$tmp_course][$tmp_section]['mapped_section']);
 						} else {
 							$this->log_it("{$course} has been mapped.  Section {$section} is in feed, but not mapped.");
+							$validation_flag = false;
 						}
                 	}
 
-                    //Validation passed. Include row in data set.
-                    self::$data['users'][] = array('user_id'            => $row[COLUMN_USER_ID],
-                                                   'user_firstname'     => $row[COLUMN_FIRSTNAME],
-                                                   'user_preferredname' => $row[COLUMN_PREFERREDNAME],
-                                                   'user_lastname'      => $row[COLUMN_LASTNAME],
-                                                   'user_email'         => $row[COLUMN_EMAIL]);
+					//Validation passed. Include row in data set.
+					self::$data['users'][] = array('user_id'            => $row[COLUMN_USER_ID],
+												   'user_firstname'     => $row[COLUMN_FIRSTNAME],
+												   'user_preferredname' => $row[COLUMN_PREFERREDNAME],
+												   'user_lastname'      => $row[COLUMN_LASTNAME],
+												   'user_email'         => $row[COLUMN_EMAIL]);
 
 					//Group 'courses_users' data by individual courses, so
 					//upserts can be transacted per course.  This helps prevent
 					//FK violations blocking upserts for other courses.
-                    self::$data['courses_users'][$course][] = array('semester'             => self::$semester,
-                                                                    'course'               => $course,
-                                                                    'user_id'              => $row[COLUMN_USER_ID],
-                                                                    'user_group'           => 4,
-                                                                    'registration_section' => $section,
-                                                                    'manual_registration'  => 'FALSE');
+					self::$data['courses_users'][$course][] = array('semester'             => self::$semester,
+																	'course'               => $course,
+																	'user_id'              => $row[COLUMN_USER_ID],
+																	'user_group'           => 4,
+																	'registration_section' => $section,
+																	'manual_registration'  => 'FALSE');
                 }
             }
         }
@@ -237,9 +246,9 @@ class submitty_student_auto_feed {
 
         deduplicate::deduplicate_data(self::$data['users'], 'user_id');
 
-        //TRUE:  Validated data set will have at least 1 row per table.
-        //FALSE: Empty sets shouldn't be processed.
-        return (count(self::$data['users']) > 0 && count(self::$data['courses_users']) > 0);
+        //TRUE:  Data validation passed and validated data set will have at least 1 row per table.
+        //FALSE: Either data validation failed or at least one table is an empty set.
+        return ($validation_flag && count(self::$data['users']) > 0 && count(self::$data['courses_users']) > 0);
     }
 
     private function get_participating_course_list() {
@@ -431,17 +440,20 @@ LOCK TABLE courses_users IN EXCLUSIVE MODE;
 SQL;
 
         //This portion ensures that UPDATE will only occur when a record already exists.
+        //CASE WHEN clause checks user/instructor_updated flags for permission to change
+        //user_preferred_firstname column.
         $sql['users']['update'] = <<<SQL
 UPDATE users
 SET
     user_firstname=upsert_users.user_firstname,
     user_lastname=upsert_users.user_lastname,
-    user_preferred_firstname=upsert_users.user_preferred_firstname,
+    user_preferred_firstname=
+    	CASE WHEN user_updated=FALSE AND instructor_updated=FALSE
+    	THEN upsert_users.user_preferred_firstname
+    	ELSE users.user_preferred_firstname END,
     user_email=upsert_users.user_email
 FROM upsert_users
 WHERE users.user_id=upsert_users.user_id
-AND users.user_updated=FALSE
-AND users.instructor_updated=FALSE
 SQL;
 
         $sql['courses_users']['update'] = <<<SQL
@@ -457,6 +469,7 @@ FROM upsert_courses_users
 WHERE courses_users.user_id=upsert_courses_users.user_id
 AND courses_users.course=upsert_courses_users.course
 AND courses_users.semester=upsert_courses_users.semester
+AND courses_users.user_group=4
 AND courses_users.manual_registration=FALSE
 SQL;
 

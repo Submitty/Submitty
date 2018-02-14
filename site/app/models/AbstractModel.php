@@ -47,9 +47,10 @@ abstract class AbstractModel {
      * is passed to this function is returned as is (such as primitive types).
      *
      * @param $object
+     * @param $check_property
      * @return mixed
      */
-    protected function parseObject($object) {
+    protected function parseObject($object, $check_property=true) {
         if (is_object($object)) {
             if (is_a($object, 'app\Models\AbstractModel') || is_subclass_of($object, 'app\Models\AbstractModel')) {
                 /** @noinspection PhpUndefinedMethodInspection */
@@ -62,8 +63,8 @@ abstract class AbstractModel {
         else if (is_array($object)) {
             $return = array();
             foreach ($object as $key => $value) {
-                if (is_numeric($key) || isset($this->properties[$key])) {
-                    $return[$key] = $this->parseObject($value);
+                if (is_numeric($key) || (!$check_property || isset($this->properties[$key]))) {
+                    $return[$key] = $this->parseObject($value, false);
                 }
 
             }

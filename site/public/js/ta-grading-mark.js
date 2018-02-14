@@ -35,9 +35,68 @@ function checkIfSelected(me) {
     checkMarks(question_num);
 }
 
+function updateMarksOnPage(current_row, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
+
+    var current = $('[name=mark_'+num+']').last().attr('id');
+    if (current == null) { //only happens if there are no previous marks
+        last_num = -1; // should never happen, since there always should be a full credit/ no credit
+    } 
+    else {
+        last_num = parseInt($('[name=mark_'+num+']').last().attr('id').split('-')[2]);
+    }
+    $.ajax({
+            type: "POST",
+            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
+            async: false,
+            data: {
+                'gradeable_id' : gradeable_id,
+                'anon_id' : user_id,
+                'gradeable_component_id' : question_id,
+            },
+            success: function(data) {
+                console.log("success for adding a new mark");
+                console.log(data);
+                data = JSON.parse(data);
+                console.log(last_num + 1);
+                //it is data['data'].length - 1, since we're ignoring the custom mark
+                for (var x = last_num + 1; x < data['data'].length - 1; x++) {
+                    var got_this_mark = "fa-square-o";
+                    if (data['data'][x]['has_mark'] === true) {
+                        got_this_mark = "fa-square";
+                    }
+                    current_row.before(' \
+<tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'"> \
+<td colspan="1" style="'+background+'; text-align: center;"> \
+    <span onclick="selectMark(this);"> <i class="fa '+got_this_mark+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
+    <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+data['data'][x]['score']+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
+</td> \
+<td colspan="3" style="'+background+'"> \
+    <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;">'+data['data'][x]['note']+'</textarea> \
+    <span id="mark_info_id-'+num+'-'+x+'" style="display: none" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\'); getMarkInfo(this,\''+gradeable_id+'\');"> <i class="fa fa-users icon-got-this-mark"></i> </span> \
+    <!--\
+    <span id="mark_remove_id-'+num+'-'+x+'" onclick="deleteMark(this,'+num+','+x+');"> <i class="fa fa-times" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
+    --!>\
+</td> \
+</tr> \
+    ');
+                    console.log(data['data'].length - 1);
+                }
+
+            },
+            error: function() {
+                console.log("Something went wront with adding a mark...");
+                alert("There was an error with saving the grade. Please refresh the page and try agian.");
+            }
+    })
+}
+
 function addMark(me, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
     var last_num = -10;
     var current_row = $(me.parentElement.parentElement);
+    
+    //updates the component
+    updateMarksOnPage(current_row, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id)
+
     var current = $('[name=mark_'+num+']').last().attr('id');
     if (current == null) {
         last_num = -1;
@@ -50,16 +109,36 @@ function addMark(me, num, background, min, max, precision, gradeable_id, user_id
     current_row.before(' \
 <tr id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'"> \
 <td colspan="1" style="'+background+'; text-align: center;"> \
-    <span onclick="selectMark(this);"> <i class="fa fa-square-o mark" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
+    <span onclick="selectMark(this);"> <i class="fa fa-square-o mark fa-lg" name="mark_icon_'+num+'_'+new_num+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span> \
     <input name="mark_points_'+num+'_'+new_num+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="0" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
 </td> \
 <td colspan="3" style="'+background+'"> \
     <textarea name="mark_text_'+num+'_'+new_num+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;"></textarea> \
     <span id="mark_info_id-'+num+'-'+new_num+'" style="display: none" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\'); getMarkInfo(this,\''+gradeable_id+'\');"> <i class="fa fa-users icon-got-this-mark"></i> </span> \
+    <!--\
     <span id="mark_remove_id-'+num+'-'+new_num+'" onclick="deleteMark(this,'+num+','+new_num+');"> <i class="fa fa-times" style="visibility: visible; cursor: pointer; position: relative; top: 2px; left: 10px;"></i> </span> \
+    --!>\
 </td> \
 </tr> \
     '); 
+
+    $.ajax({
+            type: "POST",
+            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'add_one_new_mark'}),
+            async: true,
+            data: {
+                'gradeable_id' : gradeable_id,
+                'anon_id' : user_id,
+                'gradeable_component_id' : question_id,
+            },
+            success: function() {
+                console.log("success for adding a new mark");
+            },
+            error: function() {
+                console.log("Something went wront with adding a mark...");
+                alert("There was an error with saving the grade. Please refresh the page and try agian.");
+            }
+        })
 }
 
 function deleteMark(me, num, last_num) {
@@ -362,7 +441,7 @@ function openClose(row_id, num_questions = -1) {
                         else {
                             src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
                         }
-                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='600px' style='border: 0'></iframe>");
+                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='1200px' style='border: 0'></iframe>");
 
                         if (!pdf_div.hasClass('open')) {
                             pdf_div.addClass('open');
@@ -555,7 +634,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
     else {
         var arr_length = $('tr[name=mark_'+num+']').length;
         var mark_data = new Array(arr_length);
-
+        var existing_marks_num = 0;
         for (var i = 0; i < arr_length; i++) {
             var current_row = $('#mark_id-'+num+'-'+i);
             var info_mark = $('#mark_info_id-'+num+'-'+i);
@@ -574,8 +653,14 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             };
             mark_data[i] = mark;
             info_mark[0].style.display = '';
+            if(delete_mark.length) {
+
+            } else {
+                existing_marks_num++;
+            }
             delete_mark.remove();
         }
+
         current_row = $('#mark_custom_id-'+num);
         var custom_points = current_row.find('input[name=mark_points_custom_'+num+']').val();
         var custom_message = current_row.find('textarea[name=mark_text_custom_'+num+']').val();
@@ -594,6 +679,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             if(mark_data[i].selected === true) {
                 all_false = false;
                 current_points += parseFloat(mark_data[i].points);
+                mark_data[i].note = escapeHTML(mark_data[i].note);
                 if(first_text === true) {
                     if (parseFloat(mark_data[i].points) == 0) {
                         new_text += "* " + mark_data[i].note;
@@ -624,6 +710,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             all_false = false;
         }
         if(custom_message != "") {
+            custom_message = escapeHTML(custom_message);
             if(first_text === true) {
                 if (parseFloat(custom_points) == 0) {
                     new_text += "* " + custom_message;
@@ -652,7 +739,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         }
         
         current_question_num[0].innerHTML = (all_false === false) ? current_points : "";
-        current_question_text[0].innerHTML = new_text;
+        current_question_text.html(new_text);
 
         calculatePercentageTotal();
 
@@ -677,19 +764,27 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
                 'custom_message' : custom_message,
                 'overwrite' : overwrite,
                 'marks' : mark_data,
+                'num_existing_marks' : existing_marks_num,
             },
             success: function(data) {
                 console.log("success for saving a mark");
+                console.log(existing_marks_num);
                 console.log(data);
                 data = JSON.parse(data);
                 if (data['modified'] === true) {
                     if (all_false === true) {
                         $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
+                        $('#summary-' + num)[0].style.backgroundColor = "initial";
                     } else {
                         if($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || (overwrite === "true")) {
                             $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
+                            $('#summary-' + num)[0].style.backgroundColor = "#eebb77";
                         }
                     }
+                }
+
+                if(data['version_updated'] === "true") {
+                    $('#wrong_version_' + num)[0].innerHTML = "";
                 }
             },
             error: function() {

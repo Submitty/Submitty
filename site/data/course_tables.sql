@@ -133,6 +133,7 @@ CREATE TABLE electronic_gradeable (
     eg_submission_open_date timestamp(6) with time zone NOT NULL,
     eg_submission_due_date timestamp(6) with time zone NOT NULL,
     eg_late_days integer DEFAULT (-1) NOT NULL,
+    eg_allow_late_submission boolean DEFAULT true NOT NULL,
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
@@ -206,6 +207,7 @@ CREATE TABLE gradeable_component_mark (
     gc_id integer NOT NULL,
     gcm_points numeric NOT NULL,
     gcm_note character varying NOT NULL,
+    gcm_publish boolean DEFAULT false,
     gcm_order integer NOT NULL
 );
 
@@ -230,10 +232,10 @@ CREATE TABLE gradeable_component (
     gc_title character varying(255) NOT NULL,
     gc_ta_comment character varying NOT NULL,
     gc_student_comment character varying NOT NULL,
-    gc_lower_clamp integer NOT NULL,
-    gc_default integer NOT NULL,
+    gc_lower_clamp numeric NOT NULL,
+    gc_default numeric NOT NULL,
     gc_max_value numeric NOT NULL,
-    gc_upper_clamp integer NOT NULL,
+    gc_upper_clamp numeric NOT NULL,
     gc_is_text boolean NOT NULL,
     gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL,
@@ -252,7 +254,7 @@ CREATE TABLE gradeable_component_data (
     gcd_component_comment character varying NOT NULL,
     gcd_grader_id character varying(255) NOT NULL,
     gcd_graded_version integer,
-    gcd_grade_time timestamp(6) without time zone NOT NULL
+    gcd_grade_time timestamp(6) with time zone NOT NULL
     -- CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id)) -
 );
 
@@ -374,7 +376,7 @@ CREATE TABLE late_day_exceptions (
 CREATE TABLE late_days (
     user_id character varying(255) NOT NULL,
     allowed_late_days integer NOT NULL,
-    since_timestamp timestamp with time zone NOT NULL
+    since_timestamp timestamp(6) with time zone NOT NULL
 );
 
 
@@ -404,7 +406,7 @@ CREATE TABLE sessions (
     session_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
-    session_expires timestamp with time zone NOT NULL
+    session_expires timestamp(6) with time zone NOT NULL
 );
 
 
@@ -423,7 +425,7 @@ CREATE TABLE users (
     registration_section integer,
     rotating_section integer,
     manual_registration boolean DEFAULT false,
-    last_updated TIMESTAMP WITH time zone,
+    last_updated timestamp(6) with time zone,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 0) AND (user_group <= 4)))
 );
 
@@ -450,6 +452,65 @@ CREATE TABLE teams (
     state integer NOT NULL
 );
 
+
+-- Begins Forum 
+
+--
+-- Name: posts; Type: Table; Schema: public; Owner: -
+--
+CREATE TABLE "posts" (
+	"id" serial NOT NULL,
+	"thread_id" int NOT NULL,
+	"parent_id" int DEFAULT '-1',
+	"author_user_id" character varying NOT NULL,
+	"content" TEXT NOT NULL,
+	"timestamp" timestamp with time zone NOT NULL,
+	"anonymous" BOOLEAN NOT NULL,
+	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
+	"endorsed_by" varchar,
+	"resolved" BOOLEAN NOT NULL,
+	"type" int NOT NULL,
+    "has_attachment" BOOLEAN NOT NULL,
+	CONSTRAINT posts_pk PRIMARY KEY ("id")
+);
+
+CREATE TABLE "threads" (
+	"id" serial NOT NULL,
+	"title" varchar NOT NULL,
+	"created_by" varchar NOT NULL,
+	"pinned" BOOLEAN NOT NULL DEFAULT 'false',
+	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
+	"merged_id" int DEFAULT '-1',
+	"is_visible" BOOLEAN NOT NULL,
+	CONSTRAINT threads_pk PRIMARY KEY ("id")
+);
+
+CREATE TABLE "thread_categories" (
+	"thread_id" int NOT NULL,
+	"category_id" int NOT NULL
+);
+
+CREATE TABLE "categories_list" (
+	"category_id" serial NOT NULL,
+	"category_desc" varchar NOT NULL,
+	CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
+);
+
+CREATE TABLE "student_favorites" (
+	"id" serial NOT NULL,
+	"user_id" character varying NOT NULL,
+	"thread_id" int,
+	CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
+);
+
+CREATE TABLE "viewed_responses" (
+	"thread_id" int NOT NULL,
+	"user_id" character varying NOT NULL,
+	"timestamp" timestamp with time zone NOT NULL
+);
+
+
+-- Ends Forum
 
 --
 -- Name: gc_id; Type: DEFAULT; Schema: public; Owner: -
@@ -739,7 +800,7 @@ ALTER TABLE ONLY gradeable_component_mark_data
 --
 
 ALTER TABLE ONLY gradeable_component_mark_data
-    ADD CONSTRAINT gradeable_component_mark_data_gd_id_and_gc_id_fkey FOREIGN KEY (gd_id, gc_id, gcd_grader_id) REFERENCES gradeable_component_data(gd_id, gc_id, gcd_grader_id) ON DELETE CASCADE;
+    ADD CONSTRAINT gradeable_component_mark_data_gd_id_and_gc_id_fkey FOREIGN KEY (gd_id, gc_id, gcd_grader_id) REFERENCES gradeable_component_data(gd_id, gc_id, gcd_grader_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --
 -- Name: gradeable_data_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
@@ -899,6 +960,26 @@ ALTER TABLE ONLY teams
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
+
+-- Forum Key relationships
+
+ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
+ALTER TABLE "posts" ADD CONSTRAINT "posts_fk1" FOREIGN KEY ("author_user_id") REFERENCES "users"("user_id");
+
+
+ALTER TABLE "thread_categories" ADD CONSTRAINT "thread_categories_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
+ALTER TABLE "thread_categories" ADD CONSTRAINT "thread_categories_fk1" FOREIGN KEY ("category_id") REFERENCES "categories_list"("category_id");
+
+
+ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk0" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
+ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
+
+ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
+ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
+
+ALTER TABLE "attachment" ADD CONSTRAINT "attachment_fk0" FOREIGN KEY ("post_id") REFERENCES "posts"("id");
+
+-- End Forum Key relationships
 
 --
 -- PostgreSQL database dump complete

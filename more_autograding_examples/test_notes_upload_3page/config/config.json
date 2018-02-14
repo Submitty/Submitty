@@ -1,0 +1,58 @@
+{
+    // 3 mb maximum submission size
+    "max_submission_size" : 3000000,
+
+    "resource_limits" : {
+	"RLIMIT_FSIZE" : 200000000
+    },
+
+    "autograding" : {
+	"submission_to_compilation" : [ "*.pdf" ],
+	"submission_to_runner" : [ "*.pdf" ],
+	"submission_to_validation" : [ "*.pdf" ],
+	"work_to_details" : [
+	    "*test_template.pdf", "*student_file.pdf" ]
+    },
+
+    "assignment_message" : "Prepare a 3 page, black & white, 8.5x11”, portrait orientation, max size = 3MB .pdf of notes you would like to have during the test.<br>NOTE:  If you submit a 1 or 2 page .pdf, the attachment test below will fail.  Please make a 3 page pdf to ensure the test below will pass.<br>Be sure to inspect the produced sample test pdf to make sure that your notes are legible.",
+
+    "testcases" : [
+	{
+	    "title" : "Did you submit .pdf file?",
+	    "command" : [ "mv *.pdf student_file.pdf" ],
+	    "points" : 1,
+	    "validation": [
+		{
+                    "actual_file": "student_file.pdf",
+                    "deduction": 1.0,
+                    "description": "uploaded file",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                }
+	    ]
+	},
+        {
+	    "title" : "Can we attach your notes page to a sample test?",
+	    "command" : [ //"mv *.pdf student_file.pdf",
+			  "pdflatex test_template.tex" ],
+	    "points" : 1,
+	    "validation": [
+                {
+                    "actual_file": "test_template.pdf",
+                    "deduction": 1.0,
+                    "description": "Test with your notes attached at the back",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                }
+	    ]
+	}
+    ] 
+}

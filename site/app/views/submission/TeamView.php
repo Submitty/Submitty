@@ -54,7 +54,7 @@ HTML;
         foreach ($team->getMembers() as $teammate) {
             $teammate = $this->core->getQueries()->getUserById($teammate);
             $return .= <<<HTML
-        <span>&emsp;{$teammate->getFirstName()} {$teammate->getLastName()} ({$teammate->getId()}) - {$teammate->getEmail()}</span> <br />
+        <span>&emsp;{$teammate->getDisplayedFirstName()} {$teammate->getLastName()} ({$teammate->getId()}) - {$teammate->getEmail()}</span> <br />
 HTML;
         }
         //Team invitations status
@@ -78,6 +78,34 @@ HTML;
 HTML;
                 }
             }
+        }
+        if ($gradeable->getIsRepository()) {
+
+	    // FIXME: We'll eventually use this course config option.
+	    // Right now, we assume full path is specifified in gradeable
+	    //$this->core->getConfig()->getVcsBaseUrl().$gradeable->getSubdirectory();
+
+	    $repo = $gradeable->getSubdirectory();
+
+	    // FIXME: Read from submitty config
+	    $vcs_https_path = "https://submitty-vcs.cs.rpi.edu/git/";
+
+	    $repo = str_replace("{\$gradeable_id}", $gradeable->getId(), $repo);
+	    $repo = str_replace("/var/local/submitty/vcs/",$vcs_https_path, $repo);
+            $repo = str_replace("{\$team_id}", $team->getId(), $repo);
+            $return .= <<<HTML
+    <br />
+    <h3>To access your Team Repository:</h3>
+    <span>
+<em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em>
+    <br />
+    <br />
+
+<samp>git  clone  {$repo}  SPECIFY_TARGET_DIRECTORY</samp>
+<p>
+
+    </span> <br />
+HTML;
         }
     }
 

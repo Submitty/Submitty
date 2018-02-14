@@ -56,6 +56,19 @@ HTML;
         <!--<button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
 HTML;
         }
+
+
+        // ======================================================================================
+        // FORUM BUTTON
+        // ====================================================================================== 
+        
+        if($this->core->getConfig()->isForumEnabled()) {
+            $return .= <<<HTML
+            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Discussion Forum</a>
+HTML;
+        }
+
+
         // ======================================================================================
         // GRADES SUMMARY BUTTON
         // ======================================================================================
@@ -303,7 +316,7 @@ HTML;
 						if ($points_percent > 100) { 
                             $points_percent = 100; 
                         }
-                        if ($g_data->isTeamAssignment() && $g_data->getTeam() === null) {
+                        if (($g_data->isTeamAssignment() && $g_data->getTeam() === null) && (!$this->core->getUser()->accessAdmin())){
                             $gradeable_open_range = <<<HTML
                 <a class="btn {$title_to_button_type_submission[$title]} btn-nav" disabled>
                      MUST BE ON A TEAM TO SUBMIT<br>{$display_date}
@@ -442,11 +455,12 @@ HTML;
                         }
                         
                         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable_id);
+                        $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
                         $sections = array();
                         if (count($total_users) > 0) {
-                            foreach ($total_users as $key => $value) {
+                            foreach ($num_submitted as $key => $value) {
                                 $sections[$key] = array(
-                                    'total_components' => $value * $num_components,                        
+                                    'total_components' => $value * $num_components,
                                     'graded_components' => 0,
                                     'graders' => array()
                                 );
@@ -454,7 +468,8 @@ HTML;
                                     $sections[$key]['no_team'] = $no_team_users[$key];
                                 }
                                 if (isset($graded_components[$key])) {
-                                    $sections[$key]['graded_components'] = intval($graded_components[$key]);
+                                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                                    $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                                 }
                                 if (isset($graders[$key])) {
                                     $sections[$key]['graders'] = $graders[$key];

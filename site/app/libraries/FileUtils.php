@@ -390,6 +390,9 @@ class FileUtils {
             case 'xlsx':
                 $content_type = 'spreadsheet/xlsx';
                 break;
+            case 'txt':
+                $content_type = 'text/plain';
+                break;
             default:
                 $content_type = 'text/x-sh';
                 break;
