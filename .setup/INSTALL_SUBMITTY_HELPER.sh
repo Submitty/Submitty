@@ -113,14 +113,6 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
         mv ${originalcurrentcourses} ${mytempcurrentcourses}
     fi
 
-    original_autograding_workers=/usr/local/submitty/site/config/autograding_workers.json
-    if [ -f $original_autograding_workers ]; then
-        mytemp_autograding_workers=`mktemp`
-        echo "save this file! ${original_autograding_workers} ${mytemp_autograding_workers}"
-        mv ${original_autograding_workers} ${mytemp_autograding_workers}
-    fi
-
-
     rm -rf ${SUBMITTY_INSTALL_DIR}/hwgrading_website
     rm -rf ${SUBMITTY_INSTALL_DIR}/site
     rm -rf ${SUBMITTY_INSTALL_DIR}/src
@@ -464,17 +456,10 @@ find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini
 mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DIR}/site/config/master.ini
 
-
 # return the course index page (only necessary when 'clean' option is used)
 if [ -f "$mytempcurrentcourses" ]; then
     echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
     mv ${mytempcurrentcourses} ${originalcurrentcourses}
-fi
-
-# return the autograding workers json (only necessary when 'clean' option is used)
-if [ -f "$mytemp_autograding_workers" ]; then
-    echo "return this file! ${mytemp_autograding_workers} ${original_autograding_workers}"
-    mv ${mytemp_autograding_workers} ${original_autograding_workers}
 fi
 
 

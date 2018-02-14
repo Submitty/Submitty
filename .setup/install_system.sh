@@ -333,8 +333,6 @@ fi
 #################################################################
 # SUBMITTY SETUP
 #################
-#create the site/config folder for later use
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/config
 
 if [ ${VAGRANT} == 1 ]; then
     # This should be set by setup_distro.sh for whatever distro we have, but
