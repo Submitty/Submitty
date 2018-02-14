@@ -27,6 +27,10 @@ def arg_parse():
     parser.add_argument("--interactive", dest="interactive", action='store_const', const=True, default=False,
                         help="What queue (INTERACTIVE or BATCH) to use for the regrading. Default "
                         "is batch.")
+
+    parser.add_argument("--replay", dest="starttime", type=str, default="",
+                        help="replay what interval of time?")
+    
     parser.add_argument("--no_input", dest="no_input", action='store_const', const=True, default=False,
                         help="Do not wait for confirmation input, even if many things are being added to the queue.")
     return parser.parse_args()
@@ -48,6 +52,10 @@ def main():
         input_path = input_path.rstrip('/')
         # split the path into directories
         dirs = input_path.split(os.sep)
+
+        if not args.starttime == "":
+            print ("do that ", args.starttime)
+            exit()
 
         # must be in the known submitty base data directory
         if dirs[0:len(data_dirs)] != data_dirs:
