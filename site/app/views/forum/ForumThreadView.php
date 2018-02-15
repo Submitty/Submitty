@@ -209,21 +209,24 @@ HTML;
                         $return .= <<<HTML
 							<div class="$classes" style="margin-left:0;">
 HTML;
-						if($first){
-                            $first = false;
-                            $return .= $title_html;
-                        }
 
 						if($this->core->getUser()->getGroup() <= 2){
 							$return .= <<<HTML
-							<a class="post_button" style="position:absolute; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+								<a class="post_button" style="position:absolute; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
 HTML;
-							} 
-						
+						}
+						 
+						if($first){
+                            $first = false;
+                            $return .= $title_html;
+                        } else {
+							$return .= <<<HTML
+								<p style="float:right; right: 25px; position: absolute"> reply </p>
+HTML;
+						}
+
 						$return .= <<<HTML
 							<p class="post_content">{$function_content($post["content"])}</p>
-							
-							
 							<hr style="margin-bottom:3px;"><span style="margin-top:5px;margin-left:10px;float:right;">
 							
 HTML;
