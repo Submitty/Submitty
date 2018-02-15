@@ -201,7 +201,8 @@ HTML;
 						}
 						$date = date_create($post["timestamp"]);
 
-						$post_content = (strpos("&NewLine;", $post['content']) === false) ? $post['content'] : str_replace("&NewLine;", "", $post['content']);
+						//This line is legacy code to support formating of older posts
+						$post_content = (strpos("\r\n", $post['content']) === false) ? $post['content'] : str_replace("\r\n", "", $post['content']);
 
 						$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 
