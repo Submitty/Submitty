@@ -185,9 +185,9 @@ class MiscController extends AbstractController {
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
-            header('Content-Disposition: inline; filename="' . rawurlencode(basename($_REQUEST['path'])) . '"');
+            header('Content-Disposition: inline; filename="' . basename($_REQUEST['path']) . '"');
             readfile($corrected_name);
-            $this->core->getOutput()->renderString(rawurlencode($_REQUEST['path']));
+            $this->core->getOutput()->renderString($_REQUEST['path']);
         }
         else {
             $contents = htmlentities(file_get_contents($corrected_name), ENT_SUBSTITUTE);
