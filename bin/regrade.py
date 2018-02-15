@@ -102,24 +102,16 @@ def main():
     grade_queue = []
 
     if not args.times is None:
-        print ("do that ", args.times[0])
-        print ("do that ", args.times[1])
-
         starttime = dateutils.read_submitty_date(args.times[0])
         endtime = dateutils.read_submitty_date(args.times[1])
 
         replay(starttime,endtime)
         exit()
 
-    print ("PATH",args.path)
-        
     if len(args.path) == 0:
         print ("ERROR! Must specify at least one path")
         exit()
 
-
-    print ("PATH ", args.path)
-    
     for input_path in args.path:
 
         print ('input path',input_path)
@@ -134,8 +126,6 @@ def main():
         # split the path into directories
         dirs = input_path.split(os.sep)
 
-        print ("TEST", dirs, "T", dirs[0:len(data_dirs)], " THING ", data_dirs)
-        
         # must be in the known submitty base data directory
         if dirs[0:len(data_dirs)] != data_dirs:
             print("ERROR: BAD REGRADE SUBMISSIONS PATH",input_path)
