@@ -201,7 +201,7 @@ HTML;
 						}
 						$date = date_create($post["timestamp"]);
 
-						$post_content = (strpos("<br />", $post['content']) === false) ? $post['content'] : str_replace("<br />", "", $post['content']);
+						$post_content = (strpos("&NewLine;", $post['content']) === false) ? $post['content'] : str_replace("&NewLine;", "", $post['content']);
 
 						$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 
