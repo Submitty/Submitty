@@ -60,19 +60,24 @@ def read_submitty_date(s):
         with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
     except ValueError:
         try:
-            # hoping to find no timezone
-            without_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S')
-            my_timezone = get_timezone()
-            with_timezone = my_timezone.localize(without_timezone)
+            print ("with microseconds?")
+            # FIXME: READING MICROSECONDS STILL BUGGY
+            with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S.%f %z')
         except ValueError:
             try:
-                # hoping to find timezone -04
-                thedatetime = thedatetime+"00"
-                print ("dateutils read_submitty_date -- added '00' to ",thedatetime)
-                with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
+                # hoping to find no timezone
+                without_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S')
+                my_timezone = get_timezone()
+                with_timezone = my_timezone.localize(without_timezone)
             except ValueError:
-                print ("DATE PROBLEM",s)
-                raise SystemExit("ERROR:  invalid date format %s" % s)
+                try:
+                    # hoping to find timezone -04
+                    thedatetime = thedatetime+"00"
+                    print ("dateutils read_submitty_date -- added '00' to ",thedatetime)
+                    with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
+                except ValueError:
+                    print ("DATE PROBLEM",s)
+                    raise SystemExit("ERROR:  invalid date format %s" % s)
     return with_timezone
 
 
