@@ -291,12 +291,6 @@ class Gradeable extends AbstractModel {
 
     protected $user_viewed_date = null;
 
-    /** @property @var string The worker pc that this gradeable is to be run on.*/
-    protected $required_capabilities = "default";
-
-    /** @property @var int.*/
-    protected $max_possible_grading_time = -1;
-
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
         if(!isset($details['g_id'])) {
@@ -490,10 +484,6 @@ class Gradeable extends AbstractModel {
         if (isset($details['textboxes'])) {
           $num_textboxes = count($details['textboxes']);
         }
-
-        $this->required_capabilities = $details['required_capabilities'] ?? 'default';
-
-        $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
 
         for ($i = 1; $i <= $num_parts; $i++) {
             $this->previous_files[$i] = array();

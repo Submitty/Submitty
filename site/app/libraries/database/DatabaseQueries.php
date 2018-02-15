@@ -1753,13 +1753,13 @@ AND gc_id IN (
     public function getDisplayUserNameFromUserId($user_id){
       $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname from users where user_id = ?", array($user_id));
       $name_rows = $this->course_db->rows()[0];
-      $last_name =  " " . $name_rows["user_lastname"];
+      $last_name_initial =  " " . substr($name_rows["user_lastname"], 0, 1) . ".";
       if(empty($name_rows["user_preferred_firstname"])){
         $name = $name_rows["user_firstname"];
       } else {
         $name = $name_rows["user_preferred_firstname"];
       }
-      $name .= $last_name;
+      $name .= $last_name_initial;
       return $name;
     }
 

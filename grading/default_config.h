@@ -8,9 +8,6 @@ extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
 // defined in load_config_json.cpp
 nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid);
 
-extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;
-const int CPU_TO_WALLCLOCK_TIME_BUFFER = 10;
-
 // ========================================================================================
 // ========================================================================================
 

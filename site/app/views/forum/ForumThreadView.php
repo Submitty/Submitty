@@ -36,39 +36,6 @@ class ForumThreadView extends AbstractView {
 		}
 		</script>
 
-HTML;
-	if($this->core->getUser()->getGroup() <= 2){
-		$return .= <<<HTML
-		<script>
-								function changeName(element, user, visible_username, anon){
-									new_element = element.getElementsByTagName("strong")[0];
-									icon = element.getElementsByClassName("fa fa-eye");
-									if(icon.length == 0){
-										icon = element.getElementsByClassName("fa fa-eye-slash");
-									} icon = icon[0];
-									if(new_element.innerText == visible_username) {
-										if(anon) {
-											new_element.style.color = "grey";
-											new_element.style.fontStyle = "italic";
-										}
-										new_element.innerText = user;
-										icon.className = "fa fa-eye-slash";
-										icon.title = "Hide full user information";
-									} else {
-										if(anon) {
-											new_element.style.color = "black";
-											new_element.style.fontStyle = "normal";
-										}
-										new_element.innerText = visible_username;
-										icon.className = "fa fa-eye";
-										icon.title = "Show full user information";
-									}
-									
-								}
-		</script>
-HTML;
-	}
-	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
 		<div style="margin-top:10px; margin-bottom:10px; height:50px;  " id="forum_bar">
@@ -152,6 +119,7 @@ HTML;
 
 			$thread_id = -1;
 			$function_content = 'nl2br';
+			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$title_html = '';
 			$return .= <<< HTML
 					</div>
@@ -188,12 +156,26 @@ HTML;
 						}
 						$date = date_create($post["timestamp"]);
 
-						$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
-
-						if($post["anonymous"]){
-							$visible_username = "Anonymous";
+						if($post["anonymous"] == true){
+							if($userAccessToAnon){
+								$visible_username = "<a onClick=\"changeName(this, '{$post["author_user_id"]}')\" id=\"anonUser\">Anonymous</a>";
+								$return .= <<<HTML
+								<script>
+								function changeName(element, user){
+									if(element.innerHTML.indexOf("Anonymous") != -1) {
+										element.innerHTML = user;
+									} else {
+										element.innerHTML = 'Anonymous';
+									}
+									
+								}
+								</script>
+HTML;
+							} else {
+								$visible_username = "Anonymous";
+							}
 						} else {
-							$visible_username = substr($full_name, 0, strpos($full_name, " ")+2) . ".";
+							$visible_username = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 						}
 
 						$classes = "post_box";
@@ -216,27 +198,15 @@ HTML;
 
 						if($this->core->getUser()->getGroup() <= 2){
 							$return .= <<<HTML
-							<a class="post_button" style="position:absolute; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+							<a class="remove_post_button" style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
 HTML;
-							} 
-						
+						}
 						$return .= <<<HTML
 							<p class="post_content">{$function_content($post["content"])}</p>
 							
 							
-							<hr style="margin-bottom:3px;"><span style="margin-top:5px;margin-left:10px;float:right;">
+							<hr style="margin-bottom:3px;">
 							
-HTML;
-
-if($this->core->getUser()->getGroup() <= 2){
-						$info_name = $full_name . " (" . $post['author_user_id'] . ")";
-						$return .= <<<HTML
-						<a style=" margin-right:2px;display:inline-block; color:black; " onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}', {$post['anonymous']}	)" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
-HTML;
-}
-			$return .= <<<HTML
-			
-<h7><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")}</h7></span>
 HTML;
 
 						if($post["has_attachment"]){
@@ -253,14 +223,15 @@ HTML;
 							}
 							
 						}
-						$return .= <<<HTML
+			$return .= <<<HTML
+			
+<h7 style="margin-top:5px;float:right;"><strong>{$visible_username}</a></strong> {$function_date($date,"m/d/Y g:i A")}</h7>
 </div>
 HTML;
 						
 					}
 
 			$return .= <<<HTML
-			
 					<form style="margin:20px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>

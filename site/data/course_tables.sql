@@ -470,7 +470,7 @@ CREATE TABLE "posts" (
 	"endorsed_by" varchar,
 	"resolved" BOOLEAN NOT NULL,
 	"type" int NOT NULL,
-    "has_attachment" BOOLEAN NOT NULL,
+  "has_attachment" BOOLEAN NOT NULL,
 	CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
@@ -976,8 +976,6 @@ ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN K
 
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
-
-ALTER TABLE "attachment" ADD CONSTRAINT "attachment_fk0" FOREIGN KEY ("post_id") REFERENCES "posts"("id");
 
 -- End Forum Key relationships
 

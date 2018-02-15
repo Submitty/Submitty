@@ -51,7 +51,7 @@ class ElectronicGraderView extends AbstractView {
             $percentage = 0;
         }
         else{
-            $percentage = number_format(($graded / $total) * 100, 1);
+            $percentage = round(($graded / $total) * 100, 1);
         }
         $return = <<<HTML
 <div class="content">
@@ -124,7 +124,7 @@ HTML;
             if ($peer) {
                 $show_total = floor($sections['stu_grad']['total_components']/$gradeable->getNumPeerComponents());
                 $show_graded = floor($sections['stu_grad']['graded_components']/$gradeable->getNumPeerComponents());
-                $percentage = number_format(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
+                $percentage = round(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
                 $return .= <<<HTML
             Current percentage of students grading done: {$percentage}% ({$show_graded}/{$show_total})
         </div>
@@ -141,7 +141,7 @@ HTML;
                         $percentage = 0;
                     }
                     else {
-                        $percentage = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
+                        $percentage = round(($section['graded_components'] / $section['total_components']) * 100, 1);
                     }
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
@@ -593,22 +593,10 @@ HTML;
                 <td>{$row->getUser()->getId()}</td>
 HTML;
                     }
-                    // Construct a string containing the names of all team members
-                     else {
-                        $member_list = "";
-                        foreach($row->getTeam()->getMembers() as $team_member) {
-                            if ($member_list !== "") {
-                                $member_list = $member_list . ", ";
-                            }
- 	 
-                            $first_name = $this->core->getQueries()->getUserById($team_member)->getDisplayedFirstName();
-                            $last_name = $this->core->getQueries()->getUserById($team_member)->getLastName();
-
-                            $member_list = $member_list . $first_name . " " . $last_name;
-                        }
+                    else {
                         $return .= <<<HTML
-                <td>{$member_list}</td>
-        
+
+                <td>{$row->getTeam()->getMemberList()}</td>
 HTML;
                     }
                 }
