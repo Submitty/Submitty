@@ -637,7 +637,8 @@ HTML;
                         OPEN TO TAS NOW
                         </a>
 HTML;
-                } else if($title_save === "BETA" && $this->core->getUser()->accessAdmin()) {
+                }
+                else if($title_save === "BETA" && $this->core->getUser()->accessAdmin()) {
                     if($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
                         $quick_links = <<<HTML
                         <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable, 'quick_link_action' => 'open_students_now'))}">
@@ -651,12 +652,6 @@ HTML;
                         </a>
 HTML;
                     }
-                } else if($title_save === "CLOSED" && $this->core->getUser()->accessAdmin()){
-                    $quick_links = <<<HTML
-                        <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable, 'quick_link_action' => 'open_grading_now'))}">
-                        OPEN TO GRADING NOW
-                        </a>
-HTML;
                 } else {
                     $quick_links = "";
                 }

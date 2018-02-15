@@ -154,13 +154,6 @@ apt-get install -qqy oracle-java8-set-default
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-apt-get update
-apt-get install -y docker-ce
-systemctl status docker
-
-
 if [ ${VAGRANT} == 1 ]; then
     apt-get install -qqy gitweb libcgi-session-perl
 fi
