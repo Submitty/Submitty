@@ -314,7 +314,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 
 
-# FIXME / WPI:  line below is temporary, to avoid error message if file does not exist
+# FIXME / WIP:  line below is temporary, to avoid error message if file does not exist
 touch ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
 
 
