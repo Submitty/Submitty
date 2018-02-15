@@ -179,7 +179,7 @@ class MiscController extends AbstractController {
             return false;
         }
 
-		$corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_REQUEST['path']));
+        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_REQUEST['path']));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
