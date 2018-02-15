@@ -221,7 +221,7 @@ HTML;
                             $return .= $title_html;
                         } else {
 							$return .= <<<HTML
-								<p style="float:right; right: 25px; position: absolute"> reply </p>
+								<a style="float:right; right: 25px; position: absolute" onClick="replyPost({$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}')"> reply </a>
 HTML;
 						}
 
