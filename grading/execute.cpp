@@ -25,6 +25,8 @@
 #include "error_message.h"
 #include "window_utils.h"
 
+extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
+
 
 #define DIR_PATH_MAX 1000
 
@@ -65,6 +67,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
+    { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
 
     // for Computer Science I
     { "python",                  "/usr/bin/python" },
@@ -1130,7 +1133,7 @@ bool memory_ok(int rss_memory, int allowed_rss_memory){
 bool time_ok(float elapsed, float seconds_to_run){
   // allow 10 extra seconds for differences in wall clock
   // vs CPU time (imperfect solution)
-  if(elapsed > seconds_to_run + 10.0f){
+  if(elapsed > seconds_to_run + CPU_TO_WALLCLOCK_TIME_BUFFER){
       return false;
   }
   else{
