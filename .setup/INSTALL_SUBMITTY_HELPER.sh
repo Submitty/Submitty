@@ -507,6 +507,10 @@ if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     for b in count plagiarism diagnostics;
         do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${ST_VERSION}/${b}" -O ${b}
     done
+
+    # We may revise this later, when we use a binary of the common ast tool
+    git pull origin master
+
     echo ${ST_VERSION} > VERSION
 fi
 popd
