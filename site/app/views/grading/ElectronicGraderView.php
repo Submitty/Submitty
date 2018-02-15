@@ -1199,12 +1199,14 @@ HTML;
             $color = "green";
             if($status != "Good" && $status != "Late") {
                 $color = "red";
+                $my_color="'#F62817'"; // fire engine red
+                $my_message="Late Submission";
                 $return .= <<<HTML
             <script>
-                $('body').css('background', 'red');
-                $('#bar_wrapper').append("<div id='bar_banner' class='banner'>The student submitted late</div>");
-                $('#bar_banner').css('background-color', 'red');
-                $('#bar_banner').css('color', 'lightcyan');
+                $('body').css('background', $my_color);
+                $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                $('#bar_banner').css('background-color', $my_color);
+                $('#bar_banner').css('color', 'black');
             </script>
 HTML;
             }
@@ -1243,25 +1245,29 @@ HTML;
         if($gradeable->getActiveVersion() == 0){
             $disabled='disabled';
             $break_onclick = "return false; ";
+            $my_color="'#FF8040'"; // mango orange
+            $my_message="Cancelled Submission";
             if($gradeable->hasSubmitted()){
                 $return .= <<<HTML
                 <script>
-                    $('body').css('background', 'brown');
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>This student chose not to be graded</div>");
-                    $('#bar_banner').css('background-color', 'brown');
-                    $('#bar_banner').css('color', 'cornflowerblue');
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color); 
+                    $('#bar_banner').css('color', 'black');
                 </script>
-                <div class="red-message" style="text-align: center">This student chose not to be graded</div>
+                <div class="red-message" style="text-align: center">$my_message</div>
 HTML;
             } else {
+                $my_color="'#C38189'";  // lipstick pink (purple)
+                $my_message="No Submission";
                 $return .= <<<HTML
                 <script>
-                    $('body').css('background', 'purple');
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>This student did not submit anything</div>");
-                    $('#bar_banner').css('background-color', 'purple');
-                    $('#bar_banner').css('color', 'salmon');
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
                 </script>
-                <div class="red-message" style="text-align: center">This student did not submit anything</div>
+                <div class="red-message" style="text-align: center">$my_message</div>
 HTML;
             }
         } else if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
