@@ -179,7 +179,7 @@ class MiscController extends AbstractController {
             return false;
         }
 
-		$corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_GET['path']));
+		$corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_REQUEST['path']));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -193,7 +193,7 @@ class MiscController extends AbstractController {
             $contents = htmlentities(file_get_contents($corrected_name), ENT_SUBSTITUTE);
             if ($_REQUEST['ta_grading'] === "true") {
                 $filename = htmlentities($corrected_name, ENT_SUBSTITUTE);
-               $this->core->getOutput()->renderOutput('Misc', 'displayCode', $mime_type, $corrected_name, $contents);
+                $this->core->getOutput()->renderOutput('Misc', 'displayCode', $mime_type, $corrected_name, $contents);
             }
             else {
                 $this->core->getOutput()->renderOutput('Misc', 'displayFile', $contents);
@@ -216,7 +216,7 @@ class MiscController extends AbstractController {
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
         header("Content-disposition: attachment; filename=\"{$_REQUEST['file']}\"");
-		readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_GET['path'])));
+		readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_REQUEST['path'])));
     }
 
     private function downloadZip() {
