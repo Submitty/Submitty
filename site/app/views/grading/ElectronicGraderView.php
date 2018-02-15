@@ -671,7 +671,15 @@ HTML;
                 if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
                     $box_background = "late-box";
                 }
-                if ($row->beenTAgraded()) {
+                if (!($row->hasSubmitted())) {
+                    $btn_class = "btn-default";
+                    $contents = "No Submission";
+                }
+                else if ($active_version === 0) {
+                    $btn_class = "btn-default";
+                    $contents = "Cancelled Submission";
+                }
+                else if ($row->beenTAgraded()) {
                     if($row->validateVersions()) {
                         $btn_class = "btn-default";
                         $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
@@ -686,14 +694,6 @@ HTML;
                             $contents = "Version Conflict";
                         }
                     }
-                }
-                else if (!($row->hasSubmitted())) {
-                    $btn_class = "btn-default";
-                    $contents = "No Submission";
-                }
-                else if ($active_version === 0) {
-                    $btn_class = "btn-default";
-                    $contents = "Cancelled Submission";
                 }
                 else {
                     $btn_class = "btn-primary";
@@ -1199,9 +1199,14 @@ HTML;
             $color = "green";
             if($status != "Good" && $status != "Late") {
                 $color = "red";
+                $my_color="'#F62817'"; // fire engine red
+                $my_message="Late Submission";
                 $return .= <<<HTML
             <script>
-                $('body').css('background', 'red');
+                $('body').css('background', $my_color);
+                $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                $('#bar_banner').css('background-color', $my_color);
+                $('#bar_banner').css('color', 'black');
             </script>
 HTML;
             }
@@ -1237,13 +1242,42 @@ HTML;
 HTML;
         $break_onclick = "";
         $disabled = '';
-        if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion() || $gradeable->getCurrentVersionNumber() == 0){
+        if($gradeable->getActiveVersion() == 0){
+            $disabled='disabled';
+            $break_onclick = "return false; ";
+            $my_color="'#FF8040'"; // mango orange
+            $my_message="Cancelled Submission";
+            if($gradeable->hasSubmitted()){
+                $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color); 
+                    $('#bar_banner').css('color', 'black');
+                </script>
+                <div class="red-message" style="text-align: center">$my_message</div>
+HTML;
+            } else {
+                $my_color="'#C38189'";  // lipstick pink (purple)
+                $my_message="No Submission";
+                $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
+                </script>
+                <div class="red-message" style="text-align: center">$my_message</div>
+HTML;
+            }
+        } else if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
             $disabled='disabled';
             $break_onclick = "return false; ";
             $return .= <<<HTML
-    <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
+            <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
         }
+       
         $num_questions = count($gradeable->getComponents());
 
         // if use student components, get the values for pages from the student's submissions
