@@ -12,7 +12,7 @@ AUTOGRADING_LOG_PATH="__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
 
-def log_message(is_batch,which_untrusted,jobname,timelabel,elapsed_time,message):
+def log_message(is_batch=False,which_untrusted="",jobname="",timelabel="",elapsed_time="",message=""):
     now = dateutils.get_current_time()
     datefile=datetime.strftime(now,"%Y%m%d")+".txt"
     autograding_log_file=os.path.join(AUTOGRADING_LOG_PATH,datefile)
