@@ -573,12 +573,10 @@ HTML;
                         // get the full filename for PDF popout
                         // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path."&ta_grading=false";
-                        $filename_full = str_replace("_cover.pdf", ".pdf", rawurldecode( $filename) );
+                        $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
                         $path_full = str_replace("_cover.pdf", ".pdf", $path);
                         $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full."&ta_grading=false";
-                        $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode( $filename_full) );
-                        //decode the filename after to display correctly for users
-                        $filename_full = rawurldecode($filename_full);
+                        $count_array[$count] = FileUtils::joinPaths($timestamp, $filename_full);
                         $return .= <<<HTML
             <tr class="tr tr-vertically-centered">
                 <td>{$count}</td>
@@ -812,7 +810,7 @@ HTML;
                     else {
                         $size = number_format(-1);
                     }
-                    $return .= urldecode( $file ['relative_name']) . " ({$size}kb)";
+                    $return .= "{$file['relative_name']} ({$size}kb)";
                     // download icon if student can download files
                     if (!$gradeable->useVcsCheckout() && $gradeable->getStudentDownload()) {
                         // if not active version and student cannot see any more than active version
