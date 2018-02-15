@@ -120,7 +120,7 @@ fi
 pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
-pip3 install psycopg2
+pip3 install psycopg2-binary
 pip3 install sqlalchemy
 pip3 install pylint
 pip3 install psutil
