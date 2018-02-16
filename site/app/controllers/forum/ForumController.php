@@ -159,7 +159,6 @@ class ForumController extends AbstractController {
         $thread_id = htmlentities($_POST["reply_thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $parent_id = htmlentities($_POST["reply_parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        $this->core->addErrorMessage($parent_id);
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error with your reply.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));

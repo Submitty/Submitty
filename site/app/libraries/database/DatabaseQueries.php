@@ -129,7 +129,8 @@ class DatabaseQueries {
         $parent_post = -1;
         if(!$first){
             $this->course_db->query("SELECT id FROM posts where timestamp = (SELECT MAX(timestamp) from posts where thread_id = ? and deleted=false)", array($thread_id));
-            $parent_post = $this->course_db->rows()[0]["id"];
+            // $parent_post = $this->course_db->rows()[0]["id"];
+            $parent_post = 1; //The default posts on the thread all have parent_id of 1. 
         }
 
         try {

@@ -180,101 +180,32 @@ HTML;
 					{$activeThreadTitle}</h3>
 HTML;
 					$first = true;
+					$order_array = array();
 					foreach($posts as $post){
-						
 						if($thread_id == -1) {
 							$thread_id = $post["thread_id"];
-							$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 						}
-
-						if($post['parent_id'] > 1){
-							array_push($reply_posts, $post);
-							continue;
-						}
-
-						$date = date_create($post["timestamp"]);
-
-						$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
-
-						if($post["anonymous"]){
-							$visible_username = "Anonymous";
+						if($post["parent_id"] > 1){
+							$place = array_search($post["parent_id"], $order_array);
+							$tmp_array = array($post["id"]);
+							array_splice($order_array, $place+1, 0, $tmp_array);
 						} else {
-							$visible_username = substr($full_name, 0, strpos($full_name, " ")+2) . ".";
+							array_push($order_array, $post["id"]);
 						}
-
-						$classes = "post_box";
-
-						if($first){
-						    $classes .= " first_post";
-                        }
-
-						if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
-							$classes .= " important";
-						}
-
-                        $return .= <<<HTML
-							<div class="$classes" style="margin-left:0;">
-HTML;
-
-						if($this->core->getUser()->getGroup() <= 2){
-							$return .= <<<HTML
-								<a class="post_button" style="position:absolute; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
-HTML;
-						}
-						 
-						if($first){
-                            $first = false;
-                            $return .= $title_html;
-                        } else {
-							$return .= <<<HTML
-								<a style="float:right; right: 25px; position: absolute" onClick="replyPost({$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}')"> reply </a>
-HTML;
-						}
-						// This Chunk below is the pop-up window for reply.
-						$return .= <<<HTML
-							<div class="popup-form" id="reply-user-post">
-								<h3 id="reply_user_prompt"></h3>
-								<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'reply_post'))}">
-									<input type="hidden" id="reply_thread_id" name="reply_thread_id" value="" />
-									<input type="hidden" id="reply_parent_id" name="reply_parent_id" value="" />
-									<textarea name="reply_post_content" id="reply_post_content" style="margin-right:10px;white-space: pre-wrap;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
-									<div style="float: right; width: auto; margin-top: 10px">
-										<a onclick="$('#reply-user-post').css('display', 'none');" class="btn btn-danger">Cancel</a>
-										<input class="btn btn-primary" type="submit" value="Submit" />
-									</div>	
-								</form>
-							</div>
-							<p class="post_content">{$function_content($post["content"])}</p>
-							<hr style="margin-bottom:3px;"><span style="margin-top:5px;margin-left:10px;float:right;">		
-HTML;
-
-					if($this->core->getUser()->getGroup() <= 2){
-						$info_name = $full_name . " (" . $post['author_user_id'] . ")";
-						$return .= <<<HTML
-						<a style=" margin-right:2px;display:inline-block; color:black; " onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}', {$post['anonymous']}	)" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
-HTML;
-					}
-					$return .= <<<HTML
-						<h7><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")}</h7></span>
-HTML;
-
-						if($post["has_attachment"]){
-							$post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
-							$files = FileUtils::getAllFiles($post_dir);
-							foreach($files as $file){
-								$path = urlencode(htmlspecialchars($file['path']));
-								$name = urlencode(htmlspecialchars($file['name']));
-								$name_display = htmlentities($file['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-								$return .= <<<HTML
-							<a href="#" style="display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
-HTML;
-							}
-						}
-						$return .= <<<HTML
-							</div>
-HTML;
 					}
 					
+					foreach($order_array as $ordered_post){
+						foreach($posts as $post){
+							if($post["id"] == $ordered_post){
+								$return .= $this->createPost($thread_id, $post, $function_content, $function_date, $title_html, $first);
+								break;
+							}
+						}
+						if($first){
+							$first= false;
+						}
+					}
+
 			$return .= <<<HTML
 			
 					<form style="margin:20px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
@@ -326,12 +257,11 @@ HTML;
 		return $return;
 	}
 
-	public function createPost($thread_id, $post){
+	public function createPost($thread_id, $post, $function_content, $function_date, $title_html, $first){
 		$post_html = "";
-		if($thread_id == -1) {
-			$thread_id = $post["thread_id"];
-			$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
-		}
+		$post_id = $post["id"];
+		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
+
 		$date = date_create($post["timestamp"]);
 		$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 		if($post["anonymous"]){
@@ -350,7 +280,7 @@ HTML;
 		}
 
 		$post_html .= <<<HTML
-			<div class="$classes" style="margin-left:0;">
+			<div class="$classes" id="$post_id" style="margin-left:0;">
 HTML;
 
 		if($this->core->getUser()->getGroup() <= 2){
