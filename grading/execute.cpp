@@ -25,6 +25,8 @@
 #include "error_message.h"
 #include "window_utils.h"
 
+extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
+
 
 #define DIR_PATH_MAX 1000
 
@@ -65,6 +67,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
+    { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
 
     // for Computer Science I
     { "python",                  "/usr/bin/python" },
@@ -72,6 +75,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "python2.7",               "/usr/bin/python2.7" },
     { "python3",                 "/usr/bin/python3" },
     { "python3.5",               "/usr/bin/python3.5" },
+    { "pylint",                  "/usr/local/bin/pylint" },
 
     // for Data Structures
     { "g++",                     "/usr/bin/g++" },
@@ -86,6 +90,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // for Principles of Software
     { "java",                    "/usr/bin/java" },
     { "javac",                   "/usr/bin/javac" },
+    { "mono",                    "/usr/bin/mono" },   // should put more checks here, only run with "mono dafny/Dafny.exe "
 
     // for Operating Systems
     { "gcc",                     "/usr/bin/gcc" },
@@ -223,22 +228,39 @@ void validate_filename(const std::string &filename) {
 
 
 std::string validate_option(const std::string &program, const std::string &option) {
+
+  // TODO: update this with the option to junit5
+
+  //{ "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
+  //{ "submitty_junit_5.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-5xx.jar" },
+  //{ "submitty_junit_4.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
+
+  // also for hamcrest 2.0
+
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
         { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
+        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
       }
     },
     { "/usr/bin/java",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
         { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
+        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
+      }
+    },
+    { "/usr/bin/mono",
+      { { "submitty_dafny",         SUBMITTY_INSTALL_DIRECTORY+"/Dafny/dafny/Dafny.exe" }
       }
     }
-    };
+  };
 
   // see if this program has option replacements
   std::map<std::string,std::map<std::string,std::string> >::const_iterator itr = option_replacements.find(program);
@@ -1111,7 +1133,7 @@ bool memory_ok(int rss_memory, int allowed_rss_memory){
 bool time_ok(float elapsed, float seconds_to_run){
   // allow 10 extra seconds for differences in wall clock
   // vs CPU time (imperfect solution)
-  if(elapsed > seconds_to_run + 10.0f){
+  if(elapsed > seconds_to_run + CPU_TO_WALLCLOCK_TIME_BUFFER){
       return false;
   }
   else{

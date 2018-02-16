@@ -57,6 +57,12 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 #################################################################
+# BUILD CLANG SETUP
+#################
+
+#python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
+
+#################################################################
 # USERS SETUP
 #################
 
@@ -117,10 +123,12 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser hwcron vagrant
 fi
 
+usermod -aG docker hwcron
+
 pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
-pip3 install psycopg2
+pip3 install psycopg2-binary
 pip3 install sqlalchemy
 pip3 install pylint
 pip3 install psutil
@@ -140,7 +148,8 @@ sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
 
 pushd /tmp > /dev/null
 
-echo "Getting JUnit..."
+# -----------------------------------------
+echo "Getting JUnit & Hamcrest..."
 JUNIT_VER=4.12
 HAMCREST_VER=1.3
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
@@ -153,7 +162,13 @@ mv remotecontent?filepath=junit%2Fjunit%2F${JUNIT_VER}%2Fjunit-${JUNIT_VER}.jar 
 wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F${HAMCREST_VER}%2Fhamcrest-core-${HAMCREST_VER}.jar hamcrest-core-${HAMCREST_VER}.jar
 
+
+# TODO:  Want to Install JUnit 5.0
+# And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
+
+
 popd > /dev/null
+
 
 # EMMA is a tool for computing code coverage of Java programs
 
@@ -327,7 +342,6 @@ fi
 # SUBMITTY SETUP
 #################
 
-
 if [ ${VAGRANT} == 1 ]; then
     # This should be set by setup_distro.sh for whatever distro we have, but
     # in case it is not, default to our primary URL
@@ -346,7 +360,6 @@ else
 fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
-
 
 # (re)start the submitty grading scheduler daemon
 systemctl restart submitty_grading_scheduler
@@ -411,6 +424,18 @@ if [[ ${VAGRANT} == 1 ]]; then
     ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
+
+#################################################################
+# DOCKER SETUP
+#################
+
+#mkdir -p /tmp/docker
+#cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+#pushd /tmp/docker
+#cp -R ${SUBMITTY_INSTALL_DIR}/drmemory ./
+#cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools ./
+#docker build -t ubuntu:custom -f Dockerfile .
+#popd
 
 #################################################################
 # RESTART SERVICES
