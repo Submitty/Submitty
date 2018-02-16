@@ -68,7 +68,7 @@ def main():
                 'user_email': None
                 }
     if user is not None:
-        print('User already exists! Hit enter on any question to use existing value for that field.')
+        print('User with this user-id already exists! Press enter on any question to use the current values of this user for that field.')
         defaults = user
 
     firstname = get_input('User firstname', defaults['user_firstname'])
