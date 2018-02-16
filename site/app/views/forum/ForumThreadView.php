@@ -181,6 +181,7 @@ HTML;
 HTML;
 					$first = true;
 					$order_array = array();
+					$reply_level_array = array();
 					foreach($posts as $post){
 						if($thread_id == -1) {
 							$thread_id = $post["thread_id"];
@@ -189,21 +190,32 @@ HTML;
 							$place = array_search($post["parent_id"], $order_array);
 							$tmp_array = array($post["id"]);
 							array_splice($order_array, $place+1, 0, $tmp_array);
+							$parent_reply_level = $reply_level_array[$place];
+							array_splice($reply_level_array, $place+1, 0, $parent_reply_level+1);
 						} else {
 							array_push($order_array, $post["id"]);
+							array_push($reply_level_array, 1);
 						}
 					}
-					
+					$i = 0;
 					foreach($order_array as $ordered_post){
 						foreach($posts as $post){
 							if($post["id"] == $ordered_post){
-								$return .= $this->createPost($thread_id, $post, $function_content, $function_date, $title_html, $first);
+								if($post["parent_id"] == 1) {
+									$reply_level = 1;	
+								} else {
+									$reply_level = $reply_level_array[$i];
+								}
+								
+								$return .= $this->createPost($thread_id, $post, $function_content, $function_date, $title_html, $first, $reply_level);
 								break;
 							}
+							
 						}
 						if($first){
 							$first= false;
 						}
+						$i++;
 					}
 
 			$return .= <<<HTML
@@ -257,7 +269,7 @@ HTML;
 		return $return;
 	}
 
-	public function createPost($thread_id, $post, $function_content, $function_date, $title_html, $first){
+	public function createPost($thread_id, $post, $function_content, $function_date, $title_html, $first, $reply_level){
 		$post_html = "";
 		$post_id = $post["id"];
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
@@ -279,8 +291,9 @@ HTML;
 			$classes .= " important";
 		}
 
+		$offset = ($reply_level-1)*15;
 		$post_html .= <<<HTML
-			<div class="$classes" id="$post_id" style="margin-left:0;">
+			<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
 HTML;
 
 		if($this->core->getUser()->getGroup() <= 2){
