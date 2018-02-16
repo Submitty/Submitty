@@ -740,4 +740,3 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         }
     });
 }
-
