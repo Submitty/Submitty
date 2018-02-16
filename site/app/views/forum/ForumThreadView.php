@@ -224,13 +224,12 @@ HTML;
 								<a style="float:right; right: 25px; position: absolute" onClick="replyPost({$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}')"> reply </a>
 HTML;
 						}
-						$parent_id = $post["id"];
 						$return .= <<<HTML
 							<div class="popup-form" id="reply-user-post">
 								<h3 id="reply_user_prompt"></h3>
 								<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'reply_post'))}">
-									<input type="hidden" name="thread_id" value="{$thread_id}" />
-									<input type="hidden" name="test_id" value="{$parent_id}" />
+									<input type="hidden" id="reply_thread_id" name="reply_thread_id" value="" />
+									<input type="hidden" id="reply_parent_id" name="reply_parent_id" value="" />
 									<textarea name="reply_post_content" id="reply_post_content" style="margin-right:10px;white-space: pre-wrap;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
 									<div style="float: right; width: auto; margin-top: 10px">
 										<a onclick="$('#reply-user-post').css('display', 'none');" class="btn btn-danger">Cancel</a>

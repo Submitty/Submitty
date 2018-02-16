@@ -156,9 +156,10 @@ class ForumController extends AbstractController {
 
     public function replyPost(){
         $post_content = htmlentities($_POST["reply_post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $parent_id = htmlentities($_POST["test_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $thread_id = htmlentities($_POST["reply_thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $parent_id = htmlentities($_POST["reply_parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
+        $this->core->addErrorMessage($parent_id);
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error with your reply.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
@@ -167,7 +168,7 @@ class ForumController extends AbstractController {
             // if($hasGoodAttachment == -1){
             //     return;
             // }
-            $this->core->addErrorMessage($parent_id);
+            
             $post_id = $this->core->getQueries()->createReply($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, $parent_id, false);
             $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
             // if($hasGoodAttachment == 1) {

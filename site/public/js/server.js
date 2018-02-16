@@ -838,8 +838,8 @@ function replyPost(thread_id, post_id, user_id, time){
     var editUserPrompt = document.getElementById('reply_user_prompt');
     editUserPrompt.innerHTML = 'Replying to a post by: ' + user_id + ' on ' + time;
     // contentBox.innerHTML = content;
-    // document.getElementById('edit_thread_id').value = thread_id;
-    // document.getElementById('edit_post_id').value = post_id;
+    document.getElementById('reply_thread_id').value = thread_id;
+    document.getElementById('reply_parent_id').value = post_id;
     $('#reply-user-post').css('display', 'block');
 }
 
