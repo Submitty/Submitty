@@ -634,7 +634,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         }
     }
     else if (days_late > 0) {
-        message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?";
+        message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absense. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
         }
@@ -740,3 +740,4 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         }
     });
 }
+
