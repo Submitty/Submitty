@@ -833,24 +833,14 @@ function checkNumFilesForumUpload(input){
             
 }
 
-function replyPost(thread_id, post_id, content, user_id, time){
-    var contentBox = document.getElementById('edit_post_content');
-    var editUserPrompt = document.getElementById('edit_user_prompt');
+function replyPost(thread_id, post_id, user_id, time){
+    // var contentBox = document.getElementById('reply_post_content');
+    var editUserPrompt = document.getElementById('reply_user_prompt');
     editUserPrompt.innerHTML = 'Replying to a post by: ' + user_id + ' on ' + time;
-    contentBox.innerHTML = content;
-    document.getElementById('edit_thread_id').value = thread_id;
-    document.getElementById('edit_post_id').value = post_id;
-    $('.popup-form').css('display', 'block');
-}
-
-function editPost(thread_id, post_id, content, user_id, time) {
-    var contentBox = document.getElementById('edit_post_content');
-    var editUserPrompt = document.getElementById('edit_user_prompt');
-    editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + time;
-    contentBox.innerHTML = content;
-    document.getElementById('edit_thread_id').value = thread_id;
-    document.getElementById('edit_post_id').value = post_id;
-    $('.popup-form').css('display', 'block');
+    // contentBox.innerHTML = content;
+    // document.getElementById('edit_thread_id').value = thread_id;
+    // document.getElementById('edit_post_id').value = post_id;
+    $('#reply-user-post').css('display', 'block');
 }
 
 function deletePost(thread_id, post_id, author, time){

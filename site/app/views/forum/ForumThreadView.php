@@ -224,22 +224,32 @@ HTML;
 								<a style="float:right; right: 25px; position: absolute" onClick="replyPost({$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}')"> reply </a>
 HTML;
 						}
-
+						$parent_id = $post["id"];
 						$return .= <<<HTML
+							<div class="popup-form" id="reply-user-post">
+								<h3 id="reply_user_prompt"></h3>
+								<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'reply_post'))}">
+									<input type="hidden" name="thread_id" value="{$thread_id}" />
+									<input type="hidden" name="test_id" value="{$parent_id}" />
+									<textarea name="reply_post_content" id="reply_post_content" style="margin-right:10px;white-space: pre-wrap;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
+									<div style="float: right; width: auto; margin-top: 10px">
+										<a onclick="$('#reply-user-post').css('display', 'none');" class="btn btn-danger">Cancel</a>
+										<input class="btn btn-primary" type="submit" value="Submit" />
+									</div>	
+								</form>
+							</div>
 							<p class="post_content">{$function_content($post["content"])}</p>
-							<hr style="margin-bottom:3px;"><span style="margin-top:5px;margin-left:10px;float:right;">
-							
+							<hr style="margin-bottom:3px;"><span style="margin-top:5px;margin-left:10px;float:right;">		
 HTML;
 
-if($this->core->getUser()->getGroup() <= 2){
+					if($this->core->getUser()->getGroup() <= 2){
 						$info_name = $full_name . " (" . $post['author_user_id'] . ")";
 						$return .= <<<HTML
 						<a style=" margin-right:2px;display:inline-block; color:black; " onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}', {$post['anonymous']}	)" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
 HTML;
 }
-			$return .= <<<HTML
-			
-<h7><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")}</h7></span>
+					$return .= <<<HTML
+						<h7><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")}</h7></span>
 HTML;
 
 						if($post["has_attachment"]){
