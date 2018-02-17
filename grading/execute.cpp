@@ -108,7 +108,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "timeout",                 "/usr/bin/timeout" },
     { "mpicc.openmpi",           "/usr/bin/mpicc.openmpi" },
     { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
-    { "mpirun"        ,          "/usr/bin/mpirun"},
+    { "mpirun",                  "/usr/bin/mpirun"},
     { "mpicc",                   "/usr/bin/mpicc"},
 
     // for LLVM / Compiler class
