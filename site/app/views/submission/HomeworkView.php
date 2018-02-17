@@ -357,8 +357,8 @@ HTML;
                 $return .= <<<HTML
     <div>
         {$upload_message}
-	<br>
-	&nbsp;
+    <br>
+    &nbsp;
     </div>
 
     <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
@@ -757,7 +757,7 @@ HTML;
 HTML;
             }
             else {
-	            if($gradeable->getActiveVersion() > 0
+                if($gradeable->getActiveVersion() > 0
                     && $gradeable->getActiveVersion() === $current_version->getVersion()) {
                     $return .= <<<HTML
     <div class="sub" id="submission_message">
@@ -768,8 +768,8 @@ HTML;
 HTML;
                 }
                 else {
-		            if($gradeable->getActiveVersion() > 0) {
-		                $return .= <<<HTML
+                    if($gradeable->getActiveVersion() > 0) {
+                        $return .= <<<HTML
    <div class="sub" id="submission_message">
        <p class="red-message">
             Note: This version of your assignment will not be graded the instructor/TAs. <br />
@@ -782,14 +782,14 @@ HTML;
             Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
             This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
 HTML;
-		            }
+                    }
 
-		                $return .= <<<HTML
+                        $return .= <<<HTML
             Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
          </p>
      </div>
 HTML;
-	            }
+                }
 
                 if ($gradeable->hasIncentiveMessage()) {
                     $return .= <<<HTML
@@ -812,7 +812,7 @@ HTML;
                     else {
                         $size = number_format(-1);
                     }
-                    $return .= urldecode( $file ['relative_name']) . " ({$size}kb)";
+                    $return .= "{$file['relative_name']} ({$size}kb)";
                     // download icon if student can download files
                     if (!$gradeable->useVcsCheckout() && $gradeable->getStudentDownload()) {
                         // if not active version and student cannot see any more than active version
@@ -970,7 +970,7 @@ HTML;
             $return .= <<<HTML
 </div>
 HTML;
-	}
+    }
         if ($gradeable->taGradesReleased()) {
             $return .= <<<HTML
 <div class="content">
