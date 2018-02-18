@@ -23,8 +23,8 @@ HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
 BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 
-USE_DOCKER = False
-WRITE_DATABASE = True
+#USE_DOCKER = os.path.isfile("/tmp/use_docker")
+WRITE_DATABASE = False
 
 # ==================================================================================
 def parse_args():
@@ -265,12 +265,16 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # --------------------------------------------------------------------
     # START DOCKER
 
+    USE_DOCKER = os.path.isfile("/tmp/use_docker")
+    
     container = None
     if USE_DOCKER:
+        print ("USE DOCKER")
         container = subprocess.check_output(['docker', 'run', '-t', '-d',
                                              '-v', tmp + ':' + tmp,
                                              'ubuntu:custom']).decode('utf8').strip()
-
+    else:
+        print ("no docker")
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
 
