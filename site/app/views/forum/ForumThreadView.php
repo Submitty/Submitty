@@ -44,6 +44,11 @@ class ForumThreadView extends AbstractView {
 		function openFile(directory, file, path ){
 			window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + file + "&path=" + path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
 		}
+
+			$( document ).ready(function() {
+			    enableTabsInTextArea('post_content');
+			});
+
 		</script>
 
 HTML;
@@ -201,9 +206,6 @@ HTML;
 						}
 						$date = date_create($post["timestamp"]);
 
-						//This line is legacy code to support formating of older posts
-						$post_content = (strpos("\r\n", $post['content']) === false) ? $post['content'] : str_replace("\r\n", "", $post['content']);
-
 						$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 
 						if($post["anonymous"]){
@@ -230,11 +232,17 @@ HTML;
                             $return .= $title_html;
                         }
 
-                        $post_content = $post['content'];
+                        $codeBracketString = "&lbrack;&sol;code&rsqb;";
+                        if(strpos($post['content'], "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
+                        	$codeBracketString = "&NewLine;" . $codeBracketString;
+                        }
+
+
+                        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post["content"]));
+
+                        //This code is for legacy posts that had an extra \r per newline
                         if(strpos($post['content'], "\r") !== false){
-                        	
-                        	$post_content = str_replace("\r","",$post['content']);
-                        	
+                        	$post_content = str_replace("\r","", $post_content);
                         }
 
 						if($this->core->getUser()->getGroup() <= 2){
@@ -288,10 +296,10 @@ HTML;
 					<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            	<br/>
 	            	<div style="margin-bottom:10px;" class="form-group row">
-            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content')" style="margin-right:10px;" class="btn btn-primary"><i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content')" class="btn btn-primary"><i class="fa fa-code fa-1x"></i></button>
+            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content')" style="margin-right:10px;" class="btn btn-primary">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content')" class="btn btn-primary">Code <i class="fa fa-code fa-1x"></i></button>
             		</div>
 	            	<div class="form-group row">
-	            		<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+	            		<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
 	            	</div>
 
 	            	<br/>
@@ -372,6 +380,12 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
 
+		<script> 
+			$( document ).ready(function() {
+			    enableTabsInTextArea('thread_content');
+			});
+		 </script>
+
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
 		<div style="margin-top:10px; margin-bottom:10px; height:50px;  " id="forum_bar">
@@ -390,10 +404,10 @@ HTML;
             	</div>
             	<br/>
             	<div style="margin-bottom:10px;" class="form-group row">
-            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_content')" style="margin-right:10px;" class="btn btn-primary"><i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_content')" class="btn btn-primary"><i class="fa fa-code fa-1x"></i></button>
+            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_content')" style="margin-right:10px;" class="btn btn-primary">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_content')" class="btn btn-primary">Code <i class="fa fa-code fa-1x"></i></button>
             	</div>
             	<div class="form-group row">
-            		<textarea name="thread_content" id="thread_content" style="resize:none;height:50vh;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+            		<textarea name="thread_content" id="thread_content" style="resize:none;min-height:45vh;overflow:hidden;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
             	</div>
 
             	<br/>
