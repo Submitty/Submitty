@@ -971,7 +971,7 @@ HTML;
 </div>
 HTML;
     }
-        if ($gradeable->taGradesReleased()) {
+        if ($gradeable->taGradesReleased() && $gradeable->useTAGrading()) {
             $return .= <<<HTML
 <div class="content">
 HTML;
