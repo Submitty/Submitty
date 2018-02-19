@@ -230,6 +230,13 @@ HTML;
                             $return .= $title_html;
                         }
 
+                        $post_content = $post['content'];
+                        if(strpos($post['content'], "\r") !== false){
+                        	
+                        	$post_content = str_replace("\r","",$post['content']);
+                        	
+                        }
+
 						if($this->core->getUser()->getGroup() <= 2){
 							$return .= <<<HTML
 							<a class="post_button" style="position:absolute; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
@@ -237,7 +244,7 @@ HTML;
 							} 
 						
 						$return .= <<<HTML
-							<pre><p class="post_content" style="white-space: pre-wrap; ">{$post['content']}</p></pre>
+							<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>
 							
 							
 							<hr style="margin-bottom:3px;"><span style="margin-top:5px;margin-left:10px;float:right;">
