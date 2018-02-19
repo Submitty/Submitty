@@ -183,7 +183,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     queue_time = get_queue_time(next_directory,next_to_grade)
     queue_time_longstring = dateutils.write_submitty_date(queue_time)
     grading_began = dateutils.get_current_time()
-    waittime = int((grading_began-queue_time).total_seconds())
+    waittime = (grading_began-queue_time).total_seconds()
     grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"wait:",waittime,"")
 
     # --------------------------------------------------------
@@ -266,15 +266,18 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # START DOCKER
 
     USE_DOCKER = os.path.isfile("/tmp/use_docker")
+    use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
+    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message=use_docker_string)
     
     container = None
     if USE_DOCKER:
-        print ("USE DOCKER")
         container = subprocess.check_output(['docker', 'run', '-t', '-d',
                                              '-v', tmp + ':' + tmp,
                                              'ubuntu:custom']).decode('utf8').strip()
-    else:
-        print ("no docker")
+        dockerlaunch_done=dateutils.get_current_time()
+        dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"dcct:",dockerlaunch_time,"docker container created")
+
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
 
@@ -329,8 +332,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         print ("pid",my_pid,"COMPILATION OK")
     else:
         print ("pid",my_pid,"COMPILATION FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
-    #raise SystemExit()
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message="COMPILATION FAILURE")
+        #raise SystemExit()
 
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
         
@@ -397,7 +400,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         print ("pid",my_pid,"RUNNER OK")
     else:
         print ("pid",my_pid,"RUNNER FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","RUNNER FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message="RUNNER FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
@@ -458,7 +461,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         print ("pid",my_pid,"VALIDATOR OK")
     else:
         print ("pid",my_pid,"VALIDATOR FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","VALIDATION FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message="VALIDATION FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
 
@@ -527,7 +530,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     grading_began_longstring = dateutils.write_submitty_date(grading_began)
     grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
 
-    gradingtime = int((grading_finished-grading_began).total_seconds())
+    gradingtime = (grading_finished-grading_began).total_seconds()
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,
@@ -568,10 +571,17 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # REMOVE TEMP DIRECTORY
     shutil.rmtree(tmp)
 
+    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message="done grading")
+
     # --------------------------------------------------------------------
     # CLEAN UP DOCKER
     if USE_DOCKER:
         subprocess.call(['docker', 'rm', '-f', container])
+
+        dockerdestroy_done=dateutils.get_current_time()
+        dockerdestroy_time = (dockerdestroy_done-grading_finished).total_seconds()
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"ddt:",dockerdestroy_time,"docker container destroyed")
+
 
 
 # ==================================================================================
