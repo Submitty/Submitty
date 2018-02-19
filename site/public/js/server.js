@@ -867,7 +867,6 @@ function deletePost(thread_id, post_id, author, time){
                 thread_id: thread_id
             },
             success: function(data){
-                console.log(data);
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
