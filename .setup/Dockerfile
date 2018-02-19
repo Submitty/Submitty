@@ -9,6 +9,7 @@ javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
 g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils pdftk
 
+RUN mkdir -p /usr/local/submitty
 COPY drmemory /usr/local/submitty/drmemory
 COPY SubmittyAnalysisTools /usr/local/submitty/SubmittyAnalysisTools
 
