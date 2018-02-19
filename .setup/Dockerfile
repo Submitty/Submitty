@@ -8,6 +8,7 @@ libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-
 javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
 g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils pdftk
+RUN apt-get install imagemagick
 
 RUN mkdir -p /usr/local/submitty
 COPY drmemory /usr/local/submitty/drmemory
