@@ -834,10 +834,9 @@ function checkNumFilesForumUpload(input){
 }
 
 function replyPost(thread_id, post_id, user_id, time){
-    // var contentBox = document.getElementById('reply_post_content');
-    var editUserPrompt = document.getElementById('reply_user_prompt');
-    editUserPrompt.innerHTML = 'Replying to a post by: ' + user_id + ' on ' + time;
-    // contentBox.innerHTML = content;
+    var replyUserPrompt = document.getElementById('reply_user_prompt');
+    replyUserPrompt.innerHTML = 'Replying to a post by: ' + user_id + ' on ' + time;
+    contentBox.innerHTML = $('#'+post_id).children('.post_content').html();
     document.getElementById('reply_thread_id').value = thread_id;
     document.getElementById('reply_parent_id').value = post_id;
     $('#reply-user-post').css('display', 'block');

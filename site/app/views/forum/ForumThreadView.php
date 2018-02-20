@@ -317,6 +317,7 @@ HTML;
 		$post_html .= <<<HTML
 			<div class="popup-form" id="reply-user-post">
 				<h3 id="reply_user_prompt"></h3>
+				<p id="parent_post_content"> </p>
 				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'reply_post'))}">
 					<input type="hidden" id="reply_thread_id" name="reply_thread_id" value="" />
 					<input type="hidden" id="reply_parent_id" name="reply_parent_id" value="" />
