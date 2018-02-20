@@ -863,7 +863,7 @@ function saveScrollLocationOnRefresh(className){
     $(document).ready(function() {
         if(sessionStorage.scrollTop != "undefined"){
 
-            //This can be used in stead of the animation: 
+            //This can be used instead of the animation: 
             //$(element).scrollTop(sessionStorage.scrollTop);
 
             $(element).animate({
