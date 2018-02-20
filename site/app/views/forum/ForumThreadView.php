@@ -58,6 +58,7 @@ HTML;
 		<script>
 								function changeName(element, user, visible_username, anon){
 									var new_element = element.getElementsByTagName("strong")[0];
+									anon = (anon == 'true');
 									icon = element.getElementsByClassName("fa fa-eye")[0];
 									if(icon == undefined){
 										icon = element.getElementsByClassName("fa fa-eye-slash")[0];
@@ -260,7 +261,7 @@ HTML;
 HTML;
 
 if($this->core->getUser()->getGroup() <= 2){
-						$info_name = $first_name . $last_name . " (" . $post['author_user_id'] . ")";
+						$info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
 						$visible_user_json = json_encode($visible_username);
 						$info_name = json_encode($info_name);
 						$jscriptAnonFix = $post['anonymous'] ? 'true' : 'false' ;
