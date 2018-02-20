@@ -834,6 +834,7 @@ function checkNumFilesForumUpload(input){
 }
 
 function replyPost(thread_id, post_id, user_id, time){
+    var contentBox = document.getElementById('parent_post_content');
     var replyUserPrompt = document.getElementById('reply_user_prompt');
     replyUserPrompt.innerHTML = 'Replying to a post by: ' + user_id + ' on ' + time;
     contentBox.innerHTML = $('#'+post_id).children('.post_content').html();
