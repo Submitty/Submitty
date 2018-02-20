@@ -504,7 +504,7 @@ rm ${HWCRON_CRONTAB_FILE}
 
 echo -e "Compile and install analysis tools"
 
-ST_VERSION=v0.3.3
+ST_VERSION=v0.3.4
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
