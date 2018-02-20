@@ -116,7 +116,7 @@ class ForumController extends AbstractController {
                 FileUtils::createDir($post_dir);
 
                 for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
-                    $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
+                    $target_file = $post_dir . "/" . basename(rawurlencode($_FILES["file_input"]["name"][$i]));
                     move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
                 }
                 
@@ -145,7 +145,7 @@ class ForumController extends AbstractController {
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                 FileUtils::createDir($post_dir);
                 for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
-                    $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
+                    $target_file = $post_dir . "/" . basename(rawurlencode($_FILES["file_input"]["name"][$i]));
                     move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
                 }
             }

@@ -47,6 +47,7 @@ class ForumThreadView extends AbstractView {
 
 			$( document ).ready(function() {
 			    enableTabsInTextArea('post_content');
+			    saveScrollLocationOnRefresh('thread_list');
 			});
 
 		</script>
@@ -140,8 +141,8 @@ HTML;
 						$first_post_content = str_replace("&lbrack;&sol;code&rsqb;", "", str_replace("&lbrack;code&rsqb;", "", strip_tags($first_post["content"])));
 						$sizeOfContent = strlen($first_post_content);
 						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strpos($first_post_content, " ", 70));
-						
-						$titleDisplay = substr($thread["title"], 0, 30);
+						$titleLength = strlen($thread['title']);
+						$titleDisplay = substr($thread["title"], 0, ($titleLength < 30) ? $titleLength : strpos($thread['title'], " ", 29));
 						if(strlen($first_post["content"]) > 80){
 							$contentDisplay .= "...";
 						}
@@ -261,8 +262,9 @@ HTML;
 
 if($this->core->getUser()->getGroup() <= 2){
 						$info_name = $full_name . " (" . $post['author_user_id'] . ")";
+						$jscriptAnonFix = $post['anonymous'] ? 'true' : 'false' ;
 						$return .= <<<HTML
-						<a style=" margin-right:2px;display:inline-block; color:black; " onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}', {$post['anonymous']}	)" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
+						<a style=" margin-right:2px;display:inline-block; color:black; " onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}', {$jscriptAnonFix})" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
 HTML;
 }
 			$return .= <<<HTML
@@ -274,9 +276,9 @@ HTML;
 							$post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
 							$files = FileUtils::getAllFiles($post_dir);
 							foreach($files as $file){
-								$path = urlencode(htmlspecialchars($file['path']));
-								$name = urlencode(htmlspecialchars($file['name']));
-								$name_display = htmlentities($file['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+								$path = rawurlencode(htmlspecialchars($file['path']));
+								$name = rawurlencode(htmlspecialchars('"'.$file['name'].'"'));
+								$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 								$return .= <<<HTML
 							<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
 HTML;
@@ -313,7 +315,7 @@ HTML;
 					</span>
 
 	            	<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
+	            		<label style="display:inline-block;" for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
 	            	</div>
 	            	</form>
 	            	<br/>
@@ -393,7 +395,7 @@ HTML;
 			</div>
 		</div>
 
-		<div style="padding-left:20px;padding-top:1vh;height:69vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
+		<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;height:69vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
 
 		<h3> Create Thread </h3>
 
@@ -407,7 +409,7 @@ HTML;
             		<button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_content')" style="margin-right:10px;" class="btn btn-primary">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_content')" class="btn btn-primary">Code <i class="fa fa-code fa-1x"></i></button>
             	</div>
             	<div class="form-group row">
-            		<textarea name="thread_content" id="thread_content" style="resize:none;min-height:45vh;overflow:hidden;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+            		<textarea name="thread_content" id="thread_content" style="resize:none;min-height:40vmin;overflow:hidden;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
             	</div>
 
             	<br/>
@@ -423,7 +425,7 @@ HTML;
 				</span>
 
 				<span style="display:inline-block;float:right;">
-            	<label for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" />
+            	<label for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" />
 HTML;
 				
 				if($this->core->getUser()->getGroup() <= 2){

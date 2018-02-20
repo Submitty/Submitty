@@ -837,7 +837,7 @@ function enableTabsInTextArea(id){
     var t = document.getElementById(id);
 
     $(t).on('input', function() {
-        $(this).outerHeight(20).outerHeight(this.scrollHeight);
+        $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     $(t).trigger('input');
         t.onkeydown = function(t){
@@ -853,6 +853,24 @@ function enableTabsInTextArea(id){
             }
         };
 
+}
+
+function saveScrollLocationOnRefresh(className){
+    var element = document.getElementsByClassName(className);
+    $(element).scroll(function() {
+        sessionStorage.scrollTop = $(this).scrollTop();
+    });
+    $(document).ready(function() {
+        if(sessionStorage.scrollTop != "undefined"){
+
+            //This can be used instead of the animation: 
+            //$(element).scrollTop(sessionStorage.scrollTop);
+
+            $(element).animate({
+                scrollTop: sessionStorage.scrollTop
+            }, 300);
+        }
+    });
 }
 
 function deletePost(thread_id, post_id, author, time){
