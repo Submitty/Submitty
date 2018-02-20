@@ -190,7 +190,7 @@ HTML;
 							$place = array_search($post["parent_id"], $order_array);
 							$tmp_array = array($post["id"]);
 							$parent_reply_level = $reply_level_array[$place];
-							while($place && $place+1 < sizeof($reply_level_array) && $reply_level_array[$place+1] != 1){
+							while($place && $place+1 < sizeof($reply_level_array) && $reply_level_array[$place+1] > $parent_reply_level){
 								$place++;
 							}
 							array_splice($order_array, $place+1, 0, $tmp_array);
