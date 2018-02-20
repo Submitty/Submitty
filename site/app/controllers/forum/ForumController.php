@@ -163,21 +163,21 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error with your reply.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
-            // $hasGoodAttachment = $this->checkGoodAttachment(false, $_POST["post_content"], $thread_id);
-            // if($hasGoodAttachment == -1){
-            //     return;
-            // }
+            $hasGoodAttachment = $this->checkGoodAttachment(false, $_POST["post_content"], $thread_id);
+            if($hasGoodAttachment == -1){
+                return;
+            }
             
             $post_id = $this->core->getQueries()->createReply($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, $parent_id, false);
             $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
-            // if($hasGoodAttachment == 1) {
-            //     $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-            //     FileUtils::createDir($post_dir);
-            //     for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
-            //         $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
-            //         move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
-            //     }
-            // }
+            if($hasGoodAttachment == 1) {
+                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
+                FileUtils::createDir($post_dir);
+                for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
+                    $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
+                    move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
+                }
+            }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
     }
