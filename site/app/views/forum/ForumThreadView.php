@@ -294,7 +294,7 @@ HTML;
 			$classes .= " important";
 		}
 
-		$offset = ($reply_level-1)*15;
+		$offset = ($reply_level-1)*30;
 		$post_html .= <<<HTML
 			<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
 HTML;
