@@ -868,7 +868,7 @@ function saveScrollLocationOnRefresh(className){
 
             $(element).animate({
                 scrollTop: sessionStorage.scrollTop
-            });
+            }, 300);
         }
     });
 }
