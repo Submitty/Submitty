@@ -276,9 +276,9 @@ HTML;
 							$post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
 							$files = FileUtils::getAllFiles($post_dir);
 							foreach($files as $file){
-								$path = urlencode(htmlspecialchars($file['path']));
-								$name = urlencode(htmlspecialchars($file['name']));
-								$name_display = htmlentities($file['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+								$path = rawurlencode(htmlspecialchars($file['path']));
+								$name = rawurlencode(htmlspecialchars('"'.$file['name'].'"'));
+								$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 								$return .= <<<HTML
 							<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
 HTML;
