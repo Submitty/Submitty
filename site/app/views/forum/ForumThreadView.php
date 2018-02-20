@@ -57,29 +57,26 @@ HTML;
 		$return .= <<<HTML
 		<script>
 								function changeName(element, user, visible_username, anon){
-									new_element = element.getElementsByTagName("strong")[0];
-									icon = element.getElementsByClassName("fa fa-eye");
-									if(icon.length == 0){
-										icon = element.getElementsByClassName("fa fa-eye-slash");
-									} icon = icon[0];
-									if(new_element.innerText == visible_username) {
-										if(anon) {
-											new_element.style.color = "grey";
-											new_element.style.fontStyle = "italic";
-										}
-										new_element.innerText = user;
-										icon.className = "fa fa-eye-slash";
-										icon.title = "Hide full user information";
-									} else {
+									var new_element = element.getElementsByTagName("strong")[0];
+									icon = element.getElementsByClassName("fa fa-eye")[0];
+									if(icon == undefined){
+										icon = element.getElementsByClassName("fa fa-eye-slash")[0];
 										if(anon) {
 											new_element.style.color = "black";
 											new_element.style.fontStyle = "normal";
 										}
-										new_element.innerText = visible_username;
+										new_element.innerHTML = visible_username;
 										icon.className = "fa fa-eye";
 										icon.title = "Show full user information";
-									}
-									
+									} else {
+										if(anon) {
+											new_element.style.color = "grey";
+											new_element.style.fontStyle = "italic";
+										}
+										new_element.innerHTML = user;
+										icon.className = "fa fa-eye-slash";
+										icon.title = "Hide full user information";
+									} 									
 								}
 		</script>
 HTML;
@@ -208,11 +205,13 @@ HTML;
 						$date = date_create($post["timestamp"]);
 
 						$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
+						$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 						if($post["anonymous"]){
 							$visible_username = "Anonymous";
 						} else {
-							$visible_username = substr($full_name, 0, strpos($full_name, " ")+2) . ".";
+							$visible_username = $first_name . " " . substr($last_name, 0 , 1);
 						}
 
 						$classes = "post_box";
@@ -261,10 +260,13 @@ HTML;
 HTML;
 
 if($this->core->getUser()->getGroup() <= 2){
-						$info_name = $full_name . " (" . $post['author_user_id'] . ")";
+						$info_name = $first_name . $last_name . " (" . $post['author_user_id'] . ")";
+						$visible_user_json = json_encode($visible_username);
+						$info_name = json_encode($info_name);
 						$jscriptAnonFix = $post['anonymous'] ? 'true' : 'false' ;
+						$jscriptAnonFix = json_encode($jscriptAnonFix);
 						$return .= <<<HTML
-						<a style=" margin-right:2px;display:inline-block; color:black; " onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}', {$jscriptAnonFix})" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
+						<a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {$info_name}, {$visible_user_json}, {$jscriptAnonFix})' title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
 HTML;
 }
 			$return .= <<<HTML
@@ -277,7 +279,7 @@ HTML;
 							$files = FileUtils::getAllFiles($post_dir);
 							foreach($files as $file){
 								$path = rawurlencode(htmlspecialchars($file['path']));
-								$name = rawurlencode(htmlspecialchars('"'.$file['name'].'"'));
+								$name = rawurlencode(htmlspecialchars($file['name']));
 								$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 								$return .= <<<HTML
 							<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
