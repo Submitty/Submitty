@@ -100,12 +100,14 @@ adduser hwphp hwcronphp
 adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcgi hwphp
 adduser hwcgi www-data
+
 # NOTE: hwcgi must be in the shadow group so that it has access to the
 # local passwords for pam authentication
 adduser hwcgi shadow
 
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcron hwcronphp
+adduser hwcron www-data
 
 # FIXME:  umask setting above not complete
 # might need to also set USERGROUPS_ENAB to "no", and manually create
