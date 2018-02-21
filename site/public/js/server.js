@@ -855,6 +855,12 @@ function enableTabsInTextArea(id){
 
 }
 
+function resetScrollPosition(){
+    if(sessionStorage.scrollTop != "undefined") {
+        sessionStorage.scrollTop = undefined;
+    }
+}
+
 function saveScrollLocationOnRefresh(className){
     var element = document.getElementsByClassName(className);
     $(element).scroll(function() {
