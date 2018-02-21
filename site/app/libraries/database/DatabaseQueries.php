@@ -1759,8 +1759,10 @@ AND gc_id IN (
       } else {
         $name = $name_rows["user_preferred_firstname"];
       }
-      $name .= $last_name;
-      return $name;
+      $ar = array();
+      $ar["first_name"] = $name;
+      $ar["last_name"] = $last_name;
+      return $ar;
     }
 
     public function getPostsForThread($current_user, $thread_id){

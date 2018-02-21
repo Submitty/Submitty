@@ -855,6 +855,12 @@ function enableTabsInTextArea(id){
 
 }
 
+function resetScrollPosition(){
+    if(sessionStorage.scrollTop != "undefined") {
+        sessionStorage.scrollTop = undefined;
+    }
+}
+
 function saveScrollLocationOnRefresh(className){
     var element = document.getElementsByClassName(className);
     $(element).scroll(function() {
@@ -862,13 +868,7 @@ function saveScrollLocationOnRefresh(className){
     });
     $(document).ready(function() {
         if(sessionStorage.scrollTop != "undefined"){
-
-            //This can be used instead of the animation: 
-            //$(element).scrollTop(sessionStorage.scrollTop);
-
-            $(element).animate({
-                scrollTop: sessionStorage.scrollTop
-            }, 300);
+            $(element).scrollTop(sessionStorage.scrollTop);
         }
     });
 }
