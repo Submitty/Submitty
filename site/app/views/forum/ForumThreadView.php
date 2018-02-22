@@ -180,13 +180,18 @@ HTML;
 					{$activeThreadTitle}</h3>
 HTML;
 					$first = true;
+					$first_post_id = 1;
 					$order_array = array();
 					$reply_level_array = array();
 					foreach($posts as $post){
 						if($thread_id == -1) {
 							$thread_id = $post["thread_id"];
 						}
-						if($post["parent_id"] > 1){
+						if($first){
+							$first= false;
+							$first_post_id = $post["id"];
+						}
+						if($post["parent_id"] > $first_post_id){
 							$place = array_search($post["parent_id"], $order_array);
 							$tmp_array = array($post["id"]);
 							$parent_reply_level = $reply_level_array[$place];
@@ -201,10 +206,11 @@ HTML;
 						}
 					}
 					$i = 0;
+					$first = true;
 					foreach($order_array as $ordered_post){
 						foreach($posts as $post){
 							if($post["id"] == $ordered_post){
-								if($post["parent_id"] == 1) {
+								if($post["parent_id"] == $first_post_id) {
 									$reply_level = 1;	
 								} else {
 									$reply_level = $reply_level_array[$i];

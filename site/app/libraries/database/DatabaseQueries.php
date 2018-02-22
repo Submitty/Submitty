@@ -112,12 +112,10 @@ class DatabaseQueries {
         return $this->course_db->rows();
     }
 
-    public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $parent_post = 1){
-        // $parent_post = -1;
-        if(!$first){
-            $this->course_db->query("SELECT id FROM posts where timestamp = (SELECT MAX(timestamp) from posts where thread_id = ? and deleted=false)", array($thread_id));
-            // $parent_post = $this->course_db->rows()[0]["id"];s
-            // $parent_post = 1; //The default posts on the thread all have parent_id of 1. 
+    public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $parent_post = 0){
+        if(!$first && $parent_post == 0){
+            $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", array($thread_id));
+            $parent_post = $this->course_db->rows()[0]["id"];
         }
 
         try {
