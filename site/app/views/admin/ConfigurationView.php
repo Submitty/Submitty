@@ -120,6 +120,16 @@ class ConfigurationView extends AbstractView {
                 </div>
             </div>
         </div>
+        
+        <div class="option">
+            <div class="option-input"><input type="text" name="vcs_user" value="{$fields['vcs_user']}" /></div>
+            <div class="option-desc">
+                <div class="option-title">Version Control System (VCS) User</div>
+                <div class="option-alt">
+                    User to use when doing VCS checkouts    
+                </div>
+            </div>    
+        </div>
 
         <div class="option">
             <div class="option-input">
