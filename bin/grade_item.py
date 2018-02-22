@@ -89,12 +89,11 @@ def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
     # so we have to strip out the " in python
     vcs_type = course_ini['course_details']['vcs_type'].strip('"')
     vcs_base_url = course_ini['course_details']['vcs_base_url'].strip('"')
-    vcs_user = course_ini['course_details']['vcs_user'].strip('"')
     vcs_subdirectory = form_json["subdirectory"] if is_vcs else ''
     vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}", gradeable)
     vcs_subdirectory = vcs_subdirectory.replace("{$user_id}", userid)
     vcs_subdirectory = vcs_subdirectory.replace("{$team_id}", teamid)
-    return is_vcs, vcs_type, vcs_base_url, vcs_user, vcs_subdirectory
+    return is_vcs, vcs_type, vcs_base_url, vcs_subdirectory
 
 
 # copy the files & directories from source to target
@@ -182,12 +181,12 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
     print("pid", my_pid, "GRADE THIS", submission_path)
 
-    is_vcs, vcs_type, vcs_base_url, vcs_user, vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,
-                                                                              obj["semester"],
-                                                                              obj["course"],
-                                                                              obj["gradeable"],
-                                                                              obj["who"],
-                                                                              obj["team"])
+    is_vcs, vcs_type, vcs_base_url, vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,
+                                                                    obj["semester"],
+                                                                    obj["course"],
+                                                                    obj["gradeable"],
+                                                                    obj["who"],
+                                                                    obj["team"])
 
     is_batch_job = next_directory == BATCH_QUEUE
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
@@ -260,16 +259,9 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
             else:
                 vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
 
-        if vcs_user != '':
-            if '://' in vcs_path:
-                vcs_path = vcs_path.replace('://', '://' + vcs_user + "@")
-            else:
-                vcs_path = vcs_user + "@" + vcs_path
-
         with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
             print("====================================\nVCS CHECKOUT", file=f)
             print('vcs_base_url', vcs_base_url, file=f)
-            print('vcs_user', vcs_user, file=f)
             print('vcs_subdirectory', vcs_subdirectory, file=f)
             print('vcs_path', vcs_path, file=f)
             print(['/usr/bin/git', 'clone', vcs_path, checkout_path], file=f)
@@ -285,10 +277,10 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         what_version = str(what_version.decode('utf-8')).rstrip()
         if what_version == "":
             # oops, pressed the grade button before a valid commit
-            shutil.rmtree(checkout_path,ignore_errors=True)
+            shutil.rmtree(checkout_path, ignore_errors=True)
         else:
             # and check out the right version
-            subprocess.call (['git', 'checkout', '-b', 'grade', what_version])
+            subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
         os.chdir(tmp)
         subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
 

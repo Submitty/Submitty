@@ -354,6 +354,7 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 ${SUBMISSION_URL}
+${GIT_URL}/git
 
 1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 

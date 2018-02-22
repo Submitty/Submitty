@@ -19,6 +19,7 @@ use app\libraries\Utils;
  * @method string getSemester()
  * @method string getCourse()
  * @method string getBaseUrl()
+ * @method string getVcsUrl()
  * @method string getTaBaseUrl()
  * @method string getCgiUrl()
  * @method string getSiteUrl()
@@ -83,6 +84,8 @@ class Config extends AbstractModel {
     /*** MASTER CONFIG ***/
     /** @property @var string */
     protected $base_url;
+    /** @property @var string */
+    protected $vcs_url;
     /** @property @var string */
     protected $ta_base_url;
     /** @property @var string */
@@ -191,7 +194,7 @@ class Config extends AbstractModel {
 
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
-        $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
+        $this->setConfigValues($master, 'site_details', array('base_url', 'vcs_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
 
         if (!isset($master['database_details']) || !is_array($master['database_details'])) {
             throw new ConfigException("Missing config section database_details in ini file");
@@ -271,7 +274,7 @@ class Config extends AbstractModel {
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_user', 'vcs_type', 'forum_enabled');
+            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'forum_enabled');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
