@@ -123,7 +123,7 @@ class AdminGradeable extends AbstractModel {
         $this->eg_submission_open_date = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
         $this->eg_submission_due_date = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
         $this->default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-        $this->vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
+        $this->vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->old_components = array(new GradeableComponent($this->core, array()));
     }
 
