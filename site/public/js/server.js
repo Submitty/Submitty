@@ -883,7 +883,6 @@ function saveScrollLocationOnRefresh(className){
             $(element).scrollTop(sessionStorage.scrollTop);
         }
     });
->>>>>>> master
 }
 
 function deletePost(thread_id, post_id, author, time){
