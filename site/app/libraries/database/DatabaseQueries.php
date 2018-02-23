@@ -170,24 +170,33 @@ class DatabaseQueries {
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($onOff, $thread_id));
     }
 
+
+    private function findChildren($post_id, $thread_id, &$children){
+        $this->course_db->query("SELECT id from posts where deleted=false and parent_id=?", array($post_id));
+        $row = $this->course_db->rows();
+        for($i = 0; $i < count($row); $i++){
+            $child_id = $row[$i]["id"];
+            array_push($children, $child_id);
+            $this->findChildren($child_id, $thread_id, $children);
+        }
+    }
+
     public function deletePost($post_id, $thread_id){
         $this->course_db->query("SELECT parent_id from posts where id=?", array($post_id));
 
         //If you delete the first post in a thread it deletes all posts in thread
 
         $parent_id = $this->course_db->rows()[0]["parent_id"];
-
+        $children = array($post_id);
+        $this->findChildren($post_id, $thread_id, $children);
         if($parent_id == -1){
             $this->course_db->query("UPDATE threads SET deleted = true WHERE id = ?", array($thread_id));
             $this->course_db->query("UPDATE posts SET deleted = true WHERE thread_id = ?", array($thread_id));
             return true;
         } else {
-            $this->course_db->query("SELECT id from posts where parent_id = ?", array($post_id));
-            $row = $this->course_db->rows();
-            if(count($row) > 0){
-                $this->course_db->query("UPDATE posts SET parent_id = ? WHERE id = ?", array($parent_id, $row[0]["id"]));
+            foreach($children as $post_id){
+                $this->course_db->query("UPDATE posts SET deleted = true WHERE id = ?", array($post_id));
             }
-            $this->course_db->query("UPDATE posts SET deleted = true WHERE id = ?", array($post_id));
         } return false;
     }
 
