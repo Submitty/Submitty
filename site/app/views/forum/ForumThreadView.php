@@ -158,10 +158,10 @@ HTML;
 						}
 						$first_post_content = str_replace("&lbrack;&sol;code&rsqb;", "", str_replace("&lbrack;code&rsqb;", "", strip_tags($first_post["content"])));
 						$sizeOfContent = strlen($first_post_content);
-						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strpos($first_post_content, " ", 70));
+						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 100) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 100), " "));
 						$titleLength = strlen($thread['title']);
-						$titleDisplay = substr($thread["title"], 0, ($titleLength < 30) ? $titleLength : strpos($thread['title'], " ", 29));
-						if(strlen($first_post["content"]) > 80){
+						$titleDisplay = substr($thread["title"], 0, ($titleLength < 40) ? $titleLength : strrpos(substr($thread['title'], 0, 40), " "));
+						if(strlen($first_post["content"]) > 100){
 							$contentDisplay .= "...";
 						}
 						if(strlen($thread["title"]) > 30){
