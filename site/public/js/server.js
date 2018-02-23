@@ -833,6 +833,8 @@ function checkNumFilesForumUpload(input){
             
 }
 
+//This code should use an ajax call to instead get the content rather than passing 
+//it as a parameter
 function editPost(thread_id, post_id, content, user_id, time) {
     var contentBox = document.getElementById('edit_post_content');
     var editUserPrompt = document.getElementById('edit_user_prompt');
@@ -841,6 +843,47 @@ function editPost(thread_id, post_id, content, user_id, time) {
     document.getElementById('edit_thread_id').value = thread_id;
     document.getElementById('edit_post_id').value = post_id;
     $('.popup-form').css('display', 'block');
+}
+
+function enableTabsInTextArea(id){
+    var t = document.getElementById(id);
+
+    $(t).on('input', function() {
+        $(this).outerHeight(38).outerHeight(this.scrollHeight);
+    });
+    $(t).trigger('input');
+        t.onkeydown = function(t){
+            if(t.keyCode == 9){
+                var text = this.value;
+                var beforeCurse = this.selectionStart;
+                var afterCurse = this.selectionEnd;
+                this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse);
+                this.selectionStart = this.selectionEnd = beforeCurse+1;
+
+                return false;
+
+            }
+        };
+
+}
+
+function resetScrollPosition(){
+    if(sessionStorage.scrollTop != "undefined") {
+        sessionStorage.scrollTop = undefined;
+    }
+}
+
+function saveScrollLocationOnRefresh(className){
+    var element = document.getElementsByClassName(className);
+    $(element).scroll(function() {
+        sessionStorage.scrollTop = $(this).scrollTop();
+    });
+    $(document).ready(function() {
+        if(sessionStorage.scrollTop != "undefined"){
+            $(element).scrollTop(sessionStorage.scrollTop);
+        }
+    });
+>>>>>>> master
 }
 
 function deletePost(thread_id, post_id, author, time){
@@ -977,6 +1020,18 @@ function loadHomeworkExtensions(g_id) {
             window.alert("Something went wrong. Please try again.");
         }
     });
+}
+
+function addBBCode(type, divTitle){
+    var cursor = $(divTitle).prop('selectionStart');
+    var text = $(divTitle).val();
+    var insert = "";
+    if(type == 1) {
+        insert = "[url=http://example.com]display text[/url]";
+    } else if(type == 0){
+        insert = "[code][/code]";
+    }
+    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
 function updateLateDays(data) {
