@@ -182,6 +182,10 @@ class ForumController extends AbstractController {
                 $thread_id = $_POST["edit_thread_id"];
                 $post_id = $_POST["edit_post_id"];
                 $new_post_content = htmlentities($_POST["edit_post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                //This will need to be changed later but to get it working assume good input
+               /* $new_post_content = str_replace(str_replace("&equals;", "=", str_replace("&lt;a", "<a", $new_post_content);
+                $new_post_content = str_replace("&lt;&sol;a", "</a", $new_post_content);
+                $new_post_content = str_replace("&gt;", ">", $new_post_content);*/
                 if(!$this->core->getQueries()->editPost($thread_id, $post_id, $new_post_content)){
                     $this->core->addErrorMessage("There was an error trying to modify the post. Please try again.");
                 } $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));

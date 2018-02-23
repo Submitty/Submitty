@@ -289,13 +289,13 @@ HTML;
 							$wrapped_content = json_encode($post['content']);
 							$return .= <<<HTML
 
-							<a class="post_button" style="position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+							<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
 							<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost( {$post['thread_id']}, {$post['id']}, `{$post['content']}`, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 							} 
 			$return .= <<<HTML
 			
-<h7><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")}</h7></span>
+<h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")} </h7></span>
 HTML;
 
 						if($post["has_attachment"]){
