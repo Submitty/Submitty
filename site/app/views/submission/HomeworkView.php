@@ -5,6 +5,7 @@ namespace app\views\submission;
 use app\models\Gradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\models\LateDaysCalculation;
 
 class HomeworkView extends AbstractView {
 
@@ -67,6 +68,15 @@ HTML;
 </div>
 HTML;
         }
+        $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
+        $late_days_data = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
+        $late_days_remaining = $late_days_data['remaining_days'];
+
+            $return .= <<<HTML
+<div class="content">
+    <h4>You have {$late_days_remaining} late days available for this homework</h4>
+</div>
+HTML;
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
