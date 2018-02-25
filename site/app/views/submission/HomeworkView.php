@@ -89,7 +89,7 @@ HTML;
             }
         $return .= <<<HTML
 <div class="content" style=$style>
-    <h4>You are submitting this assignment {$days_late} day(s) late, but only have {$late_days_remaining} late day(s) available</h4>
+    <h4>You are submitting this assignment {$days_late} day(s) late, but have {$late_days_remaining} late day(s) available</h4>
 </div>
 HTML;
     }
