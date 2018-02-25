@@ -53,8 +53,7 @@ HTML;
      *
      * @return string
      */
-    public function showGradeable($gradeable, $late_days_use, $extensions)
-    {
+    public function showGradeable($gradeable, $late_days_use, $extensions) {
         $return = "";
         // hiding entire page if user is not a grader and student cannot view
         if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
