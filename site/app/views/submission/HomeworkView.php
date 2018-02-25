@@ -689,7 +689,6 @@ HTML;
         }
         $team_header = '';
         if ($gradeable->isTeamAssignment()) {
-            if ($gradeable->getTeam() != null)
             $team_header = <<<HTML
     <h3>Team: {$gradeable->getTeam()->getMemberList()}</h3><br />
 HTML;
