@@ -53,7 +53,8 @@ HTML;
      *
      * @return string
      */
-    public function showGradeable($gradeable, $late_days_use, $extensions) {
+    public function showGradeable($gradeable, $late_days_use, $extensions)
+    {
         $return = "";
         // hiding entire page if user is not a grader and student cannot view
         if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
@@ -71,12 +72,29 @@ HTML;
         $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
         $late_days_data = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
         $late_days_remaining = $late_days_data['remaining_days'];
+        $days_late = $gradeable->getActiveDaysLate();
 
+        if ($days_late < 1){
             $return .= <<<HTML
 <div class="content">
-    <h4>You have {$late_days_remaining} late days available for this homework</h4>
+    <h4>You have {$late_days_remaining} late day(s) available for this homework</h4>
 </div>
 HTML;
+    }
+    else {
+            if ($late_days_remaining > $days_late){
+                $style = "";
+            }
+            else{
+                $style="background-color:#d9534f;";
+            }
+        $return .= <<<HTML
+<div class="content" style=$style>
+    <h4>You are submitting this assignment {$days_late} days late, but only have {$late_days_remaining} late days available</h4>
+</div>
+HTML;
+    }
+
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
