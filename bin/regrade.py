@@ -66,7 +66,7 @@ def replay(starttime,endtime):
                 original_time > endtime):
                 continue
             # skip batch items
-            if (things[2] == "BATCH"):
+            if (things[2].strip() == "BATCH"):
                 continue
             # only process the "wait" time (when we started grading the item)
             iswait=things[5].strip()[0:5]
@@ -82,7 +82,7 @@ def replay(starttime,endtime):
             if not (what[1]=="csci1200" or what[1]=="csci1100"):
                 continue
             # calculate when this job should be relaunched
-            pause_time=replay_starttime+(original_time-starttime)
+            pause_time=replay_starttime+(0.0625*(original_time-starttime))
             pause.until(pause_time)
             
             print(datetime.datetime.now(),"      REPLAY: ",original_time," ",my_job)

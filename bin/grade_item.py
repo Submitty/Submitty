@@ -386,6 +386,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
             runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
                                               os.path.join(tmp_work, 'my_runner.out'), obj['gradeable'],
                                               obj['who'], str(obj['version']), submission_string], stdout=logfile)
+
         else:
             runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
                                               which_untrusted,
@@ -561,6 +562,11 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",gradingtime,grade_result)
 
+    if USE_DOCKER:
+        with open(os.path.join(tmp_logs,"overall_log.txt"), 'w') as logfile:
+            chmod_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
+                                             'chmod', '-R', 'o+rwx', '.'], stdout=logfile)
+
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("FINISHED GRADING!")
 
@@ -569,6 +575,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
+
     shutil.rmtree(tmp)
 
     grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message="done grading")

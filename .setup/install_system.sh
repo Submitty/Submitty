@@ -430,13 +430,20 @@ fi
 # DOCKER SETUP
 #################
 
-#mkdir -p /tmp/docker
-#cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-#pushd /tmp/docker
-#cp -R ${SUBMITTY_INSTALL_DIR}/drmemory ./
-#cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools ./
-#docker build -t ubuntu:custom -f Dockerfile .
-#popd
+SUBMITTY_REPOSITORY="/usr/local/submitty/GIT_CHECKOUT_Submitty"
+SUBMITTY_INSTALL_DIR="/usr/local/submitty"
+
+rm -rf /tmp/docker
+mkdir -p /tmp/docker
+cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
+cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
+
+chown hwcron:hwcron -R .
+
+pushd /tmp/docker
+su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
+popd
 
 #################################################################
 # RESTART SERVICES
