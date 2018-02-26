@@ -100,6 +100,26 @@ function newUserForm() {
     $("[name='grading_registration_section[]']").prop('checked', false);
 }
 
+function newCopyStudentEmailForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#copy-student-email-form");
+    form.css("display", "block");
+    $('[name="registered_section"] option[value="NULL"]', form).prop('selected', true);
+    $('#radio1', form).prop('checked', true);
+    $('#radio2', form).prop('checked', false);
+    $('#radio3', form).prop('checked', false);
+}
+
+
+function newCopyGraderEmailForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#copy-grader-email-form");
+    form.css("display", "block");
+    $('#radio1', form).prop('checked', true);
+    $('#radio2', form).prop('checked', false);
+    $('#radio3', form).prop('checked', false);
+}
+
 function newGraderListForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#grader-list-form");
@@ -114,6 +134,106 @@ function newClassListForm() {
     $('[name="move_missing"]', form).prop('checked', false);
     $('[name="upload"]', form).val(null);
 }
+
+function copyStudentEmail(code,emails,emails_corresponding_section) {
+    emails = emails.split(",");
+    emails_corresponding_section = emails_corresponding_section.split(",");
+    var required_emails="";
+    var form = $("#copy-student-email-form");
+    if($('#radio1',form).is(':checked')){
+        var selected_section= $('[name="registered_section"]', form).find(":selected").val();
+        for (var i = 0; i < emails.length; i++) {
+            if(selected_section == emails_corresponding_section[i]){
+                required_emails+=emails[i]+" ";
+            }
+        }
+    }
+    else if($('#radio2',form).is(':checked')){
+        for (var i = 0; i < emails.length; i++) {
+            if(emails_corresponding_section[i]!="NULL"){
+                required_emails+=emails[i]+" ";
+            }
+        }   
+    }
+    else if($('#radio3',form).is(':checked')){
+        for (var i = 0; i < emails.length; i++) {
+            required_emails+=emails[i]+" ";
+        }   
+    }
+    if(code=="copy"){   
+        var temp_element = $("<textarea></textarea>").text(required_emails);
+        $("body").append(temp_element);
+        temp_element.select();
+        document.execCommand('copy');
+        temp_element.remove();
+        setTimeout(function () {
+            $('#copymsgid',form).css( "visibility", "visible" );
+        }, 0);
+        setTimeout(function () {
+            $('#copymsgid',form).css( "visibility", "hidden" );
+        }, 1000);
+    }
+    else if(code=="download"){
+        var temp_element = $('<a id="downloadlink"></a>');
+        var address="data:text/plain;charset=utf-8,"+encodeURIComponent(required_emails);
+        temp_element.attr("href", address);
+        temp_element.attr("download", "mails.txt");
+        temp_element.css("display" ,"none");
+        $("body").append(temp_element);
+        $('#downloadlink')[0].click();
+        $('#downloadlink').remove();
+    }
+}
+
+function copyGraderEmail(code,emails,emails_corresponding_group) {
+    emails = emails.split(",");
+    emails_corresponding_group = emails_corresponding_group.split(",");
+    var required_emails="";
+    var form = $("#copy-grader-email-form");
+    if($('#radio1',form).is(':checked')){
+        for (var i = 0; i < emails.length; i++) {
+            required_emails+=emails[i]+" ";
+        }
+    }
+    else if($('#radio2',form).is(':checked')){
+        for (var i = 0; i < emails.length; i++) {
+            if(emails_corresponding_group[i]==2){
+                required_emails+=emails[i]+" ";
+            }
+        }   
+    }
+    else if($('#radio3',form).is(':checked')){
+        for (var i = 0; i < emails.length; i++) {
+            if(emails_corresponding_group[i]==3){
+                required_emails+=emails[i]+" ";
+            }
+        }   
+    }
+    if(code=="copy"){   
+        var temp_element = $("<textarea></textarea>").text(required_emails);
+        $("body").append(temp_element);
+        temp_element.select();
+        document.execCommand('copy');
+        temp_element.remove();
+        setTimeout(function () {
+            $('#copymsgid',form).css( "visibility", "visible" );
+        }, 0);
+        setTimeout(function () {
+            $('#copymsgid',form).css( "visibility", "hidden" );
+        }, 1000);
+    }
+    else if(code=="download"){
+        var temp_element = $('<a id="downloadlink"></a>');
+        var address="data:text/plain;charset=utf-8,"+encodeURIComponent(required_emails);
+        temp_element.attr("href", address);
+        temp_element.attr("download", "mails.txt");
+        temp_element.css("display" ,"none");
+        $("body").append(temp_element);
+        $('#downloadlink')[0].click();
+        $('#downloadlink').remove();
+    }
+}
+
 
 function adminTeamForm(new_team, who_id, section, members, max_members) {
     $('.popup-form').css('display', 'none');

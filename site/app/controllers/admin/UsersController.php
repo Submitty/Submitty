@@ -52,6 +52,7 @@ class UsersController extends AbstractController {
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
         $this->renderUserForm('update_student', $use_database);
+        $this->renderCopyStudentEmailForm($students, $use_database);
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm', $use_database);
     }
 
@@ -60,6 +61,7 @@ class UsersController extends AbstractController {
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders);
         $this->renderUserForm('update_grader', $use_database);
+        $this->renderCopyGraderEmailForm($graders, $use_database);
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'graderListForm', $use_database);
     }
 
@@ -67,6 +69,16 @@ class UsersController extends AbstractController {
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'userForm', $reg_sections, $rot_sections, $action, $use_database);
+    }
+
+    private function renderCopyStudentEmailForm($students, $use_database) {
+        $reg_sections = $this->core->getQueries()->getRegistrationSections();
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'copyStudentEmailForm',$students, $reg_sections, $use_database);
+    }
+
+
+    private function renderCopyGraderEmailForm($graders, $use_database) {
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'copyGraderEmailForm',$graders, $use_database);
     }
 
     public function ajaxGetUserDetails() {

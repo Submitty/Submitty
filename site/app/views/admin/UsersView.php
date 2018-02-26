@@ -15,6 +15,7 @@ class UsersView extends AbstractView {
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
+        <a onclick="newCopyStudentEmailForm()" class="btn btn-primary">Copy Emails</a>
         <a onclick="newClassListForm()" class="btn btn-primary">Upload Classlist</a>
         <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
     </div>
@@ -106,6 +107,7 @@ HTML;
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
+        <a onclick="newCopyGraderEmailForm()" class="btn btn-primary">Copy Emails</a>
         <a onclick="newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
         <a onclick="newUserForm();
             $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
@@ -294,6 +296,133 @@ HTML;
 HTML;
         return $return;
     }
+
+    /**
+     * Creates the form box to be displayed when copying or downloading emails on the students pages
+     * @param User[] $students  
+     * @param array  $reg_sections associative array representing registration sections in the system
+     * @param bool   $use_database
+     * @return string
+     */
+    public function copyStudentEmailForm($students,$reg_sections,$use_database=false) {
+        $reg_select_html = "";
+        foreach ($reg_sections as $section) {
+            $section = $section['sections_registration_id'];
+            $reg_select_html .= "<option value='{$section}'>Section {$section}</option>\n";
+        }
+        $emails=array();
+        $emails_corresponding_section=array();
+        foreach($students as $student){
+            array_push($emails,$student->getEmail());
+            if($student->getRegistrationSection()===null){
+                array_push($emails_corresponding_section,"NULL");
+            }
+            else{
+                array_push($emails_corresponding_section,$student->getRegistrationSection());
+            }    
+        }
+        $emails_str=implode(",", $emails);
+        $emails_corresponding_section_str= implode(",",$emails_corresponding_section);
+        $return = <<<HTML
+<div class="popup-form" id="copy-student-email-form">                                                                   
+<form>
+    <div>
+        <input type="radio" name="email_group" id="radio1" value="1"/>
+        Registered Section:
+        <select name="registered_section">
+            <option value="NULL">Not Registered</option>
+            {$reg_select_html}
+        </select>
+    </div><br />
+    <div>
+        <input type="radio" name="email_group" id="radio2" value="2"/>
+        All Registered Students (Non Null)
+    </div><br />
+    <div>
+        <input type="radio" name="email_group" id="radio3" value="3"/>
+        All Users
+    </div><br />
+HTML;
+        if ($use_database) {
+            $return .= <<<HTML
+    <div style="width: 60%">
+        Password:<br />
+        <input type="password" name="user_password" placeholder="New Password" />    
+    </div>
+HTML;
+        }
+
+        $return .= <<<HTML
+    <label for="copymsg" id="copymsgid" style="visibility: hidden; float: right; width: auto;">mails copied!</label><br />    
+    <div style="float: right; width: auto; margin-top: 10px">
+        <a onclick="$('#copy-student-email-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+        <input class="btn btn-primary" type="button" value="Download" onclick="copyStudentEmail('download','{$emails_str}','{$emails_corresponding_section_str}');" />
+        <input class="btn btn-primary" type="button" value="Copy" onclick="copyStudentEmail('copy','{$emails_str}','{$emails_corresponding_section_str}');" />
+    </div>
+</form>
+</div>
+HTML;
+        return $return;
+    }
+
+
+/**
+     * Creates the form box to be displayed when copying or downloading emails on the graders pages
+     * @param User[] $graders
+     * @param bool   $use_database
+     * @return string
+     */
+    public function copyGraderEmailForm($graders,$use_database=false) {
+        $emails=array();
+        $emails_corresponding_group=array();
+        foreach($graders as $grader){
+            array_push($emails,$grader->getEmail());
+            if($grader->getGroup()===null){
+                array_push($emails_corresponding_group,"NULL");
+            }
+            else{
+                array_push($emails_corresponding_group,$grader->getGroup());
+            }    
+        }
+        $emails_str=implode(",", $emails);
+        $emails_corresponding_group_str= implode(",",$emails_corresponding_group);
+        $return = <<<HTML
+<div class="popup-form" id="copy-grader-email-form">                                                                   
+<form>
+    <div>
+        <input type="radio" name="email_group" id="radio1" value="1"/>
+        All Graders
+    </div><br />
+    <div>
+        <input type="radio" name="email_group" id="radio2" value="2"/>
+        Full Access Grader (Grad TA)
+    </div><br />
+    <div>
+        <input type="radio" name="email_group" id="radio3" value="3"/>
+        Limited Access Grader (Mentor)
+    </div><br />
+HTML;
+        if ($use_database) {
+            $return .= <<<HTML
+    <div style="width: 60%">
+        Password:<br />
+        <input type="password" name="user_password" placeholder="New Password" />    
+    </div>
+HTML;
+        }
+        $return .= <<<HTML
+    <label for="copymsg" id="copymsgid" style="visibility: hidden; float: right; width: auto;">mails copied!</label><br />     
+    <div style="float: right; width: auto; margin-top: 10px">
+        <a onclick="$('#copy-grader-email-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+        <input class="btn btn-primary" type="button" value="Download" onclick="copyGraderEmail('download','{$emails_str}','{$emails_corresponding_group_str}');" />
+        <input class="btn btn-primary" type="button" value="Copy" onclick="copyGraderEmail('copy','{$emails_str}','{$emails_corresponding_group_str}');" />
+    </div>
+</form>
+</div>
+HTML;
+        return $return;
+    }
+
 
     public function rotatingUserForm($not_null_counts, $null_counts, $max_section) {
         $return = <<<HTML
