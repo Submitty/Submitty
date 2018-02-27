@@ -2,14 +2,15 @@
 
 namespace app\views\submission;
 
+use app\libraries\FileUtils;
 use app\views\AbstractView;
 
 class TeamView extends AbstractView {
 
     /**
     * Show team management page
-    * @param Gradeable $gradeable
-    * @param Team[] $teams
+    * @param \app\models\Gradeable $gradeable
+    * @param \app\models\Team[] $teams
     * @return string
     */
     public function showTeamPage($gradeable, $teams, $lock) {
@@ -80,19 +81,24 @@ HTML;
             }
         }
         if ($gradeable->getIsRepository()) {
+            if (strpos($gradeable->getSubdirectory(), '://') !== false || substr($gradeable->getSubdirectory(), 0, 1) === '/') {
+                $vcs_path = $gradeable->getSubdirectory();
+            }
+            else {
+                if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
+                    $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $gradeable->getSubdirectory();
+                }
+                else {
+                    $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $gradeable->getSubdirectory());
+                }
+            }
+            $repo = $vcs_path;
 
-	    // FIXME: We'll eventually use this course config option.
-	    // Right now, we assume full path is specifified in gradeable
-	    //$this->core->getConfig()->getVcsBaseUrl().$gradeable->getSubdirectory();
-
-	    $repo = $gradeable->getSubdirectory();
-
-	    // FIXME: Read from submitty config
-	    $vcs_https_path = "https://submitty-vcs.cs.rpi.edu/git/";
-
-	    $repo = str_replace("{\$gradeable_id}", $gradeable->getId(), $repo);
-	    $repo = str_replace("/var/local/submitty/vcs/",$vcs_https_path, $repo);
-            $repo = str_replace("{\$team_id}", $team->getId(), $repo);
+            $repo = str_replace('{$gradeable_id}', $gradeable->getId(), $repo);
+            $repo = str_replace('{$user_id}', $this->core->getUser()->getId(), $repo);
+            $repo = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
+                $this->core->getConfig()->getVcsUrl(), $repo);
+            $repo = str_replace('{$team_id}', $team->getId(), $repo);
             $return .= <<<HTML
     <br />
     <h3>To access your Team Repository:</h3>

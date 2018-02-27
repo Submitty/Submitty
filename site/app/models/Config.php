@@ -19,6 +19,7 @@ use app\libraries\Utils;
  * @method string getSemester()
  * @method string getCourse()
  * @method string getBaseUrl()
+ * @method string getVcsUrl()
  * @method string getTaBaseUrl()
  * @method string getCgiUrl()
  * @method string getSiteUrl()
@@ -43,6 +44,10 @@ use app\libraries\Utils;
  * @method string getInstitutionHomepage()
  * @method string getUsernameChangeText()
  * @method bool isForumEnabled()
+ * @method string getVcsBaseUrl()
+ * @method string getCourseEmail()
+ * @method string getVcsUser()
+ * @method string getVcsType()
  */
 
 class Config extends AbstractModel {
@@ -79,6 +84,8 @@ class Config extends AbstractModel {
     /*** MASTER CONFIG ***/
     /** @property @var string */
     protected $base_url;
+    /** @property @var string */
+    protected $vcs_url;
     /** @property @var string */
     protected $ta_base_url;
     /** @property @var string */
@@ -187,7 +194,7 @@ class Config extends AbstractModel {
 
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
-        $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
+        $this->setConfigValues($master, 'site_details', array('base_url', 'vcs_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
 
         if (!isset($master['database_details']) || !is_array($master['database_details'])) {
             throw new ConfigException("Missing config section database_details in ini file");

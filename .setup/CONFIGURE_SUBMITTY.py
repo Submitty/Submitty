@@ -121,17 +121,12 @@ CONFIGURATION_FILE = os.path.join(SETUP_INSTALL_DIR, 'INSTALL_SUBMITTY.sh')
 CONFIGURATION_JSON = os.path.join(SETUP_INSTALL_DIR, 'submitty_conf.json')
 SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
 
-CONF_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'conf')
-
-DATABASE_JSON = os.path.join(CONF_INSTALL_DIR, 'database_conf.json')
-SUBMITTY_JSON = os.path.join(CONF_INSTALL_DIR, 'submitty_conf.json')
-WORKERS_JSON = os.path.join(CONF_INSTALL_DIR, 'autograding_workers.json')
-
 ##############################################################################
 
 defaults = {'database_host': 'localhost',
             'database_user': 'hsdbu',
             'submission_url': '',
+            'vcs_url': '',
             'authentication_method': 1,
             'institution_name' : '',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
@@ -176,6 +171,9 @@ print()
 
 SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
                            'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
+print()
+
+VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
 print()
 
 INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
@@ -224,12 +222,6 @@ os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
 shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(SETUP_INSTALL_DIR, 0o751)
 
-if os.path.isdir(CONF_INSTALL_DIR):
-    shutil.rmtree(CONF_INSTALL_DIR)
-os.makedirs(CONF_INSTALL_DIR, exist_ok=True)
-shutil.chown(CONF_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
-os.chmod(CONF_INSTALL_DIR, 0o751)
-
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/.setup
 
@@ -258,6 +250,11 @@ config['database_user'] = DATABASE_USER
 config['database_password'] = DATABASE_PASS
 
 config['authentication_method'] = AUTHENTICATION_METHOD
+
+config['submission_url'] = SUBMISSION_URL
+config['vcs_url'] = VCS_URL
+config['tagrading_url'] = TAGRADING_URL
+config['cgi_url'] = CGI_URL
 
 config['submission_url'] = SUBMISSION_URL
 config['tagrading_url'] = TAGRADING_URL
@@ -305,14 +302,35 @@ with open(CONFIGURATION_JSON, 'w') as json_file:
 os.chmod(CONFIGURATION_JSON, 0o500)
 
 ##############################################################################
+# Setup ${SUBMITTY_INSTALL_DIR}/conf
+
+CONF_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'conf')
+
+AUTHENTICATION_JSON = os.path.join(CONF_INSTALL_DIR, 'authentication_conf.json')
+DATABASE_JSON = os.path.join(CONF_INSTALL_DIR, 'database_conf.json')
+SUBMITTY_JSON = os.path.join(CONF_INSTALL_DIR, 'submitty_conf.json')
+WORKERS_JSON = os.path.join(CONF_INSTALL_DIR, 'autograding_workers.json')
+
+if os.path.isdir(CONF_INSTALL_DIR):
+    shutil.rmtree(CONF_INSTALL_DIR)
+os.makedirs(CONF_INSTALL_DIR, exist_ok=True)
+shutil.chown(CONF_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
+os.chmod(CONF_INSTALL_DIR, 0o751)
+
+##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/conf
 
 # Write protected details. This should be readable only by root + hwcron
 config = OrderedDict()
+config['authentication_method'] = AUTHENTICATION_METHOD
+
+with open()
 config['database_host'] = DATABASE_HOST
 config['database_user'] = DATABASE_USER
 config['database_password'] = DATABASE_PASS
 config['debugging_enabled'] = DEBUGGING_ENABLED
+
+
 with open(DATABASE_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
 
@@ -339,9 +357,8 @@ config['hwcron_gid'] = HWCRON_GID
 config['hwphp_uid'] = HWPHP_UID
 config['hwphp_gid'] = HWPHP_GID
 
-config['authentication_method'] = AUTHENTICATION_METHOD
-
 config['submission_url'] = SUBMISSION_URL
+config['vcs_url'] = VCS_URL
 config['tagrading_url'] = TAGRADING_URL
 config['cgi_url'] = CGI_URL
 

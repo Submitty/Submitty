@@ -196,6 +196,7 @@ HTML;
     </div>
 HTML;
             if($gradeable->useVcsCheckout()) {
+/*              TODO: Build ability for students to specify their own repo url
                 if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
                     $return .= <<<HTML
     repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
@@ -207,7 +208,31 @@ HTML;
     repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
 HTML;
                 }
+*/
+                if (strpos($gradeable->getSubdirectory(), '://') !== false || substr($gradeable->getSubdirectory(), 0, 1) === '/') {
+                    $vcs_path = $gradeable->getSubdirectory();
+                }
+                else {
+                    if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
+                        $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $gradeable->getSubdirectory();
+                    }
+                    else {
+                        $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $gradeable->getSubdirectory());
+                    }
+                }
+
+                $vcs_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_path);
+                $vcs_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_path);
+                if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+                    $vcs_path = str_replace('{$team_id}', $gradeable->getTeam()->getId(), $vcs_path);
+                }
+                $vcs_path = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
+                    $this->core->getConfig()->getVcsUrl(), $vcs_path);
+
                 $return .= <<<HTML
+    <h3>To access your Repository:</h3>
+    <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
+    <samp>git  clone  {$vcs_path}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
     <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
 HTML;
             }
