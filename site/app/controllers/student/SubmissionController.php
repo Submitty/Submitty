@@ -12,6 +12,7 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\GradeableList;
 use app\models\LateDaysCalculation;
+use app\controllers\grading\ElectronicGraderController;
 
 
 
@@ -141,6 +142,8 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
+
+        // var_dump($_POST);
         if (!isset($_POST['user_id'])) {
             $msg = "Did not pass in user_id.";
             $return = array('success' => false, 'message' => $msg);
@@ -156,9 +159,12 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
         }
 
-
+        //EVAN TODO: Multi user check.
         $gradeable_id = $_REQUEST['gradeable_id'];
-        $user_id = $_POST['user_id'];
+        $user_ids = explode (",", $_POST['user_id']);
+        $user_ids = array_filter($user_ids);
+        $user_id = $user_ids[0];
+
 
         //TODO: support entering team names rather than single user ids.
         //This code will be useful for the case above, but is currently redundant
@@ -376,7 +382,7 @@ class SubmissionController extends AbstractController {
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
         }
-        if (!isset($_POST['user_id'])) {
+        if (!isset($_POST['user_ids'])) {
             return $this->uploadResult("Invalid user id.", false);
         }
         if (!isset($_POST['path'])) {
@@ -392,7 +398,8 @@ class SubmissionController extends AbstractController {
 
         $gradeable_id = $_REQUEST['gradeable_id'];
         $original_user_id = $this->core->getUser()->getId();
-        $user_id = $_POST['user_id'];
+        $user_ids = array_filter($_POST['user_ids']);
+        $user_id = $user_ids[0];
         $path = $_POST['path'];
         if ($user_id === $original_user_id) {
             $gradeable = $gradeable_list[$gradeable_id];
@@ -426,7 +433,8 @@ class SubmissionController extends AbstractController {
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
-            $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
+            $leader = $user_ids[0];
+            $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
             if ($team !== null) {
                 $team_id = $team->getId();
                 $who_id = $team_id;
@@ -434,7 +442,10 @@ class SubmissionController extends AbstractController {
             }
             //if the student isn't on a team, build the team.
             else{
-
+                ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader, $user_ids);
+                $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
+                $who_id = $team_id;
+                $user_id = "";
             }
         }
         
