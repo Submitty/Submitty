@@ -45,9 +45,6 @@ class ForumController extends AbstractController {
             case 'remove_announcement':
                 $this->alterAnnouncement(0);
                 break;
-            case 'reply_post':
-                $this->replyPost();
-                break;
             case 'view_thread':
             default:
                 $this->showThreads();
@@ -131,6 +128,10 @@ class ForumController extends AbstractController {
     public function publishPost(){
         $post_content = htmlentities($_POST["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $parent_id = -1;
+        if(!empty($_POST["parent_id"])){
+            $parent_id = htmlentities($_POST["parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
@@ -140,34 +141,6 @@ class ForumController extends AbstractController {
             if($hasGoodAttachment == -1){
                 return;
             }
-            $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment);
-            $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
-            if($hasGoodAttachment == 1) {
-                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-                FileUtils::createDir($post_dir);
-                for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
-                    $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
-                    move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
-                }
-            }
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
-        }
-    }
-
-    public function replyPost(){
-        $post_content = htmlentities($_POST["reply_post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $thread_id = htmlentities($_POST["reply_thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $parent_id = htmlentities($_POST["reply_parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        if(empty($post_content) || empty($thread_id)){
-            $this->core->addErrorMessage("There was an error with your reply.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
-        } else {
-            $hasGoodAttachment = $this->checkGoodAttachment(false, $_POST["post_content"], $thread_id);
-            if($hasGoodAttachment == -1){
-                return;
-            }
-            
             $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment, $parent_id);
             $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
             if($hasGoodAttachment == 1) {

@@ -324,10 +324,10 @@ HTML;
 			<div class="popup-form" id="reply-user-post">
 				<h3 id="reply_user_prompt"></h3>
 				<p id="parent_post_content"> </p>
-				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'reply_post'))}">
-					<input type="hidden" id="reply_thread_id" name="reply_thread_id" value="" />
-					<input type="hidden" id="reply_parent_id" name="reply_parent_id" value="" />
-					<textarea name="reply_post_content" id="reply_post_content" style="margin-right:10px;white-space: pre-wrap;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
+				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}">
+					<input type="hidden" id="reply_thread_id" name="thread_id" value="" />
+					<input type="hidden" id="reply_parent_id" name="parent_id" value="" />
+					<textarea name="post_content" id="reply_post_content" style="margin-right:10px;white-space: pre-wrap;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
 					<div style="float: right; width: auto; margin-top: 10px">
 						<a onclick="$('#reply-user-post').css('display', 'none');" class="btn btn-danger">Cancel</a>
 						<input class="btn btn-primary" type="submit" value="Submit" />

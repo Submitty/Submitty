@@ -112,7 +112,7 @@ class DatabaseQueries {
         return $this->course_db->rows();
     }
 
-    public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $parent_post = 0){
+    public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $parent_post = -1){
         if(!$first && $parent_post == 0){
             $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", array($thread_id));
             $parent_post = $this->course_db->rows()[0]["id"];
