@@ -27,7 +27,6 @@ BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 
 USE_DOCKER = False
 WRITE_DATABASE = True
-#WRITE_DATABASE = False
 
 # ==================================================================================
 def parse_args():
@@ -426,13 +425,18 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         print ("LOGGING END my_runner.out",file=logfile)
         logfile.flush()
 
-        runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                          which_untrusted,
-                                          os.path.join(SUBMITTY_INSTALL_DIR,"bin","killall.py")],
-                                         stdout=logfile)
+        killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                                           which_untrusted,
+                                           os.path.join(SUBMITTY_INSTALL_DIR,"bin","killall.py")],
+                                          stdout=logfile)
 
         print ("KILLALL COMPLETE my_runner.out",file=logfile)
         logfile.flush()
+
+        if killall_success != 0:
+            msg='RUNNER ERROR: had to kill {} process(es)'.format(killall_success)
+            print ("pid",my_pid,msg)
+            grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","",msg)
 
     if runner_success == 0:
         print ("pid",my_pid,"RUNNER OK")
