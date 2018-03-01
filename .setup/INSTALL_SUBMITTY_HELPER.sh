@@ -303,10 +303,12 @@ chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
 
 # course builders & hwcron need access to these scripts
 chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
