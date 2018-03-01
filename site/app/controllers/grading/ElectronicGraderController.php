@@ -458,7 +458,7 @@ class ElectronicGraderController extends AbstractController {
         $team_leader_id = null;
         $gradeable_id = $gradeable->getId();
         foreach($user_ids as $id) {
-            if($user_id === "undefined" || $user_id === "")
+            if($id === "undefined" || $id === "")
             {
                 continue;
             }
@@ -468,24 +468,29 @@ class ElectronicGraderController extends AbstractController {
             }
             if ($id === $leader) {
                 $team_leader_id = $id;
-                if ($gradeable->isGradeByRegistration()) {
-                    $registration_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
-                    $rotating_section = $core->getQueries()->getUserById($id)->getRotatingSection();
-                }
-                else {
-                    $registration_section = $core->getQueries()->getUserById($id)->getRegistrationSection();
-                    $rotating_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
-                }
             }
         }
         if ($team_leader_id === null) {
-            $core->addErrorMessage("ERROR: {$_POST['new_team_user_id']} must be on the team");
+            $core->addErrorMessage("ERROR: {$team_leader_id} must be on the team");
             return;
+        }
+
+        $registration_section = $core->getQueries()->getUserById($team_leader_id)->getRegistrationSection();
+        $rotating_section = $core->getQueries()->getUserById($team_leader_id)->getRotatingSection();
+
+        //overwrite sections if they are available in the post
+        if(isset($_POST['section']) && $_POST['section'] !== "NULL"){
+            if ($gradeable->isGradeByRegistration()) {
+                $registration_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+            }
+            else {
+                $rotating_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+            }
         }
 
         $team_id = $core->getQueries()->createTeam($gradeable_id, $team_leader_id, $registration_section, $rotating_section);
         foreach($user_ids as $id) {
-            if($user_id === "undefined" or $user_id === ""){
+            if($id === "undefined" or $id === ""){
                 continue;
             }
             $core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);

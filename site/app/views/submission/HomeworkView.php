@@ -619,7 +619,8 @@ HTML;
                 </td>
                 <td>
                     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                    <input type="text" id="bulk_user_id_{$count}[0]" value =""/>
+                    <div id="users_{$count}">
+                        <input type="text" id="bulk_user_id_{$count}[0]" value =""/>
 HTML;
                     if ($gradeable->isTeamAssignment())
                     {
@@ -631,6 +632,7 @@ HTML;
                         }
                     }
                     $return .= <<<HTML
+                    </div>
                 </td>
                 <td>
                     <button type="button" id="bulk_submit_{$count}" class="btn btn-success">Submit</button>
@@ -676,8 +678,10 @@ HTML;
             if(e.keyCode === 13) { // enter was pressed
                 var text = $(document.activeElement);
                 var id = text.attr("id");
-                var count = text.parent().parent().index()+1;
-                var user_ids = $(document.activeElement).val();
+                var count = text.parent().parent().parent().index()+1;
+                var name = "bulk_user_id_"+count;
+                var user_ids = [];
+                $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); });
                 var js_count_array = $count_array_json;
                 var path = js_count_array[count];
                 validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_ids, true, path, count, "", makeSubmission);
