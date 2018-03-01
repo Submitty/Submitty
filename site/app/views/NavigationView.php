@@ -301,6 +301,10 @@ HTML;
                         	{$submission_status["AUTOGRADE"]} {$display_date}";
                         $title_to_button_type_submission['GRADED'] = "btn-default";
                     }
+                    else if($title_save == "GRADED" && !$g_data->useTAGrading()) {
+                        $button_text = "{$title_to_prefix[$title]} {$submission_status["SUBMITTED"]} {$submission_status["AUTOGRADE"]} {$display_date}";
+                        $title_to_button_type_submission['GRADED'] = "btn-default";
+                    } // electronic gradeable with no ta grading should never be green
                     else {
                     	$button_text = "{$title_to_prefix[$title]} {$submission_status["SUBMITTED"]} {$submission_status["AUTOGRADE"]} {$display_date}";
                     }
