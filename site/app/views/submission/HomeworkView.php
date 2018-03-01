@@ -622,10 +622,8 @@ HTML;
                     <div id="users_{$count}">
                         <input type="text" id="bulk_user_id_{$count}[0]" value =""/>
 HTML;
-                    if ($gradeable->isTeamAssignment())
-                    {
-                        for($i = 1; $i < $gradeable->getMaxTeamSize(); $i++)
-                        {
+                    if ($gradeable->isTeamAssignment()){
+                        for($i = 1; $i < $gradeable->getMaxTeamSize(); $i++){
                             $return .= <<<HTML
                         <input type="text" id="bulk_user_id_{$count}[{$i}]" value =""/>
 HTML;
