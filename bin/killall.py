@@ -12,7 +12,9 @@ current_pid = os.getpid()
 for proc in psutil.process_iter():
     try:
         pinfo = proc.as_dict(attrs=['name', 'pid', 'username'])
-        if pinfo['pid'] != current_pid and pinfo['username'] == pwd.getpwuid(os.getuid())[0]:
-            proc.kill()
+        if pinfo['username'] == pwd.getpwuid(os.getuid())[0]:
+            print ("a process to kill (except if its this script)", proc)
+            if pinfo['pid'] != current_pid:
+                proc.kill()
     except psutil.NoSuchProcess:
         pass
