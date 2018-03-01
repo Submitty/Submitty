@@ -395,22 +395,35 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
+
+
     # raise SystemExit()
     # run the run.out as the untrusted user
     with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
-        if USE_DOCKER:
-            runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
-                                              os.path.join(tmp_work, 'my_runner.out'), obj['gradeable'],
-                                              obj['who'], str(obj['version']), submission_string], stdout=logfile)
-        else:
-            runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                              which_untrusted,
-                                              os.path.join(tmp_work,"my_runner.out"),
-                                              obj["gradeable"],
-                                              obj["who"],
-                                              str(obj["version"]),
-                                              submission_string],
-                                              stdout=logfile)
+        print ("LOGGING BEGIN my_runner.out",file=logfile)
+        logfile.flush()
+
+        try:
+            if USE_DOCKER:
+                runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
+                                                  os.path.join(tmp_work, 'my_runner.out'), obj['gradeable'],
+                                                  obj['who'], str(obj['version']), submission_string], stdout=logfile)
+            else:
+                runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                                                  which_untrusted,
+                                                  os.path.join(tmp_work,"my_runner.out"),
+                                                  obj["gradeable"],
+                                                  obj["who"],
+                                                  str(obj["version"]),
+                                                  submission_string],
+                                                 stdout=logfile)
+            logfile.flush()
+        except Exception as e:
+            print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)
+            logfile.flush()
+
+        print ("LOGGING END my_runner.out",file=logfile)
+        logfile.flush()
 
     if runner_success == 0:
         print ("pid",my_pid,"RUNNER OK")
