@@ -190,6 +190,26 @@ chmod o+r . *.jar
 
 popd > /dev/null
 
+# JaCoCo is a potential replacement for EMMA
+
+echo "Getting JaCoCo..."
+
+pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
+
+JACOCO_VER=0.8.0
+wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
+mkdir jacoco-${JACOCO_VER}
+unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
+mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
+mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
+rm -rf jacoco-${JACOCO_VER}
+rm jacoco-${JACOCO_VER}.zip
+
+chmod o+r . *.jar
+
+popd > /dev/null
+
+
 #################################################################
 # DRMEMORY SETUP
 #################
