@@ -316,6 +316,9 @@ chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_a
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 
+# everyone needs to run this script
+chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/killall.py
+
 
 # FIXME / WIP:  line below is temporary, to avoid error message if file does not exist
 touch ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
