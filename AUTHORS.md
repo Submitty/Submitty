@@ -1,4 +1,4 @@
-##Members
+## Members
 [Barbara Cutler](http://www.cs.rpi.edu/~cutler/)  
 [Matthew Peveler](http://mpeveler.com/)  
 Jeramey Tyler

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import configparser
 import json
 import os
 import tempfile
@@ -10,6 +11,7 @@ import stat
 import time
 import dateutil
 import dateutil.parser
+import urllib.parse
 
 from submitty_utils import dateutils, glob
 import grade_items_logging
@@ -22,6 +24,9 @@ SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
 BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
+
+USE_DOCKER = False
+WRITE_DATABASE = True
 
 # ==================================================================================
 def parse_args():
@@ -68,24 +73,28 @@ def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
             add_permissions(os.path.join(root, f),file_perms)
 
 
-
-def get_vcs_info(top_dir,semester,course,gradeable,userid,teamid):
-
-    form_json_file = os.path.join(top_dir,"courses",semester,course,"config","form","form_"+gradeable+".json")
-
+def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
+    form_json_file = os.path.join(top_dir, 'courses', semester, course, 'config', 'form', 'form_'+gradeable+'.json')
     with open(form_json_file, 'r') as fj:
         form_json = json.load(fj)
 
-    is_vcs = form_json["upload_type"]=="repository"
-    vcs_type = "git"
-    vcs_base_url = ""
-    vcs_subdirectory = ""
-    if is_vcs:
-        vcs_subdirectory = form_json["subdirectory"]
-    vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}",gradeable)
-    vcs_subdirectory = vcs_subdirectory.replace("{$user_id}",userid)
-    vcs_subdirectory = vcs_subdirectory.replace("{$team_id}",teamid)
-    return (is_vcs,vcs_type,vcs_base_url,vcs_subdirectory)
+    course_ini_file = os.path.join(top_dir, 'courses', semester, course, 'config', 'config.ini')
+    with open(course_ini_file, 'r') as open_file:
+        course_ini = configparser.ConfigParser()
+        course_ini.read_file(open_file)
+
+    is_vcs = form_json["upload_type"] == "repository"
+
+    # PHP reads " as a character around the string, while Python reads it as part of the string
+    # so we have to strip out the " in python
+    vcs_type = course_ini['course_details']['vcs_type'].strip('"')
+    vcs_base_url = course_ini['course_details']['vcs_base_url'].strip('"')
+    vcs_subdirectory = form_json["subdirectory"] if is_vcs else ''
+    vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}", gradeable)
+    vcs_subdirectory = vcs_subdirectory.replace("{$user_id}", userid)
+    vcs_subdirectory = vcs_subdirectory.replace("{$team_id}", teamid)
+    return is_vcs, vcs_type, vcs_base_url, vcs_subdirectory
+
 
 # copy the files & directories from source to target
 # it will create directories as needed
@@ -170,11 +179,16 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     if not os.path.isdir(submission_path):
         grade_items_logging.log_message("ERROR: the submission directory does not exist" + submission_path)
         raise SystemExit("ERROR: the submission directory does not exist",submission_path)
-    print ("pid",my_pid,"GRADE THIS", submission_path)
+    print("pid", my_pid, "GRADE THIS", submission_path)
 
-    is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
+    is_vcs, vcs_type, vcs_base_url, vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,
+                                                                    obj["semester"],
+                                                                    obj["course"],
+                                                                    obj["gradeable"],
+                                                                    obj["who"],
+                                                                    obj["team"])
 
-    is_batch_job = next_directory==BATCH_QUEUE
+    is_batch_job = next_directory == BATCH_QUEUE
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
 
     queue_time = get_queue_time(next_directory,next_to_grade)
@@ -233,17 +247,29 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     
     submission_datetime = dateutils.read_submitty_date(submission_string)
 
-
     # --------------------------------------------------------------------
     # CHECKOUT THE STUDENT's REPO
     if is_vcs:
-        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-            print ("====================================\nVCS CHECKOUT", file=f)
-            print ("vcs_subdirectory",vcs_subdirectory, file=f)
+        # is vcs_subdirectory standalone or should it be combined with base_url?
+        if vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
+            vcs_path = vcs_subdirectory
+        else:
+            if '://' in vcs_base_url:
+                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
+            else:
+                vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
+
+        with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
+            print("====================================\nVCS CHECKOUT", file=f)
+            print('vcs_base_url', vcs_base_url, file=f)
+            print('vcs_subdirectory', vcs_subdirectory, file=f)
+            print('vcs_path', vcs_path, file=f)
+            print(['/usr/bin/git', 'clone', vcs_path, checkout_path], file=f)
+
         # cleanup the previous checkout (if it exists)
         shutil.rmtree(checkout_path,ignore_errors=True)
         os.makedirs(checkout_path, exist_ok=True)
-        subprocess.call (['/usr/bin/git', 'clone', vcs_subdirectory, checkout_path])
+        subprocess.call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
         os.chdir(checkout_path)
 
         # determine which version we need to checkout
@@ -251,19 +277,28 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         what_version = str(what_version.decode('utf-8')).rstrip()
         if what_version == "":
             # oops, pressed the grade button before a valid commit
-            shutil.rmtree(checkout_path,ignore_errors=True)
+            shutil.rmtree(checkout_path, ignore_errors=True)
         else:
             # and check out the right version
-            subprocess.call (['git', 'checkout', '-b', 'grade', what_version])
+            subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
         os.chdir(tmp)
         subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
 
     # --------------------------------------------------------------------
+    # START DOCKER
+
+    container = None
+    if USE_DOCKER:
+        container = subprocess.check_output(['docker', 'run', '-t', '-d',
+                                             '-v', tmp + ':' + tmp,
+                                             'ubuntu:custom']).decode('utf8').strip()
+
+    # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
 
-    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-        print ("====================================\nCOMPILATION STARTS", file=f)
+    with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
+        print("====================================\nCOMPILATION STARTS", file=f)
     
     # copy submitted files to the tmp compilation directory
     tmp_compilation = os.path.join(tmp,"TMP_COMPILATION")
@@ -295,21 +330,26 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
     with open(os.path.join(tmp_logs,"compilation_log.txt"), 'w') as logfile:
-        compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                           which_untrusted,
-                                           os.path.join(tmp_compilation,"my_compile.out"),
-                                           obj["gradeable"],
-                                           obj["who"],
-                                           str(obj["version"]),
-                                           submission_string],
-                                          stdout=logfile)
+        if USE_DOCKER:
+            compile_success = subprocess.call(['docker', 'exec', '-w', tmp_compilation, container,
+                                               os.path.join(tmp_compilation, 'my_compile.out'), obj['gradeable'],
+                                               obj['who'], str(obj['version']), submission_string], stdout=logfile)
+        else:
+            compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                                               which_untrusted,
+                                               os.path.join(tmp_compilation,"my_compile.out"),
+                                               obj["gradeable"],
+                                               obj["who"],
+                                               str(obj["version"]),
+                                               submission_string],
+                                              stdout=logfile)
 
     if compile_success == 0:
         print ("pid",my_pid,"COMPILATION OK")
     else:
         print ("pid",my_pid,"COMPILATION FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
-
+    #raise SystemExit()
 
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
         
@@ -355,16 +395,48 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
+
+
+    # raise SystemExit()
     # run the run.out as the untrusted user
     with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
-        runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                          which_untrusted,
-                                          os.path.join(tmp_work,"my_runner.out"),
-                                          obj["gradeable"],
-                                          obj["who"],
-                                          str(obj["version"]),
-                                          submission_string],
+        print ("LOGGING BEGIN my_runner.out",file=logfile)
+        logfile.flush()
+
+        try:
+            if USE_DOCKER:
+                runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
+                                                  os.path.join(tmp_work, 'my_runner.out'), obj['gradeable'],
+                                                  obj['who'], str(obj['version']), submission_string], stdout=logfile)
+            else:
+                runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                                                  which_untrusted,
+                                                  os.path.join(tmp_work,"my_runner.out"),
+                                                  obj["gradeable"],
+                                                  obj["who"],
+                                                  str(obj["version"]),
+                                                  submission_string],
+                                                 stdout=logfile)
+            logfile.flush()
+        except Exception as e:
+            print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)
+            logfile.flush()
+
+        print ("LOGGING END my_runner.out",file=logfile)
+        logfile.flush()
+
+        killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                                           which_untrusted,
+                                           os.path.join(SUBMITTY_INSTALL_DIR,"bin","killall.py")],
                                           stdout=logfile)
+
+        print ("KILLALL COMPLETE my_runner.out",file=logfile)
+        logfile.flush()
+
+        if killall_success != 0:
+            msg='RUNNER ERROR: had to kill {} process(es)'.format(killall_success)
+            print ("pid",my_pid,msg)
+            grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","",msg)
 
     if runner_success == 0:
         print ("pid",my_pid,"RUNNER OK")
@@ -413,14 +485,19 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
-        validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
-                                             which_untrusted,
-                                             os.path.join(tmp_work,"my_validator.out"),
-                                             obj["gradeable"],
-                                             obj["who"],
-                                             str(obj["version"]),
-                                             submission_string],
-                                            stdout=logfile)
+        if USE_DOCKER:
+            validator_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
+                                                 os.path.join(tmp_work, 'my_validator.out'), obj['gradeable'],
+                                                 obj['who'], str(obj['version']), submission_string], stdout=logfile)
+        else:
+            validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                                                 which_untrusted,
+                                                 os.path.join(tmp_work,"my_validator.out"),
+                                                 obj["gradeable"],
+                                                 obj["who"],
+                                                 str(obj["version"]),
+                                                 submission_string],
+                                                stdout=logfile)
 
     if validator_success == 0:
         print ("pid",my_pid,"VALIDATOR OK")
@@ -511,15 +588,16 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     #---------------------------------------------------------------------
     # WRITE OUT VERSION DETAILS
-    insert_database_version_data.insert_to_database(
-        obj["semester"],
-        obj["course"],
-        obj["gradeable"],
-        obj["user"],
-        obj["team"],
-        obj["who"],
-        True if obj["is_team"] else False,
-        str(obj["version"]))
+    if WRITE_DATABASE:
+        insert_database_version_data.insert_to_database(
+            obj["semester"],
+            obj["course"],
+            obj["gradeable"],
+            obj["user"],
+            obj["team"],
+            obj["who"],
+            True if obj["is_team"] else False,
+            str(obj["version"]))
 
     print ("pid",my_pid,"finished grading ", next_to_grade, " in ", gradingtime, " seconds")
 
@@ -531,10 +609,14 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # save the logs!
     shutil.copytree(tmp_logs,os.path.join(results_path,"logs"))
 
-
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
     shutil.rmtree(tmp)
+
+    # --------------------------------------------------------------------
+    # CLEAN UP DOCKER
+    if USE_DOCKER:
+        subprocess.call(['docker', 'rm', '-f', container])
 
 
 # ==================================================================================

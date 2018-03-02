@@ -13,7 +13,7 @@ class LateController extends AbstractController {
                 $this->viewLateDays();
                 break;
             case 'view_extension':
-                $this->core->getOutput()->addBreadcrumb('Excused Absense Extensions');
+                $this->core->getOutput()->addBreadcrumb('Excused Absence Extensions');
                 $this->viewExtensions();
                 break;
             case 'update_late':

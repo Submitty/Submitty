@@ -196,6 +196,7 @@ HTML;
     </div>
 HTML;
             if($gradeable->useVcsCheckout()) {
+/*              TODO: Build ability for students to specify their own repo url
                 if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
                     $return .= <<<HTML
     repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
@@ -207,7 +208,31 @@ HTML;
     repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
 HTML;
                 }
+*/
+                if (strpos($gradeable->getSubdirectory(), '://') !== false || substr($gradeable->getSubdirectory(), 0, 1) === '/') {
+                    $vcs_path = $gradeable->getSubdirectory();
+                }
+                else {
+                    if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
+                        $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $gradeable->getSubdirectory();
+                    }
+                    else {
+                        $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $gradeable->getSubdirectory());
+                    }
+                }
+
+                $vcs_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_path);
+                $vcs_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_path);
+                if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+                    $vcs_path = str_replace('{$team_id}', $gradeable->getTeam()->getId(), $vcs_path);
+                }
+                $vcs_path = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
+                    $this->core->getConfig()->getVcsUrl(), $vcs_path);
+
                 $return .= <<<HTML
+    <h3>To access your Repository:</h3>
+    <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
+    <samp>git  clone  {$vcs_path}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
     <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
 HTML;
             }
@@ -357,8 +382,8 @@ HTML;
                 $return .= <<<HTML
     <div>
         {$upload_message}
-	<br>
-	&nbsp;
+    <br>
+    &nbsp;
     </div>
 
     <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
@@ -573,10 +598,12 @@ HTML;
                         // get the full filename for PDF popout
                         // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path."&ta_grading=false";
-                        $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
+                        $filename_full = str_replace("_cover.pdf", ".pdf", rawurldecode( $filename) );
                         $path_full = str_replace("_cover.pdf", ".pdf", $path);
                         $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full."&ta_grading=false";
-                        $count_array[$count] = FileUtils::joinPaths($timestamp, $filename_full);
+                        $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode( $filename_full) );
+                        //decode the filename after to display correctly for users
+                        $filename_full = rawurldecode($filename_full);
                         $return .= <<<HTML
             <tr class="tr tr-vertically-centered">
                 <td>{$count}</td>
@@ -670,7 +697,7 @@ HTML;
             }
         }
         $team_header = '';
-        if ($gradeable->isTeamAssignment()) {
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
             $team_header = <<<HTML
     <h3>Team: {$gradeable->getTeam()->getMemberList()}</h3><br />
 HTML;
@@ -755,7 +782,7 @@ HTML;
 HTML;
             }
             else {
-	            if($gradeable->getActiveVersion() > 0
+                if($gradeable->getActiveVersion() > 0
                     && $gradeable->getActiveVersion() === $current_version->getVersion()) {
                     $return .= <<<HTML
     <div class="sub" id="submission_message">
@@ -766,8 +793,8 @@ HTML;
 HTML;
                 }
                 else {
-		            if($gradeable->getActiveVersion() > 0) {
-		                $return .= <<<HTML
+                    if($gradeable->getActiveVersion() > 0) {
+                        $return .= <<<HTML
    <div class="sub" id="submission_message">
        <p class="red-message">
             Note: This version of your assignment will not be graded the instructor/TAs. <br />
@@ -780,14 +807,14 @@ HTML;
             Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
             This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
 HTML;
-		            }
+                    }
 
-		                $return .= <<<HTML
+                        $return .= <<<HTML
             Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
          </p>
      </div>
 HTML;
-	            }
+                }
 
                 if ($gradeable->hasIncentiveMessage()) {
                     $return .= <<<HTML
@@ -968,7 +995,7 @@ HTML;
             $return .= <<<HTML
 </div>
 HTML;
-	}
+    }
         if ($gradeable->taGradesReleased()) {
             $return .= <<<HTML
 <div class="content">

@@ -14,6 +14,7 @@ use app\models\GradeableList;
 use app\models\LateDaysCalculation;
 
 
+
 class SubmissionController extends AbstractController {
 
     /**
@@ -85,7 +86,7 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
                 return array('error' => true, 'message' => 'No gradeable with that id.');
             }
-            else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) {
+            else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null && !$this->core->getUser()->accessAdmin()) {
                 $this->core->addErrorMessage('Must be on a team to access submission');
                 $this->core->redirect($this->core->getConfig()->getSiteUrl());
                 return array('error' => true, 'message' => 'Must be on a team to access submission.');                
@@ -520,6 +521,9 @@ class SubmissionController extends AbstractController {
             $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
                                 "course" => $this->core->getConfig()->getCourse(),
                                 "gradeable" =>  $gradeable->getId(),
+                                "required_capabilities" => $gradeable->getRequiredCapabilities(),
+                                "max_possible_grading_time" => $gradeable->getMaxPossibleGradingTime(),
+                                "queue_time" => $current_time,
                                 "user" => $user_id,
                                 "team" => $team_id,
                                 "who" => $who_id,
@@ -530,6 +534,9 @@ class SubmissionController extends AbstractController {
             $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
                                 "course" => $this->core->getConfig()->getCourse(),
                                 "gradeable" =>  $gradeable->getId(),
+                                "required_capabilities" => $gradeable->getRequiredCapabilities(),
+                                "max_possible_grading_time" => $gradeable->getMaxPossibleGradingTime(),
+                                "queue_time" => $current_time,
                                 "user" => $user_id,
                                 "team" => $team_id,
                                 "who" => $who_id,
@@ -1000,6 +1007,9 @@ class SubmissionController extends AbstractController {
             $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
                                 "course" => $this->core->getConfig()->getCourse(),
                                 "gradeable" =>  $gradeable->getId(),
+                                "required_capabilities" => $gradeable->getRequiredCapabilities(),
+                                "max_possible_grading_time" => $gradeable->getMaxPossibleGradingTime(),
+                                "queue_time" => $current_time,
                                 "user" => $user_id,
                                 "team" => $team_id,
                                 "who" => $who_id,
@@ -1010,6 +1020,9 @@ class SubmissionController extends AbstractController {
             $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
                                 "course" => $this->core->getConfig()->getCourse(),
                                 "gradeable" =>  $gradeable->getId(),
+                                "required_capabilities" => $gradeable->getRequiredCapabilities(),
+                                "max_possible_grading_time" => $gradeable->getMaxPossibleGradingTime(),
+                                "queue_time" => $current_time,
                                 "user" => $user_id,
                                 "team" => $team_id,
                                 "who" => $who_id,

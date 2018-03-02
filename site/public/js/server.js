@@ -833,6 +833,46 @@ function checkNumFilesForumUpload(input){
             
 }
 
+function enableTabsInTextArea(id){
+    var t = document.getElementById(id);
+
+    $(t).on('input', function() {
+        $(this).outerHeight(38).outerHeight(this.scrollHeight);
+    });
+    $(t).trigger('input');
+        t.onkeydown = function(t){
+            if(t.keyCode == 9){
+                var text = this.value;
+                var beforeCurse = this.selectionStart;
+                var afterCurse = this.selectionEnd;
+                this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse);
+                this.selectionStart = this.selectionEnd = beforeCurse+1;
+
+                return false;
+
+            }
+        };
+
+}
+
+function resetScrollPosition(){
+    if(sessionStorage.scrollTop != "undefined") {
+        sessionStorage.scrollTop = undefined;
+    }
+}
+
+function saveScrollLocationOnRefresh(className){
+    var element = document.getElementsByClassName(className);
+    $(element).scroll(function() {
+        sessionStorage.scrollTop = $(this).scrollTop();
+    });
+    $(document).ready(function() {
+        if(sessionStorage.scrollTop != "undefined"){
+            $(element).scrollTop(sessionStorage.scrollTop);
+        }
+    });
+}
+
 function deletePost(thread_id, post_id, author, time){
     var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note:  If you are deleting the first post in a thread this will delete the entire thread.");
     if(confirm){
@@ -899,7 +939,7 @@ function alterAnnouncement(thread_id, confirmString, url){
 }
 
 function updateHomeworkExtensions(data) {
-    var fd = new FormData($('#excusedAbsenseForm').get(0));
+    var fd = new FormData($('#excusedAbsenceForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
     $.ajax({
         url: url,
@@ -967,6 +1007,18 @@ function loadHomeworkExtensions(g_id) {
             window.alert("Something went wrong. Please try again.");
         }
     });
+}
+
+function addBBCode(type, divTitle){
+    var cursor = $(divTitle).prop('selectionStart');
+    var text = $(divTitle).val();
+    var insert = "";
+    if(type == 1) {
+        insert = "[url=http://example.com]display text[/url]";
+    } else if(type == 0){
+        insert = "[code][/code]";
+    }
+    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
 function updateLateDays(data) {
