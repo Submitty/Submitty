@@ -45,6 +45,9 @@ class ForumController extends AbstractController {
             case 'edit_post':
                 $this->alterPost(1);
                 break;
+            case 'get_edit_post_content':
+                $this->getEditPostContent();
+                break;
             case 'remove_announcement':
                 $this->alterAnnouncement(0);
                 break;
@@ -92,9 +95,8 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     public function publishThread(){
-        $title = htmlentities($_POST["title"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $thread_content = htmlentities(str_replace("\r", "", $_POST["thread_content"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $thread_content = $this->displayUrl($thread_content);
+        $title = $_POST["title"];
+        $thread_content = str_replace("\r", "", $_POST["thread_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         if(empty($title) || empty($thread_content)){
@@ -130,8 +132,7 @@ class ForumController extends AbstractController {
     }
 
     public function publishPost(){
-        $post_content = htmlentities(str_replace("\r", "", $_POST["post_content"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $post_content = $this->displayUrl($post_content);
+        $post_content = str_replace("\r", "", $_POST["post_content"]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
@@ -181,12 +182,8 @@ class ForumController extends AbstractController {
             } else if($modifyType == 1) { //edit post
                 $thread_id = $_POST["edit_thread_id"];
                 $post_id = $_POST["edit_post_id"];
-                $new_post_content = htmlentities($_POST["edit_post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                //This will need to be changed later but to get it working assume good input
-               /* $new_post_content = str_replace(str_replace("&equals;", "=", str_replace("&lt;a", "<a", $new_post_content);
-                $new_post_content = str_replace("&lt;&sol;a", "</a", $new_post_content);
-                $new_post_content = str_replace("&gt;", ">", $new_post_content);*/
-                if(!$this->core->getQueries()->editPost($thread_id, $post_id, $new_post_content)){
+                $new_post_content = $_POST["edit_post_content"];
+                if(!$this->core->getQueries()->editPost($post_id, $new_post_content)){
                     $this->core->addErrorMessage("There was an error trying to modify the post. Please try again.");
                 } $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
             }
@@ -228,16 +225,19 @@ class ForumController extends AbstractController {
          $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread');
     }
 
-    private function displayUrl($content){
-        $pos = 0;
-        $positions = array();
-        while(($pos = strpos($content, "&lbrack;url&equals;", $pos)) !== false){
-            $end_pos = strpos($content, "&lbrack;&sol;url&rsqb;", $pos);
-            $end_bracket = strpos($content, "&rsqb;", $pos);
-            $line = html_entity_decode(substr($content, $pos, $end_bracket-$pos) , ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $replacement = "<a href='" . substr($line, 5) . "'>" . substr($content, $end_bracket+6, $end_pos-$end_bracket-6) . "</a>";
-            $content = str_replace(substr($content, $pos, $end_pos+22-$pos), $replacement, $content);
-        } return $content;
+    public function getEditPostContent(){
+        $post_id = $_POST["post_id"];
+        if($this->core->getUser()->getGroup() <= 2 && !empty($post_id)) {
+            $result = $this->core->getQueries()->getPost($post_id);
+            $output = array();
+            $output['user'] = $result["author_user_id"];
+            $output['post'] = $result["content"];
+            $output['post_time'] = $result['timestamp'];
+            $this->core->getOutput()->renderJson($output);
+            return $output;
+        } else {
+            $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
+        }
     }
 
 }

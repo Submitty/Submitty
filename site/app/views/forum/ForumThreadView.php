@@ -85,8 +85,10 @@ HTML;
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
-		<div style="margin-top:10px; margin-bottom:10px; height:50px;  " id="forum_bar">
-			<div style="margin-left:20px; height: 50px; width:50px;" class="create_thread_button"><a title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i style="vertical-align: middle; position: absolute; margin-top: 9px; margin-left: 11px;" class="fa fa-plus-circle fa-2x" aria-hidden="true"></i></a>
+		<div style="margin-top:10px; height:50px;  " id="forum_bar">
+			<div style="margin-left:20px; height: 20px; width:136px;" class="create_thread_button">
+
+			<a class="btn btn-primary" style="position:absolute;top:3px;left:2px;vertical-align: middle;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 			</div>
 		</div>
 
@@ -107,10 +109,10 @@ HTML;
 				<h3 id="edit_user_prompt"></h3>
 
 				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
+    					<input type="hidden" id="edit_post_id" name="edit_post_id" value="" />
 						<input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" />
-    					<input type="hidden" id="edit_post_id" name="edit_post_id" id="edit_post_id" value="" />
-					
-	            		<textarea name="edit_post_content" id="edit_post_content" style="margin-right:10px;white-space: pre-wrap;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
+
+	            		<textarea name="edit_post_content" id="edit_post_content" style="margin-right:10px;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
 	            	
 					<div style="float: right; width: auto; margin-top: 10px">
 	        			<a onclick="$('#edit-user-post').css('display', 'none');" class="btn btn-danger">Cancel</a>
@@ -156,17 +158,34 @@ HTML;
 						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
 						}
-						$first_post_content = str_replace("&lbrack;&sol;code&rsqb;", "", str_replace("&lbrack;code&rsqb;", "", strip_tags($first_post["content"])));
+
+						//fix legacy code
+						$titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						$first_post_content = html_entity_decode($first_post['content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+						//replace tags from displaying in sidebar
+						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
+						$temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
+
+						if(!empty($temp_first_post_content)){
+							$first_post_content = $temp_first_post_content;
+						}
+
 						$sizeOfContent = strlen($first_post_content);
 						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 100) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 100), " "));
 						$titleLength = strlen($thread['title']);
-						$titleDisplay = substr($thread["title"], 0, ($titleLength < 40) ? $titleLength : strrpos(substr($thread['title'], 0, 40), " "));
+						$titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
 						if(strlen($first_post["content"]) > 100){
 							$contentDisplay .= "...";
 						}
-						if(strlen($thread["title"]) > 30){
+						if(strlen($thread["title"]) > 40){
+							//Fix ... appearing
+							if(empty($titleDisplay))
+								$titleDisplay .= substr($thread['title'], 0, 30);
 							$titleDisplay .= "...";
 						}
+						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 						$return .= <<<HTML
 						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
 						<div class="{$class}">
@@ -253,19 +272,47 @@ HTML;
                             $return .= $title_html;
                         }
 
-                        $codeBracketString = "&lbrack;&sol;code&rsqb;";
-                        if(strpos($post['content'], "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
-                        	$codeBracketString = "&NewLine;" . $codeBracketString;
+                      
+
+                        //handle converting links 
+
+
+                        //convert legacy htmlentities being saved in db
+                        $post_content = html_entity_decode($post["content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
+
+                        if(!empty($pre_post)){
+                        	$post_content = $pre_post;
                         }
 
+                        $post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                       
 
-                        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post["content"]));
+                        //convert back to visible code
+                        $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="$1">$2</a>', $post_content);
+
+                        if(!empty($pre_post)){
+                        	$post_content = $pre_post;
+                        }
 
                         //This code is for legacy posts that had an extra \r per newline
                         if(strpos($post['content'], "\r") !== false){
                         	$post_content = str_replace("\r","", $post_content);
                         }
-						
+
+                        //end link handling
+
+                        //handle converting code segments
+
+                        $codeBracketString = "&lbrack;&sol;code&rsqb;";
+                        if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
+                        	$codeBracketString = "&NewLine;" . $codeBracketString;
+                        }
+
+                        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+
+						//end code segment handling
+
 						$return .= <<<HTML
 							<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>
 							
@@ -290,7 +337,7 @@ HTML;
 							$return .= <<<HTML
 
 							<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
-							<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost( {$post['thread_id']}, {$post['id']}, `{$post['content']}`, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
+							<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 							} 
 			$return .= <<<HTML
@@ -416,8 +463,10 @@ HTML;
 
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
-		<div style="margin-top:10px; margin-bottom:10px; height:50px;  " id="forum_bar">
-			<div style="margin-left:20px; height:50px; width:50px;" class="create_thread_button"><a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i style="vertical-align: middle; position: absolute; margin-top: 8px; margin-left: 10px;" class="fa fa-arrow-left fa-2x" aria-hidden="true"></i></a>
+		<div style="margin-top:10px; height:50px;" id="forum_bar">
+			<div style="margin-left:20px; height: 20px; width:148px;" class="create_thread_button">
+
+			<a class="btn btn-primary" style="position:absolute;top:3px;left:2px;vertical-align: middle;" title="Create thread" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
 			</div>
 		</div>
 

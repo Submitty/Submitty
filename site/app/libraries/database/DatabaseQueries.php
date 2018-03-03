@@ -138,6 +138,11 @@ class DatabaseQueries {
         return $this->course_db->rows()[0];
     }
 
+    public function getPost($post_id){
+        $this->course_db->query("SELECT * FROM posts where id = ?", array($post_id));
+        return $this->course_db->rows()[0];
+    }
+
     public function isStaffPost($author_id){
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", array($author_id));
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
@@ -192,9 +197,9 @@ class DatabaseQueries {
         } return false;
     }
 
-    public function editPost($thread_id, $post_id, $content){
+    public function editPost($post_id, $content){
         try {
-            $this->course_db->query("UPDATE posts SET content = ? where thread_id = ? and id = ?", array($content, $thread_id, $post_id));
+            $this->course_db->query("UPDATE posts SET content = ? where id = ?", array($content, $post_id));
         } catch(DatabaseException $dbException) {
             return false;
         } return true;
