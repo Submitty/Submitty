@@ -174,11 +174,9 @@ HTML;
 						$sizeOfContent = strlen($first_post_content);
 						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 100) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 100), " "));
 						$titleLength = strlen($thread['title']);
-<<<<<<< HEAD
+
 						$titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
-=======
-						$titleDisplay = substr($thread["title"], 0, ($titleLength < 40) ? $titleLength : strrpos(substr($thread['title'], 0, 40), " "));
->>>>>>> master
+
 						if(strlen($first_post["content"]) > 100){
 							$contentDisplay .= "...";
 						}
