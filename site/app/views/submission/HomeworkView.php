@@ -619,7 +619,18 @@ HTML;
                 </td>
                 <td>
                     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                    <input type="text" id="bulk_user_id_{$count}" value =""/>
+                    <div id="users_{$count}">
+                        <input type="text" id="bulk_user_id_{$count}[0]" value =""/>
+HTML;
+                    if ($gradeable->isTeamAssignment()){
+                        for($i = 1; $i < $gradeable->getMaxTeamSize(); $i++){
+                            $return .= <<<HTML
+                        <input type="text" id="bulk_user_id_{$count}[{$i}]" value =""/>
+HTML;
+                        }
+                    }
+                    $return .= <<<HTML
+                    </div>
                 </td>
                 <td>
                     <button type="button" id="bulk_submit_{$count}" class="btn btn-success">Submit</button>
@@ -643,7 +654,9 @@ HTML;
             var btn = $(document.activeElement);
             var id = btn.attr("id");
             var count = btn.parent().parent().index()+1;
-            var user_id = $("#bulk_user_id_"+count).val();
+            var name = "bulk_user_id_"+count;
+            var user_ids = [];
+            $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); }); 
             var js_count_array = $count_array_json;
             var path = js_count_array[count];
             if (id.includes("delete")) {
@@ -654,7 +667,7 @@ HTML;
                 deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
                 moveNextInput(count);
             } else {
-                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, "", makeSubmission);
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_ids, true, path, count, "", makeSubmission);
             }
             e.preventDefault();
             e.stopPropagation();
@@ -663,11 +676,13 @@ HTML;
             if(e.keyCode === 13) { // enter was pressed
                 var text = $(document.activeElement);
                 var id = text.attr("id");
-                var count = text.parent().parent().index()+1;
-                var user_id = $(document.activeElement).val();
+                var count = text.parent().parent().parent().index()+1;
+                var name = "bulk_user_id_"+count;
+                var user_ids = [];
+                $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); });
                 var js_count_array = $count_array_json;
                 var path = js_count_array[count];
-                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, "", makeSubmission);
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_ids, true, path, count, "", makeSubmission);
                 e.preventDefault();
                 e.stopPropagation();
             }
