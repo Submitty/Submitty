@@ -28,4 +28,4 @@ if count>0:
     print ("ERROR: killall.py had to kill ",count," process(es)")
     sys.exit(count)  # non-zero exit code means that many things had to be killed
 
-sys.exit(100)  # zero exit code means nothing had to be killed
+sys.exit(0)  # zero exit code means nothing had to be killed
