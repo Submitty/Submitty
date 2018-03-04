@@ -12,6 +12,7 @@ import time
 import dateutil
 import dateutil.parser
 import urllib.parse
+import uuid
 
 from submitty_utils import dateutils, glob
 import grade_items_logging
@@ -195,7 +196,8 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     queue_time_longstring = dateutils.write_submitty_date(queue_time)
     grading_began = dateutils.get_current_time()
     waittime = int((grading_began-queue_time).total_seconds())
-    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"wait:",waittime,"")
+    job_id = uuid.uuid4().hex
+    grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"wait:",waittime,"")
 
     # --------------------------------------------------------
     # various paths
@@ -348,7 +350,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         print ("pid",my_pid,"COMPILATION OK")
     else:
         print ("pid",my_pid,"COMPILATION FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
+        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"","","COMPILATION FAILURE")
     #raise SystemExit()
 
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
@@ -436,13 +438,13 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         if killall_success != 0:
             msg='RUNNER ERROR: had to kill {} process(es)'.format(killall_success)
             print ("pid",my_pid,msg)
-            grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","",msg)
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"","",msg)
 
     if runner_success == 0:
         print ("pid",my_pid,"RUNNER OK")
     else:
         print ("pid",my_pid,"RUNNER FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","RUNNER FAILURE")
+        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"","","RUNNER FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
@@ -503,7 +505,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         print ("pid",my_pid,"VALIDATOR OK")
     else:
         print ("pid",my_pid,"VALIDATOR FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"","","VALIDATION FAILURE")
+        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"","","VALIDATION FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
 
@@ -601,7 +603,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     print ("pid",my_pid,"finished grading ", next_to_grade, " in ", gradingtime, " seconds")
 
-    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"grade:",gradingtime,grade_result)
+    grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"grade:",gradingtime,grade_result)
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("FINISHED GRADING!")
