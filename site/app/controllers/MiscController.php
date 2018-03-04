@@ -179,13 +179,13 @@ class MiscController extends AbstractController {
             return false;
         }
 
-        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_REQUEST['path']));
+        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($_GET['path'])));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
-            header('Content-Disposition: inline; filename="' . basename($_REQUEST['path']) . '"');
+            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))) . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($_REQUEST['path']);
         }
@@ -216,7 +216,7 @@ class MiscController extends AbstractController {
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
         header("Content-disposition: attachment; filename=\"{$_REQUEST['file']}\"");
-        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_REQUEST['path'])));
+        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_GET['path'])));
     }
 
     private function downloadZip() {
