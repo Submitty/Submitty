@@ -514,6 +514,8 @@ class SubmissionController extends AbstractController {
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $path);
 
+        $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
+
         // copy over the uploaded file
         if (isset($uploaded_file)) {
             if (!@copy($uploaded_file, FileUtils::joinPaths($version_path,"upload.pdf"))) {
