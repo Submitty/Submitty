@@ -870,10 +870,10 @@ HTML;
                 }
             </script>
 HTML;
-                        $filename = $file['relative_name'];
-                        $filepath = $file['path'];
+                        $filename = urlencode($file['relative_name']);
+                        $filepath = urlencode($file['path']);
                         $return .= <<< HTML
-            <a onclick="downloadFile('$filename','$filepath')"><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='downloadFile("{$filename}","{$filepath}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
             <br />
 HTML;
                     }

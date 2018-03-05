@@ -40,8 +40,14 @@ class MiscController extends AbstractController {
         }
         // from this point on, is not a zip
         // do path and permissions checking
+
         $dir = $_REQUEST['dir'];
         $path = $_REQUEST['path'];
+
+        if(!empty($_GET['dir']) && !empty($_GET['path'])) {
+            $dir = $_GET['dir'];
+            $path = $_GET['path'];
+        }
 
         foreach (explode(DIRECTORY_SEPARATOR, $path) as $part) {
             if ($part == ".." || $part == ".") {
@@ -185,7 +191,7 @@ class MiscController extends AbstractController {
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
-            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))) . '"');
+            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))) . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($_REQUEST['path']);
         }
@@ -211,12 +217,14 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
         
+        $filename = rawurldecode(htmlspecialchars_decode($_REQUEST['file']));
+
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
-        header("Content-disposition: attachment; filename=\"{$_REQUEST['file']}\"");
-        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . rawurlencode( basename($_GET['path'])));
+        header("Content-disposition: attachment; filename=\"{$filename}\"");
+        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
     }
 
     private function downloadZip() {

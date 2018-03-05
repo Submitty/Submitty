@@ -511,6 +511,8 @@ class SubmissionController extends AbstractController {
 
         $max_size = $gradeable->getMaxSize();
 
+        $path = rawurldecode(htmlspecialchars_decode($path));
+
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $path);
 
@@ -641,10 +643,12 @@ class SubmissionController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $gradeable_list[$gradeable_id];
         $gradeable->loadResultDetails();
-        $path = $_POST['path'];
+        $path = rawurldecode(htmlspecialchars_decode($_POST['path']));
 
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $path);
+
+        $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
 
         if (!@unlink($uploaded_file)) {
             return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
