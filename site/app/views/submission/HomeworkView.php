@@ -870,8 +870,8 @@ HTML;
                 }
             </script>
 HTML;
-                        $filename = urlencode($file['relative_name']);
-                        $filepath = urlencode($file['path']);
+                        $filename = rawurlencode($file['relative_name']);
+                        $filepath = rawurlencode($file['path']);
                         $return .= <<< HTML
             <a onclick='downloadFile("{$filename}","{$filepath}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
             <br />
