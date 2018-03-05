@@ -41,13 +41,8 @@ class MiscController extends AbstractController {
         // from this point on, is not a zip
         // do path and permissions checking
 
-        $dir = $_REQUEST['dir'];
-        $path = $_REQUEST['path'];
-
-        if(!empty($_GET['dir']) && !empty($_GET['path'])) {
-            $dir = $_GET['dir'];
-            $path = $_GET['path'];
-        }
+        $dir = $_GET['dir'];
+        $path = $_GET['path'];
 
         foreach (explode(DIRECTORY_SEPARATOR, $path) as $part) {
             if ($part == ".." || $part == ".") {
