@@ -71,8 +71,8 @@ class AdminGradeable extends AbstractModel {
     protected $eg_subdirectory = "";
     /** @property @var bool Is this a team assignment */
     protected $eg_team_assignment = false;
-    /** @property @var int maximum allowed team size */
-    protected $eg_max_team_size = 1;
+    /** @property @var int maximum allowed team size, Minimum must be 2*/
+    protected $eg_max_team_size = 2;
     /** @property @var \DateTime Date when students cannot create/leave/join teams without instructor's help */
     protected $eg_team_lock_date;
     /** @property @var bool Is there any TA grading to be done for this gradeable (ie. any rubric questions) */
