@@ -165,7 +165,7 @@ HTML;
 
 						//replace tags from displaying in sidebar
 						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
-						$temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
+						$temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', (filter_var('$2', FILTER_VALIDATE_URL)) ? '$2' : "", $first_post_content);
 
 						if(!empty($temp_first_post_content)){
 							$first_post_content = $temp_first_post_content;
@@ -291,7 +291,7 @@ HTML;
                        
 
                         //convert back to visible code
-                        $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="$1">$2</a>', $post_content);
+                        $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', ((filter_var('$1', FILTER_VALIDATE_URL))) ? '<a href="$1">$2</a>' : "", $post_content);
 
                         if(!empty($pre_post)){
                         	$post_content = $pre_post;
