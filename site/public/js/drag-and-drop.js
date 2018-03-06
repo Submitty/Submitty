@@ -310,7 +310,7 @@ function openFile(url_full) {
 // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
 function moveNextInput(count) {
     var next_count = count+1;
-    var next_input = "#users_" + next_count;
+    var next_input = "#users_" + next_count + " :first";
     if ($(next_input).length) {
         $(next_input).focus();
         $(next_input).select(); 
