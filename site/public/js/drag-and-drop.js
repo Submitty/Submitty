@@ -310,7 +310,7 @@ function openFile(url_full) {
 // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
 function moveNextInput(count) {
     var next_count = count+1;
-    var next_input = "#bulk_user_id_" + next_count;
+    var next_input = "#users_" + next_count + " :first";
     if ($(next_input).length) {
         $(next_input).focus();
         $(next_input).select(); 
@@ -381,7 +381,13 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                    var make_submission = true;
+                    if(data['previous_submission']){
+                        var make_submission = confirm("One or more users you are submitting for had a previous submission. Do you wish to continue?")
+                    }
+                    if(make_submission){
+                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                    }
                 }
                 else {
                     alert("ERROR! \n\n" + data['message']);
@@ -430,7 +436,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
                 if (data['success']) {
                     $("#bulk_submit_" + count).prop("disabled", true);
                     $("#bulk_delete_" + count).prop("disabled", true);
-                    $("#bulk_user_id_" + count).prop("disabled", true);
+                    $("#users_" + count + " :input").prop("disabled", true);
                     var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
                     $('#messages').append(message);
                     setTimeout(function() {
