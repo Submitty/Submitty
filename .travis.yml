@@ -141,7 +141,7 @@ after_script:
   - sudo /usr/local/submitty/bin/check_everything.py
 
 after_success:
-  - travis_retry php vendor/bin/coveralls -v
+  - if [ ${INTEGRATION_SUITE} = false ]; then travis_retry php vendor/bin/coveralls -v; fi
 
 notifications:
   email: false
