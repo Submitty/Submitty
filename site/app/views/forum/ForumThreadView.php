@@ -165,7 +165,7 @@ HTML;
 
 						//replace tags from displaying in sidebar
 						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
-						$temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', (filter_var('$2', FILTER_VALIDATE_URL)) ? '$2' : "", $first_post_content);
+						$temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
 
 						if(!empty($temp_first_post_content)){
 							$first_post_content = $temp_first_post_content;
@@ -288,13 +288,26 @@ HTML;
                         }
 
                         $post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                       
 
-                        //convert back to visible code
-                        $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', ((filter_var('$1', FILTER_VALIDATE_URL))) ? '<a href="$1">$2</a>' : "", $post_content);
+                        preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
+                        $accepted_schemes = array("https", "http");
+                        $pos = 0;
+                        if(count($result) > 0) {
+                        	foreach($result[1] as $url){
+                        		$decoded_url = trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+                        		$parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
+                        		if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
+                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . $decoded_url . '">'. htmlentities($result[2][$pos], ENT_QUOTES | ENT_HTML5, 'UTF-8') .'</a>', $post_content);
 
-                        if(!empty($pre_post)){
-                        	$post_content = $pre_post;
+                        		} else {
+                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content);
+                        		}
+                        		if(!empty($pre_post)){
+                        			$post_content = $pre_post;
+                        		
+                        		}
+                        		 $pos++;
+                        	}
                         }
 
                         //This code is for legacy posts that had an extra \r per newline
