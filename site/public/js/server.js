@@ -833,6 +833,49 @@ function checkNumFilesForumUpload(input){
             
 }
 
+function editPost(post_id, thread_id) {
+     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
+     $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id,
+                thread_id: thread_id
+            },
+            success: function(data){
+                console.log(data);
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var user_id = escape(json.user);
+                var post_content = json.post;
+                var time = (new Date(json.post_time));
+                var date = time.toLocaleDateString();
+                time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                var contentBox = document.getElementById('edit_post_content');
+                var editUserPrompt = document.getElementById('edit_user_prompt');
+                editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
+                contentBox.innerHTML = post_content;
+                document.getElementById('edit_post_id').value = post_id;
+                document.getElementById('edit_thread_id').value = thread_id;
+                $('.popup-form').css('display', 'block');
+                
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to edit the post. Please try again.");
+            }
+        });
+}
+
 function enableTabsInTextArea(id){
     var t = document.getElementById(id);
 
