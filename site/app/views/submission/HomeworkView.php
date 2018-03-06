@@ -120,7 +120,7 @@ HTML;
             <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
                 Normal Submission
             <input type='radio' id="radio_student" name="submission_type">
-                Make Submission for a Student
+                Make Submission for a Student1
 HTML;
                 if ($gradeable->getNumParts() == 1 && !$gradeable->useVcsCheckout()) {
                     $return .= <<<HTML
