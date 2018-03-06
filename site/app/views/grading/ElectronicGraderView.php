@@ -1028,8 +1028,8 @@ HTML;
             foreach ($files as $dir => $path) {
                 if (!is_array($path)) {
                     $name = htmlentities($dir);
-                    $dir = urlencode(htmlspecialchars($dir));
-                    $path = urlencode(htmlspecialchars($path));
+                    $dir = rawurlencode(htmlspecialchars($dir));
+                    $path = rawurlencode(htmlspecialchars($path));
                     $indent_offset = $indent * -15;
                     $return .= <<<HTML
                 <div>
