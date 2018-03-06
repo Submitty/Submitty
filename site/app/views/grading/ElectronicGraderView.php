@@ -573,15 +573,18 @@ HTML;
 HTML;
                         if($row->getTeam()=== null) {
                             $return .= <<<HTML
-                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], [], {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td></td>
 HTML;
                         }
                         else {
+                            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $row->getTeam()->getId(), "user_assignment_settings.json");
+                            $user_assignment_setting = FileUtils::readJsonFile($settings_file);
+                            $user_assignment_setting_json = json_encode($user_assignment_setting);
                             $members = json_encode($row->getTeam()->getMembers());
                             $return .= <<<HTML
-                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$members}, {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$user_assignment_setting_json}, {$members}, {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$row->getTeam()->getId()}</td>
 HTML;
@@ -813,11 +816,14 @@ HTML;
             foreach($empty_teams as $team) {
                 $display_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
                 if ($display_section == null) $display_section = "NULL";
+                $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $team->getId(), "user_assignment_settings.json");
+                $user_assignment_setting = FileUtils::readJsonFile($settings_file);
+                $user_assignment_setting_json=json_encode($user_assignment_setting);
                 $return .= <<<HTML
             <tr id="{empty-team-row-{$team->getId()}}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
-                <td><a onclick='adminTeamForm(false, "{$team->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(false, "{$team->getId()}", "{$display_section}", {$user_assignment_setting_json}, [], {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$team->getId()}</td>
 HTML;
@@ -845,7 +851,7 @@ HTML;
     public function adminTeamForm($gradeable, $sections) {
         $reg_or_rot = $gradeable->isGradeByRegistration() ? "Registration" : "Rotating";
         $return = <<<HTML
-<div class="popup-form" id="admin-team-form" style="width:500px; margin-left:-250px;">
+<div class="popup-form" id="admin-team-form" style="width:550px; margin-left:-250px;">
     <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'submit_team_form', 'gradeable_id'=>$gradeable->getId()))}">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <input type="hidden" name="new_team" />
@@ -875,6 +881,11 @@ HTML;
             <option value="NULL">Section NULL</option>
         </select>
     </div>
+    <br />
+    <br />
+    <h4 id="admin-team-history-title"></h4>
+    <div id="admin-team-history-left" style="width:28%;"></div>
+    <div id="admin-team-history-right" style="width:62%;"></div>
     <div style="float: right; width: auto; margin-top: 10px">
         <a onclick="$('#admin-team-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
         <input class="btn btn-primary" type="submit" value="Submit" />
