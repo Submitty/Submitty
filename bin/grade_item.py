@@ -12,7 +12,8 @@ import time
 import dateutil
 import dateutil.parser
 import urllib.parse
-import uuid
+import string
+import random
 
 from submitty_utils import dateutils, glob
 import grade_items_logging
@@ -196,7 +197,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
     queue_time_longstring = dateutils.write_submitty_date(queue_time)
     grading_began = dateutils.get_current_time()
     waittime = int((grading_began-queue_time).total_seconds())
-    job_id = uuid.uuid4().hex
+    job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
     grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"wait:",waittime,"")
 
     # --------------------------------------------------------

@@ -35,12 +35,11 @@ def anon_log(in_filename,out_filename,offset):
                 if len(tokens) == 6:
                     # pre f17
                     timestamp = tokens[0]
-                    process = tokens[1]
+                    job_id = tokens[1]
                     batch = tokens[2]
                     untrusted = "           "
                     which = tokens[3].strip()
                     waitgrade = tokens[4]
-                    job_id="                                "
                     result =tokens[5]
 
                     things=which.split('__')
@@ -56,34 +55,13 @@ def anon_log(in_filename,out_filename,offset):
                 elif len(tokens) == 7:
                     # f17 or later
                     timestamp = tokens[0]
-                    process = tokens[1]
+                    job_id = tokens[1]
                     batch = tokens[2]
                     untrusted = tokens[3]                
                     which=tokens[4].strip()
                     waitgrade =tokens[5]
-                    job_id ="                                "
                     result =tokens[6]
                     
-                    things=which.split('/')
-                    if len(things) != 6:
-                        # discard unparseable things (only errors)
-                        continue
-                    semester = things[0]
-                    course = things[1]
-                    assignment = things[3]
-                    user = things[4]
-                    version = things[5]
-
-                elif len(tokens) == 8:
-                    timestamp = tokens[0]
-                    process = tokens[1]
-                    batch = tokens[2]
-                    untrusted = tokens[3]
-                    which=tokens[4].strip()
-                    waitgrade =tokens[5]
-                    job_id =tokens[6]
-                    result =tokens[7]
-
                     things=which.split('/')
                     if len(things) != 6:
                         # discard unparseable things (only errors)
@@ -101,8 +79,8 @@ def anon_log(in_filename,out_filename,offset):
                 hash = random_string(semester+course+user+offset)
 
                 anon_which = semester+"/"+course+"/submissions/"+assignment+"/"+hash+"/"+version
-                outfile.write('{0}|{1}|{2}|{3}| {4:76}|{5}|{6}|{7}\n'
-                              .format(timestamp,process,batch,untrusted,anon_which,waitgrade,job_id,result))
+                outfile.write('{0}|{1}|{2}|{3}| {4:76}|{5}|{6}\n'
+                              .format(timestamp,job_id,batch,untrusted,anon_which,waitgrade,result))
                 
 
 def anon_dir(indir,outdir,offset):
