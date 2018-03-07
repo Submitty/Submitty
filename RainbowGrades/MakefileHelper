@@ -60,18 +60,20 @@ remove_json_comments: customization.json
 	grep '{"file":' customization_no_comments.json > iclicker_file_list.txt || true
 	python ${RAINBOW_GRADES_DIRECTORY}/parsexml.py iclicker_file_list.txt
 
-compile:  remove_json_comments
-	g++ -Wall ${flags} ${memory_flags} \
-		${RAINBOW_GRADES_DIRECTORY}/main.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/output.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/table.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/student.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/iclicker.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/zone.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/benchmark.cpp \
-		-g -o process_grades.out
-	mkdir -p individual_summary_html/
-	mkdir -p all_students_summary_html/
+process_grades.out: \
+	${RAINBOW_GRADES_DIRECTORY}/main.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/output.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/table.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/student.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/iclicker.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/zone.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/benchmark.cpp
+	g++ -Wall ${flags} ${memory_flags} $^ -g -o $@
+
+individual_summary_html all_students_summary_html:
+	mkdir -p $@
+
+compile: remove_json_comments process_grades.out individual_summary_html all_students_summary_html
 
 clean:
 	rm process_grades.out
