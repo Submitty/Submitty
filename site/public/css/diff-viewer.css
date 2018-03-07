@@ -83,3 +83,26 @@
     white-space: pre;
     padding-left: 10px;
 }
+.modal{
+    display: none;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+.modal-content{
+    text-align: center;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px;
+    padding-top: 15px;
+    border: 1px solid #888;
+    width: 420px;
+    min-width: 400px;
+    border-radius: 5px;
+}

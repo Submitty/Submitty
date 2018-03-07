@@ -1827,4 +1827,34 @@ AND gc_id IN (
         $this->course_db->query("SELECT anon_id FROM users");
         return $this->course_db->rows();
     }
+
+    public function insertNewRegradeRequest($gradeable_id, $student_id){
+        $params = array($gradeable_id, $student_id, -1);
+        $this->course_db->query("INSERT INTO regrade_requests(gradeable_id, timestamp, student_user_id, status) VALUES (?, current_timestamp, ?, ?)", $params);
+        return true;
+    }
+    public function modifyRegradeStatus($gradeable_id, $student_id, $status){
+        $this->course_db->query("UPDATE regrade_requests SET timestamp = current_timestamp, status = '$status' WHERE gradeable_id = '$gradeable_id' AND student_user_id = '$student_id'" );
+    }
+    public function insertNewRegradePost($gradeable_id, $student_id, $content){
+        $params = array($gradeable_id, $student_id, $content);
+        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content) VALUES (?, current_timestamp, ?, ?)", $params);
+    }
+
+    public function getRegradeRequestStatus($student_id, $gradeable_id){
+        $params = array($student_id, $gradeable_id);
+        $question_marks = implode(",", array_fill(0, count($params), "?"));
+        $row = $this->course_db->query("SELECT * FROM regrade_requests WHERE student_user_id = '$student_id' AND gradeable_id = '$gradeable_id' ");
+        if( $this->course_db->row() ){
+            return $row['status'];
+        }
+        else return 0;
+        //-1 -> regrade in process
+        //0 ->no regrade
+        //1 regrade complete
+    }
+    public function getContent($student_id, $gradeable_id){
+       
+       return 0;
+    }
 }

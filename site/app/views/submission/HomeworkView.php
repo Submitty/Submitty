@@ -1019,10 +1019,52 @@ HTML;
 <div class="content">
 HTML;
             if ($gradeable->hasGradeFile()) {
+                if($gradeable->getRegradeStatus() === 0){
+                    $regradeButton = '<input type="button" id="request_regrade" class="btn btn-default" style="float: right" value="Request Regrade" onclick="show()">';
+                }else if($gradeable->getRegradeStatus() === 1){
+                    $regradeButton = '<input type="button" id="request_regrade" class="btn btn-success" style="float: right" value="View TA Response">';
+                }else{
+                    $regradeButton = '<input type="button" id="request_regrade" class="btn btn-default" style="float: right" value="Request Under Review" disabled = "true">';
+                }
                 $return .= <<<HTML
-    <h3 class="label">TA grade</h3>
+    <h3>TA Grade</h3>
+    <div style="margin-top: -30px; margin-bottom: 30px;" method="post">{$regradeButton}</div>
+
+    <div class="modal" id="modal-container">
+      <div class="modal-content" id="regradeBox">
+            <h3>Submit Regrade Request</h3>
+            <hr>
+            <p class = "red-message"> Warning: Frivoulous requests may result in a grade deduction, loss of late days, or having to retake data structures! :0 </p>
+            <br style = "margin-bottom: 10px;">
+            <form method="POST" action="{$this->core->buildUrl(array('component' => 'student',
+                                                                     'action' => 'request_regrade',
+                                                                     'gradeable_id' => $gradeable->getId(),
+                                                                     'student_id' => $this->core->getUser()->getId()
+                                                                 ))}">
+                <textarea name ="request_content" rows="10" cols="60" maxlength="350" style="resize: none; height: 200px; font-family: inherit;"
+                placeholder="please enter a consise description of your request and indicate which areas/checkpoints need to be re-checked"
+                ></textarea>
+                <br style = "margin-bottom: 10px;">
+                <input type="submit" value="submit" id = "submitRegrade" class="btn btn-default" style="margin: 15px;">
+                <input type="button" value="cancel" id="cancelRegrade" class="btn btn-default" style="margin: 15px;">
+            </form>
+      </div>
+    </div>
+    <script type = "text/javascript">
+        var regradeBox = document.getElementById("regradeBox");
+        var modal =document.getElementById("modal-container");
+        function show(){
+            regradeBox.style.display = "block";
+            modal.style.display = "block";
+        }  
+        document.getElementById("cancelRegrade").onclick= function(){
+            regradeBox.style.display = "none";
+            modal.style.display = "none";
+        }; 
+    </script>
     <pre>{$gradeable->getGradeFile()}</pre>
 HTML;
+
             } else {
                 $return .= <<<HTML
     <h3 class="label">TA grade not available</h3>
@@ -1032,7 +1074,6 @@ HTML;
 </div>
 HTML;
         }
-
         return $return;
     }
 }

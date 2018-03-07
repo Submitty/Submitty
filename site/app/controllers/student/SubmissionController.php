@@ -58,6 +58,9 @@ class SubmissionController extends AbstractController {
             case 'verify':
                 return $this->ajaxValidGradeable();
                 break;
+            case 'request_regrade':
+                return $this->requestRegrade();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
@@ -65,6 +68,25 @@ class SubmissionController extends AbstractController {
         }
     }
 
+    private function requestRegrade(){
+        $request_content = htmlentities($_REQUEST["request_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
+
+        if($gradeable_id !== null && $student_id !== null) {
+            if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id)){
+                $this->core->getQueries()->insertNewRegradePost($gradeable_id, $student_id, $request_content);
+                $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
+            }
+            else{
+                //handle error
+            }
+        }
+        else{
+            //handle error
+        }
+    }
+    
     private function popUp() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);

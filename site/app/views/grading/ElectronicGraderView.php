@@ -681,9 +681,15 @@ HTML;
                 }
                 else if ($row->beenTAgraded()) {
                     if($row->validateVersions()) {
-                        $btn_class = "btn-default";
-                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-			            $graded += $row->getGradedTAPoints();
+                       if($row->getRegradeStatus() === 0){
+                          $btn_class = "btn-default";
+                          $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                          $graded += $row->getGradedTAPoints();
+                        }
+                        else if($row->getRegradeStatus() === -1){
+                          $btn_class = "btn-danger";
+                          $contents = "Regrade Requested";
+                        }
                     }
                     else{
                         $btn_class = "btn-primary";
@@ -1116,6 +1122,17 @@ HTML;
         $user = $gradeable->getUser();
         if(!$peer) {
             $return .= <<<HTML
+            
+<div id="displayRequests" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%;">
+    <span class = "grading_label">Regrade Request Discussion</span>
+    <div class = "inner-container" style = "text-align: center;">
+HTML;
+            $return .= <<<HTML
+            <form method = "POST" action="{$this->core->getQueries()->modifyRegradeStatus($gradeable->getId(),$this->core->getUser()->getId(), 1)}" >
+                <input type="submit" class ="btn btn-default" value="Submit">
+            </form>
+    </div>
+</div>
 
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
     <span class="grading_label">Student Information</span>
@@ -1127,8 +1144,16 @@ HTML;
             $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'individual'=>$individual,
                                                       'gradeable_version' => ""))}', this)";
             $formatting = "font-size: 13px;";
+           if($gradeable->getRegradeStatus() === -1){
+                $regradeButton = '<input type="button" class="btn btn-danger" id="showRegradeDiscussion" onclick="showRequestDiscussion()" value="Regrade Requested">';
+            }else if($gradeable->getRegradeStatus() === 0){ 
+                $regradeButton = '<button style = "display: none;"></button>';
+            }else{
+                $regradeButton = '<input type="button" class="btn btn-default" id="showRegradeDiscussion" onclick="showRequestDiscussion() value = "Regrade Discussion">';
+            }
             $return .= <<<HTML
             <div style="float:right;">
+            {$regradeButton}
 HTML;
             $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
 
@@ -1689,6 +1714,14 @@ HTML;
         }
         window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
+    }
+    function hideRequestDiscussion(){
+        var displayRequests = document.getElementById("displayRequests");
+        displayRequests.style.display = "none";
+    }
+    function showRequestDiscussion(){
+        var displayRequests = document.getElementById("displayRequests");
+        displayRequests.style.display = "block";
     }
 </script>
 <script type="text/javascript">
