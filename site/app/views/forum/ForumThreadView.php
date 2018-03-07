@@ -294,18 +294,17 @@ HTML;
                         $pos = 0;
                         if(count($result) > 0) {
                         	foreach($result[1] as $url){
-                        		$decoded_url = trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+                        		$decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
                         		$parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
                         		if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
-                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . $decoded_url . '">'. htmlentities(htmlspecialchars(strip_tags($result[2][$pos])), ENT_QUOTES | ENT_HTML5, 'UTF-8') .'</a>', $post_content);
+                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . $decoded_url . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
 
                         		} else {
-                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content);
+                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
                         		}
                         		if(!empty($pre_post)){
                         			$post_content = $pre_post;
-                        		
-                        		}
+                        		} $pre_post = "";
                         		 $pos++;
                         	}
                         }
@@ -481,7 +480,7 @@ HTML;
 		<div style="margin-top:10px; height:50px;" id="forum_bar">
 			<div style="margin-left:20px; height: 20px; width:148px;" class="create_thread_button">
 
-			<a class="btn btn-primary" style="position:absolute;top:3px;left:2px;vertical-align: middle;" title="Create thread" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+			<a class="btn btn-primary" style="position:absolute;top:3px;left:2px;vertical-align: middle;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
 			</div>
 		</div>
 
