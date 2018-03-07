@@ -480,7 +480,7 @@ HTML;
 		<div style="margin-top:10px; height:50px;" id="forum_bar">
 			<div style="margin-left:20px; height: 20px; width:148px;" class="create_thread_button">
 
-			<a class="btn btn-primary" style="position:absolute;top:3px;left:2px;vertical-align: middle;" title="Create thread" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+			<a class="btn btn-primary" style="position:absolute;top:3px;left:2px;vertical-align: middle;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
 			</div>
 		</div>
 
