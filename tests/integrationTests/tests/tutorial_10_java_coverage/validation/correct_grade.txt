@@ -1,9 +1,12 @@
-Testcase  1: Java - Compilation                                   2 /  2  
-Testcase  2: Java - Student and Instructor JUnit Test Compilation   2 /  2  
-Testcase  3: Java - Instrumentation of Student Code               0 /  0  
-Testcase  4: Java - Running Student JUnit Tests in hw0/tests/     4 /  4  
-Testcase  5: Java - Generating Coverage Report for Student Tests   6 /  6  
-Testcase  6: Java - Instructor JUnit Tests                        6 /  6  
-Testcase  7: Submission Limit                                             
-Automatic grading total:                                         20 / 20
-Non-hidden automatic grading total:                              20 / 20
+Testcase  1: Class Compilation                                    2 /  2  
+Testcase  2: Student and Instructor JUnit Test Compilation        2 /  2  
+Testcase  3: JaCoCo - Running Student JUnit Tests in hw0/tests/   4 /  4  
+Testcase  4: JaCoCo - Generating Coverage Report for Student Tests   6 /  6  
+Testcase  5: JaCoCo - Instructor JUnit Tests                      6 /  6  
+Testcase  6: EMMA - Instrumentation of Student Code               0 /  0  
+Testcase  7: EMMA - Running Student JUnit Tests in hw0/tests/     4 /  4  
+Testcase  8: EMMA - Generating Coverage Report for Student Tests   6 /  6  
+Testcase  9: EMMA - Instructor JUnit Tests                        6 /  6  
+Testcase 10: Submission Limit                                             
+Automatic grading total:                                         36 / 36
+Non-hidden automatic grading total:                              36 / 36
