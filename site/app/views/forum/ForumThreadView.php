@@ -208,6 +208,8 @@ HTML;
 HTML;
 					}
 
+					$activeThreadTitle = htmlentities(strip_tags($activeThreadTitle), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
 			$thread_id = -1;
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$title_html = '';
