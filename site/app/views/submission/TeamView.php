@@ -165,7 +165,7 @@ HTML;
             foreach ($invites_received as $invite) {
                 $return .= <<<HTML
     <form action="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'accept'))}" method="post">
-        <input type="hidden" name="team_id" value={$invite->getId()} />
+        <input type="hidden" name="team_id" value="{$invite->getId()}" />
         &emsp;{$invite->getMemberList()}: <input type="submit" value = "Accept" class="btn btn-success" />
     </form>
     <br />
