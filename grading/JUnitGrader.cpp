@@ -369,6 +369,10 @@ std::vector<std::string> SplitOnComma(const std::string& in) {
   return answer;
 }
 
+// implemented in execute.cpp
+bool wildcard_match(const std::string &pattern, const std::string &thing);
+
+
 TestResults* JaCoCoCoverageReportGrader_doit (const TestCase &tc, const nlohmann::json& j) {
 
   float instruction_coverage_threshold = j.value("instruction_coverage_threshold",0);
@@ -385,8 +389,10 @@ TestResults* JaCoCoCoverageReportGrader_doit (const TestCase &tc, const nlohmann
     return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Must specify coverage threshold for instruction, branch, line, complexity, or method")});
   }
 
-  std::string which_package = j.value("package", "");
-  std::string which_class = j.value("class", "");
+  std::string include_package = j.value("package", "*");
+  std::string include_class = j.value("class", "*");
+  std::string exclude_package = j.value("exclude_package", "");
+  std::string exclude_class = j.value("exclude_class", "");
 
   std::string filename = j.value("actual_file","");
 
@@ -420,8 +426,8 @@ TestResults* JaCoCoCoverageReportGrader_doit (const TestCase &tc, const nlohmann
     }
 
     // skip the package if its not the one to check
-    if (which_package != "" && which_package != tokens[1]) continue;
-    if (which_class != "" && which_class != tokens[2]) continue;
+    if ( !wildcard_match(include_package,tokens[1]) || wildcard_match(exclude_package,tokens[1]) ) continue;
+    if ( !wildcard_match(include_class,  tokens[2]) || wildcard_match(exclude_class,  tokens[2]) ) continue;
 
     // parse the line
     int i_m = std::stoi(tokens[3]);
@@ -505,7 +511,11 @@ TestResults* JaCoCoCoverageReportGrader_doit (const TestCase &tc, const nlohmann
   }
 
   if (check_count==0) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Nothing matched the package="+which_package+" and class="+which_class)});
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,
+                                               "ERROR: Nothing matched the package="+include_package+
+                                               " but not package="+exclude_package+
+                                               " and class="+include_class+
+                                               " but not class="+exclude_class)});
   }
 
   return new TestResults(score,answer);

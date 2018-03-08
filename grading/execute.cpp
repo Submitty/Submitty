@@ -339,10 +339,13 @@ std::string escape_spaces(const std::string& input) {
 
 // =====================================================================
 
-bool wildcard_match(const std::string &pattern, const std::string &thing, std::ostream &logfile) {
+bool wildcard_match(const std::string &pattern, const std::string &thing) {
   //  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
 
   int wildcard_loc = pattern.find("*");
+  if (wildcard_loc == std::string::npos) {
+    return pattern == thing;
+  }
   assert (wildcard_loc != std::string::npos);
 
   std::string before = pattern.substr(0,wildcard_loc);
@@ -459,7 +462,7 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
       ent = readdir(dir);
       if (ent == NULL) break;
       std::string thing = ent->d_name;
-      if (wildcard_match(file_pattern,thing,logfile)) {
+      if (wildcard_match(file_pattern,thing)) {
         std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
         validate_filename(directory+thing);
         my_args.push_back(directory+thing);
