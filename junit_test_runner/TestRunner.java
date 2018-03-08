@@ -2,19 +2,25 @@ import org.junit.runner.RunWith;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.internal.TextListener;
+
+import static org.junit.Assert.assertArrayEquals;
+
 import java.io.*;
 
 public class TestRunner {
 
     private static String HIDDEN_TESTS_PREFIX = "ALMHidden";
+    private static String TESTS_SUFFIX = "Test";
 
     /*
     @param: relative name of the folder where the tests are
     @effects: runs all tests in folder ./$homework/test/ with JUnit
     */
-    public static void runAllTestsInTestDirectory(String homework) {
-
-	String folderName = homework+"/test/";
+    public static void runAllTestsInTestDirectory(String homework, 
+    		String subFolderPath) {
+        System.out.println("Working Directory = " +
+                System.getProperty("user.dir"));
+	String folderName = homework + subFolderPath;
 
 	File folder = new File(folderName);
 
@@ -34,7 +40,7 @@ public class TestRunner {
 	for (int i = 0; i < listOfFiles.length; i++) {
 	    if (listOfFiles[i].isFile()) {
 		String filename = listOfFiles[i].getName();
-		if (filename.indexOf(".class") > -1) {
+		if (filename.indexOf("Test.class") > -1) {
 		    // if class file is a hidden test, skip
 		    if (filename.startsWith(HIDDEN_TESTS_PREFIX))
 			continue;
@@ -89,7 +95,11 @@ public class TestRunner {
     public static void main(String args[]) {
 
 	String folderName = args[0];
-	runAllTestsInTestDirectory(folderName);
+	String subFolderPath = "/test/";
+	if (!"".equals(args[1])) {
+		subFolderPath = args[1];
+	}
+	runAllTestsInTestDirectory(folderName, subFolderPath);
 
     }
 }
