@@ -18,8 +18,7 @@ public class TestRunner {
     */
     public static void runAllTestsInTestDirectory(String homework, 
     		String subFolderPath) {
-        System.out.println("Working Directory = " +
-                System.getProperty("user.dir"));
+        //System.out.println("Working Directory = " + System.getProperty("user.dir"));
 	String folderName = homework + subFolderPath;
 
 	File folder = new File(folderName);
@@ -96,7 +95,7 @@ public class TestRunner {
 
 	String folderName = args[0];
 	String subFolderPath = "/test/";
-	if (!"".equals(args[1])) {
+	if (args.length > 1) {
 		subFolderPath = args[1];
 	}
 	runAllTestsInTestDirectory(folderName, subFolderPath);
