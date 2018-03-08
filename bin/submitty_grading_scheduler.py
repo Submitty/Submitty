@@ -23,6 +23,7 @@ HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
 BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 
+JOB_ID = '!!??!!'
 
 # ==================================================================================
 class NewFileHandler(FileSystemEventHandler):
@@ -79,7 +80,7 @@ def grade_queue_file(queue_file,which_untrusted):
         grade_item.just_grade_item(my_dir, queue_file, which_untrusted)
     except Exception as e:
         print ("ERROR attempting to grade item: ", queue_file, " exception=",e)
-        grade_items_logging.log_message("",False,"","","","","ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
+        grade_items_logging.log_message(JOB_ID,False,"","","","","ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
 
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
@@ -87,12 +88,12 @@ def grade_queue_file(queue_file,which_untrusted):
         os.remove(queue_file)
     except:
         print ("ERROR attempting to remove queue file: ", queue_file)
-        grade_items_logging.log_message("",False,"","","","","ERROR attempting to remove queue file: " + queue_file)
+        grade_items_logging.log_message(JOB_ID,False,"","","","","ERROR attempting to remove queue file: " + queue_file)
     try:
         os.remove(grading_file)
     except:
         print ("ERROR attempting to remove grading file: ", grading_file)
-        grade_items_logging.log_message("",False,"","","","","ERROR attempting to remove grading file: " + grading_file)
+        grade_items_logging.log_message(JOB_ID,False,"","","","","ERROR attempting to remove grading file: " + grading_file)
 
 
 def populate_queue(queue, folder):
@@ -106,7 +107,7 @@ def populate_queue(queue, folder):
     """
 
     for file_path in glob.glob(os.path.join(folder, "GRADING_*")):
-        grade_items_logging.log_message("",False,"","","","","Remove old queue file: " + file_path)
+        grade_items_logging.log_message(JOB_ID,False,"","","","","Remove old queue file: " + file_path)
         os.remove(file_path)
 
     # Grab all the files currently in the folder, sorted by creation
@@ -165,7 +166,7 @@ def launch_workers(num_workers):
     if not int(os.getuid()) == int(HWCRON_UID):
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
-    grade_items_logging.log_message("",False,"","","","","grade_scheduler.py launched")
+    grade_items_logging.log_message(JOB_ID,False,"","","","","grade_scheduler.py launched")
 
     # prepare a list of untrusted users to be used by the workers
     untrusted_users = multiprocessing.Queue()
@@ -209,14 +210,14 @@ def launch_workers(num_workers):
                 if processes[i].is_alive:
                     alive = alive+1
                 else:
-                    grade_items_logging.log_message("",False,"","","","","ERROR: process "+str(i)+" is not alive")
+                    grade_items_logging.log_message(JOB_ID,False,"","","","","ERROR: process "+str(i)+" is not alive")
             if alive != num_workers:
-                grade_items_logging.log_message("",False,"","","","","ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
+                grade_items_logging.log_message(JOB_ID,False,"","","","","ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
             #print ("workers= ",num_workers,"  alive=",alive)
             time.sleep(1)
 
     except KeyboardInterrupt:
-        grade_items_logging.log_message("",False,"","","","","grade_scheduler.py keyboard interrupt")
+        grade_items_logging.log_message(JOB_ID,False,"","","","","grade_scheduler.py keyboard interrupt")
 
 
 
@@ -245,7 +246,7 @@ def launch_workers(num_workers):
         observer.stop()
         observer.join()
 
-    grade_items_logging.log_message("",False,"","","","","grade_scheduler.py terminated")
+    grade_items_logging.log_message(JOB_ID,False,"","","","","grade_scheduler.py terminated")
 
 
 # ==================================================================================
