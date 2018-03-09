@@ -72,6 +72,7 @@ function replace_fillin_variables {
 
     sed -i -e "s|__INSTALL__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__VCS_URL__|$VCS_URL|g" $1
     sed -i -e "s|__INSTALL__FILLIN__CGI_URL__|$CGI_URL|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SITE_LOG_PATH__|$SITE_LOG_PATH|g" $1
 
@@ -302,16 +303,26 @@ chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
 
 # course builders & hwcron need access to these scripts
 chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+
+# everyone needs to run this script
+chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/killall.py
+
+
+# FIXME / WIP:  line below is temporary, to avoid error message if file does not exist
+touch ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
+
 
 # hwcron only things
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
@@ -458,12 +469,13 @@ find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini
 mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DIR}/site/config/master.ini
 
-
 # return the course index page (only necessary when 'clean' option is used)
 if [ -f "$mytempcurrentcourses" ]; then
     echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
     mv ${mytempcurrentcourses} ${originalcurrentcourses}
 fi
+
+
 
 
 ################################################################################################################
@@ -497,7 +509,8 @@ rm ${HWCRON_CRONTAB_FILE}
 # COMPILE AND INSTALL ANALYSIS TOOLS
 
 echo -e "Compile and install analysis tools"
-ST_VERSION=v0.3.3
+
+ST_VERSION=v0.3.4
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
@@ -505,6 +518,10 @@ if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     for b in count plagiarism diagnostics;
         do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${ST_VERSION}/${b}" -O ${b}
     done
+
+    # We may revise this later, when we use a binary of the common ast tool
+    git pull origin master
+
     echo ${ST_VERSION} > VERSION
 fi
 popd
@@ -512,6 +529,32 @@ popd
 # change permissions
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+#copying commonAST scripts 
+mkdir -p ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/astMatcher.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/commonast.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/CMakeLists.txt ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/ASTMatcher.cpp ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
+
+#building commonAST excecutable
+pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/commonASTCount.out
+popd
+
+#building clang ASTMatcher.cpp
+if [ -d ${SUBMITTY_INSTALL_DIR}/clang-llvm/build ]; then
+	pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
+	ninja
+	popd
+	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
+fi
+
+# change permissions
+chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+echo -e "\nCompleted installation of the Submitty homework submission server\n"
 
 ################################################################################################################
 ################################################################################################################

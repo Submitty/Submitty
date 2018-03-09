@@ -259,7 +259,7 @@ gradeables:
   g_id: open_team_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Open Team Homework
-  gradeable_config: python_simple_homework
+  gradeable_config: cpp_hidden_tests
   g_bucket: homework
 
 - components:

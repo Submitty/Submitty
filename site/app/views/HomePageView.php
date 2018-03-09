@@ -28,7 +28,7 @@ class HomePageView extends AbstractView {
                     </tr>
                     <tr>
                         <td><b>First Name:</b> {$user->getDisplayedFirstName()} </td>
-                        <td><a onclick="userNameChange('$displayedFirstName')"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                        <td><a onclick="userNameChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                         <script type="text/javascript">
                             function userNameChange() {
                                 $('.popup-form').css('display', 'none');
