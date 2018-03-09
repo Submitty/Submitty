@@ -13,7 +13,7 @@ class TeamView extends AbstractView {
     * @param \app\models\Team[] $teams
     * @return string
     */
-    public function showTeamPage($gradeable, $teams, $lock) {
+    public function showTeamPage($gradeable, $teams, $lock, $users_seeking_team) {
         $site_url = $this->core->getConfig()->getSiteUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -137,6 +137,7 @@ HTML;
     </form>
     <br />
     <button class="btn btn-danger" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'leave_team'))}'">Leave Team</button>
+    <button class="btn btn-default" style="float:right" onclick="$('.popup-form').css('display', 'none');$('#users_seeking_team_show').css('display', 'block');">Users Seeking Team/Partner</button>
 HTML;
     }
 
@@ -162,7 +163,7 @@ HTML;
 <div class="content">
     <h3>Invitations:</h3> <br />
 HTML;
-            foreach ($invites_received as $invite) {
+            foreach ($invites_received as $invite){
                 $return .= <<<HTML
     <form action="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'accept'))}" method="post">
         <input type="hidden" name="team_id" value={$invite->getId()} />
@@ -178,8 +179,34 @@ HTML;
     <br />
     <button class="btn btn-primary" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'create_new_team'))}'">Create New Team </button>
 HTML;
+		if(!(in_array($user_id, $users_seeking_team))){
+			$return .= <<<HTML
+    &nbsp;or&nbsp;<button class="btn btn-primary" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'seek_team'))}'">Seek Team/Partner </button>
+HTML;
+		}
+		$return .= <<<HTML
+	<button class="btn btn-default" style="float:right" onclick="$('.popup-form').css('display', 'none');$('#users_seeking_team_show').css('display', 'block');">Users Seeking Team/Partner</button>
+HTML;
     }
     $return .= <<<HTML
+</div>
+<div class="popup-form" id="users_seeking_team_show" style="width:420px">
+	<center><h3>Users seeking team/partner-</h3></center><br />
+	<form>
+HTML;
+	foreach ($users_seeking_team as $user_seeking_team) {
+		$return .= <<<HTML
+		<center><input class="readonly" type="text" readonly="readonly" value="{$user_seeking_team}" /></center><br />
+HTML;
+	}
+	if (empty($users_seeking_team)) {
+		$return .= <<<HTML
+		<center>no one seeking team/partner right now</center><br />
+HTML;
+	}
+	$return .= <<<HTML
+    <a style="float:right" onclick="$('#users_seeking_team_show').css('display', 'none');" class="btn btn-danger">Back</a>
+	</form>
 </div>
 HTML;
     return $return;
