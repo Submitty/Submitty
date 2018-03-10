@@ -336,7 +336,9 @@ table tr.table-header {
     background-color: #E9EFEF;
     border-radius: 3px;
     padding: 2%;
-    margin: 2% 15px;
+    margin: 5% auto;
+    max-width: 500px;
+    text-align: center;
 }
 
 .content h2 {

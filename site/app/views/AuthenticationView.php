@@ -24,7 +24,7 @@ HTML;
             <input type="text" name="user_id" placeholder="User ID" autofocus/><br />
             <input type="password" name="password" placeholder="Password" /><br />
             <label for="stay_logged_in">Stay Logged In</label> <input type="checkbox" name="stay_logged_in" checked /><br />
-            <input type="submit" name="login" value="Login" class="btn btn-default" />
+            <input type="submit" name="login" value="Login" class="btn btn-default btn-success" />
         </form>
     </div>
 </div>
