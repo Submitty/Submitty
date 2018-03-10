@@ -74,6 +74,8 @@ function deleteCookies(){
     });
 }
 
+function onAjaxInit() {}
+
 function readCookies(){
     var output_top = document.cookie.replace(/(?:(?:^|.*;\s*)output_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var output_left = document.cookie.replace(/(?:(?:^|.*;\s*)output_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -154,14 +156,14 @@ function readCookies(){
 
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
     if (autoscroll == "on") {
-        openClose(parseInt(opened_mark));
-        if (scroll_pixel > 0) {
-
-            document.getElementById('grading_rubric').scrollTop = scroll_pixel;
+        onAjaxInit = function() {
+            $('#title-'+opened_mark).click();
+            
+            if (scroll_pixel > 0) {
+                document.getElementById('grading_rubric').scrollTop = scroll_pixel;
+            }
         }
-    }
-
-    if (autoscroll == "on") {
+        
         var testcases_array = JSON.parse(testcases);
         testcases_array.forEach(function(element) {
             var id = 'testcase_' + element;
@@ -169,9 +171,7 @@ function readCookies(){
                 toggleDiv(id);
             }
         });
-    }
-
-    if (autoscroll == "on") {
+        
         var files_array = JSON.parse(files);
         files_array.forEach(function(element) {
             var file_path = element.split('#$SPLIT#$');

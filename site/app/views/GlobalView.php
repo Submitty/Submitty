@@ -76,7 +76,8 @@ HTML;
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/diff-viewer.js{$extra}"></script>
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/server.js{$extra}"></script>
 </head>
-<body onload="setSiteDetails('{$this->core->getConfig()->getSiteUrl()}', '{$this->core->getCsrfToken()}')">
+<script>var onAjaxInit;</script>
+<body onload="setSiteDetails('{$this->core->getConfig()->getSiteUrl()}', '{$this->core->getCsrfToken()}'); if (onAjaxInit) { onAjaxInit(); }">
 {$messages}
 <div id="container">
 
