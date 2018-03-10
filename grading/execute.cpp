@@ -100,6 +100,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "swipl",                   "/usr/bin/swipl" },
     { "plt-r5rs",                "/usr/bin/plt-r5rs" },
 
+    // for Program Analysis course
+    { "ghc",                     "/usr/bin/ghc" },
+
     // for Cmake & Make
     { "cmake",                   "/usr/bin/cmake" },
     { "make",                    "/usr/bin/make" },
@@ -110,6 +113,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
     { "mpirun",                  "/usr/local/mpich-3.2/bin/mpirun"},
     { "mpicc",                   "/usr/local/mpich-3.2/bin/mpicc"},
+    { "expect",                  "/usr/bin/expect" },
 
     // for LLVM / Compiler class
     { "lex",                     "/usr/bin/lex" },
