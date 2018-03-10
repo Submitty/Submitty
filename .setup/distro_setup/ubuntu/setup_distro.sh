@@ -161,6 +161,10 @@ apt-get install -y docker-ce
 systemctl status docker
 
 
+# install haskell
+sudo apt-get install haskell-platform
+
+
 if [ ${VAGRANT} == 1 ]; then
     apt-get install -qqy gitweb libcgi-session-perl
 fi
