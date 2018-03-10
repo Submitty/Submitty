@@ -32,6 +32,8 @@ Andrew Ma 2017
 Jason Parham 2014-2017  
 Jeramey Tyler 2016-2017  
 Zishan Huang 2015-2016  
+Garrett Chang 2016  
+Robert Patterson 2016  
 Andrea Wong 2015-2016  
 Melissa Lindquist 2015-2016  
 Beverly Sihsobhon 2015-2016  
