@@ -50,7 +50,7 @@ def load_queue_file_obj(next_directory,next_to_grade):
     queue_file = os.path.join(next_directory,next_to_grade)
     if not os.path.isfile(queue_file):
         grade_items_logging.log_message("ERROR: the file does not exist " + queue_file)
-        raise SystemExit("ERROR: the file does not exist",queue_file)
+        raise RuntimeError("ERROR: the file does not exist",queue_file)
     with open(queue_file, 'r') as infile:
         obj = json.load(infile)
     return obj
@@ -103,7 +103,7 @@ def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
 def copy_contents_into(source,target,tmp_logs):
     if not os.path.isdir(target):
         grade_items_logging.log_message("ERROR: the target directory does not exist " + target)
-        raise SystemExit("ERROR: the target directory does not exist '", target, "'")
+        raise RuntimeError("ERROR: the target directory does not exist '", target, "'")
     if os.path.isdir(source):
         for item in os.listdir(source):
             if os.path.isdir(os.path.join(source,item)):
@@ -112,7 +112,7 @@ def copy_contents_into(source,target,tmp_logs):
                     copy_contents_into(os.path.join(source,item),os.path.join(target,item),tmp_logs)
                 elif os.path.isfile(os.path.join(target,item)):
                     grade_items_logging.log_message("ERROR: the target subpath is a file not a directory '" + os.path.join(target,item) + "'")
-                    raise SystemExit("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
+                    raise RuntimeError("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
                 else:
                     # copy entire subtree
                     shutil.copytree(os.path.join(source,item),os.path.join(target,item))
@@ -125,13 +125,13 @@ def copy_contents_into(source,target,tmp_logs):
                 try:
                     shutil.copy(os.path.join(source,item),target)
                 except:
-                    raise SystemExit("ERROR COPYING FILE: " +  os.path.join(source,item) + " -> " + os.path.join(target,item))
+                    raise RuntimeError("ERROR COPYING FILE: " +  os.path.join(source,item) + " -> " + os.path.join(target,item))
 
 
 def copytree_if_exists(source,target):
     # target must not exist!
     if os.path.exists(target):
-        raise SystemExit("ERROR: the target directory already exist '", target, "'")
+        raise RuntimeError("ERROR: the target directory already exist '", target, "'")
     # source might exist
     if not os.path.isdir(source):
         os.mkdir(target)
@@ -174,15 +174,15 @@ def untrusted_grant_rwx_access(which_untrusted,my_dir):
 def zip_my_directory(path,zipfilename):
     zipf = zipfile.ZipFile(zipfilename,'w',zipfile.ZIP_DEFLATED)
     for root,dirs,files in os.walk(path):
-        for file in files:
+        for my_file in files:
             relpath = root[len(path)+1:]
-            zipf.write(os.path.join(root,file),os.path.join(relpath,file))
+            zipf.write(os.path.join(root,my_file),os.path.join(relpath,my_file))
     zipf.close()
 
 
 def unzip_this_file(zipfilename,path):
     if not os.path.exists(zipfilename):
-        raise SystemExit("ERROR: zip file does not exist '", zipfilename, "'")
+        raise RuntimeError("ERROR: zip file does not exist '", zipfilename, "'")
     zip_ref = zipfile.ZipFile(zipfilename,'r')
     zip_ref.extractall(path)
     zip_ref.close()
@@ -191,11 +191,11 @@ def unzip_this_file(zipfilename,path):
 def unzip_queue_file(zipfilename):
     # be sure the zip file is ok, and contains the queue file
     if not os.path.exists(zipfilename):
-        raise SystemExit("ERROR: zip file does not exist '", zipfilename, "'")
+        raise RuntimeError("ERROR: zip file does not exist '", zipfilename, "'")
     zip_ref = zipfile.ZipFile(zipfilename,'r')
     names = zip_ref.namelist()
     if not 'queue_file.json' in names:
-        raise SystemExit("ERROR: zip file does not contain queue file '", zipfilename, "'")
+        raise RuntimeError("ERROR: zip file does not contain queue file '", zipfilename, "'")
     # remember the current directory
     cur_dir = os.getcwd()
     # create a temporary directory and go to it
@@ -227,7 +227,7 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
     if not os.path.isdir(submission_path):
         grade_items_logging.log_message("ERROR: the submission directory does not exist" + submission_path)
-        raise SystemExit("ERROR: the submission directory does not exist",submission_path)
+        raise RuntimeError("ERROR: the submission directory does not exist",submission_path)
     print("pid", os.getpid(), "GRADE THIS", submission_path)
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
@@ -538,9 +538,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
-
-
-    # raise SystemExit()
     # run the run.out as the untrusted user
     with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
         print ("LOGGING BEGIN my_runner.out",file=logfile)
