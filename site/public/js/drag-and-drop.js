@@ -310,7 +310,7 @@ function openFile(url_full) {
 // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
 function moveNextInput(count) {
     var next_count = count+1;
-    var next_input = "#bulk_user_id_" + next_count;
+    var next_input = "#users_" + next_count + " :first";
     if ($(next_input).length) {
         $(next_input).focus();
         $(next_input).select(); 
@@ -381,7 +381,13 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                    var make_submission = true;
+                    if(data['previous_submission']){
+                        var make_submission = confirm("One or more users you are submitting for had a previous submission. Do you wish to continue?")
+                    }
+                    if(make_submission){
+                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                    }
                 }
                 else {
                     alert("ERROR! \n\n" + data['message']);
@@ -430,7 +436,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
                 if (data['success']) {
                     $("#bulk_submit_" + count).prop("disabled", true);
                     $("#bulk_delete_" + count).prop("disabled", true);
-                    $("#bulk_user_id_" + count).prop("disabled", true);
+                    $("#users_" + count + " :input").prop("disabled", true);
                     var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
                     $('#messages').append(message);
                     setTimeout(function() {
@@ -555,7 +561,7 @@ function handleBulk(gradeable_id, num_pages) {
                 alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                 return;
             }
-            formData.append('files' + (i + 1) + '[]', file_array[i][j]);
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
         }
     }
 
@@ -632,7 +638,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         }
     }
     else if (days_late > 0) {
-        message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absense. Are you sure you want to continue?";
+        message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
         }
@@ -672,8 +678,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                     alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                     return;
                 }
-                formData.append('files' + (i + 1) + '[]', file_array[i][j]);
-            }
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);            }
         }
         // Files from previous submission
         formData.append('previous_files', JSON.stringify(previous_files));

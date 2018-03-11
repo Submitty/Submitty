@@ -57,6 +57,12 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 #################################################################
+# BUILD CLANG SETUP
+#################
+
+#python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
+
+#################################################################
 # USERS SETUP
 #################
 
@@ -94,12 +100,14 @@ adduser hwphp hwcronphp
 adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcgi hwphp
 adduser hwcgi www-data
+
 # NOTE: hwcgi must be in the shadow group so that it has access to the
 # local passwords for pam authentication
 adduser hwcgi shadow
 
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcron hwcronphp
+adduser hwcron www-data
 
 # FIXME:  umask setting above not complete
 # might need to also set USERGROUPS_ENAB to "no", and manually create
@@ -117,10 +125,12 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser hwcron vagrant
 fi
 
+usermod -aG docker hwcron
+
 pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
-pip3 install psycopg2
+pip3 install psycopg2-binary
 pip3 install sqlalchemy
 pip3 install pylint
 pip3 install psutil
@@ -179,6 +189,26 @@ rm index.html* > /dev/null 2>&1
 chmod o+r . *.jar
 
 popd > /dev/null
+
+# JaCoCo is a potential replacement for EMMA
+
+echo "Getting JaCoCo..."
+
+pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
+
+JACOCO_VER=0.8.0
+wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
+mkdir jacoco-${JACOCO_VER}
+unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
+mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
+mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
+rm -rf jacoco-${JACOCO_VER}
+rm jacoco-${JACOCO_VER}.zip
+
+chmod o+r . *.jar
+
+popd > /dev/null
+
 
 #################################################################
 # DRMEMORY SETUP
@@ -312,7 +342,7 @@ else
     git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     # remember to change this version in .setup/travis/autograder.sh too
-    git checkout v0.93
+    git checkout v0.94
     popd
 fi
 
@@ -334,7 +364,6 @@ fi
 # SUBMITTY SETUP
 #################
 
-
 if [ ${VAGRANT} == 1 ]; then
     # This should be set by setup_distro.sh for whatever distro we have, but
     # in case it is not, default to our primary URL
@@ -345,6 +374,7 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 ${SUBMISSION_URL}
+${GIT_URL}/git
 
 1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
@@ -353,7 +383,6 @@ else
 fi
 
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
-
 
 # (re)start the submitty grading scheduler daemon
 systemctl restart submitty_grading_scheduler
@@ -418,6 +447,18 @@ if [[ ${VAGRANT} == 1 ]]; then
     ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
+
+#################################################################
+# DOCKER SETUP
+#################
+
+#mkdir -p /tmp/docker
+#cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+#pushd /tmp/docker
+#cp -R ${SUBMITTY_INSTALL_DIR}/drmemory ./
+#cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools ./
+#docker build -t ubuntu:custom -f Dockerfile .
+#popd
 
 #################################################################
 # RESTART SERVICES

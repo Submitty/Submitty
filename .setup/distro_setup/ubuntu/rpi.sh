@@ -81,11 +81,24 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 # TODO: add download & install for soot-develop.jar & rt.jar
 # target:  /usr/local/submity/tools/soot/
 
+# install haskell
+apt-get install -qqy haskell-platform
 
 ##################################################
 # Used by Network Programming class
 apt-get install -qqy libssl-dev
 
+# don't install these...
+#apt-get install -qqy libavahi-compat-libdnssd-dev avahi-utils avahi-daemon
+
+# instead:
+mkdir tmp_avahi_install_dir
+cd tmp_avahi_install_dir
+apt-get download libavahi-compat-libdnssd-dev
+mv libavahi*deb libavahi-compat-libdnssd-dev.deb
+dpkg --force-all -i libavahi-compat-libdnssd-dev.deb
+cd ..
+rm -r tmp_avahi_install_dir
 
 ##################################################
 # Used by Advanced Computer Graphics course
