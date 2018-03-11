@@ -8,6 +8,7 @@ all gradeables for example) or on a per gradeable level.
 
 import argparse
 import os
+import stat
 import sys
 import shutil
 from sqlalchemy import create_engine, MetaData, Table, bindparam
@@ -18,14 +19,15 @@ DATABASE_PASS = '__INSTALL__FILLIN__DATABASE_PASSWORD__'
 
 VCS_FOLDER = os.path.join('__INSTALL__FILLIN__SUBMITTY_DATA_DIR__', 'vcs')
 
-def create_folder(folder):
+def create_folder(folder, course_id):
     if not os.path.isdir(folder):
         os.makedirs(folder, mode=0o770)
+        shutil.chown(folder, user='www-data', group="{}_tas_www".format(course_id))
         os.chdir(folder)
         os.system('git init --bare --shared')
         for root, dirs, files in os.walk(folder):
             for entry in files + dirs:
-                shutil.chown(os.path.join(root, entry), group='www-data')
+                shutil.chown(os.path.join(root, entry), user='www-data', group="{}_tas_www".format(course_id))
 
 
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
@@ -58,7 +60,9 @@ if not os.path.isdir(vcs_course):
     shutil.chown(VCS_FOLDER, group='www-data')
     for root, dirs, files in os.walk(VCS_FOLDER):
         for entry in dirs:
-            shutil.chown(os.path.join(root, entry), group='www-data')
+            inner_dir = os.path.join(root, entry)
+            os.chmod(inner_dir, os.stat(inner_dir).st_mode | stat.S_IXOTH)
+            shutil.chown(inner_dir, group='www-data')
 
 is_team = False;
 
@@ -98,8 +102,11 @@ else:
     is_team = eg.eg_team_assignment
 
 if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
-    os.makedirs(os.path.join(vcs_course, args.repo_name), mode=0o770)
-    shutil.chown(os.path.join(vcs_course, args.repo_name), group='www-data')
+    repo_dir = os.path.join(vcs_course, args.repo_name)
+    # mode in makedirs getting ignored
+    os.makedirs(repo_dir)
+    os.chmod(repo_dir, 0o771)
+    shutil.chown(repo_dir, group='www-data')
 
 
 if is_team:
@@ -108,7 +115,7 @@ if is_team:
     teams = course_connection.execute(select, gradeable_id=args.repo_name)
 
     for team in teams:
-        create_folder(os.path.join(vcs_course, args.repo_name, team.team_id))
+        create_folder(os.path.join(vcs_course, args.repo_name, team.team_id), args.course)
 
 else:
     users_table = Table('courses_users', metadata, autoload=True)
@@ -116,4 +123,4 @@ else:
     users = connection.execute(select, semester=args.semester, course=args.course)
 
     for user in users:
-        create_folder(os.path.join(vcs_course, args.repo_name, user.user_id))
+        create_folder(os.path.join(vcs_course, args.repo_name, user.user_id), args.course)
