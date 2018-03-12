@@ -230,7 +230,6 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
         grade_items_logging.log_message(message="ERROR: the submission directory does not exist" + submission_path)
         raise RuntimeError("ERROR: the submission directory does not exist",submission_path)
     print("pid", os.getpid(), "GRADE THIS", submission_path)
-
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
     is_batch_job = next_directory == BATCH_QUEUE
@@ -240,14 +239,12 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     queue_time_longstring = dateutils.write_submitty_date(queue_time)
     grading_began = dateutils.get_current_time()
     waittime = (grading_began-queue_time).total_seconds()
-
-    grade_items_logging.log_message(is_batch_job,"zip",item_name,"wait:",'{0:.3f}'.format(waittime),"")
+    grade_items_logging.log_message(is_batch_job,"zip",item_name,"wait:",waittime,"")
 
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
 
     tmp = tempfile.mkdtemp()
-
     tmp_autograding = os.path.join(tmp,"TMP_AUTOGRADING")
     os.mkdir(tmp_autograding)
     tmp_submission = os.path.join(tmp,"TMP_SUBMISSION")
@@ -289,7 +286,7 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
     checkout_subdir_path = os.path.join(checkout_path,checkout_subdirectory)
     queue_file = os.path.join(next_directory,next_to_grade)
-    
+
     # switch to tmp directory
     os.chdir(tmp)
 
@@ -405,7 +402,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
 
-    grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"wait:",'{0:.3f}'.format(waittime),"")
+    grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"wait:",waittime,"")
 
     # --------------------------------------------------------------------
     # START DOCKER
@@ -770,7 +767,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         dockerdestroy_time = (dockerdestroy_done-grading_finished).total_seconds()
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"ddt:",dockerdestroy_time,"docker container destroyed")
         
-    grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"grade:",'{0:.3f}'.format(gradingtime),grade_result)
+    grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"grade:",gradingtime,grade_result)
 
     return my_results_zip_file
 
@@ -815,7 +812,7 @@ def unpack_grading_results_zip(my_results_zip_file):
 
     print ("pid",os.getpid(),"finished grading ", item_name, " in ", int(gradingtime), " seconds")
 
-    grade_items_logging.log_message(is_batch_job,"unzip",item_name,"grade:",'{0:.3f}'.format(gradingtime),grade_result)
+    grade_items_logging.log_message(is_batch_job,"unzip",item_name,"grade:",gradingtime,grade_result)
 
 
 # ==================================================================================
