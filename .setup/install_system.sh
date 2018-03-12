@@ -453,8 +453,8 @@ fi
 # DOCKER SETUP
 #################
 
-SUBMITTY_REPOSITORY="/usr/local/submitty/GIT_CHECKOUT_Submitty"
-SUBMITTY_INSTALL_DIR="/usr/local/submitty"
+# WIP: creates basic container for grading CS1 & DS assignments
+# CAUTION: needs users/groups for security 
 
 rm -rf /tmp/docker
 mkdir -p /tmp/docker

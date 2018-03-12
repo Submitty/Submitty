@@ -410,9 +410,10 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # --------------------------------------------------------------------
     # START DOCKER
 
-    USE_DOCKER = os.path.isfile("/tmp/use_docker")
-    use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
-    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message=use_docker_string)
+    # WIP: This option file facilitated testing...
+    #USE_DOCKER = os.path.isfile("/tmp/use_docker")
+    #use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
+    #grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message=use_docker_string)
     
     container = None
     if USE_DOCKER:
@@ -758,7 +759,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     shutil.rmtree(tmp_work)
     shutil.rmtree(tmp)
 
-    grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message="done grading")
+    # WIP: extra logging for testing
+    #grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message="done grading")
 
     # --------------------------------------------------------------------
     # CLEAN UP DOCKER
