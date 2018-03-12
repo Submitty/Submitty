@@ -149,7 +149,7 @@ chmod  751                                        ${SUBMITTY_DATA_DIR}
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
 chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
 chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
-chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
+chmod  771                                        ${SUBMITTY_DATA_DIR}/vcs
 chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
 chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding

@@ -800,7 +800,7 @@ class SubmissionController extends AbstractController {
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $max_size = $gradeable->getMaxSize();
-        
+
         if ($vcs_checkout === false) {
             $uploaded_files = array();
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++){
@@ -1006,6 +1006,18 @@ class SubmissionController extends AbstractController {
             if (!@touch(FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT"))) {
                 return $this->uploadResult("Failed to touch file for vcs submission.", false);
             }
+            $vcs_repo = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                $gradeable->getId(), $who_id);
+            $vcs_repo = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "vcs",
+                implode(DIRECTORY_SEPARATOR, $vcs_repo));
+            $vcs_head = $vcs_repo . DIRECTORY_SEPARATOR . "HEAD";
+            if (file_exists($vcs_head)) {
+                $vcs_ref = trim(explode(":", file_get_contents($vcs_head))[1]);
+                $vcs_commitfile = $vcs_repo . DIRECTORY_SEPARATOR . $vcs_ref;
+                if (file_exists($vcs_commitfile)) {
+                    $vcs_commit = file_get_contents($vcs_commitfile);
+                }
+            }
         }
 
         // save the contents of the page number inputs to files
@@ -1108,7 +1120,10 @@ class SubmissionController extends AbstractController {
             $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getName()}");
         else
             $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}");
-            
+
+        if (isset($vcs_commit)) {
+            $this->core->addNoticeMessage("HEAD Commit : ". substr($vcs_commit, 0, 7));
+        }
 
         return $this->uploadResult("Successfully uploaded files");
     }
