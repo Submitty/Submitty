@@ -50,7 +50,7 @@ def get_queue_time(next_directory,next_to_grade):
 def load_queue_file_obj(next_directory,next_to_grade):
     queue_file = os.path.join(next_directory,next_to_grade)
     if not os.path.isfile(queue_file):
-        grade_items_logging.log_message("ERROR: the file does not exist " + queue_file)
+        grade_items_logging.log_message(message="ERROR: the file does not exist " + queue_file)
         raise RuntimeError("ERROR: the file does not exist",queue_file)
     with open(queue_file, 'r') as infile:
         obj = json.load(infile)
@@ -103,7 +103,7 @@ def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
 # it will overwrite files with the same name if they exist
 def copy_contents_into(source,target,tmp_logs):
     if not os.path.isdir(target):
-        grade_items_logging.log_message("ERROR: the target directory does not exist " + target)
+        grade_items_logging.log_message(message="ERROR: the target directory does not exist " + target)
         raise RuntimeError("ERROR: the target directory does not exist '", target, "'")
     if os.path.isdir(source):
         for item in os.listdir(source):
@@ -112,7 +112,7 @@ def copy_contents_into(source,target,tmp_logs):
                     # recurse
                     copy_contents_into(os.path.join(source,item),os.path.join(target,item),tmp_logs)
                 elif os.path.isfile(os.path.join(target,item)):
-                    grade_items_logging.log_message("ERROR: the target subpath is a file not a directory '" + os.path.join(target,item) + "'")
+                    grade_items_logging.log_message(message="ERROR: the target subpath is a file not a directory '" + os.path.join(target,item) + "'")
                     raise RuntimeError("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
                 else:
                     # copy entire subtree
@@ -227,7 +227,7 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
     if not os.path.isdir(submission_path):
-        grade_items_logging.log_message("ERROR: the submission directory does not exist" + submission_path)
+        grade_items_logging.log_message(message="ERROR: the submission directory does not exist" + submission_path)
         raise RuntimeError("ERROR: the submission directory does not exist",submission_path)
     print("pid", os.getpid(), "GRADE THIS", submission_path)
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
@@ -239,14 +239,12 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     queue_time_longstring = dateutils.write_submitty_date(queue_time)
     grading_began = dateutils.get_current_time()
     waittime = (grading_began-queue_time).total_seconds()
-
-    grade_items_logging.log_message(is_batch_job,"zip",item_name,"wait:",'{0:.3f}'.format(waittime),"")
+    grade_items_logging.log_message(is_batch_job,"zip",item_name,"wait:",waittime,"")
 
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
 
     tmp = tempfile.mkdtemp()
-
     tmp_autograding = os.path.join(tmp,"TMP_AUTOGRADING")
     os.mkdir(tmp_autograding)
     tmp_submission = os.path.join(tmp,"TMP_SUBMISSION")
@@ -288,7 +286,7 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
     checkout_subdir_path = os.path.join(checkout_path,checkout_subdirectory)
     queue_file = os.path.join(next_directory,next_to_grade)
-    
+
     # switch to tmp directory
     os.chdir(tmp)
 
@@ -404,16 +402,24 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
 
-    grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"wait:",'{0:.3f}'.format(waittime),"")
+    grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"wait:",waittime,"")
 
     # --------------------------------------------------------------------
     # START DOCKER
 
+    # WIP: This option file facilitated testing...
+    #USE_DOCKER = os.path.isfile("/tmp/use_docker")
+    #use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
+    #grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message=use_docker_string)
+    
     container = None
     if USE_DOCKER:
         container = subprocess.check_output(['docker', 'run', '-t', '-d',
                                              '-v', tmp + ':' + tmp,
                                              'ubuntu:custom']).decode('utf8').strip()
+        dockerlaunch_done=dateutils.get_current_time()
+        dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"dcct:",dockerlaunch_time,"docker container created")
 
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
@@ -493,7 +499,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("pid",os.getpid(),"COMPILATION OK")
     else:
         print ("pid",os.getpid(),"COMPILATION FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"","","COMPILATION FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,message="COMPILATION FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
         
@@ -583,7 +589,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("pid",os.getpid(),"RUNNER OK")
     else:
         print ("pid",os.getpid(),"RUNNER FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"","","RUNNER FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,message="RUNNER FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
@@ -644,7 +650,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("pid",os.getpid(),"VALIDATOR OK")
     else:
         print ("pid",os.getpid(),"VALIDATOR FAILURE")
-        grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"","","VALIDATION FAILURE")
+        grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,message="VALIDATION FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
 
@@ -707,13 +713,11 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     gradingtime = (grading_finished-grading_began).total_seconds()
 
-    #queue_file = os.path.join(tmp_results,"queue_file.json")
     with open(os.path.join(tmp_submission,"queue_file.json"), 'r') as infile:
         queue_obj = json.load(infile)
     queue_obj["gradingtime"]=gradingtime
     queue_obj["grade_result"]=grade_result
     queue_obj["which_untrusted"]=which_untrusted
-
 
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
@@ -732,6 +736,11 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     os.chdir(SUBMITTY_DATA_DIR)
 
+    if USE_DOCKER:
+        with open(os.path.join(tmp_logs,"overall_log.txt"), 'w') as logfile:
+            chmod_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
+                                             'chmod', '-R', 'o+rwx', '.'], stdout=logfile)
+
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("FINISHED GRADING!\n")
 
@@ -747,12 +756,18 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     shutil.rmtree(tmp_work)
     shutil.rmtree(tmp)
 
+    # WIP: extra logging for testing
+    #grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,message="done grading")
+
     # --------------------------------------------------------------------
     # CLEAN UP DOCKER
     if USE_DOCKER:
         subprocess.call(['docker', 'rm', '-f', container])
-
-    grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"grade:",'{0:.3f}'.format(gradingtime),grade_result)
+        dockerdestroy_done=dateutils.get_current_time()
+        dockerdestroy_time = (dockerdestroy_done-grading_finished).total_seconds()
+        grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"ddt:",dockerdestroy_time,"docker container destroyed")
+        
+    grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"grade:",gradingtime,grade_result)
 
     return my_results_zip_file
 
@@ -797,7 +812,7 @@ def unpack_grading_results_zip(my_results_zip_file):
 
     print ("pid",os.getpid(),"finished grading ", item_name, " in ", int(gradingtime), " seconds")
 
-    grade_items_logging.log_message(is_batch_job,"unzip",item_name,"grade:",'{0:.3f}'.format(gradingtime),grade_result)
+    grade_items_logging.log_message(is_batch_job,"unzip",item_name,"grade:",gradingtime,grade_result)
 
 
 # ==================================================================================
@@ -805,7 +820,7 @@ def unpack_grading_results_zip(my_results_zip_file):
 def just_grade_item(next_directory,next_to_grade,which_untrusted):
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
-        grade_items_logging.log_message("ERROR: must be run by hwcron")
+        grade_items_logging.log_message(message="ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
     # prepare the zip files
@@ -834,6 +849,7 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         with contextlib.suppress(FileNotFoundError):
             os.remove(results_zip)
         return
+
 
 # ==================================================================================
 # ==================================================================================

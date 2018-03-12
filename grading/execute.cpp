@@ -902,7 +902,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     close(stderrfd);
     dup2(new_stderrfd, stderrfd);
   }
-
+  
 
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
