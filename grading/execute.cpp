@@ -902,10 +902,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     close(stderrfd);
     dup2(new_stderrfd, stderrfd);
   }
-
-  // PLEASE DON'T MERGE THIS CODE
-#if 0
-  // PLEASE DON'T MERGE THIS CODE
   
 
   // SECCOMP: install the filter (system calls restrictions)
@@ -915,10 +911,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
   // END SECCOMP
 
-  // PLEASE DON'T MERGE THIS CODE
-#endif
-  // PLEASE DON'T MERGE THIS CODE
-  
   
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here

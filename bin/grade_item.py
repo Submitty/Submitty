@@ -228,6 +228,7 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
     if not os.path.isdir(submission_path):
         grade_items_logging.log_message(message="ERROR: the submission directory does not exist" + submission_path)
+        raise RuntimeError("ERROR: the submission directory does not exist",submission_path)
     print("pid", os.getpid(), "GRADE THIS", submission_path)
 
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
@@ -768,7 +769,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         grade_items_logging.log_message(is_batch_job,which_untrusted,submission_path,"ddt:",dockerdestroy_time,"docker container destroyed")
         
     grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"grade:",'{0:.3f}'.format(gradingtime),grade_result)
-    
+
     return my_results_zip_file
 
 
