@@ -12,6 +12,7 @@ import time
 import dateutil
 import dateutil.parser
 import urllib.parse
+import contextlib
 
 from submitty_utils import dateutils, glob
 import grade_items_logging
@@ -658,7 +659,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
 
     # --------------------------------------------------------------------
-    
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
     tmp_results = os.path.join(tmp,"TMP_RESULTS")
 
@@ -808,10 +808,36 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         grade_items_logging.log_message("ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
-    autograding_zip,submission_zip = prepare_autograding_and_submission_zip(next_directory,next_to_grade)
-    results_zip = grade_from_zip(autograding_zip,submission_zip,which_untrusted)
-    unpack_grading_results_zip(results_zip)
-    
+    # prepare the zip files
+    try:
+        autograding_zip,submission_zip = prepare_autograding_and_submission_zip(next_directory,next_to_grade)
+    except:
+        grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when preparing autograding and submission zip")
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(autograding_zip)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(submission_zip)
+        return
+
+    # actually do the grading (this step could be shipped to another machine)
+    try:
+        results_zip = grade_from_zip(autograding_zip,submission_zip,which_untrusted)
+    except:
+        grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when grading from zip")
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(autograding_zip)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(submission_zip)
+        return
+
+    # archive the results of grading
+    try:
+        unpack_grading_results_zip(results_zip)
+    except:
+        grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when unpacking zip")
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(results_zip)
+        return
 
 # ==================================================================================
 # ==================================================================================
