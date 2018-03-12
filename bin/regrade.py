@@ -27,35 +27,31 @@ def arg_parse():
                         help="What queue (INTERACTIVE or BATCH) to use for the regrading. Default "
                         "is batch.")
 
-    parser.add_argument("--replay", dest="times", nargs=2, type=str, 
+    parser.add_argument("--replay", dest="times", nargs=2, type=str,
                         help="Specify start time for replay?  example format: '2018-02-14 00:13:17.000 -0500'")
-    
+
     parser.add_argument("--no_input", dest="no_input", action='store_const', const=True, default=False,
                         help="Do not wait for confirmation input, even if many things are being added to the queue.")
     return parser.parse_args()
-
-
 
 
 def replay(starttime,endtime):
 
     print ("start: ",starttime.year," ", starttime.month," ",starttime.day,"FOO")
     print ("end: ",endtime.year," ", endtime.month," ",endtime.day,"FOO")
-    
+
     if not (starttime.year == endtime.year and
             starttime.month == endtime.month and
             starttime.day == endtime.day):
         print ("ERROR!  invalid replay range ",starttime,"->",endtime, " (must be same day)")
         exit()
-            
+
     if not ((starttime.hour == endtime.hour and
              starttime.minute < endtime.minute) or
             (starttime.hour < endtime.hour)):
         print ("ERROR!  invalid replay range ",starttime,"->",endtime, " (invalid times)")
         exit()
 
-
-    #file = "/var/local/submitty/logs/autograding_logs/"+year+"0"+month+
     file = '/var/local/submitty/logs/autograding/{:d}{:02d}{:02d}.txt'.format(starttime.year,starttime.month,starttime.day)
     print ("FILE",file)
 
@@ -79,50 +75,34 @@ def replay(starttime,endtime):
             what = my_job.split('/')
             if not what[1]=="sample":
                 continue
-            
+
             print("USE '"+my_job+"'",line)
 
             item = {"semester": what[0], "course": what[1], "gradeable": what[3],
                     "user": what[4], "team": "", "who": what[4], "is_team": False, "version": what[5]}
-            
+
             file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['who'], item['version']])
             file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive", file_name)
             with open(file_name, "w") as open_file:
                 json.dump(item, open_file)
                 os.system("chmod o+rw {}".format(file_name))
-                
-    
-            
+
 
 def main():
     args = arg_parse()
     data_dir = os.path.join(SUBMITTY_DATA_DIR, "courses")
     data_dirs = data_dir.split(os.sep)
     grade_queue = []
-
     if not args.times is None:
-        print ("do that ", args.times[0])
-        print ("do that ", args.times[1])
-
         starttime = dateutils.read_submitty_date(args.times[0])
         endtime = dateutils.read_submitty_date(args.times[1])
-
         replay(starttime,endtime)
         exit()
-
-    print ("PATH",args.path)
-        
     if len(args.path) == 0:
         print ("ERROR! Must specify at least one path")
         exit()
-
-
-    print ("PATH ", args.path)
-    
     for input_path in args.path:
-
         print ('input path',input_path)
-        
         # handle relative path
         if input_path == '.':
             input_path = os.getcwd()
@@ -133,8 +113,6 @@ def main():
         # split the path into directories
         dirs = input_path.split(os.sep)
 
-        print ("TEST", dirs, "T", dirs[0:len(data_dirs)], " THING ", data_dirs)
-        
         # must be in the known submitty base data directory
         if dirs[0:len(data_dirs)] != data_dirs:
             print("ERROR: BAD REGRADE SUBMISSIONS PATH",input_path)
