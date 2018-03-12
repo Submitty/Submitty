@@ -43,6 +43,10 @@ def main():
             else:
                 sys.exit(1)
 
+            if obj is None:
+                print("whoops, this file did not load as a json object: ",filename)
+                continue
+
             # ONLY ELECTRONIC GRADEABLES HAVE A CONFIG PATH
             if "config_path" in obj:
                 g_id = obj["gradeable_id"]

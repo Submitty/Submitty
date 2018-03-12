@@ -55,7 +55,8 @@ def correct(test):
     test.run_validator()
     test.diff("grade.txt","correct_grade.txt","-b")
     test.json_diff("results.json","correct_results.json")
-    test.emma_coverage_diff("test05_emma_report.txt","correct_test05_emma_report.txt")
+    test.diff("test04_jacoco_report.csv","correct_jacoco_report.csv")
+    test.emma_coverage_diff("test08_emma_report.txt","correct_emma_report.txt")
 
 
 @testcase
@@ -75,7 +76,8 @@ def correct_no_coverage(test):
     test.run_validator()
     test.diff("grade.txt","correct_no_coverage_grade.txt","-b")
     test.json_diff("results.json","correct_no_coverage_results.json")
-    test.emma_coverage_diff("test05_emma_report.txt","correct_no_coverage_test05_emma_report.txt")
+    test.diff("test04_jacoco_report.csv","correct_no_coverage_jacoco_report.csv")
+    test.emma_coverage_diff("test08_emma_report.txt","correct_no_coverage_emma_report.txt")
 
 
 @testcase
@@ -95,7 +97,8 @@ def buggy_coverage(test):
     test.run_validator()
     test.diff("grade.txt", "buggy_coverage_grade.txt", "-b")
     test.json_diff("results.json", "buggy_coverage_results.json")
-    test.emma_coverage_diff("test05_emma_report.txt", "buggy_coverage_test05_emma_report.txt")
+    test.diff("test04_jacoco_report.csv","buggy_coverage_jacoco_report.csv")
+    test.emma_coverage_diff("test08_emma_report.txt","buggy_coverage_emma_report.txt")
 
 
 @testcase
@@ -115,6 +118,6 @@ def buggy_no_coverage(test):
     test.run_validator()
     test.diff("grade.txt","buggy_no_coverage_grade.txt","-b")
     test.json_diff("results.json","buggy_no_coverage_results.json")
-    test.emma_coverage_diff("test05_emma_report.txt","buggy_no_coverage_test05_emma_report.txt")
-
+    test.diff("test04_jacoco_report.csv","buggy_no_coverage_jacoco_report.csv")
+    test.emma_coverage_diff("test08_emma_report.txt","buggy_no_coverage_emma_report.txt")
 
