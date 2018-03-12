@@ -724,10 +724,14 @@ table tr.table-header {
 .first_post .post_button {
 }
 
+#post_user_id {
+    left:5px;
+}
+
 .post_button {
-    position: absolute;
-    top: 5px;
+    position:relative;
     right: 5px;
+    margin-left:5px;
 }
 
 .post_box {

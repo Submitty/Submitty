@@ -303,16 +303,21 @@ chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
 
 # course builders & hwcron need access to these scripts
 chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+
+# everyone needs to run this script
+chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/killall.py
 
 
 # FIXME / WIP:  line below is temporary, to avoid error message if file does not exist
@@ -508,6 +513,7 @@ echo -e "Compile and install analysis tools"
 ST_VERSION=v0.3.4
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
+#if [ "1" == "0" ]; then
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     for b in count plagiarism diagnostics;
@@ -520,6 +526,7 @@ if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     echo ${ST_VERSION} > VERSION
 fi
 popd
+#fi
 
 # change permissions
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
