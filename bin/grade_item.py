@@ -813,10 +813,6 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         autograding_zip,submission_zip = prepare_autograding_and_submission_zip(next_directory,next_to_grade)
     except:
         grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when preparing autograding and submission zip")
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(autograding_zip)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(submission_zip)
         return
 
     # actually do the grading (this step could be shipped to another machine)
