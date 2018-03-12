@@ -513,6 +513,7 @@ echo -e "Compile and install analysis tools"
 ST_VERSION=v0.3.4
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
+#if [ "1" == "0" ]; then
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     for b in count plagiarism diagnostics;
@@ -525,6 +526,7 @@ if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     echo ${ST_VERSION} > VERSION
 fi
 popd
+#fi
 
 # change permissions
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
