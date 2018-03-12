@@ -16,76 +16,84 @@ import argparse
 import json
 import os
 from submitty_utils import glob, dateutils
+import time
+import datetime
+import pause
 
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
+
 
 def arg_parse():
     parser = argparse.ArgumentParser(description="Re-adds any submission folders found in the given path and adds"
                                                  "them to a queue (default batch) for regrading")
-    parser.add_argument("path", nargs=argparse.REMAINDER, metavar="PATH", help="Path (absolute or relative) to submissions to regrade")
+    parser.add_argument("path", nargs=argparse.REMAINDER, metavar="PATH",
+                        help="Path (absolute or relative) to submissions to regrade")
     parser.add_argument("--interactive", dest="interactive", action='store_const', const=True, default=False,
                         help="What queue (INTERACTIVE or BATCH) to use for the regrading. Default "
                         "is batch.")
-
-    parser.add_argument("--replay", dest="times", nargs=2, type=str,
+    parser.add_argument("--replay", dest="times", nargs=2, type=str, 
                         help="Specify start time for replay?  example format: '2018-02-14 00:13:17.000 -0500'")
-
     parser.add_argument("--no_input", dest="no_input", action='store_const', const=True, default=False,
                         help="Do not wait for confirmation input, even if many things are being added to the queue.")
     return parser.parse_args()
 
 
+# For the specified interval, walks over the log file and creates
+# queue files for these submissions.
 def replay(starttime,endtime):
+    replay_starttime=datetime.datetime.now()
+    print (replay_starttime,"replay start: ",starttime)
 
-    print ("start: ",starttime.year," ", starttime.month," ",starttime.day,"FOO")
-    print ("end: ",endtime.year," ", endtime.month," ",endtime.day,"FOO")
-
+    # error checking
     if not (starttime.year == endtime.year and
             starttime.month == endtime.month and
             starttime.day == endtime.day):
         print ("ERROR!  invalid replay range ",starttime,"->",endtime, " (must be same day)")
         exit()
-
-    if not ((starttime.hour == endtime.hour and
-             starttime.minute < endtime.minute) or
-            (starttime.hour < endtime.hour)):
+    if starttime >= endtime:
         print ("ERROR!  invalid replay range ",starttime,"->",endtime, " (invalid times)")
         exit()
 
+    # file the correct file
     file = '/var/local/submitty/logs/autograding/{:d}{:02d}{:02d}.txt'.format(starttime.year,starttime.month,starttime.day)
-    print ("FILE",file)
-
     with open(file,'r') as lines:
         for line in lines:
-            #print ("LINE",line)
             things = line.split('|')
-            my_time = dateutils.read_submitty_date(things[0])
-            if (my_time.hour < starttime.hour or
-                my_time.hour > endtime.hour or
-                (my_time.hour == starttime.hour and my_time.minute < starttime.minute) or
-                (my_time.hour == endtime.hour and my_time.minute > endtime.minute)
-                ):
+            original_time = dateutils.read_submitty_date(things[0])
+            # skip items outside of this time range
+            if (original_time < starttime or
+                original_time > endtime):
                 continue
-            if (things[2] == "BATCH"):
+            # skip batch items
+            if (things[2].strip() == "BATCH"):
                 continue
+            # only process the "wait" time (when we started grading the item)
+            iswait=things[5].strip()[0:5]
+            if (iswait != "wait:"):
+                continue
+            waittime=float(things[5].split()[1])
+            # grab the job name
             my_job = things[4].strip()
             if my_job == "":
                 continue
-
             what = my_job.split('/')
-            if not what[1]=="sample":
+            # for now, only interested in Data Structures and Computer Science 1
+            if not (what[1]=="csci1200" or what[1]=="csci1100"):
                 continue
-
-            print("USE '"+my_job+"'",line)
-
+            # calculate when this job should be relaunched
+            time_multipler=1.0
+            pause_time=replay_starttime+(time_multiplier*(original_time-starttime))
+            pause.until(pause_time)
+            
+            print(datetime.datetime.now(),"      REPLAY: ",original_time," ",my_job)
             item = {"semester": what[0], "course": what[1], "gradeable": what[3],
                     "user": what[4], "team": "", "who": what[4], "is_team": False, "version": what[5]}
-
             file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['who'], item['version']])
-            file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive", file_name)
+            file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", file_name)
             with open(file_name, "w") as open_file:
                 json.dump(item, open_file)
-                os.system("chmod o+rw {}".format(file_name))
+                os.system("chmod o+rw {}".format(file_name))  
+    print (datetime.datetime.now(),"replay end: ",endtime)
 
 
 def main():
