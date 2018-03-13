@@ -73,10 +73,19 @@ def grade_queue_file(queue_file,which_untrusted):
     name = os.path.basename(os.path.realpath(queue_file))
     grading_file = os.path.join(directory, "GRADING_" + name)
 
+    which_machine="MASTER"
+    
     open(os.path.join(grading_file), "w").close()
-    #untrusted = multiprocessing.current_process().untrusted
     try:
-        grade_item.just_grade_item(my_dir, queue_file, which_untrusted)
+
+        # prepare the job
+        grade_item.just_grade_item_A(my_dir, queue_file, which_untrusted, which_machine)
+
+        # then wait for grading to be completed
+        while not grade_item.just_grade_item_C(my_dir, queue_file, which_untrusted, which_machine):
+            print ("shipper waiting: ",which_machine," ",which_untrusted)
+            time.sleep(1)
+
     except Exception as e:
         print ("ERROR attempting to grade item: ", queue_file, " exception=",e)
         grade_items_logging.log_message(message="ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
@@ -152,7 +161,7 @@ def worker_process(interactive_queue,batch_queue,new_job_event,overall_lock,whic
                 new_job_event.clear()
                 overall_lock.release()
                 pid = os.getpid()
-                print ("pid ",pid,": no job for now, going to wait 10 seconds")
+                print (which_untrusted,": no job for now, going to wait 10 seconds")
                 new_job_event.wait(10)
     except:
         print ("exiting worker")

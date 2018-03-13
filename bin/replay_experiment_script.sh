@@ -12,10 +12,6 @@ fi
 
 test_user=INSERT_USERNAME
 
-#sudo /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh
-#sudo systemctl restart submitty_grading_scheduler
-
-#sudo su -c '/usr/local/submitty/bin/regrade.submitty_grading_scheduler.py' $(test_user)
 
 rm -f /home/$(test_user)/PAPER_DATA/*.txt
 

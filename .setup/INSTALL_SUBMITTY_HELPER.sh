@@ -283,7 +283,8 @@ replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/adduser.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
@@ -328,14 +329,16 @@ touch ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
@@ -582,26 +585,82 @@ popd
 # INSTALL & START GRADING SCHEDULER DAEMON
 
 
-# stop the scheduler (if it's running)
+#############################################################
+# NOTE: This section is to cleanup the old scheduler -- and this code should eventually be removed
+# BEGIN TO BE DELETED
+# stop the old scheduler (if it's running)
 systemctl is-active --quiet submitty_grading_scheduler
-is_active_before=$?
-if [[ "$is_active_before" == "0" ]]; then
+is_scheduler_active=$?
+if [[ "$is_scheduler_active" == "0" ]]; then
     systemctl stop submitty_grading_scheduler
-    echo -e "Stopped Submitty Grading Scheduler Daemon\n"
+    echo -e "WARNING: Stopped Submitty Grading Scheduler Daemon\n"
 fi
-
 systemctl is-active --quiet submitty_grading_scheduler
 is_active_tmp=$?
 if [[ "$is_active_tmp" == "0" ]]; then
     echo -e "ERROR: did not successfully stop submitty grading scheduler daemon\n"
     exit 1
 fi
+# END TO BE DELETED
 
 
-# update the scheduler daemon
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.service   /etc/systemd/system/submitty_grading_scheduler.service
-chown -R hwcron:hwcron /etc/systemd/system/submitty_grading_scheduler.service
-chmod 444 /etc/systemd/system/submitty_grading_scheduler.service
+#############################################################
+# stop the shipper daemon (if it's running)
+systemctl is-active --quiet submitty_autograding_shipper
+is_shipper_active_before=$?
+if [[ "$is_shipper_active_before" == "0" ]]; then
+    systemctl stop submitty_autograding_shipper
+    echo -e "Stopped Submitty Grading Shipper Daemon\n"
+fi
+systemctl is-active --quiet submitty_autograding_shipper
+is_active_tmp=$?
+if [[ "$is_active_tmp" == "0" ]]; then
+    echo -e "ERROR: did not successfully stop submitty grading shipper daemon\n"
+    exit 1
+fi
+
+
+#############################################################
+# stop the worker daemon (if it's running)
+systemctl is-active --quiet submitty_autograding_worker
+is_worker_active_before=$?
+if [[ "$is_worker_active_before" == "0" ]]; then
+    systemctl stop submitty_autograding_worker
+    echo -e "Stopped Submitty Grading Worker Daemon\n"
+fi
+systemctl is-active --quiet submitty_autograding_worker
+is_active_tmp=$?
+if [[ "$is_active_tmp" == "0" ]]; then
+    echo -e "ERROR: did not successfully stop submitty grading worker daemon\n"
+    exit 1
+fi
+
+
+#############################################################
+# cleanup the TODO and DONE folders
+
+rm -rf $SUBMITTY_DATA_DIR/autograding_TODO
+rm -rf $SUBMITTY_DATA_DIR/autograding_DONE
+
+# recreate the TODO and DONE folders
+mkdir -p $SUBMITTY_DATA_DIR/autograding_TODO
+mkdir -p $SUBMITTY_DATA_DIR/autograding_DONE
+chown -R ${HWCRON_USER}:root ${SUBMITTY_DATA_DIR}/autograding_TODO
+chown -R ${HWCRON_USER}:root ${SUBMITTY_DATA_DIR}/autograding_DONE
+chmod 700 ${SUBMITTY_DATA_DIR}/autograding_TODO
+chmod 700 ${SUBMITTY_DATA_DIR}/autograding_DONE
+
+
+#############################################################
+
+
+# update the autograding shipper & worker daemons
+rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_shipper.service   /etc/systemd/system/submitty_autograding_shipper.service
+chown -R hwcron:hwcron /etc/systemd/system/submitty_autograding_shipper.service
+chmod 444 /etc/systemd/system/submitty_autograding_shipper.service
+rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_worker.service   /etc/systemd/system/submitty_autograding_worker.service
+chown -R hwcron:hwcron /etc/systemd/system/submitty_autograding_worker.service
+chmod 444 /etc/systemd/system/submitty_autograding_worker.service
 
 
 # delete the autograding tmp directories
@@ -623,18 +682,32 @@ do
 done
 
 
-# start the scheduler (if it was running)
-if [[ "$is_active_before" == "0" ]]; then
-    systemctl start submitty_grading_scheduler
-    systemctl is-active --quiet submitty_grading_scheduler
-    is_active_after=$?
-    if [[ "$is_active_after" != "0" ]]; then
-        echo -e "\nERROR!  Failed to restart Submitty Grading Scheduler Daemon\n"
+# start the shipper daemon (if it was running)
+if [[ "$is_shipper_active_before" == "0" ]]; then
+    systemctl start submitty_autograding_shipper
+    systemctl is-active --quiet submitty_autograding_shipper
+    is_shipper_active_after=$?
+    if [[ "$is_shipper_active_after" != "0" ]]; then
+        echo -e "\nERROR!  Failed to restart Submitty Grading Shipper Daemon\n"
     fi
-    echo -e "Restarted Submitty Grading Scheduler Daemon\n"
+    echo -e "Restarted Submitty Grading Shipper Daemon\n"
 else
-    echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_grading_scheduler\n"
+    echo -e "NOTE: Submitty Grading Shipper Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_shipper\n"
+fi
+
+# start the worker daemon (if it was running)
+if [[ "$is_worker_active_before" == "0" ]]; then
+    systemctl start submitty_autograding_worker
+    systemctl is-active --quiet submitty_autograding_worker
+    is_worker_active_after=$?
+    if [[ "$is_worker_active_after" != "0" ]]; then
+        echo -e "\nERROR!  Failed to restart Submitty Grading Worker Daemon\n"
+    fi
+    echo -e "Restarted Submitty Grading Worker Daemon\n"
+else
+    echo -e "NOTE: Submitty Grading Worker Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_worker\n"
 fi
 
 

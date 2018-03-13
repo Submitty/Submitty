@@ -33,12 +33,12 @@ USE_DOCKER = False
 
 
 # ==================================================================================
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("next_directory")
-    parser.add_argument("next_to_grade")
-    parser.add_argument("which_untrusted")
-    return parser.parse_args()
+#def parse_args():
+#    parser = argparse.ArgumentParser()
+#    parser.add_argument("next_directory")
+#    parser.add_argument("next_to_grade")
+#    parser.add_argument("which_untrusted")
+#    return parser.parse_args()
 
 def get_queue_time(next_directory,next_to_grade):
     t = time.ctime(os.path.getctime(os.path.join(next_directory,next_to_grade)))
@@ -496,7 +496,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                               stdout=logfile)
 
     if compile_success == 0:
-        print ("pid",os.getpid(),"COMPILATION OK")
+        print (which_untrusted,"pid",os.getpid(),"COMPILATION OK")
     else:
         print ("pid",os.getpid(),"COMPILATION FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,message="COMPILATION FAILURE")
@@ -586,7 +586,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"","",msg)
 
     if runner_success == 0:
-        print ("pid",os.getpid(),"RUNNER OK")
+        print (which_untrusted,"pid",os.getpid(),"RUNNER OK")
     else:
         print ("pid",os.getpid(),"RUNNER FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,message="RUNNER FAILURE")
@@ -647,7 +647,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                 stdout=logfile)
 
     if validator_success == 0:
-        print ("pid",os.getpid(),"VALIDATOR OK")
+        print (which_untrusted,"pid",os.getpid(),"VALIDATOR OK")
     else:
         print ("pid",os.getpid(),"VALIDATOR FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,message="VALIDATION FAILURE")
@@ -817,7 +817,7 @@ def unpack_grading_results_zip(my_results_zip_file):
 
 # ==================================================================================
 # ==================================================================================
-def just_grade_item(next_directory,next_to_grade,which_untrusted):
+def just_grade_item_A(next_directory,next_to_grade,which_untrusted,which_machine):
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
         grade_items_logging.log_message(message="ERROR: must be run by hwcron")
@@ -825,22 +825,45 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
 
     # prepare the zip files
     try:
-        autograding_zip,submission_zip = prepare_autograding_and_submission_zip(next_directory,next_to_grade)
+        autograding_zip_tmp,submission_zip_tmp = prepare_autograding_and_submission_zip(next_directory,next_to_grade)
+        autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_autograding.zip")
+        submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_submission.zip")
+        todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_queue.json")
+        shutil.move(autograding_zip_tmp,autograding_zip)
+        shutil.move(submission_zip_tmp,submission_zip)
+        with open(next_to_grade, 'r') as infile:
+            queue_obj = json.load(infile)
+            queue_obj["which_untrusted"]=which_untrusted
+            queue_obj["which_machine"]=which_machine
+            queue_obj["ship_time"]=dateutils.write_submitty_date(microseconds=True)
+        with open(todo_queue_file, 'w') as outfile:
+            json.dump(queue_obj, outfile, sort_keys=True, indent=4)
     except:
         grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when preparing autograding and submission zip")
         return
 
-    # actually do the grading (this step could be shipped to another machine)
-    try:
-        results_zip = grade_from_zip(autograding_zip,submission_zip,which_untrusted)
-    except:
-        grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when grading from zip")
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(autograding_zip)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(submission_zip)
-        return
+    #print ("A ZIP FILES: ",autograding_zip," ",submission_zip)
+    #time.sleep(10)
 
+
+
+
+
+
+# ==================================================================================
+# ==================================================================================
+def just_grade_item_C(next_directory,next_to_grade,which_untrusted,which_machine):
+    # verify the hwcron user is running this script
+    if not int(os.getuid()) == int(HWCRON_UID):
+        grade_items_logging.log_message(message="ERROR: must be run by hwcron")
+        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+
+    results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_results.zip")
+    done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_queue.json")
+    
+    if not os.path.exists(done_queue_file):
+        return False
+        
     # archive the results of grading
     try:
         unpack_grading_results_zip(results_zip)
@@ -848,12 +871,17 @@ def just_grade_item(next_directory,next_to_grade,which_untrusted):
         grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when unpacking zip")
         with contextlib.suppress(FileNotFoundError):
             os.remove(results_zip)
-        return
+
+    with contextlib.suppress(FileNotFoundError):
+        os.remove(done_queue_file)
+
+    return True
 
 
 # ==================================================================================
 # ==================================================================================
 if __name__ == "__main__":
-    args = parse_args()
-    just_grade_item(args.next_directory,args.next_to_grade,args.which_untrusted)
+    #args = parse_args()
+    print ("ERROR: Do not call this script directly")
+    #just_grade_item(args.next_directory,args.next_to_grade,args.which_untrusted)
 

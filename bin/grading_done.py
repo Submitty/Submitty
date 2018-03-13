@@ -57,7 +57,7 @@ def main():
                 proc = psutil.Process(pid)
                 if 'hwcron' == proc.username():
                     if (len(proc.cmdline()) >= 2 and
-                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"bin","submitty_grading_scheduler.py")):
+                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"bin","submitty_autograding_shipper.py")):
                         num_procs+=1
             except psutil.NoSuchProcess:
                 pass
@@ -68,7 +68,7 @@ def main():
         num_procs-=2
 
         if num_procs <= 0:
-            print ("WARNING: No matching submitty_grading_scheduler.py processes!")
+            print ("WARNING: No matching submitty_autograding_shipper.py processes!")
             num_procs = 0
 
         done = True
