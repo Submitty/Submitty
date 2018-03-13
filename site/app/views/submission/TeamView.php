@@ -137,7 +137,6 @@ HTML;
     </form>
     <br />
     <button class="btn btn-danger" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'leave_team'))}'">Leave Team</button>
-    <button class="btn btn-default" style="float:right" onclick="$('.popup-form').css('display', 'none');$('#users_seeking_team_show').css('display', 'block');">Users Seeking Team/Partner</button>
 HTML;
     }
 
@@ -184,29 +183,47 @@ HTML;
     &nbsp;or&nbsp;<button class="btn btn-primary" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'seek_team'))}'">Seek Team/Partner </button>
 HTML;
 		}
-		$return .= <<<HTML
-	<button class="btn btn-default" style="float:right" onclick="$('.popup-form').css('display', 'none');$('#users_seeking_team_show').css('display', 'block');">Users Seeking Team/Partner</button>
+		else if(in_array($user_id, $users_seeking_team)){
+			$return .= <<<HTML
+    <button class="btn btn-danger" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'stop_seek_team'))}'">Stop Seeking Team/Partner </button>
 HTML;
+		}
     }
     $return .= <<<HTML
 </div>
-<div class="popup-form" id="users_seeking_team_show" style="width:420px">
-	<center><h3>Users seeking team/partner-</h3></center><br />
-	<form>
+<div class="content">
+	<div style="width:60%;">
+		<h3>Users Seeking Team/Partner:</h3><br />
+		<table class="table table-striped table-bordered persist-area">
+			<thead class="persist thead">
+				<tr>
+					<td width="3%"></td>
+					<td width="10%">First Name</td>
+					<td width="10%">Last Name</td>
+					<td width="10%">Username</td>
+					<td width="40%">Email</td>
+				</tr>
+			</thead>
+			<tbody>
 HTML;
-	foreach ($users_seeking_team as $user_seeking_team) {
-		$return .= <<<HTML
-		<center><input class="readonly" type="text" readonly="readonly" value="{$user_seeking_team}" /></center><br />
+			$index=1;
+			foreach ($users_seeking_team as $user_seeking_team) {
+		        $user_details = $this->core->getQueries()->getUserById($user_seeking_team);
+				$return .= <<<HTML
+				<tr>
+					<td>{$index}</td>
+					<td>{$user_details->getDisplayedFirstName()}</td>
+					<td>{$user_details->getLastName()}</td>
+					<td>{$user_details->getId()}</td>
+					<td>{$user_details->getEmail()}</td>
+				</tr>
 HTML;
-	}
-	if (empty($users_seeking_team)) {
-		$return .= <<<HTML
-		<center>no one seeking team/partner right now</center><br />
-HTML;
-	}
-	$return .= <<<HTML
-    <a style="float:right" onclick="$('#users_seeking_team_show').css('display', 'none');" class="btn btn-danger">Back</a>
-	</form>
+				$index++;
+			}
+			$return .= <<<HTML
+			</tbody>
+		</table>	
+	</div>
 </div>
 HTML;
     return $return;
