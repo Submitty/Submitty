@@ -906,6 +906,16 @@ HTML;
 queue wait time: {$results['wait_time']} seconds<br />
 HTML;
                     }
+                    if(isset($results['revision'])) {
+                      if(empty($results['revision'])) {
+                        $revision = "None";
+                      } else {
+                        $revision =  substr($results['revision'], 0, 7);
+                      }
+                      $return .= <<<HTML
+revision submitted : {$revision}<br />
+HTML;
+                    }
                 }
                 $return .= <<<HTML
         </div>
