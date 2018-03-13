@@ -39,6 +39,7 @@ if os.getuid() != 0:
 
 parser = argparse.ArgumentParser(description='Submitty configuration script')
 parser.add_argument('--debug', action='store_true', default=False, help='Configure Submitty in debug mode')
+parser.add_argument('--headless', action='store_true', default=False, help='Configure Submitty with autograding only')
 args = parser.parse_args()
 
 # determine location of SUBMITTY GIT repository
@@ -62,22 +63,24 @@ AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
 HWPHP_USER = 'hwphp'
 HWCGI_USER = 'hwcgi'
 HWCRON_USER = 'hwcron'
-HWPHP_UID, HWPHP_GID = get_ids(HWPHP_USER)
-HWCGI_UID, HWCGI_GID = get_ids(HWCGI_USER)
+if not args.headless:
+    HWPHP_UID, HWPHP_GID = get_ids(HWPHP_USER)
+    HWCGI_UID, HWCGI_GID = get_ids(HWCGI_USER)
 HWCRON_UID, HWCRON_GID = get_ids(HWCRON_USER)
 
-# System Groups
-HWCRONPHP_GROUP = 'hwcronphp'
-try:
-    grp.getgrnam(HWCRONPHP_GROUP)
-except KeyError:
-    raise SystemExit("ERROR: Could not find group: " + HWCRONPHP_GROUP)
+if not args.headless:
+    # System Groups
+    HWCRONPHP_GROUP = 'hwcronphp'
+    try:
+        grp.getgrnam(HWCRONPHP_GROUP)
+    except KeyError:
+        raise SystemExit("ERROR: Could not find group: " + HWCRONPHP_GROUP)
 
-COURSE_BUILDERS_GROUP = 'course_builders'
-try:
-    grp.getgrnam(COURSE_BUILDERS_GROUP)
-except KeyError:
-    raise SystemExit("ERROR: Could not find group: " + COURSE_BUILDERS_GROUP)
+    COURSE_BUILDERS_GROUP = 'course_builders'
+    try:
+        grp.getgrnam(COURSE_BUILDERS_GROUP)
+    except KeyError:
+        raise SystemExit("ERROR: Could not find group: " + COURSE_BUILDERS_GROUP)
 
 ##############################################################################
 
@@ -99,7 +102,10 @@ for i in range(1, NUM_UNTRUSTED):
 
 # adjust this number depending on the # of processors
 # available on your hardware
-NUM_GRADING_SCHEDULER_WORKERS = 5
+if args.debug == False:
+    NUM_GRADING_SCHEDULER_WORKERS = 5
+else:
+    NUM_GRADING_SCHEDULER_WORKERS = 1
 
 ##############################################################################
 
@@ -142,63 +148,69 @@ if DEBUGGING_ENABLED:
     print('!! DEBUG MODE ENABLED !!')
     print()
 
+if args.headless:
+    print("CONFIGURING FOR HEADLESS SUBMITTY !!")
+
 print('Hit enter to use default in []')
 print()
 
-DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
-print()
-
-DATABASE_USER = get_input('What is the database user?', defaults['database_user'])
-print()
-
-default = ''
-if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
-    default = '(Leave blank to use same password)'
-DATABASE_PASS = get_input('What is the database password for {}? {}'.format(DATABASE_USER, default))
-if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
-    DATABASE_PASS = defaults['database_password']
-print()
-
-SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
-print()
-
-VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
-print()
-
-INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)', defaults['institution_name'])
-if INSTITUTION_NAME.lower() == "none":
-    INSTITUTION_NAME = ''
-print()
-
-if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
-    INSTITUTION_HOMEPAGE = ''
-else:
-    INSTITUTION_HOMEPAGE = get_input('What is the url of your institution\'s homepage? (Leave blank/type "none" if not desired)', defaults['institution_homepage'])
-    if INSTITUTION_HOMEPAGE.lower() == "none":
-        INSTITUTION_HOMEPAGE = ''
+if not args.headless:
+    DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
 
-USERNAME_TEXT = defaults['username_change_text']
+    DATABASE_USER = get_input('What is the database user?', defaults['database_user'])
+    print()
 
-print("What authentication method to use:\n1. PAM\n2. Database\n")
-while True:
-    try:
-        auth = int(get_input('Enter number?', defaults['authentication_method']))
-    except ValueError:
-        auth = 0
-    if 0 < auth < 3:
-        break
-    print('Number must be between 0 and 3')
-print()
-print()
+    default = ''
+    if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
+        default = '(Leave blank to use same password)'
+    DATABASE_PASS = get_input('What is the database password for {}? {}'.format(DATABASE_USER, default))
+    if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
+        DATABASE_PASS = defaults['database_password']
+    print()
 
-if auth == 1:
-    AUTHENTICATION_METHOD = 'PamAuthentication'
-else:
-    AUTHENTICATION_METHOD = 'DatabaseAuthentication'
+    SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
+    print()
 
-TAGRADING_URL = SUBMISSION_URL + '/hwgrading'
-CGI_URL = SUBMISSION_URL + '/cgi-bin'
+    VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
+    print()
+
+    INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)', defaults['institution_name'])
+    if INSTITUTION_NAME.lower() == "none":
+        INSTITUTION_NAME = ''
+    print()
+
+
+    if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
+        INSTITUTION_HOMEPAGE = ''
+    else:
+        INSTITUTION_HOMEPAGE = get_input('What is the url of your institution\'s homepage? (Leave blank/type "none" if not desired)', defaults['institution_homepage'])
+        if INSTITUTION_HOMEPAGE.lower() == "none":
+            INSTITUTION_HOMEPAGE = ''
+        print()
+
+    USERNAME_TEXT = defaults['username_change_text']
+
+    print("What authentication method to use:\n1. PAM\n2. Database\n")
+    while True:
+        try:
+            auth = int(get_input('Enter number?', defaults['authentication_method']))
+        except ValueError:
+            auth = 0
+        if 0 < auth < 3:
+            break
+        print('Number must be between 0 and 3')
+    print()
+    print()
+
+    if auth == 1:
+        AUTHENTICATION_METHOD = 'PamAuthentication'
+    else:
+        AUTHENTICATION_METHOD = 'DatabaseAuthentication'
+
+    TAGRADING_URL = SUBMISSION_URL + '/hwgrading'
+    CGI_URL = SUBMISSION_URL + '/cgi-bin'
+
 
 ##############################################################################
 # make the installation setup directory
@@ -214,7 +226,9 @@ else:
 if os.path.isdir(SETUP_INSTALL_DIR):
     shutil.rmtree(SETUP_INSTALL_DIR)
 os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
-shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
+
+if not args.headless:
+    shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(SETUP_INSTALL_DIR, 0o751)
 
 with open(WORKERS_JSON, 'w') as workers_file:
@@ -225,15 +239,19 @@ with open(WORKERS_JSON, 'w') as workers_file:
 # WRITE THE VARIABLES TO A FILE
 
 obj = OrderedDict()
+
 obj['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 obj['submitty_repository'] = SUBMITTY_REPOSITORY
-obj['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
 obj['submitty_data_dir'] = SUBMITTY_DATA_DIR
-obj['hwphp_user'] = HWPHP_USER
-obj['hwcgi_user'] = HWCGI_USER
+
+if not args.headless:
+    obj['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
+    obj['hwphp_user'] = HWPHP_USER
+    obj['hwcgi_user'] = HWCGI_USER
+    obj['hwcronphp_group'] = HWCRONPHP_GROUP
+    obj['course_builders_group'] = COURSE_BUILDERS_GROUP
+
 obj['hwcron_user'] = HWCRON_USER
-obj['hwcronphp_group'] = HWCRONPHP_GROUP
-obj['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 obj['num_untrusted'] = NUM_UNTRUSTED
 obj['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
@@ -241,30 +259,37 @@ obj['first_untrusted_gid'] = FIRST_UNTRUSTED_UID
 
 obj['hwcron_uid'] = HWCRON_UID
 obj['hwcron_gid'] = HWCRON_GID
-obj['hwphp_uid'] = HWPHP_UID
-obj['hwphp_gid'] = HWPHP_GID
 
-obj['database_host'] = DATABASE_HOST
-obj['database_user'] = DATABASE_USER
-obj['database_password'] = DATABASE_PASS
+if not args.headless:
+    obj['hwphp_uid'] = HWPHP_UID
+    obj['hwphp_gid'] = HWPHP_GID
 
-obj['authentication_method'] = AUTHENTICATION_METHOD
+    obj['database_host'] = DATABASE_HOST
+    obj['database_user'] = DATABASE_USER
+    obj['database_password'] = DATABASE_PASS
+    obj['authentication_method'] = AUTHENTICATION_METHOD
+    obj['vcs_url'] = VCS_URL
+    obj['submission_url'] = SUBMISSION_URL
+    obj['tagrading_url'] = TAGRADING_URL
+    obj['cgi_url'] = CGI_URL
 
-obj['submission_url'] = SUBMISSION_URL
-obj['vcs_url'] = VCS_URL
-obj['tagrading_url'] = TAGRADING_URL
-obj['cgi_url'] = CGI_URL
+    obj['site_log_path'] = TAGRADING_LOG_PATH
 
 obj['autograding_log_path'] = AUTOGRADING_LOG_PATH
-obj['site_log_path'] = TAGRADING_LOG_PATH
 
 obj['num_grading_scheduler_workers'] = NUM_GRADING_SCHEDULER_WORKERS
 
 obj['debugging_enabled'] = DEBUGGING_ENABLED
 
-obj['institution_name'] = INSTITUTION_NAME
-obj['username_change_text'] = USERNAME_TEXT
-obj['institution_homepage'] = INSTITUTION_HOMEPAGE
+if not args.headless:
+    obj['institution_name'] = INSTITUTION_NAME
+    obj['username_change_text'] = USERNAME_TEXT
+    obj['institution_homepage'] = INSTITUTION_HOMEPAGE
+
+if args.headless:
+    obj['headless'] = True
+else:
+    obj['headless'] = False
 
 
 with open(CONFIGURATION_FILE, 'w') as open_file:
@@ -288,6 +313,7 @@ with open(CONFIGURATION_FILE, 'w') as open_file:
             write('{}={}'.format(key, value))
     write()
     write('# Now actually run the installation script')
+    #EVAN: fix to take the correct arg or something
     write('source '+SETUP_REPOSITORY_DIR+'/INSTALL_SUBMITTY_HELPER.sh  "$@"')
 
 os.chmod(CONFIGURATION_FILE, 0o700)
