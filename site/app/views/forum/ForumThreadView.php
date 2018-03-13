@@ -230,25 +230,25 @@ HTML;
 			$return .= <<<HTML
 			
 					<form style="margin-right:17px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
-					<input type="hidden" name="thread_id" value="{$thread_id}" />
-	            	<br/>
-	            	<div class="form-group row">
-	            		<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
-	            	</div>
+						<input type="hidden" name="thread_id" value="{$thread_id}" />
+	            		<br/>
+	            		<div class="form-group row">
+	            			<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+	            		</div>
 
-	            	<br/>
+	            		<br/>
 
-	           		<span style="float:left;display:inline-block;">
-            			<label id="file_input_label" class="btn btn-primary" for="file_input">
-    					<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
-    					Upload Attachment
-						</label>
-						<span class='label label-info' id="file_name"></span>
-					</span>
+	           			<span style="float:left;display:inline-block;">
+            				<label id="file_input_label" class="btn btn-primary" for="file_input">
+    						<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
+    						Upload Attachment
+							</label>
+							<span class='label label-info' id="file_name"></span>
+						</span>
 
-	            	<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            		<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
-	            	</div>
+	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
+	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
+	            		</div>
 	            	</form>
 	            	<br/>
 
@@ -319,24 +319,6 @@ HTML;
 				<a style="float:right; right: 25px; position: absolute" onClick="replyPost({$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}')"> reply </a>
 HTML;
 		}
-		// This Chunk below is the pop-up window for reply.
-		$post_html .= <<<HTML
-			<div class="popup-form" id="reply-user-post">
-				<h3 id="reply_user_prompt"></h3>
-				<p id="parent_post_content"> </p>
-				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}">
-					<input type="hidden" id="reply_thread_id" name="thread_id" value="" />
-					<input type="hidden" id="reply_parent_id" name="parent_id" value="" />
-					<textarea name="post_content" id="reply_post_content" style="margin-right:10px;white-space: pre-wrap;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
-					<div style="float: right; width: auto; margin-top: 10px">
-						<a onclick="$('#reply-user-post').css('display', 'none');" class="btn btn-danger">Cancel</a>
-						<input class="btn btn-primary" type="submit" value="Submit" />
-					</div>	
-				</form>
-			</div>
-			<p class="post_content">{$function_content($post["content"])}</p>
-			<hr style="margin-bottom:3px;"><span style="margin-top:5px;margin-left:10px;float:right;">		
-HTML;
 
 	if($this->core->getUser()->getGroup() <= 2){
 		$info_name = $full_name . " (" . $post['author_user_id'] . ")";
@@ -360,9 +342,34 @@ HTML;
 HTML;
 			}
 		}
+
 		$post_html .= <<<HTML
-			</div>
+		</div>
 HTML;
+		//This chunk here is for reply-box under the post
+		$offset = $offset + 30;
+		$post_html .= <<<HTML
+			<form class="reply-box" id="$post_id-reply" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+				<input type="hidden" name="thread_id" value="{$thread_id}" />
+				<input type="hidden" name="parent_id" value="{$post_id}" />
+          		<br/>
+           		<div class="form-group row">
+           			<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+           		</div>
+           		<br/>
+       			<span style="float:left;display:inline-block;">
+	   				<label id="file_input_label" class="btn btn-primary" for="file_input">
+						<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
+						Upload Attachment
+					</label>
+					<span class='label label-info' id="file_name"></span>
+				</span>
+           		<div style="margin-bottom:20px;float:right;" class="form-group row">
+           			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
+           		</div>
+           	</form>
+HTML;
+
 		return $post_html;
 	}
 
