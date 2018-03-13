@@ -887,32 +887,32 @@ HTML;
 HTML;
                 $results = $gradeable->getResults();
                 if($gradeable->hasResults()) {
-
                     $return .= <<<HTML
 submission timestamp: {$current_version->getSubmissionTime()}<br />
 days late: {$current_version->getDaysLate()} (before extensions)<br />
 grading time: {$results['grade_time']} seconds<br />
 HTML;
                     if($results['num_autogrades'] > 1) {
-                      $regrades = $results['num_autogrades']-1;
-                      $return .= <<<HTML
+                        $regrades = $results['num_autogrades']-1;
+                        $return .= <<<HTML
 <br />
 number of re-autogrades: {$regrades}<br />
 last re-autograde finished: {$results['grading_finished']}<br />
 HTML;
                     }
                     else {
-                      $return .= <<<HTML
+                        $return .= <<<HTML
 queue wait time: {$results['wait_time']} seconds<br />
 HTML;
                     }
-                    if(isset($results['revision'])) {
-                      if(empty($results['revision'])) {
-                        $revision = "None";
-                      } else {
-                        $revision =  substr($results['revision'], 0, 7);
-                      }
-                      $return .= <<<HTML
+                    if (isset($results['revision'])) {
+                        if (empty($results['revision'])) {
+                            $revision = "None";
+                        }
+                        else {
+                            $revision =  substr($results['revision'], 0, 7);
+                        }
+                        $return .= <<<HTML
 revision submitted : {$revision}<br />
 HTML;
                     }
