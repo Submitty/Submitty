@@ -24,8 +24,6 @@ import zipfile
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
-INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
-BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 
 
 # NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
@@ -232,7 +230,7 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     print("pid", os.getpid(), "GRADE THIS", submission_path)
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
-    is_batch_job = next_directory == BATCH_QUEUE
+    is_batch_job = obj["regrade"]
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
 
     queue_time = get_queue_time(next_directory,next_to_grade)
@@ -342,7 +340,7 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     copytree_if_exists(submission_path,os.path.join(tmp_submission,"submission"))
     copytree_if_exists(checkout_path,os.path.join(tmp_submission,"checkout"))
     obj["queue_time"] = queue_time_longstring
-    obj["is_batch_job"] = is_batch_job
+    obj["regrade"] = is_batch_job
     obj["waittime"] = waittime
 
     with open(os.path.join(tmp_submission,"queue_file.json"),'w') as outfile:
@@ -361,6 +359,8 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     shutil.rmtree(tmp_autograding)
     shutil.rmtree(tmp_submission)
     shutil.rmtree(tmp)
+
+    grade_items_logging.log_message(is_batch_job,"done zip",item_name)
 
     return (my_autograding_zip_file,my_submission_zip_file)
 
@@ -396,7 +396,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     queue_time_longstring = queue_obj["queue_time"]
     waittime = queue_obj["waittime"]
-    is_batch_job = queue_obj["is_batch_job"]
+    is_batch_job = queue_obj["regrade"]
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
 
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
@@ -806,7 +806,7 @@ def unpack_grading_results_zip(my_results_zip_file):
 
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
 
-    is_batch_job = queue_obj["is_batch_job"]
+    is_batch_job = queue_obj["regrade"]
     gradingtime=queue_obj["gradingtime"]
     grade_result=queue_obj["grade_result"]
 
@@ -841,12 +841,6 @@ def just_grade_item_A(next_directory,next_to_grade,which_untrusted,which_machine
     except:
         grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when preparing autograding and submission zip")
         return
-
-    #print ("A ZIP FILES: ",autograding_zip," ",submission_zip)
-    #time.sleep(10)
-
-
-
 
 
 

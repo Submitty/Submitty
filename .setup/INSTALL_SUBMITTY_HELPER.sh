@@ -155,19 +155,19 @@ chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
+# remove the old versions of the queues
+rm -r $SUBMITTY_DATA_DIR/to_be_graded_interactive
+rm -r $SUBMITTY_DATA_DIR/to_be_graded_batch
 # if the to_be_graded directories do not exist, then make them
-mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_interactive
-mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_batch
+mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
 mkdir -p $SUBMITTY_DATA_DIR/to_be_built
 
 # set the permissions of these directories
 
 #hwphp will write items to this list, hwcron will remove them
-chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_interactive
-chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_interactive
-#course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
-chown  ${HWCRON_USER}:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/to_be_graded_batch
-chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_batch
+#FIXME: course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
+chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
+chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
 
 #hwphp will write items to this list, hwcron will remove them
 chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built

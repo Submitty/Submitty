@@ -12,6 +12,7 @@ from submitty_utils import glob
 from submitty_utils import dateutils
 import multiprocessing
 import contextlib
+import socket
 
 # ==================================================================================
 # these variables will be replaced by INSTALL_SUBMITTY.sh
@@ -85,7 +86,7 @@ def launch_workers(num_workers):
 
 
     # launch the worker threads
-    which_machine="MASTER"
+    which_machine=socket.gethostname()
     processes = list()
     for i in range(0,num_workers):
         u = "untrusted" + str(i).zfill(2)

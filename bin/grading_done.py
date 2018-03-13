@@ -20,8 +20,8 @@ import psutil
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
-INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
-BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
+INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
+#BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 
 
 # ======================================================================
@@ -29,13 +29,13 @@ BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 
 if not os.path.isdir(INTERACTIVE_QUEUE):
     raise SystemExit("ERROR: interactive queue {} does not exist".format(INTERACTIVE_QUEUE))
-if not os.path.isdir(BATCH_QUEUE):
-    raise SystemExit("ERROR: batch queue {} does not exist".format(BATCH_QUEUE))
+#if not os.path.isdir(BATCH_QUEUE):
+#    raise SystemExit("ERROR: batch queue {} does not exist".format(BATCH_QUEUE))
 if not os.access(INTERACTIVE_QUEUE, os.R_OK):
     # most instructors do not have read access to the interactive queue
     print("WARNING: interactive queue {} is not readable".format(INTERACTIVE_QUEUE))
-if not os.access(BATCH_QUEUE, os.R_OK):
-    raise SystemExit("ERROR: batch queue {} is not readeable".format(BATCH_QUEUE))
+#if not os.access(BATCH_QUEUE, os.R_OK):
+#    raise SystemExit("ERROR: batch queue {} is not readeable".format(BATCH_QUEUE))
 
 # ======================================================================
 
@@ -72,10 +72,10 @@ def main():
             num_procs = 0
 
         done = True
-        batch_queue = os.listdir(BATCH_QUEUE)
-        grading_batch_queue = list(filter(lambda x: x.startswith("GRADING"), batch_queue))
-        if len(batch_queue) != 0:
-            done = False
+#        batch_queue = os.listdir(BATCH_QUEUE)
+#        grading_batch_queue = list(filter(lambda x: x.startswith("GRADING"), batch_queue))
+#        if len(batch_queue) != 0:
+#            done = False
 
         print("GRADING PROCESSES:{:3d}       ".format(num_procs), end="")
 
@@ -91,9 +91,9 @@ def main():
             if len(interactive_queue) != 0:
                 done = False
 
-        print("BATCH todo:{:3d} ".format(len(batch_queue) - len(grading_batch_queue)), end="")
-        if len(grading_batch_queue) != 0:
-            print("(grading:{:3d})".format(len(grading_batch_queue)), end="")
+#        print("BATCH todo:{:3d} ".format(len(batch_queue) - len(grading_batch_queue)), end="")
+#        if len(grading_batch_queue) != 0:
+#            print("(grading:{:3d})".format(len(grading_batch_queue)), end="")
         print()
 
         # quit when the queues are empty

@@ -32,8 +32,7 @@ kill_stuff () {
     ps -ef | grep performance_monitor.py | grep -v grep | awk '{print $2}' | xargs kill -9
 
     # kill all old jobs
-    rm -f /var/local/submitty/to_be_graded_batch/*
-    rm -f /var/local/submitty/to_be_graded_interactive/*
+    rm -f /var/local/submitty/to_be_graded_queue/*
 
     # clean up files
     rm -rf /var/local/submitty/autograding_tmp/untrusted*/tmp
