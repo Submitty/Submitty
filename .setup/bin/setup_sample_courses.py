@@ -83,7 +83,8 @@ def main():
     print ("pausing the autograding scheduling daemon")
     os.system("crontab -u hwcron -l > /tmp/hwcron_cron_backup.txt")
     os.system("crontab -u hwcron -r")
-    os.system("systemctl stop submitty_grading_scheduler")
+    os.system("systemctl stop submitty_autograding_shipper")
+    os.system("systemctl stop submitty_autograding_worker")
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
@@ -201,7 +202,8 @@ def main():
     print ("restarting the autograding scheduling daemon")
     os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
     os.system("rm /tmp/hwcron_cron_backup.txt")
-    os.system("systemctl restart submitty_grading_scheduler")
+    os.system("systemctl restart submitty_autograding_shipper")
+    os.system("systemctl restart submitty_autograding_worker")
 
     # queue up all of the newly created submissions to grade!
     os.system("/usr/local/submitty/bin/regrade.py /var/local/submitty/courses/ --no_input")
