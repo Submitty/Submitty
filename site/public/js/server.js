@@ -917,6 +917,10 @@ function saveScrollLocationOnRefresh(className){
 }
 
 function replyPost(thread_id, post_id, user_id, time){
+    var hide_replies = document.getElementsByClassName("reply-box");
+    for(var i = 0; i < hide_replies.length; i++){
+        hide_replies[i].style.display = "none"; 
+    }
     $('#'+ post_id + '-reply').css('display', 'block');
 }
 
