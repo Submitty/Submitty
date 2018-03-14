@@ -289,6 +289,8 @@ HTML;
 					}
 
 			$return .= <<<HTML
+
+			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
 			
 					<form style="margin-right:17px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
