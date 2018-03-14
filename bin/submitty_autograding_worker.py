@@ -58,15 +58,15 @@ def worker_process(which_machine,which_untrusted):
                     os.remove(autograding_zip)
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(submission_zip)
-
             with contextlib.suppress(FileNotFoundError):
                 os.remove(todo_queue_file)
+            counter = 0
         else:
-            time.sleep(1)
-            counter+=1
-            if counter >= 10:
-                print ("worker waiting: ",which_machine," ",which_untrusted)
+            if counter == 0 or counter >= 10:
+                print (which_machine,which_untrusted,"wait")
                 counter=0
+            counter+=1
+            time.sleep(1)
 
                 
 # ==================================================================================
@@ -83,7 +83,6 @@ def launch_workers(num_workers):
     untrusted_users = multiprocessing.Queue()
     for i in range(num_workers):
         untrusted_users.put("untrusted" + str(i).zfill(2))
-
 
     # launch the worker threads
     which_machine=socket.gethostname()

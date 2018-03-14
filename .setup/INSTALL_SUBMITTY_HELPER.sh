@@ -156,8 +156,8 @@ chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/auto
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
 # remove the old versions of the queues
-rm -r $SUBMITTY_DATA_DIR/to_be_graded_interactive
-rm -r $SUBMITTY_DATA_DIR/to_be_graded_batch
+rm -rf $SUBMITTY_DATA_DIR/to_be_graded_interactive
+rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
 mkdir -p $SUBMITTY_DATA_DIR/to_be_built
