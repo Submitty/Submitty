@@ -295,7 +295,7 @@ HTML;
 						<input type="hidden" name="parent_id" value="{$first_post_id}" />
 	            		<br/>
 	            		<div style="margin-bottom:10px;" class="form-group row">
-            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content')" style="margin-right:10px;" class="btn btn-primary">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content')" class="btn btn-primary">Code <i class="fa fa-code fa-1x"></i></button>
+            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
             	</div>
 	            		<div class="form-group row">
 	            			<textarea name="post_content" onclick="hideReplies();" id="post_content" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
@@ -304,7 +304,7 @@ HTML;
 	            		<br/>
 
 	           			<span style="float:left;display:inline-block;">
-            				<label id="file_input_label" class="btn btn-primary" for="file_input">
+            				<label id="file_input_label" class="btn btn-default" for="file_input">
     						<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
     						Upload Attachment
 							</label>
@@ -312,7 +312,7 @@ HTML;
 						</span>
 
 	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
+	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Submit reply to thread" class="btn btn-primary" />
 	            		</div>
 	            	</form>
 	            	<br/>
@@ -462,7 +462,7 @@ HTML;
 HTML;
 							if(!$first){
 								$return .= <<<HTML
-								<a class="btn btn-primary btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
+								<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
 HTML;
 							} else {
 								$first = false;
@@ -522,7 +522,7 @@ HTML;
 	            		<br/>
 
 	            		<div style="margin-bottom:10px;" class="form-group row">
-            				<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content_{$post_id}')" style="margin-right:10px;" class="btn btn-primary">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content_{$post_id}')" class="btn btn-primary">Code <i class="fa fa-code fa-1x"></i></button>
+            				<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content_{$post_id}')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content_{$post_id}')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
             			</div>
 	            		<div class="form-group row">
 	            			<textarea name="post_content_{$post_id}" id="post_content_{$post_id}" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
@@ -531,7 +531,7 @@ HTML;
 	            		<br/>
 
 	           			<span style="float:left;display:inline-block;">
-            				<label id="file_input_label_{$post_id}" class="btn btn-primary" for="file_input_{$post_id}">
+            				<label id="file_input_label_{$post_id}" class="btn btn-default" for="file_input_{$post_id}">
     						<input id="file_input_{$post_id}" name="file_input_{$post_id}[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this, '{$post_id}')" multiple>
     						Upload Attachment
 							</label>
@@ -539,7 +539,7 @@ HTML;
 						</span>
 
 	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
+	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Submit reply to {$visible_username}" class="btn btn-primary" />
 	            		</div>
 	            	</form>
 HTML;
@@ -583,7 +583,7 @@ HTML;
             	</div>
             	<br/>
             	<div style="margin-bottom:10px;" class="form-group row">
-            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_content')" style="margin-right:10px;" class="btn btn-primary">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_content')" class="btn btn-primary">Code <i class="fa fa-code fa-1x"></i></button>
+            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
             	</div>
             	<div class="form-group row">
             		<textarea name="thread_content" id="thread_content" style="resize:none;min-height:40vmin;overflow:hidden;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
@@ -594,7 +594,7 @@ HTML;
             	<div style="margin-bottom:10px;" class="form-group row">
 
             	<span style="float:left;display:inline-block;">
-            	<label id="file_input_label" class="btn btn-primary" for="file_input">
+            	<label id="file_input_label" class="btn btn-default" for="file_input">
     				<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
     				Upload Attachment
 				</label>
@@ -612,7 +612,7 @@ HTML;
 
 				}
 				$return .= <<<HTML
-				<input type="submit" style="display:inline-block;" name="post" value="Post" class="btn btn-primary" />
+				<input type="submit" style="display:inline-block;" name="post" value="Submit Post" class="btn btn-primary" />
 				</span>
             	</div>
 
