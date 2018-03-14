@@ -207,7 +207,7 @@ HTML;
 HTML;
 					}
 
-					$activeThreadTitle = htmlentities(strip_tags(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8')), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+					$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 			$thread_id = -1;
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
