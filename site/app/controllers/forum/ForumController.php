@@ -40,7 +40,13 @@ class ForumController extends AbstractController {
                 $this->publishPost();
                 break;
             case 'delete_post':
-                $this->deletePost();
+                $this->alterPost(0);
+                break;
+            case 'edit_post':
+                $this->alterPost(1);
+                break;
+            case 'get_edit_post_content':
+                $this->getEditPostContent();
                 break;
             case 'remove_announcement':
                 $this->alterAnnouncement(0);
@@ -89,8 +95,8 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     public function publishThread(){
-        $title = htmlentities($_POST["title"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $thread_content = htmlentities($_POST["thread_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $title = $_POST["title"];
+        $thread_content = str_replace("\r", "", $_POST["thread_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         if(empty($title) || empty($thread_content)){
@@ -126,7 +132,7 @@ class ForumController extends AbstractController {
     }
 
     public function publishPost(){
-        $post_content = htmlentities($_POST["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $post_content = str_replace("\r", "", $_POST["post_content"]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $parent_id = -1;
         if(!empty($_POST["parent_id"])){
@@ -164,17 +170,30 @@ class ForumController extends AbstractController {
         }
     }
 
-    public function deletePost(){
+    public function alterPost($modifyType){
         if($this->core->getUser()->getGroup() <= 2){
-            $thread_id = $_POST["thread_id"];
-            $post_id = $_POST["post_id"];
-            $type = "";
-            if($this->core->getQueries()->deletePost($post_id, $thread_id)){
-                $type = "thread";
-            } else {
-                $type = "post";
+
+            if($modifyType == 0) { //delete post
+                $thread_id = $_POST["thread_id"];
+                $post_id = $_POST["post_id"];
+                $type = "";
+                if($this->core->getQueries()->deletePost($post_id, $thread_id)){
+                    $type = "thread";
+                } else {
+                    $type = "post";
+                }
+                $this->core->getOutput()->renderJson(array('type' => $type));
+            } else if($modifyType == 1) { //edit post
+                $thread_id = $_POST["edit_thread_id"];
+                $post_id = $_POST["edit_post_id"];
+                $new_post_content = $_POST["edit_post_content"];
+                if(!$this->core->getQueries()->editPost($post_id, $new_post_content)){
+                    $this->core->addErrorMessage("There was an error trying to modify the post. Please try again.");
+                } $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
             }
-            $this->core->getOutput()->renderJson(array('type' => $type));
+            $response = array('type' => $type);
+            $this->core->getOutput()->renderJson($response);
+            return $response;
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
@@ -208,6 +227,21 @@ class ForumController extends AbstractController {
 
     public function showCreateThread(){
          $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread');
+    }
+
+    public function getEditPostContent(){
+        $post_id = $_POST["post_id"];
+        if($this->core->getUser()->getGroup() <= 2 && !empty($post_id)) {
+            $result = $this->core->getQueries()->getPost($post_id);
+            $output = array();
+            $output['user'] = $result["author_user_id"];
+            $output['post'] = $result["content"];
+            $output['post_time'] = $result['timestamp'];
+            $this->core->getOutput()->renderJson($output);
+            return $output;
+        } else {
+            $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
+        }
     }
 
 }

@@ -12,6 +12,7 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\GradeableList;
 use app\models\LateDaysCalculation;
+use app\controllers\grading\ElectronicGraderController;
 
 
 
@@ -141,6 +142,7 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
+
         if (!isset($_POST['user_id'])) {
             $msg = "Did not pass in user_id.";
             $return = array('success' => false, 'message' => $msg);
@@ -156,33 +158,40 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
         }
 
-
         $gradeable_id = $_REQUEST['gradeable_id'];
-        $user_id = $_POST['user_id'];
+        //usernames come in comma delimited. We split on the commas, then filter out blanks.
+        $user_ids = explode (",", $_POST['user_id']);
+        $user_ids = array_filter($user_ids);
 
-        //TODO: support entering team names rather than single user ids.
-        //This code will be useful for the case above, but is currently redundant
-        // $gradeable = $gradeable_list[$gradeable_id];
-        // if ($gradeable === null) {
-        //     $msg = "Invalid gradeable id '{$_POST['gradeable_id']}'";
-        //     $return = array('success' => false, 'message' => $msg);
-        //     $this->core->getOutput()->renderJson($return);
-        //     return $return;
-        // }
+        //If no user id's were submitted, give a graceful error.
+        if (count($user_ids) === 0) {
+            $msg = "No valid user ids were found.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+
+        //For every userid, we have to check that its real.
+        foreach($user_ids as $id){
+            $user = $this->core->getQueries()->getUserById($id);
+            if ($user === null) {
+                $msg = "Invalid user id '{$id}'";
+                $return = array('success' => false, 'message' => $msg);
+                $this->core->getOutput()->renderJson($return);
+                return $return;
+            }
+            if (!$user->isLoaded()) {
+                $msg = "Invalid user id '{$id}'";
+                $return = array('success' => false, 'message' => $msg);
+                $this->core->getOutput()->renderJson($return);
+                return $return;
+            }
+        }
+        //This grabs the first user in the list. If there is more than one user
+        //in the list, we will use this user as the team leader.
+        $user_id = reset($user_ids);
 
         $user = $this->core->getQueries()->getUserById($user_id);
-        if ($user === null) {
-            $msg = "Invalid user id '{$_POST['user_id']}'";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
-        if (!$user->isLoaded()) {
-            $msg = "Invalid user id '{$_POST['user_id']}'";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
 
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
 
@@ -193,10 +202,39 @@ class SubmissionController extends AbstractController {
             return $return;
         }
 
+        //If this is a team assignment, we need to check that all users are on the same (or no) team.
+        //To do this, we just compare the leader's teamid to the team id of every other user.
+        if($gradeable->isTeamAssignment()){
+            $leader_team_id = "";
+            $leader_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
+            if($leader_team !== null){
+                $leader_team_id = $leader_team->getId();
+            }
+            foreach($user_ids as $id){
+                $user_team_id = "";
+                $user_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id);
+                if($user_team !== null){
+                    $user_team_id = $user_team->getId();
+                }
+                if($user_team_id !== $leader_team_id){
+                    $msg = "Inconsistent teams. One or more users are on different teams.";
+                    $return = array('success' => false, 'message' => $msg);
+                    $this->core->getOutput()->renderJson($return);
+                    return $return;
+                }
+            }
+        }
+
+
         $gradeable->loadResultDetails();
 
         $highest_version = $gradeable->getHighestVersion();
-        $return = array('success' => true, 'highest_version' => $highest_version);
+        $previous_submission = false;
+        //If there has been a previous submission, we tag it so that we can pop up a warning.
+        if($highest_version > 0){
+            $previous_submission = true;
+        }
+        $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $previous_submission);
         $this->core->getOutput()->renderJson($return);
 
         return $return;
@@ -392,7 +430,14 @@ class SubmissionController extends AbstractController {
 
         $gradeable_id = $_REQUEST['gradeable_id'];
         $original_user_id = $this->core->getUser()->getId();
-        $user_id = $_POST['user_id'];
+
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        //user ids come in as a comma delimited list. we explode that list, then filter out empty values.
+        $user_ids = explode (",", $_POST['user_id']);
+        $user_ids = array_filter($user_ids);
+        //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
+        $user_id = reset($user_ids);
+
         $path = $_POST['path'];
         if ($user_id === $original_user_id) {
             $gradeable = $gradeable_list[$gradeable_id];
@@ -426,8 +471,19 @@ class SubmissionController extends AbstractController {
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
-            $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
+            $leader = $user_id;
+            $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
             if ($team !== null) {
+                $team_id = $team->getId();
+                $who_id = $team_id;
+                $user_id = "";
+            }
+            //if the student isn't on a team, build the team.
+            else{
+                //If the team doesn't exist yet, we need to build a new one. (Note, we have already checked in ajaxvalidgradeable
+                //that all users are either on the same team or no team).
+                ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader, $user_ids);
+                $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
                 $team_id = $team->getId();
                 $who_id = $team_id;
                 $user_id = "";
@@ -455,8 +511,12 @@ class SubmissionController extends AbstractController {
 
         $max_size = $gradeable->getMaxSize();
 
+        $path = rawurldecode(htmlspecialchars_decode($path));
+
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $path);
+
+        $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
 
         // copy over the uploaded file
         if (isset($uploaded_file)) {
@@ -583,10 +643,12 @@ class SubmissionController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $gradeable_list[$gradeable_id];
         $gradeable->loadResultDetails();
-        $path = $_POST['path'];
+        $path = rawurldecode(htmlspecialchars_decode($_POST['path']));
 
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $path);
+
+        $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
 
         if (!@unlink($uploaded_file)) {
             return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);

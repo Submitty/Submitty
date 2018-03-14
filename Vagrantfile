@@ -15,6 +15,10 @@ mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/logs
 ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV['EXTRA']} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/logs/vagrant.log
 SCRIPT
 
+unless Vagrant.has_plugin?('vagrant-vbguest')
+  raise 'vagrant-vbguest is not installed!'
+end
+
 Vagrant.configure(2) do |config|
   # Specify the various machines that we might develop on. After defining a name, we
   # can specify if the vm is our "primary" one (if we don't specify a VM, it'll use

@@ -100,12 +100,14 @@ adduser hwphp hwcronphp
 adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcgi hwphp
 adduser hwcgi www-data
+
 # NOTE: hwcgi must be in the shadow group so that it has access to the
 # local passwords for pam authentication
 adduser hwcgi shadow
 
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcron hwcronphp
+adduser hwcron www-data
 
 # FIXME:  umask setting above not complete
 # might need to also set USERGROUPS_ENAB to "no", and manually create
@@ -128,16 +130,17 @@ usermod -aG docker hwcron
 pip3 install -U pip
 pip3 install python-pam
 pip3 install PyYAML
-pip3 install psycopg2
+pip3 install psycopg2-binary
 pip3 install sqlalchemy
 pip3 install pylint
 pip3 install psutil
 pip3 install python-dateutil
 pip3 install watchdog
 pip3 install xlsx2csv
+pip3 install pause
 
-chmod -R 555 /usr/local/lib/python*/*
-chmod 555 /usr/lib/python*/dist-packages
+sudo chmod -R 555 /usr/local/lib/python*/*
+sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
 sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
 
@@ -187,6 +190,26 @@ rm index.html* > /dev/null 2>&1
 chmod o+r . *.jar
 
 popd > /dev/null
+
+# JaCoCo is a potential replacement for EMMA
+
+echo "Getting JaCoCo..."
+
+pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
+
+JACOCO_VER=0.8.0
+wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
+mkdir jacoco-${JACOCO_VER}
+unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
+mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
+mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
+rm -rf jacoco-${JACOCO_VER}
+rm jacoco-${JACOCO_VER}.zip
+
+chmod o+r . *.jar
+
+popd > /dev/null
+
 
 #################################################################
 # DRMEMORY SETUP
@@ -320,7 +343,7 @@ else
     git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     # remember to change this version in .setup/travis/autograder.sh too
-    git checkout v0.93
+    git checkout v0.94
     popd
 fi
 
@@ -352,6 +375,7 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 ${SUBMISSION_URL}
+${GIT_URL}/git
 
 1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
@@ -429,13 +453,20 @@ fi
 # DOCKER SETUP
 #################
 
-#mkdir -p /tmp/docker
-#cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-#pushd /tmp/docker
-#cp -R ${SUBMITTY_INSTALL_DIR}/drmemory ./
-#cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools ./
-#docker build -t ubuntu:custom -f Dockerfile .
-#popd
+# WIP: creates basic container for grading CS1 & DS assignments
+# CAUTION: needs users/groups for security 
+
+rm -rf /tmp/docker
+mkdir -p /tmp/docker
+cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
+cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
+
+chown hwcron:hwcron -R .
+
+pushd /tmp/docker
+su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
+popd
 
 #################################################################
 # RESTART SERVICES

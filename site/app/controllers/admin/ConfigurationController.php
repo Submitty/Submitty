@@ -32,7 +32,7 @@ class ConfigurationController extends AbstractController {
             'upload_message'            => $this->core->getConfig()->getUploadMessage(),
             'keep_previous_files'       => $this->core->getConfig()->keepPreviousFiles(),
             'display_rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
-            'display_custom_message'      => $this->core->getConfig()->displayCustomMessage(),
+            'display_custom_message'    => $this->core->getConfig()->displayCustomMessage(),
             'course_email'              => $this->core->getConfig()->getCourseEmail(),
             'vcs_base_url'              => $this->core->getConfig()->getVcsBaseUrl(),
             'vcs_type'                  => $this->core->getConfig()->getVcsType(),
