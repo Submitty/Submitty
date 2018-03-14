@@ -285,6 +285,9 @@ HTML;
 
 		$date = date_create($post["timestamp"]);
 		$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
+		$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		
 		if($post["anonymous"]){
 			$visible_username = "Anonymous";
 		} else {
@@ -301,54 +304,123 @@ HTML;
 		}
 
 		$offset = ($reply_level-1)*30;
-		$post_html .= <<<HTML
-			<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
+							$return = <<<HTML
+								<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
 HTML;
 
-		if($this->core->getUser()->getGroup() <= 2){
-			$post_html .= <<<HTML
-				<a class="post_button" style="position:absolute; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
-HTML;
-		}
-		 
-		if($first){
-			$first = false;
-			$post_html .= $title_html;
-		} else {
-			$post_html .= <<<HTML
+
+						if($first){
+                            $first = false;
+                            $return .= $title_html;
+                        } else {
+			$return .= <<<HTML
 				<a style="float:right; right: 25px; position: absolute" onClick="replyPost({$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}')"> reply </a>
 HTML;
 		}
 
-	if($this->core->getUser()->getGroup() <= 2){
-		$info_name = $full_name . " (" . $post['author_user_id'] . ")";
-		$post_html .= <<<HTML
-		<a style=" margin-right:2px;display:inline-block; color:black; " onClick="changeName(this.parentNode, '{$info_name}', '{$visible_username}', {$post['anonymous']}	)" title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
-HTML;
-	}
-	$post_html .= <<<HTML
-		<h7><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")}</h7></span>
+                      
+
+                        //handle converting links 
+
+
+                        //convert legacy htmlentities being saved in db
+                        $post_content = html_entity_decode($post["content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
+
+                        if(!empty($pre_post)){
+                        	$post_content = $pre_post;
+                        }
+
+                        $post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+                        preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
+                        $accepted_schemes = array("https", "http");
+                        $pos = 0;
+                        if(count($result) > 0) {
+                        	foreach($result[1] as $url){
+                        		$decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
+                        		$parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
+                        		if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
+                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . $decoded_url . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
+
+                        		} else {
+                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
+                        		}
+                        		if(!empty($pre_post)){
+                        			$post_content = $pre_post;
+                        		} $pre_post = "";
+                        		 $pos++;
+                        	}
+                        }
+
+                        //This code is for legacy posts that had an extra \r per newline
+                        if(strpos($post['content'], "\r") !== false){
+                        	$post_content = str_replace("\r","", $post_content);
+                        }
+
+                        //end link handling
+
+                        //handle converting code segments
+
+                        $codeBracketString = "&lbrack;&sol;code&rsqb;";
+                        if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
+                        	$codeBracketString = "&NewLine;" . $codeBracketString;
+                        }
+
+                        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+
+						//end code segment handling
+
+						$return .= <<<HTML
+							<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>
+							
+							
+							<hr style="margin-bottom:3px;"><span style="margin-top:5px;margin-left:10px;float:right;">
+							
 HTML;
 
-		if($post["has_attachment"]){
-			$post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
-			$files = FileUtils::getAllFiles($post_dir);
-			foreach($files as $file){
-				$path = urlencode(htmlspecialchars($file['path']));
-				$name = urlencode(htmlspecialchars($file['name']));
-				$name_display = htmlentities($file['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$post_html .= <<<HTML
-			<a href="#" style="display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
+if($this->core->getUser()->getGroup() <= 2){
+						$info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
+						$visible_user_json = json_encode($visible_username);
+						$info_name = json_encode($info_name);
+						$jscriptAnonFix = $post['anonymous'] ? 'true' : 'false' ;
+						$jscriptAnonFix = json_encode($jscriptAnonFix);
+						$return .= <<<HTML
+						<a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {$info_name}, {$visible_user_json}, {$jscriptAnonFix})' title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
 HTML;
-			}
-		}
+}
 
-		$post_html .= <<<HTML
-		</div>
+						if($this->core->getUser()->getGroup() <= 2){
+							$wrapped_content = json_encode($post['content']);
+							$return .= <<<HTML
+
+							<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+							<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
-		//This chunk here is for reply-box under the post
-		$offset = $offset + 30;
-		$post_html .= <<<HTML
+							} 
+			$return .= <<<HTML
+			
+<h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")} </h7></span>
+HTML;
+
+						if($post["has_attachment"]){
+							$post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
+							$files = FileUtils::getAllFiles($post_dir);
+							foreach($files as $file){
+								$path = rawurlencode($file['path']);
+								$name = rawurlencode($file['name']);
+								$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+								$return .= <<<HTML
+							<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
+HTML;
+
+							}
+							
+						}
+						$offset = $offset + 30;
+						$return .= <<<HTML
+</div>
+
 			<form class="reply-box" id="$post_id-reply" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 				<input type="hidden" name="thread_id" value="{$thread_id}" />
 				<input type="hidden" name="parent_id" value="{$post_id}" />
@@ -370,7 +442,7 @@ HTML;
            	</form>
 HTML;
 
-		return $post_html;
+		return $return;
 	}
 
 	public function createThread() {
