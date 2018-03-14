@@ -39,6 +39,9 @@ class UsersController extends AbstractController {
             case 'upload_class_list':
                 $this->uploadClassList();
                 break;
+            case 'download_email_csv':
+                $this->downloadEmailCSV();
+                break;
             case 'students':
             default:
                 $this->core->getOutput()->addBreadcrumb('View Students');
@@ -638,5 +641,21 @@ class UsersController extends AbstractController {
 
         $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
         $this->core->redirect($return_url);
+    }
+
+    public function downloadEmailCSV(){
+        $students = $this->core->getQueries()->getAllUsers();
+        $n1= "\n";
+        $csv_data = array();
+        $csv_data[] = implode(',',array('Id','Name','Email')).$n1;
+        $filename = $this->core->getConfig()->getCourse()."StudentEmailCSV.csv";
+        if (count($students) > 0) {
+        foreach ($students as $student) {
+            $csv_data[]=implode(',',array($student->getId(),$student->getDisplayedFirstName(),$student->getEmail()));
+        }
+        $csv_data = implode($n1,$csv_data);
+        }
+        $this->core->getOutput()->renderFile($csv_data, $filename);
+        return $csv_data;
     }
 }
