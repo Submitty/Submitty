@@ -7,8 +7,10 @@ import signal
 import json
 import grade_items_logging
 import grade_item
+import datetime
 from submitty_utils import glob
 import multiprocessing
+from submitty_utils import dateutils, glob
 
 # ==================================================================================
 # these variables will be replaced by INSTALL_SUBMITTY.sh
@@ -53,9 +55,13 @@ def grade_queue_file(queue_file,which_machine,which_untrusted):
         grade_item.just_grade_item_A(my_dir, queue_file, which_untrusted, which_machine)
 
         # then wait for grading to be completed
+        shipper_counter=0
         while not grade_item.just_grade_item_C(my_dir, queue_file, which_untrusted, which_machine):
-            print (which_machine,which_untrusted,"shipper waiting: ",queue_file)
+            shipper_counter+=1
             time.sleep(1)
+            if shipper_counter >= 10:
+                print (which_machine,which_untrusted,"shipper waiting: ",queue_file)
+                shipper_counter=0
 
     except Exception as e:
         print ("ERROR attempting to grade item: ", queue_file, " exception=",e)
@@ -76,12 +82,14 @@ def grade_queue_file(queue_file,which_machine,which_untrusted):
 
 
 # ==================================================================================
-def get_job(overall_lock):
+def get_job(which_machine,which_untrusted,overall_lock):
     """
     Picks a job from the queue
 
     :param overall_lock: a lock on the directory containing all queue files
     """
+
+    time_get_job_begin = dateutils.get_current_time()
 
     overall_lock.acquire()
     folder= INTERACTIVE_QUEUE
@@ -124,6 +132,13 @@ def get_job(overall_lock):
 
     overall_lock.release()
 
+    time_get_job_end = dateutils.get_current_time()
+
+    time_delta = time_get_job_end-time_get_job_begin
+    if time_delta > datetime.timedelta(milliseconds=100):
+        print ("WARNING: submitty_autograding shipper get_job time ", time_delta)
+        grade_items_logging.log_message(message="WARNING: submitty_autograding shipper get_job time "+str(time_delta))
+
     return my_job
 
 
@@ -145,7 +160,7 @@ def shipper_process(overall_lock,which_machine,which_untrusted):
 
     try:
         while True:
-            my_job = get_job(overall_lock)
+            my_job = get_job(which_machine,which_untrusted,overall_lock)
             if not my_job == "":
                 counter=0
                 grade_queue_file(os.path.join(INTERACTIVE_QUEUE,my_job),which_machine,which_untrusted)

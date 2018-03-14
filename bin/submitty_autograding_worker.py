@@ -33,7 +33,7 @@ def worker_process(which_machine,which_untrusted):
 
     # ignore keyboard interrupts in the worker processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
-    counter=0
+    counter = 0
     
     autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_autograding.zip")
     submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_submission.zip")
@@ -62,10 +62,10 @@ def worker_process(which_machine,which_untrusted):
                 os.remove(todo_queue_file)
             counter = 0
         else:
-            if counter == 0 or counter >= 10:
+            if counter >= 10:
                 print (which_machine,which_untrusted,"wait")
-                counter=0
-            counter+=1
+                counter = 0
+            counter += 1
             time.sleep(1)
 
                 
