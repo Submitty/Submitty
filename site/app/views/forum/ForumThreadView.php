@@ -294,8 +294,11 @@ HTML;
 					<form style="margin-right:17px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            		<br/>
+	            		<div style="margin-bottom:10px;" class="form-group row">
+            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content')" style="margin-right:10px;" class="btn btn-primary">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content')" class="btn btn-primary">Code <i class="fa fa-code fa-1x"></i></button>
+            	</div>
 	            		<div class="form-group row">
-	            			<textarea name="post_content" onclick="hideReplies();" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+	            			<textarea name="post_content" onclick="hideReplies();" id="post_content" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
 	            		</div>
 
 	            		<br/>
@@ -517,8 +520,12 @@ HTML;
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$post_id}" />
 	            		<br/>
+
+	            		<div style="margin-bottom:10px;" class="form-group row">
+            				<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content_{$post_id}')" style="margin-right:10px;" class="btn btn-primary">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content_{$post_id}')" class="btn btn-primary">Code <i class="fa fa-code fa-1x"></i></button>
+            			</div>
 	            		<div class="form-group row">
-	            			<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+	            			<textarea name="post_content_{$post_id}" id="post_content_{$post_id}" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
 	            		</div>
 
 	            		<br/>

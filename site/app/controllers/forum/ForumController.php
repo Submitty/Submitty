@@ -132,18 +132,21 @@ class ForumController extends AbstractController {
     }
 
     public function publishPost(){
-        $post_content = str_replace("\r", "", $_POST["post_content"]);
-        $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $parent_id = -1;
+        $post_content_tag = 'post_content';
         if(!empty($_POST["parent_id"])){
             $parent_id = htmlentities($_POST["parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $post_content_tag .= '_' . $parent_id;
         }
+        $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
+        $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $parent_id = -1;
+
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
-            $hasGoodAttachment = $this->checkGoodAttachment(false, $_POST["post_content"], $thread_id);
+            $hasGoodAttachment = $this->checkGoodAttachment(false, $_POST[$post_content_tag], $thread_id);
             if($hasGoodAttachment == -1){
                 return;
             }
