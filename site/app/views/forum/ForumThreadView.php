@@ -85,11 +85,10 @@ HTML;
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
-		<div style="margin-top:10px; height:50px;  " id="forum_bar">
-			<div style="margin-left:20px; height: 20px; width:136px;" class="create_thread_button">
+		<div style="margin-left:20px;margin-top:10px; height:50px;  " id="forum_bar">
 
-			<a class="btn btn-primary" style="position:absolute;top:3px;left:2px;vertical-align: middle;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
-			</div>
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
+			
 		</div>
 
 HTML;
@@ -293,6 +292,7 @@ HTML;
 			
 					<form style="margin-right:17px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
+						<input type="hidden" name="parent_id" value="{$first_post_id}" />
 	            		<br/>
 	            		<div style="margin-bottom:10px;" class="form-group row">
             		<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content')" style="margin-right:10px;" class="btn btn-primary">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content')" class="btn btn-primary">Code <i class="fa fa-code fa-1x"></i></button>
@@ -566,11 +566,10 @@ HTML;
 
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
-		<div style="margin-top:10px; height:50px;" id="forum_bar">
-			<div style="margin-left:20px; height: 20px; width:148px;" class="create_thread_button">
+		<div style="margin-left:20px;margin-top:10px; height:50px;" id="forum_bar">
 
-			<a class="btn btn-primary" style="position:absolute;top:3px;left:2px;vertical-align: middle;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
-			</div>
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+		
 		</div>
 
 		<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;height:69vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
