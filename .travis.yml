@@ -8,8 +8,6 @@ matrix:
       env: AUTH_METHOD=2 INTEGRATION_SUITE=false
     - php: 7.1
       env: AUTH_METHOD=2 INTEGRATION_SUITE=false
-    - php: 7.2
-      env: AUTH_METHOD=2 INTEGRATION_SUITE=false
     - php: 7.0
       env: AUTH_METHOD=1 INTEGRATION_SUITE=false
     - php: 7.0
