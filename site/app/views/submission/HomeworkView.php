@@ -913,7 +913,7 @@ HTML;
                             $revision =  substr($results['revision'], 0, 7);
                         }
                         $return .= <<<HTML
-revision submitted : {$revision}<br />
+git commit hash: {$revision}<br />
 HTML;
                     }
                 }
