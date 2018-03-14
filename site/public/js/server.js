@@ -919,8 +919,12 @@ function saveScrollLocationOnRefresh(className){
 }
 
 function replyPost(post_id){
-    hideReplies();
-    $('#'+ post_id + '-reply').css('display', 'block');
+    if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
+        $('#'+ post_id + '-reply').css("display","none");
+    } else {
+        hideReplies();
+        $('#'+ post_id + '-reply').css('display', 'block');
+    }
 }
 
 function hideReplies(){
