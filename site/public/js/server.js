@@ -818,17 +818,18 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
-function checkNumFilesForumUpload(input){
+function checkNumFilesForumUpload(input, post_id){
+    var displayPostId = (typeof post_id !== "undefined") ? "_" + escape(post_id) : "";
     if(input.files.length > 5){
-        $('#file_name').html('');
-        document.getElementById('file_input_label').style.border = "2px solid red";
+        $('#file_name' + displayPostId).html('');
+        document.getElementById('file_input_label' + displayPostId).style.border = "2px solid red";
         var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Max file upload size is 5. Please try again.</div>';
         $('#messages').append(message);
-        document.getElementById('file_input').value = null;
+        document.getElementById('file_input' + displayPostId).value = null;
     } else {
-        $('#file_name').html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
+        $('#file_name' + displayPostId).html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
         $('#messages').fadeOut();
-        document.getElementById('file_input_label').style.border = "";
+        document.getElementById('file_input_label' + displayPostId).style.border = "";
     }
             
 }
@@ -916,12 +917,16 @@ function saveScrollLocationOnRefresh(className){
     });
 }
 
-function replyPost(thread_id, post_id, user_id, time){
+function replyPost(post_id){
+    hideReplies();
+    $('#'+ post_id + '-reply').css('display', 'block');
+}
+
+function hideReplies(){
     var hide_replies = document.getElementsByClassName("reply-box");
     for(var i = 0; i < hide_replies.length; i++){
         hide_replies[i].style.display = "none"; 
     }
-    $('#'+ post_id + '-reply').css('display', 'block');
 }
 
 function deletePost(thread_id, post_id, author, time){

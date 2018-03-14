@@ -208,7 +208,7 @@ HTML;
 HTML;
 					}
 
-					$activeThreadTitle = htmlentities(strip_tags($activeThreadTitle), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+					$activeThreadTitle = htmlentities(strip_tags(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8')), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 			$thread_id = -1;
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
@@ -295,7 +295,7 @@ HTML;
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 	            		<br/>
 	            		<div class="form-group row">
-	            			<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+	            			<textarea name="post_content" onclick="hideReplies();" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
 	            		</div>
 
 	            		<br/>
@@ -320,6 +320,31 @@ HTML;
 				</div>
 HTML;
 		}
+
+		$return .= <<<HTML
+	<script>
+		var codeSegments = document.querySelectorAll("[id=code]");
+		for (let element of codeSegments){
+			var editor0 = CodeMirror.fromTextArea(element, {
+            lineNumbers: true,
+            readOnly: true,
+            cursorHeight: 0.0,
+            lineWrapping: true
+	    });
+
+	    var lineCount = editor0.lineCount();
+	    if (lineCount == 1) {
+	        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+	    }
+	    else {
+	        editor0.setSize("100%", "auto");
+	    }
+	    editor0.setOption("theme", "eclipse");
+	    editor0.refresh(); 
+		}
+			
+	    </script>
+HTML;
 
 if(isset($_SESSION["post_content"]) && isset($_SESSION["post_recover_active"])){
 			
@@ -434,14 +459,14 @@ HTML;
 HTML;
 							if(!$first){
 								$return .= <<<HTML
-								<a class="btn btn-primary btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}')"> Reply</a>
+								<a class="btn btn-primary btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
 HTML;
 							} else {
 								$first = false;
 							}
 
 							$return .= <<<HTML
-							<span style="margin-top:6px;margin-left:10px;float:right;">
+							<span style="margin-top:8px;margin-left:10px;float:right;">
 
 							
 HTML;
@@ -488,50 +513,28 @@ HTML;
 						$return .= <<<HTML
 </div>
 
-			<form class="reply-box" id="$post_id-reply" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
-				<input type="hidden" name="thread_id" value="{$thread_id}" />
-				<input type="hidden" name="parent_id" value="{$post_id}" />
-          		<br/>
-           		<div class="form-group row">
-           			<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
-           		</div>
-           		<br/>
-       			<span style="float:left;display:inline-block;">
-	   				<label id="file_input_label" class="btn btn-primary" for="file_input">
-						<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
-						Upload Attachment
-					</label>
-					<span class='label label-info' id="file_name"></span>
-				</span>
-           		<div style="margin-bottom:20px;float:right;" class="form-group row">
-           			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
-           		</div>
-           	</form>
-HTML;
+           	<form class="reply-box" id="$post_id-reply" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+						<input type="hidden" name="thread_id" value="{$thread_id}" />
+						<input type="hidden" name="parent_id" value="{$post_id}" />
+	            		<br/>
+	            		<div class="form-group row">
+	            			<textarea name="post_content" id="post_content" style="white-space: pre-wrap;resize:none;height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply here..." required></textarea>
+	            		</div>
 
-	$return .= <<<HTML
-	<script>
-		var codeSegments = document.querySelectorAll("[id=code]");
-		for (let element of codeSegments){
-			var editor0 = CodeMirror.fromTextArea(element, {
-            lineNumbers: true,
-            readOnly: true,
-            cursorHeight: 0.0,
-            lineWrapping: true
-	    });
+	            		<br/>
 
-	    var lineCount = editor0.lineCount();
-	    if (lineCount == 1) {
-	        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
-	    }
-	    else {
-	        editor0.setSize("100%", "auto");
-	    }
-	    editor0.setOption("theme", "eclipse");
-	    editor0.refresh(); 
-		}
-			
-	    </script>
+	           			<span style="float:left;display:inline-block;">
+            				<label id="file_input_label_{$post_id}" class="btn btn-primary" for="file_input_{$post_id}">
+    						<input id="file_input_{$post_id}" name="file_input_{$post_id}[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this, '{$post_id}')" multiple>
+    						Upload Attachment
+							</label>
+							<span class='label label-info' id="file_name_{$post_id}"></span>
+						</span>
+
+	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
+	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Reply" class="btn btn-primary" />
+	            		</div>
+	            	</form>
 HTML;
 
 		return $return;
