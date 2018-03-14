@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import signal
+import json
 import grade_items_logging
 import grade_item
 from submitty_utils import glob
@@ -100,9 +101,21 @@ def get_job(overall_lock):
             continue
         if os.path.exists(os.path.join(folder,"GRADING_"+just_file)):
             continue
+
         # found something to do
-        my_job = just_file
-        break
+        with open(full_path_file, 'r') as infile:
+            queue_obj = json.load(infile)
+
+        # prioritize interactive jobs over (batch) regrades
+        # if you've found an interactive job, exit early (since they are sorted by timestamp)
+        if not "regrade" in queue_obj or not queue_obj["regrade"]:
+            my_job = just_file
+            break
+
+        # otherwise it's a regrade, and if we don't already have a
+        # job, take it, but we have to search the rest of the list
+        if my_job == "":
+            my_job = just_file
 
     if not my_job == "":
         grading_file = os.path.join(folder, "GRADING_" + my_job)

@@ -593,12 +593,12 @@ systemctl is-active --quiet submitty_grading_scheduler
 is_scheduler_active=$?
 if [[ "$is_scheduler_active" == "0" ]]; then
     systemctl stop submitty_grading_scheduler
-    echo -e "WARNING: Stopped Submitty Grading Scheduler Daemon\n"
+    echo -e "WARNING: Stopped Deprecated Submitty Grading Scheduler Daemon\n"
 fi
 systemctl is-active --quiet submitty_grading_scheduler
 is_active_tmp=$?
 if [[ "$is_active_tmp" == "0" ]]; then
-    echo -e "ERROR: did not successfully stop submitty grading scheduler daemon\n"
+    echo -e "ERROR: did not successfully stop deprecated submitty grading scheduler daemon\n"
     exit 1
 fi
 # END TO BE DELETED

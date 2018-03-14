@@ -32,13 +32,6 @@ USE_DOCKER = False
 
 
 # ==================================================================================
-#def parse_args():
-#    parser = argparse.ArgumentParser()
-#    parser.add_argument("next_directory")
-#    parser.add_argument("next_to_grade")
-#    parser.add_argument("which_untrusted")
-#    return parser.parse_args()
-
 def get_queue_time(next_directory,next_to_grade):
     t = time.ctime(os.path.getctime(os.path.join(next_directory,next_to_grade)))
     t = dateutil.parser.parse(t)
@@ -231,7 +224,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     print(which_machine,which_untrusted,"prepare zip",submission_path)
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
-    is_batch_job = obj["regrade"]
+    is_batch_job = "regrade" in obj and obj["regrade"]
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
 
     queue_time = get_queue_time(next_directory,next_to_grade)
