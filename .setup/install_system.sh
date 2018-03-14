@@ -166,9 +166,10 @@ pip3 install psutil
 pip3 install python-dateutil
 pip3 install watchdog
 pip3 install xlsx2csv
+pip3 install pause
 
-chmod -R 555 /usr/local/lib/python*/*
-chmod 555 /usr/lib/python*/dist-packages
+sudo chmod -R 555 /usr/local/lib/python*/*
+sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
 
 #Evan: there is no hwcgi in headless
@@ -444,9 +445,11 @@ source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
 #Evan: Check on grading scheduler
 # (re)start the submitty grading scheduler daemon
-systemctl restart submitty_grading_scheduler
+systemctl restart submitty_autograding_shipper
+systemctl restart submitty_autograding_worker
 # also, set it to automatically start on boot
-sudo systemctl enable submitty_grading_scheduler
+sudo systemctl enable submitty_autograding_shipper
+sudo systemctl enable submitty_autograding_worker
 
 #Evan: Remove user authentication for website
 if [ ${HEADLESS} == 0 ]; then
@@ -517,13 +520,20 @@ fi
 # DOCKER SETUP
 #################
 
-#mkdir -p /tmp/docker
-#cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-#pushd /tmp/docker
-#cp -R ${SUBMITTY_INSTALL_DIR}/drmemory ./
-#cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools ./
-#docker build -t ubuntu:custom -f Dockerfile .
-#popd
+# WIP: creates basic container for grading CS1 & DS assignments
+# CAUTION: needs users/groups for security 
+
+rm -rf /tmp/docker
+mkdir -p /tmp/docker
+cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
+cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
+
+chown hwcron:hwcron -R .
+
+pushd /tmp/docker
+su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
+popd
 
 #################################################################
 # RESTART SERVICES

@@ -20,8 +20,7 @@ NUM_GRADING_SCHEDULER_WORKERS_int    = int(NUM_GRADING_SCHEDULER_WORKERS_string)
 AUTOGRADING_LOG_PATH="__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
-INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
-BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
+INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
 
 
 # ==================================================================================
@@ -73,13 +72,22 @@ def grade_queue_file(queue_file,which_untrusted):
     name = os.path.basename(os.path.realpath(queue_file))
     grading_file = os.path.join(directory, "GRADING_" + name)
 
+    which_machine="localhost"
+    
     open(os.path.join(grading_file), "w").close()
-    #untrusted = multiprocessing.current_process().untrusted
     try:
-        grade_item.just_grade_item(my_dir, queue_file, which_untrusted)
+
+        # prepare the job
+        grade_item.just_grade_item_A(my_dir, queue_file, which_untrusted, which_machine)
+
+        # then wait for grading to be completed
+        while not grade_item.just_grade_item_C(my_dir, queue_file, which_untrusted, which_machine):
+            print ("shipper waiting: ",which_machine," ",which_untrusted)
+            time.sleep(1)
+
     except Exception as e:
         print ("ERROR attempting to grade item: ", queue_file, " exception=",e)
-        grade_items_logging.log_message(False,"","","","","ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
+        grade_items_logging.log_message(message="ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
 
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
@@ -87,12 +95,12 @@ def grade_queue_file(queue_file,which_untrusted):
         os.remove(queue_file)
     except:
         print ("ERROR attempting to remove queue file: ", queue_file)
-        grade_items_logging.log_message(False,"","","","","ERROR attempting to remove queue file: " + queue_file)
+        grade_items_logging.log_message(message="ERROR attempting to remove queue file: " + queue_file)
     try:
         os.remove(grading_file)
     except:
         print ("ERROR attempting to remove grading file: ", grading_file)
-        grade_items_logging.log_message(False,"","","","","ERROR attempting to remove grading file: " + grading_file)
+        grade_items_logging.log_message(message="ERROR attempting to remove grading file: " + grading_file)
 
 
 def populate_queue(queue, folder):
@@ -106,7 +114,7 @@ def populate_queue(queue, folder):
     """
 
     for file_path in glob.glob(os.path.join(folder, "GRADING_*")):
-        grade_items_logging.log_message(False,"","","","","Remove old queue file: " + file_path)
+        grade_items_logging.log_message(message="Remove old queue file: " + file_path)
         os.remove(file_path)
 
     # Grab all the files currently in the folder, sorted by creation
@@ -124,7 +132,7 @@ def exit_gracefully(signum,frame):
 
 # ==================================================================================
 # ==================================================================================
-def worker_process(interactive_queue,batch_queue,new_job_event,overall_lock,which_untrusted):
+def worker_process(interactive_queue,new_job_event,overall_lock,which_untrusted):
     """
     Each worker process spins in a loop, acquiring the overall lock to
     check the queues, prioritizing interactive jobs over batch jobs.
@@ -143,16 +151,11 @@ def worker_process(interactive_queue,batch_queue,new_job_event,overall_lock,whic
                 overall_lock.release()
                 grade_queue_file(job,which_untrusted)
                 continue
-            elif not batch_queue.empty():
-                job = batch_queue.get()
-                overall_lock.release()
-                grade_queue_file(job,which_untrusted)
-                continue
             else:
                 new_job_event.clear()
                 overall_lock.release()
                 pid = os.getpid()
-                print ("pid ",pid,": no job for now, going to wait 10 seconds")
+                print (which_untrusted,": no job for now, going to wait 10 seconds")
                 new_job_event.wait(10)
     except:
         print ("exiting worker")
@@ -165,7 +168,7 @@ def launch_workers(num_workers):
     if not int(os.getuid()) == int(HWCRON_UID):
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
-    grade_items_logging.log_message(False,"","","","","grade_scheduler.py launched")
+    grade_items_logging.log_message(message="grade_scheduler.py launched")
 
     # prepare a list of untrusted users to be used by the workers
     untrusted_users = multiprocessing.Queue()
@@ -174,9 +177,7 @@ def launch_workers(num_workers):
 
     # Set up our queues that we're going to monitor for new jobs to run on
     interactive_queue = multiprocessing.Queue()
-    batch_queue = multiprocessing.Queue()
     populate_queue(interactive_queue, INTERACTIVE_QUEUE)
-    populate_queue(batch_queue, BATCH_QUEUE)
 
     # the workers will wait on event if the queues are exhausted
     new_job_event = multiprocessing.Event()
@@ -187,17 +188,15 @@ def launch_workers(num_workers):
     # Setup watchdog observer that will watch the folders and run the handler on any
     # FileSystemEvents. This runs in a thread automatically.
     interactive_handler = NewFileHandler(interactive_queue,new_job_event,overall_lock)
-    batch_handler = NewFileHandler(batch_queue,new_job_event,overall_lock)
     observer = Observer()
     observer.schedule(event_handler=interactive_handler, path=INTERACTIVE_QUEUE, recursive=False)
-    observer.schedule(event_handler=batch_handler, path=BATCH_QUEUE, recursive=False)
     observer.start()
 
     # launch the worker threads
     processes = list()
     for i in range(0,num_workers):
         u = "untrusted" + str(i).zfill(2)
-        p = multiprocessing.Process(target=worker_process,args=(interactive_queue,batch_queue,new_job_event,overall_lock,u))
+        p = multiprocessing.Process(target=worker_process,args=(interactive_queue,new_job_event,overall_lock,u))
         p.start()
         processes.append(p)
 
@@ -209,14 +208,14 @@ def launch_workers(num_workers):
                 if processes[i].is_alive:
                     alive = alive+1
                 else:
-                    grade_items_logging.log_message(False,"","","","","ERROR: process "+str(i)+" is not alive")
+                    grade_items_logging.log_message(message="ERROR: process "+str(i)+" is not alive")
             if alive != num_workers:
-                grade_items_logging.log_message(False,"","","","","ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
+                grade_items_logging.log_message(message="ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
             #print ("workers= ",num_workers,"  alive=",alive)
             time.sleep(1)
 
     except KeyboardInterrupt:
-        grade_items_logging.log_message(False,"","","","","grade_scheduler.py keyboard interrupt")
+        grade_items_logging.log_message(message="grade_scheduler.py keyboard interrupt")
 
 
 
@@ -245,7 +244,7 @@ def launch_workers(num_workers):
         observer.stop()
         observer.join()
 
-    grade_items_logging.log_message(False,"","","","","grade_scheduler.py terminated")
+    grade_items_logging.log_message(message="grade_scheduler.py terminated")
 
 
 # ==================================================================================
