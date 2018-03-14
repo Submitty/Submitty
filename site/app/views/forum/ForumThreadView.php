@@ -371,7 +371,6 @@ HTML;
 
 
 						if($first){
-                            $first = false;
                             $return .= $title_html;
                         } 
 
@@ -432,8 +431,17 @@ HTML;
 							
 							<hr style="margin-bottom:3px;">
 
-							<a class="btn btn-primary btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}')"> Reply</a>
-							<span style="margin-top:5px;margin-left:10px;float:right;">
+HTML;
+							if(!$first){
+								$return .= <<<HTML
+								<a class="btn btn-primary btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}')"> Reply</a>
+HTML;
+							} else {
+								$first = false;
+							}
+
+							$return .= <<<HTML
+							<span style="margin-top:6px;margin-left:10px;float:right;">
 
 							
 HTML;
@@ -480,7 +488,7 @@ HTML;
 						$return .= <<<HTML
 </div>
 
-			<form class="reply-box" id="{$post_id-reply}" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+			<form class="reply-box" id="$post_id-reply" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 				<input type="hidden" name="thread_id" value="{$thread_id}" />
 				<input type="hidden" name="parent_id" value="{$post_id}" />
           		<br/>
