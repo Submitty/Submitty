@@ -645,8 +645,10 @@ rm -rf $SUBMITTY_DATA_DIR/autograding_DONE
 # recreate the TODO and DONE folders
 mkdir -p $SUBMITTY_DATA_DIR/autograding_TODO
 mkdir -p $SUBMITTY_DATA_DIR/autograding_DONE
-chown -R ${HWCRON_USER}:autograding_dirs ${SUBMITTY_DATA_DIR}/autograding_TODO
-chown -R ${HWCRON_USER}:autograding_dirs ${SUBMITTY_DATA_DIR}/autograding_DONE
+chown -R ${HWCRON_USER} ${SUBMITTY_DATA_DIR}/autograding_TODO
+chown -R ${HWCRON_USER} ${SUBMITTY_DATA_DIR}/autograding_DONE
+chgrp autograding_dirs ${SUBMITTY_DATA_DIR}/autograding_TODO
+chgrp autograding_dirs ${SUBMITTY_DATA_DIR}/autograding_DONE
 chmod 770 ${SUBMITTY_DATA_DIR}/autograding_TODO
 chmod 770 ${SUBMITTY_DATA_DIR}/autograding_DONE
 
