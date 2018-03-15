@@ -15,7 +15,6 @@ class UsersView extends AbstractView {
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-        <a onclick="location.href='{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'download_email_csv'))}'" class="btn btn-primary">Download all Emails as CSV</a>
         <a onclick="newClassListForm()" class="btn btn-primary">Upload Classlist</a>
         <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
     </div>
