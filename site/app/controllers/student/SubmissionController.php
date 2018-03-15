@@ -61,21 +61,31 @@ class SubmissionController extends AbstractController {
             case 'request_regrade':
                 return $this->requestRegrade();
                 break;
+            case 'edit_request_post':
+                break;
+            case 'make_request_post':
+                break;
+            case 'delete_request':
+                return $this->deleteRequest();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
                 break;
         }
     }
-
-    private function requestRegrade(){
-        $request_content = htmlentities($_REQUEST["request_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    private function deleteRequest(){
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
-
+        $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
+        $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
+    }
+    private function requestRegrade(){
+        $content = htmlentities($_REQUEST["request_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         if($gradeable_id !== null && $student_id !== null) {
-            if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id)){
-                $this->core->getQueries()->insertNewRegradePost($gradeable_id, $student_id, $request_content);
+            if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
                 $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
             }
             else{
