@@ -394,6 +394,7 @@ HTML;
                     && $current_version_number > 0) {
                     $return .= <<<HTML
     <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+    <a class="btn btn-primary" onclick="downloadZip('{$gradeable->getId()}','{$gradeable->getUser()->getId()}')" >Download Zip of Latest Submission</a>
 HTML;
                 }
 
@@ -435,6 +436,11 @@ HTML;
                 $return .= <<<HTML
 
     <script type="text/javascript">
+         //Function to Download the ZIP file for student
+        function downloadZip(grade_id, user_id) {
+            window.location = buildUrl({'component': 'misc', 'page': 'download_zip_student', 'gradeable_id': grade_id, 'user_id': user_id});
+            return false;
+        }
         // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
         var num_parts = {$gradeable->getNumParts()};
         createArray(num_parts);
