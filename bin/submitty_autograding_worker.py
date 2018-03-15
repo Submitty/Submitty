@@ -12,6 +12,7 @@ from submitty_utils import glob
 from submitty_utils import dateutils
 import multiprocessing
 import contextlib
+import socket
 
 # ==================================================================================
 # these variables will be replaced by INSTALL_SUBMITTY.sh
@@ -32,7 +33,7 @@ def worker_process(which_machine,which_untrusted):
 
     # ignore keyboard interrupts in the worker processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
-    counter=0
+    counter = 0
     
     autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_autograding.zip")
     submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_submission.zip")
@@ -44,7 +45,9 @@ def worker_process(which_machine,which_untrusted):
                 results_zip_tmp = grade_item.grade_from_zip(autograding_zip,submission_zip,which_untrusted)
                 results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_results.zip")
                 done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_queue.json")
-                shutil.move(results_zip_tmp,results_zip)
+                #move doesn't inherit the permissions of the destination directory. Copyfile does.
+                shutil.copyfile(results_zip_tmp, results_zip)
+                os.remove(results_zip_tmp)
                 with open(todo_queue_file, 'r') as infile:
                     queue_obj = json.load(infile)
                     queue_obj["done_time"]=dateutils.write_submitty_date(microseconds=True)
@@ -57,15 +60,15 @@ def worker_process(which_machine,which_untrusted):
                     os.remove(autograding_zip)
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(submission_zip)
-
             with contextlib.suppress(FileNotFoundError):
                 os.remove(todo_queue_file)
+            counter = 0
         else:
-            time.sleep(1)
-            counter+=1
             if counter >= 10:
-                print ("worker waiting: ",which_machine," ",which_untrusted)
-                counter=0
+                print (which_machine,which_untrusted,"wait")
+                counter = 0
+            counter += 1
+            time.sleep(1)
 
                 
 # ==================================================================================
@@ -83,9 +86,8 @@ def launch_workers(num_workers):
     for i in range(num_workers):
         untrusted_users.put("untrusted" + str(i).zfill(2))
 
-
     # launch the worker threads
-    which_machine="MASTER"
+    which_machine=socket.gethostname()
     processes = list()
     for i in range(0,num_workers):
         u = "untrusted" + str(i).zfill(2)

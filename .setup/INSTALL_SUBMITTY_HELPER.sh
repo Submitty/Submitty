@@ -155,19 +155,19 @@ chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
+# remove the old versions of the queues
+rm -rf $SUBMITTY_DATA_DIR/to_be_graded_interactive
+rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
 # if the to_be_graded directories do not exist, then make them
-mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_interactive
-mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_batch
+mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
 mkdir -p $SUBMITTY_DATA_DIR/to_be_built
 
 # set the permissions of these directories
 
 #hwphp will write items to this list, hwcron will remove them
-chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_interactive
-chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_interactive
-#course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
-chown  ${HWCRON_USER}:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/to_be_graded_batch
-chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_batch
+#FIXME: course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
+chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
+chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
 
 #hwphp will write items to this list, hwcron will remove them
 chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
@@ -593,12 +593,12 @@ systemctl is-active --quiet submitty_grading_scheduler
 is_scheduler_active=$?
 if [[ "$is_scheduler_active" == "0" ]]; then
     systemctl stop submitty_grading_scheduler
-    echo -e "WARNING: Stopped Submitty Grading Scheduler Daemon\n"
+    echo -e "WARNING: Stopped Deprecated Submitty Grading Scheduler Daemon\n"
 fi
 systemctl is-active --quiet submitty_grading_scheduler
 is_active_tmp=$?
 if [[ "$is_active_tmp" == "0" ]]; then
-    echo -e "ERROR: did not successfully stop submitty grading scheduler daemon\n"
+    echo -e "ERROR: did not successfully stop deprecated submitty grading scheduler daemon\n"
     exit 1
 fi
 # END TO BE DELETED
@@ -645,10 +645,10 @@ rm -rf $SUBMITTY_DATA_DIR/autograding_DONE
 # recreate the TODO and DONE folders
 mkdir -p $SUBMITTY_DATA_DIR/autograding_TODO
 mkdir -p $SUBMITTY_DATA_DIR/autograding_DONE
-chown -R ${HWCRON_USER}:root ${SUBMITTY_DATA_DIR}/autograding_TODO
-chown -R ${HWCRON_USER}:root ${SUBMITTY_DATA_DIR}/autograding_DONE
-chmod 700 ${SUBMITTY_DATA_DIR}/autograding_TODO
-chmod 700 ${SUBMITTY_DATA_DIR}/autograding_DONE
+chown -R ${HWCRON_USER}:autograding_dirs ${SUBMITTY_DATA_DIR}/autograding_TODO
+chown -R ${HWCRON_USER}:autograding_dirs ${SUBMITTY_DATA_DIR}/autograding_DONE
+chmod 770 ${SUBMITTY_DATA_DIR}/autograding_TODO
+chmod 770 ${SUBMITTY_DATA_DIR}/autograding_DONE
 
 
 #############################################################

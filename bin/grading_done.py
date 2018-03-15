@@ -15,27 +15,23 @@ import os
 import subprocess
 import time
 import psutil
+import json
+from submitty_utils import glob
 
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
-
-INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
-BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
+GRADING_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
 
 
 # ======================================================================
 # some error checking on the queues (& permissions of this user)
 
-if not os.path.isdir(INTERACTIVE_QUEUE):
-    raise SystemExit("ERROR: interactive queue {} does not exist".format(INTERACTIVE_QUEUE))
-if not os.path.isdir(BATCH_QUEUE):
-    raise SystemExit("ERROR: batch queue {} does not exist".format(BATCH_QUEUE))
-if not os.access(INTERACTIVE_QUEUE, os.R_OK):
+if not os.path.isdir(GRADING_QUEUE):
+    raise SystemExit("ERROR: interactive queue {} does not exist".format(GRADING_QUEUE))
+if not os.access(GRADING_QUEUE, os.R_OK):
     # most instructors do not have read access to the interactive queue
-    print("WARNING: interactive queue {} is not readable".format(INTERACTIVE_QUEUE))
-if not os.access(BATCH_QUEUE, os.R_OK):
-    raise SystemExit("ERROR: batch queue {} is not readeable".format(BATCH_QUEUE))
+    print("WARNING: interactive queue {} is not readable".format(GRADING_QUEUE))
 
 # ======================================================================
 
@@ -62,38 +58,74 @@ def main():
             except psutil.NoSuchProcess:
                 pass
 
-        # remove 2 from the count...  each worker is forked from the
-        # initial process, and there's a helper process for the
-        # observer too
-        num_procs-=2
+        # remove 1 from the count...  each worker is forked from the
+        # initial process
+        num_procs-=1
 
         if num_procs <= 0:
             print ("WARNING: No matching submitty_autograding_shipper.py processes!")
             num_procs = 0
 
         done = True
-        batch_queue = os.listdir(BATCH_QUEUE)
-        grading_batch_queue = list(filter(lambda x: x.startswith("GRADING"), batch_queue))
-        if len(batch_queue) != 0:
-            done = False
 
         print("GRADING PROCESSES:{:3d}       ".format(num_procs), end="")
 
-        if os.access(INTERACTIVE_QUEUE, os.R_OK):
+        if os.access(GRADING_QUEUE, os.R_OK):
             # most instructors do not have read access to the interactive queue
-            interactive_queue = os.listdir(INTERACTIVE_QUEUE)
-            grading_interactive_queue = list(filter(lambda x: x.startswith("GRADING"), interactive_queue))
-            print("INTERACTIVE todo:{:3d} ".format(len(interactive_queue)-len(grading_interactive_queue)), end="")
-            if len(grading_interactive_queue) == 0:
+
+            files = glob.glob(os.path.join(GRADING_QUEUE, "*"))
+            interactive_count = 0
+            interactive_grading_count = 0
+            regrade_count = 0
+            regrade_grading_count = 0
+
+            for full_path_file in files:
+                json_file = full_path_file
+
+                # get the file name (without the path)
+                just_file = full_path_file[len(GRADING_QUEUE)+1:]
+                # skip items that are already being graded
+                is_grading = just_file[0:8]=="GRADING_"
+                is_regrade = False
+
+                if is_grading:
+                    json_file = os.path.join(GRADING_QUEUE,just_file[8:])
+
+                try:
+                    with open(json_file, 'r') as infile:
+                        queue_obj = json.load(infile)
+                    if "regrade" in queue_obj:
+                        is_regrade = queue_obj["regrade"]
+                except:
+                    print ("whoops",json_file,end="")
+
+                if is_grading:
+                    if is_regrade:
+                        regrade_grading_count+=1
+                    else:
+                        interactive_grading_count+=1
+                else:
+                    if is_regrade:
+                        regrade_count+=1
+                    else:
+                        interactive_count+=1
+
+            print("INTERACTIVE todo:{:3d} ".format(interactive_count), end="")
+            if interactive_grading_count == 0:
                 print("                 ", end="")
             else:
-                print("(grading:{:3d})    ".format(len(grading_interactive_queue)), end="")
-            if len(interactive_queue) != 0:
+                print("(grading:{:3d})    ".format(interactive_grading_count), end="")
+            if interactive_count != 0:
                 done = False
 
-        print("BATCH todo:{:3d} ".format(len(batch_queue) - len(grading_batch_queue)), end="")
-        if len(grading_batch_queue) != 0:
-            print("(grading:{:3d})".format(len(grading_batch_queue)), end="")
+            print("BATCH todo:{:3d} ".format(regrade_count), end="")
+            if regrade_grading_count == 0:
+                print("                 ", end="")
+            else:
+                print("(grading:{:3d})    ".format(regrade_grading_count), end="")
+            if regrade_count != 0:
+                done = False
+
         print()
 
         # quit when the queues are empty

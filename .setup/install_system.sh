@@ -86,6 +86,9 @@ addgroup hwcronphp
 
 addgroup ${COURSE_BUILDERS_GROUP}
 
+#add the group that can read the autograding_TODO, DONE, and tmp files (initially only hwcron)
+addgroup autograding_dirs
+
 if [ ${VAGRANT} == 1 ]; then
 	adduser vagrant sudo
 fi

@@ -14,6 +14,7 @@ import dateutil.parser
 import urllib.parse
 import contextlib
 import paramiko
+import socket
 
 from submitty_utils import dateutils, glob
 import grade_items_logging
@@ -25,8 +26,6 @@ import zipfile
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
-INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
-BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 
 
 # NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
@@ -34,13 +33,6 @@ USE_DOCKER = False
 
 
 # ==================================================================================
-#def parse_args():
-#    parser = argparse.ArgumentParser()
-#    parser.add_argument("next_directory")
-#    parser.add_argument("next_to_grade")
-#    parser.add_argument("which_untrusted")
-#    return parser.parse_args()
-
 def get_queue_time(next_directory,next_to_grade):
     t = time.ctime(os.path.getctime(os.path.join(next_directory,next_to_grade)))
     t = dateutil.parser.parse(t)
@@ -218,7 +210,7 @@ def unzip_queue_file(zipfilename):
 
 # ==================================================================================
 # ==================================================================================
-def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
+def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade):
     os.chdir(SUBMITTY_DATA_DIR)
     # --------------------------------------------------------
     # figure out what we're supposed to grade & error checking
@@ -230,10 +222,10 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     if not os.path.isdir(submission_path):
         grade_items_logging.log_message(message="ERROR: the submission directory does not exist" + submission_path)
         raise RuntimeError("ERROR: the submission directory does not exist",submission_path)
-    print("pid", os.getpid(), "GRADE THIS", submission_path)
+    print(which_machine,which_untrusted,"prepare zip",submission_path)
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
-    is_batch_job = next_directory == BATCH_QUEUE
+    is_batch_job = "regrade" in obj and obj["regrade"]
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
 
     queue_time = get_queue_time(next_directory,next_to_grade)
@@ -343,7 +335,7 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     copytree_if_exists(submission_path,os.path.join(tmp_submission,"submission"))
     copytree_if_exists(checkout_path,os.path.join(tmp_submission,"checkout"))
     obj["queue_time"] = queue_time_longstring
-    obj["is_batch_job"] = is_batch_job
+    obj["regrade"] = is_batch_job
     obj["waittime"] = waittime
 
     with open(os.path.join(tmp_submission,"queue_file.json"),'w') as outfile:
@@ -363,6 +355,8 @@ def prepare_autograding_and_submission_zip(next_directory,next_to_grade):
     shutil.rmtree(tmp_submission)
     shutil.rmtree(tmp)
 
+    grade_items_logging.log_message(is_batch_job,"done zip",item_name)
+
     return (my_autograding_zip_file,my_submission_zip_file)
 
 
@@ -381,6 +375,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     shutil.rmtree(tmp,ignore_errors=True)
     os.makedirs(tmp)
 
+    which_machine=socket.gethostname()
+
     # unzip autograding and submission folders
     tmp_autograding = os.path.join(tmp,"TMP_AUTOGRADING")
     tmp_submission = os.path.join(tmp,"TMP_SUBMISSION")
@@ -397,7 +393,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     queue_time_longstring = queue_obj["queue_time"]
     waittime = queue_obj["waittime"]
-    is_batch_job = queue_obj["is_batch_job"]
+    is_batch_job = queue_obj["regrade"]
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
 
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
@@ -497,9 +493,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                               stdout=logfile)
 
     if compile_success == 0:
-        print (which_untrusted,"pid",os.getpid(),"COMPILATION OK")
+        print (which_machine,which_untrusted,"COMPILATION OK")
     else:
-        print ("pid",os.getpid(),"COMPILATION FAILURE")
+        print (which_machine,which_untrusted,"COMPILATION FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,message="COMPILATION FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
@@ -587,9 +583,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,"","",msg)
 
     if runner_success == 0:
-        print (which_untrusted,"pid",os.getpid(),"RUNNER OK")
+        print (which_machine,which_untrusted,"RUNNER OK")
     else:
-        print ("pid",os.getpid(),"RUNNER FAILURE")
+        print (which_machine,which_untrusted,"RUNNER FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,message="RUNNER FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
@@ -648,9 +644,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                 stdout=logfile)
 
     if validator_success == 0:
-        print (which_untrusted,"pid",os.getpid(),"VALIDATOR OK")
+        print (which_machine,which_untrusted,"VALIDATOR OK")
     else:
-        print ("pid",os.getpid(),"VALIDATOR FAILURE")
+        print (which_machine,which_untrusted,"VALIDATOR FAILURE")
         grade_items_logging.log_message(is_batch_job,which_untrusted,item_name,message="VALIDATION FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_work)
@@ -777,7 +773,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 # ==================================================================================
 # ==================================================================================
 # ==================================================================================
-def unpack_grading_results_zip(my_results_zip_file):
+def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file):
     os.chdir(SUBMITTY_DATA_DIR)
 
     queue_obj = unzip_queue_file(my_results_zip_file)
@@ -807,11 +803,11 @@ def unpack_grading_results_zip(my_results_zip_file):
 
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
 
-    is_batch_job = queue_obj["is_batch_job"]
+    is_batch_job = queue_obj["regrade"]
     gradingtime=queue_obj["gradingtime"]
     grade_result=queue_obj["grade_result"]
 
-    print ("pid",os.getpid(),"finished grading ", item_name, " in ", int(gradingtime), " seconds")
+    print (which_machine,which_untrusted,"unzip",item_name, " in ", int(gradingtime), " seconds")
 
     grade_items_logging.log_message(is_batch_job,"unzip",item_name,"grade:",gradingtime,grade_result)
 
@@ -826,7 +822,7 @@ def just_grade_item_A(next_directory,next_to_grade,which_untrusted,which_machine
 
     # prepare the zip files
     try:
-        autograding_zip_tmp,submission_zip_tmp = prepare_autograding_and_submission_zip(next_directory,next_to_grade)
+        autograding_zip_tmp,submission_zip_tmp = prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_autograding.zip")
         submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_submission.zip")
         todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_queue.json")
@@ -836,42 +832,38 @@ def just_grade_item_A(next_directory,next_to_grade,which_untrusted,which_machine
             queue_obj["which_untrusted"] = which_untrusted
             queue_obj["which_machine"] = which_machine
             queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
-        
+
+        #TODO: replace which_machine with user, host, and passkey
         if which_machine == "localhost":
           shutil.move(autograding_zip_tmp,autograding_zip)
           shutil.move(submission_zip_tmp,submission_zip)
           with open(todo_queue_file, 'w') as outfile:
               json.dump(queue_obj, outfile, sort_keys=True, indent=4)
         else:
+          #TODO: read these in as separate parameters in place of whichmachine.
           user, host = which_machine.split("@")
-          print("attempting to copy to {0}@{1}".format(user, host))
-          print(autograding_zip)
           ssh = paramiko.SSHClient()
           ssh.get_host_keys()
           ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+          #TODO: replace with password parameter read in with user and host
           passit = "submitty"
                     
           ssh.connect(hostname = host, username = user, password = passit)
-          
           sftp = ssh.open_sftp()
-          print("source: {0}\ndestination: {1}".format(autograding_zip_tmp, autograding_zip))
+
           sftp.put(autograding_zip_tmp,autograding_zip)
           sftp.put(submission_zip_tmp,submission_zip)
           with open(todo_queue_file, 'w') as outfile:
               json.dump(queue_obj, outfile, sort_keys=True, indent=4)
           sftp.put(todo_queue_file, todo_queue_file)
-          sftp.put(todo_queue_file, todo_queue_file)
           sftp.close()
+          print("Successfully forwarded files to {0}@{1}".format(user, host))
     except Exception as e:
-        print("ERROR: ", e)
+        print("Cound not move files due to the following error:\n{0}".format(e))
         grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when preparing autograding and submission zip")
-        return
+        return False
 
-    #print ("A ZIP FILES: ",autograding_zip," ",submission_zip)
-    #time.sleep(10)
-
-
-
+    return True
 
 
 
@@ -891,31 +883,38 @@ def just_grade_item_C(next_directory,next_to_grade,which_untrusted,which_machine
           return False
       else:
         local_done_queue_file = target_done_queue_file
+        local_results_zip = target_results_zip
     else:      
       user, host = which_machine.split("@")
       ssh = paramiko.SSHClient() 
       ssh.get_host_keys()
       ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
       passit = "submitty"
-      ssh.connect(hostname = host, username = user, password=passit)
-      
-      sftp = ssh.open_sftp()
 
-      #same file structure local and remote. Try queue file first.
       try:
+        ssh.connect(hostname = host, username = user, password=passit)
+
+        sftp = ssh.open_sftp()
         local_done_queue_file = tempfile.mkstemp()[1]
         local_results_zip     = tempfile.mkstemp()[1]
         #remote path first, then local.
         sftp.get(target_done_queue_file, local_done_queue_file)
         sftp.get(target_results_zip, local_results_zip)
-        #clean up (remove remote file?) ???
+        #Because get works like cp rather tnan mv, we have to clean up.
+        sftp.remove(target_done_queue_file)
+        sftp.remove(target_results_zip)
         sftp.close()
-
-      except:
+      #This is the normal case (still grading on the other end) so we don't need to print anything.
+      except FileNotFoundError:
+          return False
+      #In this more general case, we do want to print what the error was.
+      #TODO catch other types of exception as we identify them. 
+      except Exception as e:
+        print("Could not retrieve the file from the foreign machine.\nERROR: {0}".format(e))
         return False  
     # archive the results of grading
     try:
-        unpack_grading_results_zip(local_results_zip)
+        unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
     except:
         grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when unpacking zip")
         with contextlib.suppress(FileNotFoundError):

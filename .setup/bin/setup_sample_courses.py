@@ -206,7 +206,7 @@ def main():
     os.system("systemctl restart submitty_autograding_worker")
 
     # queue up all of the newly created submissions to grade!
-    os.system("/usr/local/submitty/bin/regrade.py /var/local/submitty/courses/ --no_input")
+    os.system("/usr/local/submitty/bin/regrade.py --no_input /var/local/submitty/courses/")
 
 def generate_random_user_id(length=15):
     return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
