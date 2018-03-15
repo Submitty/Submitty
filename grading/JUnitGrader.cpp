@@ -351,3 +351,175 @@ TestResults* EmmaCoverageReportGrader_doit (const TestCase &tc, const nlohmann::
 
 // =============================================================================
 // =============================================================================
+
+std::vector<std::string> SplitOnComma(const std::string& in) {
+  std::vector<std::string> answer;
+  std::string tmp;
+  for (int i = 0; i < in.size(); i++) {
+    if (in[i]==',') {
+      answer.push_back(tmp);
+      tmp="";
+    } else {
+      tmp.push_back(in[i]);
+    }
+  }
+  if (tmp != "") {
+    answer.push_back(tmp);
+  }
+  return answer;
+}
+
+// implemented in execute.cpp
+bool wildcard_match(const std::string &pattern, const std::string &thing);
+
+
+TestResults* JaCoCoCoverageReportGrader_doit (const TestCase &tc, const nlohmann::json& j) {
+
+  float instruction_coverage_threshold = j.value("instruction_coverage_threshold",0);
+  float branch_coverage_threshold = j.value("branch_coverage_threshold",0);
+  float line_coverage_threshold = j.value("line_coverage_threshold",0);
+  float complexity_coverage_threshold = j.value("complexity_coverage_threshold",0);
+  float method_coverage_threshold = j.value("method_coverage_threshold",0);
+
+  if (instruction_coverage_threshold <= 0.01 &&
+      branch_coverage_threshold <= 0.01 &&
+      line_coverage_threshold <= 0.01 &&
+      complexity_coverage_threshold <= 0.01 &&
+      method_coverage_threshold <= 0.01) {
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Must specify coverage threshold for instruction, branch, line, complexity, or method")});
+  }
+
+  std::string include_package = j.value("package", "*");
+  std::string include_class = j.value("class", "*");
+  std::string exclude_package = j.value("exclude_package", "");
+  std::string exclude_class = j.value("exclude_class", "");
+
+  std::string filename = j.value("actual_file","");
+
+  // open the specified runtime Jacoco output/log file
+  std::ifstream jacoco_output((tc.getPrefix()+"_"+filename).c_str());
+
+  // check to see if the file was opened successfully
+  if (!jacoco_output.good()) {
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: JaCoCo output does not exist")});
+  }
+
+  // look for the opening line
+  std::string token;
+  jacoco_output >> token;
+  if (token != "GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED") {
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: Jacoco output format incompatible with grader")});
+  }
+
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > answer;
+
+  float score = 1.0;
+  int check_count = 0;
+
+  // read the rest of the file, one line at a time.
+  std::string line;
+  while (getline(jacoco_output,line)) {
+    std::vector<std::string> tokens = SplitOnComma(line);
+    if (tokens.size() == 0) continue;
+    if (tokens.size() != 13 || tokens[0] != "JaCoCo Coverage Report") {
+      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR: incorrectly formatted JaCoCo data line: "+line)});
+    }
+
+    // skip the package if its not the one to check
+    if ( !wildcard_match(include_package,tokens[1]) || wildcard_match(exclude_package,tokens[1]) ) continue;
+    if ( !wildcard_match(include_class,  tokens[2]) || wildcard_match(exclude_class,  tokens[2]) ) continue;
+
+    // parse the line
+    int i_m = std::stoi(tokens[3]);
+    int i_c = std::stoi(tokens[4]);
+    int b_m = std::stoi(tokens[5]);
+    int b_c = std::stoi(tokens[6]);
+    int l_m = std::stoi(tokens[7]);
+    int l_c = std::stoi(tokens[8]);
+    int c_m = std::stoi(tokens[9]);
+    int c_c = std::stoi(tokens[10]);
+    int m_m = std::stoi(tokens[11]);
+    int m_c = std::stoi(tokens[12]);
+    // calculate the coverage
+    float instruction_coverage = 100;
+    float branch_coverage = 100;
+    float line_coverage = 100;
+    float complexity_coverage = 100;
+    float method_coverage = 100;
+    if (i_m+i_c > 0) instruction_coverage = 100 * i_c / float (i_c+i_m);
+    if (b_m+b_c > 0) branch_coverage      = 100 * b_c / float (b_c+b_m);
+    if (l_m+l_c > 0) line_coverage        = 100 * l_c / float (l_c+l_m);
+    if (c_m+c_c > 0) complexity_coverage  = 100 * c_c / float (c_c+c_m);
+    if (m_m+m_c > 0) method_coverage      = 100 * m_c / float (m_c+m_m);
+    // print the coverage
+    std::stringstream ss;
+    ss << tokens[1] << " " << tokens[2] << " "
+       << std::setw(4) << std::fixed << std::setprecision(1) << instruction_coverage << "% instruction, "
+       << std::setw(4) << std::fixed << std::setprecision(1) << branch_coverage << "% branch, "
+       << std::setw(4) << std::fixed << std::setprecision(1) << line_coverage << "% line, "
+       << std::setw(4) << std::fixed << std::setprecision(1) << complexity_coverage << "% complexity, "
+       << std::setw(4) << std::fixed << std::setprecision(1) << method_coverage << "% method";
+    answer.push_back(std::make_pair(MESSAGE_FAILURE,ss.str()));
+
+    // partial credit for missing the threshold(s)
+    check_count++;
+    if (instruction_coverage_threshold > 0.01 && instruction_coverage < instruction_coverage_threshold) {
+      score *= instruction_coverage / float (instruction_coverage_threshold);
+      std::stringstream ss;
+      ss << std::fixed << std::setprecision(1) << instruction_coverage
+         << "% < "
+         << std::fixed << std::setprecision(1) << instruction_coverage_threshold
+         << "% insufficient instruction coverage for " << tokens[1] << " " << tokens[2];
+      answer.push_back(std::make_pair(MESSAGE_FAILURE,ss.str()));
+    }
+    if (branch_coverage_threshold > 0.01 && branch_coverage < branch_coverage_threshold) {
+      score *= branch_coverage / float (branch_coverage_threshold);
+      std::stringstream ss;
+      ss << std::fixed << std::setprecision(1) << branch_coverage
+         << "% < "
+         << std::fixed << std::setprecision(1) << branch_coverage_threshold
+         << "% insufficient branch coverage for " << tokens[1] << " " << tokens[2];
+      answer.push_back(std::make_pair(MESSAGE_FAILURE,ss.str()));
+    }
+    if (line_coverage_threshold > 0.01 && line_coverage < line_coverage_threshold) {
+      score *= line_coverage / float (line_coverage_threshold);
+      std::stringstream ss;
+      ss << std::fixed << std::setprecision(1) << line_coverage
+         << "% < "
+         << std::fixed << std::setprecision(1) << line_coverage_threshold
+         << "% insufficient line coverage for " << tokens[1] << " " << tokens[2];
+      answer.push_back(std::make_pair(MESSAGE_FAILURE,ss.str()));
+    }
+    if (complexity_coverage_threshold > 0.01 && complexity_coverage < complexity_coverage_threshold) {
+      score *= complexity_coverage / float (complexity_coverage_threshold);
+      std::stringstream ss;
+      ss << std::fixed << std::setprecision(1) << complexity_coverage
+         << "% < "
+         << std::fixed << std::setprecision(1) << complexity_coverage_threshold
+         << "% insufficient complexity coverage for " << tokens[1] << " " << tokens[2];
+      answer.push_back(std::make_pair(MESSAGE_FAILURE,ss.str()));
+    }
+    if (method_coverage_threshold > 0.01 && method_coverage < method_coverage_threshold) {
+      score *= method_coverage / float (method_coverage_threshold);
+      std::stringstream ss;
+      ss << std::fixed << std::setprecision(1) << method_coverage
+         << "% < "
+         << std::fixed << std::setprecision(1) << method_coverage_threshold
+         << "% insufficient method coverage for " << tokens[1] << " " << tokens[2];
+      answer.push_back(std::make_pair(MESSAGE_FAILURE,ss.str()));
+    }
+  }
+
+  if (check_count==0) {
+    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,
+                                               "ERROR: Nothing matched the package="+include_package+
+                                               " but not package="+exclude_package+
+                                               " and class="+include_class+
+                                               " but not class="+exclude_class)});
+  }
+
+  return new TestResults(score,answer);
+}
+
+// =============================================================================
+// =============================================================================

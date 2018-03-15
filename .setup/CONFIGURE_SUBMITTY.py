@@ -116,6 +116,7 @@ WORKERS_JSON = os.path.join(SETUP_INSTALL_DIR, "autograding_workers.json")
 defaults = {'database_host': 'localhost',
             'database_user': 'hsdbu',
             'submission_url': '',
+            'vcs_url': '',
             'authentication_method': 1,
             'institution_name' : '',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
@@ -159,6 +160,9 @@ if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'datab
 print()
 
 SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
+print()
+
+VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
 print()
 
 INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)', defaults['institution_name'])
@@ -247,6 +251,7 @@ obj['database_password'] = DATABASE_PASS
 obj['authentication_method'] = AUTHENTICATION_METHOD
 
 obj['submission_url'] = SUBMISSION_URL
+obj['vcs_url'] = VCS_URL
 obj['tagrading_url'] = TAGRADING_URL
 obj['cgi_url'] = CGI_URL
 
