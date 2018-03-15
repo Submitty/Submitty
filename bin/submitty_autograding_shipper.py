@@ -73,7 +73,7 @@ def grade_queue_file(queue_file,which_untrusted):
     name = os.path.basename(os.path.realpath(queue_file))
     grading_file = os.path.join(directory, "GRADING_" + name)
 
-    which_machine="MASTER"
+    which_machine="emaicus@dozer.cs.rpi.edu"
     
     open(os.path.join(grading_file), "w").close()
     try:
