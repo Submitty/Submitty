@@ -200,7 +200,7 @@ HTML;
 					<td width="3%"></td>
 					<td width="10%">First Name</td>
 					<td width="10%">Last Name</td>
-					<td width="10%">Username</td>
+					<td width="10%">User ID</td>
 					<td width="40%">Email</td>
 				</tr>
 			</thead>
