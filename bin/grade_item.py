@@ -331,6 +331,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
             subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
         os.chdir(tmp)
         subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
+        obj['revision'] = what_version
 
     copytree_if_exists(submission_path,os.path.join(tmp_submission,"submission"))
     copytree_if_exists(checkout_path,os.path.join(tmp_submission,"checkout"))
@@ -685,7 +686,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         add_permissions(history_file,stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
 
-    shutil.copy(os.path.join(tmp_work,"results.json"),tmp_results)
     shutil.copy(os.path.join(tmp_work,"grade.txt"),tmp_results)
 
     # -------------------------------------------------------------
@@ -718,6 +718,13 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+
+    with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
+        results_obj = json.load(read_file)
+    if 'revision' in queue_obj.keys():
+        results_obj['revision'] = queue_obj['revision']
+    with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
+        json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,

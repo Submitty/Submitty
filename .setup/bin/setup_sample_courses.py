@@ -789,7 +789,7 @@ class Course(object):
                                 dst = os.path.join(submission_path, "1")
                                 create_gradeable_submission(src, dst)
 
-                if gradeable.grade_start_date < NOW:
+                if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, "1")):
                     if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
