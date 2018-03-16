@@ -56,9 +56,9 @@ endif
 
 remove_json_comments: customization.json
 	cpp -xc++ $< | sed -e '/^#/d' > customization_no_comments.json
-	python $(GRADING_DIRECTORY)/json_syntax_checker.py customization_no_comments.json
+	python3 $(GRADING_DIRECTORY)/json_syntax_checker.py customization_no_comments.json
 	grep '{"file":' customization_no_comments.json > iclicker_file_list.txt || true
-	python ${RAINBOW_GRADES_DIRECTORY}/parsexml.py iclicker_file_list.txt
+	python3 ${RAINBOW_GRADES_DIRECTORY}/parsexml.py iclicker_file_list.txt
 
 process_grades.out: \
 	${RAINBOW_GRADES_DIRECTORY}/main.cpp \
