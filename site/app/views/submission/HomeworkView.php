@@ -1040,9 +1040,9 @@ HTML;
             if($gradeable->getRegradeStatus() === 0){
                 $regradeButton = '<input type="button" class="btn btn-default" style="float: right" value="Request Regrade" onclick="show()">';
                 $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'displayTextBox', $gradeable_id,$student_id,'request_regrade');
-            }else if($gradeable->getRegradeStatus() === 1){
+            }else if($gradeable->getRegradeStatus() === 1 || $this->core->getQueries()->existsInstructorResponse($thread_id)){
                 $regradeButton = '<input type="button" class="btn btn-danger" style="float: right;" value="Delete Request" disabled>';
-            }else if(!$this->core->getQueries()->existsInstructorResponse($thread_id)){
+            }else{
                 $regradeButton = "<a id='request_regrade' class='btn btn-danger' style='float: right; color:white;' 
                 href='{$this->core->buildUrl(array('component'=>'student', 'action'=>'delete_request','gradeable_id' => $gradeable_id,'student_id' => $student_id))}'>Delete Request</a>";
             }
@@ -1064,17 +1064,18 @@ HTML;
         return $return;
     }
     public function displayTextBox($gradeable_id,$student_id,$action){
-        $title = ($action === 'request_regrade') ? "Submit Regrade Request" : "Edit Post" ;
         $warningMessage = "Warning: Frivoulous requests may result in a grade deduction, loss of late days, or having to retake data structures!";
         $placeholder = "please enter a consise description of your request and indicate which areas/checkpoints need to be re-checked";
         if($action === 'request_regrade'){
+            $title = "Submit Regrade Request";
             $url = $this->core->buildUrl(array('component' => 'student',
                                                'action' => $action,
                                                'gradeable_id' => $gradeable_id,
                                                'student_id' =>$student_id
                                         ));
         }else{
-            $url = $this->core->buildUrl(array('component' => 'student', 'action' => $action));
+            $title = "Edit Post";
+            $url = $this->core->buildUrl(array('component' => 'student', 'action' => $action, 'gradeable_id' => $gradeable_id));
         }
         $return = <<<HTML
         <div class="modal" id="modal-container">
@@ -1083,7 +1084,7 @@ HTML;
                 <hr>
                 <p class = "red-message">{$warningMessage}</p>
                 <br style = "margin-bottom: 10px;">
-                <form method="POST" action="{$url}">
+                <form id="requestRegradeForm" method="POST" action="{$url}">
                     <textarea id="requestTextArea" name ="request_content" rows="10" cols="60" maxlength="400" style="resize: none; height: 200px; font-family: inherit;"
                     placeholder="$placeholder"></textarea>
                     <br style = "margin-bottom: 10px;">
@@ -1094,6 +1095,17 @@ HTML;
             </div>
         </div>
         <script type = "text/javascript">
+            $("#requestRegradeForm").submit(function(event) {
+                $.ajax({
+                   type: "POST",
+                   url: $(this).attr("action"),
+                   data: $("#requestRegradeForm").serialize(), 
+                   success: function(data){
+                       window.location.reload();
+                   }
+                });
+                event.preventDefault();
+            });
             var regradeBox = document.getElementById("regradeBox");
             var modal =document.getElementById("modal-container");
             function show(){
@@ -1136,7 +1148,7 @@ HTML;
                     $class .= " first_post";
                     $first = false;
                 }else{
-                    $deleteButton = '<input type="submit" class="btn btn-default" style="float: right;" value="Delete Post">';
+                    $deleteButton = '<input type="submit" class="btn btn-default" style="float: right;" value="Delete Post" id="deleteRequestPost">';
                 }
                 $function_date = 'date_format';
                 $return .= <<<HTML
@@ -1149,9 +1161,22 @@ HTML;
                             $return .= <<<HTML
                             <input type="button" class="btn btn-default" style="float:right; margin-left:15px;" value="Edit Post" 
                             onclick="edit('$content','$id')">
-                            <form style="float: right;" method="POST" action="{$this->core->buildUrl(array('component'=>'student','action'=> 'delete_request_post','thread_id' => $id,'gradeable_id' => $gradeable_id))}">
+                            <form  method="POST" style="float: right;" action="{$this->core->buildUrl(array('component'=>'student','action'=> 'delete_request_post','thread_id' => $id, 'user' => $user, 'gradeable_id' =>$gradeable_id))}" id="deleteRequestPost">
                                 {$deleteButton}
                             </form>
+                            <script type = "text/javascript">
+                            $("#deleteRequestPost").click(function(event) {
+                                event.preventDefault();
+                                $.ajax({
+                                    type: "POST",
+                                    url: $("#deleteRequestPost").attr("action"),
+                                    data: $("#deleteRequestPost").serialize(), 
+                                    success: function(data){
+                                       window.location.reload();
+                                    }
+                                });
+                            });
+                            </script>
 HTML;
                         }
                         $return .= <<<HTML
@@ -1167,15 +1192,28 @@ HTML;
             $return .= <<<HTML
             <br>
             <div style="padding:20px;">
-                <form method="POST" action="{$this->core->buildUrl(array('component' => 'student',
+                <form method="POST" id="replyTextForm" action="{$this->core->buildUrl(array('component' => 'student',
                                                                          'action'=> 'make_request_post',
                                                                          'thread_id'=> $thread_id,
                                                                          'gradeable_id' => $gradeable_id,
                                                                          'user_id' =>$user 
-                                                                   ))}">
+                                                                ))}">
                     <textarea name = "replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="Enter your reply here..." required id="makeRequestPost"></textarea>
                     <input type="submit" value="Submit Reply" id = "submitPost" class="btn btn-default" style="margin-top: 15px; float: right;">
                 </form>
+                <script type = "text/javascript">
+                $("#replyTextForm").submit(function(event) {
+                    $.ajax({
+                        type: "POST",
+                        url: $(this).attr("action"),
+                        data: $("#replyTextForm").serialize(), 
+                        success: function(data){
+                           window.location.reload();
+                        }
+                    });
+                    event.preventDefault();
+                });
+            </script>
             </div>
         </div>
 HTML;

@@ -85,27 +85,25 @@ class SubmissionController extends AbstractController {
         $this->core->getQueries()->modifyRegradeRequestPost($thread_id,$content);
     }
     private function deleteRequestPost(){
-        $thread_id = $_POST['thread_id'];
+        $thread_id = $_REQUEST['thread_id'];
+        $user = $_REQUEST['user'];
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $this->core->getQueries()->deleteRegradeRequestPost($thread_id);
-        $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id)));
+        //this is here since window.reload on the student side leads to the wrong page
+        if(!$this->core->getQueries()->isStaffPost($user)){
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
+        }
     }
     private function makeRequestPost(){
         $thread_id = (isset($_REQUEST['thread_id'])) ? $_REQUEST['thread_id'] : null;
-        $content = htmlentities($_REQUEST['request_content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $content = htmlentities($_POST['replyTextArea'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $this->core->getQueries()->insertNewRegradePost($thread_id,$gradeable_id, $user_id, $content);
         if(!$this->core->getQueries()->isStaffPost($user_id)){
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id)));
             $this->core->getQueries()->modifyRegradeStatus($thread_id, -1);
         }else{
             $this->core->getQueries()->modifyRegradeStatus($thread_id, 1);
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 
-                                                              'page' => 'electronic',
-                                                              'action' => 'grade',
-                                                              'gradeable_id' => $gradeable_id
-                                                        )));
         }
     }
     private function deleteRequest(){

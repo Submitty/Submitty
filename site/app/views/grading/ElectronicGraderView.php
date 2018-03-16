@@ -943,8 +943,9 @@ HTML;
         <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="handleKeyPress('KeyS');"></i>
 HTML;
         if($gradeable->getRegradeStatus()!==0){
+            $class = ($gradeable->getRegradeStatus() === -1) ? 'btn btn-danger' : 'btn btn-default';
             $return .=<<<HTML
-            <input type="button" class ="btn btn-danger" value="!" onclick="showRequestDiscussion()">
+            <input type="button" class ="$class" value="!" onclick="showRequestDiscussion()">
 HTML;
         }
     }
@@ -1130,12 +1131,13 @@ HTML;
             
 <div id="regrade_request_box" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%;">
     <span class = "grading_label">Regrade Request Discussion</span>
-    <div class = "inner-container" style = "padding:20px;">
+    <input type="button" class = "btn btn-default" style="float:right; margin:20px; margin-top: 10px;" value="Close Panel" onclick="hideRequestDiscussion()">
+    <div class = "inner-container" style = "padding:20px; margin-top: 10px;">
 HTML;
-    $gradeable_id = $gradeable->getId();
-    $student_id = $user->getId();
-    $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'displayTextBox', $gradeable,$gradeable_id,$student_id);
-    $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'displayPrivateDiscussion', $gradeable,$gradeable_id,$student_id);
+        $gradeable_id = $gradeable->getId();
+        $student_id = $user->getId();
+        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'displayTextBox', $gradeable_id,$student_id,'edit_request_post');
+        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'displayPrivateDiscussion', $gradeable,$gradeable_id,$student_id);
             $return .= <<<HTML
     </div>
 </div>

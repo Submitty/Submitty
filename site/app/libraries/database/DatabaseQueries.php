@@ -1877,7 +1877,7 @@ AND gc_id IN (
         $this->course_db->query("UPDATE regrade_discussion SET deleted = true where id = '$thread_id'");
     }
     public function existsInstructorResponse($thread_id){
-        $this->course_db->query("SELECT * FROM regrade_discussion WHERE thread_id = '$thread_id' ");
+        $this->course_db->query("SELECT * FROM regrade_discussion WHERE thread_id = '$thread_id' AND deleted = false ");
         foreach ($this->course_db->rows() as $row => $val) {
             if( $this->isStaffPost($val['user_id']) ) return true;
         }
