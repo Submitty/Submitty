@@ -351,22 +351,6 @@ HTML;
 	    </script>
 HTML;
 
-if(isset($_SESSION["post_content"]) && isset($_SESSION["post_recover_active"])){
-			
-	$post_content = html_entity_decode($_SESSION["post_content"]);
-
-	$return .= <<<HTML
-			<script>
-				var contentBox = document.getElementById('post_content');
-				contentBox.innerHTML = `{$post_content}`;
-				document.getElementById('file_input').value = null;
-				var box = $('.posts_list');
-				box.scrollTop(box.prop('scrollHeight'));
-			</script>
-HTML;
-		$_SESSION["post_recover_active"] = null;
-}
-
 		return $return;
 	}
 
@@ -625,22 +609,6 @@ HTML;
 		</div>
 HTML;
 
-if(isset($_SESSION["thread_title"]) && isset($_SESSION["thread_content"]) && isset($_SESSION["thread_recover_active"])){
-	$title = html_entity_decode($_SESSION["thread_title"]);
-			
-	$thread_content = html_entity_decode($_SESSION["thread_content"]);
-
-	$return .= <<<HTML
-			<script>
-				var titleBox = document.getElementById('title');
-				titleBox.value = `{$title}`;
-				var contentBox = document.getElementById('thread_content');
-				contentBox.innerHTML = `{$thread_content}`;
-				document.getElementById('file_input').value = null;
-			</script>
-HTML;
-		unset($_SESSION["thread_recover_active"]);
-}
 		return $return;
 	}
 
