@@ -116,7 +116,8 @@ def get_job(which_machine,which_untrusted,overall_lock):
         # skip items that are already being graded
         if (just_file[0:8]=="GRADING_"):
             continue
-        if os.path.exists(os.path.join(folder,"GRADING_"+just_file)):
+        grading_file = os.path.join(folder,"GRADING_"+just_file)
+        if grading_file in files:
             continue
 
         # found something to do
