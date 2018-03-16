@@ -938,12 +938,17 @@ HTML;
     <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="handleKeyPress('KeyG');"></i>
     <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="handleKeyPress('KeyO');"></i>
 HTML;
-        if(!$peer) {
-            $return .= <<<HTML
-    <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="handleKeyPress('KeyS');"></i>
+    if(!$peer) {
+       $return .= <<<HTML
+        <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="handleKeyPress('KeyS');"></i>
+HTML;
+        if($gradeable->getRegradeStatus()!==0){
+            $return .=<<<HTML
+            <input type="button" class ="btn btn-danger" value="!" onclick="showRequestDiscussion()">
 HTML;
         }
-        $return .= <<<HTML
+    }
+    $return .= <<<HTML
 </div>
 
 <div class="progress_bar">
@@ -1123,14 +1128,15 @@ HTML;
         if(!$peer) {
             $return .= <<<HTML
             
-<div id="displayRequests" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%;">
+<div id="regrade_request_box" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%;">
     <span class = "grading_label">Regrade Request Discussion</span>
-    <div class = "inner-container" style = "text-align: center;">
+    <div class = "inner-container" style = "padding:20px;">
 HTML;
+    $gradeable_id = $gradeable->getId();
+    $student_id = $user->getId();
+    $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'displayTextBox', $gradeable,$gradeable_id,$student_id);
+    $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'displayPrivateDiscussion', $gradeable,$gradeable_id,$student_id);
             $return .= <<<HTML
-            <form method = "POST" action="{$this->core->getQueries()->modifyRegradeStatus($gradeable->getId(),$this->core->getUser()->getId(), 1)}" >
-                <input type="submit" class ="btn btn-default" value="Submit">
-            </form>
     </div>
 </div>
 
@@ -1144,16 +1150,8 @@ HTML;
             $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'individual'=>$individual,
                                                       'gradeable_version' => ""))}', this)";
             $formatting = "font-size: 13px;";
-           if($gradeable->getRegradeStatus() === -1){
-                $regradeButton = '<input type="button" class="btn btn-danger" id="showRegradeDiscussion" onclick="showRequestDiscussion()" value="Regrade Requested">';
-            }else if($gradeable->getRegradeStatus() === 0){ 
-                $regradeButton = '<button style = "display: none;"></button>';
-            }else{
-                $regradeButton = '<input type="button" class="btn btn-default" id="showRegradeDiscussion" onclick="showRequestDiscussion() value = "Regrade Discussion">';
-            }
             $return .= <<<HTML
             <div style="float:right;">
-            {$regradeButton}
 HTML;
             $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
 
@@ -1716,11 +1714,11 @@ HTML;
         return false;
     }
     function hideRequestDiscussion(){
-        var displayRequests = document.getElementById("displayRequests");
+        var displayRequests = document.getElementById("regrade_request_box");
         displayRequests.style.display = "none";
     }
     function showRequestDiscussion(){
-        var displayRequests = document.getElementById("displayRequests");
+        var displayRequests = document.getElementById("regrade_request_box");
         displayRequests.style.display = "block";
     }
 </script>
