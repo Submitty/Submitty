@@ -59,19 +59,12 @@ class ForumController extends AbstractController {
     }
 
 
-    private function returnUserContentToPage($error, $isThread, $content, $thread_id, $title=""){
-        //Notify User
+    private function returnUserContentToPage($error, $isThread, $thread_id){
+            //Notify User
             $this->core->addErrorMessage($error);
-           
-            //Save post content to repopulate
             if($isThread){
-                $_SESSION["thread_content"] = $content;
-                $_SESSION["thread_title"] = $title;
-                $_SESSION["thread_recover_active"] = true;  
                 $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
             } else {
-                $_SESSION["post_content"] = $content;
-                $_SESSION["post_recover_active"] = true; 
                 $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
             }
 
@@ -79,14 +72,14 @@ class ForumController extends AbstractController {
     }
 
 
-    private function checkGoodAttachment($isThread, $content, $thread_id, $file_post, $title = ""){
-        if(count($_FILES[$file_post]) > 5) {
-            $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $content, $thread_id, $title);
+    private function checkGoodAttachment($isThread, $thread_id, $file_post){
+        if(count($_FILES[$file_post]['tmp_name']) > 5) {
+            $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
             return -1;
         }
         $imageCheck = Utils::checkUploadedImageFile($file_post) ? 1 : 0;
         if($imageCheck == 0 && !empty($_FILES[$file_post]['tmp_name'])){
-            $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $content, $thread_id, $title);
+            $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
             return -1;
         
         } return $imageCheck;
@@ -103,7 +96,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("One of the fields was empty. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
-            $hasGoodAttachment = $this->checkGoodAttachment(true, $_POST["thread_content"], -1, 'file_input', $_POST["title"]);
+            $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
             if($hasGoodAttachment == -1){
                 return;
             }
@@ -146,7 +139,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
-            $hasGoodAttachment = $this->checkGoodAttachment(false, $_POST[$post_content_tag], $thread_id, $file_post);
+            $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
             if($hasGoodAttachment == -1){
                 return;
             }
