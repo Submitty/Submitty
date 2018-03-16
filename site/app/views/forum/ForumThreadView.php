@@ -353,7 +353,7 @@ HTML;
 
 if(isset($_SESSION["post_content"]) && isset($_SESSION["post_recover_active"])){
 			
-	$post_content = html_entity_decode($_SESSION["post_content"]);
+	$post_content = htmlentities($_SESSION["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 	$return .= <<<HTML
 			<script>
@@ -626,9 +626,9 @@ HTML;
 HTML;
 
 if(isset($_SESSION["thread_title"]) && isset($_SESSION["thread_content"]) && isset($_SESSION["thread_recover_active"])){
-	$title = html_entity_decode($_SESSION["thread_title"]);
+	$title = htmlentities($_SESSION["thread_title"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 			
-	$thread_content = html_entity_decode($_SESSION["thread_content"]);
+	$thread_content = htmlentities($_SESSION["thread_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 	$return .= <<<HTML
 			<script>
