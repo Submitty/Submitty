@@ -115,7 +115,7 @@
             "test_name": "Test 9 Error Checking: Too Many Arguments"
         },
         {
-            "points_awarded": -5,
+            "points_awarded": -4,
             "test_name": "Test 10 Submission Limit"
         }
     ]
