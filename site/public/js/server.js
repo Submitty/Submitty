@@ -826,7 +826,9 @@ function checkFileExtensions(files){
     var count = 0;
     for(var i = 0; i < files.length; i++){
         var extension = getFileExtension(files[i].name);
-        count = (extension == "gif" || extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp") ? count+1 : count;
+        if(extension == "gif" || extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp"){
+            count++;
+        }
     } return count == files.length;
 }
 
