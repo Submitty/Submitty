@@ -76,8 +76,12 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN KEY ("thread_id") REFERENCES "threads"("id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
-    
+        
+        #Regrade Request System
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "regrade_requests" ("id" serial NOT NULL, "gradeable_id" VARCHAR(255) NOT NULL,"timestamp" TIMESTAMP NOT NULL, "student_user_id" VARCHAR(255) NOT NULL, "status" INTEGER DEFAULT 0 NOT NULL)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "regrade_discussion" ("id" serial NOT NULL, "user_id" varchar(255) NOT NULL,"timestamp" TIMESTAMP NOT NULL,"content" TEXT,"regrade_id" VARCHAR(255) NOT NULL,"deleted" BOOLEAN default false NOT NULL,thread_id INTEGER DEFAULT 0 NOT NULL)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
 
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_regrade_requests_id_fk" FOREIGN KEY ("thread_id") REFERENCES "regrade_requests"("id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
         # create the forum attachments directory and set the owner, group, and permissions
         course_dir = os.path.join(settings['submitty_data_dir'],"courses",term.name,course.name)
         forum_dir = os.path.join(course_dir,"forum_attachments")
