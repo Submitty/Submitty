@@ -181,8 +181,8 @@ chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/auto
 #EVAN: We are not currently using these directories.
 if [ ${HEADLESS} == 0 ]; then
 # remove the old versions of the queues
-rm -r $SUBMITTY_DATA_DIR/to_be_graded_interactive
-rm -r $SUBMITTY_DATA_DIR/to_be_graded_batch
+rm -rf $SUBMITTY_DATA_DIR/to_be_graded_interactive
+rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
 mkdir -p $SUBMITTY_DATA_DIR/to_be_built
@@ -648,12 +648,12 @@ systemctl is-active --quiet submitty_grading_scheduler
 is_scheduler_active=$?
 if [[ "$is_scheduler_active" == "0" ]]; then
     systemctl stop submitty_grading_scheduler
-    echo -e "WARNING: Stopped Submitty Grading Scheduler Daemon\n"
+    echo -e "WARNING: Stopped Deprecated Submitty Grading Scheduler Daemon\n"
 fi
 systemctl is-active --quiet submitty_grading_scheduler
 is_active_tmp=$?
 if [[ "$is_active_tmp" == "0" ]]; then
-    echo -e "ERROR: did not successfully stop submitty grading scheduler daemon\n"
+    echo -e "ERROR: did not successfully stop deprecated submitty grading scheduler daemon\n"
     exit 1
 fi
 # END TO BE DELETED

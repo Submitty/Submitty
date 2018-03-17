@@ -33,7 +33,7 @@ def worker_process(which_machine,which_untrusted):
 
     # ignore keyboard interrupts in the worker processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
-    counter=0
+    counter = 0
     
     autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_autograding.zip")
     submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_submission.zip")
@@ -42,18 +42,17 @@ def worker_process(which_machine,which_untrusted):
     while True:
         if os.path.exists(todo_queue_file):
             try:
-                print("Grading")
                 results_zip_tmp = grade_item.grade_from_zip(autograding_zip,submission_zip,which_untrusted)
-                print("Graded")
                 results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_results.zip")
                 done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_queue.json")
-                print("Moving")
-                shutil.move(results_zip_tmp,results_zip)
-                print("Moved")
+                #move doesn't inherit permissions of destination directory. Copyfile does.
+                shutil.copyfile(results_zip_tmp,results_zip)
+                os.remove(results_zip_tmp)
+
                 with open(todo_queue_file, 'r') as infile:
                     queue_obj = json.load(infile)
                     queue_obj["done_time"]=dateutils.write_submitty_date(microseconds=True)
-                print("QUEUE OBJECT: ", queue_obj)
+
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)        
             except Exception as e:
@@ -64,16 +63,15 @@ def worker_process(which_machine,which_untrusted):
                     os.remove(autograding_zip)
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(submission_zip)
-
             with contextlib.suppress(FileNotFoundError):
                 os.remove(todo_queue_file)
+            counter = 0
         else:
-            print("COULDN'T FIND ", todo_queue_file)
-            time.sleep(1)
-            counter+=1
             if counter >= 10:
-                print ("worker waiting: ",which_machine," ",which_untrusted)
-                counter=0
+                print (which_machine,which_untrusted,"wait")
+                counter = 0
+            counter += 1
+            time.sleep(1)
 
                 
 # ==================================================================================
@@ -90,7 +88,6 @@ def launch_workers(num_workers):
     untrusted_users = multiprocessing.Queue()
     for i in range(num_workers):
         untrusted_users.put("untrusted" + str(i).zfill(2))
-
 
     # launch the worker threads
     which_machine=socket.gethostname()

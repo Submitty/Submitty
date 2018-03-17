@@ -32,7 +32,7 @@ fi
 # PROVISION SETUP
 #################
 
-if [[ $1 == "--vagrant" ]]; then
+if [[ $1 == "--vagrant" ] || [$2 == "--vagrant" ] ]; then
   echo "Non-interactive vagrant script..."
   export VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
@@ -50,17 +50,11 @@ fi
 #   export HEADLESS=0
 # fi
 
-#EVAN: TEMPORARY, FIX BEFORE COMMITING
-export HEADLESS=1
-
-# if [ ${HEADLESS} == 1 ]; then
-#     echo HEADLESS
-#     exit
-# else
-#     echo Headless
-#     echo $HEADLESS
-#     sleep 1m
-# fi
+if [ [ $1 == "--worker" ] || [ $2 == "--worker" ] ]; then
+    export HEADLESS=1
+else
+    export HEADLESS=0
+fi
 
 
 #################################################################
