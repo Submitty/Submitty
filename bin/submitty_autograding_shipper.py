@@ -35,7 +35,7 @@ def initialize(untrusted_queue):
     multiprocessing.current_process().untrusted = untrusted_queue.get()
 
 # ==================================================================================
-def grade_queue_file(queue_file,which_machine,which_untrusted):
+def grade_queue_file(which_machine,which_untrusted,queue_file):
     """
     Oversees the autograding of single item from the queue
 
@@ -56,7 +56,7 @@ def grade_queue_file(queue_file,which_machine,which_untrusted):
     try:
         # prepare the job
         shipper_counter=0
-        while not grade_item.just_grade_item_A(my_dir, queue_file, which_untrusted, which_machine):
+        while not grade_item.just_grade_item_A(which_machine, which_untrusted, my_dir, queue_file):
             shipper_counter = 0
             time.sleep(1)
             if shipper_counter >= 10:
@@ -65,7 +65,7 @@ def grade_queue_file(queue_file,which_machine,which_untrusted):
                 
         # then wait for grading to be completed
         shipper_counter=0
-        while not grade_item.just_grade_item_C(my_dir, queue_file, which_untrusted, which_machine):
+        while not grade_item.just_grade_item_C(which_machine, which_untrusted, queue_file):
             shipper_counter+=1
             time.sleep(1)
             if shipper_counter >= 10:
@@ -166,7 +166,7 @@ def get_job(which_machine,which_untrusted,overall_lock):
 
 # ==================================================================================
 # ==================================================================================
-def shipper_process(overall_lock,which_machine,which_untrusted):
+def shipper_process(which_machine,which_untrusted,overall_lock):
     """
     Each shipper process spins in a loop, looking for a job that
     matches the capabilities of this machine, and then oversees the
@@ -185,7 +185,7 @@ def shipper_process(overall_lock,which_machine,which_untrusted):
             my_job = get_job(which_machine,which_untrusted,overall_lock)
             if not my_job == "":
                 counter=0
-                grade_queue_file(os.path.join(INTERACTIVE_QUEUE,my_job),which_machine,which_untrusted)
+                grade_queue_file(which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job))
                 continue
             else:
                 if counter == 0 or counter >= 10:
@@ -233,7 +233,7 @@ def launch_shippers(num_workers):
     processes = list()
     for i in range(0,num_workers):
         u = "untrusted" + str(i).zfill(2)
-        p = multiprocessing.Process(target=shipper_process,args=(overall_lock,which_machine,u))
+        p = multiprocessing.Process(target=shipper_process,args=(which_machine,u,overall_lock))
         p.start()
         processes.append(p)
 

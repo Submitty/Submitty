@@ -824,7 +824,7 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
 
 # ==================================================================================
 # ==================================================================================
-def just_grade_item_A(next_directory,next_to_grade,which_untrusted,which_machine):
+def just_grade_item_A(which_machine,which_untrusted,next_directory,next_to_grade):
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
         grade_items_logging.log_message(message="ERROR: must be run by hwcron")
@@ -888,7 +888,7 @@ def just_grade_item_A(next_directory,next_to_grade,which_untrusted,which_machine
 
 # ==================================================================================
 # ==================================================================================
-def just_grade_item_C(next_directory,next_to_grade,which_untrusted,which_machine):
+def just_grade_item_C(which_machine,which_untrusted,next_directory,next_to_grade):
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
         grade_items_logging.log_message(message="ERROR: must be run by hwcron")
@@ -954,7 +954,5 @@ def just_grade_item_C(next_directory,next_to_grade,which_untrusted,which_machine
 # ==================================================================================
 # ==================================================================================
 if __name__ == "__main__":
-    #args = parse_args()
     print ("ERROR: Do not call this script directly")
-    #just_grade_item(args.next_directory,args.next_to_grade,args.which_untrusted)
 
