@@ -23,7 +23,6 @@ HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive")
 BATCH_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch")
 
-
 # ==================================================================================
 class NewFileHandler(FileSystemEventHandler):
     """
