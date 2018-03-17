@@ -310,7 +310,7 @@ function openFile(url_full) {
 // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
 function moveNextInput(count) {
     var next_count = count+1;
-    var next_input = "#users_" + next_count;
+    var next_input = "#users_" + next_count + " :first";
     if ($(next_input).length) {
         $(next_input).focus();
         $(next_input).select(); 
@@ -561,9 +561,7 @@ function handleBulk(gradeable_id, num_pages) {
                 alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                 return;
             }
-            var newName = file_array[i][j].name;
-            newName = newName.split('+').join(' ');
-            formData.append('files' + (i + 1) + '[]', file_array[i][j], encodeURIComponent(newName).replace(/\!/g, "%21").replace(/\(/g, "%28").replace(/\)/g, "%29"));
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
         }
     }
 
@@ -680,8 +678,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                     alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                     return;
                 }
-                formData.append('files' + (i + 1) + '[]', file_array[i][j], encodeURIComponent(file_array[i][j].name).replace(/\!/g, "%21").replace(/\(/g, "%28").replace(/\)/g, "%29"));
-            }
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);            }
         }
         // Files from previous submission
         formData.append('previous_files', JSON.stringify(previous_files));

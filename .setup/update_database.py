@@ -18,6 +18,7 @@
 from datetime import datetime
 import json
 import os
+import urllib.parse
 
 usr_path = "/usr/local/submitty"
 
@@ -91,10 +92,8 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         else:
             #Legacy fix for spaces in attachment file names for the forum
             for root, dir_cur, files in os.walk(forum_dir):
-                files_with_space = list(filter(lambda x: " " in x, files))
-                for filename in files_with_space:
-                    filename_old = filename
-                    os.rename(os.path.join(root, filename_old), os.path.join(root, filename.replace(" ", "%20")));
+                for filename in files:
+                    os.rename(os.path.join(root, filename), os.path.join(root, urllib.parse.unquote(filename)));
 
 
             

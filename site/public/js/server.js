@@ -808,6 +808,10 @@ function setupNumericTextCells() {
     });
 }
 
+function getFileExtension(filename){
+    return (filename.substring(filename.lastIndexOf(".")+1)).toLowerCase();
+}
+
 function openPopUp(css, title, count, testcase_num, side) {
     var element_id = "container_" + count + "_" + testcase_num + "_" + side;
     var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
@@ -818,19 +822,87 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
-function checkNumFilesForumUpload(input){
+function checkForumFileExtensions(files){
+    var count = 0;
+    for(var i = 0; i < files.length; i++){
+        var extension = getFileExtension(files[i].name);
+        if(extension == "gif" || extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp"){
+            count++;
+        }
+    } return count == files.length;
+}
+
+function displayError(message){
+    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + message + '</div>';
+    $('#messages').append(message);
+    $('#messages').fadeIn("slow");
+}
+
+function resetForumFileUploadAfterError(displayPostId){
+    $('#file_name' + displayPostId).html('');
+    document.getElementById('file_input_label' + displayPostId).style.border = "2px solid red";
+    document.getElementById('file_input' + displayPostId).value = null;
+}
+
+function checkNumFilesForumUpload(input, post_id){
+    var displayPostId = (typeof post_id !== "undefined") ? "_" + escape(post_id) : "";
     if(input.files.length > 5){
-        $('#file_name').html('');
-        document.getElementById('file_input_label').style.border = "2px solid red";
-        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Max file upload size is 5. Please try again.</div>';
-        $('#messages').append(message);
-        document.getElementById('file_input').value = null;
+        displayError('Max file upload size is 5. Please try again.');
+        resetForumFileUploadAfterError(displayPostId);
     } else {
-        $('#file_name').html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
+        if(!checkForumFileExtensions(input.files)){
+            displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+            resetForumFileUploadAfterError(displayPostId);
+            return;
+        }
+        $('#file_name' + displayPostId).html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
         $('#messages').fadeOut();
-        document.getElementById('file_input_label').style.border = "";
+        document.getElementById('file_input_label' + displayPostId).style.border = "";
     }
             
+}
+
+function editPost(post_id, thread_id) {
+     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
+     $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id,
+                thread_id: thread_id
+            },
+            success: function(data){
+                console.log(data);
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var user_id = escape(json.user);
+                var post_content = json.post;
+                var time = (new Date(json.post_time));
+                var date = time.toLocaleDateString();
+                time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                var contentBox = document.getElementById('edit_post_content');
+                var editUserPrompt = document.getElementById('edit_user_prompt');
+                editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
+                contentBox.innerHTML = post_content;
+                document.getElementById('edit_post_id').value = post_id;
+                document.getElementById('edit_thread_id').value = thread_id;
+                $('.popup-form').css('display', 'block');
+                
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to edit the post. Please try again.");
+            }
+        });
 }
 
 function enableTabsInTextArea(id){
@@ -873,8 +945,24 @@ function saveScrollLocationOnRefresh(className){
     });
 }
 
+function replyPost(post_id){
+    if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
+        $('#'+ post_id + '-reply').css("display","none");
+    } else {
+        hideReplies();
+        $('#'+ post_id + '-reply').css('display', 'block');
+    }
+}
+
+function hideReplies(){
+    var hide_replies = document.getElementsByClassName("reply-box");
+    for(var i = 0; i < hide_replies.length; i++){
+        hide_replies[i].style.display = "none"; 
+    }
+}
+
 function deletePost(thread_id, post_id, author, time){
-    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note:  If you are deleting the first post in a thread this will delete the entire thread.");
+    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be deleted. \n\nIf you are deleting the first post in a thread this will delete the entire thread.");
     if(confirm){
         var url = buildUrl({'component': 'forum', 'page': 'delete_post'});
         $.ajax({

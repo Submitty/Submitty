@@ -91,7 +91,12 @@ def anon_dir(indir,outdir,offset):
         print("processing... "+file)
         anon_log(indir+"/"+file,outdir+"/"+file,offset)
 
-        
+
+if len(sys.argv) == 5 and sys.argv[1]=="file":
+    anon_log(sys.argv[2],sys.argv[3],sys.argv[4])
+    exit();
+
+
 if len(sys.argv) != 4:
     print ("ERROR! 3 arguments required: log_directory output_directory offset")
     exit();

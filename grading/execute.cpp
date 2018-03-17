@@ -100,6 +100,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "swipl",                   "/usr/bin/swipl" },
     { "plt-r5rs",                "/usr/bin/plt-r5rs" },
 
+    // for Program Analysis course
+    { "ghc",                     "/usr/bin/ghc" },
+
     // for Cmake & Make
     { "cmake",                   "/usr/bin/cmake" },
     { "make",                    "/usr/bin/make" },
@@ -110,6 +113,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
     { "mpirun",                  "/usr/local/mpich-3.2/bin/mpirun"},
     { "mpicc",                   "/usr/local/mpich-3.2/bin/mpicc"},
+    { "expect",                  "/usr/bin/expect" },
 
     // for LLVM / Compiler class
     { "lex",                     "/usr/bin/lex" },
@@ -339,10 +343,13 @@ std::string escape_spaces(const std::string& input) {
 
 // =====================================================================
 
-bool wildcard_match(const std::string &pattern, const std::string &thing, std::ostream &logfile) {
+bool wildcard_match(const std::string &pattern, const std::string &thing) {
   //  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
 
   int wildcard_loc = pattern.find("*");
+  if (wildcard_loc == std::string::npos) {
+    return pattern == thing;
+  }
   assert (wildcard_loc != std::string::npos);
 
   std::string before = pattern.substr(0,wildcard_loc);
@@ -459,7 +466,7 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
       ent = readdir(dir);
       if (ent == NULL) break;
       std::string thing = ent->d_name;
-      if (wildcard_match(file_pattern,thing,logfile)) {
+      if (wildcard_match(file_pattern,thing)) {
         std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
         validate_filename(directory+thing);
         my_args.push_back(directory+thing);
@@ -895,7 +902,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     close(stderrfd);
     dup2(new_stderrfd, stderrfd);
   }
-
+  
 
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
