@@ -23,6 +23,7 @@ echo "Getting pylint..."
 # install pylint for python3 using pip
 apt install -qqy python3-pip
 pip3 install pylint
+pip3 install pillow
 
 # unit tests for python
 echo "Getting unittest... "
