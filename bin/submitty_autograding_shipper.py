@@ -11,7 +11,7 @@ import datetime
 from submitty_utils import glob
 import multiprocessing
 from submitty_utils import dateutils, glob
-
+import operator
 # ==================================================================================
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 NUM_GRADING_SCHEDULER_WORKERS_string = "__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__"
@@ -106,11 +106,20 @@ def get_job(which_machine,which_untrusted,overall_lock):
     # Grab all the files currently in the folder, sorted by creation
     # time, and put them in the queue to be graded
     files = glob.glob(os.path.join(folder, "*"))
-    files.sort(key=os.path.getctime)
+    files_and_times = list()
+    for f in files:
+        try:
+            my_time = os.path.getctime(f)
+        except:
+            continue
+        tup = (f, my_time)
+        files_and_times.append(tup)
+
+    files_and_times = sorted(files_and_times, key=operator.itemgetter(1))
 
     my_job=""
 
-    for full_path_file in files:
+    for full_path_file, file_time in files_and_times:
         # get the file name (without the path)
         just_file = full_path_file[len(folder)+1:]
         # skip items that are already being graded
@@ -121,8 +130,11 @@ def get_job(which_machine,which_untrusted,overall_lock):
             continue
 
         # found something to do
-        with open(full_path_file, 'r') as infile:
-            queue_obj = json.load(infile)
+        try:
+            with open(full_path_file, 'r') as infile:
+                queue_obj = json.load(infile)
+        except:
+            continue
 
         # prioritize interactive jobs over (batch) regrades
         # if you've found an interactive job, exit early (since they are sorted by timestamp)
