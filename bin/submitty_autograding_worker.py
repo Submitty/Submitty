@@ -45,10 +45,11 @@ def worker_process(which_machine,which_untrusted):
                 results_zip_tmp = grade_item.grade_from_zip(autograding_zip,submission_zip,which_untrusted)
                 results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_results.zip")
                 done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_queue.json")
+
                 #move doesn't inherit permissions of destination directory. Copyfile does.
                 shutil.copyfile(results_zip_tmp,results_zip)
                 os.remove(results_zip_tmp)
-
+                
                 with open(todo_queue_file, 'r') as infile:
                     queue_obj = json.load(infile)
                     queue_obj["done_time"]=dateutils.write_submitty_date(microseconds=True)

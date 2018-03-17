@@ -108,7 +108,7 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     # pop this argument from the list of arguments...
     shift
 
-    echo -e "\nDeleting directories for a clean installation\n"
+    echo -e "\nDeleting submitty installation directories, ${SUBMITTY_INSTALL_DIR}, for a clean installation\n"
 
     # save the course index page
     originalcurrentcourses=/usr/local/submitty/site/app/views/current_courses.php
@@ -700,10 +700,10 @@ rm -rf $SUBMITTY_DATA_DIR/autograding_DONE
 # recreate the TODO and DONE folders
 mkdir -p $SUBMITTY_DATA_DIR/autograding_TODO
 mkdir -p $SUBMITTY_DATA_DIR/autograding_DONE
-chown -R ${HWCRON_USER}:root ${SUBMITTY_DATA_DIR}/autograding_TODO
-chown -R ${HWCRON_USER}:root ${SUBMITTY_DATA_DIR}/autograding_DONE
-chmod 700 ${SUBMITTY_DATA_DIR}/autograding_TODO
-chmod 700 ${SUBMITTY_DATA_DIR}/autograding_DONE
+chown -R ${HWCRON_USER}:${HWCRON_GID} ${SUBMITTY_DATA_DIR}/autograding_TODO
+chown -R ${HWCRON_USER}:${HWCRON_GID} ${SUBMITTY_DATA_DIR}/autograding_DONE
+chmod 770 ${SUBMITTY_DATA_DIR}/autograding_TODO
+chmod 770 ${SUBMITTY_DATA_DIR}/autograding_DONE
 
 
 #############################################################

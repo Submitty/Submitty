@@ -884,6 +884,12 @@ table .instructor .two-options{
     width: 95%;
 }
 
+.reply-box{
+    display: none;
+    margin-right: 15px;
+    margin-bottom: 60px;
+}
+
 .cell-all,
 .cell-grade {
     cursor: pointer;

@@ -13,6 +13,7 @@ import dateutil
 import dateutil.parser
 import urllib.parse
 import contextlib
+import paramiko
 import socket
 
 from submitty_utils import dateutils, glob
@@ -270,7 +271,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
         filehandle,history_file_tmp = tempfile.mkstemp()
         shutil.copy(history_file,history_file_tmp)
         shutil.copy(history_file,os.path.join(tmp_submission,"history.json"))
-
+        os.close(filehandle)
     # get info from the gradeable config file
     with open(complete_config, 'r') as infile:
         complete_config_obj = json.load(infile)
@@ -330,6 +331,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
             subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
         os.chdir(tmp)
         subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
+        obj['revision'] = what_version
 
     copytree_if_exists(submission_path,os.path.join(tmp_submission,"submission"))
     copytree_if_exists(checkout_path,os.path.join(tmp_submission,"checkout"))
@@ -345,10 +347,12 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
         print (grading_began_longstring,file=f)
 
     # zip up autograding & submission folders
-    my_autograding_zip_file=tempfile.mkstemp()[1]
-    my_submission_zip_file=tempfile.mkstemp()[1]
+    filehandle1, my_autograding_zip_file =tempfile.mkstemp()
+    filehandle2, my_submission_zip_file =tempfile.mkstemp()
     zip_my_directory(tmp_autograding,my_autograding_zip_file)
     zip_my_directory(tmp_submission,my_submission_zip_file)
+    os.close(filehandle1)
+    os.close(filehandle2)
     # cleanup
     shutil.rmtree(tmp_autograding)
     shutil.rmtree(tmp_submission)
@@ -684,7 +688,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         add_permissions(history_file,stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
 
-    shutil.copy(os.path.join(tmp_work,"results.json"),tmp_results)
     shutil.copy(os.path.join(tmp_work,"grade.txt"),tmp_results)
 
     # -------------------------------------------------------------
@@ -718,6 +721,13 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
+    with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
+        results_obj = json.load(read_file)
+    if 'revision' in queue_obj.keys():
+        results_obj['revision'] = queue_obj['revision']
+    with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
+        json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,
                                                  submission_longstring,
@@ -744,8 +754,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     shutil.copytree(tmp_logs,os.path.join(tmp_results,"logs"))
 
     # zip up results folder
-    my_results_zip_file=tempfile.mkstemp()[1]
+    filehandle, my_results_zip_file=tempfile.mkstemp()
     zip_my_directory(tmp_results,my_results_zip_file)
+    os.close(filehandle)
     shutil.rmtree(tmp_autograding)
     shutil.rmtree(tmp_submission)
     shutil.rmtree(tmp_results)
@@ -825,18 +836,53 @@ def just_grade_item_A(next_directory,next_to_grade,which_untrusted,which_machine
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_autograding.zip")
         submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_submission.zip")
         todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_queue.json")
-        shutil.move(autograding_zip_tmp,autograding_zip)
-        shutil.move(submission_zip_tmp,submission_zip)
+
         with open(next_to_grade, 'r') as infile:
             queue_obj = json.load(infile)
-            queue_obj["which_untrusted"]=which_untrusted
-            queue_obj["which_machine"]=which_machine
-            queue_obj["ship_time"]=dateutils.write_submitty_date(microseconds=True)
-        with open(todo_queue_file, 'w') as outfile:
-            json.dump(queue_obj, outfile, sort_keys=True, indent=4)
-    except:
-        grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when preparing autograding and submission zip")
-        return
+            queue_obj["which_untrusted"] = which_untrusted
+            queue_obj["which_machine"] = which_machine
+            queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
+    except Exception as e:
+        print("ERROR: failed preparing submission zip or accessing next to grade ", e)
+        #TODO: replace which_machine with user, host, and passkey
+    if which_machine == "localhost":
+        try:
+            shutil.move(autograding_zip_tmp,autograding_zip)
+            shutil.move(submission_zip_tmp,submission_zip)
+            with open(todo_queue_file, 'w') as outfile:
+                json.dump(queue_obj, outfile, sort_keys=True, indent=4)
+        except Exception as e:
+            print("ERROR: could not move files due to the following error: {0}".format(e))
+            return False
+    else:
+        #TODO: read these in as separate parameters in place of whichmachine.
+        try:
+            user, host = which_machine.split("@")
+            ssh = paramiko.SSHClient()
+            ssh.get_host_keys()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            #TODO: replace with password parameter read in with user and host
+            passit = "submitty"
+                
+            ssh.connect(hostname = host, username = user)
+            sftp = ssh.open_sftp()
+
+            sftp.put(autograding_zip_tmp,autograding_zip)
+            sftp.put(submission_zip_tmp,submission_zip)
+            with open(todo_queue_file, 'w') as outfile:
+                json.dump(queue_obj, outfile, sort_keys=True, indent=4)
+            sftp.put(todo_queue_file, todo_queue_file)
+            sftp.close()
+            print("Successfully forwarded files to {0}@{1}".format(user, host))
+            success = True
+        except Exception as e:
+            print("Could not move files due to the following error: {0}".format(e))
+            success = False
+        finally:
+            sftp.close()
+            ssh.close()
+            return success
+    return True
 
 
 
@@ -848,23 +894,60 @@ def just_grade_item_C(next_directory,next_to_grade,which_untrusted,which_machine
         grade_items_logging.log_message(message="ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
-    results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_results.zip")
-    done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_queue.json")
-    
-    if not os.path.exists(done_queue_file):
-        return False
-        
+    target_results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_results.zip")
+    target_done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_queue.json")
+     
+    if which_machine == "localhost":
+        if not os.path.exists(target_done_queue_file):
+            return False
+        else:
+          local_done_queue_file = target_done_queue_file
+          local_results_zip = target_results_zip
+    else:      
+        user, host = which_machine.split("@")
+        ssh = paramiko.SSHClient() 
+        ssh.get_host_keys()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        passit = "submitty"
+
+        try:
+            ssh.connect(hostname = host, username = user)
+
+            sftp = ssh.open_sftp()
+            fd1, local_done_queue_file = tempfile.mkstemp()
+            fd2, local_results_zip     = tempfile.mkstemp()
+            #remote path first, then local.
+            sftp.get(target_done_queue_file, local_done_queue_file)
+            sftp.get(target_results_zip, local_results_zip)
+            #Because get works like cp rather tnan mv, we have to clean up.
+            sftp.remove(target_done_queue_file)
+            sftp.remove(target_results_zip)
+            success = True
+        #This is the normal case (still grading on the other end) so we don't need to print anything.
+        except FileNotFoundError:
+            success = False
+        #In this more general case, we do want to print what the error was.
+        #TODO catch other types of exception as we identify them. 
+        except Exception as e:
+            print("Could not retrieve the file from the foreign machine.\nERROR: {0}".format(e))
+            success = False
+        finally:
+            os.close(fd1)
+            os.close(fd2)
+            sftp.close()
+            ssh.close()
+            if not success:
+                return False
     # archive the results of grading
     try:
-        unpack_grading_results_zip(which_machine,which_untrusted,results_zip)
+        unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
     except:
         grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when unpacking zip")
         with contextlib.suppress(FileNotFoundError):
-            os.remove(results_zip)
+            os.remove(local_results_zip)
 
     with contextlib.suppress(FileNotFoundError):
-        os.remove(done_queue_file)
-
+        os.remove(local_done_queue_file)
     return True
 
 
