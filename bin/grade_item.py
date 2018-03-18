@@ -12,8 +12,6 @@ import time
 import dateutil
 import dateutil.parser
 import urllib.parse
-import contextlib
-import paramiko
 import socket
 
 from submitty_utils import dateutils, glob
@@ -824,135 +822,7 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
 
 # ==================================================================================
 # ==================================================================================
-def just_grade_item_A(which_machine,which_untrusted,next_directory,next_to_grade):
-    # verify the hwcron user is running this script
-    if not int(os.getuid()) == int(HWCRON_UID):
-        grade_items_logging.log_message(message="ERROR: must be run by hwcron")
-        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
-    # prepare the zip files
-    try:
-        autograding_zip_tmp,submission_zip_tmp = prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
-        autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_autograding.zip")
-        submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_submission.zip")
-        todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_queue.json")
-
-        with open(next_to_grade, 'r') as infile:
-            queue_obj = json.load(infile)
-            queue_obj["which_untrusted"] = which_untrusted
-            queue_obj["which_machine"] = which_machine
-            queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
-    except Exception as e:
-        print("ERROR: failed preparing submission zip or accessing next to grade ", e)
-        #TODO: replace which_machine with user, host, and passkey
-    if which_machine == "localhost":
-        try:
-            shutil.move(autograding_zip_tmp,autograding_zip)
-            shutil.move(submission_zip_tmp,submission_zip)
-            with open(todo_queue_file, 'w') as outfile:
-                json.dump(queue_obj, outfile, sort_keys=True, indent=4)
-        except Exception as e:
-            print("ERROR: could not move files due to the following error: {0}".format(e))
-            return False
-    else:
-        #TODO: read these in as separate parameters in place of whichmachine.
-        try:
-            user, host = which_machine.split("@")
-            ssh = paramiko.SSHClient()
-            ssh.get_host_keys()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            #TODO: replace with password parameter read in with user and host
-            passit = "submitty"
-                
-            ssh.connect(hostname = host, username = user)
-            sftp = ssh.open_sftp()
-
-            sftp.put(autograding_zip_tmp,autograding_zip)
-            sftp.put(submission_zip_tmp,submission_zip)
-            with open(todo_queue_file, 'w') as outfile:
-                json.dump(queue_obj, outfile, sort_keys=True, indent=4)
-            sftp.put(todo_queue_file, todo_queue_file)
-            sftp.close()
-            print("Successfully forwarded files to {0}@{1}".format(user, host))
-            success = True
-        except Exception as e:
-            print("Could not move files due to the following error: {0}".format(e))
-            success = False
-        finally:
-            sftp.close()
-            ssh.close()
-            return success
-    return True
-
-
-
-# ==================================================================================
-# ==================================================================================
-def just_grade_item_C(which_machine,which_untrusted,next_directory,next_to_grade):
-    # verify the hwcron user is running this script
-    if not int(os.getuid()) == int(HWCRON_UID):
-        grade_items_logging.log_message(message="ERROR: must be run by hwcron")
-        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
-
-    target_results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_results.zip")
-    target_done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_queue.json")
-     
-    if which_machine == "localhost":
-        if not os.path.exists(target_done_queue_file):
-            return False
-        else:
-          local_done_queue_file = target_done_queue_file
-          local_results_zip = target_results_zip
-    else:      
-        user, host = which_machine.split("@")
-        ssh = paramiko.SSHClient() 
-        ssh.get_host_keys()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        passit = "submitty"
-
-        try:
-            ssh.connect(hostname = host, username = user)
-
-            sftp = ssh.open_sftp()
-            fd1, local_done_queue_file = tempfile.mkstemp()
-            fd2, local_results_zip     = tempfile.mkstemp()
-            #remote path first, then local.
-            sftp.get(target_done_queue_file, local_done_queue_file)
-            sftp.get(target_results_zip, local_results_zip)
-            #Because get works like cp rather tnan mv, we have to clean up.
-            sftp.remove(target_done_queue_file)
-            sftp.remove(target_results_zip)
-            success = True
-        #This is the normal case (still grading on the other end) so we don't need to print anything.
-        except FileNotFoundError:
-            success = False
-        #In this more general case, we do want to print what the error was.
-        #TODO catch other types of exception as we identify them. 
-        except Exception as e:
-            print("Could not retrieve the file from the foreign machine.\nERROR: {0}".format(e))
-            success = False
-        finally:
-            os.close(fd1)
-            os.close(fd2)
-            sftp.close()
-            ssh.close()
-            if not success:
-                return False
-    # archive the results of grading
-    try:
-        unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
-    except:
-        grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when unpacking zip")
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(local_results_zip)
-
-    with contextlib.suppress(FileNotFoundError):
-        os.remove(local_done_queue_file)
-    return True
-
-
-# ==================================================================================
-# ==================================================================================
 if __name__ == "__main__":
     print ("ERROR: Do not call this script directly")
 
