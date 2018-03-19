@@ -9,7 +9,6 @@ pattern and add them to the grading queue.
 
 USAGE:
     regrade.py  <one or more (absolute or relative) PATTERN PATH>
-    regrade.py  <one or more (absolute or relative) PATTERN PATH>  --interactive
 """
 
 import argparse
@@ -28,9 +27,6 @@ def arg_parse():
                                                  "them to a queue (default batch) for regrading")
     parser.add_argument("path", nargs=argparse.REMAINDER, metavar="PATH",
                         help="Path (absolute or relative) to submissions to regrade")
-    parser.add_argument("--interactive", dest="interactive", action='store_const', const=True, default=False,
-                        help="What queue (INTERACTIVE or BATCH) to use for the regrading. Default "
-                        "is batch.")
     parser.add_argument("--replay", dest="times", nargs=2, type=str, 
                         help="Specify start time for replay?  example format: '2018-02-14 00:13:17.000 -0500'")
     parser.add_argument("--no_input", dest="no_input", action='store_const', const=True, default=False,
@@ -84,14 +80,26 @@ def replay(starttime,endtime):
             time_multipler=1.0
             pause_time=replay_starttime+(time_multiplier*(original_time-starttime))
             pause.until(pause_time)
-            
+            queue_time = dateutils.write_submitty_date()
             print(datetime.datetime.now(),"      REPLAY: ",original_time," ",my_job)
-            item = {"semester": what[0], "course": what[1], "gradeable": what[3],
-                    "user": what[4], "team": "", "who": what[4], "is_team": False, "version": what[5]}
+            # FIXME : This will need to be adjust for team assigments
+            # and assignments with special required capabilities!
+            item = {"semester": what[0],
+                    "course": what[1],
+                    "gradeable": what[3],
+                    "user": what[4],
+                    "team": "",
+                    "who": what[4],
+                    "is_team": False,
+                    "version": what[5],
+                    "required_capabilities": "default",
+                    "queue_time": queue_time,
+                    "regrade": True,
+                    "max_possible_grading_time" : -1 }
             file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['who'], item['version']])
-            file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", file_name)
+            file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", file_name)
             with open(file_name, "w") as open_file:
-                json.dump(item, open_file)
+                json.dump(item, open_file, sort_keys=True, indent=4)
                 os.system("chmod o+rw {}".format(file_name))  
     print (datetime.datetime.now(),"replay end: ",endtime)
 
@@ -185,10 +193,18 @@ def main():
                     my_team = my_who
                     my_is_team = True
 
-                grade_queue.append({"semester": my_semester, "course": my_course, "gradeable": my_gradeable,
-                                    "user": my_user, "team": my_team, "who": my_who, "is_team": my_is_team,
-                                    "version": my_version, "required_capabilities" : required_capabilities,
-                                    "queue_time":queue_time, "max_possible_grading_time" : max_grading_time})
+                grade_queue.append({"semester": my_semester,
+                                    "course": my_course,
+                                    "gradeable": my_gradeable,
+                                    "user": my_user,
+                                    "team": my_team,
+                                    "who": my_who,
+                                    "is_team": my_is_team,
+                                    "version": my_version,
+                                    "required_capabilities" : required_capabilities,
+                                    "queue_time":queue_time,
+                                    "regrade":True,
+                                    "max_possible_grading_time" : max_grading_time})
 
     # Check before adding a very large number of systems to the queue
     if len(grade_queue) > 50 and not args.no_input:
@@ -196,18 +212,14 @@ def main():
         if inp.lower() not in ["yes", "y"]:
             raise SystemExit("Aborting...")
 
-    which_queue="batch"
-    if args.interactive:
-        which_queue="interactive"
-
     for item in grade_queue:
         file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['who'], item['version']])
-        file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_"+which_queue, file_name)
+        file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", file_name)
         with open(file_name, "w") as open_file:
-            json.dump(item, open_file)
+            json.dump(item, open_file, sort_keys=True, indent=4)
         os.system("chmod o+rw {}".format(file_name))
 
-    print("Added {:d} to the {} queue for regrading.".format(len(grade_queue), which_queue.upper()))
+    print("Added {:d} to the queue for regrading.".format(len(grade_queue)))
 
 
 if __name__ == "__main__":
