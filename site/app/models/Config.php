@@ -95,7 +95,7 @@ class Config extends AbstractModel {
     /** @property @var string */
     protected $authentication;
     /** @property @var string */
-    protected $timezone = "America/New_York";
+    protected $timezone;
     /** @property @var string */
     protected $submitty_path;
     /** @property @var string */
@@ -177,6 +177,7 @@ class Config extends AbstractModel {
         parent::__construct($core);
         $this->semester = $semester;
         $this->course = $course;
+        $this->timezone = file_get_contents('/etc/timezone');
     }
 
     public function loadMasterIni($master_ini_path) {
