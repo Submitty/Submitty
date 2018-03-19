@@ -23,16 +23,11 @@ SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
-# Groups
-if [ ${HEADLESS} == 0 ]; then
-COURSE_BUILDERS_GROUP=course_builders
-fi
-
 #################################################################
 # PROVISION SETUP
 #################
 
-if [[ $1 == "--vagrant" ] || [$2 == "--vagrant" ] ]; then
+if [ "$1" == "--vagrant" ] || [ "$2" == "--vagrant" ]; then
   echo "Non-interactive vagrant script..."
   export VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
@@ -50,12 +45,17 @@ fi
 #   export HEADLESS=0
 # fi
 
-if [ [ $1 == "--worker" ] || [ $2 == "--worker" ] ]; then
+if [ "$1" == "--worker" ] || [ "$2" == "--worker" ]; then
+    echo Building a submitty in worker mode.
     export HEADLESS=1
 else
+    echo Building full submitty.
     export HEADLESS=0
 fi
 
+if [ ${HEADLESS} == 0 ]; then
+    COURSE_BUILDERS_GROUP=course_builders
+fi
 
 #################################################################
 # DISTRO SETUP
@@ -541,9 +541,6 @@ service postgresql restart
 #Evan: set up headless folder
 else
     rm -rf ${SUBMITTY_DATA_DIR}/logs/*
-    mkdir -p ${SUBMITTY_DATA_DIR}/incoming
-    mkdir -p ${SUBMITTY_DATA_DIR}/outgoing
-    mkdir -p ${SUBMITTY_DATA_DIR}/test_input
 fi
 
 echo "Done."
