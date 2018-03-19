@@ -640,24 +640,6 @@ popd
 
 #Evan: TODO, fix the grading scheduler.
 
-#############################################################
-# NOTE: This section is to cleanup the old scheduler -- and this code should eventually be removed
-# BEGIN TO BE DELETED
-# stop the old scheduler (if it's running)
-systemctl is-active --quiet submitty_grading_scheduler
-is_scheduler_active=$?
-if [[ "$is_scheduler_active" == "0" ]]; then
-    systemctl stop submitty_grading_scheduler
-    echo -e "WARNING: Stopped Deprecated Submitty Grading Scheduler Daemon\n"
-fi
-systemctl is-active --quiet submitty_grading_scheduler
-is_active_tmp=$?
-if [[ "$is_active_tmp" == "0" ]]; then
-    echo -e "ERROR: did not successfully stop deprecated submitty grading scheduler daemon\n"
-    exit 1
-fi
-# END TO BE DELETED
-
 
 #############################################################
 # stop the shipper daemon (if it's running)
@@ -689,6 +671,30 @@ if [[ "$is_active_tmp" == "0" ]]; then
     echo -e "ERROR: did not successfully stop submitty grading worker daemon\n"
     exit 1
 fi
+
+
+
+#############################################################
+# NOTE: This section is to cleanup the old scheduler -- and this code should eventually be removed
+# BEGIN TO BE DELETED
+# stop the old scheduler (if it's running)
+systemctl is-active --quiet submitty_grading_scheduler
+is_scheduler_active=$?
+if [[ "$is_scheduler_active" == "0" ]]; then
+    systemctl stop submitty_grading_scheduler
+    echo -e "WARNING: Stopped Deprecated Submitty Grading Scheduler Daemon\n"
+    # launch the shipper & worker daemons on relaunch
+    is_shipper_active_before=0
+    is_worker_active_before=0
+    echo -e "WARNING: Will launch replacement Submitty Autograding Shipper & Worker Daemon\n"
+fi
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_tmp=$?
+if [[ "$is_active_tmp" == "0" ]]; then
+    echo -e "ERROR: did not successfully stop deprecated submitty grading scheduler daemon\n"
+    exit 1
+fi
+# END TO BE DELETED
 
 
 #############################################################
