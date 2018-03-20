@@ -875,6 +875,10 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // (without this, default desired threads may be based on the system specs)
   setenv("OMP_NUM_THREADS","4",1);
 
+
+  // Haskell compiler needs a home environment variable (but it can be anything)
+  setenv("HOME","/tmp",1);
+
   
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {
