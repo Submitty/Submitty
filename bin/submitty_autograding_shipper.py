@@ -15,7 +15,7 @@ import multiprocessing
 from submitty_utils import dateutils, glob
 import operator
 import paramiko
-
+import tempfile 
 # ==================================================================================
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 NUM_GRADING_SCHEDULER_WORKERS_string = "__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__"
