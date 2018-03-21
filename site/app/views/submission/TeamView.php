@@ -13,7 +13,7 @@ class TeamView extends AbstractView {
     * @param \app\models\Team[] $teams
     * @return string
     */
-    public function showTeamPage($gradeable, $teams, $lock) {
+    public function showTeamPage($gradeable, $teams, $lock, $users_seeking_team) {
         $site_url = $this->core->getConfig()->getSiteUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -162,7 +162,7 @@ HTML;
 <div class="content">
     <h3>Invitations:</h3> <br />
 HTML;
-            foreach ($invites_received as $invite) {
+            foreach ($invites_received as $invite){
                 $return .= <<<HTML
     <form action="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'accept'))}" method="post">
         <input type="hidden" name="team_id" value={$invite->getId()} />
@@ -178,8 +178,52 @@ HTML;
     <br />
     <button class="btn btn-primary" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'create_new_team'))}'">Create New Team </button>
 HTML;
+		if(!(in_array($user_id, $users_seeking_team))){
+			$return .= <<<HTML
+    &nbsp;or&nbsp;<button class="btn btn-primary" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'seek_team'))}'">Seek Team/Partner </button>
+HTML;
+		}
+		else if(in_array($user_id, $users_seeking_team)){
+			$return .= <<<HTML
+    <button class="btn btn-danger" onclick="location.href='{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'stop_seek_team'))}'">Stop Seeking Team/Partner </button>
+HTML;
+		}
     }
     $return .= <<<HTML
+</div>
+<div class="content">
+	<div style="width:60%;">
+		<h3>Users Seeking Team/Partner:</h3><br />
+		<table class="table table-striped table-bordered persist-area">
+			<thead class="persist thead">
+				<tr>
+					<td width="3%"></td>
+					<td width="10%">First Name</td>
+					<td width="10%">Last Name</td>
+					<td width="10%">User ID</td>
+					<td width="40%">Email</td>
+				</tr>
+			</thead>
+			<tbody>
+HTML;
+			$index=1;
+			foreach ($users_seeking_team as $user_seeking_team) {
+		        $user_details = $this->core->getQueries()->getUserById($user_seeking_team);
+				$return .= <<<HTML
+				<tr>
+					<td>{$index}</td>
+					<td>{$user_details->getDisplayedFirstName()}</td>
+					<td>{$user_details->getLastName()}</td>
+					<td>{$user_details->getId()}</td>
+					<td>{$user_details->getEmail()}</td>
+				</tr>
+HTML;
+				$index++;
+			}
+			$return .= <<<HTML
+			</tbody>
+		</table>	
+	</div>
 </div>
 HTML;
     return $return;
