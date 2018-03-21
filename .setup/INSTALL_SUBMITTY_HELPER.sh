@@ -480,7 +480,6 @@ fi
 
 
 
-
 ################################################################################################################
 ################################################################################################################
 # GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
@@ -644,9 +643,18 @@ fi
 
 #############################################################
 # cleanup the TODO and DONE folders
+original_autograding_workers=/var/local/submitty/autograding_TODO/autograding_worker.json
+if [ -f $original_autograding_workers ]; then
+    temp_autograding_workers=`mktemp`
+    echo "save this file! ${original_autograding_workers} ${temp_autograding_workers}"
+    mv ${original_autograding_workers} ${temp_autograding_workers}
+fi
 
 rm -rf $SUBMITTY_DATA_DIR/autograding_TODO
 rm -rf $SUBMITTY_DATA_DIR/autograding_DONE
+
+
+
 
 # recreate the TODO and DONE folders
 mkdir -p $SUBMITTY_DATA_DIR/autograding_TODO
@@ -656,6 +664,11 @@ chown -R ${HWCRON_USER}:${HWCRON_GID} ${SUBMITTY_DATA_DIR}/autograding_DONE
 chmod 770 ${SUBMITTY_DATA_DIR}/autograding_TODO
 chmod 770 ${SUBMITTY_DATA_DIR}/autograding_DONE
 
+# return the autograding_workers json
+if [ -f "$temp_autograding_workers" ]; then
+    echo "return this file! ${temp_autograding_workers} ${original_autograding_workers}"
+    mv ${temp_autograding_workers} ${original_autograding_workers}
+fi
 
 #############################################################
 

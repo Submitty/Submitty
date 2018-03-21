@@ -18,6 +18,8 @@ import socket
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 NUM_GRADING_SCHEDULER_WORKERS_string = "__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__"
 NUM_GRADING_SCHEDULER_WORKERS_int    = int(NUM_GRADING_SCHEDULER_WORKERS_string)
+SUBMITTY_INSTALL_DIR= "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
+
 
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
@@ -73,7 +75,8 @@ def worker_process(which_machine,which_untrusted):
                 
 # ==================================================================================
 # ==================================================================================
-def launch_workers(num_workers):
+def launch_workers(my_name, my_stats):
+    num_workers = my_stats['num_autograding_workers']
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
@@ -131,9 +134,20 @@ def launch_workers(num_workers):
             processes[i].join()
 
     grade_items_logging.log_message(message="grade_scheduler.py terminated")
+# ==================================================================================
 
-
+def read_autograding_worker_json():
+    all_workers_json   = os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "autograding_workers.json")
+    try:
+        with open(all_workers_json, 'r') as infile:
+            name_and_stats = json.load(infile)
+            #grab the key and the value. NOTE: For now there should only ever be one pair.
+            name = list(name_and_stats.keys())[0]
+            stats = name_and_stats[name]
+    except Exception as e:
+        raise SystemExit("ERROR loading autograding_worker.json file: {0}".format(e))
+    return name, stats
 # ==================================================================================
 if __name__ == "__main__":
-    num_workers = NUM_GRADING_SCHEDULER_WORKERS_int
-    launch_workers(num_workers)
+    my_name, my_stats = read_autograding_worker_json()
+    launch_workers(my_name, my_stats)
