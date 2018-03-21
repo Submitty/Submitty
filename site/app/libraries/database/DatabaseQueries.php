@@ -1448,6 +1448,44 @@ WHERE gcm_id=?", $params);
     }
 
     /**
+     * Add ($g_id,$user_id) pair to table seeking_team
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function addToSeekingTeam($g_id,$user_id) {
+        $this->course_db->query("INSERT INTO seeking_team(g_id, user_id) VALUES (?,?)", array($g_id, $user_id));
+    }
+
+    /**
+     * Remove ($g_id,$user_id) pair from table seeking_team
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function removeFromSeekingTeam($g_id,$user_id) {
+        $this->course_db->query("DELETE FROM seeking_team WHERE g_id=? AND user_id=?", array($g_id, $user_id));
+    }
+
+    /**
+     * Return an array of user_id who are seeking team who passed gradeable_id
+     * @param string $g_id
+     * @return array $users_seeking_team
+     */
+    public function getUsersSeekingTeamByGradeableId($g_id) {
+        $this->course_db->query("
+          SELECT user_id
+          FROM seeking_team
+          WHERE g_id=?
+          ORDER BY user_id",
+            array($g_id));
+
+        $users_seeking_team = array();
+        foreach($this->course_db->rows() as $row) {
+            array_push($users_seeking_team,$row['user_id']);
+        }
+        return $users_seeking_team;
+    }
+
+    /**
      * Return array of counts of teams/users without team/graded components
      * corresponding to each registration/rotating section
      * @param string $g_id
