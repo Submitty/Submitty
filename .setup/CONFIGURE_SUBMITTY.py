@@ -70,6 +70,7 @@ AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
 
 # recommended names for special users & groups related to the SUBMITTY system
 HWPHP_USER = 'hwphp'
+HWPHP_GROUP = 'hwphp'
 HWCGI_USER = 'hwcgi'
 HWCRON_USER = 'hwcron'
 HWCRON_GROUP = 'hwcron'
@@ -306,35 +307,46 @@ os.chmod(CONFIGURATION_JSON, 0o500)
 
 CONF_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'conf')
 
-AUTHENTICATION_JSON = os.path.join(CONF_INSTALL_DIR, 'authentication_conf.json')
-DATABASE_JSON = os.path.join(CONF_INSTALL_DIR, 'database_conf.json')
-SUBMITTY_JSON = os.path.join(CONF_INSTALL_DIR, 'submitty_conf.json')
+DATABASE_JSON = os.path.join(CONF_INSTALL_DIR, 'database.json')
+PATHS_JSON = os.path.join(CONF_INSTALL_DIR, 'paths.json')
+SUBMITTY_JSON = os.path.join(CONF_INSTALL_DIR, 'submitty.json')
+USERS_JSON = os.path.join(CONF_INSTALL_DIR, 'users.json')
 WORKERS_JSON = os.path.join(CONF_INSTALL_DIR, 'autograding_workers.json')
 
 if os.path.isdir(CONF_INSTALL_DIR):
     shutil.rmtree(CONF_INSTALL_DIR)
 os.makedirs(CONF_INSTALL_DIR, exist_ok=True)
 shutil.chown(CONF_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
-os.chmod(CONF_INSTALL_DIR, 0o751)
+os.chmod(CONF_INSTALL_DIR, 0o755)
 
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/conf
 
-# Write protected details. This should be readable only by root + hwcron
+if not os.path.isfile(WORKERS_JSON):
+    worker_dict = {
+        "primary": {
+            "capabilities": ["default"],
+            "address": "",
+            "username": "",
+            "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS
+        }
+    }
+
+    with open(WORKERS_JSON, 'w') as workers_file:
+        json.dump(worker_dict, workers_file, indent=4)
+    shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
+    os.chmod(WORKERS_JSON, 0o440)
+
 config = OrderedDict()
 config['authentication_method'] = AUTHENTICATION_METHOD
-
-with open()
 config['database_host'] = DATABASE_HOST
 config['database_user'] = DATABASE_USER
 config['database_password'] = DATABASE_PASS
 config['debugging_enabled'] = DEBUGGING_ENABLED
 
-
 with open(DATABASE_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
-
-shutil.chown(DATABASE_JSON, 'root', HWCRON_GROUP)
+shutil.chown(DATABASE_JSON, HWPHP_USER, 'www-data')
 os.chmod(DATABASE_JSON, 0o440)
 
 config = OrderedDict()
@@ -342,58 +354,45 @@ config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
-config['hwphp_user'] = HWPHP_USER
-config['hwcgi_user'] = HWCGI_USER
-config['hwcron_user'] = HWCRON_USER
-config['hwcronphp_group'] = HWCRONPHP_GROUP
-config['course_builders_group'] = COURSE_BUILDERS_GROUP
-
-config['num_untrusted'] = NUM_UNTRUSTED
-config['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
-config['first_untrusted_gid'] = FIRST_UNTRUSTED_UID
-
-config['hwcron_uid'] = HWCRON_UID
-config['hwcron_gid'] = HWCRON_GID
-config['hwphp_uid'] = HWPHP_UID
-config['hwphp_gid'] = HWPHP_GID
-
+config['autograding_log_path'] = AUTOGRADING_LOG_PATH
+config['site_log_path'] = TAGRADING_LOG_PATH
 config['submission_url'] = SUBMISSION_URL
 config['vcs_url'] = VCS_URL
 config['tagrading_url'] = TAGRADING_URL
 config['cgi_url'] = CGI_URL
 
-config['autograding_log_path'] = AUTOGRADING_LOG_PATH
-config['site_log_path'] = TAGRADING_LOG_PATH
+with open(PATHS_JSON, 'w') as json_file:
+    json.dump(config, json_file, indent=2)
+os.chmod(PATHS_JSON, 0o444)
 
-config['num_grading_scheduler_workers'] = NUM_GRADING_SCHEDULER_WORKERS
-
+config = OrderedDict()
 config['institution_name'] = INSTITUTION_NAME
 config['username_change_text'] = USERNAME_TEXT
 config['institution_homepage'] = INSTITUTION_HOMEPAGE
 
 with open(SUBMITTY_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
-shutil.chown(SUBMITTY_JSON, 'root', COURSE_BUILDERS_GROUP)
-os.chmod(SUBMITTY_JSON, 0o440)
+os.chmod(SUBMITTY_JSON, 0o444)
 
-##############################################################################
-# WRITE THE WORKER CONF TO FILE
+config = OrderedDict()
+config['num_grading_scheduler_workers'] = NUM_GRADING_SCHEDULER_WORKERS
+config['num_untrusted'] = NUM_UNTRUSTED
+config['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
+config['first_untrusted_gid'] = FIRST_UNTRUSTED_UID
+config['hwcron_uid'] = HWCRON_UID
+config['hwcron_gid'] = HWCRON_GID
+config['hwphp_uid'] = HWPHP_UID
+config['hwphp_gid'] = HWPHP_GID
+config['hwphp_user'] = HWPHP_USER
+config['hwcgi_user'] = HWCGI_USER
+config['hwcron_user'] = HWCRON_USER
+config['hwcronphp_group'] = HWCRONPHP_GROUP
+config['course_builders_group'] = COURSE_BUILDERS_GROUP
 
-worker_dict = {}
-
-if os.path.isfile(WORKERS_JSON):
-    with open(WORKERS_JSON, 'r') as f:
-        worker_dict = json.load(f)
-else:
-    worker_dict["primary"] = {
-        "capabilities": ["default"],
-        "address": "",
-        "username": "",
-        "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS
-    }
-
-with open(WORKERS_JSON, 'w') as workers_file:
-    json.dump(worker_dict, workers_file, indent=4)
+with open(USERS_JSON, 'w') as json_file:
+    json.dump(config, json_file, indent=2)
+shutil.chown(DATABASE_JSON, 'root', HWCRON_GROUP)
+os.chmod(DATABASE_JSON, 0o440)
 
 ##############################################################################
 
