@@ -71,8 +71,8 @@ class AdminGradeable extends AbstractModel {
     protected $eg_subdirectory = "";
     /** @property @var bool Is this a team assignment */
     protected $eg_team_assignment = false;
-    /** @property @var int maximum allowed team size */
-    protected $eg_max_team_size = 1;
+    /** @property @var int maximum allowed team size, Minimum must be 2*/
+    protected $eg_max_team_size = 2;
     /** @property @var \DateTime Date when students cannot create/leave/join teams without instructor's help */
     protected $eg_team_lock_date;
     /** @property @var bool Is there any TA grading to be done for this gradeable (ie. any rubric questions) */
@@ -123,7 +123,7 @@ class AdminGradeable extends AbstractModel {
         $this->eg_submission_open_date = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
         $this->eg_submission_due_date = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
         $this->default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-        $this->vcs_base_url = ($this->core->getConfig()->getVcsBaseUrl() !== "") ? $this->core->getConfig()->getVcsBaseUrl() : "None specified.";
+        $this->vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->old_components = array(new GradeableComponent($this->core, array()));
     }
 

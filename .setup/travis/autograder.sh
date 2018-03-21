@@ -38,8 +38,20 @@ mv emma-2.0.5312/lib/emma.jar emma.jar
 rm -rf emma-2.0.5312
 rm emma-2.0.5312.zip
 rm index.html* > /dev/null 2>&1
-
 chmod o+r . *.jar
+
+# JaCoCo is a potential replacement for EMMA
+echo "Getting JaCoCo..."
+JACOCO_VER=0.8.0
+wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
+mkdir jacoco-${JACOCO_VER}
+unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
+mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
+mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
+rm -rf jacoco-${JACOCO_VER}
+rm jacoco-${JACOCO_VER}.zip
+chmod o+r . *.jar
+
 popd
 
 # --------------------------------------
@@ -71,5 +83,5 @@ echo -e "Compile and install the tutorial repository"
 git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
 # remember to change this version in .setup/install_system.sh too
-git checkout v0.93
+git checkout v0.94
 popd

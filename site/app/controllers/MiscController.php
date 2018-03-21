@@ -40,8 +40,9 @@ class MiscController extends AbstractController {
         }
         // from this point on, is not a zip
         // do path and permissions checking
-        $dir = $_REQUEST['dir'];
-        $path = $_REQUEST['path'];
+
+        $dir = $_GET['dir'];
+        $path = $_GET['path'];
 
         foreach (explode(DIRECTORY_SEPARATOR, $path) as $part) {
             if ($part == ".." || $part == ".") {
@@ -179,20 +180,21 @@ class MiscController extends AbstractController {
             return false;
         }
 
-        $mime_type = FileUtils::getMimeType($_REQUEST['path']);
+        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($_GET['path'])));
+        $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
-            header('Content-Disposition: inline; filename="' .  basename($_REQUEST['path']) . '"');
-            readfile($_REQUEST['path']);
+            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))) . '"');
+            readfile($corrected_name);
             $this->core->getOutput()->renderString($_REQUEST['path']);
         }
         else {
-            $contents = htmlentities(file_get_contents($_REQUEST['path']), ENT_SUBSTITUTE);
+            $contents = htmlentities(file_get_contents($corrected_name), ENT_SUBSTITUTE);
             if ($_REQUEST['ta_grading'] === "true") {
-                $filename = htmlentities($_REQUEST['file'], ENT_SUBSTITUTE);
-                $this->core->getOutput()->renderOutput('Misc', 'displayCode', $mime_type, $filename, $contents);
+                $filename = htmlentities($corrected_name, ENT_SUBSTITUTE);
+                $this->core->getOutput()->renderOutput('Misc', 'displayCode', $mime_type, $corrected_name, $contents);
             }
             else {
                 $this->core->getOutput()->renderOutput('Misc', 'displayFile', $contents);
@@ -210,12 +212,14 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
         
+        $filename = rawurldecode(htmlspecialchars_decode($_REQUEST['file']));
+
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
-        header("Content-disposition: attachment; filename=\"{$_REQUEST['file']}\"");
-        readfile($_REQUEST['path']);
+        header("Content-disposition: attachment; filename=\"{$filename}\"");
+        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
     }
 
     private function downloadZip() {
