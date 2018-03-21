@@ -351,10 +351,11 @@ def launch_shippers():
 
     grade_items_logging.log_message(message="grade_scheduler.py launched")
 
+    # Clean up old files from previous shipping/autograding (any
+    # partially completed work will be re-done)
     for file_path in glob.glob(os.path.join(INTERACTIVE_QUEUE, "GRADING_*")):
         grade_items_logging.log_message(message="Remove old queue file: " + file_path)
         os.remove(file_path)
-
     for file_path in glob.glob(os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO","*")):
         grade_items_logging.log_message(message="Remove autograding TODO file: " + file_path)
         os.remove(file_path)
@@ -362,16 +363,12 @@ def launch_shippers():
         grade_items_logging.log_message(message="Remove autograding DONE file: " + file_path)
         os.remove(file_path)
 
-    # prepare a list of untrusted users to be used by the shippers
-    #untrusted_users = multiprocessing.Queue()
-    #TODO: unused???
-    #for i in range(num_workers):
-    #    untrusted_users.put("untrusted" + str(i).zfill(2))
-
     # this lock will be used to edit the queue or new job event
     overall_lock = multiprocessing.Lock()
 
-    # grab the grading autograding_workers json
+    # The names of the worker machines, the capabilities of each
+    # worker machine, and the number of workers per machine are stored
+    # in the autograding_workers json.
     try:
         autograding_workers_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "autograding_workers.json")
         with open(autograding_workers_path, 'r') as infile:
@@ -379,26 +376,35 @@ def launch_shippers():
     except Exception as e:
         raise SystemExit("ERROR: could not locate the autograding workers json: {0}".format(e))
 
+    # There must always be a primary machine, it may or may not have
+    # autograding workers.
     if not "primary" in autograding_workers:
         raise SystemExit("ERROR: autograding_workers.json contained no primary machine.")
 
+    # One (or more) of the machines must accept "default" jobs.
     default_present = False
     for name, machine in autograding_workers.items():
         if "default" in machine["capabilities"]:
             default_present = True
             break
-
     if not default_present:
         raise SystemExit("ERROR: autograding_workers.json contained no machine with default capabilities")
 
+    # Launch a shipper process for every work on the primary machine and each worker machine
     total_num_workers = 0
     processes = list()
     for name, machine in autograding_workers.items():
         try:
             which_machine=machine["address"]
             if which_machine != "localhost":
+                if machine["username"] == "":
+                    raise SystemExit("ERROR: empty username for worker machine '" + which_machine + "'")
                 which_machine = "{0}@{1}".format(machine["username"], machine["address"])
+            elif not machine["username"] == "":
+                Raise('ERROR: username for primary (localhost) must be ""')
             num_workers_on_machine = machine["num_autograding_workers"]
+            if num_workers_on_machine < 0:
+                raise SystemExit("ERROR: num_workers_on_machine for '" + which_machine + "' must be non-negative.")
             my_capabilities = machine["capabilities"]
         except Exception as e:
             print("ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name, e))
@@ -422,8 +428,8 @@ def launch_shippers():
                 else:
                     grade_items_logging.log_message(message="ERROR: process "+str(i)+" is not alive")
             if alive != total_num_workers:
-                grade_items_logging.log_message(message="ERROR: #shippers="+str(num_workers)+" != #alive="+str(alive))
-            #print ("shippers= ",num_workers,"  alive=",alive)
+                grade_items_logging.log_message(message="ERROR: #shippers="+str(total_num_workers)+" != #alive="+str(alive))
+            #print ("shippers= ",total_num_workers,"  alive=",alive)
             time.sleep(1)
 
     except KeyboardInterrupt:
@@ -439,10 +445,10 @@ def launch_shippers():
         # but this was mostly working...
 
         # terminate the jobs
-        for i in range(0,num_workers):
+        for i in range(0,total_num_workers):
             processes[i].terminate()
         # wait for them to join
-        for i in range(0,num_workers):
+        for i in range(0,total_num_workers):
             processes[i].join()
 
     grade_items_logging.log_message(message="grade_scheduler.py terminated")
