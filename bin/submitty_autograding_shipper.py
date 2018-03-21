@@ -393,7 +393,6 @@ def launch_shippers():
 
     total_num_workers = 0
     processes = list()
-    my_untrusted = 0
     for name, machine in autograding_workers.items():
         try:
             which_machine=machine["address"]
@@ -407,8 +406,7 @@ def launch_shippers():
             continue
         # launch the shipper threads
         for i in range(0,num_workers_on_machine):
-            u = "untrusted" + str(my_untrusted).zfill(2)
-            my_untrusted += 1
+            u = "untrusted" + str(i).zfill(2)
             p = multiprocessing.Process(target=shipper_process,args=(which_machine,my_capabilities,u,overall_lock))
             p.start()
             processes.append(p)
