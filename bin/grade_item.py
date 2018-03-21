@@ -356,7 +356,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     shutil.rmtree(tmp_submission)
     shutil.rmtree(tmp)
 
-    grade_items_logging.log_message(is_batch_job,"done zip",item_name)
+    #grade_items_logging.log_message(is_batch_job,"done zip",item_name)
 
     return (my_autograding_zip_file,my_submission_zip_file)
 

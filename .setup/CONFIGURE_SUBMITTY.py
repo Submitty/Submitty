@@ -75,12 +75,11 @@ if not args.headless:
         grp.getgrnam(HWCRONPHP_GROUP)
     except KeyError:
         raise SystemExit("ERROR: Could not find group: " + HWCRONPHP_GROUP)
-
-    COURSE_BUILDERS_GROUP = 'course_builders'
-    try:
-        grp.getgrnam(COURSE_BUILDERS_GROUP)
-    except KeyError:
-        raise SystemExit("ERROR: Could not find group: " + COURSE_BUILDERS_GROUP)
+COURSE_BUILDERS_GROUP = 'course_builders'
+try:
+    grp.getgrnam(COURSE_BUILDERS_GROUP)
+except KeyError:
+    raise SystemExit("ERROR: Could not find group: " + COURSE_BUILDERS_GROUP)
 
 ##############################################################################
 
@@ -221,20 +220,20 @@ if os.path.isfile(WORKERS_JSON):
     with open(WORKERS_JSON, 'r') as f:
         worker_dict = json.load(f)
 else:
-    worker_dict["primary"] = {"capabilities" : ["default"], "address" : "", "username" : "",
+    worker_dict["primary"] = {"capabilities" : ["default"], "address" : "localhost", "username" : "",
         "num_autograding_workers" : NUM_GRADING_SCHEDULER_WORKERS}
 
 if os.path.isdir(SETUP_INSTALL_DIR):
     shutil.rmtree(SETUP_INSTALL_DIR)
 os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
 
-if not args.headless:
-    shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
+shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(SETUP_INSTALL_DIR, 0o751)
 
 with open(WORKERS_JSON, 'w') as workers_file:
     json.dump(worker_dict, workers_file, indent=4)
 
+shutil.chown(WORKERS_JSON, 'root', HWCRON_GID)
 
 ##############################################################################
 # WRITE THE VARIABLES TO A FILE
@@ -250,7 +249,8 @@ if not args.headless:
     obj['hwphp_user'] = HWPHP_USER
     obj['hwcgi_user'] = HWCGI_USER
     obj['hwcronphp_group'] = HWCRONPHP_GROUP
-    obj['course_builders_group'] = COURSE_BUILDERS_GROUP
+
+obj['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 obj['hwcron_user'] = HWCRON_USER
 

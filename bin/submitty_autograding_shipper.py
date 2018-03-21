@@ -15,17 +15,19 @@ import multiprocessing
 from submitty_utils import dateutils, glob
 import operator
 import paramiko
-
+import tempfile 
 # ==================================================================================
 # these variables will be replaced by INSTALL_SUBMITTY.sh
-NUM_GRADING_SCHEDULER_WORKERS_string = "__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__"
-NUM_GRADING_SCHEDULER_WORKERS_int    = int(NUM_GRADING_SCHEDULER_WORKERS_string)
+
+# NOTE: DEPRECATED
+# NUM_GRADING_SCHEDULER_WORKERS_string = "__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__"
+# NUM_GRADING_SCHEDULER_WORKERS_int    = int(NUM_GRADING_SCHEDULER_WORKERS_string)
 
 AUTOGRADING_LOG_PATH="__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
+SUBMITTY_INSTALL_DIR= "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
-
 # ==================================================================================
 def initialize(untrusted_queue):
     """
@@ -187,8 +189,7 @@ def grade_queue_file(which_machine,which_untrusted,queue_file):
     grading_file = os.path.join(directory, "GRADING_" + name)
 
     #TODO: breach which_machine into id, address, and passphrase.
-    which_machine="localhost"
-
+    
     try:
         # prepare the job
         shipper_counter=0
@@ -227,7 +228,7 @@ def grade_queue_file(which_machine,which_untrusted,queue_file):
 
 
 # ==================================================================================
-def get_job(which_machine,which_untrusted,overall_lock):
+def get_job(which_machine,my_capabilities,which_untrusted,overall_lock):
     """
     Picks a job from the queue
 
@@ -272,6 +273,11 @@ def get_job(which_machine,which_untrusted,overall_lock):
         except:
             continue
 
+        #Check to make sure that we are capable of grading this submission
+        required_capabilities = queue_obj["required_capabilities"]
+        if not required_capabilities in my_capabilities:
+            continue
+
         # prioritize interactive jobs over (batch) regrades
         # if you've found an interactive job, exit early (since they are sorted by timestamp)
         if not "regrade" in queue_obj or not queue_obj["regrade"]:
@@ -302,7 +308,7 @@ def get_job(which_machine,which_untrusted,overall_lock):
 
 # ==================================================================================
 # ==================================================================================
-def shipper_process(which_machine,which_untrusted,overall_lock):
+def shipper_process(which_machine,my_capabilities,which_untrusted,overall_lock):
     """
     Each shipper process spins in a loop, looking for a job that
     matches the capabilities of this machine, and then oversees the
@@ -318,7 +324,7 @@ def shipper_process(which_machine,which_untrusted,overall_lock):
 
     try:
         while True:
-            my_job = get_job(which_machine,which_untrusted,overall_lock)
+            my_job = get_job(which_machine,my_capabilities,which_untrusted,overall_lock)
             if not my_job == "":
                 counter=0
                 grade_queue_file(which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job))
@@ -337,7 +343,7 @@ def shipper_process(which_machine,which_untrusted,overall_lock):
 
 # ==================================================================================
 # ==================================================================================
-def launch_shippers(num_workers):
+def launch_shippers():
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
@@ -345,10 +351,11 @@ def launch_shippers(num_workers):
 
     grade_items_logging.log_message(message="grade_scheduler.py launched")
 
+    # Clean up old files from previous shipping/autograding (any
+    # partially completed work will be re-done)
     for file_path in glob.glob(os.path.join(INTERACTIVE_QUEUE, "GRADING_*")):
         grade_items_logging.log_message(message="Remove old queue file: " + file_path)
         os.remove(file_path)
-
     for file_path in glob.glob(os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO","*")):
         grade_items_logging.log_message(message="Remove autograding TODO file: " + file_path)
         os.remove(file_path)
@@ -356,41 +363,77 @@ def launch_shippers(num_workers):
         grade_items_logging.log_message(message="Remove autograding DONE file: " + file_path)
         os.remove(file_path)
 
-    # prepare a list of untrusted users to be used by the shippers
-    untrusted_users = multiprocessing.Queue()
-    for i in range(num_workers):
-        untrusted_users.put("untrusted" + str(i).zfill(2))
-
     # this lock will be used to edit the queue or new job event
     overall_lock = multiprocessing.Lock()
 
-    which_machine="localhost"
+    # The names of the worker machines, the capabilities of each
+    # worker machine, and the number of workers per machine are stored
+    # in the autograding_workers json.
+    try:
+        autograding_workers_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "autograding_workers.json")
+        with open(autograding_workers_path, 'r') as infile:
+            autograding_workers = json.load(infile)
+    except Exception as e:
+        raise SystemExit("ERROR: could not locate the autograding workers json: {0}".format(e))
 
-    # launch the shipper threads
+    # There must always be a primary machine, it may or may not have
+    # autograding workers.
+    if not "primary" in autograding_workers:
+        raise SystemExit("ERROR: autograding_workers.json contained no primary machine.")
+
+    # One (or more) of the machines must accept "default" jobs.
+    default_present = False
+    for name, machine in autograding_workers.items():
+        if "default" in machine["capabilities"]:
+            default_present = True
+            break
+    if not default_present:
+        raise SystemExit("ERROR: autograding_workers.json contained no machine with default capabilities")
+
+    # Launch a shipper process for every work on the primary machine and each worker machine
+    total_num_workers = 0
     processes = list()
-    for i in range(0,num_workers):
-        u = "untrusted" + str(i).zfill(2)
-        p = multiprocessing.Process(target=shipper_process,args=(which_machine,u,overall_lock))
-        p.start()
-        processes.append(p)
+    for name, machine in autograding_workers.items():
+        try:
+            which_machine=machine["address"]
+            if which_machine != "localhost":
+                if machine["username"] == "":
+                    raise SystemExit("ERROR: empty username for worker machine '" + which_machine + "'")
+                which_machine = "{0}@{1}".format(machine["username"], machine["address"])
+            elif not machine["username"] == "":
+                Raise('ERROR: username for primary (localhost) must be ""')
+            num_workers_on_machine = machine["num_autograding_workers"]
+            if num_workers_on_machine < 0:
+                raise SystemExit("ERROR: num_workers_on_machine for '" + which_machine + "' must be non-negative.")
+            my_capabilities = machine["capabilities"]
+        except Exception as e:
+            print("ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name, e))
+            grade_items_logging.log_message(message="ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name,e))
+            continue
+        # launch the shipper threads
+        for i in range(0,num_workers_on_machine):
+            u = "untrusted" + str(i).zfill(2)
+            p = multiprocessing.Process(target=shipper_process,args=(which_machine,my_capabilities,u,overall_lock))
+            p.start()
+            processes.append(p)
+        total_num_workers += num_workers_on_machine
 
     # main monitoring loop
     try:
         while True:
             alive = 0
-            for i in range(0,num_workers):
+            for i in range(0,total_num_workers):
                 if processes[i].is_alive:
                     alive = alive+1
                 else:
                     grade_items_logging.log_message(message="ERROR: process "+str(i)+" is not alive")
-            if alive != num_workers:
-                grade_items_logging.log_message(message="ERROR: #shippers="+str(num_workers)+" != #alive="+str(alive))
-            #print ("shippers= ",num_workers,"  alive=",alive)
+            if alive != total_num_workers:
+                grade_items_logging.log_message(message="ERROR: #shippers="+str(total_num_workers)+" != #alive="+str(alive))
+            #print ("shippers= ",total_num_workers,"  alive=",alive)
             time.sleep(1)
 
     except KeyboardInterrupt:
         grade_items_logging.log_message(message="grade_scheduler.py keyboard interrupt")
-
         # just kill everything in this group id right now
         # NOTE:  this may be a bug if the grandchildren have a different group id and not be killed
         os.kill(-os.getpid(), signal.SIGKILL)
@@ -402,10 +445,10 @@ def launch_shippers(num_workers):
         # but this was mostly working...
 
         # terminate the jobs
-        for i in range(0,num_workers):
+        for i in range(0,total_num_workers):
             processes[i].terminate()
         # wait for them to join
-        for i in range(0,num_workers):
+        for i in range(0,total_num_workers):
             processes[i].join()
 
     grade_items_logging.log_message(message="grade_scheduler.py terminated")
@@ -413,5 +456,4 @@ def launch_shippers(num_workers):
 
 # ==================================================================================
 if __name__ == "__main__":
-    num_workers = NUM_GRADING_SCHEDULER_WORKERS_int
-    launch_shippers(num_workers)
+    launch_shippers()

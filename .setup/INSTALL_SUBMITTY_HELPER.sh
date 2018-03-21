@@ -132,11 +132,8 @@ export HEADLESS=1
 
 
 # set the permissions of the top level directory
-if [ ${HEADLESS} == 0 ]; then
-
 chown  root:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_INSTALL_DIR}
 chmod  751                            ${SUBMITTY_INSTALL_DIR}
-fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -301,10 +298,9 @@ echo -e "Copy the scripts"
 
 # make the directory (has a different name)
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
-if [ ${HEADLESS} == 0 ]; then
+
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin
 chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
-fi
 
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
@@ -334,7 +330,6 @@ echo -e "EVAN: 1"
 # all course builders (instructors & head TAs) need read/execute access to these scripts
 chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 
-if [ ${HEADLESS} == 0 ]; then
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
@@ -351,7 +346,6 @@ chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_
 chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
-fi
 
 echo -e "EVAN: 2"
 
@@ -396,9 +390,7 @@ g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INST
 # set the permissions
 echo -e "EVAN: 5"
 
-if [ ${HEADLESS} == 0 ]; then
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
-fi
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 
 
@@ -582,9 +574,7 @@ popd
 #fi
 
 # change permissions
-if [ ${HEADLESS} == 0 ]; then
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-fi
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #copying commonAST scripts 
