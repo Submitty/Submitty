@@ -20,6 +20,8 @@ def log_message(is_batch=False,which_untrusted="",jobname="",timelabel="",elapse
     my_pid = os.getpid()
     parent_pid = os.getppid()
     batch_string = "BATCH" if is_batch else ""
+    if elapsed_time == "":
+        elapsed_time = -1
     elapsed_time_string = "" if elapsed_time<0 else '{:9.3f}'.format(elapsed_time)
     time_unit = "" if elapsed_time<0 else "sec"
     with open(autograding_log_file,'a') as myfile:

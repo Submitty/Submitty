@@ -53,9 +53,7 @@ else
     export HEADLESS=0
 fi
 
-if [ ${HEADLESS} == 0 ]; then
-    COURSE_BUILDERS_GROUP=course_builders
-fi
+COURSE_BUILDERS_GROUP=course_builders
 
 #################################################################
 # DISTRO SETUP
@@ -100,9 +98,7 @@ addgroup hwcronphp
 # The group course_builders allows instructors/head TAs/course
 # managers to write website custimization files and run course
 # management scripts.
-if [ ${HEADLESS} == 0 ]; then
 addgroup ${COURSE_BUILDERS_GROUP}
-fi
 
 if [ ${VAGRANT} == 1 ]; then
 	adduser vagrant sudo
@@ -258,10 +254,8 @@ tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
 mv /tmp/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 
-#Evan: Remove the course builders group
-if [ ${HEADLESS} == 0 ]; then
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
-fi
+
 
 chmod 755 ${SUBMITTY_INSTALL_DIR}/drmemory
 

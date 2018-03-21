@@ -75,12 +75,11 @@ if not args.headless:
         grp.getgrnam(HWCRONPHP_GROUP)
     except KeyError:
         raise SystemExit("ERROR: Could not find group: " + HWCRONPHP_GROUP)
-
-    COURSE_BUILDERS_GROUP = 'course_builders'
-    try:
-        grp.getgrnam(COURSE_BUILDERS_GROUP)
-    except KeyError:
-        raise SystemExit("ERROR: Could not find group: " + COURSE_BUILDERS_GROUP)
+COURSE_BUILDERS_GROUP = 'course_builders'
+try:
+    grp.getgrnam(COURSE_BUILDERS_GROUP)
+except KeyError:
+    raise SystemExit("ERROR: Could not find group: " + COURSE_BUILDERS_GROUP)
 
 ##############################################################################
 
@@ -132,7 +131,8 @@ loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
     with open(CONFIGURATION_JSON) as conf_file:
         loaded_defaults = json.load(conf_file)
-    loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
+    if not args.headless:
+        loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
 
 # grab anything not loaded in (useful for backwards compatibility if a new default is added that 
 # is not in an existing config file.)
@@ -227,8 +227,7 @@ if os.path.isdir(SETUP_INSTALL_DIR):
     shutil.rmtree(SETUP_INSTALL_DIR)
 os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
 
-if not args.headless:
-    shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
+shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(SETUP_INSTALL_DIR, 0o751)
 
 with open(WORKERS_JSON, 'w') as workers_file:
@@ -249,7 +248,8 @@ if not args.headless:
     obj['hwphp_user'] = HWPHP_USER
     obj['hwcgi_user'] = HWCGI_USER
     obj['hwcronphp_group'] = HWCRONPHP_GROUP
-    obj['course_builders_group'] = COURSE_BUILDERS_GROUP
+
+obj['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 obj['hwcron_user'] = HWCRON_USER
 
