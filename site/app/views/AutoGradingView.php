@@ -423,5 +423,29 @@ HTML;
 HTML;
         return $return;
     }
-
+    public function showTAResults(Gradeable $gradeable){
+        $current_version = $gradeable->getCurrentVersion();
+        $return = <<<HTML
+        <div>
+            <h4>Graded by : </h4>
+        </div>
+        <h3>TA Grading Subtotal</h3>
+        <div class = "sub">
+HTML;
+        foreach ($gradeable->getComponents() as $component) {
+            $return .= <<<HTML
+            var_dump($component);
+            <div class="box" style="display: 2;">
+                <div class="box-title">
+                    <span class="badge">{$component->getScore()} / {$component->getMaxValue()}</span>
+                    <h4>{$component->getTitle()}</h4>
+                </div>
+            </div>
+HTML;
+        }
+        $return .= <<<HTML
+        </div>
+HTML;
+    return $return;
+    }
 }

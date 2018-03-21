@@ -1003,8 +1003,8 @@ HTML;
             if ($gradeable->hasGradeFile()) {
                 $return .= <<<HTML
     <h3 class="label">TA grade</h3>
-    <pre>{$gradeable->getGradeFile()}</pre>
 HTML;
+    $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults', $gradeable);
             } else {
                 $return .= <<<HTML
     <h3 class="label">TA grade not available</h3>
