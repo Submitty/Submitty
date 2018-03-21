@@ -351,22 +351,6 @@ HTML;
 	    </script>
 HTML;
 
-if(isset($_SESSION["post_content"]) && isset($_SESSION["post_recover_active"])){
-			
-	$post_content = html_entity_decode($_SESSION["post_content"]);
-
-	$return .= <<<HTML
-			<script>
-				var contentBox = document.getElementById('post_content');
-				contentBox.innerHTML = `{$post_content}`;
-				document.getElementById('file_input').value = null;
-				var box = $('.posts_list');
-				box.scrollTop(box.prop('scrollHeight'));
-			</script>
-HTML;
-		$_SESSION["post_recover_active"] = null;
-}
-
 		return $return;
 	}
 
@@ -425,7 +409,7 @@ HTML;
                         		$decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
                         		$parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
                         		if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
-                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . $decoded_url . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
+                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
 
                         		} else {
                         			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
@@ -625,22 +609,6 @@ HTML;
 		</div>
 HTML;
 
-if(isset($_SESSION["thread_title"]) && isset($_SESSION["thread_content"]) && isset($_SESSION["thread_recover_active"])){
-	$title = html_entity_decode($_SESSION["thread_title"]);
-			
-	$thread_content = html_entity_decode($_SESSION["thread_content"]);
-
-	$return .= <<<HTML
-			<script>
-				var titleBox = document.getElementById('title');
-				titleBox.value = `{$title}`;
-				var contentBox = document.getElementById('thread_content');
-				contentBox.innerHTML = `{$thread_content}`;
-				document.getElementById('file_input').value = null;
-			</script>
-HTML;
-		unset($_SESSION["thread_recover_active"]);
-}
 		return $return;
 	}
 
