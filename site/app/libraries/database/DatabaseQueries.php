@@ -112,18 +112,17 @@ class DatabaseQueries {
         return $this->course_db->rows();
     }
 
-    public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment){
-        $parent_post = -1;
-        if(!$first){
-            $this->course_db->query("SELECT id FROM posts where timestamp = (SELECT MAX(timestamp) from posts where thread_id = ? and deleted=false)", array($thread_id));
+    public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $parent_post = -1){
+        if(!$first && $parent_post == 0){
+            $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", array($thread_id));
             $parent_post = $this->course_db->rows()[0]["id"];
         }
 
         try {
-        $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, 0, $type, $hasAttachment));
-        $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = ?", array($thread_id));
-        //retrieve generated thread_id
-        $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
+            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, 0, $type, $hasAttachment));
+            $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = ?", array($thread_id));
+            //retrieve generated thread_id
+            $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
         } catch (DatabaseException $dbException){
             if($this->course_db->inTransaction()){
                 $this->course_db->rollback();
@@ -176,24 +175,33 @@ class DatabaseQueries {
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($onOff, $thread_id));
     }
 
+
+    private function findChildren($post_id, $thread_id, &$children){
+        $this->course_db->query("SELECT id from posts where deleted=false and parent_id=?", array($post_id));
+        $row = $this->course_db->rows();
+        for($i = 0; $i < count($row); $i++){
+            $child_id = $row[$i]["id"];
+            array_push($children, $child_id);
+            $this->findChildren($child_id, $thread_id, $children);
+        }
+    }
+
     public function deletePost($post_id, $thread_id){
         $this->course_db->query("SELECT parent_id from posts where id=?", array($post_id));
 
         //If you delete the first post in a thread it deletes all posts in thread
 
         $parent_id = $this->course_db->rows()[0]["parent_id"];
-
+        $children = array($post_id);
+        $this->findChildren($post_id, $thread_id, $children);
         if($parent_id == -1){
             $this->course_db->query("UPDATE threads SET deleted = true WHERE id = ?", array($thread_id));
             $this->course_db->query("UPDATE posts SET deleted = true WHERE thread_id = ?", array($thread_id));
             return true;
         } else {
-            $this->course_db->query("SELECT id from posts where parent_id = ?", array($post_id));
-            $row = $this->course_db->rows();
-            if(count($row) > 0){
-                $this->course_db->query("UPDATE posts SET parent_id = ? WHERE id = ?", array($parent_id, $row[0]["id"]));
+            foreach($children as $post_id){
+                $this->course_db->query("UPDATE posts SET deleted = true WHERE id = ?", array($post_id));
             }
-            $this->course_db->query("UPDATE posts SET deleted = true WHERE id = ?", array($post_id));
         } return false;
     }
 
@@ -1437,6 +1445,44 @@ WHERE gcm_id=?", $params);
         }
 
         return $teams;
+    }
+
+    /**
+     * Add ($g_id,$user_id) pair to table seeking_team
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function addToSeekingTeam($g_id,$user_id) {
+        $this->course_db->query("INSERT INTO seeking_team(g_id, user_id) VALUES (?,?)", array($g_id, $user_id));
+    }
+
+    /**
+     * Remove ($g_id,$user_id) pair from table seeking_team
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function removeFromSeekingTeam($g_id,$user_id) {
+        $this->course_db->query("DELETE FROM seeking_team WHERE g_id=? AND user_id=?", array($g_id, $user_id));
+    }
+
+    /**
+     * Return an array of user_id who are seeking team who passed gradeable_id
+     * @param string $g_id
+     * @return array $users_seeking_team
+     */
+    public function getUsersSeekingTeamByGradeableId($g_id) {
+        $this->course_db->query("
+          SELECT user_id
+          FROM seeking_team
+          WHERE g_id=?
+          ORDER BY user_id",
+            array($g_id));
+
+        $users_seeking_team = array();
+        foreach($this->course_db->rows() as $row) {
+            array_push($users_seeking_team,$row['user_id']);
+        }
+        return $users_seeking_team;
     }
 
     /**
