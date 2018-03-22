@@ -415,7 +415,7 @@ def shipper_process(my_name, which_machine,my_capabilities,which_untrusted,overa
                 time.sleep(1)
 
         except Exception as e:
-            my_message = "ERROR in get_job " + which_machine + " " + which_untrusted + " " str(e)
+            my_message = "ERROR in get_job " + which_machine + " " + which_untrusted + " " + str(e)
             print (my_message)
             grade_items_logging.log_message(message=my_message)
             time.sleep(1)
