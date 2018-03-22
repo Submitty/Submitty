@@ -26,7 +26,7 @@ HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 
 # ==================================================================================
 # ==================================================================================
-def worker_process(which_machine,which_untrusted,my_server):
+def worker_process(which_machine,address,which_untrusted,my_server):
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
@@ -37,7 +37,7 @@ def worker_process(which_machine,which_untrusted,my_server):
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     counter = 0
 
-    servername_workername = "{0}_{1}".format(my_server, which_machine)
+    servername_workername = "{0}_{1}".format(my_server, address)
     autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
     submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_submission.zip")
     todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_queue.json")
@@ -95,15 +95,16 @@ def launch_workers(my_name, my_stats):
         untrusted_users.put("untrusted" + str(i).zfill(2))
 
     # launch the worker threads
-    if my_stats['address'] != 'localhost':
-        which_machine="{0}@{1}".format(my_stats['username'], my_stats['address'])
+    address = my_stats['address']
+    if address != 'localhost':
+        which_machine="{0}@{1}".format(my_stats['username'], address)
     else:
-        which_machine = my_stats['address']
+        which_machine = address
     my_server=my_stats['server_name']
     processes = list()
     for i in range(0,num_workers):
         u = "untrusted" + str(i).zfill(2)
-        p = multiprocessing.Process(target=worker_process,args=(which_machine,u,my_server))
+        p = multiprocessing.Process(target=worker_process,args=(which_machine,address,u,my_server))
         p.start()
         processes.append(p)
 
