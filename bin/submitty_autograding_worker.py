@@ -26,7 +26,7 @@ HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 
 # ==================================================================================
 # ==================================================================================
-def worker_process(which_machine,which_untrusted):
+def worker_process(which_machine,which_untrusted,my_server):
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
@@ -36,17 +36,18 @@ def worker_process(which_machine,which_untrusted):
     # ignore keyboard interrupts in the worker processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     counter = 0
-    
-    autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_autograding.zip")
-    submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_submission.zip")
-    todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_queue.json")
+
+    servername_workername = "{0}_{1}".format(my_server, which_machine)
+    autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
+    submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_submission.zip")
+    todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_queue.json")
 
     while True:
         if os.path.exists(todo_queue_file):
             try:
                 results_zip_tmp = grade_item.grade_from_zip(autograding_zip,submission_zip,which_untrusted)
-                results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_results.zip")
-                done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_queue.json")
+                results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_results.zip")
+                done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_queue.json")
                 #move doesn't inherit the permissions of the destination directory. Copyfile does.
                 shutil.copyfile(results_zip_tmp, results_zip)
                 os.remove(results_zip_tmp)
@@ -90,11 +91,15 @@ def launch_workers(my_name, my_stats):
         untrusted_users.put("untrusted" + str(i).zfill(2))
 
     # launch the worker threads
-    which_machine=socket.gethostname()
+    if my_stats['address'] != 'localhost':
+        which_machine="{0}@{1}".format(my_stats['username'], my_stats['address'])
+    else:
+        which_machine = my_stats['address']
+    my_server=my_stats['server_name']
     processes = list()
     for i in range(0,num_workers):
         u = "untrusted" + str(i).zfill(2)
-        p = multiprocessing.Process(target=worker_process,args=(which_machine,u))
+        p = multiprocessing.Process(target=worker_process,args=(which_machine,u,my_server))
         p.start()
         processes.append(p)
 

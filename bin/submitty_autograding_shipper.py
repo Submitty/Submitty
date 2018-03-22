@@ -15,7 +15,8 @@ import multiprocessing
 from submitty_utils import dateutils, glob
 import operator
 import paramiko
-import tempfile 
+import tempfile
+import socket
 # ==================================================================================
 # these variables will be replaced by INSTALL_SUBMITTY.sh
 
@@ -47,11 +48,13 @@ def update_all_foreign_autograding_workers():
         with open(all_workers_json, 'r') as infile:
             autograding_workers = json.load(infile)
     except FileNotFoundError as e:
-        raise SystemExit("ERROR, could not locate autograding_workers_json.")
+        raise SystemExit("ERROR, could not locate autograding_workers_json :", e)
 
     for key, value in autograding_workers.items():
         formatted_entry = {}
         formatted_entry[key] = value
+        server_name = socket.getfqdn()
+        formatted_entry[key]['server_name']=server_name
         update_foreign_autograding_worker_json(key, formatted_entry)
 
 # ==================================================================================
@@ -76,8 +79,6 @@ def update_foreign_autograding_worker_json(name, entry):
     if host == "localhost":
         try:
             shutil.move(tmp_json_path,foreign_json)
-            with open(foreign_json, 'r') as infile:
-                thing = json.load(infile)
             print("Successfully updated local autograding_TODO/autograding_worker.json")
             grade_items_logging.log_message(message="Successfully updated local autograding_TODO/autograding_worker.json")
         except Exception as e:
@@ -119,9 +120,11 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
     # prepare the zip files
     try:
         autograding_zip_tmp,submission_zip_tmp = grade_item.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
-        autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_autograding.zip")
-        submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_submission.zip")
-        todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",which_untrusted+"_queue.json")
+        fully_qualified_domain_name = socket.getfqdn()
+        servername_workername = "{0}_{1}".format(fully_qualified_domain_name, which_machine)
+        autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
+        submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_submission.zip")
+        todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_queue.json")
 
         with open(next_to_grade, 'r') as infile:
             queue_obj = json.load(infile)
@@ -179,8 +182,10 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         grade_items_logging.log_message(message="ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
-    target_results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_results.zip")
-    target_done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",which_untrusted+"_queue.json")
+    fully_qualified_domain_name = socket.getfqdn()
+    servername_workername = "{0}_{1}".format(fully_qualified_domain_name, which_machine)
+    target_results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_results.zip")
+    target_done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_queue.json")
 
     if which_machine == "localhost":
         if not os.path.exists(target_done_queue_file):
