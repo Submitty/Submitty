@@ -322,8 +322,8 @@ def shipper_process(which_machine,my_capabilities,which_untrusted,overall_lock):
 
     counter=0
 
-    try:
-        while True:
+    while True:
+        try:
             my_job = get_job(which_machine,my_capabilities,which_untrusted,overall_lock)
             if not my_job == "":
                 counter=0
@@ -336,9 +336,11 @@ def shipper_process(which_machine,my_capabilities,which_untrusted,overall_lock):
                 counter+=1
                 time.sleep(1)
 
-    except Exception as e:
-        print ("ERROR exiting shipper exception=",e)
-        grade_items_logging.log_message(message="ERROR: exiting shipper exception="+str(e))
+        except Exception as e:
+            my_message = "ERROR in get_job " + which_machine + " " + which_untrusted + " " str(e)
+            print (my_message)
+            grade_items_logging.log_message(message=my_message)
+            time.sleep(1)
 
 
 # ==================================================================================
