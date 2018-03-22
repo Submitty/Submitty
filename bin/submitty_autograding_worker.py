@@ -141,7 +141,7 @@ def launch_workers(my_name, my_stats):
 # ==================================================================================
 
 def read_autograding_worker_json():
-    all_workers_json   = os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "autograding_workers.json")
+    all_workers_json   = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO", "autograding_worker.json")
     try:
         with open(all_workers_json, 'r') as infile:
             name_and_stats = json.load(infile)
