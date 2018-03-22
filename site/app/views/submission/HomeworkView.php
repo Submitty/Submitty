@@ -73,26 +73,26 @@ HTML;
         $late_days_remaining = $late_days_data['remaining_days'];
         $days_late = $gradeable->getActiveDaysLate();
 
-        if ($days_late < 1){
+        if ($days_late < 1) {
             $return .= <<<HTML
 <div class="content">
     <h4>You have {$late_days_remaining} late day(s) available for this homework</h4>
 </div>
 HTML;
-    }
-    else {
-            if ($late_days_remaining > $days_late){
-                $style = "";
+        }
+        else {
+            if ($late_days_remaining > $days_late) {
+                $style = '';
             }
-            else{
-                $style="background-color:#d9534f;";
+            else {
+                $style = 'background-color: #d9534f;';
             }
-        $return .= <<<HTML
+            $return .= <<<HTML
 <div class="content" style=$style>
     <h4>You are submitting this assignment {$days_late} day(s) late, but have {$late_days_remaining} late day(s) available</h4>
 </div>
 HTML;
-    }
+        }
 
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
