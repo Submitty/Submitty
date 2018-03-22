@@ -117,11 +117,15 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
         grade_items_logging.log_message(message="ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
+    if which_machine == 'localhost':
+        address = which_machine
+    else:
+        address = which_machine.split('@')[1]
     # prepare the zip files
     try:
         autograding_zip_tmp,submission_zip_tmp = grade_item.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
         fully_qualified_domain_name = socket.getfqdn()
-        servername_workername = "{0}_{1}".format(fully_qualified_domain_name, which_machine)
+        servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
         submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_submission.zip")
         todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_queue.json")
@@ -136,7 +140,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
         print("ERROR: failed preparing submission zip or accessing next to grade ", e)
         return False
 
-    if which_machine == "localhost":
+    if address == "localhost":
         try:
             shutil.move(autograding_zip_tmp,autograding_zip)
             shutil.move(submission_zip_tmp,submission_zip)
@@ -182,8 +186,13 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         grade_items_logging.log_message(message="ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
+    if which_machine == 'localhost':
+        address = which_machine
+    else:
+        address = which_machine.split('@')[1]
+
     fully_qualified_domain_name = socket.getfqdn()
-    servername_workername = "{0}_{1}".format(fully_qualified_domain_name, which_machine)
+    servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
     target_results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_results.zip")
     target_done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_queue.json")
 
