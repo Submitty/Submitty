@@ -107,6 +107,7 @@ def update_foreign_autograding_worker_json(name, entry):
             success = False
         finally:
             os.close(fd)
+            os.remove(tmp_json_path)
             sftp.close()
             ssh.close()
 
@@ -165,6 +166,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             with open(todo_queue_file, 'w') as outfile:
                 json.dump(queue_obj, outfile, sort_keys=True, indent=4)
             sftp.put(todo_queue_file, todo_queue_file)
+            os.remove(todo_queue_file)
             print("Successfully forwarded files to {0}".format(my_name))
             success = True
         except Exception as e:
@@ -174,6 +176,8 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
         finally:
             sftp.close()
             ssh.close()
+            os.remove(autograding_zip_tmp)
+            os.remove(submission_zip_tmp)
             return success
     return True
 
@@ -229,6 +233,8 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         except Exception as e:
             grade_items_logging.log_message(message="ERROR: Could not retrieve the file from the foreign machine "+str(e))
             print("ERROR: Could not retrieve the file from the foreign machine.\nERROR: {0}".format(e))
+            os.remove(local_results_zip)
+            os.remove(local_done_queue_file)
             success = False
         finally:
             os.close(fd1)
