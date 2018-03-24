@@ -424,21 +424,55 @@ HTML;
         return $return;
     }
     public function showTAResults(Gradeable $gradeable){
-        $current_version = $gradeable->getCurrentVersion();
+        if(!$gradeable->beenTAgraded()){
+            $return = <<<HTML
+            <h3>This assignment has not been graded yet</h3>
+HTML;
+            return $return;
+        }
+        $graders = array();
+        //find all names of 
+        if(!$gradeable->getPeerGrading()){
+            foreach ($gradeable->getComponents() as $component) {
+                $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
+                if (!in_array($name, $graders)){
+                    $graders[] = $name;
+                }
+            }
+        }
+        $graders = implode(", ", $graders);
+        $pointsEarned = $gradeable->getGradedTAPoints();
+        $maxScore = $gradeable->getTotalTANonExtraCreditPoints();
+        $background = ($pointsEarned >= $maxScore/2) ? "green-background" : "yellow-background";
+        if($pointsEarned === 0.0) $background = "red-background";
         $return = <<<HTML
-        <div>
-            <h4>Graded by : </h4>
-        </div>
-        <h3>TA Grading Subtotal</h3>
         <div class = "sub">
+            <div class="box half" style="padding: 10px;">
+                <p>Graded by: {$graders}</p>
+                <i>Any regrade requests are due within 7 days of posting</i>
+                <hr>
+                <p>Overall note from TA: {$gradeable->getOverallComment()}</p>
+            </div>
+            <div class = "box">
+            <div class="box-title">
+                <span class="badge {$background}" style="float: left">{$pointsEarned} / {$maxScore}</span>
+                <h4>Total</h4>
+            </div>
+            </div>
 HTML;
         foreach ($gradeable->getComponents() as $component) {
+            $score = $component->getGradedTAPoints();
+            $background = ($score >= $component->getMaxValue()/2) ? "green-background" : "yellow-background";
+            if($score === 0.0) $background = "red-background";
+            $componentGrader = ($gradeable->getPeerGrading())? "" :" (Graded by: " . $component->getGrader()->getLastName().")";
             $return .= <<<HTML
-            var_dump($component);
-            <div class="box" style="display: 2;">
+            <div class="box">
                 <div class="box-title">
-                    <span class="badge">{$component->getScore()} / {$component->getMaxValue()}</span>
-                    <h4>{$component->getTitle()}</h4>
+                    <span class="badge {$background}">{$score} / {$component->getMaxValue()}</span>
+                    <h4>{$component->getTitle()} <i>{$componentGrader}</i></h4>
+                    <div id="comments">
+                        <p style="float:left;">{$component->getGradedTAComments('<br/ >',true)}</p>
+                    </div>
                 </div>
             </div>
 HTML;
