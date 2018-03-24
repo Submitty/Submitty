@@ -227,6 +227,8 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
             success = True
         #This is the normal case (still grading on the other end) so we don't need to print anything.
         except FileNotFoundError:
+            os.remove(local_results_zip)
+            os.remove(local_done_queue_file)
             success = False
         #In this more general case, we do want to print what the error was.
         #TODO catch other types of exception as we identify them.

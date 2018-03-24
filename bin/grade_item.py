@@ -266,10 +266,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     history_file = os.path.join(results_path,"history.json")
     history_file_tmp = ""
     if os.path.isfile(history_file):
-        filehandle,history_file_tmp = tempfile.mkstemp()
-        shutil.copy(history_file,history_file_tmp)
         shutil.copy(history_file,os.path.join(tmp_submission,"history.json"))
-        os.close(filehandle)
     # get info from the gradeable config file
     with open(complete_config, 'r') as infile:
         complete_config_obj = json.load(infile)
