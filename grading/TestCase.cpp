@@ -217,6 +217,7 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
   else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader);   }
   else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);     }
   else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);    }
+  else if (method == "JaCoCoCoverageReportGrader") { return JaCoCoCoverageReportGrader_doit(*this,grader);  }
   else if (method == "DrMemoryGrader")             { return DrMemoryGrader_doit(*this,grader);              }
   else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);                }
   else if (method == "searchToken")                { return searchToken_doit(*this,grader);                 }
@@ -589,11 +590,13 @@ void TestCase::Execution_Helper() {
     std::string description = j.value("description","");
     if (description=="") {
       if (method == "EmmaInstrumentationGrader") {
-        j["description"] = "JUnit EMMA instrumentation output";
+        j["description"] = "EMMA instrumentation output";
       } else if (method =="JUnitTestGrader") {
         j["description"] = "JUnit output";
       } else if (method =="EmmaCoverageReportGrader") {
-        j["description"] = "JUnit EMMA coverage report";
+        j["description"] = "EMMA coverage report";
+      } else if (method =="JaCoCoCoverageReportGrader") {
+        j["description"] = "JaCoCo coverage report";
       } else if (method =="MultipleJUnitTestGrader") {
         j["description"] = "TestRunner output";
       }

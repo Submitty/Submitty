@@ -108,7 +108,7 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late'))}">Late Days Allowed</a>
             </li>
             <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">Excused Absense Extensions</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">Excused Absence Extensions</a>
             </li>
             <li>
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">HWReports, CSV Reports, and Grade Summaries</a>

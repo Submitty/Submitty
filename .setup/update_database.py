@@ -18,6 +18,7 @@
 from datetime import datetime
 import json
 import os
+import urllib.parse
 
 usr_path = "/usr/local/submitty"
 
@@ -88,6 +89,17 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
             os.chown(forum_dir,uid,gid)
             os.chmod(forum_dir,0o770)
             print ("created directory:" + forum_dir)
+        else:
+            #Legacy fix for spaces in attachment file names for the forum
+            for root, dir_cur, files in os.walk(forum_dir):
+                for filename in files:
+                    os.rename(os.path.join(root, filename), os.path.join(root, urllib.parse.unquote(filename)));
+
+
+        # addition of 'seeking team/partner' table for team assignments
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE seeking_team (g_id character varying(255) NOT NULL, user_id character varying NOT NULL)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE seeking_team ADD CONSTRAINT seeking_team_pkey PRIMARY KEY (g_id, user_id)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY seeking_team ADD CONSTRAINT seeking_team_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
 
             
         print ("\n")

@@ -40,7 +40,13 @@ class ForumController extends AbstractController {
                 $this->publishPost();
                 break;
             case 'delete_post':
-                $this->deletePost();
+                $this->alterPost(0);
+                break;
+            case 'edit_post':
+                $this->alterPost(1);
+                break;
+            case 'get_edit_post_content':
+                $this->getEditPostContent();
                 break;
             case 'remove_announcement':
                 $this->alterAnnouncement(0);
@@ -53,19 +59,12 @@ class ForumController extends AbstractController {
     }
 
 
-    private function returnUserContentToPage($error, $isThread, $content, $thread_id, $title=""){
-        //Notify User
+    private function returnUserContentToPage($error, $isThread, $thread_id){
+            //Notify User
             $this->core->addErrorMessage($error);
-           
-            //Save post content to repopulate
             if($isThread){
-                $_SESSION["thread_content"] = $content;
-                $_SESSION["thread_title"] = $title;
-                $_SESSION["thread_recover_active"] = true;  
                 $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
             } else {
-                $_SESSION["post_content"] = $content;
-                $_SESSION["post_recover_active"] = true; 
                 $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
             }
 
@@ -73,14 +72,14 @@ class ForumController extends AbstractController {
     }
 
 
-    private function checkGoodAttachment($isThread, $content, $thread_id, $title = ""){
-        if(count($_FILES['file_input']) > 5) {
-            $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $content, $thread_id, $title);
+    private function checkGoodAttachment($isThread, $thread_id, $file_post){
+        if(count($_FILES[$file_post]['tmp_name']) > 5) {
+            $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
             return -1;
         }
-        $imageCheck = Utils::checkUploadedImageFile('file_input') ? 1 : 0;
-        if($imageCheck == 0 && !empty($_FILES['file_input']['tmp_name'])){
-            $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $content, $thread_id, $title);
+        $imageCheck = Utils::checkUploadedImageFile($file_post) ? 1 : 0;
+        if($imageCheck == 0 && !empty($_FILES[$file_post]['tmp_name'])){
+            $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
             return -1;
         
         } return $imageCheck;
@@ -89,15 +88,15 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     public function publishThread(){
-        $title = htmlentities($_POST["title"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $thread_content = htmlentities($_POST["thread_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $title = $_POST["title"];
+        $thread_content = str_replace("\r", "", $_POST["thread_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         if(empty($title) || empty($thread_content)){
             $this->core->addErrorMessage("One of the fields was empty. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
-            $hasGoodAttachment = $this->checkGoodAttachment(true, $_POST["thread_content"], -1, $_POST["title"]);
+            $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
             if($hasGoodAttachment == -1){
                 return;
             }
@@ -126,25 +125,32 @@ class ForumController extends AbstractController {
     }
 
     public function publishPost(){
-        $post_content = htmlentities($_POST["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $parent_id = (!empty($_POST["parent_id"])) ? htmlentities($_POST["parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : -1;
+        $post_content_tag = 'post_content';
+        $file_post = 'file_input';
+        if(empty($_POST['post_content'])){
+            $post_content_tag .= ('_' . $parent_id);
+            $file_post .= ('_' . $parent_id);
+        }
+        $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
-            $hasGoodAttachment = $this->checkGoodAttachment(false, $_POST["post_content"], $thread_id);
+            $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
             if($hasGoodAttachment == -1){
                 return;
             }
-            $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment);
+            $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment, $parent_id);
             $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
             if($hasGoodAttachment == 1) {
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                 FileUtils::createDir($post_dir);
-                for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
-                    $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
-                    move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
+                for($i = 0; $i < count($_FILES[$file_post]["name"]); $i++){
+                    $target_file = $post_dir . "/" . basename($_FILES[$file_post]["name"][$i]);
+                    move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
                 }
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
@@ -160,17 +166,30 @@ class ForumController extends AbstractController {
         }
     }
 
-    public function deletePost(){
+    public function alterPost($modifyType){
         if($this->core->getUser()->getGroup() <= 2){
-            $thread_id = $_POST["thread_id"];
-            $post_id = $_POST["post_id"];
-            $type = "";
-            if($this->core->getQueries()->deletePost($post_id, $thread_id)){
-                $type = "thread";
-            } else {
-                $type = "post";
+
+            if($modifyType == 0) { //delete post
+                $thread_id = $_POST["thread_id"];
+                $post_id = $_POST["post_id"];
+                $type = "";
+                if($this->core->getQueries()->deletePost($post_id, $thread_id)){
+                    $type = "thread";
+                } else {
+                    $type = "post";
+                }
+                $this->core->getOutput()->renderJson(array('type' => $type));
+            } else if($modifyType == 1) { //edit post
+                $thread_id = $_POST["edit_thread_id"];
+                $post_id = $_POST["edit_post_id"];
+                $new_post_content = $_POST["edit_post_content"];
+                if(!$this->core->getQueries()->editPost($post_id, $new_post_content)){
+                    $this->core->addErrorMessage("There was an error trying to modify the post. Please try again.");
+                } $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
             }
-            $this->core->getOutput()->renderJson(array('type' => $type));
+            $response = array('type' => $type);
+            $this->core->getOutput()->renderJson($response);
+            return $response;
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
@@ -204,6 +223,21 @@ class ForumController extends AbstractController {
 
     public function showCreateThread(){
          $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread');
+    }
+
+    public function getEditPostContent(){
+        $post_id = $_POST["post_id"];
+        if($this->core->getUser()->getGroup() <= 2 && !empty($post_id)) {
+            $result = $this->core->getQueries()->getPost($post_id);
+            $output = array();
+            $output['user'] = $result["author_user_id"];
+            $output['post'] = $result["content"];
+            $output['post_time'] = $result['timestamp'];
+            $this->core->getOutput()->renderJson($output);
+            return $output;
+        } else {
+            $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
+        }
     }
 
 }

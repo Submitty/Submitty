@@ -51,7 +51,7 @@ class ElectronicGraderView extends AbstractView {
             $percentage = 0;
         }
         else{
-            $percentage = round(($graded / $total) * 100, 1);
+            $percentage = number_format(($graded / $total) * 100, 1);
         }
         $return = <<<HTML
 <div class="content">
@@ -124,7 +124,7 @@ HTML;
             if ($peer) {
                 $show_total = floor($sections['stu_grad']['total_components']/$gradeable->getNumPeerComponents());
                 $show_graded = floor($sections['stu_grad']['graded_components']/$gradeable->getNumPeerComponents());
-                $percentage = round(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
+                $percentage = number_format(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
                 $return .= <<<HTML
             Current percentage of students grading done: {$percentage}% ({$show_graded}/{$show_total})
         </div>
@@ -141,7 +141,7 @@ HTML;
                         $percentage = 0;
                     }
                     else {
-                        $percentage = round(($section['graded_components'] / $section['total_components']) * 100, 1);
+                        $percentage = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
                     }
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
@@ -593,10 +593,22 @@ HTML;
                 <td>{$row->getUser()->getId()}</td>
 HTML;
                     }
-                    else {
-                        $return .= <<<HTML
+                    // Construct a string containing the names of all team members
+                     else {
+                        $member_list = "";
+                        foreach($row->getTeam()->getMembers() as $team_member) {
+                            if ($member_list !== "") {
+                                $member_list = $member_list . ", ";
+                            }
+ 	 
+                            $first_name = $this->core->getQueries()->getUserById($team_member)->getDisplayedFirstName();
+                            $last_name = $this->core->getQueries()->getUserById($team_member)->getLastName();
 
-                <td>{$row->getTeam()->getMemberList()}</td>
+                            $member_list = $member_list . $first_name . " " . $last_name;
+                        }
+                        $return .= <<<HTML
+                <td>{$member_list}</td>
+        
 HTML;
                     }
                 }
@@ -659,7 +671,15 @@ HTML;
                 if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
                     $box_background = "late-box";
                 }
-                if ($row->beenTAgraded()) {
+                if (!($row->hasSubmitted())) {
+                    $btn_class = "btn-default";
+                    $contents = "No Submission";
+                }
+                else if ($active_version === 0) {
+                    $btn_class = "btn-default";
+                    $contents = "Cancelled Submission";
+                }
+                else if ($row->beenTAgraded()) {
                     if($row->validateVersions()) {
                         $btn_class = "btn-default";
                         $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
@@ -674,14 +694,6 @@ HTML;
                             $contents = "Version Conflict";
                         }
                     }
-                }
-                else if (!($row->hasSubmitted())) {
-                    $btn_class = "btn-default";
-                    $contents = "No Submission";
-                }
-                else if ($active_version === 0) {
-                    $btn_class = "btn-default";
-                    $contents = "Cancelled Submission";
                 }
                 else {
                     $btn_class = "btn-primary";
@@ -1016,8 +1028,8 @@ HTML;
             foreach ($files as $dir => $path) {
                 if (!is_array($path)) {
                     $name = htmlentities($dir);
-                    $dir = urlencode(htmlspecialchars($dir));
-                    $path = urlencode(htmlspecialchars($path));
+                    $dir = rawurlencode(htmlspecialchars($dir));
+                    $path = rawurlencode(htmlspecialchars($path));
                     $indent_offset = $indent * -15;
                     $return .= <<<HTML
                 <div>
@@ -1187,9 +1199,14 @@ HTML;
             $color = "green";
             if($status != "Good" && $status != "Late") {
                 $color = "red";
+                $my_color="'#F62817'"; // fire engine red
+                $my_message="Late Submission";
                 $return .= <<<HTML
             <script>
-                $('body').css('background', 'red');
+                $('body').css('background', $my_color);
+                $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                $('#bar_banner').css('background-color', $my_color);
+                $('#bar_banner').css('color', 'black');
             </script>
 HTML;
             }
@@ -1225,13 +1242,42 @@ HTML;
 HTML;
         $break_onclick = "";
         $disabled = '';
-        if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion() || $gradeable->getCurrentVersionNumber() == 0){
+        if($gradeable->getActiveVersion() == 0){
+            $disabled='disabled';
+            $break_onclick = "return false; ";
+            $my_color="'#FF8040'"; // mango orange
+            $my_message="Cancelled Submission";
+            if($gradeable->hasSubmitted()){
+                $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color); 
+                    $('#bar_banner').css('color', 'black');
+                </script>
+                <div class="red-message" style="text-align: center">$my_message</div>
+HTML;
+            } else {
+                $my_color="'#C38189'";  // lipstick pink (purple)
+                $my_message="No Submission";
+                $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
+                </script>
+                <div class="red-message" style="text-align: center">$my_message</div>
+HTML;
+            }
+        } else if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
             $disabled='disabled';
             $break_onclick = "return false; ";
             $return .= <<<HTML
-    <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
+            <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
         }
+       
         $num_questions = count($gradeable->getComponents());
 
         // if use student components, get the values for pages from the student's submissions
@@ -1494,6 +1540,7 @@ HTML;
             $break_onclick = 'return false;';
             $disabled = 'disabled';
         }
+        $overallComment = htmlentities($gradeable->getOverallComment(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $return .= <<<HTML
                 <tr>
                     <td id="title-general" colspan="4" onclick="{$break_onclick} openClose(-2, {$num_questions});">
@@ -1511,14 +1558,14 @@ HTML;
                     </td>
                     <td style="width:98%;" colspan="3">
                         <div id="rubric-custom">
-                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;"><pre>{$gradeable->getOverallComment()}</pre></span>
+                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;"><pre>{$overallComment}</pre></span>
                         </div>
                     </td>
                 </tr>
                 <tbody id="extra-general" style="display: none" colspan="4">
                     <tr>
                         <td colspan="4">
-                            <textarea id="comment-general-id" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
+                            <textarea id="comment-general-id" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$overallComment}</textarea>
                         </td>
                     </tr>
                 </tbody>
