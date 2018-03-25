@@ -165,7 +165,6 @@ function haveMarksChanged(num, data) {
 
 function updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
     var parent = $('#extra-'+num);
-    console.log("update " + parent[0].style.display);
     if (parent[0].style.display == "none") // Don't unnecessarily update if invisible
         return;
         
@@ -187,10 +186,6 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
             var hasMark = data['data'][x]['has_mark'];
             var score   = data['data'][x]['score'];
             var note    = data['data'][x]['note'];
-            
-            console.log(data['data']);
-            console.log(data['data'][x]);
-            console.log(note + " " + x + " : " + hasMark);
             
             parent.prepend(getMarkView(num, x, hasMark, note, score, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id));
         }
@@ -261,7 +256,6 @@ function showMarklist(me, gradeable_id) {
     var gradeable_component_id = $('#extra-' + question_num)[0].dataset.question_id;
     
     ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, function(data) {
-        console.log("success for getting the information on marks");
         data = JSON.parse(data);
 
         // Calculate total and graded component amounts
@@ -571,12 +565,11 @@ function cancelMark(num, gradeable_id, user_id, gc_id) {
                 'anon_id' : user_id
             },
             success: function(data) {
-                console.log("success for canceling gradeable comment");
                 data = JSON.parse(data);
                 $('#comment-general-id').val(data['data']);
             },
             error: function() {
-                console.log("Couldn't get the gradeable comment");
+                console.error("Couldn't get the gradeable comment");
                 alert("Failed to cancel the comment");
             }
         })
@@ -602,7 +595,6 @@ function cancelMark(num, gradeable_id, user_id, gc_id) {
             },
             success: function(data) {
                 //if success reinput all the data back into the form
-                console.log("success for canceling a mark");
                 data = JSON.parse(data);
                 for (var x = 0; x < arr_length; x++) {
                     current_row = $('#mark_id-'+num+'-'+x);
@@ -638,7 +630,7 @@ function cancelMark(num, gradeable_id, user_id, gc_id) {
                 }
             },
             error: function() {
-                console.log("You make me sad. The cancel mark errored out.");
+                console.error("You make me sad. The cancel mark errored out.");
                 alert("Failed to cancel the grade");
             }
         })
@@ -678,6 +670,8 @@ function saveLastOpenedMark(gradeable_id, user_id, active_version, gc_id = -1, y
 }
 
 function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "", sync = true) {
+    if ($('#extra-' + num)[0].style.display === "none")
+        return;
     // console.log($('tr[name=mark_'+num+']'));
     var arr_length = $('tr[name=mark_'+num+']').length;
     var mark_data = new Array(arr_length);
@@ -790,7 +784,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
     }
     
     current_question_num[0].innerHTML = (all_false === false) ? current_points : "";
-    console.log("CURRENT QUESTION TEXT : " + new_text);
+    // console.log("CURRENT QUESTION TEXT : " + new_text);
     current_question_text.html(new_text);
 
     calculatePercentageTotal();
