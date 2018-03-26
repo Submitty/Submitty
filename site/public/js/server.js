@@ -962,17 +962,20 @@ function hideReplies(){
 }
 
 function hidePosts(text, id){
-    if(text.innerHTML == "[+]"){
-        text.innerHTML = "[-]";
-    } else {
-        text.innerHTML = "[+]";
-    }
     var currentLevel = $(text).parent().attr("reply-level");
     var selector = $(text).parent().next().next();
+    var counter = 0;
     while(selector.attr("reply-level") > currentLevel){
         $(selector).toggle();
         selector = $(selector).next().next();
+        counter++;
     }
+    if(text.innerHTML != "[-]" || counter == 0){
+        text.innerHTML = "[-]";
+    } else {
+        text.innerHTML = "[+" + counter + "]";
+    }
+
 }
 
 function deletePost(thread_id, post_id, author, time){
