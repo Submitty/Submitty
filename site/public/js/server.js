@@ -946,6 +946,8 @@ function saveScrollLocationOnRefresh(className){
 }
 
 function replyPost(post_id){
+    var scroll_position = document.getElementById("posts_list").scrollTop;
+    localStorage.setItem("scroll_position", scroll_position);
     if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
         $('#'+ post_id + '-reply').css("display","none");
     } else {
