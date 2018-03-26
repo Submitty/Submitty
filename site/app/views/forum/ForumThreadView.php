@@ -214,7 +214,7 @@ HTML;
 			$title_html = '';
 			$return .= <<< HTML
 					</div>
-					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
+					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">
 HTML;
 
             $title_html .= <<< HTML
@@ -451,6 +451,9 @@ HTML;
 								<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
 HTML;
 							} else {
+								$return .= <<<HTML
+								<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, .posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+HTML;
 								$first = false;
 							}
 
