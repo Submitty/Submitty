@@ -36,7 +36,13 @@
  * -------------------------------------------------------------------------- */
 
 // Univeristy campus's timezone.  ***THIS NEEDS TO BE SET.
-date_default_timezone_set('America/New_York');
+$default_zone = "America/New_York";
+$timezone = file_get_contents("/etc/timezone");
+if (!strlen($timezone)) {
+    $timezone = $default_zone;
+}
+date_default_timezone_set($timezone);
+//date_default_timezone_set('America/New_York');
 
 
 /* Definitions for error logging -------------------------------------------- */

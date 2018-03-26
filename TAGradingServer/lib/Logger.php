@@ -86,7 +86,13 @@ class Logger {
      * @param $message: message to log to the file
      */
     private static function log($level=0, $message="") {
-        date_default_timezone_set("America/New_York");
+        $default_zone = "America/New_York";
+        $timezone = file_get_contents("/etc/timezone");
+        if (!strlen($timezone)) {
+            $timezone = $default_zone;
+        }
+        date_default_timezone_set($timezone);
+        //date_default_timezone_set("America/New_York");
         if (!isset(Logger::$log_path)) {
             // don't log anything if we don't have a log path set
             return;

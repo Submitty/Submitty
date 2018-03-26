@@ -12,7 +12,13 @@ permissions aren't lost for newly created files & directories. We do this
 here as every working file must include functions.php to actuall work.
 */
 umask (0027);
-date_default_timezone_set('America/New_York');
+$default_zone = "America/New_York";
+$timezone = file_get_contents("/etc/timezone");
+if (!strlen($timezone)) {
+    $timezone = $default_zone;
+}
+date_default_timezone_set($timezone);
+//date_default_timezone_set('America/New_York');
 
 use \lib\AutoLoader;
 use \lib\Database;
