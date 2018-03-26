@@ -961,16 +961,16 @@ function hideReplies(){
     }
 }
 
-function hidePosts(text, id){
+function hidePosts(text, id) {
     var currentLevel = $(text).parent().attr("reply-level");
     var selector = $(text).parent().next().next();
     var counter = 0;
-    while(selector.attr("reply-level") > currentLevel){
+    while (selector.attr("reply-level") > currentLevel) {
         $(selector).toggle();
         selector = $(selector).next().next();
         counter++;
     }
-    if(text.innerHTML != "[-]" || counter == 0){
+    if (text.innerHTML != "[-]" || counter === 0) {
         text.innerHTML = "[-]";
     } else {
         text.innerHTML = "[+" + counter + "]";
