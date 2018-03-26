@@ -961,6 +961,20 @@ function hideReplies(){
     }
 }
 
+function hidePosts(text, id){
+    if(text.innerHTML == "[+]"){
+        text.innerHTML = "[-]";
+    } else {
+        text.innerHTML = "[+]";
+    }
+    var currentLevel = $(text).parent().attr("reply-level");
+    var selector = $(text).parent().next().next();
+    while(selector.attr("reply-level") > currentLevel){
+        $(selector).toggle();
+        selector = $(selector).next().next();
+    }
+}
+
 function deletePost(thread_id, post_id, author, time){
     var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be deleted. \n\nIf you are deleting the first post in a thread this will delete the entire thread.");
     if(confirm){

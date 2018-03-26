@@ -438,7 +438,11 @@ HTML;
                         $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
 
 						//end code segment handling
-
+						if(!$first){
+							$return .= <<<HTML
+							<a class="expand" style="float:right; text-decoration:none" onClick="hidePosts(this, {$post['id']})">[-]</a>
+HTML;
+						}
 						$return .= <<<HTML
 							<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>
 							
