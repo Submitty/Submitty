@@ -92,7 +92,7 @@ class Logger {
             $timezone = $default_zone;
         }
         date_default_timezone_set($timezone);
-        //date_default_timezone_set("America/New_York");
+
         if (!isset(Logger::$log_path)) {
             // don't log anything if we don't have a log path set
             return;

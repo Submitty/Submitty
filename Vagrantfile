@@ -54,15 +54,6 @@ Vagrant.configure(2) do |config|
     vb.customize ['guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 10000 ]
   end
 
-  # Grab host timezone and set vagrant timezone to match
-  # updates timezone every time 'vagrant up' is run
-  #require 'time'
-  #offset = -1*((Time.zone_offset(Time.now.zone) / 60) / 60)
-  #timezone_offset = offset >= 0 ? "+#{offset.to_s}" : "-#{(-1*offset).to_s}"
-  #config.vm.provision :shell, :inline => " sudo timedatectl set-timezone Etc/GMT#{timezone_offset}", run: "always"
-
-  config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
-
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
 
   config.vm.provision 'shell', inline: $script

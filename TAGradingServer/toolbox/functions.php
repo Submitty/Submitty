@@ -18,7 +18,7 @@ if (!strlen($timezone)) {
     $timezone = $default_zone;
 }
 date_default_timezone_set($timezone);
-//date_default_timezone_set('America/New_York');
+
 
 use \lib\AutoLoader;
 use \lib\Database;

@@ -10,7 +10,7 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 # TIMEZONE
-#timedatectl set-timezone America/Los_Angeles #America/New_York
+timedatectl set-timezone America/Los_Angeles
 
 #################################################################
 # CONSTANTS
