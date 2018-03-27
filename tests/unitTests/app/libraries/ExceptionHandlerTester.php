@@ -45,7 +45,7 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
             $timezone = $default_zone;
         }
         date_default_timezone_set($timezone);
-        //date_default_timezone_set("America/New_York");
+
         $date = getdate(time());
         $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']).'.log';
         ExceptionHandler::setDisplayExceptions(false);

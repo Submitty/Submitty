@@ -114,7 +114,6 @@ if (!strlen($timezone)) {
 $timezone = trim($timezone);
 date_default_timezone_set($timezone);
 
-//date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
