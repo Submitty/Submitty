@@ -208,7 +208,7 @@ if os.path.isfile(WORKERS_JSON):
     with open(WORKERS_JSON, 'r') as f:
         worker_dict = json.load(f)
 else:
-    worker_dict["primary"] = {"capabilities" : ["default"], "address" : "", "username" : "",
+    worker_dict["primary"] = {"capabilities" : ["default"], "address" : "localhost", "username" : "",
         "num_autograding_workers" : NUM_GRADING_SCHEDULER_WORKERS}
 
 if os.path.isdir(SETUP_INSTALL_DIR):
@@ -220,6 +220,7 @@ os.chmod(SETUP_INSTALL_DIR, 0o751)
 with open(WORKERS_JSON, 'w') as workers_file:
     json.dump(worker_dict, workers_file, indent=4)
 
+shutil.chown(WORKERS_JSON, 'root', HWCRON_GID)
 
 ##############################################################################
 # WRITE THE VARIABLES TO A FILE

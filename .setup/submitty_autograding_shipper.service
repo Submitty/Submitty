@@ -1,0 +1,14 @@
+[Unit]
+Description=Submitty Autograding Shipper
+Documentation=http://submitty.org
+
+[Service]
+User=hwcron
+Restart=always
+Type=simple
+ExecStart=/usr/local/submitty/bin/submitty_autograding_shipper.py
+TimeoutSec=1min
+RuntimeMaxSec=infinity
+
+[Install]
+WantedBy=multi-user.target

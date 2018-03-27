@@ -573,7 +573,7 @@ class SubmissionController extends AbstractController {
 
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
-        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
+        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
             implode("__", $queue_file));
 
         // create json file...
@@ -1061,7 +1061,7 @@ class SubmissionController extends AbstractController {
 
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
-        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
+        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
             implode("__", $queue_file));
 
         // create json file...
