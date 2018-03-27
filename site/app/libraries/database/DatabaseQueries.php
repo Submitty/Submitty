@@ -905,7 +905,7 @@ ORDER BY user_id ASC");
     /**
      * This inserts an row in the electronic_gradeable_data table for a given gradeable/user/version combination.
      * The values for the row are set to defaults (0 for numerics and NOW() for the timestamp) with the actual values
-     * to be later filled in by the submitty_grading_scheduler.py and insert_database_version_data.py scripts.
+     * to be later filled in by the submitty_autograding_shipper.py and insert_database_version_data.py scripts.
      * We do it this way as we can properly deal with the
      * electronic_gradeable_version table here as the "active_version" is a concept strictly within the PHP application
      * code and the grading scripts have no concept of it. This will either update or insert the row in

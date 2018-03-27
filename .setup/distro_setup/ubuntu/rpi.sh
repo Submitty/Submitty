@@ -23,6 +23,7 @@ echo "Getting pylint..."
 # install pylint for python3 using pip
 apt install -qqy python3-pip
 pip3 install pylint
+pip3 install pillow
 
 # unit tests for python
 echo "Getting unittest... "
@@ -136,6 +137,9 @@ pip3 install -U pip numpy
 pip3 install matplotlib
 pip3 install opencv-python
 
+
+##################################################
+# Fixup the permissions
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
