@@ -5,6 +5,7 @@ namespace app\views;
 use app\models\Gradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\models\LateDaysCalculation;
 
 class AutogradingView extends AbstractView {
     /**
@@ -431,48 +432,76 @@ HTML;
             return $return;
         }
         $graders = array();
-        //find all names of 
+        $count = 0;
+        //find all names of instructors who graded part(s) of this assignment
         if(!$gradeable->getPeerGrading()){
             foreach ($gradeable->getComponents() as $component) {
                 $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
-                if (!in_array($name, $graders)){
-                    $graders[] = $name;
-                }
+                if (!in_array($name, $graders)) $graders[] = $name;
             }
+            $graders = implode(", ",$graders);
+        }else{
+            $graders = "Graded by Peer(s)";
         }
-        $graders = implode(", ", $graders);
-        $pointsEarned = $gradeable->getGradedTAPoints();
+        //get total score and max possible score
+        $score = $gradeable->getGradedTAPoints();
         $maxScore = $gradeable->getTotalTANonExtraCreditPoints();
-        $background = ($pointsEarned >= $maxScore/2) ? "green-background" : "yellow-background";
-        if($pointsEarned === 0.0) $background = "red-background";
+        if($score >= $maxScore){
+            $background = "green-background";
+        }else if($score >  $maxScore* 0.5){
+            $background = "yellow-background";
+        }else{
+            $background = "red-background";
+        }
+        $comment = (!empty($gradeable->getOverallComment())) ? '<hr>'."Overall note from TA: " . $gradeable->getOverallComment() : "";
+        //late day data
+        $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
+        $lateDayData = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
         $return = <<<HTML
         <div class = "sub">
             <div class="box half" style="padding: 10px;">
                 <p>Graded by: {$graders}</p>
                 <i>Any regrade requests are due within 7 days of posting</i>
-                <hr>
-                <p>Overall note from TA: {$gradeable->getOverallComment()}</p>
+                <p>{$comment}</p>
+            </div>
+            <div class = "box half" style="float:right">
+                <p>Maximum number of late days allowed on this assignment: {$gradeable->getAllowedLateDays()}</p>
+                <p>Number of days late (before extensions): {$gradeable->getDaysLate()}</p>
+                <p>Late Days used in previous assignments {$lateDayData['late_days_used']}</p> 
+                <p>Number of late days used on this assignment: {$lateDayData['late_days_charged']} </p>
+                <p>Submission Status: <i>{$lateDayData['status']}</i></p>
             </div>
             <div class = "box">
-            <div class="box-title">
-                <span class="badge {$background}" style="float: left">{$pointsEarned} / {$maxScore}</span>
-                <h4>Total</h4>
-            </div>
+                <div class="box-title">
+                    <span class="badge {$background}" style="float: left">{$score} / {$maxScore}</span>
+                    <h4>Total</h4>
+                </div>
             </div>
 HTML;
         foreach ($gradeable->getComponents() as $component) {
             $score = $component->getGradedTAPoints();
-            $background = ($score >= $component->getMaxValue()/2) ? "green-background" : "yellow-background";
-            if($score === 0.0) $background = "red-background";
+            //check if extra credit
+            if(trim(strtolower($component->getTitle())) === "extra credit") {
+                $background = ($score == 0) ? "hidden" : "green-background";
+                $score = "+" . $score;
+            }else{
+                if($score >= $component->getMaxValue()){
+                    $background = "green-background";
+                }else if($score > $component->getMaxValue()* 0.5){
+                    $background = "yellow-background";
+                }else{
+                    $background = "red-background";
+                }
+                $score = $score . " / " . $component->getMaxValue();
+            }
+            //add grader's name if not peer grading
             $componentGrader = ($gradeable->getPeerGrading())? "" :" (Graded by: " . $component->getGrader()->getLastName().")";
             $return .= <<<HTML
             <div class="box">
                 <div class="box-title">
-                    <span class="badge {$background}">{$score} / {$component->getMaxValue()}</span>
+                    <span class="badge {$background}">{$score}</span>
                     <h4>{$component->getTitle()} <i>{$componentGrader}</i></h4>
-                    <div id="comments">
-                        <p style="float:left;">{$component->getGradedTAComments('<br/ >',true)}</p>
-                    </div>
+                    <p style="float:left;">{$component->getGradedTAComments('<br>',true)}</p>
                 </div>
             </div>
 HTML;

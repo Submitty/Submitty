@@ -194,7 +194,7 @@ class GradeableComponent extends AbstractModel {
             }
             $hasmark = "( ) ";
             if($mark->getHasMark() === true) {
-              $hasmark = "(*) ";
+              $hasmark = "(&#10003) "; //HTML character code for checkmark
             } else if (!($show_students === true && $mark->getPublish() === 't')) {
               continue;
             }
@@ -215,7 +215,7 @@ class GradeableComponent extends AbstractModel {
             if (floatval($this->score) != 0) {
                 $score_string = sprintf("%4.1f",$this->score);
             }
-            $text .= $newline . "(*) " . $score_string . "  " . $this->comment;
+            $text .= $newline . "(&#10003) " . $score_string . "  " . $this->comment;
         }
         return $text;
     }
