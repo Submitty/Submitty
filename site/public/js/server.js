@@ -965,14 +965,27 @@ function hidePosts(text, id) {
     var currentLevel = $(text).parent().attr("reply-level");
     var selector = $(text).parent().next().next();
     var counter = 0;
-    while (selector.attr("reply-level") > currentLevel) {
-        $(selector).toggle();
-        selector = $(selector).next().next();
-        counter++;
-    }
-    if (text.innerHTML != "[-]" || counter === 0) {
+    var parent_status = "[-]";``
+    if (text.innerHTML != "[-]") {
         text.innerHTML = "[-]";
+        while (selector.attr("reply-level") > currentLevel) {
+             $(selector).show();
+              selector = $(selector).next().next();
+            if($(selector).children()[0].innerHTML != "[-]"){
+
+                while(selector.attr("reply-level") > currentLevel+1){
+                    selector = $(selector).next().next();
+                }
+            }
+
+        }
+        
     } else {
+        while (selector.attr("reply-level") > currentLevel) {
+            $(selector).hide();
+            selector = $(selector).next().next();
+            counter++;
+        }
         text.innerHTML = "[+" + counter + "]";
     }
 
