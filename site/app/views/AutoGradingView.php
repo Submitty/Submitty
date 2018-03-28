@@ -469,6 +469,7 @@ HTML;
                 <p>Number of days late (before extensions): {$gradeable->getDaysLate()}</p>
                 <p>Late Days used in previous assignments: {$lateDayData['late_days_used']}</p> 
                 <p>Number of late days used on this assignment: {$lateDayData['late_days_charged']} </p>
+                <p>Remaining number of late days: {$lateDayData['remaining_days']}</p>
                 <p>Submission Status: <i>{$lateDayData['status']}</i></p>
             </div>
             <div class = "box">
