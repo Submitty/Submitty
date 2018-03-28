@@ -18,6 +18,8 @@ def log_message(job_id="",is_batch=False,which_untrusted="",jobname="",timelabel
     autograding_log_file=os.path.join(AUTOGRADING_LOG_PATH,datefile)
     easy_to_read_date=dateutils.write_submitty_date(now,True)
     batch_string = "BATCH" if is_batch else ""
+    if elapsed_time == "":
+        elapsed_time = -1
     elapsed_time_string = "" if elapsed_time<0 else '{:9.3f}'.format(elapsed_time)
     time_unit = "" if elapsed_time<0 else "sec"
     with open(autograding_log_file,'a') as myfile:

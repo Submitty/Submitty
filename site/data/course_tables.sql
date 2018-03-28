@@ -348,6 +348,16 @@ CREATE TABLE grading_rotating (
 );
 
 --
+-- Name: seeking_team; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE seeking_team (
+    g_id character varying(255) NOT NULL,
+    user_id character varying NOT NULL
+);
+
+
+--
 -- Name: peer_assign; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -617,6 +627,14 @@ ALTER TABLE ONLY grading_rotating
     
     
 --
+-- Name: seeking_team; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE seeking_team
+    ADD CONSTRAINT seeking_team_pkey PRIMARY KEY (g_id, user_id);
+
+    
+--
 -- Name: peer_assign_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
     
@@ -864,6 +882,14 @@ ALTER TABLE ONLY grading_rotating
 
 ALTER TABLE ONLY grading_rotating
     ADD CONSTRAINT grading_rotating_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: seeking_team; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY seeking_team
+    ADD CONSTRAINT seeking_team_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
