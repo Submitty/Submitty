@@ -196,6 +196,7 @@ HTML;
     </div>
 HTML;
             if($gradeable->useVcsCheckout()) {
+/*              TODO: Build ability for students to specify their own repo url
                 if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
                     $return .= <<<HTML
     repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
@@ -207,7 +208,31 @@ HTML;
     repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
 HTML;
                 }
+*/
+                if (strpos($gradeable->getSubdirectory(), '://') !== false || substr($gradeable->getSubdirectory(), 0, 1) === '/') {
+                    $vcs_path = $gradeable->getSubdirectory();
+                }
+                else {
+                    if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
+                        $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $gradeable->getSubdirectory();
+                    }
+                    else {
+                        $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $gradeable->getSubdirectory());
+                    }
+                }
+
+                $vcs_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_path);
+                $vcs_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_path);
+                if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+                    $vcs_path = str_replace('{$team_id}', $gradeable->getTeam()->getId(), $vcs_path);
+                }
+                $vcs_path = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
+                    $this->core->getConfig()->getVcsUrl(), $vcs_path);
+
                 $return .= <<<HTML
+    <h3>To access your Repository:</h3>
+    <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
+    <samp>git  clone  {$vcs_path}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
     <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
 HTML;
             }
@@ -452,10 +477,12 @@ HTML;
     <script type="text/javascript">
         function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id) {
             // submit the selected pdf
+            path = decodeURIComponent(path);
             if (is_pdf) {
                 submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count);
                 moveNextInput(count);
             }
+            
             // otherwise, this is a regular submission of the uploaded files
             else if (user_id == "") {
                 handleSubmission({$late_days_use},
@@ -566,14 +593,15 @@ HTML;
 
                     foreach ($files as $filename => $details) {
                         $clean_timestamp = str_replace("_", " ", $timestamp);
-                        $path = $details["path"];
+                        $path = rawurlencode(htmlspecialchars($details["path"]));
                         if (strpos($filename, "cover") === false) {
                             continue;
                         }
                         // get the full filename for PDF popout
                         // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
+                        $filename = rawurlencode(htmlspecialchars($filename));
                         $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path."&ta_grading=false";
-                        $filename_full = str_replace("_cover.pdf", ".pdf", rawurldecode( $filename) );
+                        $filename_full = str_replace("_cover.pdf", ".pdf",  $filename );
                         $path_full = str_replace("_cover.pdf", ".pdf", $path);
                         $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full."&ta_grading=false";
                         $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode( $filename_full) );
@@ -594,7 +622,18 @@ HTML;
                 </td>
                 <td>
                     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                    <input type="text" id="bulk_user_id_{$count}" value =""/>
+                    <div id="users_{$count}">
+                        <input type="text" id="bulk_user_id_{$count}[0]" value =""/>
+HTML;
+                    if ($gradeable->isTeamAssignment()){
+                        for($i = 1; $i < $gradeable->getMaxTeamSize(); $i++){
+                            $return .= <<<HTML
+                        <input type="text" id="bulk_user_id_{$count}[{$i}]" value =""/>
+HTML;
+                        }
+                    }
+                    $return .= <<<HTML
+                    </div>
                 </td>
                 <td>
                     <button type="button" id="bulk_submit_{$count}" class="btn btn-success">Submit</button>
@@ -618,9 +657,11 @@ HTML;
             var btn = $(document.activeElement);
             var id = btn.attr("id");
             var count = btn.parent().parent().index()+1;
-            var user_id = $("#bulk_user_id_"+count).val();
+            var name = "bulk_user_id_"+count;
+            var user_ids = [];
+            $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); }); 
             var js_count_array = $count_array_json;
-            var path = js_count_array[count];
+            var path = decodeURIComponent(js_count_array[count]);
             if (id.includes("delete")) {
                 message = "Are you sure you want to delete this submission?";
                 if (!confirm(message)) {
@@ -629,7 +670,7 @@ HTML;
                 deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
                 moveNextInput(count);
             } else {
-                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, "", makeSubmission);
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_ids, true, path, count, "", makeSubmission);
             }
             e.preventDefault();
             e.stopPropagation();
@@ -638,11 +679,13 @@ HTML;
             if(e.keyCode === 13) { // enter was pressed
                 var text = $(document.activeElement);
                 var id = text.attr("id");
-                var count = text.parent().parent().index()+1;
-                var user_id = $(document.activeElement).val();
+                var count = text.parent().parent().parent().index()+1;
+                var name = "bulk_user_id_"+count;
+                var user_ids = [];
+                $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); });
                 var js_count_array = $count_array_json;
                 var path = js_count_array[count];
-                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, true, path, count, "", makeSubmission);
+                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_ids, true, path, count, "", makeSubmission);
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -827,10 +870,10 @@ HTML;
                 }
             </script>
 HTML;
-                        $filename = $file['relative_name'];
-                        $filepath = $file['path'];
+                        $filename = rawurlencode($file['relative_name']);
+                        $filepath = rawurlencode($file['path']);
                         $return .= <<< HTML
-            <a onclick="downloadFile('$filename','$filepath')"><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='downloadFile("{$filename}","{$filepath}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
             <br />
 HTML;
                     }
@@ -844,23 +887,33 @@ HTML;
 HTML;
                 $results = $gradeable->getResults();
                 if($gradeable->hasResults()) {
-
                     $return .= <<<HTML
 submission timestamp: {$current_version->getSubmissionTime()}<br />
 days late: {$current_version->getDaysLate()} (before extensions)<br />
 grading time: {$results['grade_time']} seconds<br />
 HTML;
                     if($results['num_autogrades'] > 1) {
-                      $regrades = $results['num_autogrades']-1;
-                      $return .= <<<HTML
+                        $regrades = $results['num_autogrades']-1;
+                        $return .= <<<HTML
 <br />
 number of re-autogrades: {$regrades}<br />
 last re-autograde finished: {$results['grading_finished']}<br />
 HTML;
                     }
                     else {
-                      $return .= <<<HTML
+                        $return .= <<<HTML
 queue wait time: {$results['wait_time']} seconds<br />
+HTML;
+                    }
+                    if (isset($results['revision'])) {
+                        if (empty($results['revision'])) {
+                            $revision = "None";
+                        }
+                        else {
+                            $revision =  substr($results['revision'], 0, 7);
+                        }
+                        $return .= <<<HTML
+git commit hash: {$revision}<br />
 HTML;
                     }
                 }
