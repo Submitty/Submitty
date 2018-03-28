@@ -24,13 +24,15 @@ SUBMITTY_INSTALL_DIR= "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 
+JOB_ID = '~WORK~'
+
 # ==================================================================================
 # ==================================================================================
 def worker_process(which_machine,address,which_untrusted,my_server):
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
-        grade_items_logging.log_message(message="ERROR: must be run by hwcron")
+        grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
     # ignore keyboard interrupts in the worker processes
@@ -57,7 +59,7 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)        
             except Exception as e:
-                grade_items_logging.log_message(message="ERROR attempting to grade item: " + which_machine + " " + which_untrusted + " exception " + repr(e))
+                grade_items_logging.log_message(JOB_ID, message="ERROR attempting to grade item: " + which_machine + " " + which_untrusted + " exception " + repr(e))
                 grade_items_logging.log_message(jobname="DUNNO",message="ERROR: Exception when grading from zip")
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(autograding_zip)
@@ -83,7 +85,7 @@ def launch_workers(my_name, my_stats):
     if not int(os.getuid()) == int(HWCRON_UID):
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
-    grade_items_logging.log_message(message="grade_scheduler.py launched")
+    grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py launched")
 
     # prepare a list of untrusted users to be used by the workers
     untrusted_users = multiprocessing.Queue()
@@ -112,14 +114,14 @@ def launch_workers(my_name, my_stats):
                 if processes[i].is_alive:
                     alive = alive+1
                 else:
-                    grade_items_logging.log_message(message="ERROR: process "+str(i)+" is not alive")
+                    grade_items_logging.log_message(JOB_ID, message="ERROR: process "+str(i)+" is not alive")
             if alive != num_workers:
-                grade_items_logging.log_message(message="ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
+                grade_items_logging.log_message(JOB_ID, message="ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
             #print ("workers= ",num_workers,"  alive=",alive)
             time.sleep(1)
 
     except KeyboardInterrupt:
-        grade_items_logging.log_message(message="grade_scheduler.py keyboard interrupt")
+        grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py keyboard interrupt")
 
         # just kill everything in this group id right now
         # NOTE:  this may be a bug if the grandchildren have a different group id and not be killed
@@ -139,7 +141,7 @@ def launch_workers(my_name, my_stats):
         for i in range(0,num_workers):
             processes[i].join()
 
-    grade_items_logging.log_message(message="grade_scheduler.py terminated")
+    grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py terminated")
 # ==================================================================================
 
 def read_autograding_worker_json():

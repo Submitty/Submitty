@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import sys
 from datetime import datetime
 import os
 from submitty_utils import dateutils
@@ -29,13 +28,3 @@ def log_message(job_id="",is_batch=False,which_untrusted="",jobname="",timelabel
                   jobname,timelabel,elapsed_time_string,time_unit,message),
                file=myfile)
         fcntl.flock(myfile,fcntl.LOCK_UN)
-
-    
-def log_error(jobname,message):
-    log_message("","","",jobname,"",-1,"ERROR: "+message)
-    print ("ERROR :",jobname,":",message)
-
-
-def log_exit(jobname,message):
-    log_error(jobname,message)
-    log_error(jobname,"EXIT grade_items_scheduler.py")
