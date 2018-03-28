@@ -130,7 +130,7 @@ def main():
         groups.append(course['code'])
         groups.append(course['code'] + "_archive")
         groups.append(course['code'] + "_tas_www")
-        for queue in ["to_be_graded_batch", "to_be_graded_interactive"]:
+        for queue in ["to_be_graded_queue"]:
             path = os.path.join(SUBMITTY_DATA_DIR, queue, "*__{}__*".format(course['code']))
             for queue_file in glob.iglob(path):
                 os.remove(queue_file)

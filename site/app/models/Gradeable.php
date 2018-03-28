@@ -545,7 +545,9 @@ class Gradeable extends AbstractModel {
      * Sets the grading queue status of the gradeable. We don't really care
      */
     public function setQueueStatus() {
-        $interactive_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive";
+        $interactive_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_queue";
+
+        // FIXME: batch queue has gone away!
         $batch_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_batch";
 
         $user_id = $this->user->getId();
