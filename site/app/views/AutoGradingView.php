@@ -467,7 +467,7 @@ HTML;
             <div class = "box half" style="float:right">
                 <p>Maximum number of late days allowed on this assignment: {$gradeable->getAllowedLateDays()}</p>
                 <p>Number of days late (before extensions): {$gradeable->getDaysLate()}</p>
-                <p>Late Days used in previous assignments {$lateDayData['late_days_used']}</p> 
+                <p>Late Days used in previous assignments: {$lateDayData['late_days_used']}</p> 
                 <p>Number of late days used on this assignment: {$lateDayData['late_days_charged']} </p>
                 <p>Submission Status: <i>{$lateDayData['status']}</i></p>
             </div>
