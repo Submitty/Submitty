@@ -316,7 +316,7 @@ for i in "${array[@]}"; do
 done
 
 # hwcron only things
-array=( insert_database_version_data.py grade_item.py clang.Dockerfile \
+array=( insert_database_version_data.py grade_item.py \
         submitty_autograding_shipper.py submitty_autograding_worker.py grade_items_logging.py \
         write_grade_history.py build_config_upload.py )
 for i in "${array[@]}"; do
