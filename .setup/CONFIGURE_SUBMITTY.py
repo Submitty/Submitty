@@ -8,6 +8,8 @@ import os
 import pwd
 import shutil
 
+import tzlocal
+
 
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
@@ -216,25 +218,12 @@ CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
 ##############################################################################
 # make the installation setup directory
-worker_dict = {}
-
-if os.path.isfile(WORKERS_JSON):
-    with open(WORKERS_JSON, 'r') as f:
-        worker_dict = json.load(f)
-else:
-    worker_dict["primary"] = {"capabilities" : ["default"], "address" : "localhost", "username" : "",
-        "num_autograding_workers" : NUM_GRADING_SCHEDULER_WORKERS}
 
 if os.path.isdir(SETUP_INSTALL_DIR):
     shutil.rmtree(SETUP_INSTALL_DIR)
 os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
 shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(SETUP_INSTALL_DIR, 0o751)
-
-with open(WORKERS_JSON, 'w') as workers_file:
-    json.dump(worker_dict, workers_file, indent=4)
-
-shutil.chown(WORKERS_JSON, 'root', HWCRON_GID)
 
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/.setup
@@ -321,7 +310,6 @@ os.chmod(CONFIGURATION_JSON, 0o500)
 CONF_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'conf')
 
 DATABASE_JSON = os.path.join(CONF_INSTALL_DIR, 'database.json')
-PATHS_JSON = os.path.join(CONF_INSTALL_DIR, 'paths.json')
 SUBMITTY_JSON = os.path.join(CONF_INSTALL_DIR, 'submitty.json')
 USERS_JSON = os.path.join(CONF_INSTALL_DIR, 'users.json')
 WORKERS_JSON = os.path.join(CONF_INSTALL_DIR, 'autograding_workers.json')
@@ -339,7 +327,7 @@ if not os.path.isfile(WORKERS_JSON):
     worker_dict = {
         "primary": {
             "capabilities": ["default"],
-            "address": "",
+            "address": "localhost",
             "username": "",
             "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS
         }
@@ -347,8 +335,8 @@ if not os.path.isfile(WORKERS_JSON):
 
     with open(WORKERS_JSON, 'w') as workers_file:
         json.dump(worker_dict, workers_file, indent=4)
-    shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
-    os.chmod(WORKERS_JSON, 0o440)
+shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
+os.chmod(WORKERS_JSON, 0o440)
 
 config = OrderedDict()
 config['authentication_method'] = AUTHENTICATION_METHOD
@@ -373,12 +361,7 @@ config['submission_url'] = SUBMISSION_URL
 config['vcs_url'] = VCS_URL
 config['tagrading_url'] = TAGRADING_URL
 config['cgi_url'] = CGI_URL
-
-with open(PATHS_JSON, 'w') as json_file:
-    json.dump(config, json_file, indent=2)
-os.chmod(PATHS_JSON, 0o444)
-
-config = OrderedDict()
+config['timezone'] = tzlocal.get_localzone().zone
 config['institution_name'] = INSTITUTION_NAME
 config['username_change_text'] = USERNAME_TEXT
 config['institution_homepage'] = INSTITUTION_HOMEPAGE
