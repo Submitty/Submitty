@@ -255,6 +255,10 @@ function check_server(url) {
     );
 }
 
+function changeColor(div, hexColor){
+    div.style.color = hexColor;
+}
+
 function openDiv(id) {
     var elem = $('#' + id);
     if (elem.hasClass('open')) {
@@ -804,6 +808,10 @@ function setupNumericTextCells() {
     });
 }
 
+function getFileExtension(filename){
+    return (filename.substring(filename.lastIndexOf(".")+1)).toLowerCase();
+}
+
 function openPopUp(css, title, count, testcase_num, side) {
     var element_id = "container_" + count + "_" + testcase_num + "_" + side;
     var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
@@ -814,8 +822,212 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
+function checkForumFileExtensions(files){
+    var count = 0;
+    for(var i = 0; i < files.length; i++){
+        var extension = getFileExtension(files[i].name);
+        if(extension == "gif" || extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp"){
+            count++;
+        }
+    } return count == files.length;
+}
+
+function displayError(message){
+    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + message + '</div>';
+    $('#messages').append(message);
+    $('#messages').fadeIn("slow");
+}
+
+function resetForumFileUploadAfterError(displayPostId){
+    $('#file_name' + displayPostId).html('');
+    document.getElementById('file_input_label' + displayPostId).style.border = "2px solid red";
+    document.getElementById('file_input' + displayPostId).value = null;
+}
+
+function checkNumFilesForumUpload(input, post_id){
+    var displayPostId = (typeof post_id !== "undefined") ? "_" + escape(post_id) : "";
+    if(input.files.length > 5){
+        displayError('Max file upload size is 5. Please try again.');
+        resetForumFileUploadAfterError(displayPostId);
+    } else {
+        if(!checkForumFileExtensions(input.files)){
+            displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+            resetForumFileUploadAfterError(displayPostId);
+            return;
+        }
+        $('#file_name' + displayPostId).html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
+        $('#messages').fadeOut();
+        document.getElementById('file_input_label' + displayPostId).style.border = "";
+    }
+            
+}
+
+function editPost(post_id, thread_id) {
+     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
+     $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id,
+                thread_id: thread_id
+            },
+            success: function(data){
+                console.log(data);
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var user_id = escape(json.user);
+                var post_content = json.post;
+                var time = (new Date(json.post_time));
+                var date = time.toLocaleDateString();
+                time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                var contentBox = document.getElementById('edit_post_content');
+                var editUserPrompt = document.getElementById('edit_user_prompt');
+                editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
+                contentBox.innerHTML = post_content;
+                document.getElementById('edit_post_id').value = post_id;
+                document.getElementById('edit_thread_id').value = thread_id;
+                $('.popup-form').css('display', 'block');
+                
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to edit the post. Please try again.");
+            }
+        });
+}
+
+function enableTabsInTextArea(id){
+    var t = document.getElementById(id);
+
+    $(t).on('input', function() {
+        $(this).outerHeight(38).outerHeight(this.scrollHeight);
+    });
+    $(t).trigger('input');
+        t.onkeydown = function(t){
+            if(t.keyCode == 9){
+                var text = this.value;
+                var beforeCurse = this.selectionStart;
+                var afterCurse = this.selectionEnd;
+                this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse);
+                this.selectionStart = this.selectionEnd = beforeCurse+1;
+
+                return false;
+
+            }
+        };
+
+}
+
+function resetScrollPosition(){
+    if(sessionStorage.scrollTop != "undefined") {
+        sessionStorage.scrollTop = undefined;
+    }
+}
+
+function saveScrollLocationOnRefresh(className){
+    var element = document.getElementsByClassName(className);
+    $(element).scroll(function() {
+        sessionStorage.scrollTop = $(this).scrollTop();
+    });
+    $(document).ready(function() {
+        if(sessionStorage.scrollTop != "undefined"){
+            $(element).scrollTop(sessionStorage.scrollTop);
+        }
+    });
+}
+
+function replyPost(post_id){
+    if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
+        $('#'+ post_id + '-reply').css("display","none");
+    } else {
+        hideReplies();
+        $('#'+ post_id + '-reply').css('display', 'block');
+    }
+}
+
+function hideReplies(){
+    var hide_replies = document.getElementsByClassName("reply-box");
+    for(var i = 0; i < hide_replies.length; i++){
+        hide_replies[i].style.display = "none"; 
+    }
+}
+
+function deletePost(thread_id, post_id, author, time){
+    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be deleted. \n\nIf you are deleting the first post in a thread this will delete the entire thread.");
+    if(confirm){
+        var url = buildUrl({'component': 'forum', 'page': 'delete_post'});
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id,
+                thread_id: thread_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var new_url = "";
+                switch(json['type']){
+                    case "thread":
+                    default:
+                        new_url = buildUrl({'component': 'forum', 'page': 'view_thread'});
+                    break;
+
+                    
+                    case "post":
+                        new_url = buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id});
+                    break;
+                }
+                window.location.replace(new_url);
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to delete post. Please try again.");
+            }
+        })
+    } 
+}
+
+function alterAnnouncement(thread_id, confirmString, url){
+    var confirm = window.confirm(confirmString);
+    if(confirm){
+        var url = buildUrl({'component': 'forum', 'page': url});
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                thread_id: thread_id
+            },
+            success: function(data){
+                window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to remove announcement. Please try again.");
+            }
+        })
+    }
+}
+
 function updateHomeworkExtensions(data) {
-    var fd = new FormData($('#excusedAbsenseForm').get(0));
+    var fd = new FormData($('#excusedAbsenceForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
     $.ajax({
         url: url,
@@ -883,6 +1095,18 @@ function loadHomeworkExtensions(g_id) {
             window.alert("Something went wrong. Please try again.");
         }
     });
+}
+
+function addBBCode(type, divTitle){
+    var cursor = $(divTitle).prop('selectionStart');
+    var text = $(divTitle).val();
+    var insert = "";
+    if(type == 1) {
+        insert = "[url=http://example.com]display text[/url]";
+    } else if(type == 0){
+        insert = "[code][/code]";
+    }
+    $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
 function updateLateDays(data) {

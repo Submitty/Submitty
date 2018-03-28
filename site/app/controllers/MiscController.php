@@ -31,54 +31,65 @@ class MiscController extends AbstractController {
     }
 
     // function to check that this is a valid access request
-    private function checkValidAccess($is_zip) {
+    private function checkValidAccess($is_zip, &$error_string) {
+        $error_string="";
         // only allow zip if it's a grader
         if ($is_zip) {
+            $error_string="only graders may access zip files";
             return ($this->core->getUser()->accessGrading());
         }
         // from this point on, is not a zip
         // do path and permissions checking
-        $dir = $_REQUEST['dir'];
-        $path = $_REQUEST['path'];
+
+        $dir = $_GET['dir'];
+        $path = $_GET['path'];
 
         foreach (explode(DIRECTORY_SEPARATOR, $path) as $part) {
             if ($part == ".." || $part == ".") {
-                return false;
+                 $error_string=".. or . in path";
+                 return false;
             }
         }
         
         if (!FileUtils::isValidFileName($path)) {
+            $error_string="not valid filename";
             return false;
         }
 
 
-	// TEMPORARY HACK PUT THIS HERE
-	// INSTRUCTORS ARE UNABLE TO VIEW VCS CHECKOUT FILES WITHOUT THIS
-	// if instructor or grader, then it's okay
-	if ($this->core->getUser()->accessGrading()) {
+        // TEMPORARY HACK PUT THIS HERE
+        // INSTRUCTORS ARE UNABLE TO VIEW VCS CHECKOUT FILES WITHOUT THIS
+        // if instructor or grader, then it's okay
+        if ($this->core->getUser()->accessGrading()) {
             return true;
         }
-	// END HACK
+        // END HACK
 
 
-	$possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout");
+        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout", "forum_attachments");
         if (!in_array($dir, $possible_directories)) {
+            $error_string="not in possible directories list";
             return false;
         }
 
         $course_path = $this->core->getConfig()->getCoursePath();
         $check = FileUtils::joinPaths($course_path, $dir);
         if (!Utils::startsWith($path, $check)) {
+            $error_string="does not start with course path";
             return false;
         }
         if (!file_exists($path)) {
+            $error_string="path does not exist";
             return false;
         }
 
         if ($dir === "config_upload" || $dir === "uploads") {
+            $error_string="only admin can access uploads";
             return ($this->core->getUser()->accessAdmin());
-        }
-        else if ($dir === "submissions" || $dir === "results" || $dir === "checkout") {
+        } else if($dir === "forum_attachments"){
+            //Might need to be revisted but for now fixes the problem where students can't view attachments...
+            return true;
+        } else if ($dir === "submissions" || $dir === "results" || $dir === "checkout") {
             // if instructor or grader, then it's okay
             if ($this->core->getUser()->accessGrading()) {
                 return true;
@@ -109,7 +120,8 @@ class MiscController extends AbstractController {
                 $path_team_id = $path_user_id;
                 $path_team_members = $this->core->getQueries()->getTeamById($path_team_id)->getMembers();
                 if (count($path_team_members) == 0) {
-                    return false;
+                     $error_string="this team currently has no members";
+                     return false;
                 }
                 $path_user_id = $path_team_members[0];
             }
@@ -117,34 +129,40 @@ class MiscController extends AbstractController {
             // use the current user id to get the gradeable specified in the path
             $path_gradeable = $this->core->getQueries()->getGradeable($path_gradeable_id, $path_user_id);
             if ($path_gradeable === null) {
-                return false;
+                 $error_string="something wrong with gradeable path";
+                 return false;
             }
 
             // if gradeable student view or download false, don't allow anything
-            if (!$path_gradeable->getStudentView() || !$path_gradeable->getStudentDownload()) {
-                return false;
+            if ($dir == "submissions" && (!$path_gradeable->getStudentView() || !$path_gradeable->getStudentDownload())) {
+                 $error_string="students can't view / download submissions for this gradeable";
+                 return false;
             }
 
             // make sure that version is active version if student any version is false
             if (!$path_gradeable->getStudentAnyVersion() && $path_version !== $path_gradeable->getActiveVersion()) {
-                return false;
+                 $error_string="you are only allowed only view the active submission version";
+                 return false;
             }
 
             // if team assignment, check that team id matches the team of the current user
             if ($path_gradeable->isTeamAssignment()) {
                 $current_team = $this->core->getQueries()->getTeamByGradeableAndUser($path_gradeable_id,$current_user_id);
                 if ($current_team === null) {
-                    return false;
+                     $error_string="this is an invalid team and/or user";
+                     return false;
                 }
                 $current_team_id = $current_team->getId();
                 if ($path_team_id != $current_team_id) {
-                    return false;
+                     $error_string="user is not a member of this team for this gradeable";
+                     return false;
                 }
             }
             // else, just check that the user ids match
             else {
                 if ($current_user_id != $path_user_id) {
-                    return false;
+                     $error_string="user does not match";
+                     return false;
                 }
             }
             return true;
@@ -156,25 +174,27 @@ class MiscController extends AbstractController {
 
     private function displayFile() {
         // security check
-        if (!$this->checkValidAccess(false)) {
-            $this->core->getOutput()->showError("You do not have access to this file");
+        $error_string="";
+        if (!$this->checkValidAccess(false,$error_string)) {
+            $this->core->getOutput()->showError("You do not have access to this file ".$error_string);
             return false;
         }
 
-        $mime_type = FileUtils::getMimeType($_REQUEST['path']);
+        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($_GET['path'])));
+        $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
-            header('Content-Disposition: inline; filename="' .  basename($_REQUEST['path']) . '"');
-            readfile($_REQUEST['path']);
+            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))) . '"');
+            readfile($corrected_name);
             $this->core->getOutput()->renderString($_REQUEST['path']);
         }
         else {
-            $contents = htmlentities(file_get_contents($_REQUEST['path']), ENT_SUBSTITUTE);
+            $contents = htmlentities(file_get_contents($corrected_name), ENT_SUBSTITUTE);
             if ($_REQUEST['ta_grading'] === "true") {
-                $filename = htmlentities($_REQUEST['file'], ENT_SUBSTITUTE);
-                $this->core->getOutput()->renderOutput('Misc', 'displayCode', $mime_type, $filename, $contents);
+                $filename = htmlentities($corrected_name, ENT_SUBSTITUTE);
+                $this->core->getOutput()->renderOutput('Misc', 'displayCode', $mime_type, $corrected_name, $contents);
             }
             else {
                 $this->core->getOutput()->renderOutput('Misc', 'displayFile', $contents);
@@ -185,24 +205,28 @@ class MiscController extends AbstractController {
     private function downloadFile() {
         
         // security check
-        if (!$this->checkValidAccess(false)) {
-            $message = "You do not have access to that page.";
+        $error_string="";
+        if (!$this->checkValidAccess(false,$error_string)) {
+            $message = "You do not have access to that page. ".$error_string;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
         
+        $filename = rawurldecode(htmlspecialchars_decode($_REQUEST['file']));
+
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary"); 
-        header("Content-disposition: attachment; filename=\"{$_REQUEST['file']}\"");
-        readfile($_REQUEST['path']);
+        header("Content-disposition: attachment; filename=\"{$filename}\"");
+        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
     }
 
     private function downloadZip() {
         // security check
-        if (!$this->checkValidAccess(true)) {
-            $message = "You do not have access to that page.";
+        $error_string="";
+        if (!$this->checkValidAccess(true,$error_string)) {
+            $message = "You do not have access to that page. ".$error_string;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
