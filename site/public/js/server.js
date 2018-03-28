@@ -946,9 +946,6 @@ function saveScrollLocationOnRefresh(className){
 }
 
 function replyPost(post_id){
-    if($('#'+post_id).attr('reply-level') >=7){
-        alert("Notice: Any further replies will not be indented.");
-    }
     if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
         $('#'+ post_id + '-reply').css("display","none");
     } else {
