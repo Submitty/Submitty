@@ -3,7 +3,7 @@
 import argparse
 import os
 
-INI_PATH = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/site/public/hwgrading/toolbox/configs/"
+INI_PATH = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/site/config/"
 INI_FILE = "student_csv_fields.ini"
 INI_OWNER = "__INSTALL__FILLIN__HWPHP_USER__"
 

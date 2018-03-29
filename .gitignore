@@ -18,11 +18,6 @@ logs/
 *.out
 *.synctex.gz
 
-TAGradingServer/toolbox/configs/*
-!TAGradingServer/toolbox/configs/master_template.php
-!TAGradingServer/toolbox/configs/sample_course.php
-!TAGradingServer/toolbox/configs/course_template.php
-
 /site/config/*
 !/site/config/master_template.ini
 !/site/config/course_template.ini

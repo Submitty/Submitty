@@ -84,9 +84,6 @@ HTML;
 
         if ($this->core->getConfig()->isCourseLoaded() && $this->core->userLoaded()) {
             if($this->core->getUser()->accessGrading()) {
-                $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
-                $semester = $this->core->getConfig()->getSemester();
-                $course = $this->core->getConfig()->getCourse();
                 if($this->core->getUser()->accessAdmin()) {
                     $return .= <<<HTML
     <div id="nav">

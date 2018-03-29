@@ -197,7 +197,6 @@ if auth == 1:
 else:
     AUTHENTICATION_METHOD = 'DatabaseAuthentication'
 
-TAGRADING_URL = SUBMISSION_URL + '/hwgrading'
 CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
 ##############################################################################
@@ -253,7 +252,6 @@ obj['authentication_method'] = AUTHENTICATION_METHOD
 
 obj['submission_url'] = SUBMISSION_URL
 obj['vcs_url'] = VCS_URL
-obj['tagrading_url'] = TAGRADING_URL
 obj['cgi_url'] = CGI_URL
 
 obj['autograding_log_path'] = AUTOGRADING_LOG_PATH

@@ -16,12 +16,8 @@ HTML;
     }
 
     public function showGradeables($sections_to_list) {
-        $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
         $return = "";
-
 
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (typically used for exam seating assignments)
@@ -52,8 +48,6 @@ HTML;
             $return .= <<<HTML
         <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page'))}">New Gradeable</a>
         <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config'))}">Upload Config & Review Build Output</a>
-
-        <!--<button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
 HTML;
         }
 
@@ -555,7 +549,6 @@ HTML;
                 }
                 else{
                     $gradeable_open_range = '';
-                    //<!--onclick="location.href='{$ta_base_url}/account/account-checkpoints-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">-->
                     if($g_data->getType() == GradeableType::CHECKPOINTS){
                        $gradeable_grade_range = <<<HTML
                 <a class="btn {$title_to_button_type_grading[$title]} btn-nav" \\
@@ -563,7 +556,6 @@ HTML;
                 {$gradeable_grade_range}</a>
 HTML;
                     }
-                    // onclick="location.href='{$ta_base_url}/account/account-numerictext-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                     elseif($g_data->getType() == GradeableType::NUMERIC_TEXT){
                         $gradeable_grade_range = <<<HTML
                 <a class="btn {$title_to_button_type_grading[$title]} btn-nav" \\
