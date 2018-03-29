@@ -40,10 +40,10 @@ def get_queue_time(next_directory,next_to_grade):
     return t
 
 
-def load_queue_file_obj(next_directory,next_to_grade):
+def load_queue_file_obj(job_id,next_directory,next_to_grade):
     queue_file = os.path.join(next_directory,next_to_grade)
     if not os.path.isfile(queue_file):
-        grade_items_logging.log_message(message="ERROR: the file does not exist " + queue_file)
+        grade_items_logging.log_message(job_id,message="ERROR: the file does not exist " + queue_file)
         raise RuntimeError("ERROR: the file does not exist",queue_file)
     with open(queue_file, 'r') as infile:
         obj = json.load(infile)
@@ -94,18 +94,18 @@ def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
 # it will create directories as needed
 # it's ok if the target directory or subdirectories already exist
 # it will overwrite files with the same name if they exist
-def copy_contents_into(source,target,tmp_logs):
+def copy_contents_into(job_id,source,target,tmp_logs):
     if not os.path.isdir(target):
-        grade_items_logging.log_message(message="ERROR: the target directory does not exist " + target)
+        grade_items_logging.log_message(job_id,message="ERROR: the target directory does not exist " + target)
         raise RuntimeError("ERROR: the target directory does not exist '", target, "'")
     if os.path.isdir(source):
         for item in os.listdir(source):
             if os.path.isdir(os.path.join(source,item)):
                 if os.path.isdir(os.path.join(target,item)):
                     # recurse
-                    copy_contents_into(os.path.join(source,item),os.path.join(target,item),tmp_logs)
+                    copy_contents_into(job_id,os.path.join(source,item),os.path.join(target,item),tmp_logs)
                 elif os.path.isfile(os.path.join(target,item)):
-                    grade_items_logging.log_message(message="ERROR: the target subpath is a file not a directory '" + os.path.join(target,item) + "'")
+                    grade_items_logging.log_message(job_id,message="ERROR: the target subpath is a file not a directory '" + os.path.join(target,item) + "'")
                     raise RuntimeError("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
                 else:
                     # copy entire subtree
@@ -212,15 +212,19 @@ def unzip_queue_file(zipfilename):
 # ==================================================================================
 def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade):
     os.chdir(SUBMITTY_DATA_DIR)
+
+    # generate a random id to be used to track this job in the autograding logs
+    job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+
     # --------------------------------------------------------
     # figure out what we're supposed to grade & error checking
-    obj = load_queue_file_obj(next_directory,next_to_grade)
+    obj = load_queue_file_obj(job_id,next_directory,next_to_grade)
 
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
     if not os.path.isdir(submission_path):
-        grade_items_logging.log_message(message="ERROR: the submission directory does not exist" + submission_path)
+        grade_items_logging.log_message(job_id,message="ERROR: the submission directory does not exist" + submission_path)
         raise RuntimeError("ERROR: the submission directory does not exist",submission_path)
     print(which_machine,which_untrusted,"prepare zip",submission_path)
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
@@ -232,7 +236,6 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     queue_time_longstring = dateutils.write_submitty_date(queue_time)
     grading_began = dateutils.get_current_time()
     waittime = (grading_began-queue_time).total_seconds()
-    job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
     grade_items_logging.log_message(job_id,is_batch_job,"zip",item_name,"wait:",waittime,"")
 
     # --------------------------------------------------------------------
@@ -460,7 +463,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         pattern_copy("checkout_to_compilation",patterns_submission_to_compilation,checkout_subdir_path,tmp_compilation,tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
-    copy_contents_into(provided_code_path,tmp_compilation,tmp_logs)
+    copy_contents_into(job_id,provided_code_path,tmp_compilation,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
@@ -532,7 +535,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
         
     # copy input files to tmp_work directory
-    copy_contents_into(test_input_path,tmp_work,tmp_logs)
+    copy_contents_into(job_id,test_input_path,tmp_work,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
@@ -612,10 +615,10 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     shutil.rmtree(tmp_compilation)
 
     # copy output files to tmp_work directory
-    copy_contents_into(test_output_path,tmp_work,tmp_logs)
+    copy_contents_into(job_id,test_output_path,tmp_work,tmp_logs)
 
     # copy any instructor custom validation code into the tmp work directory
-    copy_contents_into(custom_validation_code_path,tmp_work,tmp_logs)
+    copy_contents_into(job_id,custom_validation_code_path,tmp_work,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 

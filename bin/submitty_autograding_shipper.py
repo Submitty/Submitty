@@ -252,7 +252,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
     try:
         grade_item.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
     except:
-        grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when unpacking zip")
+        grade_items_logging.log_message(JOB_ID,jobname=next_to_grade,message="ERROR: Exception when unpacking zip")
         with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
 
