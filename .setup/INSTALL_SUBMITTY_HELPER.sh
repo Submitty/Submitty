@@ -672,6 +672,9 @@ do
     chmod 770 $mydir
 done
 
+# If the submitty_autograding_shipper.service or submitty_autograding_worker.service
+# files have changed, we should reload the units:
+systemctl daemon-reload
 
 # start the shipper daemon (if it was running)
 if [[ "$is_shipper_active_before" == "0" ]]; then
