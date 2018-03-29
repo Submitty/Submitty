@@ -320,15 +320,9 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 # everyone needs to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/killall.py
 
-
-# FIXME / WIP:  line below is temporary, to avoid error message if file does not exist
-touch ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-
-
 # hwcron only things
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
@@ -336,7 +330,6 @@ chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
