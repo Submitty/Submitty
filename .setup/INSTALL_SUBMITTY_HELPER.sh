@@ -299,12 +299,6 @@ for i in "${array[@]}"; do
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
 done
 
-# course builders & hwcron need access to these scripts
-chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
-
 # everyone needs to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/killall.py
 
