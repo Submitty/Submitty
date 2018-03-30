@@ -29,6 +29,9 @@ SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
 SUBMITTY_INSTALL_DIR= "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
+
+JOB_ID = '~SHIP~'
+
 # ==================================================================================
 def initialize(untrusted_queue):
     """
@@ -69,7 +72,7 @@ def update_foreign_autograding_worker_json(name, entry):
         host = autograding_worker_to_ship[name]['address']
     except Exception as e:
         print("ERROR: autograding_workers.json entry for {0} is malformatted. {1}".format(e, name))
-        grade_items_logging.log_message(message="ERROR: autograding_workers.json entry for {0} is malformatted. {1}".format(e, name))
+        grade_items_logging.log_message(JOB_ID, message="ERROR: autograding_workers.json entry for {0} is malformatted. {1}".format(e, name))
         return
 
     #create a new temporary json with only the entry for the current machine.
@@ -80,9 +83,9 @@ def update_foreign_autograding_worker_json(name, entry):
         try:
             shutil.move(tmp_json_path,foreign_json)
             print("Successfully updated local autograding_TODO/autograding_worker.json")
-            grade_items_logging.log_message(message="Successfully updated local autograding_TODO/autograding_worker.json")
+            grade_items_logging.log_message(JOB_ID, message="Successfully updated local autograding_TODO/autograding_worker.json")
         except Exception as e:
-            grade_items_logging.log_message(message="ERROR: could not mv to local autograding_TODO/autograding_worker.json due to the following error: "+str(e))
+            grade_items_logging.log_message(JOB_ID, message="ERROR: could not mv to local autograding_TODO/autograding_worker.json due to the following error: "+str(e))
             print("ERROR: could not mv to local autograding_worker.json due to the following error: {0}".format(e))
         finally:
             os.close(fd)
@@ -100,9 +103,9 @@ def update_foreign_autograding_worker_json(name, entry):
 
             sftp.close()
             print("Successfully forwarded autograding_worker.json to {0}".format(name))
-            grade_items_logging.log_message(message="Successfully forwarded autograding_worker.json to {0}".format(name))
+            grade_items_logging.log_message(JOB_ID, message="Successfully forwarded autograding_worker.json to {0}".format(name))
         except Exception as e:
-            grade_items_logging.log_message(message="ERROR: could not sftp to foreign autograding_TODO/autograding_worker.json due to the following error: "+str(e))
+            grade_items_logging.log_message(JOB_ID, message="ERROR: could not sftp to foreign autograding_TODO/autograding_worker.json due to the following error: "+str(e))
             print("ERROR: could sftp to foreign autograding_TODO/autograding_worker.json due to the following error: {0}".format(e))
             success = False
         finally:
@@ -115,7 +118,7 @@ def update_foreign_autograding_worker_json(name, entry):
 def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade):
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
-        grade_items_logging.log_message(message="ERROR: must be run by hwcron")
+        grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
     if which_machine == 'localhost':
@@ -137,7 +140,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             queue_obj["which_machine"] = which_machine
             queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
     except Exception as e:
-        grade_items_logging.log_message(message="ERROR: failed preparing submission zip or accessing next to grade "+str(e))
+        grade_items_logging.log_message(JOB_ID, message="ERROR: failed preparing submission zip or accessing next to grade "+str(e))
         print("ERROR: failed preparing submission zip or accessing next to grade ", e)
         return False
 
@@ -148,7 +151,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             with open(todo_queue_file, 'w') as outfile:
                 json.dump(queue_obj, outfile, sort_keys=True, indent=4)
         except Exception as e:
-            grade_items_logging.log_message(message="ERROR: could not move files due to the following error: "+str(e))
+            grade_items_logging.log_message(JOB_ID, message="ERROR: could not move files due to the following error: "+str(e))
             print("ERROR: could not move files due to the following error: {0}".format(e))
             return False
     else:
@@ -170,7 +173,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             print("Successfully forwarded files to {0}".format(my_name))
             success = True
         except Exception as e:
-            grade_items_logging.log_message(message="ERROR: could not move files due to the following error: "+str(e))
+            grade_items_logging.log_message(JOB_ID, message="ERROR: could not move files due to the following error: "+str(e))
             print("Could not move files due to the following error: {0}".format(e))
             success = False
         finally:
@@ -187,7 +190,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
 def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
-        grade_items_logging.log_message(message="ERROR: must be run by hwcron")
+        grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by hwcron")
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
     if which_machine == 'localhost':
@@ -233,7 +236,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         #In this more general case, we do want to print what the error was.
         #TODO catch other types of exception as we identify them.
         except Exception as e:
-            grade_items_logging.log_message(message="ERROR: Could not retrieve the file from the foreign machine "+str(e))
+            grade_items_logging.log_message(JOB_ID, message="ERROR: Could not retrieve the file from the foreign machine "+str(e))
             print("ERROR: Could not retrieve the file from the foreign machine.\nERROR: {0}".format(e))
             os.remove(local_results_zip)
             os.remove(local_done_queue_file)
@@ -249,7 +252,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
     try:
         grade_item.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
     except:
-        grade_items_logging.log_message(jobname=next_to_grade,message="ERROR: Exception when unpacking zip")
+        grade_items_logging.log_message(JOB_ID,jobname=next_to_grade,message="ERROR: Exception when unpacking zip")
         with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
 
@@ -297,7 +300,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
 
     except Exception as e:
         print (my_name, " ERROR attempting to grade item: ", queue_file, " exception=",str(e))
-        grade_items_logging.log_message(message=str(my_name)+" ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
+        grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
 
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
@@ -305,12 +308,12 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         os.remove(queue_file)
     except Exception as e:
         print (my_name, " ERROR attempting to remove queue file: ", queue_file, " exception=",str(e))
-        grade_items_logging.log_message(message=str(my_name)+" ERROR attempting to remove queue file: " + queue_file + " exception=" + str(e))
+        grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR attempting to remove queue file: " + queue_file + " exception=" + str(e))
     try:
         os.remove(grading_file)
     except Exception as e:
         print (my_name, " ERROR attempting to remove grading file: ", grading_file, " exception=",str(e))
-        grade_items_logging.log_message(message=str(my_name)+" ERROR attempting to remove grading file: " + grading_file + " exception=" + str(e))
+        grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR attempting to remove grading file: " + grading_file + " exception=" + str(e))
 
 
 # ==================================================================================
@@ -387,7 +390,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
     time_delta = time_get_job_end-time_get_job_begin
     if time_delta > datetime.timedelta(milliseconds=100):
         print (my_name, " WARNING: submitty_autograding shipper get_job time ", time_delta)
-        grade_items_logging.log_message(message=str(my_name)+" WARNING: submitty_autograding shipper get_job time "+str(time_delta))
+        grade_items_logging.log_message(JOB_ID, message=str(my_name)+" WARNING: submitty_autograding shipper get_job time "+str(time_delta))
 
     return my_job
 
@@ -425,7 +428,7 @@ def shipper_process(my_name, which_machine,my_capabilities,which_untrusted,overa
         except Exception as e:
             my_message = "ERROR in get_job " + which_machine + " " + which_untrusted + " " + str(e)
             print (my_message)
-            grade_items_logging.log_message(message=my_message)
+            grade_items_logging.log_message(JOB_ID, message=my_message)
             time.sleep(1)
 
 
@@ -438,19 +441,19 @@ def launch_shippers():
     if not int(os.getuid()) == int(HWCRON_UID):
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
 
-    grade_items_logging.log_message(message="grade_scheduler.py launched")
+    grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py launched")
 
     # Clean up old files from previous shipping/autograding (any
     # partially completed work will be re-done)
     for file_path in glob.glob(os.path.join(INTERACTIVE_QUEUE, "GRADING_*")):
-        grade_items_logging.log_message(message="Remove old queue file: " + file_path)
+        grade_items_logging.log_message(JOB_ID, message="Remove old queue file: " + file_path)
         os.remove(file_path)
 
     for file_path in glob.glob(os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO","unstrusted*")):
-        grade_items_logging.log_message(message="Remove autograding TODO file: " + file_path)
+        grade_items_logging.log_message(JOB_ID, message="Remove autograding TODO file: " + file_path)
         os.remove(file_path)
     for file_path in glob.glob(os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE","*")):
-        grade_items_logging.log_message(message="Remove autograding DONE file: " + file_path)
+        grade_items_logging.log_message(JOB_ID, message="Remove autograding DONE file: " + file_path)
         os.remove(file_path)
 
     # this lock will be used to edit the queue or new job event
@@ -498,7 +501,7 @@ def launch_shippers():
             my_capabilities = machine["capabilities"]
         except Exception as e:
             print("ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name, e))
-            grade_items_logging.log_message(message="ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name,e))
+            grade_items_logging.log_message(JOB_ID, message="ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name,e))
             continue
         # launch the shipper threads
         for i in range(0,num_workers_on_machine):
@@ -516,14 +519,14 @@ def launch_shippers():
                 if processes[i].is_alive:
                     alive = alive+1
                 else:
-                    grade_items_logging.log_message(message="ERROR: process "+str(i)+" is not alive")
+                    grade_items_logging.log_message(JOB_ID, message="ERROR: process "+str(i)+" is not alive")
             if alive != total_num_workers:
-                grade_items_logging.log_message(message="ERROR: #shippers="+str(total_num_workers)+" != #alive="+str(alive))
+                grade_items_logging.log_message(JOB_ID, message="ERROR: #shippers="+str(total_num_workers)+" != #alive="+str(alive))
             #print ("shippers= ",total_num_workers,"  alive=",alive)
             time.sleep(1)
 
     except KeyboardInterrupt:
-        grade_items_logging.log_message(message="grade_scheduler.py keyboard interrupt")
+        grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py keyboard interrupt")
         # just kill everything in this group id right now
         # NOTE:  this may be a bug if the grandchildren have a different group id and not be killed
         os.kill(-os.getpid(), signal.SIGKILL)
@@ -541,7 +544,7 @@ def launch_shippers():
         for i in range(0,total_num_workers):
             processes[i].join()
 
-    grade_items_logging.log_message(message="grade_scheduler.py terminated")
+    grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py terminated")
 
 
 # ==================================================================================
