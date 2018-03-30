@@ -81,6 +81,9 @@ use app\libraries\Utils;
  * @method void setGdId(int $gd_id)
  * @method \DateTime getUserViewedDate()
  * @method float getTotalPeerGradingNonExtraCredit()
+ * @method int getLateDayExceptions()
+ * @method int getAllowedLateDays()
+ * @method int getLateDays()
  */
 class Gradeable extends AbstractModel {
     
@@ -155,7 +158,7 @@ class Gradeable extends AbstractModel {
     protected $subdirectory = "";
 
     /** @property @var int Number of days you can submit */
-    protected $late_days = 0;
+    protected $allowed_late_days = 0;
 
     /** @property @var string Url to any instructions for the gradeable for students */
     protected $instructions_url = "";
@@ -297,6 +300,12 @@ class Gradeable extends AbstractModel {
     /** @property @var int.*/
     protected $max_possible_grading_time = -1;
 
+    /** @property @var int */
+    protected $late_day_exceptions = 0;
+
+    /** @property @var int */
+    protected $late_days = 0;
+
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
         if(!isset($details['g_id'])) {
@@ -321,7 +330,7 @@ class Gradeable extends AbstractModel {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);
             $this->due_date = new \DateTime($details['eg_submission_due_date'], $timezone);
-            $this->late_days = $details['eg_late_days'];
+            $this->allowed_late_days = $details['eg_late_days'];
             $this->is_repository = $details['eg_is_repository'] === true;
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
@@ -347,6 +356,8 @@ class Gradeable extends AbstractModel {
                 $this->graded_auto_hidden_non_extra_credit = floatval($details['autograding_hidden_non_extra_credit']);
                 $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
                 $this->submission_time = new \DateTime($details['submission_time'], $timezone);
+                $this->late_day_exceptions = $details['late_day_exceptions'];
+                $this->late_days = $details['days_late'];
             }
             
             if (isset($details['highest_version']) && $details['highest_version']!== null) {
@@ -478,7 +489,7 @@ class Gradeable extends AbstractModel {
             $this->incentive_message = Utils::prepareHtmlString($details['early_submission_incentive']['message']);
             $this->minimum_days_early = intval($details['early_submission_incentive']['minimum_days_early']);
             $this->minimum_points = intval($details['early_submission_incentive']['minimum_points']);
-	    $this->early_submission_test_cases = $details['early_submission_incentive']['test_cases'];
+            $this->early_submission_test_cases = $details['early_submission_incentive']['test_cases'];
         }
 
         $num_parts = 1;
@@ -816,10 +827,6 @@ class Gradeable extends AbstractModel {
     
     public function hasSubmitted() {
         return $this->getHighestVersion() > 0;
-    }
-
-    public function getAllowedLateDays() {
-        return $this->late_days;
     }
 
     public function getTotalNonHiddenNonExtraCreditPoints() {
