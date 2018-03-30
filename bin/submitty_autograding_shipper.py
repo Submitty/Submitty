@@ -46,7 +46,7 @@ def initialize(untrusted_queue):
 
 # ==================================================================================
 def update_all_foreign_autograding_workers():
-    all_workers_json = os.path.join(SUBMITTY_INSTALL_DIR, 'conf', "autograding_workers.json")
+    all_workers_json = os.path.join(SUBMITTY_INSTALL_DIR, 'config', "autograding_workers.json")
     try:
         with open(all_workers_json, 'r') as infile:
             autograding_workers = json.load(infile)
