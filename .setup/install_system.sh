@@ -228,7 +228,7 @@ tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
 mv /tmp/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
-chmod 755 ${SUBMITTY_INSTALL_DIR}/drmemory
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
 
 popd > /dev/null
 
