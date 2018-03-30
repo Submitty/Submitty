@@ -221,11 +221,14 @@ popd > /dev/null
 pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
-DRMEM_TAG=release_1.10.1
-DRMEM_VER=1.10.1-3
+
+
+
+DRMEM_TAG=release_2.0.0_rc2
+DRMEM_VER=2.0.0-RC2
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
-mv /tmp/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
+rsync --delete -a /tmp/DrMemory-Linux-${DRMEM_VER}/ ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
 chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
