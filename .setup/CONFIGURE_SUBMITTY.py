@@ -307,7 +307,7 @@ os.chmod(CONFIGURATION_JSON, 0o500)
 ##############################################################################
 # Setup ${SUBMITTY_INSTALL_DIR}/conf
 
-CONF_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'conf')
+CONF_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 
 DATABASE_JSON = os.path.join(CONF_INSTALL_DIR, 'database.json')
 SUBMITTY_JSON = os.path.join(CONF_INSTALL_DIR, 'submitty.json')
@@ -387,8 +387,8 @@ config['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 with open(USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
-shutil.chown(DATABASE_JSON, 'root', HWCRON_GROUP)
-os.chmod(DATABASE_JSON, 0o440)
+shutil.chown(USERS_JSON, 'root', HWCRON_GROUP)
+os.chmod(USERS_JSON, 0o440)
 
 ##############################################################################
 
