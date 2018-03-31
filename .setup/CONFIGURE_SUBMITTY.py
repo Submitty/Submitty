@@ -305,20 +305,20 @@ with open(CONFIGURATION_JSON, 'w') as json_file:
 os.chmod(CONFIGURATION_JSON, 0o500)
 
 ##############################################################################
-# Setup ${SUBMITTY_INSTALL_DIR}/conf
+# Setup ${SUBMITTY_INSTALL_DIR}/config
 
-CONF_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
+CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 
-DATABASE_JSON = os.path.join(CONF_INSTALL_DIR, 'database.json')
-SUBMITTY_JSON = os.path.join(CONF_INSTALL_DIR, 'submitty.json')
-USERS_JSON = os.path.join(CONF_INSTALL_DIR, 'users.json')
-WORKERS_JSON = os.path.join(CONF_INSTALL_DIR, 'autograding_workers.json')
+DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
+SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
+SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
+WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 
-if os.path.isdir(CONF_INSTALL_DIR):
-    shutil.rmtree(CONF_INSTALL_DIR)
-os.makedirs(CONF_INSTALL_DIR, exist_ok=True)
-shutil.chown(CONF_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
-os.chmod(CONF_INSTALL_DIR, 0o755)
+if os.path.isdir(CONFIG_INSTALL_DIR):
+    shutil.rmtree(CONFIG_INSTALL_DIR)
+os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
+shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
+os.chmod(CONFIG_INSTALL_DIR, 0o755)
 
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/conf
@@ -382,13 +382,12 @@ config['hwphp_gid'] = HWPHP_GID
 config['hwphp_user'] = HWPHP_USER
 config['hwcgi_user'] = HWCGI_USER
 config['hwcron_user'] = HWCRON_USER
-config['hwcronphp_group'] = HWCRONPHP_GROUP
-config['course_builders_group'] = COURSE_BUILDERS_GROUP
+config['hwcronphp_group'] = HWCRONPHP_GROUP config['course_builders_group'] = COURSE_BUILDERS_GROUP
 
-with open(USERS_JSON, 'w') as json_file:
+with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
-shutil.chown(USERS_JSON, 'root', HWCRON_GROUP)
-os.chmod(USERS_JSON, 0o440)
+shutil.chown(SUBMITTY_USERS_JSON, 'root', HWCRON_GROUP)
+os.chmod(SUBMITTY_USERS_JSON, 0o440)
 
 ##############################################################################
 
