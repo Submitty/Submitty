@@ -139,6 +139,7 @@ pip3 install watchdog
 pip3 install xlsx2csv
 pip3 install pause
 pip3 install paramiko
+pip3 install tzlocal
 
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages

@@ -382,7 +382,8 @@ config['hwphp_gid'] = HWPHP_GID
 config['hwphp_user'] = HWPHP_USER
 config['hwcgi_user'] = HWCGI_USER
 config['hwcron_user'] = HWCRON_USER
-config['hwcronphp_group'] = HWCRONPHP_GROUP config['course_builders_group'] = COURSE_BUILDERS_GROUP
+config['hwcronphp_group'] = HWCRONPHP_GROUP
+config['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
