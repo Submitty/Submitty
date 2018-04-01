@@ -905,7 +905,7 @@ ORDER BY user_id ASC");
     /**
      * This inserts an row in the electronic_gradeable_data table for a given gradeable/user/version combination.
      * The values for the row are set to defaults (0 for numerics and NOW() for the timestamp) with the actual values
-     * to be later filled in by the submitty_grading_scheduler.py and insert_database_version_data.py scripts.
+     * to be later filled in by the submitty_autograding_shipper.py and insert_database_version_data.py scripts.
      * We do it this way as we can properly deal with the
      * electronic_gradeable_version table here as the "active_version" is a concept strictly within the PHP application
      * code and the grading scripts have no concept of it. This will either update or insert the row in
@@ -1445,6 +1445,44 @@ WHERE gcm_id=?", $params);
         }
 
         return $teams;
+    }
+
+    /**
+     * Add ($g_id,$user_id) pair to table seeking_team
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function addToSeekingTeam($g_id,$user_id) {
+        $this->course_db->query("INSERT INTO seeking_team(g_id, user_id) VALUES (?,?)", array($g_id, $user_id));
+    }
+
+    /**
+     * Remove ($g_id,$user_id) pair from table seeking_team
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function removeFromSeekingTeam($g_id,$user_id) {
+        $this->course_db->query("DELETE FROM seeking_team WHERE g_id=? AND user_id=?", array($g_id, $user_id));
+    }
+
+    /**
+     * Return an array of user_id who are seeking team who passed gradeable_id
+     * @param string $g_id
+     * @return array $users_seeking_team
+     */
+    public function getUsersSeekingTeamByGradeableId($g_id) {
+        $this->course_db->query("
+          SELECT user_id
+          FROM seeking_team
+          WHERE g_id=?
+          ORDER BY user_id",
+            array($g_id));
+
+        $users_seeking_team = array();
+        foreach($this->course_db->rows() as $row) {
+            array_push($users_seeking_team,$row['user_id']);
+        }
+        return $users_seeking_team;
     }
 
     /**

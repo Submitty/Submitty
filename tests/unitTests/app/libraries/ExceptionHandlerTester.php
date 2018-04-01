@@ -40,12 +40,12 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($tmp_dir, 'site_errors')));
         Logger::setLogPath($tmp_dir);
         $default_zone = "America/New_York";
-        $timezone = file_get_contents("/etc/timezone");
+        $timezone = trim(file_get_contents("/etc/timezone"));
         if (!strlen($timezone)) {
             $timezone = $default_zone;
         }
         date_default_timezone_set($timezone);
-        //date_default_timezone_set("America/New_York");
+
         $date = getdate(time());
         $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']).'.log';
         ExceptionHandler::setDisplayExceptions(false);

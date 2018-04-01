@@ -9,9 +9,6 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-# TIMEZONE
-#timedatectl set-timezone America/Los_Angeles #America/New_York
-
 #################################################################
 # CONSTANTS
 #################
@@ -138,6 +135,7 @@ pip3 install python-dateutil
 pip3 install watchdog
 pip3 install xlsx2csv
 pip3 install pause
+pip3 install paramiko
 
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
@@ -386,9 +384,11 @@ fi
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
 # (re)start the submitty grading scheduler daemon
-systemctl restart submitty_grading_scheduler
+systemctl restart submitty_autograding_shipper
+systemctl restart submitty_autograding_worker
 # also, set it to automatically start on boot
-sudo systemctl enable submitty_grading_scheduler
+sudo systemctl enable submitty_autograding_shipper
+sudo systemctl enable submitty_autograding_worker
 
 
 

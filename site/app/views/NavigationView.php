@@ -10,6 +10,7 @@ $timezone = file_get_contents("/etc/timezone");
 if (!strlen($timezone)) {
     $timezone = $default_zone;
 }
+$timezone = trim($timezone);
 date_default_timezone_set($timezone);
 
 class NavigationView extends AbstractView {
