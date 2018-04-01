@@ -95,7 +95,7 @@ class Config extends AbstractModel {
     /** @property @var string */
     protected $authentication;
     /** @property @var string */
-    protected $timezone;
+    protected $timezone = 'America/New_York'; //Default to EST
     /** @property @var string */
     protected $submitty_path;
     /** @property @var string */
@@ -174,27 +174,10 @@ class Config extends AbstractModel {
      * @param Core   $core
      */
     public function __construct(Core $core, $semester, $course) {
-
-
         parent::__construct($core);
 
-        $default_zone = "America/New_York";
-        $timezone = file_get_contents("/etc/timezone");
-        if (!strlen($timezone)) {
-            $timezone = $default_zone;
-        }
-        $timezone = trim($timezone);
-
-        $this->timezone = $timezone;
         $this->semester = $semester;
         $this->course = $course;
-
-        $default_zone = "America/New_York";
-        $timezone = file_get_contents('/etc/timezone');
-        if (!strlen($timezone)) {
-            $timezone = $default_zone;
-        }
-        $this->timezone = trim($timezone);
     }
 
     public function loadMasterIni($master_ini_path) {
@@ -212,7 +195,8 @@ class Config extends AbstractModel {
 
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
-        $this->setConfigValues($master, 'site_details', array('base_url', 'vcs_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
+        $this->setConfigValues($master, 'site_details', array('base_url', 'vcs_url', 'cgi_url', 'ta_base_url',
+            'submitty_path', 'authentication'));
 
         if (!isset($master['database_details']) || !is_array($master['database_details'])) {
             throw new ConfigException("Missing config section database_details in ini file");

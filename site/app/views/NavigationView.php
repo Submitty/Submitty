@@ -3,15 +3,10 @@
 namespace app\views;
 
 use \app\libraries\GradeableType;
+use app\models\Config;
 use app\models\Gradeable;
 
-$default_zone = "America/New_York";
-$timezone = file_get_contents("/etc/timezone");
-if (!strlen($timezone)) {
-    $timezone = $default_zone;
-}
-$timezone = trim($timezone);
-date_default_timezone_set($timezone);
+date_default_timezone_set(Config::timezone);
 
 class NavigationView extends AbstractView {
     public function noAccessCourse() {

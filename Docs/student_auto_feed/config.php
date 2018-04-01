@@ -36,12 +36,7 @@
  * -------------------------------------------------------------------------- */
 
 // Univeristy campus's timezone.  ***THIS NEEDS TO BE SET.
-$default_zone = "America/New_York";
-$timezone = file_get_contents("/etc/timezone");
-if (!strlen($timezone)) {
-    $timezone = $default_zone;
-}
-date_default_timezone_set($timezone);
+date_default_timezone_set(\app\models\Config::timezone);
 
 
 
