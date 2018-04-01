@@ -511,8 +511,12 @@ class SubmissionController extends AbstractController {
 
         $max_size = $gradeable->getMaxSize();
 
+        $path = rawurldecode(htmlspecialchars_decode($path));
+
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $path);
+
+        $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
 
         // copy over the uploaded file
         if (isset($uploaded_file)) {
@@ -569,7 +573,7 @@ class SubmissionController extends AbstractController {
 
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
-        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
+        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
             implode("__", $queue_file));
 
         // create json file...
@@ -639,10 +643,12 @@ class SubmissionController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $gradeable_list[$gradeable_id];
         $gradeable->loadResultDetails();
-        $path = $_POST['path'];
+        $path = rawurldecode(htmlspecialchars_decode($_POST['path']));
 
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $path);
+
+        $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
 
         if (!@unlink($uploaded_file)) {
             return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
@@ -1055,7 +1061,7 @@ class SubmissionController extends AbstractController {
 
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
-        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
+        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
             implode("__", $queue_file));
 
         // create json file...

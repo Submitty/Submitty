@@ -35,7 +35,7 @@ def anon_log(in_filename,out_filename,offset):
                 if len(tokens) == 6:
                     # pre f17
                     timestamp = tokens[0]
-                    process = tokens[1]
+                    job_id = tokens[1]
                     batch = tokens[2]
                     untrusted = "           "
                     which = tokens[3].strip()
@@ -55,7 +55,7 @@ def anon_log(in_filename,out_filename,offset):
                 elif len(tokens) == 7:
                     # f17 or later
                     timestamp = tokens[0]
-                    process = tokens[1]
+                    job_id = tokens[1]
                     batch = tokens[2]
                     untrusted = tokens[3]                
                     which=tokens[4].strip()
@@ -80,7 +80,7 @@ def anon_log(in_filename,out_filename,offset):
 
                 anon_which = semester+"/"+course+"/submissions/"+assignment+"/"+hash+"/"+version
                 outfile.write('{0}|{1}|{2}|{3}| {4:76}|{5}|{6}\n'
-                              .format(timestamp,process,batch,untrusted,anon_which,waitgrade,result))
+                              .format(timestamp,job_id,batch,untrusted,anon_which,waitgrade,result))
                 
 
 def anon_dir(indir,outdir,offset):
@@ -91,7 +91,12 @@ def anon_dir(indir,outdir,offset):
         print("processing... "+file)
         anon_log(indir+"/"+file,outdir+"/"+file,offset)
 
-        
+
+if len(sys.argv) == 5 and sys.argv[1]=="file":
+    anon_log(sys.argv[2],sys.argv[3],sys.argv[4])
+    exit();
+
+
 if len(sys.argv) != 4:
     print ("ERROR! 3 arguments required: log_directory output_directory offset")
     exit();
