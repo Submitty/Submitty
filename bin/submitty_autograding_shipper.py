@@ -46,7 +46,7 @@ def initialize(untrusted_queue):
 
 # ==================================================================================
 def update_all_foreign_autograding_workers():
-    all_workers_json = os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "autograding_workers.json")
+    all_workers_json = os.path.join(SUBMITTY_INSTALL_DIR, 'config', "autograding_workers.json")
     try:
         with open(all_workers_json, 'r') as infile:
             autograding_workers = json.load(infile)
@@ -463,7 +463,7 @@ def launch_shippers():
     # worker machine, and the number of workers per machine are stored
     # in the autograding_workers json.
     try:
-        autograding_workers_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "autograding_workers.json")
+        autograding_workers_path = os.path.join(SUBMITTY_INSTALL_DIR, 'config', "autograding_workers.json")
         with open(autograding_workers_path, 'r') as infile:
             autograding_workers = json.load(infile)
     except Exception as e:
