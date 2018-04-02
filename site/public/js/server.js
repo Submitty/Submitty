@@ -962,22 +962,22 @@ function hideReplies(){
 }
 
 function hidePosts(text, id) {
-    var currentLevel = $(text).parent().attr("reply-level");
+    var currentLevel = parseInt($(text).parent().attr("reply-level"));
     var selector = $(text).parent().next().next();
     var counter = 0;
     var parent_status = "[-]";``
     if (text.innerHTML != "[-]") {
         text.innerHTML = "[-]";
         while (selector.attr("reply-level") > currentLevel) {
-             $(selector).show();
-              selector = $(selector).next().next();
+            $(selector).show();
             if($(selector).children()[0].innerHTML != "[-]"){
-
-                while(selector.attr("reply-level") > currentLevel+1){
+                var nextLvl = parseInt($(selector).next().next().attr("reply-level"));
+                while(nextLvl > (currentLevel+1)){
                     selector = $(selector).next().next();
+                    nextLvl = $(selector).next().next().attr("reply-level");
                 }
-            }
-
+            } 
+            selector = $(selector).next().next();
         }
         
     } else {
@@ -986,7 +986,11 @@ function hidePosts(text, id) {
             selector = $(selector).next().next();
             counter++;
         }
-        text.innerHTML = "[+" + counter + "]";
+        if(counter != 0){
+            text.innerHTML = "[+" + counter + "]";
+        } else {
+            text.innerHTML = "[-]";
+        }
     }
 
 }
