@@ -270,6 +270,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
     categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
     categories.insert("DEVICE_MANAGEMENT_NEW_DEVICE");
+    categories.insert("ALLOW_SYSTEM_CALL_CATEGORY_TGKILL");
   } 
 
   // ---------------------------------------------------------------
