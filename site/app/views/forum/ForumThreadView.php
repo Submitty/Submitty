@@ -47,7 +47,8 @@ class ForumThreadView extends AbstractView {
 
 			$( document ).ready(function() {
 			    enableTabsInTextArea('post_content');
-			    saveScrollLocationOnRefresh('thread_list');
+				saveScrollLocationOnRefresh('thread_list');
+				addCollapsable();
 			});
 
 		</script>
@@ -440,7 +441,7 @@ HTML;
 						//end code segment handling
 						if(!$first){
 							$return .= <<<HTML
-							<a class="expand" style="float:right; text-decoration:none" onClick="hidePosts(this, {$post['id']})">[-]</a>
+							<a class="expand" style="float:right; text-decoration:none" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 						}
 						$return .= <<<HTML

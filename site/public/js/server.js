@@ -953,11 +953,22 @@ function replyPost(post_id){
         $('#'+ post_id + '-reply').css('display', 'block');
     }
 }
-
+/*This function ensures that only one reply box is open at a time*/
 function hideReplies(){
     var hide_replies = document.getElementsByClassName("reply-box");
     for(var i = 0; i < hide_replies.length; i++){
         hide_replies[i].style.display = "none"; 
+    }
+}
+
+/*This function makes sure that only posts with children will have the collapse function*/
+function addCollapsable(){
+    debugger;
+    var posts = $(".post_box").toArray();
+    for(var i = 1; i < posts.length; i++){
+        if(parseInt($(posts[i]).next().next().attr("reply-level")) > parseInt($(posts[i]).attr("reply-level"))){
+            posts[i].children[0].innerHTML = "[-]";
+        }
     }
 }
 
