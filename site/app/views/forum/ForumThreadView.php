@@ -48,9 +48,7 @@ class ForumThreadView extends AbstractView {
 			$( document ).ready(function() {
 			    enableTabsInTextArea('post_content');
 				saveScrollLocationOnRefresh('thread_list');
-				var previous_scroll_position = localStorage.getItem("scroll_position");
-				document.getElementById('posts_list').scrollTop = previous_scroll_position;
-				localStorage.setItem("scroll_position", 0);
+
 			});
 
 		</script>

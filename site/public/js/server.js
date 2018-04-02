@@ -943,11 +943,14 @@ function saveScrollLocationOnRefresh(className){
             $(element).scrollTop(sessionStorage.scrollTop);
         }
     });
+    var previous_scroll_position = sessionStorage.getItem("scroll_position");
+    document.getElementById('posts_list').scrollTop = previous_scroll_position;
+    sessionStorage.setItem("scroll_position", 0);
 }
 
 function replyPost(post_id){
     var scroll_position = document.getElementById("posts_list").scrollTop;
-    localStorage.setItem("scroll_position", scroll_position);
+    sessionStorage.setItem("scroll_position", scroll_position);
     if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
         $('#'+ post_id + '-reply').css("display","none");
     } else {
