@@ -1,5 +1,7 @@
 <?php
 
+use app\libraries\Core;
+
 /* HEADING ---------------------------------------------------------------------
  *
  * config.php script used by submitty_student_auto_feed
@@ -36,7 +38,8 @@
  * -------------------------------------------------------------------------- */
 
 // Univeristy campus's timezone.  ***THIS NEEDS TO BE SET.
-date_default_timezone_set(\app\models\Config::timezone);
+$core = new Core();
+date_default_timezone_set($core->getConfig()->getTimezone());
 
 
 

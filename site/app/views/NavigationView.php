@@ -5,8 +5,9 @@ namespace app\views;
 use \app\libraries\GradeableType;
 use app\models\Config;
 use app\models\Gradeable;
+use app\libraries\Core;
 
-date_default_timezone_set(Config::timezone);
+date_default_timezone_set($this->core->getConfig()->getTimezone());
 
 class NavigationView extends AbstractView {
     public function noAccessCourse() {

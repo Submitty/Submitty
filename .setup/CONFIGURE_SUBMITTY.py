@@ -121,7 +121,7 @@ defaults = {'database_host': 'localhost',
             'institution_name' : '',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
             'institution_homepage' : '',
-            'timezone': 'America/New_York'}
+            'timezone' : 'America/New_York'}
 
 loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
@@ -256,6 +256,7 @@ obj['database_password'] = DATABASE_PASS
 obj['authentication_method'] = AUTHENTICATION_METHOD
 
 obj['timezone'] = TIMEZONE
+
 obj['submission_url'] = SUBMISSION_URL
 obj['vcs_url'] = VCS_URL
 obj['tagrading_url'] = TAGRADING_URL

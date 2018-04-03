@@ -106,7 +106,8 @@ if($core->getConfig()->isCourseLoaded()){
     $core->getOutput()->addBreadcrumb("", $core->getConfig()->getCourseHomeUrl(),false, true);
 }
 
-date_default_timezone_set(\app\models\Config::timezone);
+
+date_default_timezone_set($core->getConfig()->getTimezone());
 
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
