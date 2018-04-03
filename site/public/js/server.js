@@ -963,11 +963,10 @@ function hideReplies(){
 
 /*This function makes sure that only posts with children will have the collapse function*/
 function addCollapsable(){
-    debugger;
     var posts = $(".post_box").toArray();
     for(var i = 1; i < posts.length; i++){
         if(parseInt($(posts[i]).next().next().attr("reply-level")) > parseInt($(posts[i]).attr("reply-level"))){
-            posts[i].children[0].innerHTML = "[-]";
+            $(posts[i]).find(".expand")[0].innerHTML = "[-]";
         }
     }
 }
@@ -981,7 +980,7 @@ function hidePosts(text, id) {
         text.innerHTML = "[-]";
         while (selector.attr("reply-level") > currentLevel) {
             $(selector).show();
-            if($(selector).children()[0].innerHTML != "[-]"){
+            if($(selector).find(".expand")[0].innerHTML != "[-]"){
                 var nextLvl = parseInt($(selector).next().next().attr("reply-level"));
                 while(nextLvl > (currentLevel+1)){
                     selector = $(selector).next().next();
