@@ -75,7 +75,7 @@ class Core {
     }
 
     /**
-     * Load the config details for the application. This takes in a file from the site/config/master.ini as well as
+     * Load the config details for the application. This takes in a file from the ../../config/master.ini as well as
      * then a config.ini contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
      * files contain details about how the database, location of files, late days settings, etc.
      *

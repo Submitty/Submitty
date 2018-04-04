@@ -8,8 +8,6 @@ use \app\libraries\ExceptionHandler;
 use \app\libraries\FileUtils;
 use \app\libraries\Logger;
 use app\libraries\Utils;
-use app\models\Config;
-use app\libraries\Core;
 
 class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
     public function testClassVariables() {
@@ -41,8 +39,6 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
         $this->assertTrue(FileUtils::createDir($tmp_dir));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($tmp_dir, 'site_errors')));
         Logger::setLogPath($tmp_dir);
-        $core = new Core();
-        date_default_timezone_set($core->getConfig()->getTimezone());
 
         $date = getdate(time());
         $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']).'.log';

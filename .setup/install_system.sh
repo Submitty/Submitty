@@ -373,7 +373,7 @@ if [ ${VAGRANT} == 1 ]; then
     echo -e "/var/run/postgresql
 hsdbu
 hsdbu
-America/Los_Angeles
+America/New_York
 ${SUBMISSION_URL}
 ${GIT_URL}/git
 

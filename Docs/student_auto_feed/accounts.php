@@ -53,8 +53,7 @@ define('ERROR_E_MAIL', 'sysadmins@lists.myuniversity.edu');
  * -------------------------------------------------------------------------- */
 
 //Univeristy campus's timezone.
-$core = new Core();
-date_default_timezone_set($core->getConfig()->getTimezone()->getName());
+date_default_timezone_set('America/New_York');
 
 //IMPORTANT: This script needs to be run as root!
 if (posix_getuid() !== 0) {
