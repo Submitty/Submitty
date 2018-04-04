@@ -256,12 +256,12 @@ config['database_password'] = DATABASE_PASS
 
 config['authentication_method'] = AUTHENTICATION_METHOD
 
-obj['timezone'] = TIMEZONE
+config['timezone'] = TIMEZONE
 
-obj['submission_url'] = SUBMISSION_URL
-obj['vcs_url'] = VCS_URL
-obj['tagrading_url'] = TAGRADING_URL
-obj['cgi_url'] = CGI_URL
+config['submission_url'] = SUBMISSION_URL
+config['vcs_url'] = VCS_URL
+config['tagrading_url'] = TAGRADING_URL
+config['cgi_url'] = CGI_URL
 
 config['submission_url'] = SUBMISSION_URL
 config['tagrading_url'] = TAGRADING_URL
