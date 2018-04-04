@@ -187,7 +187,7 @@ class ReportController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
-    private function addLateDays(Gradeable $gradeable, &$entry, $total_late_used) {
+    private function addLateDays(Gradeable $gradeable, &$entry, &$total_late_used) {
         $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
         $status = 'Good';
 
@@ -222,6 +222,7 @@ class ReportController extends AbstractController {
         else {
             $entry['days_late'] = 0;
         }
+        $total_late_used += $late_days_used;
     }
 
     private function addProblemScores(Gradeable $gradeable, &$entry) {
