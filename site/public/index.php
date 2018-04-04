@@ -106,7 +106,6 @@ if($core->getConfig()->isCourseLoaded()){
     $core->getOutput()->addBreadcrumb("", $core->getConfig()->getCourseHomeUrl(),false, true);
 }
 
-echo $core->getConfig()->getTimezone()->getName();
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 
 Logger::setLogPath($core->getConfig()->getLogPath());
