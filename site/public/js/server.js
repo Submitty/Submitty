@@ -928,6 +928,10 @@ function setupNumericTextCells() {
     });
 }
 
+function getFileExtension(filename){
+    return (filename.substring(filename.lastIndexOf(".")+1)).toLowerCase();
+}
+
 function openPopUp(css, title, count, testcase_num, side) {
     var element_id = "container_" + count + "_" + testcase_num + "_" + side;
     var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
@@ -938,16 +942,39 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
+function checkForumFileExtensions(files){
+    var count = 0;
+    for(var i = 0; i < files.length; i++){
+        var extension = getFileExtension(files[i].name);
+        if(extension == "gif" || extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp"){
+            count++;
+        }
+    } return count == files.length;
+}
+
+function displayError(message){
+    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + message + '</div>';
+    $('#messages').append(message);
+    $('#messages').fadeIn("slow");
+}
+
+function resetForumFileUploadAfterError(displayPostId){
+    $('#file_name' + displayPostId).html('');
+    document.getElementById('file_input_label' + displayPostId).style.border = "2px solid red";
+    document.getElementById('file_input' + displayPostId).value = null;
+}
+
 function checkNumFilesForumUpload(input, post_id){
     var displayPostId = (typeof post_id !== "undefined") ? "_" + escape(post_id) : "";
     if(input.files.length > 5){
-        $('#file_name' + displayPostId).html('');
-        document.getElementById('file_input_label' + displayPostId).style.border = "2px solid red";
-        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Max file upload size is 5. Please try again.</div>';
-        $('#messages').append(message);
-        $('#messages').fadeIn("slow");
-        document.getElementById('file_input' + displayPostId).value = null;
+        displayError('Max file upload size is 5. Please try again.');
+        resetForumFileUploadAfterError(displayPostId);
     } else {
+        if(!checkForumFileExtensions(input.files)){
+            displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+            resetForumFileUploadAfterError(displayPostId);
+            return;
+        }
         $('#file_name' + displayPostId).html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
         $('#messages').fadeOut();
         document.getElementById('file_input_label' + displayPostId).style.border = "";

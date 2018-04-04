@@ -64,6 +64,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "wc",                      "/usr/bin/wc" },
     { "head",                    "/usr/bin/head" },
     { "tail",                    "/usr/bin/tail" },
+    { "uniq",                    "/usr/bin/uniq" },
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
@@ -874,6 +875,10 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // Instructor still controls the RLIMIT_NPROC max threads.
   // (without this, default desired threads may be based on the system specs)
   setenv("OMP_NUM_THREADS","4",1);
+
+
+  // Haskell compiler needs a home environment variable (but it can be anything)
+  setenv("HOME","/tmp",1);
 
   
   // print this out here (before losing our output)
