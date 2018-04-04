@@ -91,7 +91,7 @@ class Logger {
     private static function log($level=0, $message="") {
 
         $core = new Core();
-        date_default_timezone_set($core->getConfig()->getTimezone());
+        date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 
         if (!isset(Logger::$log_path)) {
             // don't log anything if we don't have a log path set

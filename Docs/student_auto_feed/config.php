@@ -39,7 +39,7 @@ use app\libraries\Core;
 
 // Univeristy campus's timezone.  ***THIS NEEDS TO BE SET.
 $core = new Core();
-date_default_timezone_set($core->getConfig()->getTimezone());
+date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 
 
 
