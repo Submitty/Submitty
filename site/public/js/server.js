@@ -100,24 +100,18 @@ function newUserForm() {
     $("[name='grading_registration_section[]']").prop('checked', false);
 }
 
-function newCopyStudentEmailForm() {
+function newDownloadForm() {
     $('.popup-form').css('display', 'none');
-    var form = $("#copy-student-email-form");
+    var form = $("#download-form");
     form.css("display", "block");
-    $('[name="registered_section"] option[value="NULL"]', form).prop('selected', true);
-    $('#radio1', form).prop('checked', true);
-    $('#radio2', form).prop('checked', false);
-    $('#radio3', form).prop('checked', false);
-}
-
-
-function newCopyGraderEmailForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#copy-grader-email-form");
-    form.css("display", "block");
-    $('#radio1', form).prop('checked', true);
-    $('#radio2', form).prop('checked', false);
-    $('#radio3', form).prop('checked', false);
+    $( "#download-form input:checkbox" ).each(function() {
+        if($(this).val()=="NULL"){
+        	$(this).prop('checked', false);
+        }
+        else{
+        	$(this).prop('checked', true);
+        }	
+ 	});
 }
 
 function newGraderListForm() {
@@ -135,105 +129,137 @@ function newClassListForm() {
     $('[name="upload"]', form).val(null);
 }
 
-function copyStudentEmail(code,emails,emails_corresponding_section) {
-    emails = emails.split(",");
-    emails_corresponding_section = emails_corresponding_section.split(",");
-    var required_emails="";
-    var form = $("#copy-student-email-form");
-    if($('#radio1',form).is(':checked')){
-        var selected_section= $('[name="registered_section"]', form).find(":selected").val();
-        for (var i = 0; i < emails.length; i++) {
-            if(selected_section == emails_corresponding_section[i]){
-                required_emails+=emails[i]+" ";
-            }
-        }
-    }
-    else if($('#radio2',form).is(':checked')){
-        for (var i = 0; i < emails.length; i++) {
-            if(emails_corresponding_section[i]!="NULL"){
-                required_emails+=emails[i]+" ";
-            }
-        }   
-    }
-    else if($('#radio3',form).is(':checked')){
-        for (var i = 0; i < emails.length; i++) {
-            required_emails+=emails[i]+" ";
-        }   
-    }
-    if(code=="copy"){   
-        var temp_element = $("<textarea></textarea>").text(required_emails);
-        $("body").append(temp_element);
-        temp_element.select();
-        document.execCommand('copy');
-        temp_element.remove();
-        setTimeout(function () {
-            $('#copymsgid',form).css( "visibility", "visible" );
-        }, 0);
-        setTimeout(function () {
-            $('#copymsgid',form).css( "visibility", "hidden" );
-        }, 1000);
-    }
-    else if(code=="download"){
-        var temp_element = $('<a id="downloadlink"></a>');
-        var address="data:text/plain;charset=utf-8,"+encodeURIComponent(required_emails);
-        temp_element.attr("href", address);
-        temp_element.attr("download", "mails.txt");
-        temp_element.css("display" ,"none");
-        $("body").append(temp_element);
-        $('#downloadlink')[0].click();
-        $('#downloadlink').remove();
-    }
+function copyToClipboard(code) {
+	var download_info=JSON.parse($('#download_info_json_id').val());
+	var required_emails=[];
+
+	$( "#download-form input:checkbox" ).each(function() {
+        if($(this).is(':checked')){
+        	if($(this).val()=="instructor"){
+        		var i;
+				for (i = 0; i < download_info.length; ++i) {
+				    if(download_info[i].group=="Instructor"){
+				    	required_emails.push(download_info[i].email);
+				    }
+				}
+        	}
+        	else if($(this).val()=="full_access_grader"){
+        		var i;
+				for (i = 0; i < download_info.length; ++i) {
+				    if(download_info[i].group=="Full Access Grader (Grad TA)"){
+				    	required_emails.push(download_info[i].email);
+				    }
+				}
+        	}
+        	else if($(this).val()=="limited_access_grader"){
+        		var i;
+				for (i = 0; i < download_info.length; ++i) {
+				    if(download_info[i].group=="Limited Access Grader (Mentor)"){
+				    	required_emails.push(download_info[i].email);
+				    }
+				}
+        	}
+        	else{
+        		var i;
+				for (i = 0; i < download_info.length; ++i) {
+					if(code=="user"){    
+					    if(download_info[i].reg_section==($(this).val())){
+					    	required_emails.push(download_info[i].email);
+					    }
+					}
+					else if(code=="grader"){
+						if(download_info[i].reg_section=="All"){
+							required_emails.push(download_info[i].email);	
+						}
+						
+						if(jQuery.inArray($(this).val(),download_info[i].reg_section.split(','))!='-1'){
+							required_emails.push(download_info[i].email);	
+						}
+					}    
+				}	
+        	}
+        }	
+ 	});
+	required_emails = $.unique(required_emails);
+	var temp_element = $("<textarea></textarea>").text(required_emails.join(','));
+    $("body").append(temp_element);
+    temp_element.select();
+    document.execCommand('copy');
+    temp_element.remove();
+    setTimeout(function () {
+        $('#copybuttonid').prop('value', 'Copied');
+    }, 0);
+    setTimeout(function () {
+        $('#copybuttonid').prop('value', 'Copy');
+    }, 1000);
 }
 
-function copyGraderEmail(code,emails,emails_corresponding_group) {
-    emails = emails.split(",");
-    emails_corresponding_group = emails_corresponding_group.split(",");
-    var required_emails="";
-    var form = $("#copy-grader-email-form");
-    if($('#radio1',form).is(':checked')){
-        for (var i = 0; i < emails.length; i++) {
-            required_emails+=emails[i]+" ";
-        }
-    }
-    else if($('#radio2',form).is(':checked')){
-        for (var i = 0; i < emails.length; i++) {
-            if(emails_corresponding_group[i]==2){
-                required_emails+=emails[i]+" ";
-            }
-        }   
-    }
-    else if($('#radio3',form).is(':checked')){
-        for (var i = 0; i < emails.length; i++) {
-            if(emails_corresponding_group[i]==3){
-                required_emails+=emails[i]+" ";
-            }
-        }   
-    }
-    if(code=="copy"){   
-        var temp_element = $("<textarea></textarea>").text(required_emails);
-        $("body").append(temp_element);
-        temp_element.select();
-        document.execCommand('copy');
-        temp_element.remove();
-        setTimeout(function () {
-            $('#copymsgid',form).css( "visibility", "visible" );
-        }, 0);
-        setTimeout(function () {
-            $('#copymsgid',form).css( "visibility", "hidden" );
-        }, 1000);
-    }
-    else if(code=="download"){
-        var temp_element = $('<a id="downloadlink"></a>');
-        var address="data:text/plain;charset=utf-8,"+encodeURIComponent(required_emails);
-        temp_element.attr("href", address);
-        temp_element.attr("download", "mails.txt");
-        temp_element.css("display" ,"none");
-        $("body").append(temp_element);
-        $('#downloadlink')[0].click();
-        $('#downloadlink').remove();
-    }
-}
+function downloadCSV(code) {
+    var download_info=JSON.parse($('#download_info_json_id').val());
+	var csv_data='First Name,Last Name,User ID,Email,Registration Section,Rotation Section,Group\n';
+	var required_user_id=[];
 
+	$( "#download-form input:checkbox" ).each(function() {
+        if($(this).is(':checked')){
+        	if($(this).val()=="instructor"){
+        		var i;
+				for (i = 0; i < download_info.length; ++i) {
+				    if((download_info[i].group=="Instructor")&&(jQuery.inArray(download_info[i].user_id,required_user_id)=='-1')){
+				    	csv_data+=download_info[i].first_name+','+download_info[i].last_name+','+download_info[i].user_id+','+download_info[i].email+',"'+download_info[i].reg_section+'",'+download_info[i].rot_section+','+download_info[i].group+'\n';
+				    	required_user_id.push(download_info[i].user_id);
+				    }
+				}
+        	}
+        	else if($(this).val()=="full_access_grader"){
+        		var i;
+				for (i = 0; i < download_info.length; ++i){
+				    if((download_info[i].group=="Full Access Grader (Grad TA)")&&(jQuery.inArray(download_info[i].user_id,required_user_id)=='-1')){
+				    	csv_data+=download_info[i].first_name+','+download_info[i].last_name+','+download_info[i].user_id+','+download_info[i].email+',"'+download_info[i].reg_section+'",'+download_info[i].rot_section+','+download_info[i].group+'\n';
+				    	required_user_id.push(download_info[i].user_id);
+				    }
+				}
+        	}
+        	else if($(this).val()=="limited_access_grader"){
+        		var i;
+				for (i = 0; i < download_info.length; ++i) {
+				    if((download_info[i].group=="Limited Access Grader (Mentor)")&&(jQuery.inArray(download_info[i].user_id,required_user_id)=='-1')){
+				    	csv_data+=download_info[i].first_name+','+download_info[i].last_name+','+download_info[i].user_id+','+download_info[i].email+',"'+download_info[i].reg_section+'",'+download_info[i].rot_section+','+download_info[i].group+'\n';
+				    	required_user_id.push(download_info[i].user_id);
+				    }
+				}
+        	}
+        	else{
+        		var i;
+				for (i = 0; i < download_info.length; ++i) {
+					if(code=="user"){    
+					    if((download_info[i].reg_section==($(this).val()))&&(jQuery.inArray(download_info[i].user_id,required_user_id)=='-1')){
+				    		csv_data+=download_info[i].first_name+','+download_info[i].last_name+','+download_info[i].user_id+','+download_info[i].email+',"'+download_info[i].reg_section+'",'+download_info[i].rot_section+','+download_info[i].group+'\n';
+				    		required_user_id.push(download_info[i].user_id);
+				    	}	
+					}
+					else if(code=="grader"){
+						if((download_info[i].reg_section=="All")&&(jQuery.inArray(download_info[i].user_id,required_user_id)=='-1')){
+				    		csv_data+=download_info[i].first_name+','+download_info[i].last_name+','+download_info[i].user_id+','+download_info[i].email+',"'+download_info[i].reg_section+'",'+download_info[i].rot_section+','+download_info[i].group+'\n';
+				    		required_user_id.push(download_info[i].user_id);	
+						}
+						if((jQuery.inArray($(this).val(),download_info[i].reg_section.split(','))!='-1')&&(jQuery.inArray(download_info[i].user_id,required_user_id)=='-1')){
+				    		csv_data+=download_info[i].first_name+','+download_info[i].last_name+','+download_info[i].user_id+','+download_info[i].email+',"'+download_info[i].reg_section+'",'+download_info[i].rot_section+','+download_info[i].group+'\n';
+				    		required_user_id.push(download_info[i].user_id);
+						}
+					}    
+				}	
+        	}
+        }	
+ 	});
+ 	var temp_element = $('<a id="downloadlink"></a>');
+    var address="data:text/csv;charset=utf-8,"+encodeURIComponent(csv_data);
+    temp_element.attr("href", address);
+    temp_element.attr("download", "mails.csv");
+    temp_element.css("display" ,"none");
+    $("body").append(temp_element);
+    $('#downloadlink')[0].click();
+    $('#downloadlink').remove();
+}
 
 function adminTeamForm(new_team, who_id, section, members, max_members) {
     $('.popup-form').css('display', 'none');
@@ -977,7 +1003,7 @@ function checkNumFilesForumUpload(input, post_id){
         }
         $('#file_name' + displayPostId).html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
         $('#messages').fadeOut();
-        document.getElementById('file_input_label' + displayPostId).style.border = "";
+        document.getElementById('file_input_label').style.border = "";
     }
             
 }
@@ -1065,24 +1091,8 @@ function saveScrollLocationOnRefresh(className){
     });
 }
 
-function replyPost(post_id){
-    if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
-        $('#'+ post_id + '-reply').css("display","none");
-    } else {
-        hideReplies();
-        $('#'+ post_id + '-reply').css('display', 'block');
-    }
-}
-
-function hideReplies(){
-    var hide_replies = document.getElementsByClassName("reply-box");
-    for(var i = 0; i < hide_replies.length; i++){
-        hide_replies[i].style.display = "none"; 
-    }
-}
-
 function deletePost(thread_id, post_id, author, time){
-    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be deleted. \n\nIf you are deleting the first post in a thread this will delete the entire thread.");
+    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note:  If you are deleting the first post in a thread this will delete the entire thread.");
     if(confirm){
         var url = buildUrl({'component': 'forum', 'page': 'delete_post'});
         $.ajax({
