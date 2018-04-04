@@ -7,8 +7,7 @@ import json
 import os
 import pwd
 import shutil
-import stat
-from tzlocal import get_localzone
+import tzlocal
 
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
@@ -122,7 +121,7 @@ defaults = {'database_host': 'localhost',
             'institution_name' : '',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
             'institution_homepage' : '',
-            'timezone' : get_localzone()}
+            'timezone' : tzlocal.get_localzone()}
 
 loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
@@ -164,7 +163,8 @@ print()
 TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
 print()
 
-SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
+SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
+                           'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
 print()
 
 VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
