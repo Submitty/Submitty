@@ -130,6 +130,7 @@ class ReportController extends AbstractController {
                     file_put_contents(FileUtils::joinPaths($base_path, $current_user.'_summary.json'), FileUtils::encodeJson($user));
                 }
                 $current_user = $gradeable->getUser()->getId();
+                $user = [];
                 $user['user_id'] = $gradeable->getUser()->getId();
                 $user['legal_first_name'] = $gradeable->getUser()->getFirstName();
                 $user['preferred_first_name'] = $gradeable->getUser()->getPreferredFirstName();
@@ -217,7 +218,6 @@ class ReportController extends AbstractController {
             $entry['days_after_deadline'] = $gradeable->getLateDays();
             $entry['extensions'] = $gradeable->getLateDayExceptions();
             $entry['days_charged'] = $late_days_used;
-
         }
         else {
             $entry['days_late'] = 0;
