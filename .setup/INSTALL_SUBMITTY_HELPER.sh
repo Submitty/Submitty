@@ -200,11 +200,10 @@ echo -e "Copy the grading code"
 rsync -rtz ${SUBMITTY_REPOSITORY}/grading ${SUBMITTY_INSTALL_DIR}/src
 
 #replace necessary variables
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/Sample_CMakeLists.txt
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/CMakeLists.txt
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/seccomp_functions.cpp
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/execute.cpp
+array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
+for i in "${array[@]}"; do
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/${i}
+done
 
 # building the autograding library
 mkdir -p ${SUBMITTY_INSTALL_DIR}/src/grading/lib
@@ -223,7 +222,6 @@ chown -R  root:root ${SUBMITTY_INSTALL_DIR}/src
 find ${SUBMITTY_INSTALL_DIR}/src -type d -exec chmod 555 {} \;
 # "other" can read all files
 find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
-
 
 ########################################################################################################################
 ########################################################################################################################
@@ -279,79 +277,54 @@ chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 #replace necessary variables in the copied scripts
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/adduser.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
+array=( authentication.py adduser.py create_course.sh generate_repos.py grade_item.py \
+        submitty_autograding_shipper.py submitty_autograding_worker.py \
+        grade_items_logging.py grading_done.py regrade.py check_everything.py build_homework_function.sh setcsvfields \
+        setcsvfields.py get_version_details.py insert_database_version_data.py )
+for i in "${array[@]}"; do
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # most of the scripts should be root only
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
 
-# all course builders (instructors & head TAs) need read/execute access to these scripts
+# www-data needs to have access to this so that it can authenticate for git
 chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
 
-# course builders & hwcron need access to these scripts
-chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+# all course builders (instructors & head TAs) need read/execute access to these scripts
+array=( regrade.py grading_done.py read_iclicker_ids.py left_right_parse.py)
+for i in "${array[@]}"; do
+    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # everyone needs to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/killall.py
 
-
-# FIXME / WIP:  line below is temporary, to avoid error message if file does not exist
-touch ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-
+# course builders & hwcron need access to these scripts
+array=( build_homework_function.sh make_assignments_txt_file.py )
+for i in "${array[@]}"; do
+    chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # hwcron only things
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
+array=( insert_database_version_data.py grade_item.py \
+        submitty_autograding_shipper.py submitty_autograding_worker.py grade_items_logging.py \
+        write_grade_history.py build_config_upload.py )
+for i in "${array[@]}"; do
+    chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # root only things
-chown root:root ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
-chown root:root ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-chown root:root ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
-chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-
+array=( untrusted_canary.py check_everything.py get_version_details.py )
+for i in "${array[@]}"; do
+    chown root:root ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
@@ -459,14 +432,13 @@ cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zon
 chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site
 find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
 
-# "other" can read all .txt, .jpg, & .css files
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.css -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.otf -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.jpg -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.png -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.ico -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.txt -exec chmod o+r {} \;
-# "other" can read & execute all .js files
+# "other" can read all of these files
+array=( css otf jpg png ico txt )
+for i in "${array[@]}"; do
+    find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.${i} -exec chmod o+r {} \;
+done
+
+# "other" can read & execute these files
 find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.js -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
 
@@ -701,6 +673,9 @@ do
     chmod 770 $mydir
 done
 
+# If the submitty_autograding_shipper.service or submitty_autograding_worker.service
+# files have changed, we should reload the units:
+systemctl daemon-reload
 
 # start the shipper daemon (if it was running)
 if [[ "$is_shipper_active_before" == "0" ]]; then
