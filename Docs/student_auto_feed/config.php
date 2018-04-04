@@ -1,7 +1,5 @@
 <?php
 
-use app\libraries\Core;
-
 /* HEADING ---------------------------------------------------------------------
  *
  * config.php script used by submitty_student_auto_feed
