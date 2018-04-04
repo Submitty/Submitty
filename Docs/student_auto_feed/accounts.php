@@ -55,6 +55,13 @@ define('ERROR_E_MAIL', 'sysadmins@lists.myuniversity.edu');
 //Univeristy campus's timezone.
 date_default_timezone_set('America/New_York');
 
+/* EXAMPLE CRONTAB -------------------------------------------------------------
+ *
+ * This will run the script every hour at the half-hour (e.g. 8:30, 9:30, etc).
+ 30 * * * * /var/local/submitty/bin/accounts.php
+ * -------------------------------------------------------------------------- */
+
+/* MAIN ===================================================================== */
 //IMPORTANT: This script needs to be run as root!
 if (posix_getuid() !== 0) {
 	exit("This script must be run as root." . PHP_EOL);
