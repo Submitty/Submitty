@@ -20,9 +20,6 @@ use app\report\GradeSummaryView;
 class ReportController extends AbstractController {
     public function run() {
         switch($_REQUEST['action']) {
-            case 'reportpage':
-                $this->showReportPage();
-                break;
             case 'csv':
                 $this->generateCSVReport();
                 break;
@@ -32,8 +29,9 @@ class ReportController extends AbstractController {
             case 'hwreport':
                 $this->generateHWReports();
                 break;
+            case 'reportpage':
             default:
-                $this->core->getOutput()->showError("Invalid action request for controller ".get_class($this));
+                $this->showReportPage();
                 break;
         }
     }
@@ -117,9 +115,9 @@ class ReportController extends AbstractController {
     }
     
     public function generateGradeSummaries() {
-        $curr_allowed_term =
-
+        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
         $current_user = null;
+        $total_late_used = 0;
         $user = [];
         $order_by = [
             'g.g_gradeable_type',
@@ -129,7 +127,7 @@ class ReportController extends AbstractController {
             /** @var \app\models\Gradeable $gradeable */
             if ($current_user !== $gradeable->getUser()->getId()) {
                 if ($current_user !== null) {
-                    file_put_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", $current_user.'_summary.json'), $user);
+                    file_put_contents(FileUtils::joinPaths($base_path, $current_user.'_summary.json'), FileUtils::encodeJson($user));
                 }
                 $current_user = $gradeable->getUser()->getId();
                 $user['user_id'] = $gradeable->getUser()->getId();
@@ -139,6 +137,7 @@ class ReportController extends AbstractController {
                 $user['registration_section'] = $gradeable->getUser()->getRegistrationSection();
                 $user['default_allowed_late_days'] = $this->core->getConfig()->getDefaultHwLateDays();
                 $user['last_update'] = date("l, F j, Y");
+                $total_late_used = 0;
             }
             $bucket = ucwords($gradeable->getBucket());
             if (!isset($user[$bucket])) {
@@ -169,7 +168,7 @@ class ReportController extends AbstractController {
 
             switch ($gradeable->getType()) {
                 case GradeableType::ELECTRONIC_FILE:
-                    //$this->addLateDays($gradeable, $entry);
+                    $this->addLateDays($gradeable, $entry, $total_late_used);
                     $this->addText($gradeable, $entry);
                     break;
                 case GradeableType::NUMERIC_TEXT:
@@ -182,31 +181,46 @@ class ReportController extends AbstractController {
             }
             $user[$bucket][] = $entry;
         }
+
+        file_put_contents(FileUtils::joinPaths($base_path, $current_user.'_summary.json'), FileUtils::encodeJson($user));
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
-    private function addLateDays(Gradeable $gradeable, &$entry) {
-        $late_days = $gradeable->getLateDays();
+    private function addLateDays(Gradeable $gradeable, &$entry, $total_late_used) {
+        $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
+        $status = 'Good';
 
-        if(substr($late_days['status'], 0, 3) == 'Bad') {
-            $this_g["score"] = 0;
+        if ($late_days_used > 0) {
+            $status = "Late";
         }
-        $this_g['status'] = $late_days['status'];
+        //If late days used - extensions applied > allowed per assignment then status is "Bad..."
+        if ($late_days_used > $gradeable->getAllowedLateDays()) {
+            $status = "Bad";
+        }
+        //If late days used - extensions applied > allowed per term then status is "Bad..."
+        if ($late_days_used >  $gradeable->getStudentAllowedLateDays() - $total_late_used) {
+            $status = "Bad";
+        }
 
-        if (array_key_exists('late_days_charged', $late_days) && $late_days['late_days_used'] > 0) {
+        if($status === 'Bad') {
+            $entry["score"] = 0;
+        }
+        $entry['status'] = $status;
+
+        if ($late_days_used > 0) {
 
             // TODO:  DEPRECATE THIS FIELD
-            $this_g['days_late'] = $late_days['late_days_charged'];
+            $entry['days_late'] = $late_days_used;
 
             // REPLACED BY:
-            $this_g['days_after_deadline'] = $late_days['late_days_used'];
-            $this_g['extensions'] = $late_days['extensions'];
-            $this_g['days_charged'] = $late_days['late_days_charged'];
+            $entry['days_after_deadline'] = $gradeable->getLateDays();
+            $entry['extensions'] = $gradeable->getLateDayExceptions();
+            $entry['days_charged'] = $late_days_used;
 
         }
         else {
-            $this_g['days_late'] = 0;
+            $entry['days_late'] = 0;
         }
     }
 

@@ -286,7 +286,8 @@ SELECT";
   egd.submission_time,
   egv.highest_version,
   COALESCE(lde.late_day_exceptions, 0) AS late_day_exceptions,
-  GREATEST(0, CEIL((EXTRACT(EPOCH FROM(COALESCE(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)) - (300*60))/86400)::integer) AS days_late
+  GREATEST(0, CEIL((EXTRACT(EPOCH FROM(COALESCE(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)) - (300*60))/86400)::integer) AS days_late,
+  ld.allowed_late_days AS student_allowed_late_days
 FROM users AS u
 NATURAL JOIN gradeable AS g";
         }
@@ -295,10 +296,7 @@ NATURAL JOIN gradeable AS g";
 FROM gradeable AS g";
         }
         $query .= "
-LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable
-) AS eg ON eg.g_id=g.g_id
+LEFT JOIN electronic_gradeable AS eg ON eg.g_id=g.g_id
 LEFT JOIN (
   SELECT
     g_id,
@@ -420,7 +418,8 @@ LEFT JOIN (
     FROM gradeable_teams AS gt, teams AS t
     WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egv.team_id AND t.state = 1)
 )
-LEFT JOIN late_day_exceptions AS lde ON g.g_id = lde.g_id AND u.user_id = lde.user_id";
+LEFT JOIN late_day_exceptions AS lde ON g.g_id = lde.g_id AND u.user_id = lde.user_id
+LEFT JOIN (SELECT * FROM late_days ORDER BY since_timestamp DESC) AS ld ON u.user_id = ld.user_id AND eg.eg_submission_due_date < ld.since_timestamp";
         }
 
         $where = array();

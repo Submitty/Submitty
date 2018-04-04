@@ -84,6 +84,7 @@ use app\libraries\Utils;
  * @method int getLateDayExceptions()
  * @method int getAllowedLateDays()
  * @method int getLateDays()
+ * @method int getStudentAllowedLateDays()
  */
 class Gradeable extends AbstractModel {
     
@@ -306,6 +307,9 @@ class Gradeable extends AbstractModel {
     /** @property @var int */
     protected $late_days = 0;
 
+    /** @property @var int */
+    protected $student_allowed_late_days = 0;
+
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
         if(!isset($details['g_id'])) {
@@ -358,6 +362,7 @@ class Gradeable extends AbstractModel {
                 $this->submission_time = new \DateTime($details['submission_time'], $timezone);
                 $this->late_day_exceptions = $details['late_day_exceptions'];
                 $this->late_days = $details['days_late'];
+                $this->student_allowed_late_days = $details['student_allowed_late_days'] ?? $this->core->getConfig()->getDefaultStudentLateDays();
             }
             
             if (isset($details['highest_version']) && $details['highest_version']!== null) {
