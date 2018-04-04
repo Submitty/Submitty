@@ -95,8 +95,14 @@ def update_foreign_autograding_worker_json(name, entry):
             ssh = paramiko.SSHClient()
             ssh.get_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
             ssh.connect(hostname = host, username = user)
+
+        except Exception as e:
+            grade_items_logging.log_message(JOB_ID, message="ERROR: could not ssh to "+host+" due to following error: "+str(e))
+            print("ERROR: could not ssh to "+host+" due to following error: "+str(e))
+            return
+
+        try:
             sftp = ssh.open_sftp()
 
             sftp.put(tmp_json_path,foreign_json)
