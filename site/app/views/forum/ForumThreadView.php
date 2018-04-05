@@ -88,7 +88,13 @@ HTML;
 		<div style="margin-left:20px;margin-top:10px; height:50px;  " id="forum_bar">
 
 			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
+HTML;
+		if($this->core->getUser()->getGroup() <= 2){
+			$return .= <<<HTML
 			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
+HTML;
+		}
+		$return .= <<<HTML
 			
 		</div>
 
@@ -556,8 +562,13 @@ HTML;
 		<div style="margin-left:20px;margin-top:10px; height:50px;" id="forum_bar">
 
 			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+HTML;
+		if($this->core->getUser()->getGroup() <= 2){
+			$return .= <<<HTML
 			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
-		
+HTML;
+		}
+		$return .= <<<HTML
 		</div>
 
 		<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;height:69vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
