@@ -9,9 +9,6 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-# TIMEZONE
-timedatectl set-timezone America/New_York
-
 #################################################################
 # CONSTANTS
 #################
@@ -405,6 +402,7 @@ else
     echo -e "/var/run/postgresql
     hsdbu
     hsdbu
+    America/New_York
     ${SUBMISSION_URL}
     ${GIT_URL}/git
 

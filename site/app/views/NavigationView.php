@@ -1,9 +1,8 @@
 <?php
-
 namespace app\views;
-
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
+
 
 class NavigationView extends AbstractView {
     public function noAccessCourse() {
@@ -14,15 +13,12 @@ class NavigationView extends AbstractView {
 </div>
 HTML;
     }
-
     public function showGradeables($sections_to_list) {
         $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
         $return = "";
-
-
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (typically used for exam seating assignments)
         // note: placement of this information this may eventually be re-designed
@@ -40,7 +36,6 @@ HTML;
 </div>
 HTML;
         }
-
         $return .= <<<HTML
 <div class="content">
     <div class="nav-buttons">
@@ -52,12 +47,9 @@ HTML;
             $return .= <<<HTML
         <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page'))}">New Gradeable</a>
         <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config'))}">Upload Config & Review Build Output</a>
-
         <!--<button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
 HTML;
         }
-
-
         // ======================================================================================
         // FORUM BUTTON
         // ====================================================================================== 
@@ -67,8 +59,6 @@ HTML;
             <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Discussion Forum</a>
 HTML;
         }
-
-
         // ======================================================================================
         // GRADES SUMMARY BUTTON
         // ======================================================================================
@@ -81,8 +71,6 @@ HTML;
         $return .= <<<HTML
     </div>
 HTML;
-
-
         // ======================================================================================
         // INDEX OF ALL GRADEABLES
         // ======================================================================================
@@ -128,7 +116,6 @@ HTML;
         );
         
         $found_assignment = false;
-
         foreach ($sections_to_list as $title => $gradeable_list) {
             /** @var Gradeable[] $gradeable_list */
             // temporary: want to make future - only visible to
@@ -136,11 +123,9 @@ HTML;
             //  and future - grader preview
             //  (released to graders for submission)
             //if ($title == "FUTURE" && !$this->core->getUser()->accessAdmin()) {
-
             if (($title === "FUTURE" || $title === "BETA") && !$this->core->getUser()->accessGrading()) {
                 continue;
             }
-
             // count the # of electronic gradeables in this category that can be viewed
             $electronic_gradeable_count = 0;
             foreach ($gradeable_list as $gradeable => $g_data) {
@@ -149,7 +134,6 @@ HTML;
                     continue;
                 }
             }
-
             // if there are no gradeables, or if its a student and no electronic upload gradeables, don't show this category
             if (count($gradeable_list) == 0 ||
                 ($electronic_gradeable_count == 0 && !$this->core->getUser()->accessGrading())) {
@@ -157,7 +141,6 @@ HTML;
             } else {
                 $found_assignment = true;
             }
-
             $lower_title = str_replace(" ", "_", strtolower($title));
             $return .= <<<HTML
         <tr class="bar"><td colspan="10"></td></tr>
@@ -182,7 +165,6 @@ HTML;
                         );
                     }
                     else{
-
                         if ($g_data->getTotalNonHiddenNonExtraCreditPoints() == array() && ($title_save != "GRADED" && $title_save != "ITEMS BEING GRADED")){
                             $submission_status = array(
                                 "SUBMITTED" => "<em style='font-size: .8em;'></em><br>",
@@ -220,37 +202,30 @@ HTML;
                         "AUTOGRADE" => ""
                     );
                 }
-
                 $title = $title_save;
                 $title_to_button_type_submission[$title_save] = $btn_title_save;
-
                 // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
                 if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
                     continue;
                 }
-
                 // if student view false, never show
                 if (!$g_data->getStudentView() && !$this->core->getUser()->accessGrading()) {
                     continue;
                 }
-
                 if ($g_data->getActiveVersion() < 1){
                     if ($title == "GRADED" || $title == "ITEMS BEING GRADED"){
                         $title = "CLOSED";
                     }
                 }
-
                 if ($g_data->beenAutograded() && $g_data->beenTAgraded() && $g_data->getUserViewedDate() !== null){
                     $title_to_button_type_submission['GRADED'] = "btn-default";
                 }
-
                 /** @var Gradeable $g_data */
                 $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
                 if($g_data->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$this->core->getUser()->accessAdmin()){
                     continue;
                 }
                 $time = " @ H:i";
-
                 $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}").")</span>";
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
                   if ($g_data->useTAGrading()) {
@@ -281,9 +256,7 @@ HTML;
                 else{
                     $gradeable_title = '<label>'.$g_data->getName().'</label>';
                 }
-
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
-
                     $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getOpenDate()->format("m/d/Y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getDueDate()->format("m/d/Y{$time}")."</span>)";
                     if ($title=="GRADED" || $title=="ITEMS BEING GRADED") { $display_date = ""; }
                     if ($g_data->getActiveVersion() >= 1 && $title == "OPEN") { //if the user submitted something on time
@@ -338,7 +311,6 @@ HTML;
                  </a>
 HTML;
 						}
-
                         
                         
 						//If the button is autograded and has been submitted once, give a progress bar.
@@ -355,7 +327,6 @@ HTML;
 										background: rgb(224,224,224);
 										padding: 0px;
 									}
-
 									.meter1 > span {
 							  			display: block;
 							  			height: 100%;
@@ -377,7 +348,6 @@ HTML;
 									background: rgb(224,224,224);
 									padding: 0px;
 								}
-
 								.meter2 > span {
 								  	display: block;
 								  	height: 100%;
@@ -406,7 +376,6 @@ HTML;
                         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
                         $gradeable_core = $this->core->getQueries()->getGradeable($gradeable);
                         $gradeable_id = $gradeable_core->getId();
-
                         $total_users = array();
                         $no_team_users = array();
                         $graded_components = array();
@@ -476,7 +445,6 @@ HTML;
                                 }
                             }
                         }
-
                         $components_graded = 0;
                         $components_total = 0;
                         foreach ($sections as $key => $section) {
@@ -526,7 +494,6 @@ HTML;
                                     background: rgb(224,224,224);
                                     padding: 0px;
                                 }
-
                                 .meter3 > span {
                                     display: block;
                                     height: 100%;
@@ -572,7 +539,6 @@ HTML;
 HTML;
                     }
                 }
-
                 // Team management button, only visible on team assignments
                 $gradeable_team_range = '';
                 if (($g_data->isTeamAssignment()) ) {
@@ -612,7 +578,6 @@ HTML;
                 {$button_text}{$display_date}
 HTML;
                 }
-
                 if ($this->core->getUser()->accessAdmin()) {
                     $admin_button = <<<HTML
                 <a class="btn btn-default" style="width:100%;" \\
@@ -624,7 +589,6 @@ HTML;
                 else {
                     $admin_button = "";
                 }
-
                 if ($title_save === "ITEMS BEING GRADED" && $this->core->getUser()->accessAdmin()) {
                     $quick_links = <<<HTML
                         <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable, 'quick_link_action' => 'release_grades_now'))}">
@@ -660,11 +624,9 @@ HTML;
                 } else {
                     $quick_links = "";
                 }
-
                 if (!$this->core->getUser()->accessGrading() && !$g_data->getPeerGrading()) {
                     $gradeable_grade_range = "";
                 }
-
                 $return .= <<<HTML
             <tr class="gradeable_row">
                 <td>{$gradeable_title}</td>
@@ -684,7 +646,6 @@ HTML;
             }
             $return .= '</tbody><tr class="colspan"><td colspan="10" style="border-bottom:2px black solid;"></td></tr>';
         }
-
         if ($found_assignment == false) {
             $return .= <<<HTML
     <div class="container">
@@ -693,7 +654,6 @@ HTML;
 HTML;
             return $return;
         }
-
         $return .= <<<HTML
                             </table>
                         </div>
