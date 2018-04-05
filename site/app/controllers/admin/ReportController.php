@@ -221,7 +221,7 @@ class ReportController extends AbstractController {
         }
         $entry['status'] = $status;
 
-        if ($late_days_used > 0) {
+        if ($late_flag && $late_days_used > 0) {
 
             // TODO:  DEPRECATE THIS FIELD
             $entry['days_late'] = $late_days_used;
