@@ -41,7 +41,6 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider 'virtualbox' do |vb|
-    #vb.gui = true
 
     vb.memory = 2048
     vb.cpus = 2
@@ -53,6 +52,8 @@ Vagrant.configure(2) do |config|
     # to be 10 seconds at most which should make things work generally ideally
     vb.customize ['guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 10000 ]
   end
+
+  config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
 
