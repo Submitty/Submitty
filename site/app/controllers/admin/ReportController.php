@@ -191,17 +191,29 @@ class ReportController extends AbstractController {
     private function addLateDays(Gradeable $gradeable, &$entry, &$total_late_used) {
         $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
         $status = 'Good';
+        $late_flag = false;
 
         if ($late_days_used > 0) {
             $status = "Late";
+            $late_flag = true;
         }
         //If late days used - extensions applied > allowed per assignment then status is "Bad..."
         if ($late_days_used > $gradeable->getAllowedLateDays()) {
             $status = "Bad";
+            $late_flag = false;
         }
         //If late days used - extensions applied > allowed per term then status is "Bad..."
         if ($late_days_used >  $gradeable->getStudentAllowedLateDays() - $total_late_used) {
             $status = "Bad";
+            $late_flag = false;
+        }
+
+        //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
+        //be less than 0 in cases of excess extensions. Decrement remaining late days.
+        if ($late_flag) {
+            $curr_late_charged = $late_days_used;
+            $curr_late_charged = ($curr_late_charged < 0) ? 0 : $curr_late_charged;
+            $total_late_used += $curr_late_charged;
         }
 
         if($status === 'Bad') {
@@ -222,7 +234,6 @@ class ReportController extends AbstractController {
         else {
             $entry['days_late'] = 0;
         }
-        $total_late_used += $late_days_used;
     }
 
     private function addProblemScores(Gradeable $gradeable, &$entry) {
