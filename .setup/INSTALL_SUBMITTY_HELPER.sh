@@ -10,6 +10,8 @@
 
 # FIXME: Add some error checking to make sure these values were filled in correctly
 
+
+
 if [ -z ${SUBMITTY_REPOSITORY+x} ]; then
     echo "ERROR! Configuration variables not initialized"
     exit 1
@@ -53,10 +55,8 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HWCGI_USER__|$HWCGI_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
-    if [ ${HEADLESS} == 0 ]; then
     sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
     sed -i -e "s|__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $1
-    fi
 
     sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $1
     sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $1
@@ -126,11 +126,6 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 fi
 
-#Evan:Headless. Switch to arg later. 
-export HEADLESS=1
-
-
-
 # set the permissions of the top level directory
 chown  root:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_INSTALL_DIR}
 chmod  751                            ${SUBMITTY_INSTALL_DIR}
@@ -142,59 +137,71 @@ chmod  751                            ${SUBMITTY_INSTALL_DIR}
 echo -e "Make top level directores & set permissions"
 
 mkdir -p ${SUBMITTY_DATA_DIR}
-if [ ${HEADLESS} == 0 ]; then
-mkdir -p ${SUBMITTY_DATA_DIR}/courses
-mkdir -p ${SUBMITTY_DATA_DIR}/vcs
+
+if [ ${WORKER} == 1 ]; then
+    echo -e "INSTALLING SUBMITTY IN WORKER MODE"
+else
+    echo -e "INSTALLING PRIMARY SUBMITTY"
 fi
+
+#Make a courses and checkouts directory if not in worker mode.
+if [ ${WORKER} == 0 ]; then
+    mkdir -p ${SUBMITTY_DATA_DIR}/courses
+    mkdir -p ${SUBMITTY_DATA_DIR}/vcs
+fi
+
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 
-#EVAN: Get rid of site logs
-if [ ${HEADLESS} == 0 ]; then
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
+#Make site logging directories if not in worker mode.
+if [ ${WORKER} == 0 ]; then
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
 fi
 
 # set the permissions of these directories
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
 chmod  751                                        ${SUBMITTY_DATA_DIR}
 
-#EVAN: Get rid of site permissions
-if [ ${HEADLESS} == 0 ]; then
-chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
-chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
-chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
-chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
+#Set up courses and version control ownership if not in worker mode
+if [ ${WORKER} == 0 ]; then
+    chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
+    chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
+    chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
+    chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
 fi
-#EVAN: get rid of hwphp
-if [ ${HEADLESS} == 0 ]; then
-chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
-chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
+
+#Set up permissions on the logs directory. If in worker mode, hwphp does not exist.
+if [ ${WORKER} == 0 ]; then
+    chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
+    chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
+else
+    chown  -R root:${COURSE_BUILDERS_GROUP}           ${SUBMITTY_DATA_DIR}/logs
+    chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 fi
 
 chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
-#EVAN: We are not currently using these directories.
-if [ ${HEADLESS} == 0 ]; then
-# remove the old versions of the queues
-rm -rf $SUBMITTY_DATA_DIR/to_be_graded_interactive
-rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
-# if the to_be_graded directories do not exist, then make them
-mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
-mkdir -p $SUBMITTY_DATA_DIR/to_be_built
+#Set up shipper grading directories if not in worker mode.
+if [ ${WORKER} == 0 ]; then
+    # remove the old versions of the queues
+    rm -rf $SUBMITTY_DATA_DIR/to_be_graded_interactive
+    rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
+    # if the to_be_graded directories do not exist, then make them
+    mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
+    mkdir -p $SUBMITTY_DATA_DIR/to_be_built
 
-# set the permissions of these directories
+    # set the permissions of these directories
 
-#hwphp will write items to this list, hwcron will remove them
-#FIXME: course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
-chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
-chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
+    #hwphp will write items to this list, hwcron will remove them
+    #FIXME: course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
+    chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
+    chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
 
-#hwphp will write items to this list, hwcron will remove them
-chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
-chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
-#EVAN: endif
+    #hwphp will write items to this list, hwcron will remove them
+    chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
+    chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
 fi
 
 
@@ -222,11 +229,10 @@ echo -e "Copy the grading code"
 rsync -rtz ${SUBMITTY_REPOSITORY}/grading ${SUBMITTY_INSTALL_DIR}/src
 
 #replace necessary variables
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/Sample_CMakeLists.txt
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/CMakeLists.txt
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/seccomp_functions.cpp
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/execute.cpp
+array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
+for i in "${array[@]}"; do
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/${i}
+done
 
 # building the autograding library
 mkdir -p ${SUBMITTY_INSTALL_DIR}/src/grading/lib
@@ -247,24 +253,22 @@ find ${SUBMITTY_INSTALL_DIR}/src -type d -exec chmod 555 {} \;
 find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
 
 
+#Set up sample files if not in worker mode.
+if [ ${WORKER} == 0 ]; then
+    ########################################################################################################################
+    ########################################################################################################################
+    # COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
 
-#EVAN: Child doesn't need more_autograding_examples
-if [ ${HEADLESS} == 0 ]; then
-########################################################################################################################
-########################################################################################################################
-# COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
+    echo -e "Copy the sample files"
 
-echo -e "Copy the sample files"
+    # copy the files from the repo
+    rsync -rtz ${SUBMITTY_REPOSITORY}/more_autograding_examples ${SUBMITTY_INSTALL_DIR}
 
-# copy the files from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/more_autograding_examples ${SUBMITTY_INSTALL_DIR}
-
-# root will be owner & group of these files
-chown -R  root:root ${SUBMITTY_INSTALL_DIR}/more_autograding_examples
-# but everyone can read all that files & directories, and cd into all the directories
-find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type d -exec chmod 555 {} \;
-find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type f -exec chmod 444 {} \;
-#Evan: Endif
+    # root will be owner & group of these files
+    chown -R  root:root ${SUBMITTY_INSTALL_DIR}/more_autograding_examples
+    # but everyone can read all that files & directories, and cd into all the directories
+    find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type d -exec chmod 555 {} \;
+    find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type f -exec chmod 444 {} \;
 fi
 ########################################################################################################################
 ########################################################################################################################
@@ -304,91 +308,60 @@ chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
 
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
+
 #replace necessary variables in the copied scripts
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/adduser.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
+array=( authentication.py adduser.py create_course.sh generate_repos.py grade_item.py \
+        submitty_autograding_shipper.py submitty_autograding_worker.py \
+        grade_items_logging.py grading_done.py regrade.py check_everything.py build_homework_function.sh setcsvfields \
+        setcsvfields.py get_version_details.py insert_database_version_data.py )
+for i in "${array[@]}"; do
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # most of the scripts should be root only
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
-echo -e "EVAN: 1"
+
+# www-data needs to have access to this so that it can authenticate for git
+chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
-
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
-
-# course builders & hwcron need access to these scripts
-chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
-
-echo -e "EVAN: 2"
+array=( regrade.py grading_done.py read_iclicker_ids.py left_right_parse.py)
+for i in "${array[@]}"; do
+    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # everyone needs to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/killall.py
 
-
-# FIXME / WIP:  line below is temporary, to avoid error message if file does not exist
-touch ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-
+# course builders & hwcron need access to these scripts
+array=( build_homework_function.sh make_assignments_txt_file.py )
+for i in "${array[@]}"; do
+    chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # hwcron only things
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_shipper.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_autograding_worker.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
-echo -e "EVAN: 3"
+array=( insert_database_version_data.py grade_item.py \
+        submitty_autograding_shipper.py submitty_autograding_worker.py grade_items_logging.py \
+        write_grade_history.py build_config_upload.py )
+for i in "${array[@]}"; do
+    chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # root only things
-chown root:root ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
-chown root:root ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-chown root:root ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
-chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-
+array=( untrusted_canary.py check_everything.py get_version_details.py )
+for i in "${array[@]}"; do
+    chown root:root ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 # set the permissions
-echo -e "EVAN: 5"
 
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
@@ -405,8 +378,6 @@ cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_generate_csv.py   ${SUBMITTY_INST
 chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload_old_assignments.py
-
-echo -e "EVAN: 6"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -433,94 +404,88 @@ chgrp $HWCRON_USER  ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
 chmod 4550  ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
 popd > /dev/null
 
-echo -e "EVAN: 7"
-
 ################################################################################################################
 ################################################################################################################
-# COPY THE TA GRADING WEBSITE
-#EVAN: Not needed for headless.
-if [ ${HEADLESS} == 0 ]; then
-echo -e "Copy the ta grading website"
+# COPY THE TA GRADING WEBSITE IF NOT IN WORKER MODE
+if [ ${WORKER} == 0 ]; then
+    echo -e "Copy the ta grading website"
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
 
-# Using a symbolic link would be nicer, but it seems that suphp doesn't like them very much so we just have
-# two copies of the site
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/*php         ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/toolbox      ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/lib          ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/account      ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/models       ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+    # Using a symbolic link would be nicer, but it seems that suphp doesn't like them very much so we just have
+    # two copies of the site
+    rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/*php         ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+    rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/toolbox      ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+    rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/lib          ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+    rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/account      ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+    rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/models       ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
 
-# set special user $HWPHP_USER as owner & group of all hwgrading_website files
-find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+    # set special user $HWPHP_USER as owner & group of all hwgrading_website files
+    find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 
-# set the permissions of all files
-# $HWPHP_USER can read & execute all directories and read all files
-# "other" can cd into all subdirectories
-chmod -R 400 ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
-find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type d -exec chmod uo+x {} \;
-# "other" can read all .txt & .css files
-find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.css -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.txt -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.ico -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.css -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.png -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.jpg -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.gif -exec chmod o+r {} \;
+    # set the permissions of all files
+    # $HWPHP_USER can read & execute all directories and read all files
+    # "other" can cd into all subdirectories
+    chmod -R 400 ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+    find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type d -exec chmod uo+x {} \;
+    # "other" can read all .txt & .css files
+    find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.css -exec chmod o+r {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.txt -exec chmod o+r {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.ico -exec chmod o+r {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.css -exec chmod o+r {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.png -exec chmod o+r {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.jpg -exec chmod o+r {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.gif -exec chmod o+r {} \;
 
-# "other" can read & execute all .js files
-find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.js -exec chmod o+rx {} \;
-#Evan: endif
-fi
-################################################################################################################
-################################################################################################################
-# COPY THE 1.0 Grading Website
-#Evan: not needed for headless.
-if [ ${HEADLESS} == 0 ]; then
-echo -e "Copy the submission website"
-
-# copy the website from the repo
-rsync -rtz   ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
-
-# set special user $HWPHP_USER as owner & group of all website files
-find ${SUBMITTY_INSTALL_DIR}/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
-
-# TEMPORARY (until we have generalized code for generating charts in html)
-# copy the zone chart images
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
-cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null
-
-# set the permissions of all files
-# $HWPHP_USER can read & execute all directories and read all files
-# "other" can cd into all subdirectories
-chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site
-find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
-
-# "other" can read all .txt, .jpg, & .css files
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.css -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.otf -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.jpg -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.png -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.ico -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.txt -exec chmod o+r {} \;
-# "other" can read & execute all .js files
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.js -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
-
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini
-mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DIR}/site/config/master.ini
-
-# return the course index page (only necessary when 'clean' option is used)
-if [ -f "$mytempcurrentcourses" ]; then
-    echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
-    mv ${mytempcurrentcourses} ${originalcurrentcourses}
+    # "other" can read & execute all .js files
+    find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.js -exec chmod o+rx {} \;
 fi
 
-fi
-#Evan: Endif
 
+
+################################################################################################################
+################################################################################################################
+# COPY THE 1.0 Grading Website if not in worker mode
+if [ ${WORKER} == 0 ]; then
+    echo -e "Copy the submission website"
+
+    # copy the website from the repo
+    rsync -rtz   ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
+
+    # set special user $HWPHP_USER as owner & group of all website files
+    find ${SUBMITTY_INSTALL_DIR}/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
+
+    # TEMPORARY (until we have generalized code for generating charts in html)
+    # copy the zone chart images
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
+    cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null
+
+    # set the permissions of all files
+    # $HWPHP_USER can read & execute all directories and read all files
+    # "other" can cd into all subdirectories
+    chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site
+    find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
+
+    # "other" can read all of these files
+    array=( css otf jpg png ico txt )
+    for i in "${array[@]}"; do
+        find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.${i} -exec chmod o+r {} \;
+    done
+
+    # "other" can read & execute these files
+    find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.js -exec chmod o+rx {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
+
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini
+    mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DIR}/site/config/master.ini
+
+    # return the course index page (only necessary when 'clean' option is used)
+    if [ -f "$mytempcurrentcourses" ]; then
+        echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
+        mv ${mytempcurrentcourses} ${originalcurrentcourses}
+    fi
+fi
 
 ################################################################################################################
 ################################################################################################################
@@ -614,22 +579,22 @@ python3 setup.py -q install
 # fix permissions
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
-if [ ${HEADLESS} == 0 ]; then
-sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
+
+#Set up pam if not in worker mode.
+if [ ${WORKER} == 0 ]; then
+    sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
+    sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
 fi
 sudo chmod o+r /usr/local/lib/python*/dist-packages/submitty_utils*.egg
 sudo chmod o+r /usr/local/lib/python*/dist-packages/easy-install.pth
 
 popd
 
+
+
 ################################################################################################################
 ################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
-
-#Evan: TODO, fix the grading scheduler.
-
-
 #############################################################
 # stop the shipper daemon (if it's running)
 systemctl is-active --quiet submitty_autograding_shipper
@@ -717,7 +682,6 @@ fi
 
 #############################################################
 
-
 # update the autograding shipper & worker daemons
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_shipper.service   /etc/systemd/system/submitty_autograding_shipper.service
 chown -R hwcron:hwcron /etc/systemd/system/submitty_autograding_shipper.service
@@ -745,6 +709,9 @@ do
     chmod 770 $mydir
 done
 
+# If the submitty_autograding_shipper.service or submitty_autograding_worker.service
+# files have changed, we should reload the units:
+systemctl daemon-reload
 
 # start the shipper daemon (if it was running)
 if [[ "$is_shipper_active_before" == "0" ]]; then
@@ -774,77 +741,67 @@ else
     echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_worker\n"
 fi
 
-
 ################################################################################################################
 ################################################################################################################
-# INSTALL TEST SUITE
+# INSTALL TEST SUITE if not in worker mode
+if [ ${WORKER} == 0 ]; then
+    # one optional argument installs & runs test suite
+    if [[ "$#" -ge 1 && $1 == "test" ]]; then
 
-#Evan: Remove tests from headless.
-if [ ${HEADLESS} == 0 ]; then
+        # copy the directory tree and replace variables
+        echo -e "Install Autograding Test Suite..."
+        rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
+        mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite/log
+        replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/lib.py
 
-# one optional argument installs & runs test suite
-if [[ "$#" -ge 1 && $1 == "test" ]]; then
+        # add a symlink to conveniently run the test suite or specific tests without the full reinstall
+        ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
 
-    # copy the directory tree and replace variables
-    echo -e "Install Autograding Test Suite..."
-    rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite/log
-    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/lib.py
+        echo -e "\nRun Autograding Test Suite...\n"
 
-    # add a symlink to conveniently run the test suite or specific tests without the full reinstall
-    ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
+        # pop the first argument from the list of command args
+        shift
+        # pass any additional command line arguments to the run test suite
+        ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
 
-    echo -e "\nRun Autograding Test Suite...\n"
-
-    # pop the first argument from the list of command args
-    shift
-    # pass any additional command line arguments to the run test suite
-    ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
-
-    echo -e "\nCompleted Autograding Test Suite\n"
-fi
-fi
-#Evan: Endif
-
-################################################################################################################
-################################################################################################################
-
-# INSTALL RAINBOW GRADES TEST SUITE
-#Evan: Remove rainbow grades from headless
-if [ ${HEADLESS} == 0 ]; then
-
-# one optional argument installs & runs test suite
-if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
-
-    # copy the directory tree and replace variables
-    echo -e "Install Rainbow Grades Test Suite..."
-    rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
-    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py
-
-    # add a symlink to conveniently run the test suite or specific tests without the full reinstall
-    #ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
-
-    echo -e "\nRun Rainbow Grades Test Suite...\n"
-    rainbow_counter=0
-    rainbow_total=0
-
-    # pop the first argument from the list of command args
-    shift
-    # pass any additional command line arguments to the run test suite
-    rainbow_total=$((rainbow_total+1))
-    ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
-    
-    if [[ $? -ne 0 ]]; then
-        echo -e "\n[ FAILED ] sample test\n"
-    else
-        rainbow_counter=$((rainbow_counter+1))
-        echo -e "\n[ SUCCEEDED ] sample test\n"
+        echo -e "\nCompleted Autograding Test Suite\n"
     fi
-
-    echo -e "\nCompleted Rainbow Grades Test Suite. $rainbow_counter of $rainbow_total tests succeeded.\n"
 fi
-fi
-#Evan: Endif
 
+################################################################################################################
+################################################################################################################
+# INSTALL RAINBOW GRADES TEST SUITE if not in worker mode
+if [ ${WORKER} == 0 ]; then
+    # one optional argument installs & runs test suite
+    if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
+
+        # copy the directory tree and replace variables
+        echo -e "Install Rainbow Grades Test Suite..."
+        rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
+        replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py
+
+        # add a symlink to conveniently run the test suite or specific tests without the full reinstall
+        #ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
+
+        echo -e "\nRun Rainbow Grades Test Suite...\n"
+        rainbow_counter=0
+        rainbow_total=0
+
+        # pop the first argument from the list of command args
+        shift
+        # pass any additional command line arguments to the run test suite
+        rainbow_total=$((rainbow_total+1))
+        ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+        
+        if [[ $? -ne 0 ]]; then
+            echo -e "\n[ FAILED ] sample test\n"
+        else
+            rainbow_counter=$((rainbow_counter+1))
+            echo -e "\n[ SUCCEEDED ] sample test\n"
+        fi
+
+        echo -e "\nCompleted Rainbow Grades Test Suite. $rainbow_counter of $rainbow_total tests succeeded.\n"
+    fi
+fi
 ################################################################################################################
 ################################################################################################################
