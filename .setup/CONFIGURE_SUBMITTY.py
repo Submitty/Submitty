@@ -7,9 +7,7 @@ import json
 import os
 import pwd
 import shutil
-
 import tzlocal
-
 
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
@@ -133,7 +131,8 @@ defaults = {'database_host': 'localhost',
             'authentication_method': 1,
             'institution_name' : '',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
-            'institution_homepage' : ''}
+            'institution_homepage' : '',
+            'timezone' : tzlocal.get_localzone().zone}
 
 loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
@@ -170,6 +169,9 @@ if 'database_password' in defaults and DATABASE_USER == defaults['database_user'
 DATABASE_PASS = get_input('What is the database password for {}? {}'.format(DATABASE_USER, default))
 if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
     DATABASE_PASS = defaults['database_password']
+print()
+
+TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
 print()
 
 SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
@@ -253,6 +255,8 @@ config['database_user'] = DATABASE_USER
 config['database_password'] = DATABASE_PASS
 
 config['authentication_method'] = AUTHENTICATION_METHOD
+
+config['timezone'] = TIMEZONE
 
 config['submission_url'] = SUBMISSION_URL
 config['vcs_url'] = VCS_URL
