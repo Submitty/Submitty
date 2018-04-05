@@ -295,7 +295,18 @@ class DatabaseQueries {
         return $return;
     }
 
-    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
+    /** @noinspection PhpDocSignatureInspection */
+    /**
+     * @param null   $g_ids
+     * @param null   $user_ids
+     * @param string $section_key
+     * @param string $sort_key
+     * @param null   $g_type
+     * @parma array  $extra_order_by
+     *
+     * @return DatabaseRowIterator
+     */
+    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null, $extra_order_by = []) {
         throw new NotImplementedException();
     }
 
