@@ -159,6 +159,9 @@ progress::-webkit-progress-value {
     overflow:auto;
     opacity: 0.95;
 }
+#regrade_request_box.rubric_panel{
+    border:5px solid #f47a42 ;
+}
 
 #autograding_results.rubric_panel {
     border:5px solid #c40233 ;

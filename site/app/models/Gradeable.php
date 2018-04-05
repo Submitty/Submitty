@@ -297,6 +297,9 @@ class Gradeable extends AbstractModel {
     /** @property @var int.*/
     protected $max_possible_grading_time = -1;
 
+     /** @property @var int The status of the regrade, -1=in process, 0=no regrade, 1=request reviewed*/
+    protected $regrade_status = 0;
+
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
         if(!isset($details['g_id'])) {
@@ -336,6 +339,7 @@ class Gradeable extends AbstractModel {
             $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;
             $this->max_team_size = $details['eg_max_team_size'];
             $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
+            $this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
             }
@@ -478,7 +482,7 @@ class Gradeable extends AbstractModel {
             $this->incentive_message = Utils::prepareHtmlString($details['early_submission_incentive']['message']);
             $this->minimum_days_early = intval($details['early_submission_incentive']['minimum_days_early']);
             $this->minimum_points = intval($details['early_submission_incentive']['minimum_points']);
-	    $this->early_submission_test_cases = $details['early_submission_incentive']['test_cases'];
+        $this->early_submission_test_cases = $details['early_submission_incentive']['test_cases'];
         }
 
         $num_parts = 1;
@@ -1119,5 +1123,9 @@ class Gradeable extends AbstractModel {
             }
         }
         return $return;
+    }
+
+     public function getRegradeStatus(){
+        return $this->regrade_status;
     }
 }

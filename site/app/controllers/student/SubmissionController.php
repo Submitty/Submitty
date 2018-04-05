@@ -58,13 +58,77 @@ class SubmissionController extends AbstractController {
             case 'verify':
                 return $this->ajaxValidGradeable();
                 break;
+            case 'request_regrade':
+                return $this->requestRegrade();
+                break;
+            case 'edit_request_post':
+                return $this->modifyRequestPost();
+                break;
+            case 'make_request_post':
+                return $this->makeRequestPost();
+                break;
+            case 'delete_request_post':
+                return $this->deleteRequestPost();
+                break;
+            case 'delete_request':
+                return $this->deleteRequest();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
                 break;
         }
     }
-
+    private function modifyRequestPost(){
+        $content = htmlentities($_POST['request_content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $thread_id = $_POST['id'];
+        $this->core->getQueries()->modifyRegradeRequestPost($thread_id,$content);
+    }
+    private function deleteRequestPost(){
+        $thread_id = $_REQUEST['thread_id'];
+        $user = $_REQUEST['user'];
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $this->core->getQueries()->deleteRegradeRequestPost($thread_id);
+        //this is here since window.reload on the student side leads to the wrong page
+        if(!$this->core->getQueries()->isStaffPost($user)){
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
+        }
+    }
+    private function makeRequestPost(){
+        $thread_id = (isset($_REQUEST['thread_id'])) ? $_REQUEST['thread_id'] : null;
+        $content = htmlentities($_POST['replyTextArea'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $this->core->getQueries()->insertNewRegradePost($thread_id,$gradeable_id, $user_id, $content);
+        if(!$this->core->getQueries()->isStaffPost($user_id)){
+            $this->core->getQueries()->modifyRegradeStatus($thread_id, -1);
+        }else{
+            $this->core->getQueries()->modifyRegradeStatus($thread_id, 1);
+        }
+    }
+    private function deleteRequest(){
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
+        $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
+        $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
+    }
+    private function requestRegrade(){
+        $content = htmlentities($_REQUEST["request_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
+        if($gradeable_id !== null && $student_id !== null) {
+            if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
+                $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
+            }
+            else{
+                //handle error
+            }
+        }
+        else{
+            //handle error
+        }
+    }
+    
     private function popUp() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);

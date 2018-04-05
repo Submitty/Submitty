@@ -681,9 +681,15 @@ HTML;
                 }
                 else if ($row->beenTAgraded()) {
                     if($row->validateVersions()) {
-                        $btn_class = "btn-default";
-                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-			            $graded += $row->getGradedTAPoints();
+                       if($row->getRegradeStatus() === 0){
+                          $btn_class = "btn-default";
+                          $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                          $graded += $row->getGradedTAPoints();
+                        }
+                        else if($row->getRegradeStatus() === -1){
+                          $btn_class = "btn-danger";
+                          $contents = "Regrade Requested";
+                        }
                     }
                     else{
                         $btn_class = "btn-primary";
@@ -938,12 +944,18 @@ HTML;
         $return .= <<<HTML
     <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="handleKeyPress('KeyO');"></i>
 HTML;
-        if(!$peer) {
-            $return .= <<<HTML
-    <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="handleKeyPress('KeyS');"></i>
+    if(!$peer) {
+       $return .= <<<HTML
+        <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="handleKeyPress('KeyS');"></i>
+HTML;
+        if($gradeable->getRegradeStatus()!==0){
+            $class = ($gradeable->getRegradeStatus() === -1) ? 'btn btn-danger' : 'btn btn-default';
+            $return .=<<<HTML
+            <input type="button" class ="$class" value="!" onclick="showRequestDiscussion()">
 HTML;
         }
-        $return .= <<<HTML
+    }
+    $return .= <<<HTML
 </div>
 
 <div class="progress_bar">
@@ -1122,6 +1134,19 @@ HTML;
         $user = $gradeable->getUser();
         if(!$peer) {
             $return .= <<<HTML
+            
+<div id="regrade_request_box" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%;">
+    <span class = "grading_label">Regrade Request Discussion</span>
+    <input type="button" class = "btn btn-default" style="float:right; margin:20px; margin-top: 10px;" value="Close Panel" onclick="hideRequestDiscussion()">
+    <div class = "inner-container" style = "padding:20px; margin-top: 10px;">
+HTML;
+        $gradeable_id = $gradeable->getId();
+        $student_id = $user->getId();
+        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'displayTextBox', $gradeable_id,$student_id,'edit_request_post');
+        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'displayPrivateDiscussion', $gradeable,$gradeable_id,$student_id);
+            $return .= <<<HTML
+    </div>
+</div>
 
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
     <span class="grading_label">Student Information</span>
@@ -1696,6 +1721,14 @@ HTML;
         }
         window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
+    }
+    function hideRequestDiscussion(){
+        var displayRequests = document.getElementById("regrade_request_box");
+        displayRequests.style.display = "none";
+    }
+    function showRequestDiscussion(){
+        var displayRequests = document.getElementById("regrade_request_box");
+        displayRequests.style.display = "block";
     }
 </script>
 <script type="text/javascript">
