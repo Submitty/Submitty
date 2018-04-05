@@ -107,8 +107,15 @@ class DatabaseQueries {
         throw new NotImplementedException();
     }
 
-    public function loadThreads($announcements){
-        $this->course_db->query("SELECT * FROM threads WHERE deleted = false and pinned = ? ORDER BY id DESC", array($announcements));
+/**
+select * from thread_categories t INNER JOIN threads tc ON t.thread_id = thread_id where t.category_id = 2; 
+*/
+    public function loadThreads($announcements, $category_id){
+    	if($category_id === -1) {
+      		$this->course_db->query("SELECT * FROM threads WHERE deleted = false and pinned = ? ORDER BY id DESC", array($announcements));
+    	} else {
+    		$this->course_db->query("SELECT t.*, w.category_id FROM threads t, thread_categories w where deleted = false and pinned = ? and w.category_id = ? and t.id = w.thread_id", array($announcements, $category_id));
+    	}
         return $this->course_db->rows();
     }
 
@@ -147,7 +154,7 @@ class DatabaseQueries {
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment){
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment, $category_id){
 
         $this->course_db->beginTransaction();
 
@@ -163,6 +170,8 @@ class DatabaseQueries {
 
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
+
+        $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($id, $category_id));
 
         $post_id = $this->createPost($user, $content, $id, $anon, 0, true, $hasAttachment);
 
@@ -184,6 +193,11 @@ class DatabaseQueries {
             array_push($children, $child_id);
             $this->findChildren($child_id, $thread_id, $children);
         }
+    }
+
+    public function searchThreads($searchQuery){
+    	$this->course_db->query("SELECT post_content, p_author thread_id, thread_title, author, pin, timestamp FROM (SELECT t.id as thread_id, t.title as thread_title, t.created_by as author, t.pinned as pin, p.content as post_content, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(p.author_user_id) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc JOIN (SELECT thread_id as t_id, timestamp from posts where parent_id = -1) p2 ON p2.t_id = p_doc.thread_id  where p_doc.document @@ plainto_tsquery(:q)", array(':q' => $searchQuery));
+    	return $this->course_db->rows();
     }
 
     public function deletePost($post_id, $thread_id){
@@ -1822,6 +1836,11 @@ AND gc_id IN (
       $ar["first_name"] = $name;
       $ar["last_name"] = $last_name;
       return $ar;
+    }
+
+    public function getCategories(){
+    	$this->course_db->query("SELECT * from categories_list ORDER BY category_id DESC");
+    	return $this->course_db->rows();
     }
 
     public function getPostsForThread($current_user, $thread_id){

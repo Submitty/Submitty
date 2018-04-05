@@ -29,6 +29,7 @@ import subprocess
 import uuid
 import os.path
 import string
+import sys
 
 from submitty_utils import dateutils
 
@@ -199,7 +200,7 @@ def main():
             courses[course].make_course_json()
 
     # restart the autograding daemon
-    print ("restarting the autograding scheduling daemon")
+    print("restarting the autograding scheduling daemon")
     os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
     os.system("rm /tmp/hwcron_cron_backup.txt")
     os.system("systemctl restart submitty_autograding_shipper")
@@ -820,6 +821,38 @@ class Course(object):
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
+        
+        if(self.code == "sample"):  
+            f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'))
+            forum_threads = Table("threads", metadata, autoload=True)
+            forum_posts = Table("posts", metadata, autoload=True)
+            for threadData in f_data[1]:
+                conn.execute(forum_threads.insert(),
+                                  id=threadData[0],
+                                  title=threadData[1],
+                                  created_by=threadData[2],
+                                  pinned=True if threadData[3] == "t" else False,
+                                  deleted=True if threadData[4] == "t" else False,
+                                  merged_id=threadData[5],
+                                  is_visible=True if threadData[6] == "t" else False)
+
+            for postData in f_data[0]:
+                conn.execute(forum_posts.insert(),
+                                  id=postData[0],
+                                  thread_id=postData[1],
+                                  parent_id=postData[2],
+                                  author_user_id=postData[3],
+                                  content=postData[4],
+                                  timestamp=postData[5],
+                                  anonymous=True if postData[6] == "t" else False,
+                                  deleted=True if postData[7] == "t" else False,
+                                  endorsed_by=postData[8],
+                                  resolved = True if postData[9] == "t" else False,
+                                  type=postData[10],
+                                  has_attachment=1)
+            
+            print('Added forum data to sample course.') 
+        
 
         conn.close()
         submitty_conn.close()
@@ -832,6 +865,15 @@ class Course(object):
                     grading_rotating['user_id'], gradeable.id)
                 if grading_rotating['user_id'] not in users:
                     raise ValueError(string)
+
+    def getForumDataFromFile(self, filename):
+        forum_path = os.path.join(SETUP_DATA_PATH, "forum")
+        forum_data = []
+        for line in open(os.path.join(forum_path, filename)):
+            l = [ x.strip() for x in line.split("|") ]
+            if(len(l) > 1):
+                forum_data.append(l)
+        return forum_data
 
     def make_course_json(self):
         """

@@ -174,6 +174,16 @@ function addTeamMemberInput(old, i) {
         Add More Users</span>');
 }
 
+function addCategory(old, i) {
+    old.remove()
+    var form = $("#admin-team-form");
+    $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
+    var members_div = $("#admin-team-members");
+    members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+        Add More Users</span>');
+}
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details
@@ -943,6 +953,29 @@ function saveScrollLocationOnRefresh(className){
             $(element).scrollTop(sessionStorage.scrollTop);
         }
     });
+}
+
+function modifyThreadList(){
+    var category_value = $( "#thread_category option:selected").val();
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                thread_category: category_value
+            },
+            success: function(r){
+               //window.location.replace(url);
+               console.log(r);
+               var x = JSON.parse(r).html;
+               x = `${x}`;
+               console.log(thread_category + " " + x);
+               $(".thread_list").html(x);
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to delete post. Please try again.");
+            }
+    })
 }
 
 function replyPost(post_id){
