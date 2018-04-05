@@ -88,6 +88,7 @@ HTML;
 		<div style="margin-left:20px;margin-top:10px; height:50px;  " id="forum_bar">
 
 			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
 			
 		</div>
 
@@ -555,6 +556,7 @@ HTML;
 		<div style="margin-left:20px;margin-top:10px; height:50px;" id="forum_bar">
 
 			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
 		
 		</div>
 
@@ -610,6 +612,84 @@ HTML;
 HTML;
 
 		return $return;
+	}
+
+
+	public function statPage($users) {
+
+		$return = <<<HTML
+		
+		<div style="margin-left:20px;margin-top:10px; height:50px;" id="forum_bar">
+
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
+		
+		</div>
+			<div class="content">
+				<table class="table table-striped table-bordered persist-area">
+					<tr>
+						<td width="5%"></td>
+				        <td width="30%">User</td>
+				        <td width="20%">Total Posts</td>
+				        <td width="20%">Total Threads</td>
+				        <td width="25%">Show Posts</td>
+					</tr>
+HTML;
+		foreach($users as $user => $details){
+			$post_count=count($details["posts"]);
+			$posts = htmlspecialchars(json_encode($details["posts"]), ENT_QUOTES, 'UTF-8');
+			$ids = htmlspecialchars(json_encode($details["id"]), ENT_QUOTES, 'UTF-8');
+			$timestamps = htmlspecialchars(json_encode($details["timestamps"]), ENT_QUOTES, 'UTF-8');
+			$return .= <<<HTML
+			<div class="user_entry">
+				<tr>
+					<td></td>
+					<td>{$user}</td>
+					<td>{$post_count}</td>
+					<td>{$details["total_threads"]}</td>
+					<td><button class="btn btn-default" data-action = "expand" data-posts="{$posts}" data-id="{$ids}" data-timestamps="{$timestamps}">Expand</button></td>
+				</tr>
+			</div>
+HTML;
+			
+		}
+		
+		$return .= <<<HTML
+				</table>
+			</div>
+
+			<script>
+				$("button").click(function(){
+					var action = $(this).data('action');
+					var posts = $(this).data('posts');
+					var ids = $(this).data('id');
+					var timestamps = $(this).data('timestamps');
+					if(action=="expand"){
+						
+						//console.log(posts);
+						for(var i=0;i<posts.length;i++){
+							$(this).parent().append('<tr id="'+ids[i]+'"><td>'+timestamps[i]+'</td><td colspan = "4" align = "right">'+posts[i]+'</td></tr> ');
+						}
+						$(this).html("Collapse");
+						$(this).data('action',"collapse");
+					}
+					else{
+						for(var i=0;i<ids.length;i++){
+							var item = document.getElementById(ids[i]);
+							item.remove();
+						}
+						
+						$(this).html("Expand");
+						$(this).data('action',"expand");
+					}
+					return false;
+				});
+				
+			
+			</script>
+HTML;
+		return $return;
+
 	}
 
 }

@@ -132,6 +132,11 @@ class DatabaseQueries {
         return $this->course_db->rows()[0]["max_id"];
     }
 
+    public function getPosts(){
+        $this->course_db->query("SELECT * FROM posts where deleted=false");
+        return $this->course_db->rows();
+    }
+
     public function getFirstPostForThread($thread_id) {
         $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id = ?", array($thread_id));
         return $this->course_db->rows()[0];

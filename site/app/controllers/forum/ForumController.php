@@ -51,6 +51,9 @@ class ForumController extends AbstractController {
             case 'remove_announcement':
                 $this->alterAnnouncement(0);
                 break;
+            case 'show_stats':
+                $this->showStats();
+                break;
             case 'view_thread':
             default:
                 $this->showThreads();
@@ -238,6 +241,35 @@ class ForumController extends AbstractController {
         } else {
             $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
         }
+    }
+
+
+    public function showStats(){
+        $posts = array();
+        $posts = $this->core->getQueries()->getPosts();
+        $num_posts = count($posts);
+        $num_threads = 0;
+        $users = array();
+        for($i=0;$i<$num_posts;$i++){
+            $user = $posts[$i]["author_user_id"];
+            $content = $posts[$i]["content"];
+            if(!isset($users[$user])){
+                $users[$user]=array();
+                $users[$user]["posts"]=array();
+                $users[$user]["id"]=array();
+                $users[$user]["timestamps"]=array();
+                $users[$user]["total_threads"]=0;
+            }
+            if($posts[$i]["parent_id"]==-1){
+                $users[$user]["total_threads"]++;
+            }
+            $users[$user]["posts"][] = $content;
+            $users[$user]["id"][] = $posts[$i]["id"];
+            $users[$user]["timestamps"][] = $posts[$i]["timestamp"];
+            
+        }
+        
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
 
 }
