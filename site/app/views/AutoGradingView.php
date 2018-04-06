@@ -453,7 +453,7 @@ HTML;
         }else{
             $background = "red-background";
         }
-        $comment = (!empty($gradeable->getOverallComment())) ? '<hr>'."Overall note from TA: " . $gradeable->getOverallComment() : "";
+        $comment = (!empty($gradeable->getOverallComment())) ? '<hr>'."Overall note from Grader: " . $gradeable->getOverallComment() : "";
         //late day data
         $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
         $lateDayData = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
