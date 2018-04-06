@@ -344,20 +344,21 @@ os.chmod(CONFIG_INSTALL_DIR, 0o755)
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/conf
 
-if not os.path.isfile(WORKERS_JSON):
-    worker_dict = {
-        "primary": {
-            "capabilities": ["default"],
-            "address": "localhost",
-            "username": "",
-            "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS
-        }
-    }
+if not args.worker:
+	if not os.path.isfile(WORKERS_JSON):
+	    worker_dict = {
+	        "primary": {
+	            "capabilities": ["default"],
+	            "address": "localhost",
+	            "username": "",
+	            "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS
+	        }
+	    }
 
-    with open(WORKERS_JSON, 'w') as workers_file:
-        json.dump(worker_dict, workers_file, indent=4)
-shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
-os.chmod(WORKERS_JSON, 0o440)
+	    with open(WORKERS_JSON, 'w') as workers_file:
+	        json.dump(worker_dict, workers_file, indent=4)
+	shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
+	os.chmod(WORKERS_JSON, 0o440)
 
 ##############################################################################
 # Write database json
