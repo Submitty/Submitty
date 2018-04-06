@@ -24,9 +24,9 @@ HWCGI_USER=$(jq -r '.hwcgi_user' ${CONF_DIR}/submitty_users.json)
 
 COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${CONF_DIR}/submitty_users.json)
 
-DATABASE_HOST=$(jq '.database_host' ${CONF_DIR}/database.json)
-DATABASE_USER=$(jq '.database_user' ${CONF_DIR}/database.json)
-DATABASE_PASS=$(jq '.database_password' ${CONF_DIR}/database.json)
+DATABASE_HOST=$(jq -r '.database_host' ${CONF_DIR}/database.json)
+DATABASE_USER=$(jq -r '.database_user' ${CONF_DIR}/database.json)
+DATABASE_PASS=$(jq -r '.database_password' ${CONF_DIR}/database.json)
 
 ########################################################################################################################
 ########################################################################################################################
