@@ -927,30 +927,27 @@ function enableTabsInTextArea(id){
 
 }
 
-function resetScrollPosition(){
-    if(sessionStorage.scrollTop != "undefined") {
-        sessionStorage.scrollTop = undefined;
+function resetScrollPosition(id){
+    if(sessionStorage.getItem(id+"_scrollTop") != 0) {
+        sessionStorage.setItem(id+"_scrollTop", 0);
     }
 }
 
-function saveScrollLocationOnRefresh(className){
-    var element = document.getElementsByClassName(className);
+function saveScrollLocationOnRefresh(id){
+    debugger;
+    var element = document.getElementById(id);
     $(element).scroll(function() {
-        sessionStorage.scrollTop = $(this).scrollTop();
+        sessionStorage.setItem(id+"_scrollTop", $(element).scrollTop());
     });
     $(document).ready(function() {
-        if(sessionStorage.scrollTop != "undefined"){
-            $(element).scrollTop(sessionStorage.scrollTop);
+        if(sessionStorage.getItem(id+"_scrollTop") != "undefined"){
+            $(element).scrollTop(sessionStorage.getItem(id+"_scrollTop"));
         }
     });
-    var previous_scroll_position = sessionStorage.getItem("scroll_position");
-    document.getElementById('posts_list').scrollTop = previous_scroll_position;
-    sessionStorage.setItem("scroll_position", 0);
 }
 
 function replyPost(post_id){
-    var scroll_position = document.getElementById("posts_list").scrollTop;
-    sessionStorage.setItem("scroll_position", scroll_position);
+    saveScrollLocationOnRefresh('posts_list');
     if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
         $('#'+ post_id + '-reply').css("display","none");
     } else {
