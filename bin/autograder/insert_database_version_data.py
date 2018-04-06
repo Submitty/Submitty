@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 This file is used to put submission details about a version into the database so that it can be
 easily and efficiently used by the PHP script. This needs (in the general case) read access to the
@@ -21,19 +19,25 @@ will explain how to do that.
 """
 import json
 import os
-import time
-import grade_items_logging
+
 from submitty_utils import dateutils
 
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
 
-DB_HOST = "__INSTALL__FILLIN__DATABASE_HOST__"
-DB_USER = "__INSTALL__FILLIN__DATABASE_USER__"
-DB_PASSWORD = "__INSTALL__FILLIN__DATABASE_PASSWORD__"
-DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', 'config')
+with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+DB_HOST = OPEN_JSON['database_host']
+DB_USER = OPEN_JSON['database_user']
+DB_PASSWORD = OPEN_JSON['database_password']
+
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+DATA_DIR = OPEN_JSON['submitty_data_dir']
+
 
 def str2bool(v):
-  return v.lower() in ("yes", "true", "t", "1")
+    return v.lower() in ("yes", "true", "t", "1")
 
 
 def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_team,version):
@@ -45,17 +49,17 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
 
     testcases = get_testcases(semester, course, gradeable_id)
     results = get_result_details(semester, course, gradeable_id, who_id, version)
-    if not len(testcases) == len(results['testcases']):
-      print ("ERROR!  mismatched # of testcases ",len(testcases)," != ",len(results['testcases']))
+    if len(testcases) != len(results['testcases']):
+      print("ERROR!  mismatched # of testcases {} != {}".format(len(testcases), len(results['testcases'])))
     for i in range(len(testcases)):
-      if testcases[i]['hidden'] and testcases[i]['extra_credit']:
-        hidden_ec += results['testcases'][i]['points']
-      elif testcases[i]['hidden']:
-        hidden_non_ec += results['testcases'][i]['points']
-      elif testcases[i]['extra_credit']:
-        non_hidden_ec += results['testcases'][i]['points']
-      else:
-        non_hidden_non_ec += results['testcases'][i]['points']
+        if testcases[i]['hidden'] and testcases[i]['extra_credit']:
+            hidden_ec += results['testcases'][i]['points']
+        elif testcases[i]['hidden']:
+            hidden_non_ec += results['testcases'][i]['points']
+        elif testcases[i]['extra_credit']:
+            non_hidden_ec += results['testcases'][i]['points']
+        else:
+            non_hidden_non_ec += results['testcases'][i]['points']
     submission_time = results['submission_time']
 
     db_name = "submitty_{}_{}".format(semester, course)

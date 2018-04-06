@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-import argparse
 import configparser
 import json
 import os
@@ -15,17 +12,22 @@ import urllib.parse
 import string
 import random
 import socket
-
-from submitty_utils import dateutils, glob
-import grade_items_logging
-import write_grade_history
-import insert_database_version_data
 import zipfile
 
-# these variables will be replaced by INSTALL_SUBMITTY.sh
-SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
-SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
-HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
+from submitty_utils import dateutils, glob
+from . import insert_database_version_data
+from . import grade_items_logging
+from . import write_grade_history
+
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', 'config')
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
+SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
+
+with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+HWCRON_UID = OPEN_JSON['hwcron_uid']
 
 
 # NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
@@ -830,5 +832,5 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
 # ==================================================================================
 
 if __name__ == "__main__":
-    print ("ERROR: Do not call this script directly")
+    raise SystemExit('ERROR: Do not call this script directly')
 

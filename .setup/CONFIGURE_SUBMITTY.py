@@ -344,6 +344,7 @@ os.chmod(WORKERS_JSON, 0o440)
 
 config = OrderedDict()
 config['authentication_method'] = AUTHENTICATION_METHOD
+config['database_driver'] = 'pgsql'
 config['database_host'] = DATABASE_HOST
 config['database_user'] = DATABASE_USER
 config['database_password'] = DATABASE_PASS

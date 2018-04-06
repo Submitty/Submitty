@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import os
 
-INI_PATH = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/site/public/hwgrading/toolbox/configs/"
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    JSON = json.load(open_file)
+INI_PATH = os.path.join(JSON['submitty_install_dir'], 'site/public/hwgrading/toolbox/configs/')
 INI_FILE = "student_csv_fields.ini"
-INI_OWNER = "__INSTALL__FILLIN__HWPHP_USER__"
+with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+    JSON = json.load(open_file)
+INI_OWNER = JSON['hwphp_user']
 
 if os.geteuid() != 0:
     raise SystemExit("Only root is allowed to run this script.")

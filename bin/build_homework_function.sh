@@ -5,9 +5,10 @@
 
 function build_homework {
 
-    # these variables will be replaced by INSTALL.sh
-    SUBMITTY_INSTALL_DIR=__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__
-    SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
+    CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../conf
+
+    SUBMITTY_INSTALL_DIR=$(jq '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+    SUBMITTY_DATA_DIR=$(jq '.submitty_data_dir' ${CONF_DIR}/submitty.json)
 
 
     # location of the homework source files, including:

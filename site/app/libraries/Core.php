@@ -86,10 +86,10 @@ class Core {
      * @throws \Exception
      */
     public function loadConfig($semester, $course) {
-        $master_ini_path = FileUtils::joinPaths(__DIR__, "..", "..", "config", "master.ini");
+        $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'conf');
 
         $this->config = new Config($this, $semester, $course);
-        $this->config->loadMasterIni($master_ini_path);
+        $this->config->loadMasterConfigs($conf_path);
 
         if (!empty($semester) && !empty($course)) {
             $course_ini_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.ini");

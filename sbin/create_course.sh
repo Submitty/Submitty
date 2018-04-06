@@ -12,21 +12,21 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
-# these variables will be replaced by INSTALL.sh
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../conf
 
-SUBMITTY_INSTALL_DIR=__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__
-SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
-SUBMISSION_URL=__INSTALL__FILLIN__SUBMISSION_URL__
+SUBMITTY_INSTALL_DIR=$(jq '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+SUBMITTY_DATA_DIR=$(jq '.submitty_data_dir' ${CONF_DIR}/submitty.json)
+SUBMISSION_URL=$(jq '.submission_url' ${CONF_DIR}/submitty.json)
 
-HWPHP_USER=__INSTALL__FILLIN__HWPHP_USER__
-HWCRON_USER=__INSTALL__FILLIN__HWCRON_USER__
-HWCGI_USER=__INSTALL__FILLIN__HWCGI_USER__
+HWPHP_USER=$(jq '.hwphp_user' ${CONF_DIR}/users.json)
+HWCRON_USER=$(jq '.hwcron_user' ${CONF_DIR}/users.json)
+HWCGI_USER=$(jq '.hwcgi_user' ${CONF_DIR}/users.json)
 
-COURSE_BUILDERS_GROUP=__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__
+COURSE_BUILDERS_GROUP=$(jq '.course_builders_group' ${CONF_DIR}/users.json)
 
-DATABASE_HOST=__INSTALL__FILLIN__DATABASE_HOST__
-DATABASE_USER=__INSTALL__FILLIN__DATABASE_USER__
-DATABASE_PASS='__INSTALL__FILLIN__DATABASE_PASSWORD__'
+DATABASE_HOST=$(jq '.database_host' ${CONF_DIR}/database.json)
+DATABASE_USER=$(jq '.database_user' ${CONF_DIR}/database.json)
+DATABASE_PASS=$(jq '.database_password' ${CONF_DIR}/database.json)
 
 ########################################################################################################################
 ########################################################################################################################
