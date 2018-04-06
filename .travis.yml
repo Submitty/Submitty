@@ -117,7 +117,6 @@ before_script:
   - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
   - sudo service apache2 restart
   #- ./.setup/travis/start.sh
-  - sudo cat /usr/local/submitty/site/config/master.ini
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
@@ -138,7 +137,6 @@ after_script:
   # - sudo ./.setup/travis/print_debug.sh
   # if this fails, it only prints, travis does not fail
   - sudo cat /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh
-  - sudo cat /usr/local/submitty/site/config/master.ini
   - sudo cat /var/local/submitty/logs/*
   - sudo /usr/local/submitty/bin/check_everything.py
 
