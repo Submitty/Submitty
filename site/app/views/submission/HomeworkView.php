@@ -1002,7 +1002,7 @@ HTML;
 HTML;
             if ($gradeable->hasGradeFile()) {
                 $return .= <<<HTML
-    <h3 class="label">TA grade</h3>
+    <h3 class="label">TA / Instructor grade</h3>
 HTML;
     $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults', $gradeable);
             } else {
