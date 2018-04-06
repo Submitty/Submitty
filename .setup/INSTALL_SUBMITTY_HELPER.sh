@@ -267,6 +267,8 @@ popd > /dev/null
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
+source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh
+
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 # set the permissions
@@ -353,7 +355,7 @@ find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.js -exec chm
 ################################################################################################################
 # COPY THE 1.0 Grading Website
 
-source INSTALL_SUBMITTY_HELPER_SITE.sh
+source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh
 
 ################################################################################################################
 ################################################################################################################
