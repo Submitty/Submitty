@@ -6,6 +6,14 @@
 
 echo -e "Copy the submission website"
 
+if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
+    # constants are not initialized,
+    CONF_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"/../../config
+    SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
+    SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+    HWPHP_USER=$(jq -r '.hwphp_user' ${CONF_DIR}/submitty_users.json)
+    HWCGI_USER=$(jq -r '.hwcgi_user' ${CONF_DIR}/submitty_users.json)
+fi
 # copy the website from the repo
 rsync -rtz --exclude 'vendor' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 
@@ -27,15 +35,12 @@ find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
 # "other" can read all of these files
 array=( css otf jpg png ico txt )
 for i in "${array[@]}"; do
-    find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.${i} -exec chmod o+r {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.${i} -exec chmod o+r {} \;
 done
 
 # "other" can read & execute these files
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.js -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
-
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini
-mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DIR}/site/config/master.ini
+find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.js -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -type f -name \*.cgi -exec chmod u+x {} \;
 
 # return the course index page (only necessary when 'clean' option is used)
 if [ -f "$mytempcurrentcourses" ]; then

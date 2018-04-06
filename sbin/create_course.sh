@@ -12,17 +12,17 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
-CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../conf
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../config
 
-SUBMITTY_INSTALL_DIR=$(jq '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-SUBMITTY_DATA_DIR=$(jq '.submitty_data_dir' ${CONF_DIR}/submitty.json)
-SUBMISSION_URL=$(jq '.submission_url' ${CONF_DIR}/submitty.json)
+SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${CONF_DIR}/submitty.json)
+SUBMISSION_URL=$(jq -r '.submission_url' ${CONF_DIR}/submitty.json)
 
-HWPHP_USER=$(jq '.hwphp_user' ${CONF_DIR}/users.json)
-HWCRON_USER=$(jq '.hwcron_user' ${CONF_DIR}/users.json)
-HWCGI_USER=$(jq '.hwcgi_user' ${CONF_DIR}/users.json)
+HWPHP_USER=$(jq -r '.hwphp_user' ${CONF_DIR}/submitty_users.json)
+HWCRON_USER=$(jq -r '.hwcron_user' ${CONF_DIR}/submitty_users.json)
+HWCGI_USER=$(jq -r '.hwcgi_user' ${CONF_DIR}/submitty_users.json)
 
-COURSE_BUILDERS_GROUP=$(jq '.course_builders_group' ${CONF_DIR}/users.json)
+COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${CONF_DIR}/submitty_users.json)
 
 DATABASE_HOST=$(jq '.database_host' ${CONF_DIR}/database.json)
 DATABASE_USER=$(jq '.database_user' ${CONF_DIR}/database.json)
