@@ -188,6 +188,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             os.remove(autograding_zip_tmp)
             os.remove(submission_zip_tmp)
             return success
+    grade_items_logging.log_message(which_untrusted=which_untrusted, message="Began grading job on " + which_machine)
     return True
 
 
@@ -264,6 +265,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
     with contextlib.suppress(FileNotFoundError):
         os.remove(local_done_queue_file)
+    grade_items_logging.log_message(which_untrusted=which_untrusted, message="Finished job on " + which_machine)
     return True
 
 
