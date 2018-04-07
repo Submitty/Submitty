@@ -306,70 +306,70 @@ HTML;
      * @param bool   $use_database
      * @return string
      */
-    public function downloadForm($code,$students,$graders,$reg_sections,$use_database=false) {
-        $download_info=array();
-        $first_name="";
-        $last_name="";
-        if($code=="user"){
-            foreach($students as $student){
-                $rot_sec = ($student->getRotatingSection() === null) ? "NULL" : $student->getRotatingSection();
-                $reg_sec = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
-                $grp="";
+    public function downloadForm($code, $students, $graders, $reg_sections, $use_database=false) {
+        $download_info = array();
+        $first_name = "";
+        $last_name = "";
+        if ($code === 'user') {
+            foreach ($students as $student) {
+                $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
+                $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+                $grp = "";
                 switch ($student->getGroup()) {
                     case 0:
-                        $grp="Developer";
+                        $grp = 'Developer';
                         break;
                     case 1:
-                        $grp="Instructor";
+                        $grp = 'Instructor';
                         break;
                     case 2:
-                        $grp="Full Access Grader (Grad TA)";
+                        $grp = 'Full Access Grader (Grad TA)';
                         break;
                     case 3:
-                        $grp="Limited Access Grader (Mentor)";
+                        $grp = 'Limited Access Grader (Mentor)';
                         break;
                     default:
-                        $grp="Student";
+                        $grp = 'Student';
                         break;
                 }
-                $first_name=str_replace ("'","&#039;",$student->getDisplayedFirstName());
-                $last_name=str_replace ("'","&#039;",$student->getLastName());
-                array_push($download_info,["first_name"=>"$first_name" , "last_name"=>"$last_name" , "user_id"=>$student->getId() , "email"=>$student->getEmail() , "reg_section"=>"$reg_sec" , "rot_section"=>"$rot_sec" , "group"=>"$grp" ]);
+                $first_name = str_replace("'", "&#039;", $student->getDisplayedFirstName());
+                $last_name = str_replace("'", "&#039;", $student->getLastName());
+                array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $student->getId(), 'email' => $student->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => "$grp"]);
             }
         }
-        else if($code=="grader"){
-            foreach($graders as $grader){
-                $rot_sec = ($grader->getRotatingSection() === null) ? "NULL" : $grader->getRotatingSection();
-                $reg_sec="";
-                $grp="";
+        else if ($code === 'grader') {
+            foreach ($graders as $grader) {
+                $rot_sec = ($grader->getRotatingSection() === null) ? 'NULL' : $grader->getRotatingSection();
+                $reg_sec = "";
+                $grp = "";
                 switch ($grader->getGroup()) {
                     case 0:
-                        $reg_sec = "All";
-                        $grp="Developer";
+                        $reg_sec = 'All';
+                        $grp = 'Developer';
                         break;
                     case 1:
-                        $grp="Instructor";
-                        $reg_sec = "All";
+                        $reg_sec = 'All';
+                        $grp = 'Instructor';
                         break;
                     case 2:
-                        $grp="Full Access Grader (Grad TA)";
-                        $reg_sec = implode(",", $grader->getGradingRegistrationSections());
+                        $grp = 'Full Access Grader (Grad TA)';
+                        $reg_sec = implode(',', $grader->getGradingRegistrationSections());
                         break;
                     case 3:
-                        $grp="Limited Access Grader (Mentor)";
-                        $reg_sec = implode(",", $grader->getGradingRegistrationSections());
+                        $grp = 'Limited Access Grader (Mentor)';
+                        $reg_sec = implode(',', $grader->getGradingRegistrationSections());
                         break;
                     default:
-                        $grp="UNKNOWN";
+                        $grp = 'UNKNOWN';
                         $reg_sec = "";
                         break;
                 }
-                $first_name=str_replace ("'","&#039;",$grader->getDisplayedFirstName());
-                $last_name=str_replace ("'","&#039;",$grader->getLastName());
-                array_push($download_info,["first_name"=>"$first_name" , "last_name"=>"$last_name" , "user_id"=>$grader->getId() , "email"=>$grader->getEmail() , "reg_section"=>"$reg_sec" , "rot_section"=>"$rot_sec" , "group"=>"$grp" ]);
+                $first_name = str_replace("'", "&#039;", $grader->getDisplayedFirstName());
+                $last_name = str_replace("'", "&#039;", $grader->getLastName());
+                array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $grader->getId(), 'email' => $grader->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => $grp]);
             }   
         }
-        $download_info_json=json_encode($download_info);
+        $download_info_json = json_encode($download_info);
         $return = <<<HTML
 <div class="popup-form" id="download-form">                                                                   
 <form>
