@@ -1,4 +1,3 @@
-import unittest2
 from e2e.base_testcase import BaseTestCase
 
 
@@ -67,4 +66,5 @@ class TestNavigationPageNonStudent(BaseTestCase):
 
 
 if __name__ == "__main__":
-    unittest2.main()
+    import unittest
+    unittest.main()

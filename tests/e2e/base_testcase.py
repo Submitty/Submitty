@@ -1,16 +1,13 @@
 from __future__ import print_function
 from datetime import date
 import os
-import sys
+import unittest
 
-import unittest2
 from selenium import webdriver
 
-if sys.version_info[0] == 3:
-    raw_input = input
 
-
-class BaseTestCase(unittest2.TestCase):
+# noinspection PyPep8Naming
+class BaseTestCase(unittest.TestCase):
     """
     Base class that all e2e tests should extend. It provides several useful
     helper functions, sets up the selenium webdriver, and provides a common
@@ -31,6 +28,7 @@ class BaseTestCase(unittest2.TestCase):
             self.test_url = os.environ['TEST_URL']
         else:
             self.test_url = BaseTestCase.TEST_URL
+        self.driver = None
         self.user_id = BaseTestCase.USER_ID
         self.user_name = BaseTestCase.USER_NAME
         self.user_password = BaseTestCase.USER_PASSWORD
@@ -58,14 +56,14 @@ class BaseTestCase(unittest2.TestCase):
             url = "/" + url
         self.driver.get(self.test_url + url)
 
-    def log_in(self, url=None, title="SAMPLE", user_id=None, user_password=None, user_name=None):
+    def log_in(self, url=None, title="Submitty", user_id=None, user_password=None, user_name=None):
         """
         Provides a common function for logging into the site (and ensuring
         that we're logged in)
         :return:
         """
         if url is None:
-            url = "/index.php?semester=" + self.semester + "&course=sample"
+            url = "/index.php"
         if user_id is None:
             user_id = self.user_id
         if user_password is None:
@@ -97,7 +95,7 @@ class BaseTestCase(unittest2.TestCase):
         as then you cna use the javascript console to inspect the page, get the name/id of elements
         or other such actions and then use that to continue building the test
         """
-        raw_input("Hit enter to continue...")
+        input("Hit enter to continue...")
 
     @staticmethod
     def get_current_semester():
@@ -116,6 +114,3 @@ class BaseTestCase(unittest2.TestCase):
         if today.month < 7:
             semester = "s" + str(today.year)[-2:]
         return semester
-
-# if __name__ == "__main__":
-#    unittest2.main()
