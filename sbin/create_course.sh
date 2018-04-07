@@ -242,7 +242,7 @@ create_and_set  u=rwx,g=rwxs,o=   $HWPHP_USER   $ta_www_group   $course_dir/repo
 ########################################################################################################################
 
 # copy the build_course.sh script
-cp $SUBMITTY_INSTALL_DIR/bin/build_course.sh $course_dir/BUILD_${course}.sh
+cp $SUBMITTY_INSTALL_DIR/sbin/build_course.sh $course_dir/BUILD_${course}.sh
 chown $instructor:$ta_www_group $course_dir/BUILD_${course}.sh
 chmod 770 $course_dir/BUILD_${course}.sh
 replace_fillin_variables $course_dir/BUILD_${course}.sh
