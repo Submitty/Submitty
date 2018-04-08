@@ -9,8 +9,8 @@ from submitty_utils import dateutils
 import multiprocessing
 import contextlib
 
-from .autograder import grade_items_logging
-from .autograder import grade_item
+from autograder import grade_items_logging
+from autograder import grade_item
 
 # ==================================================================================
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')

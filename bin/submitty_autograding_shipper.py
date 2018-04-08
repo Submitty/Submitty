@@ -15,8 +15,8 @@ import paramiko
 import tempfile
 import socket
 
-from .autograder import grade_items_logging
-from .autograder import grade_item
+from autograder import grade_items_logging
+from autograder import grade_item
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
