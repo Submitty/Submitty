@@ -934,20 +934,18 @@ function resetScrollPosition(id){
 }
 
 function saveScrollLocationOnRefresh(id){
-    debugger;
     var element = document.getElementById(id);
     $(element).scroll(function() {
         sessionStorage.setItem(id+"_scrollTop", $(element).scrollTop());
     });
     $(document).ready(function() {
-        if(sessionStorage.getItem(id+"_scrollTop") != "undefined"){
+        if(sessionStorage.getItem(id+"_scrollTop") !== null){
             $(element).scrollTop(sessionStorage.getItem(id+"_scrollTop"));
         }
     });
 }
 
 function replyPost(post_id){
-    saveScrollLocationOnRefresh('posts_list');
     if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
         $('#'+ post_id + '-reply').css("display","none");
     } else {
