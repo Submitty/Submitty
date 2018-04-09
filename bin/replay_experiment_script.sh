@@ -12,10 +12,6 @@ fi
 
 test_user=INSERT_USERNAME
 
-#sudo /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh
-#sudo systemctl restart submitty_grading_scheduler
-
-#sudo su -c '/usr/local/submitty/bin/regrade.submitty_grading_scheduler.py' $(test_user)
 
 rm -f /home/$(test_user)/PAPER_DATA/*.txt
 
@@ -36,8 +32,7 @@ kill_stuff () {
     ps -ef | grep performance_monitor.py | grep -v grep | awk '{print $2}' | xargs kill -9
 
     # kill all old jobs
-    rm -f /var/local/submitty/to_be_graded_batch/*
-    rm -f /var/local/submitty/to_be_graded_interactive/*
+    rm -f /var/local/submitty/to_be_graded_queue/*
 
     # clean up files
     rm -rf /var/local/submitty/autograding_tmp/untrusted*/tmp
