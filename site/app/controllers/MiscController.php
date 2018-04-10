@@ -386,6 +386,7 @@ class MiscController extends AbstractController {
                  }
              }
         } else {      //IF FILE IS A VCS
+          //get checkout files and submissions
           $gradeable_checkout_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "checkout",
               $gradeable->getId());
           $gradeable_submission_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
@@ -393,6 +394,7 @@ class MiscController extends AbstractController {
 
           $zip = new \ZipArchive();
           $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+          //make two directorys in zip folder
           $zip -> addEmptyDir("submissions");
           $zip -> addEmptyDir("checkout");
           if($type === "all") {
