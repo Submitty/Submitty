@@ -65,6 +65,7 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HWCGI_UID__|$HWCGI_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCGI_GID__|$HWCGI_GID|g" $1
 
+    sed -i -e "s|__INSTALL__FILLIN__TIMEZONE__|$TIMEZONE|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $1
     sed -i -e "s|__INSTALL__FILLIN__DATABASE_USER__|$DATABASE_USER|g" $1
@@ -104,7 +105,7 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     # pop this argument from the list of arguments...
     shift
 
-    echo -e "\nDeleting directories for a clean installation\n"
+    echo -e "\nDeleting submitty installation directories, ${SUBMITTY_INSTALL_DIR}, for a clean installation\n"
 
     # save the course index page
     originalcurrentcourses=/usr/local/submitty/site/app/views/current_courses.php
@@ -155,19 +156,19 @@ chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
+# remove the old versions of the queues
+rm -rf $SUBMITTY_DATA_DIR/to_be_graded_interactive
+rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
 # if the to_be_graded directories do not exist, then make them
-mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_interactive
-mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_batch
+mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
 mkdir -p $SUBMITTY_DATA_DIR/to_be_built
 
 # set the permissions of these directories
 
 #hwphp will write items to this list, hwcron will remove them
-chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_interactive
-chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_interactive
-#course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
-chown  ${HWCRON_USER}:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/to_be_graded_batch
-chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_batch
+#FIXME: course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
+chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
+chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
 
 #hwphp will write items to this list, hwcron will remove them
 chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
@@ -199,11 +200,10 @@ echo -e "Copy the grading code"
 rsync -rtz ${SUBMITTY_REPOSITORY}/grading ${SUBMITTY_INSTALL_DIR}/src
 
 #replace necessary variables
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/Sample_CMakeLists.txt
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/CMakeLists.txt
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/seccomp_functions.cpp
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/execute.cpp
+array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
+for i in "${array[@]}"; do
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/${i}
+done
 
 # building the autograding library
 mkdir -p ${SUBMITTY_INSTALL_DIR}/src/grading/lib
@@ -222,7 +222,6 @@ chown -R  root:root ${SUBMITTY_INSTALL_DIR}/src
 find ${SUBMITTY_INSTALL_DIR}/src -type d -exec chmod 555 {} \;
 # "other" can read all files
 find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
-
 
 ########################################################################################################################
 ########################################################################################################################
@@ -278,76 +277,54 @@ chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 #replace necessary variables in the copied scripts
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/adduser.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
+array=( authentication.py adduser.py create_course.sh generate_repos.py grade_item.py \
+        submitty_autograding_shipper.py submitty_autograding_worker.py \
+        grade_items_logging.py grading_done.py regrade.py check_everything.py build_homework_function.sh setcsvfields \
+        setcsvfields.py get_version_details.py insert_database_version_data.py )
+for i in "${array[@]}"; do
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # most of the scripts should be root only
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
 
-# all course builders (instructors & head TAs) need read/execute access to these scripts
+# www-data needs to have access to this so that it can authenticate for git
 chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/left_right_parse.py
 
-# course builders & hwcron need access to these scripts
-chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+# all course builders (instructors & head TAs) need read/execute access to these scripts
+array=( regrade.py grading_done.py read_iclicker_ids.py left_right_parse.py)
+for i in "${array[@]}"; do
+    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # everyone needs to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/killall.py
 
-
-# FIXME / WIP:  line below is temporary, to avoid error message if file does not exist
-touch ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-
+# course builders & hwcron need access to these scripts
+array=( build_homework_function.sh make_assignments_txt_file.py )
+for i in "${array[@]}"; do
+    chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # hwcron only things
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_item.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/clang.Dockerfile
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/submitty_grading_scheduler.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_items_logging.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/write_grade_history.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
+array=( insert_database_version_data.py grade_item.py \
+        submitty_autograding_shipper.py submitty_autograding_worker.py grade_items_logging.py \
+        write_grade_history.py build_config_upload.py )
+for i in "${array[@]}"; do
+    chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # root only things
-chown root:root ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
-chown root:root ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-chown root:root ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/untrusted_canary.py
-chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
-chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
-
+array=( untrusted_canary.py check_everything.py get_version_details.py )
+for i in "${array[@]}"; do
+    chown root:root ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+done
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
@@ -455,14 +432,13 @@ cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zon
 chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site
 find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
 
-# "other" can read all .txt, .jpg, & .css files
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.css -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.otf -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.jpg -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.png -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.ico -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.txt -exec chmod o+r {} \;
-# "other" can read & execute all .js files
+# "other" can read all of these files
+array=( css otf jpg png ico txt )
+for i in "${array[@]}"; do
+    find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.${i} -exec chmod o+r {} \;
+done
+
+# "other" can read & execute these files
 find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.js -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
 
@@ -474,7 +450,6 @@ if [ -f "$mytempcurrentcourses" ]; then
     echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
     mv ${mytempcurrentcourses} ${originalcurrentcourses}
 fi
-
 
 
 
@@ -513,6 +488,7 @@ echo -e "Compile and install analysis tools"
 ST_VERSION=v0.3.4
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
+#if [ "1" == "0" ]; then
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     for b in count plagiarism diagnostics;
@@ -525,6 +501,7 @@ if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     echo ${ST_VERSION} > VERSION
 fi
 popd
+#fi
 
 # change permissions
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
@@ -580,26 +557,102 @@ popd
 # INSTALL & START GRADING SCHEDULER DAEMON
 
 
-# stop the scheduler (if it's running)
-systemctl is-active --quiet submitty_grading_scheduler
-is_active_before=$?
-if [[ "$is_active_before" == "0" ]]; then
-    systemctl stop submitty_grading_scheduler
-    echo -e "Stopped Submitty Grading Scheduler Daemon\n"
-fi
 
-systemctl is-active --quiet submitty_grading_scheduler
+#############################################################
+# stop the shipper daemon (if it's running)
+systemctl is-active --quiet submitty_autograding_shipper
+is_shipper_active_before=$?
+if [[ "$is_shipper_active_before" == "0" ]]; then
+    systemctl stop submitty_autograding_shipper
+    echo -e "Stopped Submitty Grading Shipper Daemon\n"
+fi
+systemctl is-active --quiet submitty_autograding_shipper
 is_active_tmp=$?
 if [[ "$is_active_tmp" == "0" ]]; then
-    echo -e "ERROR: did not successfully stop submitty grading scheduler daemon\n"
+    echo -e "ERROR: did not successfully stop submitty grading shipper daemon\n"
     exit 1
 fi
 
 
-# update the scheduler daemon
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_grading_scheduler.service   /etc/systemd/system/submitty_grading_scheduler.service
-chown -R hwcron:hwcron /etc/systemd/system/submitty_grading_scheduler.service
-chmod 444 /etc/systemd/system/submitty_grading_scheduler.service
+#############################################################
+# stop the worker daemon (if it's running)
+systemctl is-active --quiet submitty_autograding_worker
+is_worker_active_before=$?
+if [[ "$is_worker_active_before" == "0" ]]; then
+    systemctl stop submitty_autograding_worker
+    echo -e "Stopped Submitty Grading Worker Daemon\n"
+fi
+systemctl is-active --quiet submitty_autograding_worker
+is_active_tmp=$?
+if [[ "$is_active_tmp" == "0" ]]; then
+    echo -e "ERROR: did not successfully stop submitty grading worker daemon\n"
+    exit 1
+fi
+
+
+
+#############################################################
+# NOTE: This section is to cleanup the old scheduler -- and this code should eventually be removed
+# BEGIN TO BE DELETED
+# stop the old scheduler (if it's running)
+systemctl is-active --quiet submitty_grading_scheduler
+is_scheduler_active=$?
+if [[ "$is_scheduler_active" == "0" ]]; then
+    systemctl stop submitty_grading_scheduler
+    echo -e "WARNING: Stopped Deprecated Submitty Grading Scheduler Daemon\n"
+    # launch the shipper & worker daemons on relaunch
+    is_shipper_active_before=0
+    is_worker_active_before=0
+    echo -e "WARNING: Will launch replacement Submitty Autograding Shipper & Worker Daemon\n"
+fi
+systemctl is-active --quiet submitty_grading_scheduler
+is_active_tmp=$?
+if [[ "$is_active_tmp" == "0" ]]; then
+    echo -e "ERROR: did not successfully stop deprecated submitty grading scheduler daemon\n"
+    exit 1
+fi
+# END TO BE DELETED
+
+
+#############################################################
+# cleanup the TODO and DONE folders
+original_autograding_workers=/var/local/submitty/autograding_TODO/autograding_worker.json
+if [ -f $original_autograding_workers ]; then
+    temp_autograding_workers=`mktemp`
+    echo "save this file! ${original_autograding_workers} ${temp_autograding_workers}"
+    mv ${original_autograding_workers} ${temp_autograding_workers}
+fi
+
+rm -rf $SUBMITTY_DATA_DIR/autograding_TODO
+rm -rf $SUBMITTY_DATA_DIR/autograding_DONE
+
+
+
+
+# recreate the TODO and DONE folders
+mkdir -p $SUBMITTY_DATA_DIR/autograding_TODO
+mkdir -p $SUBMITTY_DATA_DIR/autograding_DONE
+chown -R ${HWCRON_USER}:${HWCRON_GID} ${SUBMITTY_DATA_DIR}/autograding_TODO
+chown -R ${HWCRON_USER}:${HWCRON_GID} ${SUBMITTY_DATA_DIR}/autograding_DONE
+chmod 770 ${SUBMITTY_DATA_DIR}/autograding_TODO
+chmod 770 ${SUBMITTY_DATA_DIR}/autograding_DONE
+
+# return the autograding_workers json
+if [ -f "$temp_autograding_workers" ]; then
+    echo "return this file! ${temp_autograding_workers} ${original_autograding_workers}"
+    mv ${temp_autograding_workers} ${original_autograding_workers}
+fi
+
+#############################################################
+
+
+# update the autograding shipper & worker daemons
+rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_shipper.service   /etc/systemd/system/submitty_autograding_shipper.service
+chown -R hwcron:hwcron /etc/systemd/system/submitty_autograding_shipper.service
+chmod 444 /etc/systemd/system/submitty_autograding_shipper.service
+rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_worker.service   /etc/systemd/system/submitty_autograding_worker.service
+chown -R hwcron:hwcron /etc/systemd/system/submitty_autograding_worker.service
+chmod 444 /etc/systemd/system/submitty_autograding_worker.service
 
 
 # delete the autograding tmp directories
@@ -620,19 +673,36 @@ do
     chmod 770 $mydir
 done
 
+# If the submitty_autograding_shipper.service or submitty_autograding_worker.service
+# files have changed, we should reload the units:
+systemctl daemon-reload
 
-# start the scheduler (if it was running)
-if [[ "$is_active_before" == "0" ]]; then
-    systemctl start submitty_grading_scheduler
-    systemctl is-active --quiet submitty_grading_scheduler
-    is_active_after=$?
-    if [[ "$is_active_after" != "0" ]]; then
-        echo -e "\nERROR!  Failed to restart Submitty Grading Scheduler Daemon\n"
+# start the shipper daemon (if it was running)
+if [[ "$is_shipper_active_before" == "0" ]]; then
+    systemctl start submitty_autograding_shipper
+    systemctl is-active --quiet submitty_autograding_shipper
+    is_shipper_active_after=$?
+    if [[ "$is_shipper_active_after" != "0" ]]; then
+        echo -e "\nERROR!  Failed to restart Submitty Grading Shipper Daemon\n"
     fi
-    echo -e "Restarted Submitty Grading Scheduler Daemon\n"
+    echo -e "Restarted Submitty Grading Shipper Daemon\n"
 else
-    echo -e "NOTE: Submitty Grading Scheduler Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_grading_scheduler\n"
+    echo -e "NOTE: Submitty Grading Shipper Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_shipper\n"
+fi
+
+# start the worker daemon (if it was running)
+if [[ "$is_worker_active_before" == "0" ]]; then
+    systemctl start submitty_autograding_worker
+    systemctl is-active --quiet submitty_autograding_worker
+    is_worker_active_after=$?
+    if [[ "$is_worker_active_after" != "0" ]]; then
+        echo -e "\nERROR!  Failed to restart Submitty Grading Worker Daemon\n"
+    fi
+    echo -e "Restarted Submitty Grading Worker Daemon\n"
+else
+    echo -e "NOTE: Submitty Grading Worker Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_worker\n"
 fi
 
 

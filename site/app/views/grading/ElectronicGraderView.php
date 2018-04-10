@@ -573,15 +573,18 @@ HTML;
 HTML;
                         if($row->getTeam()=== null) {
                             $return .= <<<HTML
-                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], [], {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td></td>
 HTML;
                         }
                         else {
+                            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $row->getTeam()->getId(), "user_assignment_settings.json");
+                            $user_assignment_setting = FileUtils::readJsonFile($settings_file);
+                            $user_assignment_setting_json = json_encode($user_assignment_setting);
                             $members = json_encode($row->getTeam()->getMembers());
                             $return .= <<<HTML
-                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$members}, {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$user_assignment_setting_json}, {$members}, {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$row->getTeam()->getId()}</td>
 HTML;
@@ -813,11 +816,14 @@ HTML;
             foreach($empty_teams as $team) {
                 $display_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
                 if ($display_section == null) $display_section = "NULL";
+                $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $team->getId(), "user_assignment_settings.json");
+                $user_assignment_setting = FileUtils::readJsonFile($settings_file);
+                $user_assignment_setting_json=json_encode($user_assignment_setting);
                 $return .= <<<HTML
             <tr id="{empty-team-row-{$team->getId()}}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
-                <td><a onclick='adminTeamForm(false, "{$team->getId()}", "{$display_section}", [], {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(false, "{$team->getId()}", "{$display_section}", {$user_assignment_setting_json}, [], {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$team->getId()}</td>
 HTML;
@@ -845,7 +851,7 @@ HTML;
     public function adminTeamForm($gradeable, $sections) {
         $reg_or_rot = $gradeable->isGradeByRegistration() ? "Registration" : "Rotating";
         $return = <<<HTML
-<div class="popup-form" id="admin-team-form" style="width:500px; margin-left:-250px;">
+<div class="popup-form" id="admin-team-form" style="width:550px; margin-left:-250px;">
     <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'submit_team_form', 'gradeable_id'=>$gradeable->getId()))}">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <input type="hidden" name="new_team" />
@@ -875,6 +881,11 @@ HTML;
             <option value="NULL">Section NULL</option>
         </select>
     </div>
+    <br />
+    <br />
+    <h4 id="admin-team-history-title"></h4>
+    <div id="admin-team-history-left" style="width:28%;"></div>
+    <div id="admin-team-history-right" style="width:62%;"></div>
     <div style="float: right; width: auto; margin-top: 10px">
         <a onclick="$('#admin-team-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
         <input class="btn btn-primary" type="submit" value="Submit" />
@@ -929,7 +940,13 @@ HTML;
 
     <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="handleKeyPress('KeyR');"></i>
     <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="handleKeyPress('KeyA');"></i>
+HTML;
+    if ($gradeable->useTAGrading()) {
+            $return .= <<<HTML
     <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="handleKeyPress('KeyG');"></i>
+HTML;
+        }
+        $return .= <<<HTML
     <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="handleKeyPress('KeyO');"></i>
 HTML;
         if(!$peer) {
@@ -1028,8 +1045,8 @@ HTML;
             foreach ($files as $dir => $path) {
                 if (!is_array($path)) {
                     $name = htmlentities($dir);
-                    $dir = urlencode(htmlspecialchars($dir));
-                    $path = urlencode(htmlspecialchars($path));
+                    $dir = rawurlencode(htmlspecialchars($dir));
+                    $path = rawurlencode(htmlspecialchars($path));
                     $indent_offset = $indent * -15;
                     $return .= <<<HTML
                 <div>
@@ -1531,6 +1548,7 @@ HTML;
             $break_onclick = 'return false;';
             $disabled = 'disabled';
         }
+        $overallComment = htmlentities($gradeable->getOverallComment(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $return .= <<<HTML
                 <tr>
                     <td id="title-general" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});">
@@ -1548,14 +1566,14 @@ HTML;
                     </td>
                     <td style="width:98%;" colspan="3">
                         <div id="rubric-custom">
-                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;"><pre>{$gradeable->getOverallComment()}</pre></span>
+                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;"><pre>{$overallComment}</pre></span>
                         </div>
                     </td>
                 </tr>
                 <tbody id="extra-general" style="display: none" colspan="4">
                     <tr>
                         <td colspan="4">
-                            <textarea id="comment-general-id" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$gradeable->getOverallComment()}</textarea>
+                            <textarea id="comment-general-id" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$overallComment}</textarea>
                         </td>
                     </tr>
                 </tbody>

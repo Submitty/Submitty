@@ -64,6 +64,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "wc",                      "/usr/bin/wc" },
     { "head",                    "/usr/bin/head" },
     { "tail",                    "/usr/bin/tail" },
+    { "uniq",                    "/usr/bin/uniq" },
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
@@ -100,6 +101,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "swipl",                   "/usr/bin/swipl" },
     { "plt-r5rs",                "/usr/bin/plt-r5rs" },
 
+    // for Program Analysis course
+    { "ghc",                     "/usr/bin/ghc" },
+
     // for Cmake & Make
     { "cmake",                   "/usr/bin/cmake" },
     { "make",                    "/usr/bin/make" },
@@ -110,6 +114,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
     { "mpirun",                  "/usr/local/mpich-3.2/bin/mpirun"},
     { "mpicc",                   "/usr/local/mpich-3.2/bin/mpicc"},
+    { "expect",                  "/usr/bin/expect" },
 
     // for LLVM / Compiler class
     { "lex",                     "/usr/bin/lex" },
@@ -242,6 +247,8 @@ std::string validate_option(const std::string &program, const std::string &optio
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
+        { "submitty_jacocoagent.jar", SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacocoagent.jar" },
+        { "submitty_jacococli.jar",   SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacococli.jar" },
         { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
         { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
@@ -251,6 +258,8 @@ std::string validate_option(const std::string &program, const std::string &optio
     },
     { "/usr/bin/java",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
+        { "submitty_jacocoagent.jar", SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacocoagent.jar" },
+        { "submitty_jacococli.jar",   SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacococli.jar" },
         { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
         { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
@@ -335,10 +344,13 @@ std::string escape_spaces(const std::string& input) {
 
 // =====================================================================
 
-bool wildcard_match(const std::string &pattern, const std::string &thing, std::ostream &logfile) {
+bool wildcard_match(const std::string &pattern, const std::string &thing) {
   //  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
 
   int wildcard_loc = pattern.find("*");
+  if (wildcard_loc == std::string::npos) {
+    return pattern == thing;
+  }
   assert (wildcard_loc != std::string::npos);
 
   std::string before = pattern.substr(0,wildcard_loc);
@@ -455,7 +467,7 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
       ent = readdir(dir);
       if (ent == NULL) break;
       std::string thing = ent->d_name;
-      if (wildcard_match(file_pattern,thing,logfile)) {
+      if (wildcard_match(file_pattern,thing)) {
         std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
         validate_filename(directory+thing);
         my_args.push_back(directory+thing);
@@ -864,6 +876,10 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // (without this, default desired threads may be based on the system specs)
   setenv("OMP_NUM_THREADS","4",1);
 
+
+  // Haskell compiler needs a home environment variable (but it can be anything)
+  setenv("HOME","/tmp",1);
+
   
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {
@@ -891,7 +907,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     close(stderrfd);
     dup2(new_stderrfd, stderrfd);
   }
-
+  
 
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {

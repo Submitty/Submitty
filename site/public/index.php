@@ -107,6 +107,7 @@ if($core->getConfig()->isCourseLoaded()){
 }
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
+
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());

@@ -145,7 +145,7 @@ class LateDaysCalculation extends AbstractModel {
                 $submission_latedays['remaining_days'] = $curr_remaining_late;
                 $submission_latedays['total_late_used'] = $total_late_used;
                 $submission_latedays['eg_submission_due_date'] = $submissions[$i]['eg_submission_due_date'];
-        $late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
+                $late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
             }
 
             $all_latedays[$student['user_id']] = $late_day_usage;
