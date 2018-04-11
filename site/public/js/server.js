@@ -955,20 +955,20 @@ function enableTabsInTextArea(id){
 
 }
 
-function resetScrollPosition(){
-    if(sessionStorage.scrollTop != "undefined") {
-        sessionStorage.scrollTop = undefined;
+function resetScrollPosition(id){
+    if(sessionStorage.getItem(id+"_scrollTop") != 0) {
+        sessionStorage.setItem(id+"_scrollTop", 0);
     }
 }
 
-function saveScrollLocationOnRefresh(className){
-    var element = document.getElementsByClassName(className);
+function saveScrollLocationOnRefresh(id){
+    var element = document.getElementById(id);
     $(element).scroll(function() {
-        sessionStorage.scrollTop = $(this).scrollTop();
+        sessionStorage.setItem(id+"_scrollTop", $(element).scrollTop());
     });
     $(document).ready(function() {
-        if(sessionStorage.scrollTop != "undefined"){
-            $(element).scrollTop(sessionStorage.scrollTop);
+        if(sessionStorage.getItem(id+"_scrollTop") !== null){
+            $(element).scrollTop(sessionStorage.getItem(id+"_scrollTop"));
         }
     });
 }
