@@ -648,7 +648,9 @@ HTML;
 					</tr>
 HTML;
 		foreach($users as $user => $details){
-			$post_count=count($details["posts"]);
+			$first_name = $details["first_name"];
+			$last_name = $details["last_name"];
+			$post_count = count($details["posts"]);
 			$posts = htmlspecialchars(json_encode($details["posts"]), ENT_QUOTES, 'UTF-8');
 			$ids = htmlspecialchars(json_encode($details["id"]), ENT_QUOTES, 'UTF-8');
 			$timestamps = htmlspecialchars(json_encode($details["timestamps"]), ENT_QUOTES, 'UTF-8');
@@ -656,7 +658,7 @@ HTML;
 			$return .= <<<HTML
 			<div class="user_entry">
 				<tr>
-					<td>{$user}</td>
+					<td>{$last_name}, {$first_name}</td>
 					<td>{$post_count}</td>
 					<td>{$details["total_threads"]}</td>
 					<td>{$num_deleted}</td>
