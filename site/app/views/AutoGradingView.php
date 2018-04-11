@@ -459,12 +459,12 @@ HTML;
         $lateDayData = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
         $return = <<<HTML
         <div class = "sub">
-            <div class="box half" style="padding: 10px;">
+            <div class="box half" style="padding: 10px; width: 40%;">
                 <p>Graded by: {$graders}</p>
                 <i>Any regrade requests are due within 7 days of posting</i>
                 <p>{$comment}</p>
             </div>
-            <div class = "box half" style="float:right">
+            <div class = "box half" style="float:right; width: 40%;">
                 <p>Maximum number of late days allowed on this assignment: {$gradeable->getAllowedLateDays()}</p>
                 <p>Number of days late (before extensions): {$gradeable->getDaysLate()}</p>
                 <p>Late Days used in previous assignments: {$lateDayData['late_days_used']}</p> 
