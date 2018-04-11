@@ -41,7 +41,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->assertTrue(FileUtils::createDir($config['course_path'], null, true));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($config['course_path'], "submissions")));
-        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($config['tmp_path'], "to_be_graded_interactive")));
+        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($config['tmp_path'], "to_be_graded_queue")));
 
         $this->config = $config;
 
@@ -249,7 +249,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
         $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
-        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive", $touch_file));
+        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", $touch_file));
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
         foreach (new \FilesystemIterator($tmp) as $iter) {
             if ($iter->isDir()) {
@@ -723,7 +723,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.VCS_CHECKOUT', '.submit.timestamp'), $files);
         $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
-        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive", $touch_file));
+        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", $touch_file));
     }
 
     public function testEmptyPost() {
@@ -999,7 +999,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testErrorCreateQueueFile() {
         $this->addUploadFile('test1.txt');
-        $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive");
+        $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue");
         $this->assertTrue(FileUtils::recursiveRmdir($dir));
         $this->assertTrue(FileUtils::createDir($dir, 0444));
         $return = $this->runController();
@@ -1027,7 +1027,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $this->runController();
         $this->assertTrue($return['success']);
 
-        $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive");
+        $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue");
         $this->assertTrue(FileUtils::recursiveRmdir($dir));
         $this->assertTrue(FileUtils::createDir($dir, 0444));
 
