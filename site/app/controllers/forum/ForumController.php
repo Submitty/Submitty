@@ -259,6 +259,7 @@ class ForumController extends AbstractController {
                 $users[$user]["id"]=array();
                 $users[$user]["timestamps"]=array();
                 $users[$user]["total_threads"]=0;
+                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user)); 
             }
             if($posts[$i]["parent_id"]==-1){
                 $users[$user]["total_threads"]++;
@@ -268,7 +269,7 @@ class ForumController extends AbstractController {
             $users[$user]["timestamps"][] = $posts[$i]["timestamp"];
             
         }
-        
+        ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
 
