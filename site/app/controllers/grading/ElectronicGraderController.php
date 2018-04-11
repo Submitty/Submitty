@@ -26,8 +26,8 @@ class ElectronicGraderController extends AbstractController {
             case 'save_one_component':
                 $this->saveSingleComponent();
                 break;
-            case 'save_gradeable_comment':
-                $this->saveGradeableComment();
+            case 'save_general_comment':
+                $this->saveGeneralComment();
                 break;
             case 'get_mark_data':
                 $this->getMarkDetails();
@@ -702,6 +702,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual, $not_in_my_section);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
     }
 
     public function saveSingleComponent() {
@@ -893,6 +894,8 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        $note = $_POST['note'];
+        $points = $_POST['points'];
         foreach ($gradeable->getComponents() as $component) {
             if(is_array($component)) {
                 if($component[0]->getId() != $_POST['gradeable_component_id']) {
@@ -905,8 +908,8 @@ class ElectronicGraderController extends AbstractController {
             $order_counter++;
             $mark = new GradeableComponentMark($this->core);
             $mark->setGcId($component->getId());
-            $mark->setPoints(0);
-            $mark->setNote("");
+            $mark->setPoints($points);
+            $mark->setNote($note);
             $mark->setOrder($order_counter);
             $mark_id = $mark->save();
             $mark->setId($mark_id);
@@ -917,7 +920,7 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    public function saveGradeableComment() {
+    public function saveGeneralComment() {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
@@ -960,6 +963,7 @@ class ElectronicGraderController extends AbstractController {
                 $temp_array['score'] = $mark->getPoints();
                 $temp_array['note'] = $mark->getNote();
                 $temp_array['has_mark'] = $mark->getHasMark();
+                $temp_array['is_publish'] = $mark->getPublish();
                 $return_data[] = $temp_array;
             }
             $temp_array = array();
