@@ -1253,6 +1253,7 @@ HTML;
         if($gradeable->useTAGrading()) {
         $return .= <<<HTML
     <div style="float: right; float: right; position: relative; top: 10px; right: 1%;">
+        <input type='button' class="btn btn-default" value='Verify All' onclick='verifyMark("{$gradeable->getId()}",-1,"{$user->getAnonId()}",true)'/>
         <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
         <span {$span_style}> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" {$checked}/> Overwrite Grader </span>
     </div>
@@ -1395,24 +1396,30 @@ HTML;
             //get the grader's id if it exists
             $grader_id = "";
             $graded_color = "";
+            $displayVerifyUser = "none";
             if($question->getGrader() === null || !$show_graded_info) {
                 $grader_id = "Ungraded!";
                 $graded_color = "";
             } else {
                 $grader_id = "Graded by " . $question->getGrader()->getId();
                 $graded_color = " background-color: #eebb77";
+                if($this->core->getUser()->getId() !== $question->getGrader()->getId())
+                    $displayVerifyUser = "inline";
             }
 
             $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="4">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         {$message}
 HTML;
 
             $return .= <<<HTML
                         <div style="float: right;">
+                            <span style="display: {$displayVerifyUser}; color: red;">
+                            <input type="button" class = "btn btn-default" onclick="verifyMark('{$gradeable->getId()}',{$question->getId()},'{$user->getAnonId()}')" value = "Verify Grader"/>
+                            </span>
                             <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
-                            <span id="save-mark-{$c}" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                            <span id="save-mark-{$c}" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true" onclick="{$break_onclick} saveMark(-2,'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">Done</i> </span>
                         </div>
                         </span> <span id="ta_note-{$c}" style="display: none;"> {$note}</span>
                         <span id="page-{$c}" style="display: none;">{$page}</span>
@@ -1467,7 +1474,7 @@ HTML;
                     </td>
                     <td style="width:98%;" colspan="3">
                         <div id="rubric-{$c}">
-                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;">{$initial_text}</span>
+                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px;  float:left; cursor: pointer;">{$initial_text}</span>
                         </div>
                     </td>
                 </tr>

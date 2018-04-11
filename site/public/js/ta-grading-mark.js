@@ -826,3 +826,24 @@ function findCurrentOpenedMark() {
         }
     }
 }
+
+function verifyMark(gradeable_id, component_id, user_id,verifyAll = false){
+    var action = (verifyAll) ? 'verify_all' : 'verify_grader';
+    $.ajax({
+        type: "POST",
+        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': action}),
+        async: true,
+        data: {
+            'gradeable_id' : gradeable_id,
+            'component_id' : component_id,
+            'anon_id' : user_id,
+        },
+        success: function(data) {
+            window.location.reload();
+            console.log("verified user");
+        },
+        error: function() {
+            alert("failed to verify grader");
+        }
+    })
+}
