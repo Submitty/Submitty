@@ -58,9 +58,7 @@ date_default_timezone_set('America/New_York');
 /* EXAMPLE CRONTAB -------------------------------------------------------------
  *
  * This will run the script every hour at the half-hour (e.g. 8:30, 9:30, etc).
-
-30 * * * * /var/local/submitty/bin/accounts.php
-
+ 30 * * * * /var/local/submitty/bin/accounts.php
  * -------------------------------------------------------------------------- */
 
 /* MAIN ===================================================================== */

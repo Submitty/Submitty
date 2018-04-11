@@ -2,59 +2,99 @@
     "testcases": [
         {
             "points_awarded": 2,
-            "test_name": "Test 1 Java - Compilation"
+            "test_name": "Test 1 Class Compilation"
         },
         {
             "points_awarded": 2,
-            "test_name": "Test 2 Java - Student and Instructor JUnit Test Compilation"
+            "test_name": "Test 2 Student and Instructor JUnit Test Compilation"
         },
         {
             "autochecks": [
                 {
                     "actual_file": "test03_STDOUT.txt",
-                    "description": "JUnit EMMA instrumentation output"
+                    "description": "TestRunner output"
                 }
             ],
-            "points_awarded": 0,
-            "test_name": "Test 3 Java - Instrumentation of Student Code"
+            "points_awarded": 4,
+            "test_name": "Test 3 JaCoCo - Running Student JUnit Tests in hw0/tests/"
         },
         {
             "autochecks": [
                 {
                     "actual_file": "test04_STDOUT.txt",
-                    "description": "TestRunner output"
+                    "description": "JaCoCo report generation output"
+                },
+                {
+                    "actual_file": "test04_jacoco_report.csv",
+                    "description": "JaCoCo coverage report",
+                    "messages": [
+                        {
+                            "message": "hw0 Factorial 100.0% instruction, 100.0% branch, 100.0% line, 100.0% complexity, 100.0% method",
+                            "type": "failure"
+                        }
+                    ]
                 }
             ],
-            "points_awarded": 4,
-            "test_name": "Test 4 Java - Running Student JUnit Tests in hw0/tests/"
+            "points_awarded": 6,
+            "test_name": "Test 4 JaCoCo - Generating Coverage Report for Student Tests"
         },
         {
             "autochecks": [
                 {
                     "actual_file": "test05_STDOUT.txt",
-                    "description": "EclEmma report generation output"
-                },
-                {
-                    "actual_file": "test05_emma_report.txt",
-                    "description": "JUnit EMMA coverage report"
+                    "description": "JUnit output"
                 }
             ],
             "points_awarded": 6,
-            "test_name": "Test 5 Java - Generating Coverage Report for Student Tests"
+            "test_name": "Test 5 JaCoCo - Instructor JUnit Tests"
         },
         {
             "autochecks": [
                 {
                     "actual_file": "test06_STDOUT.txt",
+                    "description": "EMMA instrumentation output"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 6 EMMA - Instrumentation of Student Code"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test07_STDOUT.txt",
+                    "description": "TestRunner output"
+                }
+            ],
+            "points_awarded": 4,
+            "test_name": "Test 7 EMMA - Running Student JUnit Tests in hw0/tests/"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test08_STDOUT.txt",
+                    "description": "EclEmma report generation output"
+                },
+                {
+                    "actual_file": "test08_emma_report.txt",
+                    "description": "EclEmma coverage report"
+                }
+            ],
+            "points_awarded": 6,
+            "test_name": "Test 8 EMMA - Generating Coverage Report for Student Tests"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test09_STDOUT.txt",
                     "description": "JUnit output"
                 }
             ],
             "points_awarded": 6,
-            "test_name": "Test 6 Java - Instructor JUnit Tests"
+            "test_name": "Test 9 EMMA - Instructor JUnit Tests"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 7 Submission Limit",
+            "test_name": "Test 10 Submission Limit",
             "view_testcase": false
         }
     ]

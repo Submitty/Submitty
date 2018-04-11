@@ -9,9 +9,6 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-# TIMEZONE
-timedatectl set-timezone America/New_York
-
 #################################################################
 # CONSTANTS
 #################
@@ -137,9 +134,12 @@ pip3 install psutil
 pip3 install python-dateutil
 pip3 install watchdog
 pip3 install xlsx2csv
+pip3 install pause
+pip3 install paramiko
+pip3 install tzlocal
 
-chmod -R 555 /usr/local/lib/python*/*
-chmod 555 /usr/lib/python*/dist-packages
+sudo chmod -R 555 /usr/local/lib/python*/*
+sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
 sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
 
@@ -190,6 +190,26 @@ chmod o+r . *.jar
 
 popd > /dev/null
 
+# JaCoCo is a potential replacement for EMMA
+
+echo "Getting JaCoCo..."
+
+pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
+
+JACOCO_VER=0.8.0
+wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
+mkdir jacoco-${JACOCO_VER}
+unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
+mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
+mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
+rm -rf jacoco-${JACOCO_VER}
+rm jacoco-${JACOCO_VER}.zip
+
+chmod o+r . *.jar
+
+popd > /dev/null
+
+
 #################################################################
 # DRMEMORY SETUP
 #################
@@ -199,14 +219,17 @@ popd > /dev/null
 pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
-DRMEM_TAG=release_1.10.1
-DRMEM_VER=1.10.1-3
+
+
+
+DRMEM_TAG=release_2.0.0_rc2
+DRMEM_VER=2.0.0-RC2
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
-mv /tmp/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
+rsync --delete -a /tmp/DrMemory-Linux-${DRMEM_VER}/ ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
-chmod 755 ${SUBMITTY_INSTALL_DIR}/drmemory
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
 
 popd > /dev/null
 
@@ -322,7 +345,7 @@ else
     git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
     # remember to change this version in .setup/travis/autograder.sh too
-    git checkout v0.93
+    git checkout v0.94
     popd
 fi
 
@@ -353,6 +376,7 @@ if [ ${VAGRANT} == 1 ]; then
     echo -e "/var/run/postgresql
 hsdbu
 hsdbu
+America/New_York
 ${SUBMISSION_URL}
 ${GIT_URL}/git
 
@@ -365,9 +389,11 @@ fi
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
 # (re)start the submitty grading scheduler daemon
-systemctl restart submitty_grading_scheduler
+systemctl restart submitty_autograding_shipper
+systemctl restart submitty_autograding_worker
 # also, set it to automatically start on boot
-sudo systemctl enable submitty_grading_scheduler
+sudo systemctl enable submitty_autograding_shipper
+sudo systemctl enable submitty_autograding_worker
 
 
 
@@ -432,13 +458,20 @@ fi
 # DOCKER SETUP
 #################
 
-#mkdir -p /tmp/docker
-#cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-#pushd /tmp/docker
-#cp -R ${SUBMITTY_INSTALL_DIR}/drmemory ./
-#cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools ./
-#docker build -t ubuntu:custom -f Dockerfile .
-#popd
+# WIP: creates basic container for grading CS1 & DS assignments
+# CAUTION: needs users/groups for security 
+
+rm -rf /tmp/docker
+mkdir -p /tmp/docker
+cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
+cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
+
+chown hwcron:hwcron -R /tmp/docker
+
+pushd /tmp/docker
+su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
+popd
 
 #################################################################
 # RESTART SERVICES
