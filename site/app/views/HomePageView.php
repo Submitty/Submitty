@@ -20,7 +20,7 @@ class HomePageView extends AbstractView {
     <div class="sub">
         <div class="container", style = "min-width:100px; width: auto !important; width: 100px;">
         <div class="box half">
-        <h2>About You</h2>
+            <h2>About You</h2>
             <table>
                 <tbody>
                     <tr>
@@ -92,7 +92,7 @@ HTML;
                 </tbody>
             </table>
         </div>
-        <div class="box", style = "float: none;width:48%;display:block;overflow:hidden;">
+        <div class="box half">
             <h2>Your Courses</h2>
                 <table width='95%'>
                     <tbody>
