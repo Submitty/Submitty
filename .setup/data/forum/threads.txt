@@ -1,4 +1,4 @@
-1 | HW1 is available               | instructor | t      | f       |        -1 | t
-2 | Homework 1 print clarification | bitdiddle  | f      | f       |        -1 | t
-3 | Homework 1 not running         | student    | f      | f       |        -1 | t
-4 | Course syllabus                | aphacker   | f      | f       |        -1 | t
+HW1 is available               | instructor | t      | f       |        -1 | t
+Homework 1 print clarification | bitdiddle  | f      | f       |        -1 | t
+Homework 1 not running         | student    | f      | f       |        -1 | t
+Course syllabus                | aphacker   | f      | f       |        -1 | t

@@ -209,113 +209,25 @@ class ForumController extends AbstractController {
     }
 
     public function getThreads(){
+
+        $category_id = array_key_exists('thread_category', $_POST) && !empty($_POST["thread_category"]) ? (int)$_POST['thread_category'] : -1;
+
         //NOTE: This section of code is neccesary until I find a better query 
         //To link the two sets together as the query function doesn't
         //support parenthesis starting a query 
-        $category_id = in_array('thread_category', $_POST) ? (int)$_POST['thread_category'] : -1;
-
         $announce_threads = $this->core->getQueries()->loadThreads(1, $category_id);
         $reg_threads = $this->core->getQueries()->loadThreads(0, $category_id);
         $threads = array_merge($announce_threads, $reg_threads);
         //END
 
-        $current_user = $this->core->getUser()->getId();
-
-        $posts = null;
-        if(isset($_REQUEST["thread_id"])){
-            $posts = $this->core->getQueries()->getPostsForThread($current_user, $_REQUEST["thread_id"]);
-        } else {
-            //We are at the "Home page"
-            //Show the first post
-            $posts = $this->core->getQueries()->getPostsForThread($current_user, -1);
-            
-        }
-        $return = "";
-        $used_active = false; //used for the first one if there is not thread_id set
-                    $function_date = 'date_format';
-                    $activeThreadTitle = "";
-                    $activeThread = array();
-                    $current_user = $this->core->getUser()->getId();
-                    $activeThreadAnnouncement = false;
-                    $start = 0;
-                    $end = 10;
-                    foreach($threads as $thread){
-                        $first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
-                        $date = date_create($first_post['timestamp']);
-                        $class = "thread_box";
-                        //Needs to be refactored to rid duplicated code
-                        if(!isset($_REQUEST["thread_id"]) && !$used_active){
-                            $class .= " active";
-                            $used_active = true;
-                            $activeThread = $thread;
-                            $activeThreadTitle = $thread["title"];
-                            if($thread["pinned"])
-                                $activeThreadAnnouncement = true;
-                        } else if(isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) {
-                            $class .= " active";
-                            $activeThreadTitle = $thread["title"];
-                            $activeThread = $thread;
-                            if($thread["pinned"])
-                                $activeThreadAnnouncement = true;
-                        }
-
-                        if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
-                            $class .= " viewed";
-                        }
-
-                        //fix legacy code
-                        $titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                        $first_post_content = html_entity_decode($first_post['content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-                        //replace tags from displaying in sidebar
-                        $first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
-                        $temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
-
-                        if(!empty($temp_first_post_content)){
-                            $first_post_content = $temp_first_post_content;
-                        }
-
-                        $sizeOfContent = strlen($first_post_content);
-                        $contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 100) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 100), " "));
-                        $titleLength = strlen($thread['title']);
-
-                        $titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
-
-                        if(strlen($first_post["content"]) > 100){
-                            $contentDisplay .= "...";
-                        }
-                        if(strlen($thread["title"]) > 40){
-                            //Fix ... appearing
-                            if(empty($titleDisplay))
-                                $titleDisplay .= substr($thread['title'], 0, 30);
-                            $titleDisplay .= "...";
-                        }
-                        $titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                        $first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                        $return .= <<<HTML
-                        <a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
-                        <div class="{$class}">
-HTML;
-                        if($thread["pinned"] == true){
-                            $return .= <<<HTML
-                            <i class="fa fa-star" style="position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
-HTML;
-                        }
-                        $return .= <<<HTML
-                        <h4>{$titleDisplay}</h4>
-                        <h5 style="font-weight: normal;">{$contentDisplay}</h5>
-                        <h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"m/d/Y g:i A")}</h5>
-                        </div>
-                        </a>
-                        <hr style="margin-top: 0px;margin-bottom:0px;">
-HTML;
-                    }
-    $return .= <<<HTML
-    </div>
-
-HTML;
-return $this->core->getOutput()->renderJson(array("html" => $return));
+        $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
+        $thread_data = array();
+        $current_thread_title = "";
+        $activeThread = false;
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDislpayList', $threads, true, $currentThreadId);
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return $this->core->getOutput()->renderJson(array("html" => $this->core->getOutput()->getOutput()));
     }
 
     public function showThreads(){

@@ -826,30 +826,41 @@ class Course(object):
             f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'))
             forum_threads = Table("threads", metadata, autoload=True)
             forum_posts = Table("posts", metadata, autoload=True)
+            forum_cat_list = Table("categories_list", metadata, autoload=True)
+            forum_thread_cat = Table("thread_categories", metadata, autoload=True)
+            conn.execute(forum_cat_list.insert(), category_desc="Hw1")
+            conn.execute(forum_cat_list.insert(), category_desc="Misc")
+            counter = 1
             for threadData in f_data[1]:
                 conn.execute(forum_threads.insert(),
-                                  id=threadData[0],
-                                  title=threadData[1],
-                                  created_by=threadData[2],
-                                  pinned=True if threadData[3] == "t" else False,
-                                  deleted=True if threadData[4] == "t" else False,
-                                  merged_id=threadData[5],
-                                  is_visible=True if threadData[6] == "t" else False)
+                                  title=threadData[0],
+                                  created_by=threadData[1],
+                                  pinned=True if threadData[2] == "t" else False,
+                                  deleted=True if threadData[3] == "t" else False,
+                                  merged_id=threadData[4],
+                                  is_visible=True if threadData[5] == "t" else False)
+                if(counter < 4):
+                    conn.execute(forum_thread_cat.insert(), thread_id=counter, category_id=1)
+                else:
+                    conn.execute(forum_thread_cat.insert(), thread_id=counter, category_id=2)
+                counter += 1
+
 
             for postData in f_data[0]:
                 conn.execute(forum_posts.insert(),
-                                  id=postData[0],
-                                  thread_id=postData[1],
-                                  parent_id=postData[2],
-                                  author_user_id=postData[3],
-                                  content=postData[4],
-                                  timestamp=postData[5],
-                                  anonymous=True if postData[6] == "t" else False,
-                                  deleted=True if postData[7] == "t" else False,
-                                  endorsed_by=postData[8],
-                                  resolved = True if postData[9] == "t" else False,
-                                  type=postData[10],
-                                  has_attachment=1)
+                                  thread_id=postData[0],
+                                  parent_id=postData[1],
+                                  author_user_id=postData[2],
+                                  content=postData[3],
+                                  timestamp=postData[4],
+                                  anonymous=True if postData[5] == "t" else False,
+                                  deleted=True if postData[6] == "t" else False,
+                                  endorsed_by=postData[7],
+                                  resolved = True if postData[8] == "t" else False,
+                                  type=postData[9],
+                                  has_attachment=0)
+
+            
             
             print('Added forum data to sample course.') 
         

@@ -955,21 +955,21 @@ function saveScrollLocationOnRefresh(className){
     });
 }
 
-function modifyThreadList(){
+function modifyThreadList(currentThreadId){
     var category_value = $( "#thread_category option:selected").val();
+    console.log(currentThreadId);
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                thread_category: category_value
+                thread_category: category_value,
+                currentThreadId: currentThreadId
             },
             success: function(r){
-               //window.location.replace(url);
                console.log(r);
                var x = JSON.parse(r).html;
                x = `${x}`;
-               console.log(thread_category + " " + x);
                $(".thread_list").html(x);
             },
             error: function(){

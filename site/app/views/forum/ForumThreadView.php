@@ -20,6 +20,17 @@ class ForumThreadView extends AbstractView {
 
     	$return = <<<HTML
 
+    	<style>
+	    	.hoverable:hover {
+			    -webkit-filter: brightness(85%);
+			    -webkit-transition: all .5s ease;
+			    -moz-transition: all .5s ease;
+			    -o-transition: all .5s ease;
+			    -ms-transition: all .5s ease;
+			    transition: all .5s ease;
+			}
+    	</style>
+
     	<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;border-radius:3px;margin-left:20px;margin-top:10px; height:40px; margin-bottom:10px;margin-right:20px;" id="forum_bar">
@@ -39,16 +50,14 @@ class ForumThreadView extends AbstractView {
 
     	<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;height:69vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
 
-    	<table class="table table-striped table-bordered persist-area">
+    	<table class="table table-striped table-bordered persist-area table-hover">
 
     	<thead class="persist-thead">
             <tr>                
             <td width="5%">#</td>
-                <td width="5%">Pinned</td>
-                <td width="45%">Thread Title</td>
+                <td width="45%">Post Content</td>
                 <td width="25%">Author</td>
                 <td width="10%">Timestamp</td>
-                <td width="10%"></td>
             </tr>	
 
         </thead>
@@ -57,32 +66,46 @@ class ForumThreadView extends AbstractView {
 
 
 HTML;
+		$threadArray = array();
+		$fromTitleToId = array();
+		foreach($threads as $thread){
+			if(!array_key_exists($thread["thread_title"], $threadArray)) {
+				$threadArray[$thread["thread_title"]] = array();
+				$fromTitleToId[$thread["thread_title"]] = $thread["thread_id"];
+			}
+			$threadArray[$thread["thread_title"]][] = $thread;
+		}
 		$count = 1;
-		foreach($threads as $thread) {
-			$thread_title = htmlentities($thread['thread_title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-			$author = htmlentities($thread['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-			$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($thread["author"]);
-			$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-			$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-			$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
-			$posted_on = date_format(date_create($thread['timestamp']), "m/d/Y g:i A");
+		foreach($threadArray as $thread_title => $data){
 			$return .= <<<HTML
+			<tr class="info persist-header hoverable" title="Go to thread" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $fromTitleToId[$thread_title]))}';">            
+				<td colspan="10" style="text-align: center"><h4>{$thread_title}</h4></td>
+			</tr>
+HTML;
+			foreach($data as $thread) {
+				$thread_title = htmlentities($thread['thread_title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$author = htmlentities($thread['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($thread["p_author"]);
+				$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
+				$posted_on = date_format(date_create($thread['timestamp']), "n/j g:i A");
+				$return .= <<<HTML
 
-			<tr id="search-row-{$author}">
-                <td>{$count}</td>
-                <td>1</td>
-                <td>{$thread_title}</td>
-                <td>{$visible_username}</td>
-                <td>{$posted_on}</td> 
-                <td><a style="margin-bottom:2px;" class="btn btn-default" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['thread_id']))}">View Thread</a>
-</td>       
+				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $fromTitleToId[$thread['thread_title']]))}';" id="search-row-{$author}" class="hoverable">
+	                <td>{$count}</td>
+	                <td>{$thread["post_content"]}</td>
+	                <td>{$visible_username}</td>
+	                <td>{$posted_on}</td>      
 
-            </tr>
-            
+		        </tr>
+	            
 
 HTML;
-$count++;
+				$count++;
+			}
 		}
+		
             
 
         $return .= <<<HTML
@@ -180,10 +203,12 @@ HTML;
 			<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 HTML;
 				$categories = $this->core->getQueries()->getCategories();
+				$currentThreadId = isset($_REQUEST["thread_id"]) && is_numeric($_REQUEST["thread_id"]) ? (int)$_REQUEST["thread_id"] : -1;
 				$return .= <<<HTML
 				<div style="display:inline-block;position:relative;top:3px;margin-left:20px;" id="category_wrapper">
 				<label for="thread_category">Category:</label>
-			  	<select id="thread_category" name="thread_category" class="form-control" onchange="modifyThreadList();">
+			  	<select id="thread_category" name="thread_category" class="form-control" onchange="modifyThreadList({$currentThreadId});">
+			  	<option value="" selected>None</option>
 HTML;
 			    for($i = 0; $i < count($categories); $i++){
 			    	$return .= <<<HTML
@@ -240,86 +265,12 @@ HTML;
 				<div id="forum_wrapper">
 					<div class="thread_list">
 HTML;
-					$used_active = false; //used for the first one if there is not thread_id set
-					$function_date = 'date_format';
-					$activeThreadTitle = "";
-					$activeThread = array();
-					$current_user = $this->core->getUser()->getId();
-					$activeThreadAnnouncement = false;
-					$start = 0;
-					$end = 10;
-					foreach($threads as $thread){
-						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
-						$date = date_create($first_post['timestamp']);
-						$class = "thread_box";
-						//Needs to be refactored to rid duplicated code
-						if(!isset($_REQUEST["thread_id"]) && !$used_active){
-							$class .= " active";
-							$used_active = true;
-							$activeThread = $thread;
-							$activeThreadTitle = $thread["title"];
-							if($thread["pinned"])
-								$activeThreadAnnouncement = true;
-						} else if(isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) {
-							$class .= " active";
-							$activeThreadTitle = $thread["title"];
-							$activeThread = $thread;
-							if($thread["pinned"])
-								$activeThreadAnnouncement = true;
-						}
-
-						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
-							$class .= " viewed";
-						}
-
-						//fix legacy code
-						$titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						$first_post_content = html_entity_decode($first_post['content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-						//replace tags from displaying in sidebar
-						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
-						$temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
-
-						if(!empty($temp_first_post_content)){
-							$first_post_content = $temp_first_post_content;
-						}
-
-						$sizeOfContent = strlen($first_post_content);
-						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 100) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 100), " "));
-						$titleLength = strlen($thread['title']);
-
-						$titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
-
-						if(strlen($first_post["content"]) > 100){
-							$contentDisplay .= "...";
-						}
-						if(strlen($thread["title"]) > 40){
-							//Fix ... appearing
-							if(empty($titleDisplay))
-								$titleDisplay .= substr($thread['title'], 0, 30);
-							$titleDisplay .= "...";
-						}
-						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						$return .= <<<HTML
-						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
-						<div class="{$class}">
-HTML;
-						if($thread["pinned"] == true){
-							$return .= <<<HTML
-							<i class="fa fa-star" style="position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
-HTML;
-						}
-						$return .= <<<HTML
-						<h4>{$titleDisplay}</h4>
-						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
-						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"m/d/Y g:i A")}</h5>
-						</div>
-						</a>
-						<hr style="margin-top: 0px;margin-bottom:0px;">
-HTML;
-					}
+				$activeThreadAnnouncement = false;
+				$activeThreadTitle = "";
+				$function_date = 'date_format';
+				$activeThread = array();
+				$currentThread = isset($_GET["thread_id"]) ? (int)$_GET["thread_id"] : -1;
+				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread);
 
 					$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
@@ -327,7 +278,7 @@ HTML;
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$title_html = '';
 			$return .= <<< HTML
-					</div>
+			</div>
 					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
 HTML;
 
@@ -468,6 +419,101 @@ HTML;
 		return $return;
 	}
 
+	public function showAlteredDislpayList($threads, $filtering, $thread_id){
+		$tempArray = array();
+		$threadAnnouncement = false;
+		$activeThreadTitle = "";
+		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id);
+	}
+
+	public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p){
+					$return = "";
+					$used_active = false; //used for the first one if there is not thread_id set
+					$current_user = $this->core->getUser()->getId();
+					$start = 0;
+					$activeThreadAnnouncement = false;
+					$activeThreadTitle = "";
+					$function_date = 'date_format';
+					$activeThread = array();
+					$end = 10;
+					foreach($threads as $thread){
+						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
+						$date = date_create($first_post['timestamp']);
+						$class = "thread_box";
+						//Needs to be refactored to rid duplicated code
+						if(((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"]) && !$used_active) {
+							$class .= " active";
+							$used_active = true;
+							$activeThreadTitle = $thread["title"];
+							$activeThread = $thread;
+							if($thread["pinned"])
+								$activeThreadAnnouncement = true;
+						} else if(!isset($_REQUEST["thread_id"]) && ($thread_id_p == -1 || $thread_id_p == $thread["id"]) && !$used_active){
+							$class .= " active";
+							$used_active = true;
+							$activeThread = $thread;
+							$activeThreadTitle = $thread["title"];
+							if($thread["pinned"])
+								$activeThreadAnnouncement = true;
+							$thread_id_p = $thread["id"];
+						} 
+
+						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
+							$class .= " viewed";
+						}
+
+						//fix legacy code
+						$titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						$first_post_content = html_entity_decode($first_post['content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+						//replace tags from displaying in sidebar
+						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
+						$temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
+
+						if(!empty($temp_first_post_content)){
+							$first_post_content = $temp_first_post_content;
+						}
+
+						$sizeOfContent = strlen($first_post_content);
+						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 100) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 100), " "));
+						$titleLength = strlen($thread['title']);
+
+						$titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
+
+						if(strlen($first_post["content"]) > 100){
+							$contentDisplay .= "...";
+						}
+						if(strlen($thread["title"]) > 40){
+							//Fix ... appearing
+							if(empty($titleDisplay))
+								$titleDisplay .= substr($thread['title'], 0, 30);
+							$titleDisplay .= "...";
+						}
+						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						$return .= <<<HTML
+						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
+						<div class="{$class}">
+HTML;
+						if($thread["pinned"] == true){
+							$return .= <<<HTML
+							<i class="fa fa-star" style="position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+						}
+						$return .= <<<HTML
+						<h4>{$titleDisplay}</h4>
+						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
+						<span class="label label-default">{$thread["category_desc"]}</span>
+						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
+						</div>
+						</a>
+						<hr style="margin-top: 0px;margin-bottom:0px;">
+HTML;
+					}
+					return $return;
+	}
+
 	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level){
 		$post_html = "";
 		$post_id = $post["id"];
@@ -589,13 +635,13 @@ HTML;
 							$wrapped_content = json_encode($post['content']);
 							$return .= <<<HTML
 
-							<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+							<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
 							<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 							} 
 			$return .= <<<HTML
 			
-<h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")} </h7></span>
+<h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"n/j g:i A")} </h7></span>
 HTML;
 
 						if($post["has_attachment"]){
@@ -716,6 +762,7 @@ HTML;
 				$return .= <<<HTML
 				<label for="cat">Category</label>
 			  	<select style="margin-right:10px;" id="cat" name="cat" class="form-control">
+			  	<option value="" selected>None</option>
 HTML;
 			    for($i = 0; $i < count($categories); $i++){
 			    	$return .= <<<HTML
