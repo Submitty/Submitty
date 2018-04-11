@@ -26,8 +26,8 @@ class ElectronicGraderController extends AbstractController {
             case 'save_one_component':
                 $this->saveSingleComponent();
                 break;
-            case 'save_gradeable_comment':
-                $this->saveGradeableComment();
+            case 'save_general_comment':
+                $this->saveGeneralComment();
                 break;
             case 'get_mark_data':
                 $this->getMarkDetails();
@@ -387,58 +387,8 @@ class ElectronicGraderController extends AbstractController {
         $new_team = $_POST['new_team'] === 'true' ? true : false;
 
         if ($new_team) {
-            $team_leader_id = null;
-            foreach($user_ids as $id) {
-                if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
-                    $this->core->addErrorMessage("ERROR: {$id} is already on a team");
-                    $this->core->redirect($return_url);
-                }
-                if ($id === $_POST['new_team_user_id']) {
-                    $team_leader_id = $id;
-                    if ($gradeable->isGradeByRegistration()) {
-                        $registration_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
-                        $rotating_section = $this->core->getQueries()->getUserById($id)->getRotatingSection();
-                    }
-                    else {
-                        $registration_section = $this->core->getQueries()->getUserById($id)->getRegistrationSection();
-                        $rotating_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
-                    }
-                }
-            }
-            if ($team_leader_id === null) {
-                $this->core->addErrorMessage("ERROR: {$_POST['new_team_user_id']} must be on the team");
-                $this->core->redirect($return_url);
-            }
-
-            $team_id = $this->core->getQueries()->createTeam($gradeable_id, $team_leader_id, $registration_section, $rotating_section);
-            foreach($user_ids as $id) {
-                $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
-                if ($id !== $team_leader_id) $this->core->getQueries()->acceptTeamInvitation($team_id, $id);
-            }
-            $this->core->addSuccessMessage("Created New Team {$team_id}");
-
-            $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
-            if (!FileUtils::createDir($gradeable_path)) {
-                $this->core->addErrorMEssage("Failed to make folder for this assignment");
-                $this->core->redirect($return_url);
-            }
-
-            $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
-            if (!FileUtils::createDir($user_path)) {
-                $this->core->addErrorMEssage("Failed to make folder for this assignment for the team");
-                $this->core->redirect($return_url);
-            }
-
-            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
-            $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
-            $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
-                                                        "admin_user" => $this->core->getUser()->getId(), "first_user" => $team_leader_id)));
-            foreach($user_ids as $id) {
-                if ($id !== $team_leader_id) {
-                    $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
-                                                    "admin_user" => $this->core->getUser()->getId(), "added_user" => $id);
-                }
-            }
+            $leader = $_POST['new_team_user_id'];
+            ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader, $user_ids);
         }
         else {
             $team_id = $_POST['edit_team_team_id'];
@@ -496,11 +446,83 @@ class ElectronicGraderController extends AbstractController {
                 $json["team_history"][] = array("action" => "admin_remove_user", "time" => $current_time,
                                                     "admin_user" => $this->core->getUser()->getId(), "removed_user" => $id);
             }
+            if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+                $this->core->addErrorMEssage("Failed to write to team history to settings file");
+            }
+        }   
+        
+        $this->core->redirect($return_url);
+    }
+
+    static public function createTeamWithLeaderAndUsers($core, $gradeable, $leader, $user_ids){
+        $team_leader_id = null;
+        $gradeable_id = $gradeable->getId();
+        foreach($user_ids as $id) {
+            if($id === "undefined" || $id === "")
+            {
+                continue;
+            }
+            if ($core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
+                $core->addErrorMessage("ERROR: {$id} is already on a team");
+                return;
+            }
+            if ($id === $leader) {
+                $team_leader_id = $id;
+            }
+        }
+        if ($team_leader_id === null) {
+            $core->addErrorMessage("ERROR: {$team_leader_id} must be on the team");
+            return;
+        }
+
+        $registration_section = $core->getQueries()->getUserById($team_leader_id)->getRegistrationSection();
+        $rotating_section = $core->getQueries()->getUserById($team_leader_id)->getRotatingSection();
+
+        //overwrite sections if they are available in the post
+        if(isset($_POST['section']) && $_POST['section'] !== "NULL"){
+            if ($gradeable->isGradeByRegistration()) {
+                $registration_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+            }
+            else {
+                $rotating_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+            }
+        }
+
+        $team_id = $core->getQueries()->createTeam($gradeable_id, $team_leader_id, $registration_section, $rotating_section);
+        foreach($user_ids as $id) {
+            if($id === "undefined" or $id === ""){
+                continue;
+            }
+            $core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
+            if ($id !== $team_leader_id) $core->getQueries()->acceptTeamInvitation($team_id, $id);
+        }
+        $core->addSuccessMessage("Created New Team {$team_id}");
+
+        $gradeable_path = FileUtils::joinPaths($core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
+        if (!FileUtils::createDir($gradeable_path)) {
+            $core->addErrorMEssage("Failed to make folder for this assignment");
+            return;
+        }
+
+        $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
+        if (!FileUtils::createDir($user_path)) {
+            $core->addErrorMEssage("Failed to make folder for this assignment for the team");
+            return;
+        }
+
+        $current_time = (new \DateTime('now', $core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$core->getConfig()->getTimezone()->getName();
+        $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
+        $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
+                                                    "admin_user" => $core->getUser()->getId(), "first_user" => $team_leader_id)));
+        foreach($user_ids as $id) {
+            if ($id !== $team_leader_id) {
+                $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
+                                                "admin_user" => $core->getUser()->getId(), "added_user" => $id);
+            }
         }
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $this->core->addErrorMEssage("Failed to write to team history to settings file");
         }
-        $this->core->redirect($return_url);
     }
 
     public function showGrading() {
@@ -645,6 +667,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual, $not_in_my_section);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
     }
 
     public function saveSingleComponent() {
@@ -836,6 +859,8 @@ class ElectronicGraderController extends AbstractController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        $note = $_POST['note'];
+        $points = $_POST['points'];
         foreach ($gradeable->getComponents() as $component) {
             if(is_array($component)) {
                 if($component[0]->getId() != $_POST['gradeable_component_id']) {
@@ -848,8 +873,8 @@ class ElectronicGraderController extends AbstractController {
             $order_counter++;
             $mark = new GradeableComponentMark($this->core);
             $mark->setGcId($component->getId());
-            $mark->setPoints(0);
-            $mark->setNote("");
+            $mark->setPoints($points);
+            $mark->setNote($note);
             $mark->setOrder($order_counter);
             $mark_id = $mark->save();
             $mark->setId($mark_id);
@@ -860,7 +885,7 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    public function saveGradeableComment() {
+    public function saveGeneralComment() {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
@@ -903,6 +928,7 @@ class ElectronicGraderController extends AbstractController {
                 $temp_array['score'] = $mark->getPoints();
                 $temp_array['note'] = $mark->getNote();
                 $temp_array['has_mark'] = $mark->getHasMark();
+                $temp_array['is_publish'] = $mark->getPublish();
                 $return_data[] = $temp_array;
             }
             $temp_array = array();
