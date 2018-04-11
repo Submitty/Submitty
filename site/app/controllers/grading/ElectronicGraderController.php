@@ -928,6 +928,7 @@ class ElectronicGraderController extends AbstractController {
                 $temp_array['score'] = $mark->getPoints();
                 $temp_array['note'] = $mark->getNote();
                 $temp_array['has_mark'] = $mark->getHasMark();
+                $temp_array['is_publish'] = $mark->getPublish();
                 $return_data[] = $temp_array;
             }
             $temp_array = array();

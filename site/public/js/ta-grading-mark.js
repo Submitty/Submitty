@@ -35,9 +35,9 @@ function checkIfSelected(me) {
     checkMarks(question_num);
 }
 
-function getMarkView(num, x, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
+function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
     return ' \
-<tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'"> \
+<tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"> \
     <td colspan="1" style="'+background+'; text-align: center;"> \
         <span onclick="selectMark(this);"> \
             <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
@@ -183,11 +183,12 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
         // Add all marks back
         // data['data'].length - 2 to ignore the custom mark
         for (var x = data['data'].length-2; x >= 0; x--) {
-            var hasMark = data['data'][x]['has_mark'];
-            var score   = data['data'][x]['score'];
-            var note    = data['data'][x]['note'];
-            
-            parent.prepend(getMarkView(num, x, hasMark, note, score, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id));
+            var is_publish = data['data'][x]['is_publish'] == 't';
+            var hasMark    = data['data'][x]['has_mark'];
+            var score      = data['data'][x]['score'];
+            var note       = data['data'][x]['note'];
+                        
+            parent.prepend(getMarkView(num, x, is_publish, hasMark, note, score, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id));
         }
     });
 }

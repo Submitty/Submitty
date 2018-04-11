@@ -1459,41 +1459,6 @@ HTML;
             $d = 0;
             $first = true;
             $noChange = "";
-//             foreach ($question->getMarks() as $mark) {
-// 
-//             	//Makes the mark blue if they're publish marks
-//             	if ($mark->getPublish() === 't') {
-//             		$is_publish = "is_publish";
-//             	}
-//      			else {
-//      				$is_publish = "";
-//      			}
-// 
-//                 if ($first === true) {
-//                     $first = false;
-//                     $noChange = "readonly";
-//                     $mark_text = ($question->getDefault() == 0) ? "No Credit" : "Full Credit";
-//                 }
-//                 else {
-//                     $noChange = "";
-//                     $mark_text = $mark->getNote();
-//                 }
-//                 $icon_mark = ($mark->getHasMark() === true && $show_graded_info) ? "fa-square" : "fa-square-o";
-//                 $mark_name = "mark_text_{$c}_{$d}";
-//                 $return .= <<<HTML
-//                     <tr id="mark_id-{$c}-{$d}" name="mark_{$c}" class="{$is_publish}">
-//                         <td colspan="1" style="text-align: center; width: 12%; white-space: nowrap;"> 
-//                             <span onclick="selectMark(this);"> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_{$d}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
-//                             <input name="mark_points_{$c}_{$d}" type="number" step="{$precision}" onchange="fixMarkPointValue(this);" value="{$mark->getPoints()}" min="{$min}" max="{$max}" style="width: 50%; resize:none; min-width: 50px;" {$noChange}>
-//                         </td>
-//                         <td colspan="3" style="white-space: nowrap;">
-//                                 <textarea id = "{$mark_name}" name="{$mark_name}" onkeyup="" rows="1" style="width: 90%; resize:none;" oninput="adjustSize(name)" {$noChange}>{$mark_text} </textarea>
-//                                 <span id="mark_info_id-{$c}-{$d}" onclick="{$break_onclick} saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); getMarkInfo(this, '{$gradeable->getId()}');"> <i class="fa fa-users icon-got-this-mark"></i> </span>
-//                         </td>
-//                     </tr>
-// HTML;
-//                 $d++;
-//             }
             $has_custom_mark = false;
             if (($question->getScore() == 0 && $question->getComment() == "") || !$show_graded_info) {
                 $has_custom_mark = false;
@@ -1523,14 +1488,6 @@ HTML;
                             Custom: <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
                         </td>
                     </tr>
-                    
-                    <!-- <script type="text/javascript">
-                        $('#extra-{$c}').ready(function() {
-                            console.log("readdy");
-                            updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}');
-                        });
-                    </script> -->
-                    
                 </tbody>
                 
 HTML;
