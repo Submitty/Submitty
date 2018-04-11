@@ -46,6 +46,9 @@ BEGIN
 END;
 $_$;
 
+CREATE FUNCTION get_allowed_late_days(character varying, timestamp with time zone) RETURNS integer AS $$
+SELECT allowed_late_days FROM late_days WHERE user_id = $1 AND since_timestamp <= $2 ORDER BY since_timestamp DESC LIMIT 1;
+$$ LANGUAGE SQL;
 
 --
 -- Name: csv_to_numeric_gradeable(text[], text, text); Type: FUNCTION; Schema: public; Owner: -

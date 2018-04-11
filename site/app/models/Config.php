@@ -95,7 +95,7 @@ class Config extends AbstractModel {
     /** @property @var string */
     protected $authentication;
     /** @property @var string */
-    protected $timezone = "America/New_York";
+    protected $timezone = 'America/New_York';
     /** @property @var string */
     protected $submitty_path;
     /** @property @var string */
@@ -175,6 +175,7 @@ class Config extends AbstractModel {
      */
     public function __construct(Core $core, $semester, $course) {
         parent::__construct($core);
+
         $this->semester = $semester;
         $this->course = $course;
     }
@@ -194,7 +195,8 @@ class Config extends AbstractModel {
 
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
-        $this->setConfigValues($master, 'site_details', array('base_url', 'vcs_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
+        $this->setConfigValues($master, 'site_details', array('base_url', 'vcs_url', 'cgi_url', 'ta_base_url',
+            'submitty_path', 'authentication'));
 
         if (!isset($master['database_details']) || !is_array($master['database_details'])) {
             throw new ConfigException("Missing config section database_details in ini file");
