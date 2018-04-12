@@ -115,6 +115,8 @@ ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadDatabases();
 
+$core->getOutput()->setInternalResources();
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
 if($core->getConfig()->isDebug()) {
