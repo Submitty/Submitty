@@ -1577,10 +1577,13 @@ HTML;
 
 HTML;
         }
+
+        $this->core->getOutput()->addInternalJs('ta-grading.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
+
         $return .= <<<HTML
 </div>
-<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading.js"></script>
-<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading-mark.js"></script>
+
 <script type="text/javascript">
 window.onbeforeunload = function() {
     saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);
