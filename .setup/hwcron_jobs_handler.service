@@ -1,0 +1,14 @@
+[Unit]
+Description=Submitty Hwcron Jobs Handler
+Documentation=http://submitty.org
+
+[Service]
+User=hwcron
+Restart=always
+Type=simple
+ExecStart=/usr/local/submitty/bin/hwcron_jobs_handler.py
+TimeoutSec=1min
+RuntimeMaxSec=infinity
+
+[Install]
+WantedBy=multi-user.target
