@@ -203,7 +203,6 @@ class MiscController extends AbstractController {
     }
 
     private function downloadFile() {
-
         // security check
         $error_string="";
         if (!$this->checkValidAccess(false,$error_string)) {
@@ -211,9 +210,7 @@ class MiscController extends AbstractController {
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
-
         $filename = rawurldecode(htmlspecialchars_decode($_REQUEST['file']));
-
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
@@ -230,7 +227,6 @@ class MiscController extends AbstractController {
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
-
         $zip_file_name = $_REQUEST['gradeable_id'] . "_" . $_REQUEST['user_id'] . "_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -317,31 +313,32 @@ class MiscController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']);
         $paths = ['submissions'];
         if ($gradeable->useVcsCheckout()) {
-          $paths[] = 'checkout';
+            //VCS submissions are stored in the checkout directory
+            $paths[] = 'checkout';
         }
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         foreach ($paths as $path) {
-          $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $path,
-              $gradeable->getId());
-          if($type === "all") {
-              $zip->addEmptyDir($path);
-              $files = new \RecursiveIteratorIterator(
-                  new \RecursiveDirectoryIterator($gradeable_path),
-                  \RecursiveIteratorIterator::LEAVES_ONLY
-              );
-              foreach ($files as $name => $file)
-              {
-                  // Skip directories (they would be added automatically)
-                  if (!$file->isDir())
-                  {
-                      // Get real and relative path for current file
-                      $filePath = $file->getRealPath();
-                      $relativePath = substr($filePath, strlen($gradeable_path) + 1);
-                      // Add current file to archive
-                      $zip->addFile($filePath, $path . "/" . $relativePath);
-                  }
-              }
+            $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $path,
+                $gradeable->getId());
+            if($type === "all") {
+                $zip->addEmptyDir($path);
+                $files = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($gradeable_path),
+                    \RecursiveIteratorIterator::LEAVES_ONLY
+                );
+                foreach ($files as $name => $file)
+                {
+                    // Skip directories (they would be added automatically)
+                    if (!$file->isDir())
+                    {
+                        // Get real and relative path for current file
+                        $filePath = $file->getRealPath();
+                        $relativePath = substr($filePath, strlen($gradeable_path) + 1);
+                        // Add current file to archive
+                        $zip->addFile($filePath, $path . "/" . $relativePath);
+                    }
+                }
            } else {
                //gets the students that are part of the sections
                if ($gradeable->isGradeByRegistration()) {
@@ -386,10 +383,10 @@ class MiscController extends AbstractController {
                                }
                            }
                            $x = $arr_length; //cuts the for loop early when found
-                      }
-                  }
-              }
-           }
+                        }
+                    }
+                }
+            }
         }
         // Zip archive will be created only after closing object
         $zip->close();
