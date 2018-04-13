@@ -145,17 +145,23 @@ def main():
                 # Create a queue file for each submission
                 queue_file = "__".join([args.semester, args.course_name, args.assignment_name, user_name, submission])
                 print("Creating queue file:", queue_file)
-                queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
+                queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", queue_file)
                 with open(queue_file, "w") as open_file:
-                    # FIXME: This will need to be adjusted for team assignments!
+                    # FIXME: This will need to be adjusted for team assignments
+                    # and assignments with special required capabilities!
+                    queue_time = dateutils.write_submitty_date()
                     json.dump({"semester": args.semester,
                                "course": args.course_name,
                                "gradeable": args.assignment_name,
                                "user": user_name,
-                               "version": submission,
+                               "team": "",
                                "who": user_name,
                                "is_team": False,
-                               "team": ""}, open_file)
+                               "version": submission,
+                               "required_capabilities" : "default",
+                               "queue_time": queue_time,
+                               "regrade": True,
+                               "max_possible_grading_time": -1}, open_file)
 
     conn.close()
 

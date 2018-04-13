@@ -19,6 +19,7 @@ class Output {
     private $breadcrumbs = array();
     private $loaded_views = array();
     private $css = array();
+    private $js = array();
     
     private $use_header = true;
     private $use_footer = true;
@@ -33,6 +34,20 @@ class Output {
     public function __construct(Core $core) {
         $this->core = $core;
         $this->start_time = microtime(true);
+    }
+
+    public function setInternalResources() {
+        $this->addCss('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+        $this->addInternalCss('jquery-ui.min.css');
+        $this->addInternalCss('server.css');
+        $this->addInternalCss('bootstrap.css');
+        $this->addInternalCss('diff-viewer.css');
+        $this->addInternalCss('glyphicons-halflings.css');
+
+        $this->addInternalJs('jquery.min.js');
+        $this->addInternalJs('jquery-ui.min.js');
+        $this->addInternalJs('diff-viewer.js');
+        $this->addInternalJs('server.js');
     }
 
     /**
@@ -129,7 +144,12 @@ class Output {
     }
 
     private function renderHeader() {
-        return ($this->use_header) ? $this->renderTemplate('Global', 'header', implode(' > ', $this->breadcrumbs), $this->css) : "";
+        if ($this->use_header) {
+            return $this->renderTemplate('Global', 'header', implode(' > ', $this->breadcrumbs), $this->css, $this->js);
+        }
+        else {
+            return '';
+        }
     }
 
     private function renderFooter() {
@@ -209,12 +229,22 @@ class Output {
         return $errorPage;
     }
     
-    public function addInternalCSS($file) {
-        $this->addCSS($this->core->getConfig()->getBaseUrl()."/css/".$file);
+    public function addInternalCss($file) {
+        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'css', $file));
+        $this->addCss($this->core->getConfig()->getBaseUrl()."css/".$file, $timestamp);
     }
  
-    public function addCSS($url) {
-        $this->css[] = $url;
+    public function addCss($url, $timestamp=0) {
+        $this->css[] = $url.(($timestamp !== 0) ? "?v={$timestamp}" : '');
+    }
+
+    public function addInternalJs($file) {
+        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'js', $file));
+        $this->addJs($this->core->getConfig()->getBaseUrl()."js/".$file, $timestamp);
+    }
+
+    public function addJs($url, $timestamp=0) {
+        $this->js[] = $url.(($timestamp !== 0) ? "?v={$timestamp}" : '');
     }
     
     /**
