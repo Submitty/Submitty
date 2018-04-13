@@ -25,6 +25,7 @@ $(function() {
     else{
         readCookies();
         updateCookies();
+        hideIfEmpty(".rubric_panel");
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
@@ -73,6 +74,8 @@ function deleteCookies(){
         }
     });
 }
+
+function onAjaxInit() {}
 
 function readCookies(){
     var output_top = document.cookie.replace(/(?:(?:^|.*;\s*)output_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -154,14 +157,14 @@ function readCookies(){
 
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
     if (autoscroll == "on") {
-        openClose(parseInt(opened_mark));
-        if (scroll_pixel > 0) {
-
-            document.getElementById('grading_rubric').scrollTop = scroll_pixel;
+        onAjaxInit = function() {
+            $('#title-'+opened_mark).click();
+            
+            if (scroll_pixel > 0) {
+                document.getElementById('grading_rubric').scrollTop = scroll_pixel;
+            }
         }
-    }
-
-    if (autoscroll == "on") {
+        
         var testcases_array = JSON.parse(testcases);
         testcases_array.forEach(function(element) {
             var id = 'testcase_' + element;
@@ -169,9 +172,7 @@ function readCookies(){
                 toggleDiv(id);
             }
         });
-    }
-
-    if (autoscroll == "on") {
+        
         var files_array = JSON.parse(files);
         files_array.forEach(function(element) {
             var file_path = element.split('#$SPLIT#$');
@@ -291,18 +292,22 @@ function handleKeyPress(key) {
         case "KeyA":
             $('.fa-list-alt').toggleClass('icon-selected');
             $("#autograding_results").toggle();
+            hideIfEmpty("#autograding_results");
             break;
         case "KeyG":
             $('.fa-pencil-square-o').toggleClass('icon-selected');
             $("#grading_rubric").toggle();
+            hideIfEmpty("#grading_rubric");
             break;
         case "KeyO":
             $('.fa-folder-open.icon-header').toggleClass('icon-selected');
             $("#submission_browser").toggle();
+            hideIfEmpty("#submission_browser");
             break;
         case "KeyS":
             $('.fa-user').toggleClass('icon-selected');
             $("#student_info").toggle();
+            hideIfEmpty("#student_info");
             break;
         case "KeyR":
             $('.fa-list-alt').addClass('icon-selected');
@@ -318,6 +323,7 @@ function handleKeyPress(key) {
             updateHandle("#grading_rubric");
             updateHandle("#submission_browser");
             updateHandle("#student_info");
+            hideIfEmpty(".rubric_panel");
             deleteCookies();
             updateCookies();
             break;
@@ -443,6 +449,14 @@ function updateHandle(element) {
     $(element).find('.ui-resizable-e').css('top', bottom_e + 'px');
     $(element).find('.ui-resizable-s').css('top', bottom_s + 'px');
     $(element).find('.ui-resizable-se').css('top', bottom_se + 'px');
+}
+
+function hideIfEmpty(element) {
+    $(element).each(function() {
+        if ($(this).hasClass("empty")) {
+            $(this).hide();
+        }
+    });
 }
 
 function findOpenTestcases() {

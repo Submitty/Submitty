@@ -92,7 +92,7 @@ class Config extends AbstractModel {
     /** @property @var string */
     protected $authentication;
     /** @property @var string */
-    protected $timezone = "America/New_York";
+    protected $timezone = 'America/New_York';
     /** @property @var string */
     protected $submitty_path;
     /** @property @var string */
@@ -172,6 +172,7 @@ class Config extends AbstractModel {
      */
     public function __construct(Core $core, $semester, $course) {
         parent::__construct($core);
+
         $this->semester = $semester;
         $this->course = $course;
     }
