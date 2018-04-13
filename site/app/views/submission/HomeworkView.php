@@ -1025,7 +1025,7 @@ HTML;
 HTML;
     }
         if ($gradeable->taGradesReleased()) {
-            $return .= <<<HTML
+                $return .= <<<HTML
 <div class="content">
 HTML;
             if ($gradeable->hasGradeFile()) {
