@@ -45,7 +45,7 @@ const std::vector<int> limit_names = {
 const std::map<int,rlim_t> system_limits = 
   { 
     { RLIMIT_CPU,        600              }, // 10 minutes per test
-    { RLIMIT_FSIZE,      400*1000*1000    }, // 100 MB created file size
+    { RLIMIT_FSIZE,      12000*1000*1000    }, // 100 MB created file size
     { RLIMIT_DATA,       RLIM_INFINITY    }, // heap                // 1 GB
     { RLIMIT_STACK,      RLIM_INFINITY    }, // stack size          // 50 MB
     { RLIMIT_CORE,       RLIM_INFINITY    }, // allow core files?   // FIXME: 0

@@ -295,7 +295,18 @@ class DatabaseQueries {
         return $return;
     }
 
-    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
+    /** @noinspection PhpDocSignatureInspection */
+    /**
+     * @param null   $g_ids
+     * @param null   $user_ids
+     * @param string $section_key
+     * @param string $sort_key
+     * @param null   $g_type
+     * @parma array  $extra_order_by
+     *
+     * @return DatabaseRowIterator
+     */
+    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null, $extra_order_by = []) {
         throw new NotImplementedException();
     }
 
@@ -1625,6 +1636,18 @@ ORDER BY gt.{$section_key}", $params);
             (user_id, since_timestamp, allowed_late_days)
             VALUES(?,?,?)", array($user_id, $timestamp, $days));
         }
+    }
+
+    /**
+     * Delete a given user's allowed late days entry at given effective time
+     * @param string $user_id
+     * @param string $timestamp
+     */
+    public function deleteLateDays($user_id, $timestamp){
+        $this->course_db->query("
+          DELETE FROM late_days
+          WHERE user_id=?
+          AND since_timestamp=?", array($user_id, $timestamp));
     }
 
     /**
