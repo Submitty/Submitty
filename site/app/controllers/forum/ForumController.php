@@ -210,6 +210,11 @@ class ForumController extends AbstractController {
         $current_user = $this->core->getUser()->getId();
 
         $posts = null;
+        $option = 0;
+        if(isset($_REQUEST["option"])){
+            $option = $_REQUEST["option"];
+        }
+
         if(isset($_REQUEST["thread_id"])){
             $posts = $this->core->getQueries()->getPostsForThread($current_user, $_REQUEST["thread_id"]);
         } else {
@@ -218,7 +223,7 @@ class ForumController extends AbstractController {
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1);
             
         }
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option);
     }
 
     public function showCreateThread(){
