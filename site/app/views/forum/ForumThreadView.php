@@ -289,11 +289,13 @@ HTML;
 							}
 							$i++;
 						}
-					} else {
+					} else if($display_option == "time"){
 						foreach($posts as $post){
 							$return .= $this->createPost($post["thread_id"], $post, $function_date, $title_html, $first, 1);
 							if($first) $first = false;
 						}
+					} else if($display_option == "alpha"){
+						
 					}
 			$return .= <<<HTML
 
