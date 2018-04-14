@@ -380,7 +380,6 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    var submission_status = "";
                     if(data['previous_submission']){
                         $(function() {
                             var dialog = $('<p>One or more users you are submitting for had a previous submission. Do you wish to continue?</p>').dialog({
