@@ -492,7 +492,7 @@ HTML;
         $displayTotal = "none";
         foreach ($gradeable->getTestcases() as $testcase) {
             if ($testcase->viewTestcase()){
-                $totalTitle = "TA / Instructor grading Subtotal";
+                $totalTitle = "TA / Instructor Grading Subtotal";
                 $displayTotal = "block";
                 break;
             }
@@ -560,10 +560,11 @@ HTML;
         }else{
             $background = "red-background";
         }
+        $totalScore = $totalPointsEarned . " / " . $maxPossiblePoints;
         $return .= <<<HTML
             <div style="display: {$displayTotal}" class="box">
                 <div class="box-title" style="padding-top: 15px; padding-bottom: 15px;">
-                    <span class="badge {$background}"> {$totalPointsEarned}/{$maxPossiblePoints}</span>
+                    <span class="badge {$background}"> {$totalScore}</span>
                     <h4>Total</h4>
                 </div>
             </div>
