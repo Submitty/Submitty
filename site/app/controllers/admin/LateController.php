@@ -17,13 +17,10 @@ class LateController extends AbstractController {
                 $this->viewExtensions();
                 break;
             case 'update_late':
-                $this->update("late", false);
-                break;
-            case 'delete_late':
-                $this->update("late", true);
+                $this->update("late");
                 break;
             case 'update_extension':
-                $this->update("extension", false);
+                $this->update("extension");
                 break;
             case 'get_extension_details':
                 $this->getExtensions($_REQUEST['g_id']);
@@ -44,17 +41,10 @@ class LateController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $g_ids);
     }
 
-    public function update($type, $delete) {
-        if ($delete) {
-            if ($type != 'late') {
-                $error = "Deletion implemented only for Late Days";
-                $this->core->getOutput()->renderJson(array('error' => $error));
-                return;
-            }
-        }
+    public function update($type) {
         //Check to see if a CSV file was submitted.
         $data = array();
-        if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name'])) && !$delete) {
+        if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, $type))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
                 $this->core->getOutput()->renderJson(array('error' => $error));
@@ -99,18 +89,13 @@ class LateController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
-            if (((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days']))) && !$delete) {
+            if ((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days'])) ) {
                 $error = "Late Days must be a nonnegative integer";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
             if($type == "late"){
-                if ($delete) {
-                    $this->core->getQueries()->deleteLateDays($_POST['user_id'], $_POST['datestamp']);
-                }
-                else {
-                    $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
-                }
+                $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
                 $this->getLateDays();
             }
             else{
