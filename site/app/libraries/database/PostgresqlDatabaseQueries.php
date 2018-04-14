@@ -739,6 +739,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         FULL OUTER JOIN late_days AS l
           ON u.user_id=l.user_id
         WHERE allowed_late_days IS NOT NULL
+          AND allowed_late_days>0
         ORDER BY
           user_email ASC, since_timestamp DESC;");
 

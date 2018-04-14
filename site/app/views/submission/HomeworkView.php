@@ -1032,10 +1032,7 @@ HTML;
                 $return .= <<<HTML
     <h3 class="label">TA / Instructor grade</h3>
 HTML;
-                $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults', $gradeable);
-                $return .= <<<HTML
-    <pre>{$gradeable->getGradeFile()}</pre>
-HTML;
+    $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults', $gradeable);
             } else {
                 $return .= <<<HTML
     <h3 class="label">TA grade not available</h3>

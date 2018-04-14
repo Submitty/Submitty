@@ -136,7 +136,7 @@ class ReportController extends AbstractController {
                 $user['preferred_first_name'] = $gradeable->getUser()->getPreferredFirstName();
                 $user['last_name'] = $gradeable->getUser()->getLastName();
                 $user['registration_section'] = $gradeable->getUser()->getRegistrationSection();
-                $user['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
+                $user['default_allowed_late_days'] = $this->core->getConfig()->getDefaultHwLateDays();
                 $user['last_update'] = date("l, F j, Y");
                 $total_late_used = 0;
             }

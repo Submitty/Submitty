@@ -52,7 +52,6 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                 done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_queue.json")
                 #move doesn't inherit the permissions of the destination directory. Copyfile does.
                 shutil.copyfile(results_zip_tmp, results_zip)
-
                 os.remove(results_zip_tmp)
                 with open(todo_queue_file, 'r') as infile:
                     queue_obj = json.load(infile)
