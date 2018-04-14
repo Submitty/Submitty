@@ -1639,18 +1639,6 @@ ORDER BY gt.{$section_key}", $params);
     }
 
     /**
-     * Delete a given user's allowed late days entry at given effective time
-     * @param string $user_id
-     * @param string $timestamp
-     */
-    public function deleteLateDays($user_id, $timestamp){
-        $this->course_db->query("
-          DELETE FROM late_days
-          WHERE user_id=?
-          AND since_timestamp=?", array($user_id, $timestamp));
-    }
-
-    /**
      * Updates a given user's extensions for a given homework
      * @param string $user_id
      * @param string $g_id

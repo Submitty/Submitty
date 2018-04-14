@@ -91,17 +91,17 @@ def update_foreign_autograding_worker_json(name, entry):
             os.close(fd)
     #if we are updating a foreign machine, we must connect via ssh and use sftp to update it.
     else:
-        #try to establish an ssh connection to the host
         try:
             ssh = paramiko.SSHClient()
             ssh.get_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(hostname = host, username = user)
+
         except Exception as e:
             grade_items_logging.log_message(JOB_ID, message="ERROR: could not ssh to "+host+" due to following error: "+str(e))
             print("ERROR: could not ssh to "+host+" due to following error: "+str(e))
             return
-        #try to copy the files over to the host
+
         try:
             sftp = ssh.open_sftp()
 

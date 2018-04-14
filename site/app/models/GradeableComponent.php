@@ -184,11 +184,16 @@ class GradeableComponent extends AbstractModel {
         return $points;
     }
 
-    public function getGradedTAComments($nl, $show_students) {
+    public function getGradedTAComments($nl, $show_students,$show_ascii=true) {
         $text = "";
         $first_text = true;
-        $checkedBox = '<i class="fa fa-check-square-o fa-1g"></i> ';
-        $box = '<i class="fa fa-square-o"></i> ';
+        if(!$show_ascii){
+            $checkedBox = '<i class="fa fa-check-square-o fa-1g"></i> ';
+            $box = '<i class="fa fa-square-o"></i> ';
+        }else{
+            $checkedBox = '(*)';
+            $box = '( )';
+        }
         foreach ($this->marks as $mark) {
             $points_string = "    ";
             if ($mark->getPoints() != 0) {

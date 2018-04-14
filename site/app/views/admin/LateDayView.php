@@ -36,13 +36,12 @@ class LateDayView extends AbstractView {
             <td>Last Name</td>
             <td>Total Allowed Late Days</td>
             <td>Effective Date</td>
-            <td>Delete</td>
         </thead>
         <tbody>
 HTML;
         if (!is_array($users) || count($users) < 1) {
             $return .= <<<HTML
-    <tr><td colspan="6">No late days are currently entered.</td></tr>
+    <tr><td colspan="4">No late days are currently entered.</td></tr>
 HTML;
         } else {
             foreach ($users as $user) {
@@ -53,7 +52,6 @@ HTML;
             <td>{$user->getLastName()}</td>
             <td>{$user->getAllowedLateDays()}</td>
             <td>{$user->getSinceTimestamp()}</td>
-            <td><a onclick="deleteLateDays('{$user->getId()}', '{$user->getSinceTimestamp()}');"><i class="fa fa-close"></i></a></td>
             </tr>
 HTML;
             }
