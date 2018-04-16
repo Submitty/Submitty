@@ -45,6 +45,7 @@ class ForumThreadView extends AbstractView {
 			   		enableTabsInTextArea('post_content');
 					saveScrollLocationOnRefresh('thread_list');
 					saveScrollLocationOnRefresh('posts_list');
+					$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
 				});
 			</script>	
 HTML;
@@ -266,7 +267,7 @@ HTML;
 										$reply_level = $reply_level_array[$i];
 									}
 									
-									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level);
+									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option);
 									break;
 								}
 								
@@ -346,7 +347,7 @@ HTML;
 		return $return;
 	}
 
-	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level){
+	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
 		$post_html = "";
 		$post_id = $post["id"];
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
@@ -366,15 +367,15 @@ HTML;
 			$classes .= " first_post";
 			$return .= <<<HTML
     			<p>  
-        			<input type="radio" name="selectOption" onClick="changeDisplayOptions($thread_id, 'tree')" value="tree">  
+        			<input type="radio" name="selectOption" id="tree" onClick="changeDisplayOptions($thread_id, 'tree')" value="tree">  
         			<label for="radio">Tree mode</label>  
     			</p>  
     			<p>  
-        			<input type="radio" name="selectOption" onClick="changeDisplayOptions($thread_id, 'time')" value="time">  
+        			<input type="radio" name="selectOption" id="time" onClick="changeDisplayOptions($thread_id, 'time')" value="time">  
         			<label for="radio2">Chronological</label>  
     			</p>  
 				<p>  
-        			<input type="radio" name="selectOption" onClick="changeDisplayOptions($thread_id, 'alpha')" value="alpha">  
+        			<input type="radio" name="selectOption" id="alpha" onClick="changeDisplayOptions($thread_id, 'alpha')" value="alpha">  
         			<label for="radio3">Alphabetical</label>  
     			</p>  
 HTML;
@@ -437,10 +438,14 @@ HTML;
 		$post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
 		$parent_post = $this->core->getQueries()->getPost($post['parent_id']);
 		$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($parent_post["author_user_id"]);
-		$parent_first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+		if(!$first && ($reply_level > 6 || $display_option != 'tree')){
+			$parent_first_name = '@'; //This is for the @ feature 
+			$parent_first_name .= htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		}
 		//end code segment handling
 		$return .= <<<HTML
-			<pre><p class="post_content" style="white-space: pre-wrap; ">@{$parent_first_name} {$post_content}</p></pre>	
+			<pre><p class="post_content" style="white-space: pre-wrap; ">{$parent_first_name} {$post_content}</p></pre>	
 			<hr style="margin-bottom:3px;">
 HTML;
 		if(!$first){
