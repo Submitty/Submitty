@@ -225,10 +225,10 @@ HTML;
 HTML;
                         }
                         else {
-                $percentage = 0;
+			    $percentage = 0;
                             if($gradeable->getTotalAutograderNonExtraCreditPoints() != 0) {
                                 $percentage = round($autograded_average->getAverageScore()/$gradeable->getTotalAutograderNonExtraCreditPoints()*100);
-                }
+			    }
                             $return .= <<<HTML
                 Average: {$autograded_average->getAverageScore()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()} ({$percentage}%)<br/>
                 Standard Deviation: {$autograded_average->getStandardDeviation()} <br/>
@@ -253,8 +253,8 @@ HTML;
                             $overall_score += $comp->getAverageScore();
                             $overall_max += $comp->getMaxValue();
                             $percentage = 0;
-                            if ($comp->getMaxValue() != 0) {
-                                $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
+			                if ($comp->getMaxValue() != 0) {
+			                    $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
                             }
                             $average_string = ($comp->getMaxValue() > 0 ? "{$comp->getAverageScore()} / {$comp->getMaxValue()} ({$percentage}%)" : "{$comp->getAverageScore()}");
                             $return .= <<<HTML
@@ -603,7 +603,7 @@ HTML;
                             if ($member_list !== "") {
                                 $member_list = $member_list . ", ";
                             }
-     
+ 	 
                             $first_name = $this->core->getQueries()->getUserById($team_member)->getDisplayedFirstName();
                             $last_name = $this->core->getQueries()->getUserById($team_member)->getLastName();
 
@@ -686,7 +686,7 @@ HTML;
                     if($row->validateVersions()) {
                         $btn_class = "btn-default";
                         $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-                        $graded += $row->getGradedTAPoints();
+			            $graded += $row->getGradedTAPoints();
                     }
                     else{
                         $btn_class = "btn-primary";
@@ -716,7 +716,7 @@ HTML;
 
                 //prints the graded questions
                 foreach ($row->getComponents() as $component) {
-                    $first = true;
+                	$first = true;
                     if(is_array($component)) {
                         foreach($component as $cmpt) {
                             if($cmpt->getGrader() == null) {
@@ -737,16 +737,16 @@ HTML;
                     }
                     if($question->getGrader() === null || $question === null) {
                     } else {
-                        if ($first == true) {
-                            $first = false;
-                            $return .= <<<HTML
+                    	if ($first == true) {
+                    		$first = false;
+                    		$return .= <<<HTML
                             {$temp_counter}
 HTML;
-                        } else {
-                            $return .= <<<HTML
+                    	} else {
+                    		$return .= <<<HTML
                            , {$temp_counter}
 HTML;
-                        }
+                    	}
                     }
                     $temp_counter++;
                 }
