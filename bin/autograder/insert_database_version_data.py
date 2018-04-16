@@ -21,10 +21,10 @@ import json
 import os
 
 from submitty_utils import dateutils
-
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', 'config')
+from . import CONFIG_PATH
+
 with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 DB_HOST = OPEN_JSON['database_host']

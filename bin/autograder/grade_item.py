@@ -15,11 +15,8 @@ import socket
 import zipfile
 
 from submitty_utils import dateutils, glob
-from . import insert_database_version_data
-from . import grade_items_logging
-from . import write_grade_history
+from . import insert_database_version_data, grade_items_logging, write_grade_history, CONFIG_PATH
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', 'config')
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']

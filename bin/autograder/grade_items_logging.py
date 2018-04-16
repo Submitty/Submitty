@@ -4,8 +4,8 @@ import os
 from submitty_utils import dateutils
 import fcntl
 
+from . import CONFIG_PATH
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', 'config')
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
