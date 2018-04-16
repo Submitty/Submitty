@@ -276,13 +276,11 @@ HTML;
 							}
 							$i++;
 						}
-					} else if($display_option == "time"){
+					} else {
 						foreach($posts as $post){
 							$return .= $this->createPost($post["thread_id"], $post, $function_date, $title_html, $first, 1);
 							if($first) $first = false;
 						}
-					} else if($display_option == "alpha"){
-						
 					}
 			$return .= <<<HTML
 
@@ -436,11 +434,13 @@ HTML;
         if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
             $codeBracketString = "&NewLine;" . $codeBracketString;
         }
-        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+		$post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+		$parent_post = $this->core->getQueries()->getPost($post['parent_id']);
+		$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($parent_post["author_user_id"]);
+		$parent_first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		//end code segment handling
-
 		$return .= <<<HTML
-			<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>	
+			<pre><p class="post_content" style="white-space: pre-wrap; ">@{$parent_first_name} {$post_content}</p></pre>	
 			<hr style="margin-bottom:3px;">
 HTML;
 		if(!$first){
