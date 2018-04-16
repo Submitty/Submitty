@@ -76,11 +76,16 @@ HTML;
 HTML;
             }
             else {
+                //check if instructor grades exist and change title, display hidden points when TA grades are released
+                $totalTitle = ($gradeable->hasGradeFile()) ? "Autograding Subtotal" : "Total";
+                $autoGradingPoints = $current_version->getNonHiddenTotal();
+                if($gradeable->taGradesReleased())
+                    $autoGradingPoints += $current_version->getHiddenTotal();
                 $return .= <<<HTML
 <div class="box" style="display: {$display_total};">
     <div class="box-title">
-        <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
-        <h4>Total</h4>
+        <span class="badge {$background}">{$autoGradingPoints} / {$gradeable->getNormalPoints()}</span>
+        <h4>{$totalTitle}</h4>
     </div>
 </div>
 HTML;
@@ -113,8 +118,14 @@ HTML;
             }
             if ($testcase->hasPoints()) {
                 if ($testcase->isHidden() && !$show_hidden) {
+                    if($gradeable->taGradesReleased()){
+                        $hiddenPoints = ($testcase->isExtraCredit()) ? '<br/>+'. $testcase->getPointsAwarded() : '<br>'.$testcase->getPointsAwarded() . " / " . $testcase->getPoints();
+                    }else{
+                        $hiddenPoints = "";
+                    }
+                    
                     $return .= <<<HTML
-        <div class="badge">Hidden</div>
+        <div class="badge">Hidden {$hiddenPoints} </div>
 HTML;
                 }
                 else {
@@ -432,6 +443,13 @@ HTML;
 HTML;
             return $return;
         }
+        if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
+            $return = <<<HTML
+            <br>
+            <h3>The version you have selected above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
+HTML;
+            return $return;
+        }
         foreach ($gradeable->getComponents() as $component) {
             if(!$component->getGrader()){
                 $return = <<<HTML
@@ -455,6 +473,7 @@ HTML;
         }
         //get total score and max possible score
         $score = $gradeable->getGradedTAPoints();
+        $totalInstructorPointsEarned = $score;
         $maxScore = $gradeable->getTotalTANonExtraCreditPoints();
         if($score >= $maxScore){
             $background = "green-background";
@@ -467,6 +486,17 @@ HTML;
         //late day data
         $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
         $lateDayData = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
+        //change title if autograding exists or not
+        //display a sum of autograding and instructor points if both exist
+        $totalTitle = "Total";
+        $displayTotal = "none";
+        foreach ($gradeable->getTestcases() as $testcase) {
+            if ($testcase->viewTestcase()){
+                $totalTitle = "TA / Instructor Grading Subtotal";
+                $displayTotal = "block";
+                break;
+            }
+        }
         $return = <<<HTML
         <div class = "sub">
             <div class="box half" style="padding: 10px; width: 40%;">
@@ -485,7 +515,7 @@ HTML;
             <div class = "box">
                 <div class="box-title">
                     <span class="badge {$background}" style="float: left">{$score} / {$maxScore}</span>
-                    <h4>Total</h4>
+                    <h4>{$totalTitle}</h4>
                 </div>
             </div>
 HTML;
@@ -512,12 +542,36 @@ HTML;
                 <div class="box-title">
                     <span class="badge {$background}">{$score}</span>
                     <h4>{$component->getTitle()} <i>{$componentGrader}</i></h4>
-                    <p style="float:left;">{$component->getGradedTAComments('<br>',true)}</p>
+                    <p style="float:left;">{$component->getGradedTAComments('<br>',true,false)}</p>
                 </div>
             </div>
 HTML;
         }
+        //add total points if both autograding and instructor grading exist
+        $display = "none";
+        $current = $gradeable->getCurrentVersion();
+        $totalPointsEarned = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $totalInstructorPointsEarned;
+        $maxPossiblePoints = $gradeable->getNormalPoints() + $maxScore;
+        $background = "";
+        if($totalPointsEarned >= $maxPossiblePoints){
+            $background = "green-background";
+        }else if($totalPointsEarned > $maxPossiblePoints * 0.5){
+            $background = "yellow-background";
+        }else{
+            $background = "red-background";
+        }
+        $totalScore = $totalPointsEarned . " / " . $maxPossiblePoints;
         $return .= <<<HTML
+            <div style="display: {$displayTotal}" class="box">
+                <div class="box-title" style="padding-top: 15px; padding-bottom: 15px;">
+                    <span class="badge {$background}"> {$totalScore}</span>
+                    <h4>Total</h4>
+                </div>
+            </div>
+        </div>
+        <h3>Grade File</h3>
+        <div class="sub">
+            <pre class="box">{$gradeable->getGradeFile()}</pre>
         </div>
 HTML;
     return $return;
