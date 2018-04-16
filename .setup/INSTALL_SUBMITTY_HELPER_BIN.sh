@@ -32,7 +32,7 @@ chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-array=( regrade.py grading_done.py read_iclicker_ids.py left_right_parse.py)
+array=( grading_done.py left_right_parse.py read_iclicker_ids.py regrade.py )
 for i in "${array[@]}"; do
     chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
@@ -49,13 +49,13 @@ for i in "${array[@]}"; do
 done
 
 # hwcron only things
-array=( submitty_autograding_shipper.py submitty_autograding_worker.py build_config_upload.py )
+array=( build_config_upload.py submitty_autograding_shipper.py submitty_autograding_worker.py )
 for i in "${array[@]}"; do
     chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
 done
 
-array=( insert_database_version_data.py grade_item.py grade_items_logging.py write_grade_history.py )
+array=( grade_item.py grade_items_logging.py insert_database_version_data.py write_grade_history.py )
 for i in "${array[@]}"; do
     chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/autograder/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/autograder/${i}
