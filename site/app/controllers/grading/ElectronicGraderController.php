@@ -58,10 +58,15 @@ class ElectronicGraderController extends AbstractController {
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         if($verifyAll){
+            //go through every componenet and overwrite grader that is not the current
             foreach ($gradeable->getComponents() as $component) {
+                if(!$component->getGrader()) continue;
                 if($component->getGrader()->getId() !== $this->core->getUser()->getId()){
                     $component->setGrader($this->core->getUser());
                     $component->saveGradeableComponentData($gradeable->getGdId());
+
+                    $component->setGradedVersion($_POST['active_version']);
+                    $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                 }
             }
             $hwReport = new HWReport($this->core);
@@ -73,6 +78,10 @@ class ElectronicGraderController extends AbstractController {
                 if($component->getId() == $component_id){
                     $component->setGrader($this->core->getUser());
                     $component->saveGradeableComponentData($gradeable->getGdId());
+
+                    $component->setGradedVersion($_POST['active_version']);
+                    $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+
                     $hwReport = new HWReport($this->core);
                     $hwReport->generateSingleReport($user_id, $gradeable_id);
                     return;

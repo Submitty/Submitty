@@ -1249,7 +1249,8 @@ HTML;
         $display = "none";
         //check if verify all button should be shown or not
         foreach ($gradeable->getComponents() as $component) {
-            if($component->getGrader()->getId() !== $this->core->getUser()->getId() && $this->core->getUser()->accessFullGrading()){
+            if(!$component->getGrader()) continue;
+            if(($component->getGrader()->getId() !== $this->core->getUser()->getId() || $gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) && $this->core->getUser()->accessFullGrading()){
                 $display = "inline";
                 break;
             }
