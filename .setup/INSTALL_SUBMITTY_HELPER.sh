@@ -534,14 +534,38 @@ chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #copying commonAST scripts 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
+mkdir -p ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/UnionTool/
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/astMatcher.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/commonast.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/unionTool.cpp ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/UnionTool/
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/CMakeLists.txt ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/ASTMatcher.cpp ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/ASTMatcher/
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/CMakeListsUnion.txt ${SUBMITTY_INSTALL_DIR}/clang-llvm/llvm/tools/clang/tools/extra/UnionTool/CMakeLists.txt
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/unionToolRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+#copying tree visualization scrips
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/treeTool/make_tree_interactive.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/treeTool/treeTemplate1.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/treeTool/treeTemplate2.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+#copying jsonDiff files
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/jsonDiff.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/utils.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/refMaps.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/match.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/eqTag.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/context.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/removeTokens.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+#copying runners for jsonDiffs
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/jsonDiffRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/jsonDiffRunnerRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/createAllJson.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #building commonAST excecutable
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/commonASTCount.out
+g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
 popd
 
 #building clang ASTMatcher.cpp
@@ -550,7 +574,10 @@ if [ -d ${SUBMITTY_INSTALL_DIR}/clang-llvm/build ]; then
 	ninja
 	popd
 	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
+	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/UnionTool
 fi
+
+
 
 # change permissions
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
