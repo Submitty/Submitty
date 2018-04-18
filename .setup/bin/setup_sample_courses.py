@@ -828,8 +828,8 @@ class Course(object):
             forum_posts = Table("posts", metadata, autoload=True)
             forum_cat_list = Table("categories_list", metadata, autoload=True)
             forum_thread_cat = Table("thread_categories", metadata, autoload=True)
-            conn.execute(forum_cat_list.insert(), category_desc="Hw1")
-            conn.execute(forum_cat_list.insert(), category_desc="Misc")
+            conn.execute(forum_cat_list.insert(), category_desc="Comment")
+            conn.execute(forum_cat_list.insert(), category_desc="Question")
             counter = 1
             for threadData in f_data[1]:
                 conn.execute(forum_threads.insert(),
@@ -839,7 +839,7 @@ class Course(object):
                                   deleted=True if threadData[3] == "t" else False,
                                   merged_id=threadData[4],
                                   is_visible=True if threadData[5] == "t" else False)
-                if(counter < 4):
+                if(counter < 2):
                     conn.execute(forum_thread_cat.insert(), thread_id=counter, category_id=1)
                 else:
                     conn.execute(forum_thread_cat.insert(), thread_id=counter, category_id=2)

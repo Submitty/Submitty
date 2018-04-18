@@ -89,7 +89,15 @@ HTML;
 				$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
-				$post_content = htmlentities($post["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				//convert legacy htmlentities being saved in db
+                $post_content = html_entity_decode($post["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
+
+                if(!empty($pre_post)){
+                    $post_content = $pre_post;
+				}
+			
+				$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$posted_on = date_format(date_create($post['timestamp_post']), "n/j g:i A");
 				$return .= <<<HTML
 
@@ -117,12 +125,12 @@ HTML;
 
 		if(count($threads) == 0) {
 		$return .= <<<HTML
-			<h4 style="text-align:center;margin-top:20px;">No threads match your search criteria.</h4>
+			<h4 style="padding-bottom:20px;text-align:center;margin-top:20px;">No threads match your search criteria.</h4>
 HTML;
 		}
 
     	$return .= <<<HTML
-    	</div> </div> </div>
+    	</div> </div> 
 HTML;
     	return $return;
     }
@@ -711,10 +719,18 @@ HTML;
 
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
-		<div style="margin-left:20px;margin-top:10px; height:50px;" id="forum_bar">
+		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;margin-top:10px;margin-left:20px;margin-right:20px;border-radius:3px; height:40px; margin-bottom:10px;" id="forum_bar">
 
-			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
-		
+
+		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+
+			<form style="float:right;position:relative;top:3px;right:5px;display:inline-block;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
+			<input type="text" size="35" placeholder="search" name="search_content" id="search_content" required/>
+			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
+  				<i class="fa fa-search"></i> Search
+			</button>
+			</form>
+			
 		</div>
 
 		<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;height:69vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
