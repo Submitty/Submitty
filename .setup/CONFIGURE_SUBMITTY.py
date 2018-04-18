@@ -8,6 +8,7 @@ import os
 import pwd
 import shutil
 import tzlocal
+import tempfile
 
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
@@ -335,30 +336,49 @@ SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
 SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 
+#If the workers.json exists, rescue it from the destruction of config (move it to a temp directory).
+tmp_autograding_workers_file = ""
+if not args.worker:
+    if os.path.isfile(WORKERS_JSON):
+        #make a tmp folder and copy autograding workers to it
+        tmp_folder = tempfile.mkdtemp()
+        tmp_autograding_workers_file = os.path.join(tmp_folder, "autograding_workers.json")
+        os.rename(WORKERS_JSON, tmp_autograding_workers_file)
+
 if os.path.isdir(CONFIG_INSTALL_DIR):
     shutil.rmtree(CONFIG_INSTALL_DIR)
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(CONFIG_INSTALL_DIR, 0o755)
 
+#If the workers.json exists, finish rescuing it (copy it back).
+if not tmp_autograding_workers_file == "":
+    #copy autograding workers back
+    os.rename(tmp_autograding_workers_file, WORKERS_JSON)
+    #remove the tmp folder
+    os.removedirs(tmp_folder)
+    #make sure the permissions are correct.
+    shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
+    os.chmod(WORKERS_JSON, 0o440)
+
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/conf
 
 if not args.worker:
-	if not os.path.isfile(WORKERS_JSON):
-	    worker_dict = {
-	        "primary": {
-	            "capabilities": ["default"],
-	            "address": "localhost",
-	            "username": "",
-	            "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS
-	        }
-	    }
+    if not os.path.isfile(WORKERS_JSON):
+        worker_dict = {
+            "primary": {
+                "capabilities": ["default"],
+                "address": "localhost",
+                "username": "",
+                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS
+            }
+        }
 
-	    with open(WORKERS_JSON, 'w') as workers_file:
-	        json.dump(worker_dict, workers_file, indent=4)
-	shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
-	os.chmod(WORKERS_JSON, 0o440)
+        with open(WORKERS_JSON, 'w') as workers_file:
+            json.dump(worker_dict, workers_file, indent=4)
+    shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
+    os.chmod(WORKERS_JSON, 0o440)
 
 ##############################################################################
 # Write database json
