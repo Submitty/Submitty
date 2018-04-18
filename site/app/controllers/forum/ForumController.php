@@ -284,7 +284,7 @@ class ForumController extends AbstractController {
             $posts = $this->core->getQueries()->getPostsForThread($current_user, $_REQUEST["thread_id"]);
         } else {
             //We are at the "Home page"
-            //Show the first post
+            //Show the first thread
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1);
             
         }
