@@ -629,21 +629,16 @@ HTML;
 	public function statPage($users) {
 
 		$return = <<<HTML
-		
 		<div style="margin-left:20px;margin-top:10px; height:50px;" id="forum_bar">
-
 			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
-			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
-		
 		</div>
-			<div class="content">
-				<table class="table table-striped table-bordered persist-area">
-					<tr>
-						
-				        <td width="15%">User</td>
-				        <td width="15%">Total Posts (not deleted)</td>
-				        <td width="15%">Total Threads</td>
-				        <td width="15%">Total Deleted Posts</td>
+			<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;">
+				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">
+					<tr>			
+				        <td width="15%" id="user_down">User &darr;</td>
+				        <td width="15%" id="total_posts_down">Total Posts (not deleted)</td>
+				        <td width="15%" id="total_threads_down">Total Threads</td>
+				        <td width="15%" id="total_deleted_down">Total Deleted Posts</td>
 				        <td width="40%">Show Posts</td>
 					</tr>
 HTML;
@@ -654,17 +649,18 @@ HTML;
 			$posts = htmlspecialchars(json_encode($details["posts"]), ENT_QUOTES, 'UTF-8');
 			$ids = htmlspecialchars(json_encode($details["id"]), ENT_QUOTES, 'UTF-8');
 			$timestamps = htmlspecialchars(json_encode($details["timestamps"]), ENT_QUOTES, 'UTF-8');
+			$thread_ids = htmlspecialchars(json_encode($details["thread_id"]), ENT_QUOTES, 'UTF-8');
 			$num_deleted = ($details["num_deleted_posts"]);
 			$return .= <<<HTML
-			<div class="user_entry">
+			<tbody>
 				<tr>
 					<td>{$last_name}, {$first_name}</td>
 					<td>{$post_count}</td>
 					<td>{$details["total_threads"]}</td>
 					<td>{$num_deleted}</td>
-					<td><button class="btn btn-default" data-action = "expand" data-posts="{$posts}" data-id="{$ids}" data-timestamps="{$timestamps}">Expand</button></td>
+					<td><button class="btn btn-default" data-action = "expand" data-posts="{$posts}" data-id="{$ids}" data-timestamps="{$timestamps}" data-thread_id="{$thread_ids}">Expand</button></td>
 				</tr>
-			</div>
+			</tbody>
 HTML;
 			
 		}
@@ -674,19 +670,47 @@ HTML;
 			</div>
 
 			<script>
+				$("td").click(function(){
+					if($(this).attr('id')=="user_down"){
+						sortTable(0);
+					}
+					if($(this).attr('id')=="total_posts_down"){
+						sortTable(1);
+					}
+					if($(this).attr('id')=="total_threads_down"){
+						sortTable(2);
+					}
+					if($(this).attr('id')=="total_deleted_down"){
+						sortTable(3);
+					}
+					
+				});
 				$("button").click(function(){
+					
 					var action = $(this).data('action');
 					var posts = $(this).data('posts');
 					var ids = $(this).data('id');
 					var timestamps = $(this).data('timestamps');
+					var thread_ids = $(this).data('thread_id');
 					if(action=="expand"){
 						
-						//console.log(posts);
+						
 						for(var i=0;i<posts.length;i++){
-							$(this).parent().append('<tr id="'+ids[i]+'"><td>'+timestamps[i]+'</td><td colspan = "5" align = "right">'+posts[i]+'</td></tr> ');
+							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td>'+timestamps[i]+'</td><td colspan = "4" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+posts[i]+'</pre></td></tr> ');
+							
 						}
 						$(this).html("Collapse");
 						$(this).data('action',"collapse");
+						$("td").click(function(){
+						
+							if($(this).data('type')=="post"){
+			
+								var id = $(this).data('thread_id');
+								var url = buildUrl({'component' : 'forum', 'page' : 'view_thread', 'thread_id' : id});
+								window.location.replace(url);
+							}
+						
+					});
 					}
 					else{
 						for(var i=0;i<ids.length;i++){
@@ -697,10 +721,50 @@ HTML;
 						$(this).html("Expand");
 						$(this).data('action',"expand");
 					}
+					
+					
 					return false;
 				});
+
+
 				
-			
+
+				function sortTable(sort_element_index){
+					var table = document.getElementById("forum_stats_table");
+					var switching = true;
+					while(switching){
+						switching=false;
+						var rows = table.getElementsByTagName("TBODY");
+						for(var i=1;i<rows.length-1;i++){
+
+							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+							if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : a.innerHTML<b.innerHTML){
+								rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+								switching=true;
+							}
+						}
+
+					}
+
+					var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
+					var headers = row0.getElementsByTagName("TD");
+					
+					for(var i = 0;i<headers.length;i++){
+						var index = headers[i].innerHTML.indexOf(' ↓');
+						
+						if(index> -1){
+
+							headers[i].innerHTML = headers[i].innerHTML.substr(0, index);
+							break;
+						}
+					}
+
+					headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
+
+				}
+
+
 			</script>
 HTML;
 		return $return;

@@ -270,6 +270,7 @@ class ForumController extends AbstractController {
             $users[$user]["posts"][] = $content;
             $users[$user]["id"][] = $posts[$i]["id"];
             $users[$user]["timestamps"][] = $posts[$i]["timestamp"];
+            $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             
         }
         ksort($users);
