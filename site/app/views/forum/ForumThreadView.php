@@ -31,16 +31,17 @@ class ForumThreadView extends AbstractView {
 			}
     	</style>
 
-    	<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
+    	<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0;padding-left:20px;padding-right:20px;box-shadow: none;" class="content">
 
-		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;border-radius:3px;margin-left:20px;margin-top:10px; height:40px; margin-bottom:10px;margin-right:20px;" id="forum_bar">
+		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;margin-top:10px;border-radius:3px; height:40px; margin-bottom:10px;" id="forum_bar">
+
 
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
 
 			<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 
 			<form style="float:right;position:relative;top:3px;right:5px;display:inline-block;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
-			<input type="text" size="45" placeholder="search" name="search_content" id="search_content" required/>
+			<input type="text" size="35" placeholder="search" name="search_content" id="search_content" required/>
 			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
   				<i class="fa fa-search"></i> Search
 			</button>
@@ -48,13 +49,12 @@ class ForumThreadView extends AbstractView {
 			
 		</div>
 
-    	<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;height:69vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
+		<div id="search_wrapper">
 
-    	<table class="table table-striped table-bordered persist-area table-hover">
+    	<table style="" class="table table-striped table-bordered persist-area table-hover">
 
     	<thead class="persist-thead">
             <tr>                
-            <td width="5%">#</td>
                 <td width="45%">Post Content</td>
                 <td width="25%">Author</td>
                 <td width="10%">Timestamp</td>
@@ -82,6 +82,7 @@ HTML;
 				<td colspan="10" style="text-align: center"><h4>{$thread_title}</h4></td>
 			</tr>
 HTML;
+
 			foreach($data as $thread) {
 				$thread_title = htmlentities($thread['thread_title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$author = htmlentities($thread['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -89,12 +90,12 @@ HTML;
 				$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
-				$posted_on = date_format(date_create($thread['timestamp']), "n/j g:i A");
+				$post_content = htmlentities($thread["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$posted_on = date_format(date_create($thread['timestamp_post']), "n/j g:i A");
 				$return .= <<<HTML
 
-				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $fromTitleToId[$thread['thread_title']]))}';" id="search-row-{$author}" class="hoverable">
-	                <td>{$count}</td>
-	                <td>{$thread["post_content"]}</td>
+				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $fromTitleToId[$thread['thread_title']]))}#{$thread['p_id']}';" id="search-row-{$author}" class="hoverable">
+	                <td align="left"><pre style="font-family: inherit;"><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre></td>
 	                <td>{$visible_username}</td>
 	                <td>{$posted_on}</td>      
 
@@ -122,7 +123,7 @@ HTML;
 		}
 
     	$return .= <<<HTML
-    	</div> </div>
+    	</div> </div> </div>
 HTML;
     	return $return;
     }
@@ -195,6 +196,8 @@ HTML;
 		</script>
 HTML;
 	}
+	$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
+	$currentCategoryId = $this->core->getQueries()->getCategoryIdForThread($currentThread);
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
@@ -203,11 +206,10 @@ HTML;
 			<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 HTML;
 				$categories = $this->core->getQueries()->getCategories();
-				$currentThreadId = isset($_REQUEST["thread_id"]) && is_numeric($_REQUEST["thread_id"]) ? (int)$_REQUEST["thread_id"] : -1;
 				$return .= <<<HTML
 				<div style="display:inline-block;position:relative;top:3px;margin-left:20px;" id="category_wrapper">
 				<label for="thread_category">Category:</label>
-			  	<select id="thread_category" name="thread_category" class="form-control" onchange="modifyThreadList({$currentThreadId});">
+			  	<select id="thread_category" name="thread_category" class="form-control" onchange="modifyThreadList({$currentThread}, {$currentCategoryId[0]["category_id"]});">
 			  	<option value="" selected>None</option>
 HTML;
 			    for($i = 0; $i < count($categories); $i++){
@@ -218,10 +220,10 @@ HTML;
 $return .= <<<HTML
 			</select>
 			</div>
-			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block';"><i class="fa fa-search"></i> Search</button>
+			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 
 			<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
-			<input type="text" size="45" placeholder="search" name="search_content" id="search_content" required/>
+			<input type="text" size="35" placeholder="search" name="search_content" id="search_content"/>
 
 			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
   				<i class="fa fa-search"></i> Search
@@ -269,8 +271,7 @@ HTML;
 				$activeThreadTitle = "";
 				$function_date = 'date_format';
 				$activeThread = array();
-				$currentThread = isset($_GET["thread_id"]) ? (int)$_GET["thread_id"] : -1;
-				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread);
+				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoryId[0]["category_id"]);
 
 					$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
@@ -419,14 +420,14 @@ HTML;
 		return $return;
 	}
 
-	public function showAlteredDislpayList($threads, $filtering, $thread_id){
+	public function showAlteredDislpayList($threads, $filtering, $thread_id, $category_id){
 		$tempArray = array();
 		$threadAnnouncement = false;
 		$activeThreadTitle = "";
-		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id);
+		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $category_id);
 	}
 
-	public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p){
+	public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_category_id){
 					$return = "";
 					$used_active = false; //used for the first one if there is not thread_id set
 					$current_user = $this->core->getUser()->getId();
@@ -440,24 +441,16 @@ HTML;
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
 						$date = date_create($first_post['timestamp']);
 						$class = "thread_box";
-						//Needs to be refactored to rid duplicated code
-						if(((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"]) && !$used_active) {
+						if(((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $current_category_id == $thread["category_id"]) {
 							$class .= " active";
 							$used_active = true;
 							$activeThreadTitle = $thread["title"];
 							$activeThread = $thread;
 							if($thread["pinned"])
 								$activeThreadAnnouncement = true;
-						} else if(!isset($_REQUEST["thread_id"]) && ($thread_id_p == -1 || $thread_id_p == $thread["id"]) && !$used_active){
-							$class .= " active";
-							$used_active = true;
-							$activeThread = $thread;
-							$activeThreadTitle = $thread["title"];
-							if($thread["pinned"])
-								$activeThreadAnnouncement = true;
-							$thread_id_p = $thread["id"];
-						} 
-
+							if($thread_id_p == -1)
+								$thread_id_p = $thread["id"];
+						}
 						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
 						}
@@ -475,12 +468,12 @@ HTML;
 						}
 
 						$sizeOfContent = strlen($first_post_content);
-						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 100) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 100), " "));
+						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 80), " "));
 						$titleLength = strlen($thread['title']);
 
 						$titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
 
-						if(strlen($first_post["content"]) > 100){
+						if(strlen($first_post["content"]) > 80){
 							$contentDisplay .= "...";
 						}
 						if(strlen($thread["title"]) > 40){
@@ -501,6 +494,7 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
+						$category_desc = htmlentities($thread["category_desc"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 						$return .= <<<HTML
 						<h4>{$titleDisplay}</h4>
 						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
@@ -722,10 +716,18 @@ HTML;
 
 		<h3> Create Thread </h3>
 
-			<form style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
+			<form id="create_thread_form" style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 
             	<div class="form-group row">
             		Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
+HTML;
+				if($this->core->getUser()->getGroup() <= 2){
+					$return .= <<<HTML
+					<span style="float:right;display:inline-block;">
+					New Category: <textarea id="new_category_text" style="resize:none;" rows="1" cols="25" type="text" size="45" name="new_category" id="new_category" ></textarea> <button type="button" title="Add new category" onclick="addNewCategory();" style="margin-right:10px;" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle fa-1x"></i> Add category </button></span>
+HTML;
+				}
+				$return .= <<<HTML
             	</div>
             	<br/>
             	<div style="margin-bottom:10px;" class="form-group row">
@@ -761,7 +763,7 @@ HTML;
 				$categories = $this->core->getQueries()->getCategories();
 				$return .= <<<HTML
 				<label for="cat">Category</label>
-			  	<select style="margin-right:10px;" id="cat" name="cat" class="form-control">
+			  	<select style="margin-right:10px;" id="cat" name="cat" class="form-control" required>
 			  	<option value="" selected>None</option>
 HTML;
 			    for($i = 0; $i < count($categories); $i++){

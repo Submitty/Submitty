@@ -110,11 +110,16 @@ class DatabaseQueries {
 
     public function loadThreads($announcements, $category_id){
     	if($category_id === -1) {
-      		$this->course_db->query("SELECT t.*, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($announcements));
+      		$this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($announcements));
     	} else {
 
-    		$this->course_db->query("SELECT t.*, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = ? and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($announcements, $category_id));
+    		$this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = ? and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($announcements, $category_id));
     	}
+        return $this->course_db->rows();
+    }
+
+    public function getCategoryIdForThread($thread_id) {
+        $this->course_db->query("SELECT category_id from thread_categories t where t.thread_id = ?", array($thread_id));
         return $this->course_db->rows();
     }
 
@@ -195,7 +200,7 @@ class DatabaseQueries {
     }
 
     public function searchThreads($searchQuery){
-    	$this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, timestamp FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.content as post_content, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(p.author_user_id) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc JOIN (SELECT thread_id as t_id, timestamp from posts where parent_id = -1) p2 ON p2.t_id = p_doc.thread_id  where p_doc.document @@ plainto_tsquery(:q)", array(':q' => $searchQuery));
+    	$this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.timestamp as timestamp_post, p.content as post_content, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(p.author_user_id) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc JOIN (SELECT thread_id as t_id, timestamp from posts where parent_id = -1) p2 ON p2.t_id = p_doc.thread_id  where p_doc.document @@ plainto_tsquery(:q)", array(':q' => $searchQuery));
     	return $this->course_db->rows();
     }
 
@@ -1835,6 +1840,13 @@ AND gc_id IN (
       $ar["first_name"] = $name;
       $ar["last_name"] = $last_name;
       return $ar;
+    }
+
+    public function addNewCategory($category) {
+        //Can't get "RETURNING category_id" syntax to work
+        $this->course_db->query("INSERT INTO categories_list (category_desc) VALUES (?) RETURNING category_id", array($category));
+        $this->course_db->query("SELECT MAX(category_id) as category_id from categories_list");
+        return $this->course_db->rows()[0];
     }
 
     public function getCategories(){
