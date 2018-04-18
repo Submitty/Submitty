@@ -42,7 +42,7 @@ function getMarkView(num, x, is_publish, checked, note, pointValue, precision, m
         <span onclick="selectMark(this);"> \
             <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
         </span> \
-        <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
+        <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 48px;"> \
     </td> \
     <td colspan="3" style="'+background+'"> \
         <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;">'+note+'</textarea> \
@@ -165,9 +165,6 @@ function haveMarksChanged(num, data) {
 
 function updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
     var parent = $('#extra-'+num);
-    if (parent[0].style.display == "none") // Don't unnecessarily update if invisible
-        return;
-        
     ajaxGetMarkData(gradeable_id, user_id, question_id, function(data) {
         data = JSON.parse(data);
         
@@ -450,29 +447,28 @@ function openClose(row_id, num_questions = -1) {
             current_summary.children("td:first-of-type")[0].style.backgroundColor = "initial";
         }
 
-        if (x == row_num) {
-            if (current[0].style.display === 'none') {
-                current[0].style.display = '';
-                current[0].style.backgroundColor = "#e6e6e6";
-                title[0].style.backgroundColor = "#e6e6e6";
-                title_cancel[0].style.backgroundColor = "#e6e6e6";
-                current_summary[0].style.display = 'none';
-                ta_note[0].style.display = '';
-                student_note[0].style.display = '';
-                updateProgressPoints(x);
-                progress_points[0].style.display = '';
-                cancel_mark[0].style.display = '';
-                save_mark[0].style.display = '';
-                title.attr('colspan', 3);
-                title_cancel[0].style.display = '';
-                title_cancel.attr('colspan', 1);
+        if (x == row_num && current[0].style.display === 'none') {
+            current[0].style.display = '';
+            current[0].style.backgroundColor = "#e6e6e6";
+            title[0].style.backgroundColor = "#e6e6e6";
+            title_cancel[0].style.backgroundColor = "#e6e6e6";
+            current_summary[0].style.display = 'none';
+            ta_note[0].style.display = '';
+            student_note[0].style.display = '';
+            updateProgressPoints(x);
+            progress_points[0].style.display = '';
+            cancel_mark[0].style.display = '';
+            save_mark[0].style.display = '';
+            title.attr('colspan', 3);
+            title_cancel[0].style.display = '';
+            title_cancel.attr('colspan', 1);
 
-                // if the component has a page saved, open the PDF to that page
-                // opening directories/frames based off of code in openDiv and openFrame functions
+            // if the component has a page saved, open the PDF to that page
+            // opening directories/frames based off of code in openDiv and openFrame functions
 
-                // make sure submissions folder has files
-                var submissions = $('#div_viewer_1');
-                if (page > 0 && submissions.children().length > 0) {
+            // make sure submissions folder has files
+            var submissions = $('#div_viewer_1');
+            if (page > 0 && submissions.children().length > 0) {
 
                     // find the first file that is a PDF
                     var divs = $('#div_viewer_1 > div > div');
@@ -518,21 +514,6 @@ function openClose(row_id, num_questions = -1) {
                         }
                     }
                 }
-            } else {
-                current[0].style.display = 'none';
-                current_summary[0].style.display = '';
-                current[0].style.backgroundColor = "initial";
-                title[0].style.backgroundColor = "initial";
-                title_cancel[0].style.backgroundColor = "initial";
-                ta_note[0].style.display = 'none';
-                student_note[0].style.display = 'none';
-                progress_points[0].style.display = 'none';
-                cancel_mark[0].style.display = 'none';
-                save_mark[0].style.display = 'none';
-                title.attr('colspan', 4);
-                title_cancel[0].style.display = 'none';
-                title_cancel.attr('colspan', 0);
-            }
         } else {
             current[0].style.display = 'none';
             current_summary[0].style.display = '';
