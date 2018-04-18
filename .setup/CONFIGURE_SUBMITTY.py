@@ -284,6 +284,7 @@ if not args.worker:
     config['institution_name'] = INSTITUTION_NAME
     config['username_change_text'] = USERNAME_TEXT
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
+    config['debugging_enabled'] = DEBUGGING_ENABLED
 
     config['site_log_path'] = TAGRADING_LOG_PATH
 
