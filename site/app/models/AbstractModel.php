@@ -14,7 +14,7 @@ use app\libraries\Utils;
  */
 abstract class AbstractModel {
 
-    protected $properties = array();
+    static protected $properties = array();
 
     /** @var Core */
     protected $core;
@@ -24,7 +24,9 @@ abstract class AbstractModel {
 
     public function __construct(Core $core) {
         $this->core = $core;
-        $this->setupProperties();
+        if (!isset(static::$properties[get_class($this)])) {
+            $this->setupProperties();
+        }
     }
 
     /**
@@ -63,10 +65,9 @@ abstract class AbstractModel {
         else if (is_array($object)) {
             $return = array();
             foreach ($object as $key => $value) {
-                if (is_numeric($key) || (!$check_property || isset($this->properties[$key]))) {
+                if (is_numeric($key) || (!$check_property || isset(static::$properties[get_class($this)][$key]))) {
                     $return[$key] = $this->parseObject($value, false);
                 }
-
             }
         }
         else {
@@ -77,14 +78,15 @@ abstract class AbstractModel {
 
     protected function setupProperties() {
         $class = new \ReflectionClass($this);
+        $class_name = get_class($this);
         foreach ($class->getProperties() as $property) {
             $matches = array();
             preg_match("/@property/s", $property->getDocComment(), $matches);
             if (count($matches) > 0) {
-                $this->properties[$property->getName()] = null;
+                static::$properties[$class_name][$property->getName()] = null;
                 preg_match("/@var (.*?)[ \n\*]/s", $property->getDocComment(), $matches);
                 if (count($matches) > 0) {
-                    $this->properties[$property->getName()] = $matches[1];
+                    static::$properties[$class_name][$property->getName()] = $matches[1];
                 }
             }
         }
@@ -105,11 +107,12 @@ abstract class AbstractModel {
      * @throws \BadMethodCallException
      */
     public function __call($name, $arguments) {
+        $class_name = get_class($this);
         if (Utils::startsWith($name, "set")) {
             $property_name = $this->convertName($name);
             $value = $arguments[0];
-            if (isset($this->properties[$property_name])) {
-                $type = $this->properties[$property_name];
+            if (isset(static::$properties[$class_name][$property_name])) {
+                $type = static::$properties[$class_name][$property_name];
                 switch ($type) {
                     case 'int':
                     case 'integer':

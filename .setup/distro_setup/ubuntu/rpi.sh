@@ -23,6 +23,7 @@ echo "Getting pylint..."
 # install pylint for python3 using pip
 apt install -qqy python3-pip
 pip3 install pylint
+pip3 install pillow
 
 # unit tests for python
 echo "Getting unittest... "
@@ -81,11 +82,24 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 # TODO: add download & install for soot-develop.jar & rt.jar
 # target:  /usr/local/submity/tools/soot/
 
+# install haskell
+apt-get install -qqy haskell-platform
 
 ##################################################
 # Used by Network Programming class
 apt-get install -qqy libssl-dev
 
+# don't install these...
+#apt-get install -qqy libavahi-compat-libdnssd-dev avahi-utils avahi-daemon
+
+# instead:
+mkdir tmp_avahi_install_dir
+cd tmp_avahi_install_dir
+apt-get download libavahi-compat-libdnssd-dev
+mv libavahi*deb libavahi-compat-libdnssd-dev.deb
+dpkg --force-all -i libavahi-compat-libdnssd-dev.deb
+cd ..
+rm -r tmp_avahi_install_dir
 
 ##################################################
 # Used by Advanced Computer Graphics course
@@ -123,6 +137,9 @@ pip3 install -U pip numpy
 pip3 install matplotlib
 pip3 install opencv-python
 
+
+##################################################
+# Fixup the permissions
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*

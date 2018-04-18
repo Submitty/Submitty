@@ -146,8 +146,11 @@ WHERE semester=? AND course=? AND user_id=?", $params);
         }
     }
 
-    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
+    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null, $extra_order_by = []) {
         $return = array();
+        if (!is_array($extra_order_by)) {
+            $extra_order_by = [];
+        }
         $g_ids_query = "";
         $users_query = "";
         $g_type_query = "";
@@ -164,7 +167,7 @@ WHERE semester=? AND course=? AND user_id=?", $params);
                 return $return;
             }
         }
-        if ($user_ids !== null) {
+        if ($user_ids !== null && $user_ids !== true) {
             if (!is_array($user_ids)) {
                 $user_ids = array($user_ids);
             }
@@ -281,7 +284,10 @@ SELECT";
   egd.autograding_hidden_non_extra_credit,
   egd.autograding_hidden_extra_credit,
   egd.submission_time,
-  egv.highest_version
+  egv.highest_version,
+  COALESCE(lde.late_day_exceptions, 0) AS late_day_exceptions,
+  GREATEST(0, CEIL((EXTRACT(EPOCH FROM(COALESCE(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)) - (300*60))/86400)::integer) AS days_late,
+  get_allowed_late_days(u.user_id, eg.eg_submission_due_date) AS student_allowed_late_days
 FROM users AS u
 NATURAL JOIN gradeable AS g";
         }
@@ -290,10 +296,7 @@ NATURAL JOIN gradeable AS g";
 FROM gradeable AS g";
         }
         $query .= "
-LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable
-) AS eg ON eg.g_id=g.g_id
+LEFT JOIN electronic_gradeable AS eg ON eg.g_id=g.g_id
 LEFT JOIN (
   SELECT
     g_id,
@@ -414,14 +417,15 @@ LEFT JOIN (
       t.user_id
     FROM gradeable_teams AS gt, teams AS t
     WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egv.team_id AND t.state = 1)
-)";
+)
+LEFT JOIN late_day_exceptions AS lde ON g.g_id = lde.g_id AND u.user_id = lde.user_id";
         }
 
         $where = array();
         if ($g_ids !== null) {
             $where[] = "g.g_id IN ({$g_ids_query})";
         }
-        if ($user_ids !== null) {
+        if ($user_ids !== null && $user_ids !== true) {
             $where[] = "u.user_id IN ({$users_query})";
         }
         if ($g_type !== null) {
@@ -431,9 +435,15 @@ LEFT JOIN (
             $query .= "
 WHERE ".implode(" AND ", $where);
         }
+        $order_by = [];
         if ($user_ids !== null) {
+            $order_by[] = "u.{$section_key}";
+            $order_by[] = $sort_key;
+        }
+        $order_by = array_merge($order_by, $extra_order_by);
+        if (count($order_by) > 0) {
             $query .= "
-ORDER BY u.{$section_key}, {$sort_key}";
+ORDER BY ".implode(", ", $order_by);
         }
 
         return $this->course_db->queryIterator($query, $params, function ($row) {
@@ -729,7 +739,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         FULL OUTER JOIN late_days AS l
           ON u.user_id=l.user_id
         WHERE allowed_late_days IS NOT NULL
-          AND allowed_late_days>0
         ORDER BY
           user_email ASC, since_timestamp DESC;");
 

@@ -64,6 +64,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "wc",                      "/usr/bin/wc" },
     { "head",                    "/usr/bin/head" },
     { "tail",                    "/usr/bin/tail" },
+    { "uniq",                    "/usr/bin/uniq" },
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
@@ -100,6 +101,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "swipl",                   "/usr/bin/swipl" },
     { "plt-r5rs",                "/usr/bin/plt-r5rs" },
 
+    // for Program Analysis course
+    { "ghc",                     "/usr/bin/ghc" },
+
     // for Cmake & Make
     { "cmake",                   "/usr/bin/cmake" },
     { "make",                    "/usr/bin/make" },
@@ -110,6 +114,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
     { "mpirun",                  "/usr/local/mpich-3.2/bin/mpirun"},
     { "mpicc",                   "/usr/local/mpich-3.2/bin/mpicc"},
+    { "expect",                  "/usr/bin/expect" },
 
     // for LLVM / Compiler class
     { "lex",                     "/usr/bin/lex" },
@@ -871,6 +876,10 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // (without this, default desired threads may be based on the system specs)
   setenv("OMP_NUM_THREADS","4",1);
 
+
+  // Haskell compiler needs a home environment variable (but it can be anything)
+  setenv("HOME","/tmp",1);
+
   
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {
@@ -898,7 +907,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     close(stderrfd);
     dup2(new_stderrfd, stderrfd);
   }
-
+  
 
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {

@@ -1,12 +1,12 @@
 [Unit]
-Description=Submitty Grading Scheduler
+Description=Submitty Autograding Worker
 Documentation=http://submitty.org
 
 [Service]
 User=hwcron
 Restart=always
 Type=simple
-ExecStart=/usr/local/submitty/bin/submitty_grading_scheduler.py
+ExecStart=/usr/local/submitty/bin/submitty_autograding_worker.py
 TimeoutSec=1min
 RuntimeMaxSec=infinity
 
