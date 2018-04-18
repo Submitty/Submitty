@@ -45,6 +45,8 @@ use app\libraries\Core;
  * @method void setGradeTime(\DateTime $date_time)
  * @method bool getHasGrade()
  * @method int getPage()
+ * @method bool getHasMarks()
+ * @method GradeableComponentMark[] getMarks()
  */
 class GradeableComponent extends AbstractModel {
     /** @property @var int Unique identifier for the component */
