@@ -161,7 +161,8 @@ HTML;
 
 			$( document ).ready(function() {
 			    enableTabsInTextArea('post_content');
-			    saveScrollLocationOnRefresh('thread_list');
+				saveScrollLocationOnRefresh('thread_list');
+				saveScrollLocationOnRefresh('posts_list');
 			});
 
 		</script>
@@ -202,6 +203,7 @@ HTML;
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;border-radius:3px;margin-left:20px;margin-top:10px; height:40px; margin-bottom:10px;margin-right:20px;" id="forum_bar">
+
 
 			<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 HTML;
@@ -265,7 +267,7 @@ HTML;
 
 			$return .= <<<HTML
 				<div id="forum_wrapper">
-					<div class="thread_list">
+					<div id="thread_list" class="thread_list">
 HTML;
 				$activeThreadAnnouncement = false;
 				$activeThreadTitle = "";
@@ -279,8 +281,9 @@ HTML;
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$title_html = '';
 			$return .= <<< HTML
-			</div>
-					<div style="display:inline-block;width:70%; float: right;" class="posts_list">
+
+					</div>
+					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">
 HTML;
 
             $title_html .= <<< HTML
@@ -531,8 +534,8 @@ HTML;
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
 			$classes .= " important";
 		}
-
-		$offset = ($reply_level-1)*30;
+		$offset = min(($reply_level - 1) * 30, 180);
+		
 							$return = <<<HTML
 								<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
 HTML;
@@ -605,6 +608,9 @@ HTML;
 								<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
 HTML;
 							} else {
+								$return .= <<<HTML
+								<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, .posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+HTML;
 								$first = false;
 							}
 
