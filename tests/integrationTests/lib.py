@@ -1,4 +1,3 @@
-from __future__ import print_function
 from collections import defaultdict
 import datetime
 import inspect
@@ -8,9 +7,6 @@ import subprocess
 import traceback
 import sys
 from pprint import pprint
-
-if sys.version_info[0] == 3:
-    xrange = range
 
 # global variable available to be used by the test suite modules
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
@@ -107,7 +103,7 @@ def run_tests(names):
             else:
                 testcases = val.testcases
             total = len(testcases)
-            for index, f in zip(xrange(1, total + 1), testcases):
+            for index, f in zip(range(1, total + 1), testcases):
                 try:
                     f()
                 except Exception as e:
@@ -264,7 +260,8 @@ class TestcaseWrapper:
             process = subprocess.Popen(["diff", arg, filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         else :
             raise RuntimeError("ARGUMENT "+arg+" TO DIFF NOT TESTED")
-        out, err = process.communicate()
+        out, _ = process.communicate()
+        out = out.decode('utf-8')
         if process.returncode == 1:
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
                                " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
