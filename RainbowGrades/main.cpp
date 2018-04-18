@@ -1622,14 +1622,17 @@ void load_student_grades(std::vector<Student*> &students) {
 
                   std::string other_note = "";
                   //                  nlohmann::json obj = (*itr2).value("text",nlohmann::json::object());
-                  nlohmann::json::iterator itr3 = itr2->find("text");
+                  nlohmann::json::iterator itr3 = itr2->find("components");
                   if (itr3 != itr2->end()) {
                     for (std::size_t i = 0; i < itr3->size(); i++) {
-                      other_note += (*itr3)[i].value("Notes","");
-                    }  
+                      std::string component_title = (*itr3)[i].value("title","");
+                      std::string component_comment = (*itr3)[i].value("comment","");
+                      if (component_title == "Notes" && component_comment != "") {
+                        other_note += " " + component_comment;
+                      }  
+                    }
                   }
-
-
+                  
       // Search through the gradeable categories as needed to find where this item belongs
       // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
       for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
