@@ -76,16 +76,43 @@ HTML;
 HTML;
             }
             else {
-                //check if instructor grades exist and change title, display hidden points when TA grades are released
+                //check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist)
                 $totalTitle = ($gradeable->hasGradeFile()) ? "Autograding Subtotal" : "Total";
                 $autoGradingPoints = $current_version->getNonHiddenTotal();
-                if($gradeable->taGradesReleased())
-                    $autoGradingPoints += $current_version->getHiddenTotal();
+                $all_autograder_points = $autoGradingPoints + $current_version->getHiddenTotal();
+                $display_hidden = "none";
+                $hidden_background;
+                if($gradeable->taGradesReleased()){
+                    foreach ($gradeable->getTestcases() as $testcase) {
+                        if(!$testcase->viewTestcase()) continue;
+                        if($testcase->isHidden()){
+                            $display_hidden = "block";
+                            break;
+                        }
+                    }
+                    if($display_hidden === "block"){
+                        if ($all_autograder_points >= $gradeable->getTotalAutograderNonExtraCreditPoints()) {
+                            $hidden_background = "green-background";
+                        }
+                        else if ($all_autograder_points > 0) {
+                            $hidden_background = "yellow-background";
+                        }
+                        else {
+                            $hidden_background = "red-background";
+                        }
+                    }
+                }
                 $return .= <<<HTML
 <div class="box" style="display: {$display_total};">
     <div class="box-title">
         <span class="badge {$background}">{$autoGradingPoints} / {$gradeable->getNormalPoints()}</span>
         <h4>{$totalTitle}</h4>
+    </div>
+</div>
+<div class="box" style="display: {$display_hidden}">
+    <div class="box-title">
+        <span class="badge {$hidden_background}">{$all_autograder_points} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</span>
+        <h4>{$totalTitle} <i>(With Hidden Points)</i></h4>
     </div>
 </div>
 HTML;
@@ -520,6 +547,7 @@ HTML;
             </div>
 HTML;
         foreach ($gradeable->getComponents() as $component) {
+            if(is_array($component)) continue;              
             $score = $component->getGradedTAPoints();
             //check if extra credit
             if(trim(strtolower($component->getTitle())) === "extra credit") {
@@ -568,10 +596,6 @@ HTML;
                     <h4>Total</h4>
                 </div>
             </div>
-        </div>
-        <h3>Grade File</h3>
-        <div class="sub">
-            <pre class="box">{$gradeable->getGradeFile()}</pre>
         </div>
 HTML;
     return $return;
