@@ -635,10 +635,10 @@ HTML;
 			<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;">
 				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">
 					<tr>			
-				        <td width="15%" id="user_down">User &darr;</td>
-				        <td width="15%" id="total_posts_down">Total Posts (not deleted)</td>
-				        <td width="15%" id="total_threads_down">Total Threads</td>
-				        <td width="15%" id="total_deleted_down">Total Deleted Posts</td>
+				        <td style = "cursor:pointer;" width="15%" id="user_down">User &darr;</td>
+				        <td style = "cursor:pointer;" width="15%" id="total_posts_down">Total Posts (not deleted)</td>
+				        <td style = "cursor:pointer;" width="15%" id="total_threads_down">Total Threads</td>
+				        <td style = "cursor:pointer;" width="15%" id="total_deleted_down">Total Deleted Posts</td>
 				        <td width="40%">Show Posts</td>
 					</tr>
 HTML;
@@ -703,7 +703,7 @@ HTML;
 							post_string = post_string.replace("\"","&quot;");
 							post_string = post_string.replace("\'","&#x27;");
 							post_string = post_string.replace("\/","&#x2F;");
-							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td>'+timestamps[i]+'</td><td colspan = "4" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
+							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td colspan = "3" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
 							
 						}
 						$(this).html("Collapse");
@@ -714,7 +714,7 @@ HTML;
 			
 								var id = $(this).data('thread_id');
 								var url = buildUrl({'component' : 'forum', 'page' : 'view_thread', 'thread_id' : id});
-								window.location.replace(url);
+								window.open(url);
 							}
 						
 					});
