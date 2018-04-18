@@ -30,9 +30,7 @@ JUNIT_VER=4.12
 HAMCREST_VER=1.3
 
 wget https://github.com/junit-team/junit4/releases/download/r${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
-mv junit-${JUNIT_VER}.jar junit-${JUNIT_VER}.jar
 wget http://central.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
-mv hamcrest-core-${HAMCREST_VER}.jar hamcrest-core-${HAMCREST_VER}.jar
 
 # EMMA is a tool for computing code coverage of Java programs
 echo "Getting emma..."
