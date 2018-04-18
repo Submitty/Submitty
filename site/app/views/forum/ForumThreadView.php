@@ -67,34 +67,33 @@ class ForumThreadView extends AbstractView {
 
 HTML;
 		$threadArray = array();
-		$fromTitleToId = array();
+		$fromIdtoTitle = array();
 		foreach($threads as $thread){
-			if(!array_key_exists($thread["thread_title"], $threadArray)) {
-				$threadArray[$thread["thread_title"]] = array();
-				$fromTitleToId[$thread["thread_title"]] = $thread["thread_id"];
+			if(!array_key_exists($thread["thread_id"], $threadArray)) {
+				$threadArray[$thread["thread_id"]] = array();
+				$fromIdtoTitle[$thread["thread_id"]] = $thread["thread_title"];
 			}
-			$threadArray[$thread["thread_title"]][] = $thread;
+			$threadArray[$thread["thread_id"]][] = $thread;
 		}
 		$count = 1;
-		foreach($threadArray as $thread_title => $data){
+		foreach($threadArray as $thread_id => $data){
+			$thread_title = htmlentities($fromIdtoTitle[$thread_id], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 			$return .= <<<HTML
-			<tr class="info persist-header hoverable" title="Go to thread" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $fromTitleToId[$thread_title]))}';">            
+			<tr class="info persist-header hoverable" title="Go to thread" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}';">            
 				<td colspan="10" style="text-align: center"><h4>{$thread_title}</h4></td>
 			</tr>
 HTML;
-
-			foreach($data as $thread) {
-				$thread_title = htmlentities($thread['thread_title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$author = htmlentities($thread['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($thread["p_author"]);
+			foreach($data as $post) {
+				$author = htmlentities($post['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["p_author"]);
 				$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
-				$post_content = htmlentities($thread["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$posted_on = date_format(date_create($thread['timestamp_post']), "n/j g:i A");
+				$post_content = htmlentities($post["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$posted_on = date_format(date_create($post['timestamp_post']), "n/j g:i A");
 				$return .= <<<HTML
 
-				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $fromTitleToId[$thread['thread_title']]))}#{$thread['p_id']}';" id="search-row-{$author}" class="hoverable">
+				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}#{$post['p_id']}';" id="search-row-{$author}" class="hoverable">
 	                <td align="left"><pre style="font-family: inherit;"><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre></td>
 	                <td>{$visible_username}</td>
 	                <td>{$posted_on}</td>      
