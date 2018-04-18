@@ -49,7 +49,6 @@ else {
 $base_url = $a['site_details']['base_url'];
 $ta_base_url = $a['site_details']['ta_base_url'];
 define("__CGI_URL__", $a['site_details']['cgi_url']);
-define("__SUBMISSION_GRACE_PERIOD_SECONDS__", 5 * 60);
 define("__OUTPUT_MAX_LENGTH__", 100000);
 define("__DATABASE_HOST__", $a['database_details']['database_host']);
 define("__DATABASE_USER__", $a['database_details']['database_user']);
