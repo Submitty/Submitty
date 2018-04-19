@@ -295,7 +295,18 @@ class DatabaseQueries {
         return $return;
     }
 
-    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
+    /** @noinspection PhpDocSignatureInspection */
+    /**
+     * @param null   $g_ids
+     * @param null   $user_ids
+     * @param string $section_key
+     * @param string $sort_key
+     * @param null   $g_type
+     * @parma array  $extra_order_by
+     *
+     * @return DatabaseRowIterator
+     */
+    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null, $extra_order_by = []) {
         throw new NotImplementedException();
     }
 
@@ -905,7 +916,7 @@ ORDER BY user_id ASC");
     /**
      * This inserts an row in the electronic_gradeable_data table for a given gradeable/user/version combination.
      * The values for the row are set to defaults (0 for numerics and NOW() for the timestamp) with the actual values
-     * to be later filled in by the submitty_grading_scheduler.py and insert_database_version_data.py scripts.
+     * to be later filled in by the submitty_autograding_shipper.py and insert_database_version_data.py scripts.
      * We do it this way as we can properly deal with the
      * electronic_gradeable_version table here as the "active_version" is a concept strictly within the PHP application
      * code and the grading scripts have no concept of it. This will either update or insert the row in
@@ -1625,6 +1636,18 @@ ORDER BY gt.{$section_key}", $params);
             (user_id, since_timestamp, allowed_late_days)
             VALUES(?,?,?)", array($user_id, $timestamp, $days));
         }
+    }
+
+    /**
+     * Delete a given user's allowed late days entry at given effective time
+     * @param string $user_id
+     * @param string $timestamp
+     */
+    public function deleteLateDays($user_id, $timestamp){
+        $this->course_db->query("
+          DELETE FROM late_days
+          WHERE user_id=?
+          AND since_timestamp=?", array($user_id, $timestamp));
     }
 
     /**

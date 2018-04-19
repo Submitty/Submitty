@@ -4,8 +4,10 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
+use app\models\Gradeable;
 use app\models\HWReport;
 use app\models\GradeSummary;
 use app\models\LateDaysCalculation;
@@ -18,9 +20,6 @@ use app\report\GradeSummaryView;
 class ReportController extends AbstractController {
     public function run() {
         switch($_REQUEST['action']) {
-            case 'reportpage':
-                $this->showReportPage();
-                break;
             case 'csv':
                 $this->generateCSVReport();
                 break;
@@ -30,8 +29,9 @@ class ReportController extends AbstractController {
             case 'hwreport':
                 $this->generateHWReports();
                 break;
+            case 'reportpage':
             default:
-                $this->core->getOutput()->showError("Invalid action request for controller ".get_class($this));
+                $this->showReportPage();
                 break;
         }
     }
@@ -115,10 +115,138 @@ class ReportController extends AbstractController {
     }
     
     public function generateGradeSummaries() {
-        $grade_summary = new GradeSummary($this->core);
-        $grade_summary->generateAllSummaries();
-        $this->core->addSuccessMessage("Successfully Generated GradeSummaries");
+        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
+        $current_user = null;
+        $total_late_used = 0;
+        $user = [];
+        $order_by = [
+            'g.g_gradeable_type',
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+        ];
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, true, 'registration_section', 'u.user_id', null, $order_by) as $gradeable) {
+            /** @var \app\models\Gradeable $gradeable */
+            if ($current_user !== $gradeable->getUser()->getId()) {
+                if ($current_user !== null) {
+                    file_put_contents(FileUtils::joinPaths($base_path, $current_user.'_summary.json'), FileUtils::encodeJson($user));
+                }
+                $current_user = $gradeable->getUser()->getId();
+                $user = [];
+                $user['user_id'] = $gradeable->getUser()->getId();
+                $user['legal_first_name'] = $gradeable->getUser()->getFirstName();
+                $user['preferred_first_name'] = $gradeable->getUser()->getPreferredFirstName();
+                $user['last_name'] = $gradeable->getUser()->getLastName();
+                $user['registration_section'] = $gradeable->getUser()->getRegistrationSection();
+                $user['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
+                $user['last_update'] = date("l, F j, Y");
+                $total_late_used = 0;
+            }
+            $bucket = ucwords($gradeable->getBucket());
+            if (!isset($user[$bucket])) {
+                $user[$bucket] = [];
+            }
+
+            $autograding_score = $gradeable->getGradedAutoGraderPoints();
+            $ta_grading_score = $gradeable->getGradedTAPoints();
+
+            $entry = [
+                'id' => $gradeable->getId(),
+                'name' => $gradeable->getName(),
+                'grade_released_date' => $gradeable->getGradeReleasedDate()->format('Y-m-d H:i:s O'),
+            ];
+
+            if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
+               $entry['score'] = max(0,floatval($autograding_score) + floatval($ta_grading_score));
+            }
+            else {
+                $entry['score'] = 0;
+                if ($gradeable->validateVersions(-1)) {
+                    $entry['note'] = 'This has not been graded yet.';
+                }
+                elseif ($gradeable->getActiveVersion() !== 0) {
+                    $entry['note'] = 'Score is set to 0 because there are version conflicts.';
+                }
+            }
+
+            if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+                $this->addLateDays($gradeable, $entry, $total_late_used);
+            }
+
+            $entry['components'] = [];
+            foreach ($gradeable->getComponents() as $component) {
+                $inner = ['title' => $component->getTitle()];
+                if (!$component->getIsText()) {
+                    $inner['score'] = $component->getScore();
+                }
+                $inner['comment'] = $component->getComment();
+                if ($component->getHasMarks()) {
+                    $marks = [];
+                    foreach ($component->getMarks() as $mark) {
+                        $marks[] = [
+                            'points' => $mark->getPoints(),
+                            'note' => $mark->getNote()
+                        ];
+                    }
+                    $inner['marks'] = $marks;
+                }
+                $entry['components'][] = $inner;
+            }
+
+            $user[$bucket][] = $entry;
+        }
+
+        file_put_contents(FileUtils::joinPaths($base_path, $current_user.'_summary.json'), FileUtils::encodeJson($user));
+        $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
+    }
+
+    private function addLateDays(Gradeable $gradeable, &$entry, &$total_late_used) {
+        $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
+        $status = 'Good';
+        $late_flag = false;
+
+        if ($late_days_used > 0) {
+            $status = "Late";
+            $late_flag = true;
+        }
+        //If late days used - extensions applied > allowed per assignment then status is "Bad..."
+        if ($late_days_used > $gradeable->getAllowedLateDays()) {
+            $status = "Bad";
+            $late_flag = false;
+        }
+        // If late days used - extensions applied > allowed per term then status is "Bad..."
+        // Do a max(0, ...) to protect against the case where the student's late days goes down
+        // during the semester and they've already used late days
+        if ($late_days_used > max(0, $gradeable->getStudentAllowedLateDays() - $total_late_used)) {
+            $status = "Bad";
+            $late_flag = false;
+        }
+
+        //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
+        //be less than 0 in cases of excess extensions. Decrement remaining late days.
+        if ($late_flag) {
+            $curr_late_charged = $late_days_used;
+            $curr_late_charged = ($curr_late_charged < 0) ? 0 : $curr_late_charged;
+            $total_late_used += $curr_late_charged;
+        }
+
+        if($status === 'Bad') {
+            $entry["score"] = 0;
+        }
+        $entry['status'] = $status;
+
+        if ($late_flag && $late_days_used > 0) {
+
+            // TODO:  DEPRECATE THIS FIELD
+            $entry['days_late'] = $late_days_used;
+
+            // REPLACED BY:
+            $entry['days_after_deadline'] = $gradeable->getLateDays();
+            $entry['extensions'] = $gradeable->getLateDayExceptions();
+            $entry['days_charged'] = $late_days_used;
+        }
+        else {
+            $entry['days_late'] = 0;
+        }
     }
     
     public function generateHWReports() {
