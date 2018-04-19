@@ -701,12 +701,7 @@ HTML;
 						
 						for(var i=0;i<posts.length;i++){
 							var post_string = posts[i];
-							post_string = post_string.replace("&","&amp");
-							post_string = post_string.replace("<","&lt;");
-							post_string = post_string.replace(">","&gt;");
-							post_string = post_string.replace("\"","&quot;");
-							post_string = post_string.replace("\'","&#x27;");
-							post_string = post_string.replace("\/","&#x2F;");
+							post_string = escapeSpecialChars(post_string);
 							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td colspan = "3" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
 							
 						}
