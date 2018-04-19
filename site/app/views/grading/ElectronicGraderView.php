@@ -1417,7 +1417,8 @@ HTML;
             }
 
             $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px;" colspan="4">
+
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         {$message}
 HTML;
@@ -1516,7 +1517,7 @@ HTML;
                     <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
                         <td colspan="1" style="text-align: center; white-space: nowrap;"> 
 
-                        <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> </span>
+                        <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
                         <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px;">
                         </td>
                         <td colspan="3" style="white-space: nowrap;">
@@ -1595,10 +1596,13 @@ HTML;
 
 HTML;
         }
+
+        $this->core->getOutput()->addInternalJs('ta-grading.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
+
         $return .= <<<HTML
 </div>
-<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading.js"></script>
-<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}/js/ta-grading-mark.js"></script>
+
 <script type="text/javascript">
 window.onbeforeunload = function() {
     saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);

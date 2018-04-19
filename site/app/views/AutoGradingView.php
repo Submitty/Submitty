@@ -427,9 +427,19 @@ HTML;
     public function showTAResults(Gradeable $gradeable){
         if(!$gradeable->beenTAgraded()){
             $return = <<<HTML
+            <br>
             <h3>This assignment has not been graded yet</h3>
 HTML;
             return $return;
+        }
+        foreach ($gradeable->getComponents() as $component) {
+            if(!$component->getGrader()){
+                $return = <<<HTML
+                <br>
+                <h3>Grading not complete, please contact an instructor/grader</h3>
+HTML;
+                return $return;
+            }
         }
         $graders = array();
         $count = 0;
