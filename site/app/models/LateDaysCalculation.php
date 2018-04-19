@@ -15,9 +15,6 @@ class LateDaysCalculation extends AbstractModel {
     /** @var array */
     protected $students;
 
-    /* Holds grace period in seconds (300 seconds = 5 minutes)*/
-    protected $SUBMISSION_GRACE_PERIOD = 300;
-
     function __construct(Core $core, $user_id = null) {
         parent::__construct($core);
         $this->students = $this->parseStudents($user_id);
