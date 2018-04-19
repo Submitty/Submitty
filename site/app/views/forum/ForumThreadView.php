@@ -632,6 +632,11 @@ HTML;
 
 	public function statPage($users) {
 
+		if(!$this->forumAccess() || $this->core->getUser()->getGroup() > 2){
+			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+			return;
+		}
+
 		$return = <<<HTML
 		<div style="margin-left:20px;margin-top:10px; height:50px;" id="forum_bar">
 			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>

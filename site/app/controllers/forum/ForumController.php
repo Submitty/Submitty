@@ -256,8 +256,8 @@ class ForumController extends AbstractController {
             if(!isset($users[$user])){
                 $users[$user] = array();
                 $u = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["first_name"] = $u -> getFirstName();
-                $users[$user]["last_name"] = $u -> getLastName();
+                $users[$user]["first_name"] = htmlspecialchars($u -> getFirstName());
+                $users[$user]["last_name"] = htmlspecialchars($u -> getLastName());
                 $users[$user]["posts"]=array();
                 $users[$user]["id"]=array();
                 $users[$user]["timestamps"]=array();
