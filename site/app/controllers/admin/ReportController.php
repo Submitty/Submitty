@@ -167,19 +167,30 @@ class ReportController extends AbstractController {
                 }
             }
 
-            switch ($gradeable->getType()) {
-                case GradeableType::ELECTRONIC_FILE:
-                    $this->addLateDays($gradeable, $entry, $total_late_used);
-                    $this->addText($gradeable, $entry);
-                    break;
-                case GradeableType::NUMERIC_TEXT:
-                    $this->addText($gradeable, $entry);
-                    $this->addProblemScores($gradeable, $entry);
-                    break;
-                case GradeableType::CHECKPOINTS:
-                    $this->addProblemScores($gradeable, $entry);
-                    break;
+            if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+                $this->addLateDays($gradeable, $entry, $total_late_used);
             }
+
+            $entry['components'] = [];
+            foreach ($gradeable->getComponents() as $component) {
+                $inner = ['title' => $component->getTitle()];
+                if (!$component->getIsText()) {
+                    $inner['score'] = $component->getScore();
+                }
+                $inner['comment'] = $component->getComment();
+                if ($component->getHasMarks()) {
+                    $marks = [];
+                    foreach ($component->getMarks() as $mark) {
+                        $marks[] = [
+                            'points' => $mark->getPoints(),
+                            'note' => $mark->getNote()
+                        ];
+                    }
+                    $inner['marks'] = $marks;
+                }
+                $entry['components'][] = $inner;
+            }
+
             $user[$bucket][] = $entry;
         }
 
@@ -235,25 +246,6 @@ class ReportController extends AbstractController {
         }
         else {
             $entry['days_late'] = 0;
-        }
-    }
-
-    private function addProblemScores(Gradeable $gradeable, &$entry) {
-        $component_scores = [];
-        foreach($gradeable->getComponents() as $component) {
-            $component_scores[] = [$component->getTitle() => $component->getScore()];
-        }
-        $entry["component_scores"] = $component_scores;
-    }
-
-    private function addText(Gradeable $gradeable, &$entry) {
-        $text_items = [];
-        foreach($gradeable->getComponents() as $component) {
-            $text_items[] = [$component->getTitle() => $component->getComment()];
-        }
-
-        if(count($text_items) > 0){
-            $entry["text"] = $text_items;
         }
     }
     
