@@ -475,11 +475,11 @@ HTML;
 
             $return .= <<<HTML
     <script type="text/javascript">
-        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id) {
+        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false) {
             // submit the selected pdf
             path = decodeURIComponent(path);
             if (is_pdf) {
-                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count);
+                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count, merge_previous=merge_previous);
                 moveNextInput(count);
             }
             
@@ -887,23 +887,33 @@ HTML;
 HTML;
                 $results = $gradeable->getResults();
                 if($gradeable->hasResults()) {
-
                     $return .= <<<HTML
 submission timestamp: {$current_version->getSubmissionTime()}<br />
 days late: {$current_version->getDaysLate()} (before extensions)<br />
 grading time: {$results['grade_time']} seconds<br />
 HTML;
                     if($results['num_autogrades'] > 1) {
-                      $regrades = $results['num_autogrades']-1;
-                      $return .= <<<HTML
+                        $regrades = $results['num_autogrades']-1;
+                        $return .= <<<HTML
 <br />
 number of re-autogrades: {$regrades}<br />
 last re-autograde finished: {$results['grading_finished']}<br />
 HTML;
                     }
                     else {
-                      $return .= <<<HTML
+                        $return .= <<<HTML
 queue wait time: {$results['wait_time']} seconds<br />
+HTML;
+                    }
+                    if (isset($results['revision'])) {
+                        if (empty($results['revision'])) {
+                            $revision = "None";
+                        }
+                        else {
+                            $revision =  substr($results['revision'], 0, 7);
+                        }
+                        $return .= <<<HTML
+git commit hash: {$revision}<br />
 HTML;
                     }
                 }
@@ -1020,7 +1030,10 @@ HTML;
 HTML;
             if ($gradeable->hasGradeFile()) {
                 $return .= <<<HTML
-    <h3 class="label">TA grade</h3>
+    <h3 class="label">TA / Instructor grade</h3>
+HTML;
+                $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults', $gradeable);
+                $return .= <<<HTML
     <pre>{$gradeable->getGradeFile()}</pre>
 HTML;
             } else {

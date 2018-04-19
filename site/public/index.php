@@ -107,12 +107,15 @@ if($core->getConfig()->isCourseLoaded()){
 }
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
+
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadDatabases();
+
+$core->getOutput()->setInternalResources();
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
@@ -189,6 +192,9 @@ if ($core->getUser() !== null) {
         $action = "login";
     }
     if ($log && $action !== "") {
+        if ($core->getConfig()->isCourseLoaded()) {
+            $action = $core->getConfig()->getSemester().':'.$core->getConfig()->getCourse().':'.$action;
+        }
         Logger::logAccess($core->getUser()->getId(), $action);
     }
 }

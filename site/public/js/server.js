@@ -115,7 +115,7 @@ function newClassListForm() {
     $('[name="upload"]', form).val(null);
 }
 
-function adminTeamForm(new_team, who_id, section, members, max_members) {
+function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, members, max_members) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
@@ -128,6 +128,12 @@ function adminTeamForm(new_team, who_id, section, members, max_members) {
     title_div.empty();
     var members_div = $("#admin-team-members");
     members_div.empty();
+    var team_history_title_div = $("#admin-team-history-title");
+    team_history_title_div.empty();
+    var team_history_div_left = $("#admin-team-history-left");
+    team_history_div_left.empty();
+    var team_history_div_right = $("#admin-team-history-right");
+    team_history_div_right.empty();
     members_div.append('Team Member IDs:<br />');
 
     if (new_team) {
@@ -152,6 +158,28 @@ function adminTeamForm(new_team, who_id, section, members, max_members) {
         for (var i = members.length; i < max_members; i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
         }
+        var team_history_len=user_assignment_setting_json.team_history.length;
+        team_history_title_div.append('Team History: ');
+        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_left" readonly="readonly" value="Team formed on: " /><br />');
+        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[0].time+ '" /><br />');
+        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_left" readonly="readonly" value="Last edited on: " /><br />');
+        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[team_history_len-1].time+ '" /><br />');
+        for (var i = 0; i < members.length; i++) {
+            for (var j = team_history_len-1; j >= 0; j--) {
+                if(user_assignment_setting_json.team_history[j].action == "admin_add_user"){
+                    if(user_assignment_setting_json.team_history[j].added_user == members[i]){
+                        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
+                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');        
+                    }
+                }
+                else if(user_assignment_setting_json.team_history[j].action == "admin_create"){
+                    if(user_assignment_setting_json.team_history[j].first_user == members[i]){
+                        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
+                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');  
+                    }
+                }
+            }
+        }      
     }
 
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+max_members+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
@@ -808,6 +836,10 @@ function setupNumericTextCells() {
     });
 }
 
+function getFileExtension(filename){
+    return (filename.substring(filename.lastIndexOf(".")+1)).toLowerCase();
+}
+
 function openPopUp(css, title, count, testcase_num, side) {
     var element_id = "container_" + count + "_" + testcase_num + "_" + side;
     var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
@@ -818,17 +850,42 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
-function checkNumFilesForumUpload(input){
+function checkForumFileExtensions(files){
+    var count = 0;
+    for(var i = 0; i < files.length; i++){
+        var extension = getFileExtension(files[i].name);
+        if(extension == "gif" || extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp"){
+            count++;
+        }
+    } return count == files.length;
+}
+
+function displayError(message){
+    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + message + '</div>';
+    $('#messages').append(message);
+    $('#messages').fadeIn("slow");
+}
+
+function resetForumFileUploadAfterError(displayPostId){
+    $('#file_name' + displayPostId).html('');
+    document.getElementById('file_input_label' + displayPostId).style.border = "2px solid red";
+    document.getElementById('file_input' + displayPostId).value = null;
+}
+
+function checkNumFilesForumUpload(input, post_id){
+    var displayPostId = (typeof post_id !== "undefined") ? "_" + escape(post_id) : "";
     if(input.files.length > 5){
-        $('#file_name').html('');
-        document.getElementById('file_input_label').style.border = "2px solid red";
-        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Max file upload size is 5. Please try again.</div>';
-        $('#messages').append(message);
-        document.getElementById('file_input').value = null;
+        displayError('Max file upload size is 5. Please try again.');
+        resetForumFileUploadAfterError(displayPostId);
     } else {
-        $('#file_name').html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
+        if(!checkForumFileExtensions(input.files)){
+            displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+            resetForumFileUploadAfterError(displayPostId);
+            return;
+        }
+        $('#file_name' + displayPostId).html('<p style="display:inline-block;">' + input.files.length + ' files selected.</p>');
         $('#messages').fadeOut();
-        document.getElementById('file_input_label').style.border = "";
+        document.getElementById('file_input_label' + displayPostId).style.border = "";
     }
             
 }
@@ -898,26 +955,42 @@ function enableTabsInTextArea(id){
 
 }
 
-function resetScrollPosition(){
-    if(sessionStorage.scrollTop != "undefined") {
-        sessionStorage.scrollTop = undefined;
+function resetScrollPosition(id){
+    if(sessionStorage.getItem(id+"_scrollTop") != 0) {
+        sessionStorage.setItem(id+"_scrollTop", 0);
     }
 }
 
-function saveScrollLocationOnRefresh(className){
-    var element = document.getElementsByClassName(className);
+function saveScrollLocationOnRefresh(id){
+    var element = document.getElementById(id);
     $(element).scroll(function() {
-        sessionStorage.scrollTop = $(this).scrollTop();
+        sessionStorage.setItem(id+"_scrollTop", $(element).scrollTop());
     });
     $(document).ready(function() {
-        if(sessionStorage.scrollTop != "undefined"){
-            $(element).scrollTop(sessionStorage.scrollTop);
+        if(sessionStorage.getItem(id+"_scrollTop") !== null){
+            $(element).scrollTop(sessionStorage.getItem(id+"_scrollTop"));
         }
     });
 }
 
+function replyPost(post_id){
+    if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
+        $('#'+ post_id + '-reply').css("display","none");
+    } else {
+        hideReplies();
+        $('#'+ post_id + '-reply').css('display', 'block');
+    }
+}
+
+function hideReplies(){
+    var hide_replies = document.getElementsByClassName("reply-box");
+    for(var i = 0; i < hide_replies.length; i++){
+        hide_replies[i].style.display = "none"; 
+    }
+}
+
 function deletePost(thread_id, post_id, author, time){
-    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note:  If you are deleting the first post in a thread this will delete the entire thread.");
+    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be deleted. \n\nIf you are deleting the first post in a thread this will delete the entire thread.");
     if(confirm){
         var url = buildUrl({'component': 'forum', 'page': 'delete_post'});
         $.ajax({
@@ -1064,6 +1137,18 @@ function addBBCode(type, divTitle){
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
+function refreshOnResponseLateDays(json) {
+    $('#late_day_table tr:gt(0)').remove();
+    if(json['users'].length === 0){
+        $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
+    }
+    json['users'].forEach(function(elem){
+        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fa fa-close'></i></a>";
+        var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
+        $('#late_day_table').append(bits.join('</td><td>'));
+    });
+}
+
 function updateLateDays(data) {
     var fd = new FormData($('#lateDayForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late'});
@@ -1081,14 +1166,7 @@ function updateLateDays(data) {
                 return;
             }
             var form = $("#load-late-days");
-            $('#late_day_table tr:gt(0)').remove();
-            if(json['users'].length === 0){
-                $('#late_day_table').append('<tr><td colspan="4">No late days are currently entered.</td></tr>');
-            }
-            json['users'].forEach(function(elem){
-                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'] + '</td></tr>'];
-                $('#late_day_table').append(bits.join('</td><td>'));
-            });
+            refreshOnResponseLateDays(json);
             $('#user_id').val(this.defaultValue);
             $('#datestamp').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
@@ -1100,6 +1178,39 @@ function updateLateDays(data) {
             window.alert("Something went wrong. Please try again.");
         }
     })
+    return false;
+}
+
+function deleteLateDays(user_id, datestamp) {
+    // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
+    datestamp_mmddyy = datestamp.split(" ")[0];
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'delete_late'});
+    var confirm = window.confirm("Are you sure you would like to delete this entry?");
+    if (confirm) {
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                csrf_token: csrfToken,
+                user_id: user_id,
+                datestamp: datestamp_mmddyy
+            },
+            success: function(data) {
+                var json = JSON.parse(data);
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                refreshOnResponseLateDays(json);
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days entry removed.</div>';
+                $('#messages').append(message);
+            },
+            error: function() {
+                window.alert("Something went wrong. Please try again.");
+            }
+        })
+    }
     return false;
 }
 
