@@ -5,7 +5,7 @@
 :file:     db_backup.py
 :language: python3
 :author:   Peter Bailie (Systems Programmer, Dept. of Computer Science, RPI)
-:date:     May 4 2017
+:date:     April 19 2018
 
 This script will take backup dumps of each individual Submitty course
 database.  This should be set up by a sysadmin to be run on the Submitty
@@ -25,7 +25,7 @@ import re
 import subprocess
 import sys
 
-# CONFIGURATION 
+# CONFIGURATION
 DB_HOST    = 'submitty.cs.myuniversity.edu'
 DB_USER    = 'hsdbu'
 DB_PASS    = 'DB.p4ssw0rd'  # CHANGE THIS!  DO NOT USE 'DB.p4ssw0rd'
@@ -57,10 +57,11 @@ def delete_obsolete_dumps(working_path, expiration_stamp):
 			# File's date stamp was concat'ed into the full path at [-26:-20]
 			if file[-26:-20] < expiration_stamp:
 				os.remove(file)
+				print("removed " + file[-26:-20] + " <  " + expiration_stamp)
 
 def main():
 	""" Main """
-	
+
 	# ROOT required
 	if os.getuid() != 0:
 		raise SystemExit('Root required. Please contact your sysadmin for assistance.')
@@ -87,19 +88,17 @@ def main():
 	# BUILD LISTS AND PATH
 	db_list     = list()
 	dump_list   = list()
-	course_list = list()
 
-	for course in folder_list:
+	for course in course_list:
 
 		# Build lists used as pg_dump arguments
 		db_list.append('submitty_{}_{}'.format(semester, course))
 		dump_list.append('{}_{}_{}.dbdump'.format(today_stamp, semester, course))
-		course_list.append(course)
 
 		# Make sure backup folder exists for each course
-		dump_path = '{}/{}'.format(DUMP_PATH, course)
+		dump_path = '{}/{}/{}/'.format(DUMP_PATH, semester, course)
 		try:
-			os.mkdir(dump_path, 0o700)
+			os.makedirs(dump_path, mode=0o700, exist_ok=True)
 			os.chown(dump_path, 0, 0)
 		except OSError as e:
 			if not os.path.isdir(dump_path):
@@ -109,12 +108,12 @@ def main():
 	for i in range(len(course_list)):
 		try:
 			# pg_dump postgresql://user:password@host/dbname?sslmode=prefer > /var/local/submitty-dump/course/dump_file.dbdump
-			process = 'pg_dump postgresql://{}:{}@{}/{}?sslmode=prefer > {}/{}/{}'.format(DB_USER, DB_PASS, DB_HOST, db_list[i], DUMP_PATH, course_list[i], dump_list[i])
+			process = 'pg_dump postgresql://{}:{}@{}/{}?sslmode=prefer > {}/{}/{}/{}'.format(DB_USER, DB_PASS, DB_HOST, db_list[i], DUMP_PATH, semester, course_list[i], dump_list[i])
 			return_code = subprocess.check_call(process, shell=True)
 		except subprocess.CalledProcessError as e:
 			print("Error while dumping {}".format(db_list[i]))
 			print(e.output.decode('utf-8'))
-			
+
 	# DETERMINE EXPIRATION DATE (to delete obsolete dump files)
 	# (do this BEFORE recursion so it is not calculated recursively n times)
 	expiration       = datetime.date.fromordinal(today.toordinal() - EXPIRATION)
