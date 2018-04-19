@@ -48,11 +48,8 @@ class ForumThreadView extends AbstractView {
 			$( document ).ready(function() {
 			    enableTabsInTextArea('post_content');
 				saveScrollLocationOnRefresh('thread_list');
-<<<<<<< HEAD
-				addCollapsable();
-=======
 				saveScrollLocationOnRefresh('posts_list');
->>>>>>> master
+				addCollapsable();
 			});
 
 		</script>
@@ -443,11 +440,6 @@ HTML;
                         $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
 
 						//end code segment handling
-						if(!$first){
-							$return .= <<<HTML
-							<a class="expand" style="float:right; text-decoration:none" onClick="hidePosts(this, {$post['id']})"></a>
-HTML;
-						}
 						$return .= <<<HTML
 							<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>
 							
@@ -463,13 +455,10 @@ HTML;
 								$return .= <<<HTML
 								<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, .posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
-								$first = false;
 							}
 
 							$return .= <<<HTML
-							<span style="margin-top:8px;margin-left:10px;float:right;">
-
-							
+								<span style="margin-top:8px;margin-left:10px;float:right;">							
 HTML;
 
 if($this->core->getUser()->getGroup() <= 2){
@@ -491,6 +480,11 @@ HTML;
 							<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 							} 
+						if(!$first){
+							$return .= <<<HTML
+								<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
+HTML;
+						}
 			$return .= <<<HTML
 			
 <h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")} </h7></span>

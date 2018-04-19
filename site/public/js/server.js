@@ -994,21 +994,24 @@ function addCollapsable(){
     var posts = $(".post_box").toArray();
     for(var i = 1; i < posts.length; i++){
         if(parseInt($(posts[i]).next().next().attr("reply-level")) > parseInt($(posts[i]).attr("reply-level"))){
-            $(posts[i]).find(".expand")[0].innerHTML = "[-]";
+            $(posts[i]).find(".expand")[0].innerHTML = "hide post";
+        } else {
+            var button = $(posts[i]).find(".expand")[0];
+            $(button).hide();
         }
     }
 }
 
 function hidePosts(text, id) {
-    var currentLevel = parseInt($(text).parent().attr("reply-level"));
-    var selector = $(text).parent().next().next();
+    var currentLevel = parseInt($(text).parent().parent().attr("reply-level")); //The double parent is here because the button is in a span, which is a child of the main post.
+    var selector = $(text).parent().parent().next().next();
     var counter = 0;
-    var parent_status = "[-]";``
-    if (text.innerHTML != "[-]") {
-        text.innerHTML = "[-]";
+    var parent_status = "hide post";``
+    if (text.innerHTML != "hide post") {
+        text.innerHTML = "hide post";
         while (selector.attr("reply-level") > currentLevel) {
             $(selector).show();
-            if($(selector).find(".expand")[0].innerHTML != "[-]"){
+            if($(selector).find(".expand")[0].innerHTML != "hide post"){
                 var nextLvl = parseInt($(selector).next().next().attr("reply-level"));
                 while(nextLvl > (currentLevel+1)){
                     selector = $(selector).next().next();
@@ -1025,9 +1028,9 @@ function hidePosts(text, id) {
             counter++;
         }
         if(counter != 0){
-            text.innerHTML = "[+" + counter + "]";
+            text.innerHTML = "[show " + counter + "]";
         } else {
-            text.innerHTML = "[-]";
+            text.innerHTML = "hide post";
         }
     }
 
