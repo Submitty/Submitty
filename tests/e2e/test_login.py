@@ -5,9 +5,8 @@ class TestLogin(BaseTestCase):
     """
     Test cases revolving around the logging in functionality of the site
     """
-
-    def setUp(self):
-        self.driver = BaseTestCase.DRIVER
+    def __init__(self, testname):
+        super().__init__(testname, log_in=False)
 
     def test_login(self):
         """
@@ -17,7 +16,7 @@ class TestLogin(BaseTestCase):
         """
         url = "/index.php?semester=" + self.semester + \
               "&course=sample&component=student&gradeable_id=open_homework&success_login=true"
-        self.log_in(url)
+        self.log_in(url, title='SAMPLE')
         self.assertEqual(self.test_url + url, self.driver.current_url)
 
     def test_bad_login_password(self):

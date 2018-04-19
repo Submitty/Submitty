@@ -4,6 +4,10 @@ import os
 import unittest
 
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 # noinspection PyPep8Naming
@@ -22,34 +26,35 @@ class BaseTestCase(unittest.TestCase):
     DRIVER = None
     """:type : webdriver.Chrome"""
 
-    def __init__(self, *args, **kwargs):
-        super(BaseTestCase, self).__init__(*args, **kwargs)
+    def __init__(self, testname, user_id=None, user_password=None, user_name=None, log_in=True):
+        super().__init__(testname)
         if "TEST_URL" in os.environ and os.environ['TEST_URL'] is not None:
             self.test_url = os.environ['TEST_URL']
         else:
             self.test_url = BaseTestCase.TEST_URL
         self.driver = None
-        self.user_id = BaseTestCase.USER_ID
-        self.user_name = BaseTestCase.USER_NAME
-        self.user_password = BaseTestCase.USER_PASSWORD
+        self.options = Options()
+        self.options.add_argument('--headless')
+        self.options.add_argument("--disable-extensions")
+        self.options.add_argument('--hide-scrollbars')
+        self.options.add_argument('--disable-gpu')
+        self.options.add_argument('--no-proxy-server')
+        self.user_id = user_id if user_id is not None else BaseTestCase.USER_ID
+        self.user_name = user_name if user_name is not None else BaseTestCase.USER_NAME
+        if user_password is None and user_id is not None:
+            user_password = user_id
+        self.user_password = user_password if user_password is not None else BaseTestCase.USER_PASSWORD
         self.semester = BaseTestCase.get_current_semester()
         self.logged_in = False
-
-    @classmethod
-    def setUpClass(cls):
-        BaseTestCase.DRIVER = webdriver.Chrome()
+        self.use_log_in = log_in
 
     def setUp(self):
-        self.driver = BaseTestCase.DRIVER
-        """:type : webdriver.Chrome"""
-        self.log_in()
+        self.driver = webdriver.Chrome(chrome_options=self.options)
+        if self.use_log_in:
+            self.log_in()
 
     def tearDown(self):
-        self.log_out()
-
-    @classmethod
-    def tearDownClass(cls):
-        BaseTestCase.DRIVER.close()
+        self.driver.close()
 
     def get(self, url):
         if url[0] != "/":
@@ -64,10 +69,11 @@ class BaseTestCase(unittest.TestCase):
         """
         if url is None:
             url = "/index.php"
+
+        if user_password is None:
+            user_password = user_id if user_id is not None else self.user_password
         if user_id is None:
             user_id = self.user_id
-        if user_password is None:
-            user_password = self.user_password
         if user_name is None:
             user_name = self.user_name
 
@@ -80,6 +86,10 @@ class BaseTestCase(unittest.TestCase):
         self.driver.find_element_by_name('login').click()
         self.assertEqual(user_name, self.driver.find_element_by_id("login-id").text)
         self.logged_in = True
+
+    def click_class(self, course, course_name):
+        self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
+        WebDriverWait(self.driver, 10).until(EC.title_is(course_name))
 
     def log_out(self):
         if self.logged_in:
