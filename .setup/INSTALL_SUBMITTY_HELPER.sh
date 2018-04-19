@@ -137,14 +137,14 @@ echo -e "Make top level directores & set permissions"
 
 mkdir -p ${SUBMITTY_DATA_DIR}
 
-if [ ${WORKER} == 1 ]; then
+if [ "${WORKER}" == 1 ]; then
     echo -e "INSTALLING SUBMITTY IN WORKER MODE"
 else
     echo -e "INSTALLING PRIMARY SUBMITTY"
 fi
 
 #Make a courses and checkouts directory if not in worker mode.
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/courses
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs
 fi
@@ -153,7 +153,7 @@ mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 
 #Make site logging directories if not in worker mode.
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
 fi
@@ -163,7 +163,7 @@ chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
 chmod  751                                        ${SUBMITTY_DATA_DIR}
 
 #Set up courses and version control ownership if not in worker mode
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
     chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
     chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
@@ -171,7 +171,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 #Set up permissions on the logs directory. If in worker mode, hwphp does not exist.
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
     chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 else
@@ -183,7 +183,7 @@ chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/auto
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
 #Set up shipper grading directories if not in worker mode.
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     # remove the old versions of the queues
     rm -rf $SUBMITTY_DATA_DIR/to_be_graded_interactive
     rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
@@ -253,7 +253,7 @@ find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
 
 
 #Set up sample files if not in worker mode.
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     ########################################################################################################################
     ########################################################################################################################
     # COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
@@ -407,7 +407,7 @@ popd > /dev/null
 ################################################################################################################
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     echo -e "Copy the submission website"
 
     # copy the website from the repo
@@ -542,7 +542,7 @@ chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
 
 #Set up pam if not in worker mode.
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
     sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
 fi
@@ -705,7 +705,7 @@ fi
 ################################################################################################################
 ################################################################################################################
 # INSTALL TEST SUITE if not in worker mode
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     # one optional argument installs & runs test suite
     if [[ "$#" -ge 1 && $1 == "test" ]]; then
 
@@ -732,7 +732,7 @@ fi
 ################################################################################################################
 ################################################################################################################
 # INSTALL RAINBOW GRADES TEST SUITE if not in worker mode
-if [ ${WORKER} == 0 ]; then
+if [ "${WORKER}" == 0 ]; then
     # one optional argument installs & runs test suite
     if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
 
