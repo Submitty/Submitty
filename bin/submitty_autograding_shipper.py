@@ -121,7 +121,7 @@ def update_foreign_autograding_worker_json(name, entry):
             ssh.close()
 
 # ==================================================================================
-def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade):
+def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade,is_batch):
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
         grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by hwcron")
@@ -188,13 +188,13 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             os.remove(autograding_zip_tmp)
             os.remove(submission_zip_tmp)
             return success
-    grade_items_logging.log_message(which_untrusted=which_untrusted, message="Began grading job on " + which_machine)
+    grade_items_logging.log_message(which_untrusted=which_untrusted, is_batch=is_batch,message="Began grading job on " + which_machine)
     return True
 
 
 # ==================================================================================
 # ==================================================================================
-def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
+def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade,is_batch):
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
         grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by hwcron")
@@ -265,12 +265,12 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
     with contextlib.suppress(FileNotFoundError):
         os.remove(local_done_queue_file)
-    grade_items_logging.log_message(which_untrusted=which_untrusted, message="Finished job on " + which_machine)
+    grade_items_logging.log_message(JOB_ID, jobname=next_to_grade,which_untrusted=which_untrusted, is_batch=is_batch,message="Finished job on " + which_machine)
     return True
 
 
 # ==================================================================================
-def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
+def grade_queue_file(my_name, which_machine,which_untrusted,queue_file,is_batch):
     """
     Oversees the autograding of single item from the queue
 
@@ -290,7 +290,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     try:
         # prepare the job
         shipper_counter=0
-        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file):
+        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file,is_batch):
             shipper_counter = 0
             time.sleep(1)
             if shipper_counter >= 10:
@@ -299,7 +299,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
 
         # then wait for grading to be completed
         shipper_counter=0
-        while not unpack_job(which_machine, which_untrusted, my_dir, queue_file):
+        while not unpack_job(which_machine, which_untrusted, my_dir, queue_file,is_batch):
             shipper_counter+=1
             time.sleep(1)
             if shipper_counter >= 10:
@@ -352,7 +352,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
     files_and_times = sorted(files_and_times, key=operator.itemgetter(1))
 
     my_job=""
-
+    is_batch = False
     for full_path_file, file_time in files_and_times:
         # get the file name (without the path)
         just_file = full_path_file[len(folder)+1:]
@@ -378,12 +378,14 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         # prioritize interactive jobs over (batch) regrades
         # if you've found an interactive job, exit early (since they are sorted by timestamp)
         if not "regrade" in queue_obj or not queue_obj["regrade"]:
+            is_batch = False
             my_job = just_file
             break
 
         # otherwise it's a regrade, and if we don't already have a
         # job, take it, but we have to search the rest of the list
         if my_job == "":
+            is_batch = True
             my_job = just_file
 
     if not my_job == "":
@@ -400,7 +402,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         print (my_name, " WARNING: submitty_autograding shipper get_job time ", time_delta)
         grade_items_logging.log_message(JOB_ID, message=str(my_name)+" WARNING: submitty_autograding shipper get_job time "+str(time_delta))
 
-    return my_job
+    return (my_job, is_batch)
 
 
 # ==================================================================================
@@ -421,10 +423,10 @@ def shipper_process(my_name, which_machine,my_capabilities,which_untrusted,overa
 
     while True:
         try:
-            my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
+            my_job, is_batch = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
             if not my_job == "":
                 counter=0
-                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job))
+                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job),is_batch)
                 continue
             else:
                 if counter == 0 or counter >= 10:
