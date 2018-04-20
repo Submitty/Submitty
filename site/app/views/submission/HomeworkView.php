@@ -475,11 +475,11 @@ HTML;
 
             $return .= <<<HTML
     <script type="text/javascript">
-        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id) {
+        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false) {
             // submit the selected pdf
             path = decodeURIComponent(path);
             if (is_pdf) {
-                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count);
+                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count, merge_previous=merge_previous);
                 moveNextInput(count);
             }
             
@@ -1030,7 +1030,10 @@ HTML;
 HTML;
             if ($gradeable->hasGradeFile()) {
                 $return .= <<<HTML
-    <h3 class="label">TA grade</h3>
+    <h3 class="label">TA / Instructor grade</h3>
+HTML;
+                $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults', $gradeable);
+                $return .= <<<HTML
     <pre>{$gradeable->getGradeFile()}</pre>
 HTML;
             } else {

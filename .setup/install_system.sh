@@ -173,11 +173,8 @@ fi
 chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
 cd ${SUBMITTY_INSTALL_DIR}/JUnit
 
-wget http://search.maven.org/remotecontent?filepath=junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
-mv remotecontent?filepath=junit%2Fjunit%2F${JUNIT_VER}%2Fjunit-${JUNIT_VER}.jar junit-${JUNIT_VER}.jar
-wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
-mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F${HAMCREST_VER}%2Fhamcrest-core-${HAMCREST_VER}.jar hamcrest-core-${HAMCREST_VER}.jar
-
+wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
+wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
 
 # TODO:  Want to Install JUnit 5.0
 # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
@@ -492,18 +489,20 @@ fi
 
 # WIP: creates basic container for grading CS1 & DS assignments
 # CAUTION: needs users/groups for security 
+# These commands should be run manually if testing Docker integration
 
-rm -rf /tmp/docker
-mkdir -p /tmp/docker
-cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
-cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
+# rm -rf /tmp/docker
+# mkdir -p /tmp/docker
+# cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+# cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
+# cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
 
-chown hwcron:hwcron -R /tmp/docker
+# chown hwcron:hwcron -R /tmp/docker
 
-pushd /tmp/docker
-su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
-popd
+# pushd /tmp/docker
+# su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
+# popd
+
 
 
 #################################################################
