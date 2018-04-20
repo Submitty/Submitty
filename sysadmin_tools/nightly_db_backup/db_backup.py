@@ -5,11 +5,17 @@
 :file:     db_backup.py
 :language: python3
 :author:   Peter Bailie (Systems Programmer, Dept. of Computer Science, RPI)
-:date:     April 19 2018
+:date:     April 20 2018
 
 This script will take backup dumps of each individual Submitty course
 database.  This should be set up by a sysadmin to be run on the Submitty
 server as a cron job by root.  Recommend that this is run nightly.
+
+The semester code can be specified as a command line argument.  This allows
+database dumps of previous semesters or of unique semester codes.  If no
+command line arguments are given, the semester code will be determined by
+the current month and year.  e.g. April 2018 would correspond to the
+Spring 2018 semester code "s18".
 
 WARNING: Backup data contains sensitive information protected by FERPA, and
 as such should have very strict access permissions.
@@ -42,8 +48,8 @@ def delete_obsolete_dumps(working_path, expiration_stamp):
 	:type expiration_path:   string
 	"""
 
-	# Filter out '.', '..', and any "hidden" file/folder.
-	# prepend full path to all directory list elements
+	# Filter out '.', '..', and any "hidden" files/directories.
+	# Prepend full path to all directory list elements
 	regex = re.compile('^(?!\.)')
 	files_list = filter(regex.match, [working_path + '/{}'.format(x) for x in os.listdir(working_path)])
 	re.purge()
@@ -57,7 +63,6 @@ def delete_obsolete_dumps(working_path, expiration_stamp):
 			# File's date stamp was concat'ed into the full path at [-26:-20]
 			if file[-26:-20] < expiration_stamp:
 				os.remove(file)
-				print("removed " + file[-26:-20] + " <  " + expiration_stamp)
 
 def main():
 	""" Main """
@@ -72,9 +77,15 @@ def main():
 	year        = str(today.year % 100)
 	today_stamp = '{:0>2}{:0>2}{:0>2}'.format(year, today.month, today.day)
 
-	# DETERMINE CURRENT SEMESTER (based on current date)
-	# if month <= 5: ... elif month >=8: ... else: ...
-	semester = 's' + year if today.month <= 5 else ('f' + year if today.month >= 8 else 'm' + year)
+	# DETERMINE SEMESTER CODE
+	if len(sys.argv) > 1:
+		# Semester code was dictated by command line argument
+		semester = sys.argv[1]
+	else:
+		# Semester code is dictated by current month/year.
+		# Jan - April = (s)pring, May - July = su(m)mer, Aug - Dec = (f)all
+		# if month <= 5: ... elif month >=8: ... else: ...
+		semester = 's' + year if today.month <= 5 else ('f' + year if today.month >= 8 else 'm' + year)
 
 	# GET ACTIVE COURSES FROM 'MASTER' DB
 	try:
@@ -84,6 +95,10 @@ def main():
 		course_list = list(subprocess.check_output(process, shell=True).decode('utf-8').split(os.linesep))[:-1]
 	except subprocess.CalledProcessError:
 		raise SystemExit("Communication error with Submitty 'master' DB")
+
+	if len(course_list) < 1:
+		print("No registered courses found for semester '{}'.".format(semester))
+		sys.exit(0)
 
 	# BUILD LISTS AND PATH
 	db_list     = list()
@@ -99,7 +114,7 @@ def main():
 		dump_path = '{}/{}/{}/'.format(DUMP_PATH, semester, course)
 		try:
 			os.makedirs(dump_path, mode=0o700, exist_ok=True)
-			os.chown(dump_path, 0, 0)
+			os.chown(dump_path, uid=0, gid=0)
 		except OSError as e:
 			if not os.path.isdir(dump_path):
 				raise SystemExit("Failed to prepare DB dump path '{}'{}OS error: '{}'".format(e.filename, os.linesep, e.strerror))
