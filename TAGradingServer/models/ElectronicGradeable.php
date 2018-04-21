@@ -445,7 +445,7 @@ ORDER BY gc_order ASC
                 // TODO: Convert this to using DateTime and DateTimeInterval objects
                 $date_submission = strtotime($timestamp);
                 $details['submission_time'] = $timestamp;
-                $date_due = strtotime($this->eg_details["eg_submission_due_date"]) + 1 + __SUBMISSION_GRACE_PERIOD_SECONDS__;
+                $date_due = strtotime($this->eg_details["eg_submission_due_date"]) + 1;
                 $days_late = round((($date_submission - $date_due) / (60 * 60 * 24)) + .5, 0);
                 $this->days_late = ($days_late < 0) ? 0 : $days_late;
             }

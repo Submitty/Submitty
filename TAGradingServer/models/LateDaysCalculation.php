@@ -151,7 +151,6 @@ class LateDaysCalculation
                         late_day_exceptions AS lde 
                       ON submissions.g_id = lde.g_id 
                       AND submissions.user_id = lde.user_id";
-        array_push($params, __SUBMISSION_GRACE_PERIOD_SECONDS__);
 
         //Query database and return results.
         Database::query($query, $params);
