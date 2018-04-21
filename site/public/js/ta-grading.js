@@ -446,9 +446,9 @@ function updateHandle(element) {
     var bottom_s = Math.min(height, bottom_s);
     var bottom_se = bottom_s - 20;
     var bottom_se = Math.min(height, bottom_se);
-    $(element).find('.ui-resizable-e').css('top', bottom_e + 'px');
-    $(element).find('.ui-resizable-s').css('top', bottom_s + 'px');
-    $(element).find('.ui-resizable-se').css('bottom', '0px');
+    //$(element).find('.ui-resizable-e').css('top', bottom_e + 'px');
+    //$(element).find('.ui-resizable-s').css('top', bottom_s + 'px');
+    //$(element).find('.ui-resizable-se').css('bottom', bottom_se + 'px');
 }
 
 function hideIfEmpty(element) {

@@ -1598,6 +1598,7 @@ window.onbeforeunload = function() {
 }
 </script>
 <script type="text/javascript">
+    /*
     $(document).ready(function() {
         $( "#autograding_results" ).scroll(function() {
             updateHandle("#autograding_results");
@@ -1623,7 +1624,7 @@ window.onbeforeunload = function() {
         $( "#student_info" ).resize(function() {
             updateHandle("#student_info");
         });
-    });
+    }); */
 </script>
 <script type="text/javascript">
     function openFrame(html_file, url_file, num) {
