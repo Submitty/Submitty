@@ -448,7 +448,7 @@ function updateHandle(element) {
     var bottom_se = Math.min(height, bottom_se);
     $(element).find('.ui-resizable-e').css('top', bottom_e + 'px');
     $(element).find('.ui-resizable-s').css('top', bottom_s + 'px');
-    $(element).find('.ui-resizable-se').css('top', bottom_se + 'px');
+    $(element).find('.ui-resizable-se').css('bottom', '0px');
 }
 
 function hideIfEmpty(element) {
