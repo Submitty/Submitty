@@ -1098,20 +1098,20 @@ function enableTabsInTextArea(id){
 
 }
 
-function resetScrollPosition(){
-    if(sessionStorage.scrollTop != "undefined") {
-        sessionStorage.scrollTop = undefined;
+function resetScrollPosition(id){
+    if(sessionStorage.getItem(id+"_scrollTop") != 0) {
+        sessionStorage.setItem(id+"_scrollTop", 0);
     }
 }
 
-function saveScrollLocationOnRefresh(className){
-    var element = document.getElementsByClassName(className);
+function saveScrollLocationOnRefresh(id){
+    var element = document.getElementById(id);
     $(element).scroll(function() {
-        sessionStorage.scrollTop = $(this).scrollTop();
+        sessionStorage.setItem(id+"_scrollTop", $(element).scrollTop());
     });
     $(document).ready(function() {
-        if(sessionStorage.scrollTop != "undefined"){
-            $(element).scrollTop(sessionStorage.scrollTop);
+        if(sessionStorage.getItem(id+"_scrollTop") !== null){
+            $(element).scrollTop(sessionStorage.getItem(id+"_scrollTop"));
         }
     });
 }
@@ -1280,6 +1280,18 @@ function addBBCode(type, divTitle){
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
+function refreshOnResponseLateDays(json) {
+    $('#late_day_table tr:gt(0)').remove();
+    if(json['users'].length === 0){
+        $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
+    }
+    json['users'].forEach(function(elem){
+        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fa fa-close'></i></a>";
+        var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
+        $('#late_day_table').append(bits.join('</td><td>'));
+    });
+}
+
 function updateLateDays(data) {
     var fd = new FormData($('#lateDayForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late'});
@@ -1297,14 +1309,7 @@ function updateLateDays(data) {
                 return;
             }
             var form = $("#load-late-days");
-            $('#late_day_table tr:gt(0)').remove();
-            if(json['users'].length === 0){
-                $('#late_day_table').append('<tr><td colspan="4">No late days are currently entered.</td></tr>');
-            }
-            json['users'].forEach(function(elem){
-                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'] + '</td></tr>'];
-                $('#late_day_table').append(bits.join('</td><td>'));
-            });
+            refreshOnResponseLateDays(json);
             $('#user_id').val(this.defaultValue);
             $('#datestamp').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
@@ -1316,6 +1321,39 @@ function updateLateDays(data) {
             window.alert("Something went wrong. Please try again.");
         }
     })
+    return false;
+}
+
+function deleteLateDays(user_id, datestamp) {
+    // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
+    datestamp_mmddyy = datestamp.split(" ")[0];
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'delete_late'});
+    var confirm = window.confirm("Are you sure you would like to delete this entry?");
+    if (confirm) {
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                csrf_token: csrfToken,
+                user_id: user_id,
+                datestamp: datestamp_mmddyy
+            },
+            success: function(data) {
+                var json = JSON.parse(data);
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                refreshOnResponseLateDays(json);
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days entry removed.</div>';
+                $('#messages').append(message);
+            },
+            error: function() {
+                window.alert("Something went wrong. Please try again.");
+            }
+        })
+    }
     return false;
 }
 
