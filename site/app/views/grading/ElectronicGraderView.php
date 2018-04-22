@@ -1250,7 +1250,7 @@ HTML;
         //check if verify all button should be shown or not
         foreach ($gradeable->getComponents() as $component) {
             if(!$component->getGrader()) continue;
-            if(($component->getGrader()->getId() !== $this->core->getUser()->getId() || $gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) && $this->core->getUser()->accessFullGrading()){
+            if($component->getGrader()->getId() !== $this->core->getUser()->getId() && $this->core->getUser()->accessFullGrading()){
                 $display = "inline";
                 break;
             }
@@ -1262,7 +1262,7 @@ HTML;
         if($gradeable->useTAGrading()) {
         $return .= <<<HTML
     <div style="float: right; float: right; position: relative; top: 10px; right: 1%;">
-        <input type='button' style="display: {$display};" class="btn btn-default" value='Verify All' onclick='verifyMark("{$gradeable->getId()}",-1,"{$user->getAnonId()}",true)'/>
+        <input id='verifyAllButton' type='button' style="display: {$display};" class="btn btn-default" value='Verify All' onclick='verifyMark("{$gradeable->getId()}",-1,"{$user->getAnonId()}",true);'/>
         <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
         <span {$span_style}> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" {$checked}/> Overwrite Grader </span>
     </div>
@@ -1418,7 +1418,7 @@ HTML;
 
             $return .= <<<HTML
 
-                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="4">
                         <b><span id="progress_points-{$c}" style="display: none;"></span></b>
                         {$message}
 HTML;

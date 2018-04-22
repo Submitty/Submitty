@@ -64,9 +64,6 @@ class ElectronicGraderController extends AbstractController {
                 if($component->getGrader()->getId() !== $this->core->getUser()->getId()){
                     $component->setGrader($this->core->getUser());
                     $component->saveGradeableComponentData($gradeable->getGdId());
-
-                    $component->setGradedVersion($_POST['active_version']);
-                    $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                 }
             }
             $hwReport = new HWReport($this->core);
@@ -78,9 +75,6 @@ class ElectronicGraderController extends AbstractController {
                 if($component->getId() == $component_id){
                     $component->setGrader($this->core->getUser());
                     $component->saveGradeableComponentData($gradeable->getGdId());
-
-                    $component->setGradedVersion($_POST['active_version']);
-                    $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
 
                     $hwReport = new HWReport($this->core);
                     $hwReport->generateSingleReport($user_id, $gradeable_id);

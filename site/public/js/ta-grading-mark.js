@@ -871,6 +871,8 @@ function verifyMark(gradeable_id, component_id, user_id,verifyAll = false){
         success: function(data) {
             window.location.reload();
             console.log("verified user");
+            if(action === 'verify_all')
+                document.getElementById("verifyAllButton").style.display = "none";
         },
         error: function() {
             alert("failed to verify grader");
