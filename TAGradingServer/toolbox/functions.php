@@ -1,5 +1,13 @@
 <?php
 
+use \lib\AutoLoader;
+use \lib\Database;
+use \lib\ExceptionHandler;
+use \lib\IniParser;
+use \lib\Logger;
+use \models\User;
+use app\libraries\Core;
+
 // Display all errors on initial startup in case we have an early failure in autoloader, or DB setup, etc.
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -12,14 +20,8 @@ permissions aren't lost for newly created files & directories. We do this
 here as every working file must include functions.php to actuall work.
 */
 umask (0027);
-date_default_timezone_set('America/New_York');
-
-use \lib\AutoLoader;
-use \lib\Database;
-use \lib\ExceptionHandler;
-use \lib\IniParser;
-use \lib\Logger;
-use \models\User;
+$core = new Core();
+date_default_timezone_set($core->getConfig()->getTimezone());
 
 // get our sweet autoloader!
 include __DIR__ . "/../lib/AutoLoader.php";
@@ -47,7 +49,6 @@ else {
 $base_url = $a['site_details']['base_url'];
 $ta_base_url = $a['site_details']['ta_base_url'];
 define("__CGI_URL__", $a['site_details']['cgi_url']);
-define("__SUBMISSION_GRACE_PERIOD_SECONDS__", 5 * 60);
 define("__OUTPUT_MAX_LENGTH__", 100000);
 define("__DATABASE_HOST__", $a['database_details']['database_host']);
 define("__DATABASE_USER__", $a['database_details']['database_user']);

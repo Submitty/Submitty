@@ -3,12 +3,7 @@
 namespace app\views;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $css=array()) {
-        $extra = "";
-        if ($this->core->getConfig()->isDebug()) {
-            $extra = "?v=".time();
-        }
-
+    public function header($breadcrumbs, $css=array(), $js=array()) {
         $messages = <<<HTML
 <div id='messages'>
 
@@ -30,53 +25,45 @@ HTML;
 </div>
 HTML;
 
-        $override_css = '';
-        if ($this->core->getConfig()->isCourseLoaded() && file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
-            $override_css = "<style type='text/css'>".file_get_contents($this->core->getConfig()->getCoursePath()."/config/override.css")."</style>";
-        }
-
         $return = <<<HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 HTML;
-    if($this->core->getConfig()->isCourseLoaded())
-    {
-        $return .= <<<HTML
+        if($this->core->getConfig()->isCourseLoaded()) {
+            $return .= <<<HTML
     <title>{$this->core->getFullCourseName()}</title>
+
 HTML;
-    }
-    else
-    {
-        $return .= <<<HTML
+        }
+        else {
+            $return .= <<<HTML
     <title>Submitty</title>
-HTML;
-    }
 
-    $return .= <<<HTML
-    <link rel="shortcut icon" href="{$this->core->getConfig()->getBaseUrl()}img/favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css{$extra}" />
-    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css{$extra}" />
-    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css{$extra}" />
-    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css{$extra}" />
-    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css{$extra}" />
-    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css{$extra}" />
 HTML;
+        }
 
-    foreach($css as $css_ref) {
         $return .= <<<HTML
-        <link rel="stylesheet" type="text/css" href="{$css_ref}{$extra}" />
-HTML;
-    }
+    <link rel="shortcut icon" href="{$this->core->getConfig()->getBaseUrl()}img/favicon.ico" type="image/x-icon" />
 
-    $return .= <<<HTML
-    {$override_css}
-    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.min.js{$extra}"></script>
-    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery-ui.min.js{$extra}"></script>
-    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/diff-viewer.js{$extra}"></script>
-    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/server.js{$extra}"></script>
+HTML;
+
+        foreach($css as $css_ref) {
+            $return .= "    <link rel='stylesheet' type='text/css' href='{$css_ref}' />\n";
+        }
+
+        if ($this->core->getConfig()->isCourseLoaded() && file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
+            $return .= "    <style type='text/css'>\n".file_get_contents($this->core->getConfig()->getCoursePath()."/config/override.css")."\n    </style>\n";
+        }
+
+        foreach ($js as $js_ref) {
+            $return .= "    <script type='text/javascript' src='{$js_ref}'></script>\n";
+        }
+        $return .= <<<HTML
 </head>
-<body onload="setSiteDetails('{$this->core->getConfig()->getSiteUrl()}', '{$this->core->getCsrfToken()}')">
+<script>var onAjaxInit;</script>
+<body onload="setSiteDetails('{$this->core->getConfig()->getSiteUrl()}', '{$this->core->getCsrfToken()}'); if (onAjaxInit) { onAjaxInit(); }">
 {$messages}
 <div id="container">
 
@@ -84,9 +71,6 @@ HTML;
 
         if ($this->core->getConfig()->isCourseLoaded() && $this->core->userLoaded()) {
             if($this->core->getUser()->accessGrading()) {
-                $ta_base_url = $this->core->getConfig()->getTaBaseUrl();
-                $semester = $this->core->getConfig()->getSemester();
-                $course = $this->core->getConfig()->getCourse();
                 if($this->core->getUser()->accessAdmin()) {
                     $return .= <<<HTML
     <div id="nav">
