@@ -16,22 +16,27 @@ subprocess.call(["git", "clone", "http://llvm.org/git/llvm.git", clangDir + "llv
 subprocess.call(["git", "clone", "http://llvm.org/git/clang.git", clangDir + "llvm/tools/clang"])
 subprocess.call(["git", "clone", "http://llvm.org/git/clang-tools-extra.git", clangDir + "llvm/tools/clang/tools/extra/"])
 
+
+
+# use the standard package versions..
+
 #cmake and ninja
-subprocess.call(["git", "clone", "https://github.com/martine/ninja.git", clangDir + "ninja/"])
-os.chdir(clangDir + "ninja/")
-subprocess.call(["git", "checkout", "release"])
-subprocess.call(["./bootstrap.py"])
+#subprocess.call(["git", "clone", "https://github.com/martine/ninja.git", clangDir + "ninja/"])
+#os.chdir(clangDir + "ninja/")
+#subprocess.call(["git", "checkout", "release"])
+#subprocess.call(["./bootstrap.py"])
+
+#copyfile(clangDir + "ninja/ninja", "/usr/bin/ninja")
+#subprocess.call(["chmod", "+x", "/usr/bin/ninja"])
+
+#subprocess.call(["git", "clone", "https://gitlab.kitware.com/cmake/cmake.git", clangDir + "cmake/"])
+
+#os.chdir(clangDir + "cmake/")
+#subprocess.call(["./bootstrap"])
+#subprocess.call(["make"])
+#subprocess.call(["make", "install"])
 
 
-copyfile(clangDir + "ninja/ninja", "/usr/bin/ninja")
-subprocess.call(["chmod", "+x", "/usr/bin/ninja"])
-
-subprocess.call(["git", "clone", "https://gitlab.kitware.com/cmake/cmake.git", clangDir + "cmake/"])
-
-os.chdir(clangDir + "cmake/")
-subprocess.call(["./bootstrap"])
-subprocess.call(["make"])
-subprocess.call(["make", "install"])
 
 #build clang
 if not os.path.exists(clangDir + "build/"):
@@ -39,16 +44,21 @@ if not os.path.exists(clangDir + "build/"):
 
 os.chdir(clangDir + "build/")
 
-subprocess.call(["cmake", "-G", "Ninja", "../llvm", "-DCMAKE_BUILD_TYPE=Release", "-DLLVM_TARGETS_TO_BUILD=X86", "-DCMAKE_C_COMPILER=/usr/bin/clang-3.8", "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8"])
+subprocess.call(["cmake", "-G", "Ninja", "../llvm", "-DCMAKE_INSTALL_PREFIX=/usr/local/submitty/SubmittyAnalysisTools/tmp/llvm", "-DCMAKE_BUILD_TYPE=Release", "-DLLVM_TARGETS_TO_BUILD=X86", "-DCMAKE_C_COMPILER=/usr/bin/clang-3.8", "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8"])
 
-subprocess.call(["ninja"])
-subprocess.call(["ninja", "install"])
+# building everything is perhaps not necessary...   ?
+#subprocess.call(["ninja", "install"])
 
 
 cmd = "echo 'add_subdirectory(ASTMatcher)' >> /usr/local/submitty/clang-llvm/llvm/tools/clang/tools/extra/CMakeLists.txt"
 cmd2 = "echo 'add_subdirectory(UnionTool)' >> /usr/local/submitty/clang-llvm/llvm/tools/clang/tools/extra/CMakeLists.txt"
 os.system(cmd)
 os.system(cmd2)
+# Just build targets we need
+subprocess.call(["ninja", "ASTMatcher", "UnionTool"])
+# TODO/FIXME: add lines to "install" by copying from build dir
+
+
 
 astMatcherDir = os.path.expanduser(clangDir + "llvm/tools/clang/tools/extra/ASTMatcher/")
 
