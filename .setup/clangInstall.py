@@ -6,9 +6,12 @@ from shutil import copyfile
 
 cwd = os.getcwd()
 
+
+
 clangDir = os.path.expanduser("/usr/local/submitty/clang-llvm/")
 
-
+#removing the clangDir if you have already run INTSALL_SUBMITTY.sh
+subprocess.call(["rm", "-rf", clangDir])
 
 if not os.path.exists(clangDir):
         os.mkdir(clangDir)
