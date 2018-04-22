@@ -471,7 +471,11 @@ if($this->core->getUser()->getGroup() <= 2){
 						<a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {$info_name}, {$visible_user_json}, {$jscriptAnonFix})' title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
 HTML;
 }
-
+						if(!$first){
+							$return .= <<<HTML
+								<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
+HTML;
+						}
 						if($this->core->getUser()->getGroup() <= 2){
 							$wrapped_content = json_encode($post['content']);
 							$return .= <<<HTML
@@ -480,11 +484,7 @@ HTML;
 							<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 							} 
-						if(!$first){
-							$return .= <<<HTML
-								<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
-HTML;
-						}
+
 			$return .= <<<HTML
 			
 <h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"m/d/Y g:i A")} </h7></span>
