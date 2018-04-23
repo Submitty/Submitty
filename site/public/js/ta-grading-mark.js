@@ -204,7 +204,7 @@ function addMark(me, num, background, min, max, precision, gradeable_id, user_id
     
     $("#mark-creation-popup-confirm")[0].onclick = function() {
         var note = $("#mark-creation-popup-note")[0].value;
-        var points = parseInt($("#mark-creation-popup-points")[0].value);
+        var points = parseFloat($("#mark-creation-popup-points")[0].value);
         
         if (!note.trim()) {
             $("#mark-creation-popup-error").css("display", "inherit");
