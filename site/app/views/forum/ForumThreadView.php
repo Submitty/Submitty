@@ -381,8 +381,8 @@ HTML;
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
 			$classes .= " important";
 		}
-
-		$offset = ($reply_level-1)*30;
+		$offset = min(($reply_level - 1) * 30, 180);
+		
 							$return = <<<HTML
 								<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
 HTML;
