@@ -103,6 +103,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // for Program Analysis course
     { "ghc",                     "/usr/bin/ghc" },
+    { "ocaml",                   "/usr/bin/ocaml" },
+    { "ocamllex",                "/usr/bin/ocamllex" },
+    { "ocamlyacc",               "/usr/bin/ocamlyacc" },
 
     // for Cmake & Make
     { "cmake",                   "/usr/bin/cmake" },

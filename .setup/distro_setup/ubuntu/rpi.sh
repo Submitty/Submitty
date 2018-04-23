@@ -84,6 +84,7 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 
 # install haskell
 apt-get install -qqy haskell-platform
+apt-get install -qqy ocaml
 
 ##################################################
 # Used by Network Programming class
