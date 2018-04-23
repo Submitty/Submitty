@@ -83,7 +83,7 @@ def main():
 		semester = sys.argv[1]
 	else:
 		# Semester code is dictated by current month/year.
-		# Jan - April = (s)pring, May - July = su(m)mer, Aug - Dec = (f)all
+		# Jan - May = (s)pring, Jun - July = su(m)mer, Aug - Dec = (f)all
 		# if month <= 5: ... elif month >=8: ... else: ...
 		semester = 's' + year if today.month <= 5 else ('f' + year if today.month >= 8 else 'm' + year)
 
