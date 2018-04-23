@@ -106,6 +106,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "ocaml",                   "/usr/bin/ocaml" },
     { "ocamllex",                "/usr/bin/ocamllex" },
     { "ocamlyacc",               "/usr/bin/ocamlyacc" },
+    { "z3",                      SUBMITTY_INSTALL_DIRECTORY+"/tools/z3" },
 
     // for Cmake & Make
     { "cmake",                   "/usr/bin/cmake" },
