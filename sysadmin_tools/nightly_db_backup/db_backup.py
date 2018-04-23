@@ -122,7 +122,7 @@ def main():
 	# DUMP
 	for i in range(len(course_list)):
 		try:
-			# pg_dump postgresql://user:password@host/dbname?sslmode=prefer > /var/local/submitty-dump/course/dump_file.dbdump
+			# pg_dump postgresql://user:password@host/dbname?sslmode=prefer > /var/local/submitty-dump/semester/course/dump_file.dbdump
 			process = 'pg_dump postgresql://{}:{}@{}/{}?sslmode=prefer > {}/{}/{}/{}'.format(DB_USER, DB_PASS, DB_HOST, db_list[i], DUMP_PATH, semester, course_list[i], dump_list[i])
 			return_code = subprocess.check_call(process, shell=True)
 		except subprocess.CalledProcessError as e:
