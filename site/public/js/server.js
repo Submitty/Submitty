@@ -1028,7 +1028,7 @@ function hidePosts(text, id) {
             counter++;
         }
         if(counter != 0){
-            text.innerHTML = "Show " + counter + " replie(s)";
+            text.innerHTML = "Show " + ((counter > 1) ? (counter + " replies") : "reply");
         } else {
             text.innerHTML = "Hide replies";
         }
