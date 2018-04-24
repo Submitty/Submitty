@@ -5,7 +5,7 @@
 :file:     db_backup.py
 :language: python3
 :author:   Peter Bailie (Systems Programmer, Dept. of Computer Science, RPI)
-:date:     April 23 2018
+:date:     April 24 2018
 
 This script will take backup dumps of each individual Submitty course
 database.  This should be set up by a sysadmin to be run on the Submitty
@@ -65,16 +65,18 @@ def delete_obsolete_dumps(working_path, expiration_stamp):
 			delete_obsolete_dumps(file, expiration_stamp)
 		else:
 			# File date was concat'ed into the file's name.  Use regex to isolate date from full path.
-			# e.g. "/var/local/submitty-dumps/s18/cs1000/180423_s18_cs1000.dbdump"
+			# e.g. "/var/local/submitty-dumps/s18/cs1000/180424_s18_cs1000.dbdump"
 			#      The date substring can be located with high confidence by looking for:
-			#        - date is 6 numeric chars in length
-			#        - date is prepended by '/' char.
-			#        - date is appended by '_' char.
-			#      Therefore, example path will be matched at "/180423_".
-			#      Then take substring [1:7] to get "180423".
-			match = re.search('/\d{6}_', file)
+			#        - final token of the full path (the actual file name)
+			#        - file name consists of three tokens delimited by '_' chars
+			#		   - first token is exactly 6 digits, the date stamp.
+			#          - second token is the semester code, at least one 'word' char
+			#          - third token is the course code, at least one 'word' char
+			#          - filename always ends in ".dbdump"
+			#        - then take substring [0:6] to get "180424".
+			match = re.search('(\d{6}_\w+_\w+\.dbdump)$', file)
 			if match is not None:
-				file_date_stamp = match.group(0)[1:7]
+				file_date_stamp = match.group(0)[0:6]
 				if file_date_stamp <= expiration_stamp:
 					os.remove(file)
 
