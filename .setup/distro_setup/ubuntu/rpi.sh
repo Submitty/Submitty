@@ -79,6 +79,13 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 
 # install haskell
 apt-get install -qqy haskell-platform
+apt-get install -qqy ocaml
+
+
+## TODO:  ADD INSTALLATION INFO FOR Z3
+##        https://github.com/Z3Prover/z3/releases
+##    (just installed binary at /usr/local/submitty/tools/z3)
+
 
 ##################################################
 # Used by Network Programming class
