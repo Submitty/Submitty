@@ -568,6 +568,7 @@ rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/context.
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/removeTokens.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #copying runners for jsonDiffs
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/jsonDiffSubmittyRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/jsonDiffRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/jsonDiffRunnerRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/createAllJson.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools

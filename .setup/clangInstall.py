@@ -3,6 +3,10 @@ import sys
 import os
 from shutil import copyfile
 
+#Work in progress - fix this 
+print("don't run this - exiting")
+sys.exit(1)
+
 
 cwd = os.getcwd()
 
