@@ -1,16 +1,17 @@
 #!/usr/bin/env php
 <?php
 
-/* HEADING ---------------------------------------------------------------------
- *
+/**
  * submitty_student_auto_feed.php
- * By Peter Bailie, Systems Programmer (RPI dept of computer science)
  *
- * Requires minimum PHP version 5.4 with pgsql, iconv, and ssh2 extensions.
- *
- * This class will read a student enrollment CSV feed provided by the campus
+ * This script will read a student enrollment CSV feed provided by the campus
  * registrar or data warehouse and "upsert" (insert/update) the feed into
  * Submitty's course databases.
+ *
+ * Process flow code exists in the constructor, so all that is needed is to
+ * (1) include "config.php" so that constants are defined.
+ *     (and make sure that constants are properly configured)
+ * (2) instantiate this class to process a data feed.
  *
  * THIS SOFTWARE IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
  * COMPATIBLE WITH YOUR UNIVERSITY'S INFORMATION SYSTEMS.  THIS IS ONLY A CODE
@@ -18,20 +19,15 @@
  * IMPLEMENTATION.  IT MAY REQUIRE SOME ADDITIONAL MODIFICATION TO SAFELY WORK
  * WITH YOUR UNIVERSITY'S AND/OR DEPARTMENT'S INFORMATION SYSTEMS.
  *
- * -------------------------------------------------------------------------- */
-
-/* HOW TO USE ------------------------------------------------------------------
+ * Requires minimum PHP version 5.4 with pgsql, iconv, and ssh2 extensions.
  *
- * Process flow code exists in the constructor, so all that is needed is to
- * (1) include "config.php" so that constants are defined.
- *     (and make sure that constants are properly configured)
- * (2) instantiate this class to process a data feed.
- *
- * -------------------------------------------------------------------------- */
+ * @author Peter Bailie, Systems Programmer (RPI dept of computer science)
+ */
 
 require "config.php";
 new submitty_student_auto_feed();
 
+/** primary process class */
 class submitty_student_auto_feed {
     private static $semester;
     private static $course_list;
@@ -69,7 +65,7 @@ class submitty_student_auto_feed {
         self::$db = pg_connect("host={$db_host} dbname=submitty user={$db_user} password={$db_password} sslmode=prefer");
 
         //Make sure there's a DB connection to Submitty.
-        if (pg_connection_status(self::$db) === false) {
+        if (pg_connection_status(self::$db) !== PGSQL_CONNECTION_OK) {
             $this->log_it("Error: Cannot connect to submitty DB");
         } else {
 			//Get course list
@@ -108,7 +104,7 @@ class submitty_student_auto_feed {
     public function __destruct() {
 
         //Close DB connection, if it exists.
-        if (pg_connection_status(self::$db) === false) {
+        if (pg_connection_status(self::$db) === PGSQL_CONNECTION_OK) {
         	pg_close(self::$db);
         }
 
@@ -122,10 +118,14 @@ class submitty_student_auto_feed {
         }
 	}
 
+	/**
+	 * Run some error checks and copy file data to class property.
+	 *
+	 * @access private
+	 * @param  array    $csv_data  rows of data read from enrollment CSV.
+	 * @return boolean  indicates success that CSV data passes validation tests
+	 */
     private function validate_csv($csv_data) {
-    //IN:  No parameters
-    //OUT: true when all data passes validation, false otherwise.
-    //PURPOSE: Run some error checks and copy file data to class property.
 
         if (empty($csv_data)) {
             $this->log_it("No data read from student CSV file.");
@@ -251,14 +251,19 @@ class submitty_student_auto_feed {
         return ($validation_flag && count(self::$data['users']) > 0 && count(self::$data['courses_users']) > 0);
     }
 
+	/**
+	 * Retrieves a list of participating courses.
+	 *
+	 * Submitty can handle multiple courses.  This function retrieves a list of
+	 * participating courses from the database.
+	 *
+	 * @access private
+	 * @return array  list of courses registered in Submitty
+	 */
     private function get_participating_course_list() {
-    //IN:  No parameters
-    //OUT: Array showing courses that are participating in Submitty.
-    //PURPOSE: Submitty can handle multiple courses.  This function retrieves
-    //         a list of participating courses from the database.
 
         //EXPECTED: self::$db has an active/open Postgres connection.
-        if (pg_connection_status(self::$db) === false) {
+        if (pg_connection_status(self::$db) !== PGSQL_CONNECTION_OK) {
             $this->log_it("Error: not connected to Submitty DB when retrieving active course list.");
             return false;
         }
@@ -284,15 +289,20 @@ SQL;
         return pg_fetch_all_columns($res, 0);
     }
 
+	/**
+	 * Merge mapped courses into one
+	 *
+	 * Sometimes a course is combined with undergrads/grad students, or a course
+	 * is crosslisted, but meets collectively.  Course mappings will "merge"
+	 * courses into a single master course.
+	 *
+	 * @access private
+	 * @return array  a list of "course mappings" (where one course is merged into another)
+	 */
     private function get_course_mappings() {
-    //IN:  No parameters.
-    //OUT: A list of "course mappings" (where one course is merged into another)
-    //PURPOSE:  Sometimes a course is combined with undergrads/grad students, or
-    //          a course is crosslisted, but meets collectively.  Course
-    //          mappings will "merge" courses into a single master course.
 
         //EXPECTED: self::$db has an active/open Postgres connection.
-        if (pg_connection_status(self::$db) === false) {
+        if (pg_connection_status(self::$db) !== PGSQL_CONNECTION_OK) {
             $this->log_it("Error: not connected to Submitty DB when retrieving course mappings list.");
             return false;
         }
@@ -333,16 +343,22 @@ SQL;
         return $mappings;
     }
 
+	/**
+	 * Load auto feed data.
+	 *
+	 * NOTES:
+	 * Constants need to be set in config.php.
+	 * 'remote_keypair' auth doesn't quite work with encrypted keys on Ubuntu
+	 * systems due to a bug in the PHP API when libssh2 is NOT compiled with
+	 * OpenSSH (as is normal with Ubuntu).
+	 *
+	 * @link https://bugs.php.net/bug.php?id=58573
+	 * @link http://php.net/manual/en/function.ssh2-auth-pubkey-file.php
+	 * @access private
+	 * @param array    $csv_data  empty array used to read CSV data from file
+	 * return boolean  indicates success/failure of loading CSV data
+	 */
     private function load_csv(&$csv_data) {
-    //IN:  Empty variable to recieve auto feed data by reference.
-    //OUT: True when process completes OK.  False when there is a problem.
-    //PURPOSE:  Function to load auto feed data.  Constants need to be set in
-    //          config.php.
-    //NOTE: 'remote_keypair' auth doesn't quite work with encrypted keys on
-    //      Ubuntu systems due to a bug in the PHP API when libssh2 is NOT
-    //      compiled with OpenSSH (as is normal with Ubuntu).
-    //      q.v. https://bugs.php.net/bug.php?id=58573
-    //           http://php.net/manual/en/function.ssh2-auth-pubkey-file.php
 
     	$csv_file = CSV_FILE;
 
@@ -377,19 +393,18 @@ SQL;
 	   	return true;
     }
 
+	/**
+	 * "Update/Insert" data into the database.  Code works via "batch" upserts.
+	 *
+	 * This SQL code was adapted from upsert discussion on Stack Overflow and is
+	 * meant to be compatible with PostgreSQL prior to v9.5.  Code does work with
+	 * PostgreSQL 9.5 (and presumably later versions).
+	 *
+	 * @link http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
+	 * @access private
+	 * @return boolean  true when upsert is complete
+	 */
     private function upsert_psql94() {
-    //IN:  No parameters.
-    //OUT: TRUE when upsert is complete.
-    //PURPOSE:  "Update/Insert" data into the database.  Code works via "batch"
-    //          upserts.
-
-/* -----------------------------------------------------------------------------
- * This SQL code was adapted from upsert discussion on Stack Overflow and is
- * meant to be compatible with PostgreSQL prior to v9.5.  Code does work with
- * PostgreSQL 9.5 (and presumably later versions).
- *
- *  q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
- * -------------------------------------------------------------------------- */
 
         $sql = array('users'         => array('begin'    => 'BEGIN',
                                               'commit'   => 'COMMIT',
@@ -601,10 +616,13 @@ SQL;
         return true;
     }
 
+	/**
+	 * log msg queue holds messages intended for email and text logs.
+	 *
+	 * @access private
+	 * @param string  $msg  message to write to log file
+	 */
     private function log_it($msg) {
-    //IN:  Message to write to log file
-    //OUT: No return, although log ms queue is updated.
-    //PURPOSE: log msg queue holds messages intended for email and text logs.
 
 		if (!empty($msg)) {
 	        self::$log_msg_queue .= date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
@@ -612,25 +630,38 @@ SQL;
     }
 }
 
+/** static class for deduplicating data */
 class deduplicate {
 
+	/**
+	 * deduplicate data by a specific column
+	 *
+	 * Users table in "Submitty" database must have a unique student per row.
+	 * per row.  Students in multiple courses may have multiple entries where
+	 * where deduplication is necessary.
+	 *
+	 * @access public
+	 * @param array  $arr  array to be deduplicated, passed by reference
+	 * @param mixed  $key  column by which rows are deduplicated
+	 */
 	public static function deduplicate_data(&$arr, $key='user_id') {
-	//IN:  Array to be deduplicated, passed by reference.
-	//OUT: No specific return.  Deduplicated array is passed by reference.
-	//PURPOSE: Users table in "Submitty" database must have a unique student
-	//         per row.  Students in multiple courses may have multiple entries
-	//         where deduplication is necessary.
 
 		self::merge_sort($arr, $key);
 		self::dedup($arr, $key);
 	}
 
+	/**
+	 * merge sort
+	 *
+	 * PHP's built in sort is quicksort.  It is not stable and cannot sort rows
+	 * by column, and therefore is not sufficient.  Data will be sorted to be
+	 * deduplicated.
+	 *
+	 * @access private
+	 * @param array  $arr  array of data rows to be sorted
+	 * @param mixed  $key  column by which rows are sorted
+	 */
 	private static function merge_sort(&$arr, $key) {
-	//IN:  Array to sort (returned by reference) and key to sort by
-	//OUT: No return statement.  Array to be sorted is passed by reference.
-    //PURPOSE: PHP's built in sort is quicksort.  It is not stable and cannot
-    //         sort rows by column, and therefore is not sufficient, here.
-    //         This implementation of merge sort does what is needed.
 
 		//Arrays of size < 2 require no action.
 		if (count($arr) < 2) {
@@ -676,10 +707,14 @@ class deduplicate {
 		}
 	}
 
+	/**
+	 * remove duplicated student rows
+	 *
+	 * @access private
+ 	 * @param array  $arr  array of data rows to be deduplicated
+	 * @param mixed  $key  column by which rows are deduplicated
+	 */
 	private static function dedup(&$arr, $key) {
-	//IN:  Sorted array, passed by reference.
-	//OUT: No return statement.  Deduplicated array is passed by reference.
-	//PURPOSE:  remove duplicated student data
 
 		$count = count($arr);
 		for ($i = 1; $i < $count; $i++) {
