@@ -142,6 +142,8 @@ javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
 g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils pdftk
 
+apt-get install -qqy ninja-build
+
 #CMAKE
 echo "installing cmake"
 apt-get install -qqy cmake

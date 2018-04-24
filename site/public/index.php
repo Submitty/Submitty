@@ -192,6 +192,9 @@ if ($core->getUser() !== null) {
         $action = "login";
     }
     if ($log && $action !== "") {
+        if ($core->getConfig()->isCourseLoaded()) {
+            $action = $core->getConfig()->getSemester().':'.$core->getConfig()->getCourse().':'.$action;
+        }
         Logger::logAccess($core->getUser()->getId(), $action);
     }
 }
