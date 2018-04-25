@@ -392,7 +392,7 @@ if not args.worker:
 
     with open(DATABASE_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)
-    shutil.chown(DATABASE_JSON, HWPHP_USER, 'www-data')
+    shutil.chown(DATABASE_JSON, 'root', HWCRONPHP_GROUP)
     os.chmod(DATABASE_JSON, 0o440)
 
 ##############################################################################

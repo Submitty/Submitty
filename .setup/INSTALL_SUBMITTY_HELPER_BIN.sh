@@ -55,11 +55,8 @@ for i in "${array[@]}"; do
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
 done
 
-array=( grade_item.py grade_items_logging.py insert_database_version_data.py write_grade_history.py )
-for i in "${array[@]}"; do
-    chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/autograder/${i}
-    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/autograder/${i}
-done
+chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/autograder/*
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/autograder/*
 
 #####################################
 
