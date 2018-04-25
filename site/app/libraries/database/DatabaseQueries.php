@@ -132,6 +132,16 @@ class DatabaseQueries {
         return $this->course_db->rows()[0]["max_id"];
     }
 
+    public function getPosts(){
+        $this->course_db->query("SELECT * FROM posts where deleted = false");
+        return $this->course_db->rows();
+    }
+
+    public function getDeletedPostsByUser($user){
+        $this->course_db->query("SELECT * FROM posts where deleted = true AND author_user_id = ?", array($user));
+        return $this->course_db->rows();
+    }
+
     public function getFirstPostForThread($thread_id) {
         $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id = ?", array($thread_id));
         return $this->course_db->rows()[0];
@@ -141,6 +151,8 @@ class DatabaseQueries {
         $this->course_db->query("SELECT * FROM posts where id = ?", array($post_id));
         return $this->course_db->rows()[0];
     }
+
+
 
     public function isStaffPost($author_id){
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", array($author_id));
