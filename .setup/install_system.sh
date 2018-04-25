@@ -479,7 +479,7 @@ if [ ${WORKER} == 0 ]; then
 
         # Other Universities will need to rerun /bin/setcsvfields to match their
         # classlist csv data.  See wiki for details.
-        ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
+        ${SUBMITTY_INSTALL_DIR}/sbin/setcsvfields.py 13 12 15 7
     fi
 fi
 

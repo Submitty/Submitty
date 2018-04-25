@@ -210,7 +210,6 @@ class Config extends AbstractModel {
         $this->base_url = $submitty_json['submission_url'];
         $this->vcs_url = $submitty_json['vcs_url'];
         $this->cgi_url = $submitty_json['cgi_url'];
-        $this->ta_base_url = $submitty_json['tagrading_url'];
         $this->submitty_path = $submitty_json['submitty_data_dir'];
 
         if (isset($submitty_json['timezone'])) {

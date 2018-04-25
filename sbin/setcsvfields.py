@@ -32,8 +32,8 @@ def main():
     args = parse_args()
     if len({args.first_name, args.last_name, args.email, args.section}) != 4:
         raise SystemExit("All passed arguments must be unique.")
-    ini_file = os.path.join(INI_PATH, INI_FILE)
-    with open(ini_file, "w") as open_file:
+    write_file = os.path.join(INI_PATH, INI_FILE)
+    with open(write_file, "w") as open_file:
         open_file.write("""; This sets the CSV fields from a student class list that relate to course DB
 ; entries.  Please run 'bin/setcsvfields' to set this configuration.
 
@@ -43,8 +43,8 @@ student_last_name  = {:d}
 student_email      = {:d}
 student_section    = {:d}""".format(args.first_name, args.last_name, args.email, args.section))
 
-    os.system("chown {}:{} {}".format(INI_OWNER, INI_OWNER, ini_file))
-    os.chmod(ini_file, 0o400)
+    os.system("chown {}:{} {}".format(INI_OWNER, INI_OWNER, write_file))
+    os.chmod(write_file, 0o400)
 
 if __name__ == "__main__":
     main()
