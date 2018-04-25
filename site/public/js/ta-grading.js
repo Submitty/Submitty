@@ -319,10 +319,6 @@ function handleKeyPress(key) {
             $('.fa-user').addClass('icon-selected');
             $('#bar_wrapper').attr("style", "top: -90px;left: 45%; z-index:40;");
             $("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
-            updateHandle("#autograding_results");
-            updateHandle("#grading_rubric");
-            updateHandle("#submission_browser");
-            updateHandle("#student_info");
             hideIfEmpty(".rubric_panel");
             deleteCookies();
             updateCookies();
@@ -436,19 +432,6 @@ function downloadFile(html_file, url_file) {
     }
     window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': directory, 'file': html_file, 'path': url_file});
     return false;
-}
-
-function updateHandle(element) {
-    var bottom_e = $(element).scrollTop();
-    var padding = $(element).outerHeight() - $(element).innerHeight();
-    var height = $(element).prop('scrollHeight') - padding;
-    var bottom_s = $(element).scrollTop() + $(element).prop('clientHeight');
-    var bottom_s = Math.min(height, bottom_s);
-    var bottom_se = bottom_s - 20;
-    var bottom_se = Math.min(height, bottom_se);
-    //$(element).find('.ui-resizable-e').css('top', bottom_e + 'px');
-    //$(element).find('.ui-resizable-s').css('top', bottom_s + 'px');
-    //$(element).find('.ui-resizable-se').css('bottom', bottom_se + 'px');
 }
 
 function hideIfEmpty(element) {

@@ -1598,35 +1598,6 @@ window.onbeforeunload = function() {
 }
 </script>
 <script type="text/javascript">
-    /*
-    $(document).ready(function() {
-        $( "#autograding_results" ).scroll(function() {
-            updateHandle("#autograding_results");
-        });
-        $( "#autograding_results" ).resize(function() {
-            updateHandle("#autograding_results");
-        });
-        $( "#grading_rubric" ).scroll(function() {
-            updateHandle("#grading_rubric");
-        });
-        $( "#grading_rubric" ).resize(function() {
-            updateHandle("#grading_rubric");
-        });
-        $( "#submission_browser" ).scroll(function() {
-            updateHandle("#submission_browser");
-        });
-        $( "#submission_browser" ).resize(function() {
-            updateHandle("#submission_browser");
-        });
-        $( "#student_info" ).scroll(function() {
-            updateHandle("#student_info");
-        });
-        $( "#student_info" ).resize(function() {
-            updateHandle("#student_info");
-        });
-    }); */
-</script>
-<script type="text/javascript">
     function openFrame(html_file, url_file, num) {
         var iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open')) {
