@@ -31,6 +31,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
      * exposing things to students.
      */
     public function testClassProperties() {
+        /** @noinspection PhpUnhandledExceptionInspection */
         $class = new \ReflectionClass('app\models\Config');
         $properties = $class->getDefaultProperties();
         $this->assertFalse($properties['debug']);
@@ -52,7 +53,6 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'site_details' => array(
                 'base_url' => "http://example.com",
                 'cgi_url' => "http://example.com/cgi",
-                'ta_base_url' => "http://example.com/ta",
                 'submitty_path' => $this->temp_dir,
                 'authentication' => "PamAuthentication",
                 'timezone' => "America/Chicago",
@@ -107,7 +107,6 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals("s17", $config->getSemester());
         $this->assertEquals("csci0000", $config->getCourse());
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
-        $this->assertEquals("http://example.com/ta/", $config->getTaBaseUrl());
         $this->assertEquals("http://example.com/cgi/", $config->getCgiUrl());
         $this->assertEquals("http://example.com/index.php?semester=s17&course=csci0000", $config->getSiteUrl());
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
@@ -143,7 +142,6 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'semester' => 's17',
             'course' => 'csci0000',
             'base_url' => 'http://example.com/',
-            'ta_base_url' => 'http://example.com/ta/',
             'cgi_url' => 'http://example.com/cgi/',
             'site_url' => 'http://example.com/index.php?semester=s17&course=csci0000',
             'submitty_path' => $this->temp_dir,
@@ -187,15 +185,6 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $config = new Config($this->core, "s17", "csci0000", $this->master);
         $this->assertEquals("http://example.com/course/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/course", $config->getHiddenDetails()['course_url']);
-    }
-
-    public function testHiddenTABaseUrl() {
-        $extra = array('hidden_details' => array('ta_base_url' => 'http://example.com/hwgrading'));
-        $this->createConfigFile($extra);
-
-        $config = new Config($this->core, "s17", "csci0000", $this->master);
-        $this->assertEquals("http://example.com/hwgrading/", $config->getTaBaseUrl());
-        $this->assertEquals("http://example.com/hwgrading", $config->getHiddenDetails()['ta_base_url']);
     }
 
     public function testDefaultTimezone() {
@@ -252,7 +241,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
     public function getRequiredSettings() {
         $settings = array(
             'site_details' => array(
-                'base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'
+                'base_url', 'cgi_url', 'submitty_path', 'authentication'
             ),
             'logging_details' => array(
                 'submitty_log_path', 'log_exceptions'
