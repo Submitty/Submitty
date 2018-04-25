@@ -78,7 +78,6 @@ if [ ${VAGRANT} == 1 ]; then
 ##  The VM can be accessed with the following urls:       ##
 ##    ${SUBMISSION_URL} (submission)                  ##
 ##    ${SUBMISSION_URL}/cgi-bin (cgi-bin scripts)     ##
-##    ${SUBMISSION_URL}/hwgrading (tagrading)         ##
 ##    ${GIT_URL}/git (git)                     ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##

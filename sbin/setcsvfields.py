@@ -8,7 +8,8 @@ CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'c
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     JSON = json.load(open_file)
-INI_PATH = os.path.join(JSON['submitty_install_dir'], 'site/public/hwgrading/toolbox/configs/')
+INI_PATH = os.path.join(JSON['submitty_install_dir'], 'site', 'config')
+
 INI_FILE = "student_csv_fields.ini"
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     JSON = json.load(open_file)

@@ -25,11 +25,6 @@ apt install -qqy python3-pip
 pip3 install pylint
 pip3 install pillow
 
-# unit tests for python
-echo "Getting unittest... "
-
-pip3 install unittest2
-
 
 ##################################################
 # Used by Principles of Software
