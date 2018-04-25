@@ -271,6 +271,8 @@ class ForumController extends AbstractController {
             $users[$user]["id"][] = $posts[$i]["id"];
             $users[$user]["timestamps"][] = $posts[$i]["timestamp"];
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
+            $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
+
             
         }
         ksort($users);
