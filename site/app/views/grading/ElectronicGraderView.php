@@ -167,7 +167,7 @@ HTML;
                     $valid_graders = array();
                     foreach($section['graders'] as $valid_grader){
                         if($valid_grader->getGroup() <= $gradeable->getMinimumGradingGroup()){
-                            array_push($valid_graders, $valid_grader->getFirstName());
+                            $valid_graders[] = $valid_grader->getFirstName();
                         }
                     }
                     if (count($valid_graders) > 0) {
