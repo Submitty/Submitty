@@ -181,10 +181,12 @@ class ReportController extends AbstractController {
                 if ($component->getHasMarks()) {
                     $marks = [];
                     foreach ($component->getMarks() as $mark) {
-                        $marks[] = [
-                            'points' => $mark->getPoints(),
-                            'note' => $mark->getNote()
-                        ];
+                        if ($mark->getHasMark()) {
+                            $marks[] = [
+                                'points' => $mark->getPoints(),
+                                'note' => $mark->getNote()
+                            ];
+                        }
                     }
                     $inner['marks'] = $marks;
                 }
@@ -230,8 +232,9 @@ class ReportController extends AbstractController {
         }
 
         if($status === 'Bad') {
-            $entry["score"] = 0;
+            $entry['score'] = 0;
         }
+
         $entry['status'] = $status;
 
         if ($late_flag && $late_days_used > 0) {
