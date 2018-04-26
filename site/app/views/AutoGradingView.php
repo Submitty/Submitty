@@ -579,7 +579,7 @@ HTML;
         $display = "none";
         $current = $gradeable->getCurrentVersion();
         $totalPointsEarned = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $totalInstructorPointsEarned;
-        $maxPossiblePoints = $gradeable->getTotalAutograderNonExtraCreditPoints() + $maxScore;
+        $maxPossiblePoints = $gradeable->getNormalPoints() + $maxScore;
         $background = "";
         if($totalPointsEarned >= $maxPossiblePoints){
             $background = "green-background";
