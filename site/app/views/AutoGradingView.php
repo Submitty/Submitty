@@ -81,7 +81,7 @@ HTML;
                 $autoGradingPoints = $current_version->getNonHiddenTotal();
                 $all_autograder_points = $autoGradingPoints + $current_version->getHiddenTotal();
                 $display_hidden = "none";
-                $hidden_background;
+                $hidden_background = '';
                 if($gradeable->taGradesReleased()){
                     foreach ($gradeable->getTestcases() as $testcase) {
                         if(!$testcase->viewTestcase()) continue;
