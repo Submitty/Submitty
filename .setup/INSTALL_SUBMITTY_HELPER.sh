@@ -166,7 +166,7 @@ chmod  751                                        ${SUBMITTY_DATA_DIR}
 if [ "${WORKER}" == 0 ]; then
     chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
     chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
-    chown  hwcgi:hwcgi                                ${SUBMITTY_DATA_DIR}/vcs
+    chown  root:hwcgi                                 ${SUBMITTY_DATA_DIR}/vcs
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
 fi
 
