@@ -118,6 +118,7 @@ fi
 
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcron hwcronphp
+adduser hwcron www-data
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
 
