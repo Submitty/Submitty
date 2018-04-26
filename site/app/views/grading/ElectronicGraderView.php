@@ -160,13 +160,18 @@ HTML;
             Graders:
             <div style="margin-left: 20px">
 HTML;
-
                 foreach ($sections as $key => $section) {
                     if ($key === "NULL") {
                         continue;
                     }
-                    if (count($section['graders']) > 0) {
-                        $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
+                    $valid_graders = array();
+                    foreach($section['graders'] as $valid_grader){
+                        if($valid_grader->getGroup() <= $gradeable->getMinimumGradingGroup()){
+                            array_push($valid_graders, $valid_grader->getFirstName());
+                        }
+                    }
+                    if (count($valid_graders) > 0) {
+                        $graders = implode(", ",  $valid_graders);
                     }
                     else {
                         $graders = "Nobody";
