@@ -232,8 +232,9 @@ class ReportController extends AbstractController {
         }
 
         if($status === 'Bad') {
-            $entry["score"] = 0;
+            $entry['score'] = 0;
         }
+
         $entry['status'] = $status;
 
         if ($late_flag && $late_days_used > 0) {
