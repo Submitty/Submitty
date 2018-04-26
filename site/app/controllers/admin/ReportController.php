@@ -181,10 +181,12 @@ class ReportController extends AbstractController {
                 if ($component->getHasMarks()) {
                     $marks = [];
                     foreach ($component->getMarks() as $mark) {
-                        $marks[] = [
-                            'points' => $mark->getPoints(),
-                            'note' => $mark->getNote()
-                        ];
+                        if ($mark->getHasMark()) {
+                            $marks[] = [
+                                'points' => $mark->getPoints(),
+                                'note' => $mark->getNote()
+                            ];
+                        }
                     }
                     $inner['marks'] = $marks;
                 }

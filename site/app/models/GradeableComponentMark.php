@@ -11,6 +11,7 @@ use app\libraries\Core;
  * @method int getOrder()
  * @method float getPoints()
  * @method boolean getPublish()
+ * @method boolean getHasMark()
  */
 
 class GradeableComponentMark extends AbstractModel {
