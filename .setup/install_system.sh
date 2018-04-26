@@ -97,6 +97,11 @@ fi
 sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
 grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && exit)
 
+adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwcron hwcronphp
+
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
+
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
     adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
@@ -105,6 +110,8 @@ if [ ${WORKER} == 0 ]; then
     adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
     adduser hwcgi hwphp
     adduser hwcgi www-data
+    # Add hwcron to hwcgi group so that hwcron can access VCS repos under /var/local/submitty/vcs
+    adduser hwcron hwcgi
     adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
     # NOTE: hwcgi must be in the shadow group so that it has access to the
     # local passwords for pam authentication
@@ -115,11 +122,6 @@ if [ ${WORKER} == 0 ]; then
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
 fi
-
-adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwcron hwcronphp
-
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
 
 if [ ${VAGRANT} == 1 ]; then
 	# add these users so that they can write to .vagrant/logs folder
@@ -263,15 +265,15 @@ if [ ${WORKER} == 0 ]; then
         rm /etc/apache2/sites*/default-ssl.conf
 
         cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
-        cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
+        # cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
 
         sed -i -e "s/SUBMITTY_URL/${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
-        sed -i -e "s/GIT_URL/${GIT_URL:7}/g" /etc/apache2/sites-available/git.conf
+        # sed -i -e "s/GIT_URL/${GIT_URL:7}/g" /etc/apache2/sites-available/git.conf
 
         # permissions: rw- r-- ---
         chmod 0640 /etc/apache2/sites-available/*.conf
         a2ensite submitty
-        a2ensite git
+        # a2ensite git
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
     	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password

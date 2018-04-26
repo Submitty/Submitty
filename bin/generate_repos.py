@@ -18,14 +18,15 @@ DATABASE_PASS = '__INSTALL__FILLIN__DATABASE_PASSWORD__'
 
 VCS_FOLDER = os.path.join('__INSTALL__FILLIN__SUBMITTY_DATA_DIR__', 'vcs')
 
+
 def create_folder(folder):
     if not os.path.isdir(folder):
-        os.makedirs(folder, mode=0o770)
+        os.makedirs(folder, mode=0o540)
         os.chdir(folder)
         os.system('git init --bare --shared')
         for root, dirs, files in os.walk(folder):
             for entry in files + dirs:
-                shutil.chown(os.path.join(root, entry), group='www-data')
+                shutil.chown(os.path.join(root, entry), user='hwcgi', group='hwcgi')
 
 
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
@@ -54,11 +55,11 @@ if course is None:
 vcs_course = os.path.join(VCS_FOLDER, args.semester, args.course)
 
 if not os.path.isdir(vcs_course):
-    os.makedirs(vcs_course, mode=0o770, exist_ok=True)
-    shutil.chown(VCS_FOLDER, group='www-data')
+    os.makedirs(vcs_course, mode=0o540, exist_ok=True)
+    shutil.chown(VCS_FOLDER, user='hwcgi', group='hwcgi')
     for root, dirs, files in os.walk(VCS_FOLDER):
         for entry in dirs:
-            shutil.chown(os.path.join(root, entry), group='www-data')
+            shutil.chown(os.path.join(root, entry), user='hwcgi', group='hwcgi')
 
 is_team = False;
 

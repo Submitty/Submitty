@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export GIT_PROJECT_ROOT=/var/local/submitty/vcs
+export GIT_HTTP_EXPORT_ALL=1
+
+/usr/lib/git-core/git-http-backend

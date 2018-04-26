@@ -25,7 +25,7 @@ fi
 
 if [ ${VAGRANT} == 1 ]; then
     export SUBMISSION_URL='http://192.168.56.101'
-    export GIT_URL='http://192.168.56.102'
+    export GIT_URL='http://192.168.56.101'
 
     #
     # The goal here is to ensure the VM is accessible from your own
