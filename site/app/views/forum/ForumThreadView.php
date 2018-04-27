@@ -661,6 +661,7 @@ HTML;
 			$ids = htmlspecialchars(json_encode($details["id"]), ENT_QUOTES, 'UTF-8');
 			$timestamps = htmlspecialchars(json_encode($details["timestamps"]), ENT_QUOTES, 'UTF-8');
 			$thread_ids = htmlspecialchars(json_encode($details["thread_id"]), ENT_QUOTES, 'UTF-8');
+			$thread_titles = htmlspecialchars(json_encode($details["thread_title"]), ENT_QUOTES, 'UTF-8');
 			$num_deleted = ($details["num_deleted_posts"]);
 			$return .= <<<HTML
 			<tbody>
@@ -669,7 +670,7 @@ HTML;
 					<td>{$post_count}</td>
 					<td>{$details["total_threads"]}</td>
 					<td>{$num_deleted}</td>
-					<td><button class="btn btn-default" data-action = "expand" data-posts="{$posts}" data-id="{$ids}" data-timestamps="{$timestamps}" data-thread_id="{$thread_ids}">Expand</button></td>
+					<td><button class="btn btn-default" data-action = "expand" data-posts="{$posts}" data-id="{$ids}" data-timestamps="{$timestamps}" data-thread_id="{$thread_ids}" data-thread_titles="{$thread_titles}">Expand</button></td>
 				</tr>
 			</tbody>
 HTML;
@@ -703,20 +704,23 @@ HTML;
 					var ids = $(this).data('id');
 					var timestamps = $(this).data('timestamps');
 					var thread_ids = $(this).data('thread_id');
+					var thread_titles = $(this).data('thread_titles');
 					if(action=="expand"){
 						
 						
 						for(var i=0;i<posts.length;i++){
 							var post_string = posts[i];
 							post_string = escapeSpecialChars(post_string);
-							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td colspan = "3" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
+							var thread_title = thread_titles[i]["title"];
+							thread_title = escapeSpecialChars(thread_title);
+							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
 							
 						}
 						$(this).html("Collapse");
 						$(this).data('action',"collapse");
 						$("td").click(function(){
 						
-							if($(this).data('type')=="post"){
+							if($(this).data('type')=="post" || $(this).data('type')=="thread"){
 			
 								var id = $(this).data('thread_id');
 								var url = buildUrl({'component' : 'forum', 'page' : 'view_thread', 'thread_id' : id});
@@ -752,7 +756,7 @@ HTML;
 
 							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
 							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
-							if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : a.innerHTML<b.innerHTML){
+							if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
 								rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
 								switching=true;
 							}
