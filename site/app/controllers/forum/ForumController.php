@@ -96,14 +96,16 @@ class ForumController extends AbstractController {
         } return $imageCheck;
     }
 
-    private function hasGoodCategory($inputCategoryId){
-        if($inputCategoryId < 1)
+    private function isValidCategory($inputCategoryId){
+        if($inputCategoryId < 1){
             return false;
+        }
         $rows = $this->core->getQueries()->getCategories();
         foreach($rows as $index => $values){
             if($values["category_id"] === $inputCategoryId)
                 return true;
-        } return false;
+        } 
+        return false;
     }
 
     public function addNewCategory(){
@@ -130,11 +132,11 @@ class ForumController extends AbstractController {
         $thread_content = str_replace("\r", "", $_POST["thread_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
-        $category_id = $_POST["cat"];
+        $category_id = (int)$_POST["cat"];
         if(empty($title) || empty($thread_content)){
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
-        }else if(!is_numeric($category_id) || empty($category_id) || !$this->hasGoodCategory((int)$category_id)){
+        }else if(!$this->isValidCategory($category_id)){
             $this->core->addErrorMessage("You must select a valid category. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));         
         } else {
