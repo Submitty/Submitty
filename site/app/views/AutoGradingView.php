@@ -563,8 +563,8 @@ HTML;
                 }
                 $score = $score . " / " . $component->getMaxValue();
             }
-            //add grader's name if not peer grading
-            $componentGrader = ($gradeable->getPeerGrading())? "" :" (Graded by: " . $component->getGrader()->getLastName().")";
+            //add grader's name if not peer grading and is a full access grader
+            $componentGrader = ($gradeable->getPeerGrading() || !$component->getGrader()->accessFullGrading())? "" :" (Graded by: " . $component->getGrader()->getLastName().")";
             $return .= <<<HTML
             <div class="box">
                 <div class="box-title">
