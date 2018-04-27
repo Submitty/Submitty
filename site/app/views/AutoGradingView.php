@@ -81,7 +81,7 @@ HTML;
                 $autoGradingPoints = $current_version->getNonHiddenTotal();
                 $all_autograder_points = $autoGradingPoints + $current_version->getHiddenTotal();
                 $display_hidden = "none";
-                $hidden_background;
+                $hidden_background = '';
                 if($gradeable->taGradesReleased()){
                     foreach ($gradeable->getTestcases() as $testcase) {
                         if(!$testcase->viewTestcase()) continue;
@@ -579,7 +579,7 @@ HTML;
         $display = "none";
         $current = $gradeable->getCurrentVersion();
         $totalPointsEarned = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $totalInstructorPointsEarned;
-        $maxPossiblePoints = $gradeable->getNormalPoints() + $maxScore;
+        $maxPossiblePoints = $gradeable->getTotalAutograderNonExtraCreditPoints() + $maxScore;
         $background = "";
         if($totalPointsEarned >= $maxPossiblePoints){
             $background = "green-background";
