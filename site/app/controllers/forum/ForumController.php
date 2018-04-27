@@ -248,6 +248,7 @@ class ForumController extends AbstractController {
         $posts = array();
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
+        $function_date = 'date_format';
         $num_threads = 0;
         $users = array();
         for($i=0;$i<$num_posts;$i++){
@@ -269,7 +270,8 @@ class ForumController extends AbstractController {
             }
             $users[$user]["posts"][] = $content;
             $users[$user]["id"][] = $posts[$i]["id"];
-            $users[$user]["timestamps"][] = $posts[$i]["timestamp"];
+            $date = date_create($posts[$i]["timestamp"]);
+            $users[$user]["timestamps"][] = $function_date($date,"n/j g:i A");
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
 
