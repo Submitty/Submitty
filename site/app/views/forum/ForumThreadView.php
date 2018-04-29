@@ -36,6 +36,7 @@ class ForumThreadView extends AbstractView {
     <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/clike.js"></script>
     <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/python.js"></script>
     <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 		<style>body {min-width: 925px;} pre { font-family: inherit; }</style>
 
 
@@ -49,6 +50,7 @@ class ForumThreadView extends AbstractView {
 			    enableTabsInTextArea('post_content');
 				saveScrollLocationOnRefresh('thread_list');
 				saveScrollLocationOnRefresh('posts_list');
+				$("form").areYouSure();
 				addCollapsable();
 			});
 
@@ -116,13 +118,14 @@ HTML;
 				<h3 id="edit_user_prompt"></h3>
 
 				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
-    					<input type="hidden" id="edit_post_id" name="edit_post_id" value="" />
-						<input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" />
+    					<input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
+						<input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
 
 	            		<textarea name="edit_post_content" id="edit_post_content" style="margin-right:10px;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
 	            	
 					<div style="float: right; width: auto; margin-top: 10px">
-	        			<a onclick="$('#edit-user-post').css('display', 'none');" class="btn btn-danger">Cancel</a>
+	        			<a onclick="$('#edit-user-post').css('display', 'none');$('#edit_post_content').val('');
+	        						$('#edit_post_content').trigger('checkform.areYouSure');" class="btn btn-danger">Cancel</a>
 	       			 	<input class="btn btn-primary" type="submit" value="Submit" />
 	    			</div>	
 	    			</form>
@@ -322,7 +325,7 @@ HTML;
 						</span>
 
 	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Submit reply to all" class="btn btn-primary" />
+	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/><input type="submit" style="display:inline-block;" name="post" value="Submit reply to all" class="btn btn-primary" />
 	            		</div>
 	            	</form>
 	            	<br/>
@@ -537,7 +540,7 @@ HTML;
 						</span>
 
 	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Submit reply to {$visible_username}" class="btn btn-primary" />
+	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/><input type="submit" style="display:inline-block;" name="post" value="Submit reply to {$visible_username}" class="btn btn-primary" />
 	            		</div>
 	            	</form>
 HTML;
@@ -555,10 +558,12 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
+		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 
 		<script> 
 			$( document ).ready(function() {
 			    enableTabsInTextArea('thread_content');
+				$("form").areYouSure();
 			});
 		 </script>
 
@@ -606,12 +611,12 @@ HTML;
 				</span>
 
 				<span style="display:inline-block;float:right;">
-            	<label for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" />
+            	<label for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/>
 HTML;
 				
 				if($this->core->getUser()->getGroup() <= 2){
 						$return .= <<<HTML
-						<label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" />
+						<label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" data-ays-ignore="true"/>
 HTML;
 
 				}
@@ -661,6 +666,7 @@ HTML;
 			$ids = htmlspecialchars(json_encode($details["id"]), ENT_QUOTES, 'UTF-8');
 			$timestamps = htmlspecialchars(json_encode($details["timestamps"]), ENT_QUOTES, 'UTF-8');
 			$thread_ids = htmlspecialchars(json_encode($details["thread_id"]), ENT_QUOTES, 'UTF-8');
+			$thread_titles = htmlspecialchars(json_encode($details["thread_title"]), ENT_QUOTES, 'UTF-8');
 			$num_deleted = ($details["num_deleted_posts"]);
 			$return .= <<<HTML
 			<tbody>
@@ -669,7 +675,7 @@ HTML;
 					<td>{$post_count}</td>
 					<td>{$details["total_threads"]}</td>
 					<td>{$num_deleted}</td>
-					<td><button class="btn btn-default" data-action = "expand" data-posts="{$posts}" data-id="{$ids}" data-timestamps="{$timestamps}" data-thread_id="{$thread_ids}">Expand</button></td>
+					<td><button class="btn btn-default" data-action = "expand" data-posts="{$posts}" data-id="{$ids}" data-timestamps="{$timestamps}" data-thread_id="{$thread_ids}" data-thread_titles="{$thread_titles}">Expand</button></td>
 				</tr>
 			</tbody>
 HTML;
@@ -703,20 +709,23 @@ HTML;
 					var ids = $(this).data('id');
 					var timestamps = $(this).data('timestamps');
 					var thread_ids = $(this).data('thread_id');
+					var thread_titles = $(this).data('thread_titles');
 					if(action=="expand"){
 						
 						
 						for(var i=0;i<posts.length;i++){
 							var post_string = posts[i];
 							post_string = escapeSpecialChars(post_string);
-							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td colspan = "3" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
+							var thread_title = thread_titles[i]["title"];
+							thread_title = escapeSpecialChars(thread_title);
+							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
 							
 						}
 						$(this).html("Collapse");
 						$(this).data('action',"collapse");
 						$("td").click(function(){
 						
-							if($(this).data('type')=="post"){
+							if($(this).data('type')=="post" || $(this).data('type')=="thread"){
 			
 								var id = $(this).data('thread_id');
 								var url = buildUrl({'component' : 'forum', 'page' : 'view_thread', 'thread_id' : id});
@@ -752,7 +761,7 @@ HTML;
 
 							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
 							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
-							if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : a.innerHTML<b.innerHTML){
+							if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
 								rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
 								switching=true;
 							}
