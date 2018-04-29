@@ -546,6 +546,8 @@ class ElectronicGraderController extends AbstractController {
 
         $graded = 0;
         $total = 0;
+        $team = $gradeable->isTeamAssignment();
+
         if($peer) {
             $section_key = 'registration_section';
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
@@ -561,9 +563,14 @@ class ElectronicGraderController extends AbstractController {
                     $sections[$i] = $sections[$i]['sections_registration_id'];
                 }
             }
-            $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections,$orderBy="registration_section,user_id;");
-            $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section'));
+            if ($team) {
+                $teams_to_grade = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+            }
+            else {
+                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections,$orderBy="registration_section,user_id;");
+            }
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section'));
+            $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section'));
         }
         else {
             $section_key = "rotating_section";
@@ -574,22 +581,40 @@ class ElectronicGraderController extends AbstractController {
                     $sections[$i] = $sections[$i]['sections_rotating_id'];
                 }
             }
-            $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections,$orderBy="rotating_section,user_id;");
-            $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
+            if ($team) {
+                $teams_to_grade = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+                //$total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
+                $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
+            }
+            else {
+                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections,$orderBy="rotating_section,user_id;");
+                $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
+            }
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
         }
 
         //multiplies users and the number of components a gradeable has together
-        $total = $total * count($gradeable->getComponents());
+        if($team) {
+            $total = $total * count($gradeable->getComponents());
+        }
+        else {
+            $total = $total * count($gradeable->getComponents());
+        }
         if($total == 0) {
             $progress = 100;
         }
         else {
             $progress = round(($graded / $total) * 100, 1);
         }
-        if(!$peer) {
+        if(!$peer && !$team) {
             $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
         }
+        if(!$peer && $team) {
+            foreach ($teams_to_grade as $team_id) {
+                $user_ids_to_grade[] = $team_id->getMembers()[0];
+            }
+        }
+        
         //$gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
         $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
