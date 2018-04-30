@@ -178,17 +178,15 @@ class ReportController extends AbstractController {
                 $inner = [
                     'title' => $component->getTitle()
                 ];
-                if (!$component->getIsText()) {
+
+                if ($component->getIsText()) {
+                    $inner['comment'] = $component->getComment();
+                }
+                else {
                     $inner['score'] = $component->getGradedTAPoints();
                     $inner['default_score'] = $component->getDefault();
                     $inner['upper_clamp'] = $component->getUpperClamp();
                     $inner['lower_clamp'] = $component->getLowerClamp();
-                }
-
-                // The text/score for an electronic file is a custom mark while
-                // for all other types it's the actual score/comment
-                if ($component->getIsText()) {
-                    $inner['comment'] = $component->getComment();
                 }
 
                 if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
