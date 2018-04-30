@@ -176,8 +176,7 @@ class ReportController extends AbstractController {
             $entry['components'] = [];
             foreach ($gradeable->getComponents() as $component) {
                 $inner = [
-                    'title' => $component->getTitle(),
-                    'comment' => $component->getComment(),
+                    'title' => $component->getTitle()
                 ];
                 if (!$component->getIsText()) {
                     $inner['score'] = $component->getGradedTAPoints();
@@ -186,15 +185,24 @@ class ReportController extends AbstractController {
                     $inner['lower_clamp'] = $component->getLowerClamp();
                 }
 
-                if ($component->getHasMarks()) {
+                // The text/score for an electronic file is a custom mark while
+                // for all other types it's the actual score/comment
+                if ($component->getIsText()) {
+                    $inner['comment'] = $component->getComment();
+                }
+
+                if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                     $marks = [];
-                    foreach ($component->getMarks() as $mark) {
-                        if ($mark->getHasMark()) {
-                            $marks[] = [
-                                'points' => $mark->getPoints(),
-                                'note' => $mark->getNote()
-                            ];
+                    if ($component->getHasMarks()) {
+                        foreach ($component->getMarks() as $mark) {
+                            if ($mark->getHasMark()) {
+                                $marks[] = ['points' => $mark->getPoints(), 'note' => $mark->getNote()];
+                            }
                         }
+                    }
+
+                    if (!empty($component->getComment()) || $component->getScore() != 0) {
+                        $marks[] = ['points' => $component->getScore(), 'note' => $component->getComment()];
                     }
                     $inner['marks'] = $marks;
                 }
