@@ -77,7 +77,7 @@ HTML;
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 HTML;
         // showing submission if user is grader or student can submit
-        if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit() || $this->core->getUser()->accessGrading()) {
+        if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
             $return .= <<<HTML
 <div class="content">
     <div class="upperinfo">
