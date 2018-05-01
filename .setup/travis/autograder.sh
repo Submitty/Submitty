@@ -23,12 +23,14 @@ popd
 # --------------------------------------
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
+chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit
 
-wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
-mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
-wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -o /dev/null > /dev/null 2>&1
-mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
+JUNIT_VER=4.12
+HAMCREST_VER=1.3
+
+wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
+wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
 
 # EMMA is a tool for computing code coverage of Java programs
 echo "Getting emma..."
@@ -38,8 +40,20 @@ mv emma-2.0.5312/lib/emma.jar emma.jar
 rm -rf emma-2.0.5312
 rm emma-2.0.5312.zip
 rm index.html* > /dev/null 2>&1
-
 chmod o+r . *.jar
+
+# JaCoCo is a potential replacement for EMMA
+echo "Getting JaCoCo..."
+JACOCO_VER=0.8.0
+wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
+mkdir jacoco-${JACOCO_VER}
+unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
+mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
+mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
+rm -rf jacoco-${JACOCO_VER}
+rm jacoco-${JACOCO_VER}.zip
+chmod o+r . *.jar
+
 popd
 
 # --------------------------------------
@@ -71,5 +85,5 @@ echo -e "Compile and install the tutorial repository"
 git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
 # remember to change this version in .setup/install_system.sh too
-git checkout v0.93
+git checkout v0.94
 popd

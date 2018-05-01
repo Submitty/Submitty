@@ -19,7 +19,7 @@ use app\libraries\Utils;
  * @method string getSemester()
  * @method string getCourse()
  * @method string getBaseUrl()
- * @method string getTaBaseUrl()
+ * @method string getVcsUrl()
  * @method string getCgiUrl()
  * @method string getSiteUrl()
  * @method string getSubmittyPath()
@@ -42,6 +42,11 @@ use app\libraries\Utils;
  * @method string getInstitutionName()
  * @method string getInstitutionHomepage()
  * @method string getUsernameChangeText()
+ * @method bool isForumEnabled()
+ * @method string getVcsBaseUrl()
+ * @method string getCourseEmail()
+ * @method string getVcsUser()
+ * @method string getVcsType()
  */
 
 class Config extends AbstractModel {
@@ -79,7 +84,7 @@ class Config extends AbstractModel {
     /** @property @var string */
     protected $base_url;
     /** @property @var string */
-    protected $ta_base_url;
+    protected $vcs_url;
     /** @property @var string */
     protected $cgi_url;
     /** @property @var string */
@@ -87,7 +92,7 @@ class Config extends AbstractModel {
     /** @property @var string */
     protected $authentication;
     /** @property @var string */
-    protected $timezone = "America/New_York";
+    protected $timezone = 'America/New_York';
     /** @property @var string */
     protected $submitty_path;
     /** @property @var string */
@@ -157,6 +162,8 @@ class Config extends AbstractModel {
     protected $vcs_type;
     /** @property @var array */
     protected $hidden_details;
+    /** @property @var bool */
+    protected $forum_enabled;
 
     /**
      * Config constructor.
@@ -165,6 +172,7 @@ class Config extends AbstractModel {
      */
     public function __construct(Core $core, $semester, $course) {
         parent::__construct($core);
+
         $this->semester = $semester;
         $this->course = $course;
     }
@@ -184,7 +192,7 @@ class Config extends AbstractModel {
 
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
-        $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
+        $this->setConfigValues($master, 'site_details', array('base_url', 'vcs_url', 'cgi_url', 'submitty_path', 'authentication'));
 
         if (!isset($master['database_details']) || !is_array($master['database_details'])) {
             throw new ConfigException("Missing config section database_details in ini file");
@@ -227,7 +235,6 @@ class Config extends AbstractModel {
         }
         $this->base_url = rtrim($this->base_url, "/")."/";
         $this->cgi_url = rtrim($this->cgi_url, "/")."/";
-        $this->ta_base_url = rtrim($this->ta_base_url, "/")."/";
 
         // Check that the paths from the config file are valid
         foreach(array('submitty_path', 'submitty_log_path') as $path) {
@@ -264,17 +271,13 @@ class Config extends AbstractModel {
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type');
+            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'forum_enabled');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
             $this->hidden_details = $this->course_ini['hidden_details'];
             if (isset($this->course_ini['hidden_details']['course_url'])) {
                 $this->base_url = rtrim($this->course_ini['hidden_details']['course_url'], "/")."/";;
-            }
-
-            if (isset($this->course_ini['hidden_details']['ta_base_url'])) {
-                $this->ta_base_url = rtrim($this->course_ini['hidden_details']['ta_base_url'], "/")."/";
             }
         }
         
@@ -285,7 +288,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message');
+            'display_custom_message', 'forum_enabled');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
@@ -311,6 +314,13 @@ class Config extends AbstractModel {
               $config[$section][$key] = $config[$section]["display_iris_grades_summary"];
             }
             // END TEMPORARY WORKAROUND
+
+
+            // DEFAULT FOR FORUM
+            if (!isset($config[$section][$key]) &&
+                $key == "forum_enabled") {
+              $config[$section][$key] = false;
+            }
 
 
             if (!isset($config[$section][$key])) {

@@ -46,6 +46,9 @@ BEGIN
 END;
 $_$;
 
+CREATE FUNCTION get_allowed_late_days(character varying, timestamp with time zone) RETURNS integer AS $$
+SELECT allowed_late_days FROM late_days WHERE user_id = $1 AND since_timestamp <= $2 ORDER BY since_timestamp DESC LIMIT 1;
+$$ LANGUAGE SQL;
 
 --
 -- Name: csv_to_numeric_gradeable(text[], text, text); Type: FUNCTION; Schema: public; Owner: -
@@ -348,6 +351,16 @@ CREATE TABLE grading_rotating (
 );
 
 --
+-- Name: seeking_team; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE seeking_team (
+    g_id character varying(255) NOT NULL,
+    user_id character varying NOT NULL
+);
+
+
+--
 -- Name: peer_assign; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -453,6 +466,65 @@ CREATE TABLE teams (
 );
 
 
+-- Begins Forum 
+
+--
+-- Name: posts; Type: Table; Schema: public; Owner: -
+--
+CREATE TABLE "posts" (
+	"id" serial NOT NULL,
+	"thread_id" int NOT NULL,
+	"parent_id" int DEFAULT '-1',
+	"author_user_id" character varying NOT NULL,
+	"content" TEXT NOT NULL,
+	"timestamp" timestamp with time zone NOT NULL,
+	"anonymous" BOOLEAN NOT NULL,
+	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
+	"endorsed_by" varchar,
+	"resolved" BOOLEAN NOT NULL,
+	"type" int NOT NULL,
+  "has_attachment" BOOLEAN NOT NULL,
+	CONSTRAINT posts_pk PRIMARY KEY ("id")
+);
+
+CREATE TABLE "threads" (
+	"id" serial NOT NULL,
+	"title" varchar NOT NULL,
+	"created_by" varchar NOT NULL,
+	"pinned" BOOLEAN NOT NULL DEFAULT 'false',
+	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
+	"merged_id" int DEFAULT '-1',
+	"is_visible" BOOLEAN NOT NULL,
+	CONSTRAINT threads_pk PRIMARY KEY ("id")
+);
+
+CREATE TABLE "thread_categories" (
+	"thread_id" int NOT NULL,
+	"category_id" int NOT NULL
+);
+
+CREATE TABLE "categories_list" (
+	"category_id" serial NOT NULL,
+	"category_desc" varchar NOT NULL,
+	CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
+);
+
+CREATE TABLE "student_favorites" (
+	"id" serial NOT NULL,
+	"user_id" character varying NOT NULL,
+	"thread_id" int,
+	CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
+);
+
+CREATE TABLE "viewed_responses" (
+	"thread_id" int NOT NULL,
+	"user_id" character varying NOT NULL,
+	"timestamp" timestamp with time zone NOT NULL
+);
+
+
+-- Ends Forum
+
 --
 -- Name: gc_id; Type: DEFAULT; Schema: public; Owner: -
 --
@@ -556,6 +628,14 @@ ALTER TABLE ONLY grading_registration
 ALTER TABLE ONLY grading_rotating
     ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (sections_rotating_id, user_id, g_id);
     
+    
+--
+-- Name: seeking_team; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE seeking_team
+    ADD CONSTRAINT seeking_team_pkey PRIMARY KEY (g_id, user_id);
+
     
 --
 -- Name: peer_assign_pkey; Type: CONSTRAINT; Schema: public; Owner: -
@@ -808,6 +888,14 @@ ALTER TABLE ONLY grading_rotating
 
 
 --
+-- Name: seeking_team; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY seeking_team
+    ADD CONSTRAINT seeking_team_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
 -- Name: late_day_exceptions_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -901,6 +989,24 @@ ALTER TABLE ONLY teams
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
+
+-- Forum Key relationships
+
+ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
+ALTER TABLE "posts" ADD CONSTRAINT "posts_fk1" FOREIGN KEY ("author_user_id") REFERENCES "users"("user_id");
+
+
+ALTER TABLE "thread_categories" ADD CONSTRAINT "thread_categories_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
+ALTER TABLE "thread_categories" ADD CONSTRAINT "thread_categories_fk1" FOREIGN KEY ("category_id") REFERENCES "categories_list"("category_id");
+
+
+ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk0" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
+ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
+
+ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
+ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
+
+-- End Forum Key relationships
 
 --
 -- PostgreSQL database dump complete

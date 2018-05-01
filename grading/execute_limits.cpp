@@ -207,7 +207,6 @@ void enable_all_setrlimit(const std::string &program_name,
   
   // loop over all of the limits
   for (int i = 0; i < limit_names.size(); i++) {
-
     // get the current limit values
     success = getrlimit(limit_names[i], &current_rl);
     assert (success == 0);

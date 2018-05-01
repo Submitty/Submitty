@@ -25,6 +25,8 @@
 #include "error_message.h"
 #include "window_utils.h"
 
+extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
+
 
 #define DIR_PATH_MAX 1000
 
@@ -62,9 +64,11 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "wc",                      "/usr/bin/wc" },
     { "head",                    "/usr/bin/head" },
     { "tail",                    "/usr/bin/tail" },
+    { "uniq",                    "/usr/bin/uniq" },
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
+    { "commonast", 		 SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/commonast.py"},
 
     // for Computer Science I
     { "python",                  "/usr/bin/python" },
@@ -72,6 +76,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "python2.7",               "/usr/bin/python2.7" },
     { "python3",                 "/usr/bin/python3" },
     { "python3.5",               "/usr/bin/python3.5" },
+    { "pylint",                  "/usr/local/bin/pylint" },
 
     // for Data Structures
     { "g++",                     "/usr/bin/g++" },
@@ -86,6 +91,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // for Principles of Software
     { "java",                    "/usr/bin/java" },
     { "javac",                   "/usr/bin/javac" },
+    { "mono",                    "/usr/bin/mono" },   // should put more checks here, only run with "mono dafny/Dafny.exe "
 
     // for Operating Systems
     { "gcc",                     "/usr/bin/gcc" },
@@ -95,6 +101,13 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "swipl",                   "/usr/bin/swipl" },
     { "plt-r5rs",                "/usr/bin/plt-r5rs" },
 
+    // for Program Analysis course
+    { "ghc",                     "/usr/bin/ghc" },
+    { "ocaml",                   "/usr/bin/ocaml" },
+    { "ocamllex",                "/usr/bin/ocamllex" },
+    { "ocamlyacc",               "/usr/bin/ocamlyacc" },
+    { "z3",                      SUBMITTY_INSTALL_DIRECTORY+"/tools/z3" },
+
     // for Cmake & Make
     { "cmake",                   "/usr/bin/cmake" },
     { "make",                    "/usr/bin/make" },
@@ -103,6 +116,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "timeout",                 "/usr/bin/timeout" },
     { "mpicc.openmpi",           "/usr/bin/mpicc.openmpi" },
     { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" },
+    { "mpirun",                  "/usr/local/mpich-3.2/bin/mpirun"},
+    { "mpicc",                   "/usr/local/mpich-3.2/bin/mpicc"},
+    { "expect",                  "/usr/bin/expect" },
 
     // for LLVM / Compiler class
     { "lex",                     "/usr/bin/lex" },
@@ -223,22 +239,43 @@ void validate_filename(const std::string &filename) {
 
 
 std::string validate_option(const std::string &program, const std::string &option) {
+
+  // TODO: update this with the option to junit5
+
+  //{ "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
+  //{ "submitty_junit_5.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-5xx.jar" },
+  //{ "submitty_junit_4.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
+
+  // also for hamcrest 2.0
+
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
+        { "submitty_jacocoagent.jar", SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacocoagent.jar" },
+        { "submitty_jacococli.jar",   SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacococli.jar" },
         { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
+        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
       }
     },
     { "/usr/bin/java",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
+        { "submitty_jacocoagent.jar", SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacocoagent.jar" },
+        { "submitty_jacococli.jar",   SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacococli.jar" },
         { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
         { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
+        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
+      }
+    },
+    { "/usr/bin/mono",
+      { { "submitty_dafny",         SUBMITTY_INSTALL_DIRECTORY+"/Dafny/dafny/Dafny.exe" }
       }
     }
-    };
+  };
 
   // see if this program has option replacements
   std::map<std::string,std::map<std::string,std::string> >::const_iterator itr = option_replacements.find(program);
@@ -311,10 +348,13 @@ std::string escape_spaces(const std::string& input) {
 
 // =====================================================================
 
-bool wildcard_match(const std::string &pattern, const std::string &thing, std::ostream &logfile) {
+bool wildcard_match(const std::string &pattern, const std::string &thing) {
   //  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
 
   int wildcard_loc = pattern.find("*");
+  if (wildcard_loc == std::string::npos) {
+    return pattern == thing;
+  }
   assert (wildcard_loc != std::string::npos);
 
   std::string before = pattern.substr(0,wildcard_loc);
@@ -431,7 +471,7 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
       ent = readdir(dir);
       if (ent == NULL) break;
       std::string thing = ent->d_name;
-      if (wildcard_match(file_pattern,thing,logfile)) {
+      if (wildcard_match(file_pattern,thing)) {
         std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
         validate_filename(directory+thing);
         my_args.push_back(directory+thing);
@@ -840,6 +880,10 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // (without this, default desired threads may be based on the system specs)
   setenv("OMP_NUM_THREADS","4",1);
 
+
+  // Haskell compiler needs a home environment variable (but it can be anything)
+  setenv("HOME","/tmp",1);
+
   
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {
@@ -867,7 +911,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     close(stderrfd);
     dup2(new_stderrfd, stderrfd);
   }
-
+  
 
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
@@ -1111,7 +1155,7 @@ bool memory_ok(int rss_memory, int allowed_rss_memory){
 bool time_ok(float elapsed, float seconds_to_run){
   // allow 10 extra seconds for differences in wall clock
   // vs CPU time (imperfect solution)
-  if(elapsed > seconds_to_run + 10.0f){
+  if(elapsed > seconds_to_run + CPU_TO_WALLCLOCK_TIME_BUFFER){
       return false;
   }
   else{

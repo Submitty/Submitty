@@ -409,8 +409,12 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s, const nlohmann::
   ostr << "  <tr><td>" << GLOBAL_EXAM_DATE << "</td><td align=center>" << time << "</td></tr>\n";
   ostr << "  <tr><td>Your room assignment: </td><td align=center>" << room << "</td></tr>\n";
   ostr << "  <tr><td>Your zone assignment: </td><td align=center>" << zone << "</td></tr>\n";
-  ostr << "  <tr><td>Your row assignment: </td><td align=center>" << row << "</td></tr>\n";
-  ostr << "  <tr><td>Your seat assignment: </td><td align=center>" << seat << "</td></tr>\n";
+  if (row != "N/A" && row !="") {
+    ostr << "  <tr><td>Your row assignment: </td><td align=center>" << row << "</td></tr>\n";
+  }
+  if (seat != "N/A" && seat !="") {
+    ostr << "  <tr><td>Your seat assignment: </td><td align=center>" << seat << "</td></tr>\n";
+  }
   ostr << "</table>\n";
   ostr << "</tr></td>\n";
 
@@ -551,15 +555,15 @@ void start_table_output( bool for_instructor,
   int counter = 0;
   table.set(0,counter++,TableCell("ffffff","#"));
   table.set(0,counter++,TableCell("ffffff","SECTION"));
-  //table.set(0,counter++,TableCell("ffffff","part."));
-  //table.set(0,counter++,TableCell("ffffff","under."));
   if (DISPLAY_INSTRUCTOR_NOTES) {
+    table.set(0,counter++,TableCell("ffffff","part."));
+    table.set(0,counter++,TableCell("ffffff","under."));
     table.set(0,counter++,TableCell("ffffff","notes"));
   }
   student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","USERNAME"));
   int last_name_counter=counter; table.set(0,counter++,TableCell("ffffff","LAST"));
 
-  if (DISPLAY_INSTRUCTOR_NOTES) {
+  if (DISPLAY_INSTRUCTOR_NOTES || DISPLAY_FINAL_GRADE) {
     table.set(0,counter++,TableCell("ffffff","FIRST (LEGAL)"));
   }
   student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","FIRST"));
@@ -582,6 +586,10 @@ void start_table_output( bool for_instructor,
     std::cout << "DISPLAY FINAL GRADE" << std::endl;
     student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","FINAL GRADE"));
     student_data.push_back(counter); table.set(0,counter++,TableCell(grey_divider));
+    if (DISPLAY_MOSS_DETAILS) {
+      table.set(0,counter++,TableCell("ffffff","RAW GRADE"));
+      table.set(0,counter++,TableCell(grey_divider));
+    }
   } 
 
   // ----------------------------
@@ -609,6 +617,7 @@ void start_table_output( bool for_instructor,
         std::string gradeable_name = "";
         if (GRADEABLES[g].hasCorrespondence(gradeable_id)) {
           gradeable_name = GRADEABLES[g].getCorrespondence(gradeable_id).second;
+          //gradeable_name = spacify(gradeable_name);
         }
         table.set(0,counter++,TableCell("ffffff",gradeable_name));
       }
@@ -693,7 +702,7 @@ void start_table_output( bool for_instructor,
   for (unsigned int stu= 0; stu < students.size(); stu++) {
 
     Student *this_student = students[stu];
-
+    
     std::string default_color="ffffff";
 
     myrow++;
@@ -736,9 +745,13 @@ void start_table_output( bool for_instructor,
     assert (section_color.size()==6);
     table.set(myrow,counter++,TableCell(section_color,section_label));
 
-    //table.set(myrow,counter++,TableCell(default_color,"part"));
-    //table.set(myrow,counter++,TableCell(default_color,"under"));
     if (DISPLAY_INSTRUCTOR_NOTES) {
+      float participation = this_student->getParticipation();
+      std::string color = coloritcolor(participation,5,4,3,2,1);
+      table.set(myrow,counter++,TableCell(color,participation,1));
+      float understanding = this_student->getUnderstanding();
+      color = coloritcolor(understanding,5,4,3,2,1);
+      table.set(myrow,counter++,TableCell(color,understanding,1));
       std::string notes;
       std::vector<std::string> ews = this_student->getEarlyWarnings();
       for (std::size_t i = 0; i < ews.size(); i++) {
@@ -758,7 +771,7 @@ void start_table_output( bool for_instructor,
     assert (default_color.size()==6);
     table.set(myrow,counter++,TableCell(default_color,this_student->getUserName()));
     table.set(myrow,counter++,TableCell(default_color,this_student->getLastName()));
-    if (DISPLAY_INSTRUCTOR_NOTES) {
+    if (DISPLAY_INSTRUCTOR_NOTES || DISPLAY_FINAL_GRADE) {
       table.set(myrow,counter++,TableCell(default_color,this_student->getFirstName()));
     }
     table.set(myrow,counter++,TableCell(default_color,this_student->getPreferredName()));
@@ -840,11 +853,21 @@ void start_table_output( bool for_instructor,
 
 
     if (DISPLAY_FINAL_GRADE) {
-      std::string g = this_student->grade(false,sd);
+      std::string g = this_student->grade(false,sd);      
       color = GradeColor(g);
+      if (this_student->getMossPenalty() < -0.01) {
+        g += "@";
+      }
       assert (color.size()==6);
       table.set(myrow,counter++,TableCell(color,g,"",0,CELL_CONTENTS_VISIBLE,"center"));
       table.set(myrow,counter++,TableCell(grey_divider));
+
+      if (DISPLAY_MOSS_DETAILS) {
+        std::string g2 = this_student->grade(true,sd);
+        color = GradeColor(g2);
+        table.set(myrow,counter++,TableCell(color,g2,"",0,CELL_CONTENTS_VISIBLE,"center"));
+        table.set(myrow,counter++,TableCell(grey_divider));
+      }
     }
 
     // ----------------------------
@@ -965,7 +988,7 @@ void start_table_output( bool for_instructor,
     // ICLICKER
     if (DISPLAY_ICLICKER && ICLICKER_QUESTION_NAMES.size() > 0) {
 
-      if (this_student->getRemoteID() != "") { // && this_student->hasPriorityHelpStatus()) {
+      if (this_student->getRemoteID().size() != 0) { // && this_student->hasPriorityHelpStatus()) {
         table.set(myrow,counter++,TableCell("ccccff","registered"));
         //} else if (this_student->getRemoteID() != "") {
         //table.set(myrow,counter++,TableCell("ffffff","registered"));
@@ -1212,14 +1235,16 @@ void end_table(std::ofstream &ostr,  bool for_instructor, Student *s) {
     if (s != NULL) {
       ostr << "<b>Initial number of allowed late days: </b>" << s->getDefaultAllowedLateDays() <<  "<br>" << std::endl;
     }
-    ostr << "<b>Extra late days earned after iclicker points:</b> ";
-    for (std::size_t i = 0; i < GLOBAL_earned_late_days.size(); i++) {
-      ostr << GLOBAL_earned_late_days[i];
-      if (i < GLOBAL_earned_late_days.size()-1) {
-        ostr << ", ";
+    if(!GLOBAL_earned_late_days.empty()) {
+      ostr << "<b>Extra late days earned after iclicker points:</b> ";
+      for (std::size_t i = 0; i < GLOBAL_earned_late_days.size(); i++) {
+        ostr << GLOBAL_earned_late_days[i];
+        if (i < GLOBAL_earned_late_days.size() - 1) {
+          ostr << ", ";
+        }
       }
+      ostr << "<br>" << std::endl;
     }
-    ostr << "<br>" << std::endl;
     ostr << "</p>" << std::endl;
 
 

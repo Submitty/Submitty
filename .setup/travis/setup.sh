@@ -55,7 +55,9 @@ sudo chmod 777         ${SUBMITTY_DATA_DIR}
 echo -e "/var/run/postgresql
 hsdbu
 hsdbu
+America/New_York
 http://localhost
+http://localhost/git
 
 ${AUTH_METHOD}" | sudo ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 

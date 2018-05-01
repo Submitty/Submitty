@@ -223,7 +223,9 @@ table tr.table-header {
     left: 0;
     top: 0;
     z-index: 9999;
-
+    font-size: 15px;
+    font-weight: 600;
+    margin-left:-1px;
 }
 
 #nav ul {
@@ -236,6 +238,7 @@ table tr.table-header {
 }
 
 #nav li {
+    border-left: 1px solid #6e6e6ecc;
     float: left;
 }
 
@@ -570,6 +573,21 @@ table tr.table-header {
     padding: 5px 5px 10px;
 }
 
+.active {
+    background-color: #21C2F6;
+}
+
+.important {
+    /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
+    border-style: solid;
+    border-width: 4px;
+    border-color: #ffd700; /* gold */
+}
+
+.viewed {
+    color: #888888;
+}
+
 .box-title > h4 {
     margin-left: 20px;
 }
@@ -662,6 +680,99 @@ table tr.table-header {
 .gradeable_list tr:nth-child(odd),
 .gradeable_list tr:nth-child(even) {
 /*    background-color: #E9EFEF*/
+}
+
+#forum_wrapper{
+    height: 70vh;
+    margin-left:20px;
+    margin-right:20px;
+    
+}
+
+.thread_list {
+    display:inline-block;
+    width:25%; 
+    background-color: #E9EFEF;
+    box-shadow: 0 2px 15px -5px #888888;
+    margin-right:2px; 
+    overflow-y: auto;
+    height: 100%;
+    float: left;
+    border-radius: 3px;
+}
+
+.posts_list {
+    padding-right: 20px;
+    padding-left: 20px;
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+    box-shadow: 0 2px 15px -5px #888888;
+    background-color: #E9EFEF;
+    border-radius: 3px;
+}
+
+.first_post .post_content{
+    padding-left:20px;
+    margin-top: 10px;
+}
+
+.post_content {
+    margin-right: 40px;
+}
+
+.first_post .post_button {
+}
+
+#post_user_id {
+    left:5px;
+}
+
+.post_button {
+    position:relative;
+    right: 5px;
+    margin-left:5px;
+}
+
+.post_box {
+    position: relative;
+    box-shadow: 0 2px 15px -5px #888888;
+    padding:5px;
+    margin-top: 20px;
+    word-wrap: break-word;
+    border-radius: 3px;
+    background-color:white;
+    overflow: auto;
+}
+
+.post_box a {
+    text-decoration: underline;
+}
+
+.first_post{
+    padding-left: 10px !important;
+    margin-top: 0px !important;
+    margin-left: -20px !important;
+    margin-right: -20px !important;
+    border-radius: 0 !important;
+}
+
+.thread_box {
+    padding:5px;
+    overflow-y: auto;
+    word-wrap: break-word;
+    max-height: 85px;
+    
+}
+
+.create_thread_button {
+    border-radius: 3px;
+    width: 100%;
+    min-width: 40px;
+    min-height: 40px;
+    position: relative;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 2px 2px 4px -3px #dddddd;
 }
 
 table .colspan{
@@ -771,6 +882,12 @@ table .instructor .two-options{
 
 .popup-form > div > input[type="text"] {
     width: 95%;
+}
+
+.reply-box{
+    display: none;
+    margin-right: 15px;
+    margin-bottom: 60px;
 }
 
 .cell-all,
