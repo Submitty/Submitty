@@ -170,31 +170,38 @@ class ReportController extends AbstractController {
             }
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+                $entry['overall_comment'] = $gradeable->getOverallComment();
                 $this->addLateDays($gradeable, $entry, $total_late_used);
             }
 
             $entry['components'] = [];
             foreach ($gradeable->getComponents() as $component) {
                 $inner = [
-                    'title' => $component->getTitle(),
-                    'comment' => $component->getComment(),
+                    'title' => $component->getTitle()
                 ];
-                if (!$component->getIsText()) {
+
+                if ($component->getIsText()) {
+                    $inner['comment'] = $component->getComment();
+                }
+                else {
                     $inner['score'] = $component->getGradedTAPoints();
                     $inner['default_score'] = $component->getDefault();
                     $inner['upper_clamp'] = $component->getUpperClamp();
                     $inner['lower_clamp'] = $component->getLowerClamp();
                 }
 
-                if ($component->getHasMarks()) {
+                if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                     $marks = [];
-                    foreach ($component->getMarks() as $mark) {
-                        if ($mark->getHasMark()) {
-                            $marks[] = [
-                                'points' => $mark->getPoints(),
-                                'note' => $mark->getNote()
-                            ];
+                    if ($component->getHasMarks()) {
+                        foreach ($component->getMarks() as $mark) {
+                            if ($mark->getHasMark()) {
+                                $marks[] = ['points' => $mark->getPoints(), 'note' => $mark->getNote()];
+                            }
                         }
+                    }
+
+                    if (!empty($component->getComment()) || $component->getScore() != 0) {
+                        $marks[] = ['points' => $component->getScore(), 'note' => $component->getComment()];
                     }
                     $inner['marks'] = $marks;
                 }
