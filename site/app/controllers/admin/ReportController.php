@@ -170,6 +170,7 @@ class ReportController extends AbstractController {
             }
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+                $entry['overall_comment'] = $gradeable->getOverallComment();
                 $this->addLateDays($gradeable, $entry, $total_late_used);
             }
 
