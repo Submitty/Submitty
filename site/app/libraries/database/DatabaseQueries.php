@@ -195,7 +195,10 @@ class DatabaseQueries {
 
         return array("thread_id" => $id, "post_id" => $post_id);
     }
-
+    public function getThreadTitle($thread_id){
+        $this->course_db->query("SELECT title FROM threads where id=?", array($thread_id));
+        return $this->course_db->rows()[0];
+    }
     public function setAnnouncement($thread_id, $onOff){
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($onOff, $thread_id));
     }

@@ -931,7 +931,7 @@ function editPost(post_id, thread_id) {
                 var contentBox = document.getElementById('edit_post_content');
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
-                contentBox.innerHTML = post_content;
+                contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
                 $('.popup-form').css('display', 'block');
