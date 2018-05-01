@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# We need to put this script here to wrap around the actual git-http-backend because suexec
+# only allows us to execute scripts out of this directory (site/cgi-bin). We also have to 
+# export the necessary GIT environment variables here instead of in Apache as suexec
+# strips those.
 export GIT_PROJECT_ROOT=/var/local/submitty/vcs
 export GIT_HTTP_EXPORT_ALL=1
 
