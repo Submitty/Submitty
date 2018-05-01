@@ -174,16 +174,8 @@ class GradeableComponent extends AbstractModel {
                 $points += $mark->getPoints();
             }
         }
-
         $points += $this->score;
-
-        if($points < $this->lower_clamp) {
-            $points = $this->lower_clamp;
-        }
-        if($points > $this->upper_clamp) {
-            $points = $this->upper_clamp;
-        }
-        return $points;
+        return min(max($points, $this->lower_clamp), $this->upper_clamp);
     }
 
     public function getGradedTAComments($nl, $show_students, $use_ascii = true) {
