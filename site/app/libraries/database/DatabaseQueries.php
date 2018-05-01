@@ -107,14 +107,23 @@ class DatabaseQueries {
         throw new NotImplementedException();
     }
 
+    public function loadAnnouncements($category_id){
+        $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($category_id));
+        return $this->course_db->rows();
+    }
 
-    public function loadThreads($announcements, $category_id){
-    	if($category_id === -1) {
-      		$this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($announcements));
-    	} else {
+    public function loadAnnouncementsWithoutCategory(){
+        $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC");
+            return $this->course_db->rows();
+    }
 
-    		$this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = ? and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($announcements, $category_id));
-    	}
+    public function loadThreadsWithoutCategory(){
+         $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC");
+         return $this->course_db->rows();
+    }
+
+    public function loadThreads($category_id) {
+        $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($category_id));
         return $this->course_db->rows();
     }
 

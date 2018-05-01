@@ -244,17 +244,22 @@ class ForumController extends AbstractController {
         }
     }
 
+    private function getSortedThreads($category_id){
+        if($this->isValidCategory($category_id)) {
+            $announce_threads = $this->core->getQueries()->loadAnnouncements($category_id);
+            $reg_threads = $this->core->getQueries()->loadThreads($category_id);
+        } else {
+            $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory();
+            $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory();
+        }
+        return array_merge($announce_threads, $reg_threads);
+    }
+
     public function getThreads(){
 
         $category_id = array_key_exists('thread_category', $_POST) && !empty($_POST["thread_category"]) ? (int)$_POST['thread_category'] : -1;
 
-        //NOTE: This section of code is neccesary until I find a better query 
-        //To link the two sets together as the query function doesn't
-        //support parenthesis starting a query 
-        $announce_threads = $this->core->getQueries()->loadThreads(1, $category_id);
-        $reg_threads = $this->core->getQueries()->loadThreads(0, $category_id);
-        $threads = array_merge($announce_threads, $reg_threads);
-        //END
+        $threads = $this->getSortedThreads($category_id);
 
         $currentCategoryId = array_key_exists('currentCategoryId', $_POST) ? (int)$_POST["currentCategoryId"] : -1; 
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
@@ -269,17 +274,10 @@ class ForumController extends AbstractController {
 
     public function showThreads(){
         $user = $this->core->getUser()->getId();
-
-
-        //NOTE: This section of code is neccesary until I find a better query 
-        //To link the two sets together as the query function doesn't
-        //support parenthesis starting a query 
+        
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
 
-        $announce_threads = $this->core->getQueries()->loadThreads(1, $category_id);
-        $reg_threads = $this->core->getQueries()->loadThreads(0, $category_id);
-        $threads = array_merge($announce_threads, $reg_threads);
-        //END
+        $threads = $this->getSortedThreads($category_id);
 
         $current_user = $this->core->getUser()->getId();
 

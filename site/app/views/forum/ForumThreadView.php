@@ -216,9 +216,15 @@ HTML;
 
 			<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 HTML;
+
+		if($this->core->getUser()->getGroup() <= 2){
+			$return .= <<<HTML
+			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
+HTML;
+		}
 				$categories = $this->core->getQueries()->getCategories();
 				$return .= <<<HTML
-				<div style="display:inline-block;position:relative;top:3px;margin-left:20px;" id="category_wrapper">
+				<div style="display:inline-block;position:relative;top:3px;margin-left:5px;" id="category_wrapper">
 				<label for="thread_category">Category:</label>
 			  	<select id="thread_category" name="thread_category" class="form-control" onchange="modifyThreadList({$currentThread}, {$currentCategoryId[0]["category_id"]});">
 			  	<option value="" selected>None</option>
@@ -228,11 +234,6 @@ HTML;
 			    		<option value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</option>
 HTML;
 			    } 
-		if($this->core->getUser()->getGroup() <= 2){
-			$return .= <<<HTML
-			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
-HTML;
-		}
 
 $return .= <<<HTML
 			</select>
@@ -740,7 +741,7 @@ HTML;
 
 		if($this->core->getUser()->getGroup() <= 2){
 			$return .= <<<HTML
-			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
+			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
 HTML;
 		}
 
