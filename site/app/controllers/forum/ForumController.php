@@ -51,6 +51,9 @@ class ForumController extends AbstractController {
             case 'remove_announcement':
                 $this->alterAnnouncement(0);
                 break;
+            case 'show_stats':
+                $this->showStats();
+                break;
             case 'view_thread':
             default:
                 $this->showThreads();
@@ -238,6 +241,44 @@ class ForumController extends AbstractController {
         } else {
             $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
         }
+    }
+
+
+    public function showStats(){
+        $posts = array();
+        $posts = $this->core->getQueries()->getPosts();
+        $num_posts = count($posts);
+        $function_date = 'date_format';
+        $num_threads = 0;
+        $users = array();
+        for($i=0;$i<$num_posts;$i++){
+            $user = $posts[$i]["author_user_id"];
+            $content = $posts[$i]["content"];
+            if(!isset($users[$user])){
+                $users[$user] = array();
+                $u = $this->core->getQueries()->getSubmittyUser($user);
+                $users[$user]["first_name"] = htmlspecialchars($u -> getFirstName());
+                $users[$user]["last_name"] = htmlspecialchars($u -> getLastName());
+                $users[$user]["posts"]=array();
+                $users[$user]["id"]=array();
+                $users[$user]["timestamps"]=array();
+                $users[$user]["total_threads"]=0;
+                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user)); 
+            }
+            if($posts[$i]["parent_id"]==-1){
+                $users[$user]["total_threads"]++;
+            }
+            $users[$user]["posts"][] = $content;
+            $users[$user]["id"][] = $posts[$i]["id"];
+            $date = date_create($posts[$i]["timestamp"]);
+            $users[$user]["timestamps"][] = $function_date($date,"n/j g:i A");
+            $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
+            $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
+
+            
+        }
+        ksort($users);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
 
 }

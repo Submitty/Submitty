@@ -83,7 +83,6 @@ install:
   - pip3 install xlsx2csv
   - pip3 install selenium
   - pip3 install nose2
-  - pip3 install unittest2
   - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
   - python3 setup.py install
   - popd

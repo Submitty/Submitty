@@ -279,12 +279,10 @@ HTML;
         </div>
 HTML;
             }
-            //{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
             $return .= <<<HTML
     </div>
 HTML;
         }
-        //{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
         $return .= <<<HTML
     <div style="margin-top: 20px; vertical-align:bottom;">
 HTML;

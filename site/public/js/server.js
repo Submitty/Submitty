@@ -921,7 +921,7 @@ function editPost(post_id, thread_id) {
                 var contentBox = document.getElementById('edit_post_content');
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
-                contentBox.innerHTML = post_content;
+                contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
                 $('.popup-form').css('display', 'block');
@@ -981,12 +981,59 @@ function replyPost(post_id){
         $('#'+ post_id + '-reply').css('display', 'block');
     }
 }
-
+/*This function ensures that only one reply box is open at a time*/
 function hideReplies(){
     var hide_replies = document.getElementsByClassName("reply-box");
     for(var i = 0; i < hide_replies.length; i++){
         hide_replies[i].style.display = "none"; 
     }
+}
+
+/*This function makes sure that only posts with children will have the collapse function*/
+function addCollapsable(){
+    var posts = $(".post_box").toArray();
+    for(var i = 1; i < posts.length; i++){
+        if(parseInt($(posts[i]).next().next().attr("reply-level")) > parseInt($(posts[i]).attr("reply-level"))){
+            $(posts[i]).find(".expand")[0].innerHTML = "Hide replies";
+        } else {
+            var button = $(posts[i]).find(".expand")[0];
+            $(button).hide();
+        }
+    }
+}
+
+function hidePosts(text, id) {
+    var currentLevel = parseInt($(text).parent().parent().attr("reply-level")); //The double parent is here because the button is in a span, which is a child of the main post.
+    var selector = $(text).parent().parent().next().next();
+    var counter = 0;
+    var parent_status = "Hide replies";``
+    if (text.innerHTML != "Hide replies") {
+        text.innerHTML = "Hide replies";
+        while (selector.attr("reply-level") > currentLevel) {
+            $(selector).show();
+            if($(selector).find(".expand")[0].innerHTML != "Hide replies"){
+                var nextLvl = parseInt($(selector).next().next().attr("reply-level"));
+                while(nextLvl > (currentLevel+1)){
+                    selector = $(selector).next().next();
+                    nextLvl = $(selector).next().next().attr("reply-level");
+                }
+            } 
+            selector = $(selector).next().next();
+        }
+        
+    } else {
+        while (selector.attr("reply-level") > currentLevel) {
+            $(selector).hide();
+            selector = $(selector).next().next();
+            counter++;
+        }
+        if(counter != 0){
+            text.innerHTML = "Show " + ((counter > 1) ? (counter + " replies") : "reply");
+        } else {
+            text.innerHTML = "Hide replies";
+        }
+    }
+
 }
 
 function deletePost(thread_id, post_id, author, time){
@@ -1212,6 +1259,21 @@ function deleteLateDays(user_id, datestamp) {
         })
     }
     return false;
+}
+
+/**
+  * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
+  */
+function escapeSpecialChars(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
 function escapeHTML(str) {

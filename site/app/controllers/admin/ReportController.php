@@ -152,6 +152,8 @@ class ReportController extends AbstractController {
                 'id' => $gradeable->getId(),
                 'name' => $gradeable->getName(),
                 'grade_released_date' => $gradeable->getGradeReleasedDate()->format('Y-m-d H:i:s O'),
+                'autograding_score' => $autograding_score,
+                'tagrading_score' => $ta_grading_score
             ];
 
             if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
@@ -173,18 +175,26 @@ class ReportController extends AbstractController {
 
             $entry['components'] = [];
             foreach ($gradeable->getComponents() as $component) {
-                $inner = ['title' => $component->getTitle()];
+                $inner = [
+                    'title' => $component->getTitle(),
+                    'comment' => $component->getComment(),
+                ];
                 if (!$component->getIsText()) {
-                    $inner['score'] = $component->getScore();
+                    $inner['score'] = $component->getGradedTAPoints();
+                    $inner['default_score'] = $component->getDefault();
+                    $inner['upper_clamp'] = $component->getUpperClamp();
+                    $inner['lower_clamp'] = $component->getLowerClamp();
                 }
-                $inner['comment'] = $component->getComment();
+
                 if ($component->getHasMarks()) {
                     $marks = [];
                     foreach ($component->getMarks() as $mark) {
-                        $marks[] = [
-                            'points' => $mark->getPoints(),
-                            'note' => $mark->getNote()
-                        ];
+                        if ($mark->getHasMark()) {
+                            $marks[] = [
+                                'points' => $mark->getPoints(),
+                                'note' => $mark->getNote()
+                            ];
+                        }
                     }
                     $inner['marks'] = $marks;
                 }
@@ -230,8 +240,9 @@ class ReportController extends AbstractController {
         }
 
         if($status === 'Bad') {
-            $entry["score"] = 0;
+            $entry['score'] = 0;
         }
+
         $entry['status'] = $status;
 
         if ($late_flag && $late_days_used > 0) {
