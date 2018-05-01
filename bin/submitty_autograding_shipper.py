@@ -121,7 +121,7 @@ def update_foreign_autograding_worker_json(name, entry):
             ssh.close()
 
 # ==================================================================================
-def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade,is_batch):
+def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade):
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
         grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by hwcron")
@@ -188,13 +188,26 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             os.remove(autograding_zip_tmp)
             os.remove(submission_zip_tmp)
             return success
-    grade_items_logging.log_message(JOB_ID, jobname=next_to_grade, which_untrusted=which_untrusted, is_batch=is_batch, message="Prepared job for " + which_machine)
+
+
+    obj = grade_item.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
+    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+    item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    is_batch = obj["regrade"]
+
+    grade_items_logging.log_message(JOB_ID, jobname=item_name, which_untrusted=which_untrusted, is_batch=is_batch, message="Prepared job for " + which_machine)
     return True
 
 
 # ==================================================================================
 # ==================================================================================
-def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade,is_batch):
+def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
+
+    obj = grade_item.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
+    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+    item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    is_batch = obj["regrade"]
+
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
         grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by hwcron")
@@ -259,18 +272,18 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade,is_bat
     try:
         grade_item.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
     except:
-        grade_items_logging.log_message(JOB_ID,jobname=next_to_grade,message="ERROR: Exception when unpacking zip")
+        grade_items_logging.log_message(JOB_ID,jobname=item_name,message="ERROR: Exception when unpacking zip")
         with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
 
     with contextlib.suppress(FileNotFoundError):
         os.remove(local_done_queue_file)
-    grade_items_logging.log_message(JOB_ID, jobname=next_to_grade, which_untrusted=which_untrusted, is_batch=is_batch, message="Unpacked job from " + which_machine)
+    grade_items_logging.log_message(JOB_ID, jobname=item_name, which_untrusted=which_untrusted, is_batch=is_batch, message="Unpacked job from " + which_machine)
     return True
 
 
 # ==================================================================================
-def grade_queue_file(my_name, which_machine,which_untrusted,queue_file,is_batch):
+def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     """
     Oversees the autograding of single item from the queue
 
@@ -290,7 +303,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file,is_batch)
     try:
         # prepare the job
         shipper_counter=0
-        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file,is_batch):
+        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file):
             shipper_counter = 0
             time.sleep(1)
             if shipper_counter >= 10:
@@ -299,7 +312,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file,is_batch)
 
         # then wait for grading to be completed
         shipper_counter=0
-        while not unpack_job(which_machine, which_untrusted, my_dir, queue_file,is_batch):
+        while not unpack_job(which_machine, which_untrusted, my_dir, queue_file):
             shipper_counter+=1
             time.sleep(1)
             if shipper_counter >= 10:
@@ -402,7 +415,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         print (my_name, " WARNING: submitty_autograding shipper get_job time ", time_delta)
         grade_items_logging.log_message(JOB_ID, message=str(my_name)+" WARNING: submitty_autograding shipper get_job time "+str(time_delta))
 
-    return (my_job, is_batch)
+    return (my_job)
 
 
 # ==================================================================================
@@ -423,10 +436,10 @@ def shipper_process(my_name, which_machine,my_capabilities,which_untrusted,overa
 
     while True:
         try:
-            my_job, is_batch = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
+            my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
             if not my_job == "":
                 counter=0
-                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job),is_batch)
+                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job))
                 continue
             else:
                 if counter == 0 or counter >= 10:
