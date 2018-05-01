@@ -39,7 +39,7 @@ class GradeableComponentMark extends AbstractModel {
         }
         $this->id = $details['gcm_id'];
         $this->gc_id = $details['gc_id'];
-        $this->points = $details['gcm_points'];
+        $this->points = floatval($details['gcm_points']);
         $this->order = $details['gcm_order'];
         $this->note = $details['gcm_note'];
         $this->publish = $details['gcm_publish'];
