@@ -40,12 +40,50 @@ class ElectronicGraderController extends AbstractController {
                 break;
             case 'add_one_new_mark':
                 $this->addOneMark();
+                break;
+            case 'verify_grader':
+                $this->verifyGrader();
+                break;
+            case 'verify_all':
+                $this->verifyGrader(true);
+                break;
             default:
                 $this->showStatus();
                 break;
         }
     }
+    private function verifyGrader($verifyAll = false){
+        $gradeable_id = $_POST['gradeable_id'];
+        $component_id = $_POST['component_id'];
+        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        if($verifyAll){
+            //go through every componenet and overwrite grader that is not the current
+            foreach ($gradeable->getComponents() as $component) {
+                if(!$component->getGrader()) continue;
+                if($component->getGrader()->getId() !== $this->core->getUser()->getId()){
+                    $component->setGrader($this->core->getUser());
+                    $component->saveGradeableComponentData($gradeable->getGdId());
+                }
+            }
+            $hwReport = new HWReport($this->core);
+            $hwReport->generateSingleReport($user_id, $gradeable_id);
+            return;
+        }else{
+            //looks for a specific component, and overwrites the grader
+            foreach ($gradeable->getComponents() as $component) {
+                if($component->getId() == $component_id){
+                    $component->setGrader($this->core->getUser());
+                    $component->saveGradeableComponentData($gradeable->getGdId());
 
+                    $hwReport = new HWReport($this->core);
+                    $hwReport->generateSingleReport($user_id, $gradeable_id);
+                    return;
+                }
+            }
+        }
+        $this->core->addErrorMessage("Gradeable component does not exist");
+    }
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
