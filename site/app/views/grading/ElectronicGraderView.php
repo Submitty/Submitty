@@ -170,9 +170,7 @@ HTML;
                             $valid_graders[] = $valid_grader->getFirstName();
                         }
                     }
-                    if (count($valid_graders) > 0) {
-                        $graders = implode(", ",  $valid_graders);
-                    }
+                    $graders = (count($valid_graders) > 0) ? implode(', ', $valid_graders) : 'Nobody';
                     else {
                         $graders = "Nobody";
                     }
