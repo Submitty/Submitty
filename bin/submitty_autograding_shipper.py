@@ -189,13 +189,13 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             os.remove(submission_zip_tmp)
             return success
 
-
+    # log completion of job preparation
     obj = grade_item.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     is_batch = obj["regrade"]
-
-    grade_items_logging.log_message(JOB_ID, jobname=item_name, which_untrusted=which_untrusted, is_batch=is_batch, message="Prepared job for " + which_machine)
+    grade_items_logging.log_message(JOB_ID, jobname=item_name, which_untrusted=which_untrusted,
+                                    is_batch=is_batch, message="Prepared job for " + which_machine)
     return True
 
 
@@ -203,6 +203,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
 # ==================================================================================
 def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
+    # variables needed for logging
     obj = grade_item.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
@@ -363,9 +364,8 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         files_and_times.append(tup)
 
     files_and_times = sorted(files_and_times, key=operator.itemgetter(1))
-
     my_job=""
-    is_batch = False
+
     for full_path_file, file_time in files_and_times:
         # get the file name (without the path)
         just_file = full_path_file[len(folder)+1:]
@@ -391,14 +391,12 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         # prioritize interactive jobs over (batch) regrades
         # if you've found an interactive job, exit early (since they are sorted by timestamp)
         if not "regrade" in queue_obj or not queue_obj["regrade"]:
-            is_batch = False
             my_job = just_file
             break
 
         # otherwise it's a regrade, and if we don't already have a
         # job, take it, but we have to search the rest of the list
         if my_job == "":
-            is_batch = True
             my_job = just_file
 
     if not my_job == "":
