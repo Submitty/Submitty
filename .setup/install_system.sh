@@ -25,13 +25,19 @@ SUBMITTY_DATA_DIR=/var/local/submitty
 #################
 
 if [ "$1" == "--vagrant" ] || [ "$2" == "--vagrant" ]; then
-  echo "Non-interactive vagrant script..."
-  export VAGRANT=1
-  export DEBIAN_FRONTEND=noninteractive
-  shift
+    echo "Non-interactive vagrant script..."
+    export VAGRANT=1
+    export DEBIAN_FRONTEND=noninteractive
+    shift
+
+    # Setting it up to allow SSH as root by default
+    mkdir -m 700 /root/.ssh
+    cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+
+    sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 else
-  #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
-  export VAGRANT=0
+    #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
+    export VAGRANT=0
 fi
 
 if [ "$1" == "--worker" ] || [ "$2" == "--worker" ]; then
@@ -118,6 +124,8 @@ fi
 
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcron hwcronphp
+# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and hwcron needs access to them for autograding
+adduser hwcron www-data
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
 
