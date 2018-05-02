@@ -224,8 +224,9 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
         
         // Clear away all marks
         var marks = $('[name=mark_'+num+']');
-        for (var x = 0; x < marks.length; x++)
+        for (var x = 0; x < marks.length; x++) {
             marks[x].remove();
+        }
             
         // Custom mark
         {
