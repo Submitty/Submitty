@@ -681,6 +681,11 @@ table tr.table-header {
 /*    background-color: #E9EFEF*/
 }
 
+#search_wrapper{
+    background-color: #E9EFEF;
+    border-radius: 3px;
+}
+
 #forum_wrapper{
     height: 70vh;
     margin-left:20px;
@@ -760,7 +765,6 @@ table tr.table-header {
     padding:5px;
     overflow-y: auto;
     word-wrap: break-word;
-    max-height: 85px;
     
 }
 
