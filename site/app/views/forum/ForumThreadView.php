@@ -18,7 +18,7 @@ class ForumThreadView extends AbstractView {
 		for a specific thread, in addition to all of the threads
 		that have been created to be displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threads) {
+	public function showForumThreads($user, $posts, $threads, $display_option) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -52,6 +52,7 @@ class ForumThreadView extends AbstractView {
 				saveScrollLocationOnRefresh('posts_list');
 				$("form").areYouSure();
 				addCollapsable();
+				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
 			});
 
 		</script>
@@ -251,54 +252,60 @@ HTML;
 HTML;
 					$first = true;
 					$first_post_id = 1;
-					$order_array = array();
-					$reply_level_array = array();
-					foreach($posts as $post){
-						if($thread_id == -1) {
-							$thread_id = $post["thread_id"];
-						}
-
-						if($first){
-							$first= false;
-							$first_post_id = $post["id"];
-						}
-						if($post["parent_id"] > $first_post_id){
-							$place = array_search($post["parent_id"], $order_array);
-							$tmp_array = array($post["id"]);
-							$parent_reply_level = $reply_level_array[$place];
-							while($place && $place+1 < sizeof($reply_level_array) && $reply_level_array[$place+1] > $parent_reply_level){
-								$place++;
-							}
-							array_splice($order_array, $place+1, 0, $tmp_array);
-							array_splice($reply_level_array, $place+1, 0, $parent_reply_level+1);
-						} else {
-							array_push($order_array, $post["id"]);
-							array_push($reply_level_array, 1);
-
-						}
-					}
-					$i = 0;
-					$first = true;
-					foreach($order_array as $ordered_post){
+					if($display_option == "tree"){	
+						$order_array = array();
+						$reply_level_array = array();
 						foreach($posts as $post){
-							if($post["id"] == $ordered_post){
-								if($post["parent_id"] == $first_post_id) {
-									$reply_level = 1;	
-								} else {
-									$reply_level = $reply_level_array[$i];
+							if($thread_id == -1) {
+								$thread_id = $post["thread_id"];
+							}
+
+							if($first){
+								$first= false;
+								$first_post_id = $post["id"];
+							}
+							if($post["parent_id"] > $first_post_id){
+								$place = array_search($post["parent_id"], $order_array);
+								$tmp_array = array($post["id"]);
+								$parent_reply_level = $reply_level_array[$place];
+								while($place && $place+1 < sizeof($reply_level_array) && $reply_level_array[$place+1] > $parent_reply_level){
+									$place++;
+								}
+								array_splice($order_array, $place+1, 0, $tmp_array);
+								array_splice($reply_level_array, $place+1, 0, $parent_reply_level+1);
+							} else {
+								array_push($order_array, $post["id"]);
+								array_push($reply_level_array, 1);
+
+							}
+						}
+						$i = 0;
+						$first = true;
+						foreach($order_array as $ordered_post){
+							foreach($posts as $post){
+								if($post["id"] == $ordered_post){
+									if($post["parent_id"] == $first_post_id) {
+										$reply_level = 1;	
+									} else {
+										$reply_level = $reply_level_array[$i];
+									}
+									
+									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option);
+									break;
 								}
 								
-								$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level);
-								break;
 							}
-							
+							if($first){
+								$first= false;
+							}
+							$i++;
 						}
-						if($first){
-							$first= false;
+					} else {
+						foreach($posts as $post){
+							$return .= $this->createPost($post["thread_id"], $post, $function_date, $title_html, $first, 1);
+							if($first) $first = false;
 						}
-						$i++;
 					}
-
 			$return .= <<<HTML
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
@@ -366,6 +373,7 @@ HTML;
 	}
 
 	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level){
+		$return = "";
 		$post_html = "";
 		$post_id = $post["id"];
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
@@ -383,6 +391,20 @@ HTML;
 		
 		if($first){
 			$classes .= " first_post";
+			$return = <<<HTML
+    			<p>  
+        			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions($thread_id, 'tree')" value="tree">  
+        			<label for="radio">Tree mode</label>  
+    			</p>  
+    			<p>  
+        			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions($thread_id, 'time')" value="time">  
+        			<label for="radio2">Chronological</label>  
+    			</p>  
+				<p>  
+        			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions($thread_id, 'alpha')" value="alpha">  
+        			<label for="radio3">Alphabetical</label>  
+    			</p>  
+HTML;
 		}
 
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
@@ -390,7 +412,7 @@ HTML;
 		}
 		$offset = min(($reply_level - 1) * 30, 180);
 		
-							$return = <<<HTML
+							$return .= <<<HTML
 								<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
 HTML;
 
