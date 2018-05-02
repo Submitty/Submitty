@@ -171,9 +171,7 @@ HTML;
                         }
                     }
                     $graders = (count($valid_graders) > 0) ? implode(', ', $valid_graders) : 'Nobody';
-                    else {
-                        $graders = "Nobody";
-                    }
+
                     $return .= <<<HTML
                 Section {$key}: {$graders}<br />
 HTML;
