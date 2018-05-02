@@ -145,6 +145,10 @@ HTML;
 			return;
 		}
 
+		$thread_count = count($threads);
+		$currentThread = -1;
+		$currentCategoryId = array();
+
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		
 		//Body Style is necessary to make sure that the forum is still readable...
@@ -207,8 +211,10 @@ HTML;
 		</script>
 HTML;
 	}
-	$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
-	$currentCategoryId = $this->core->getQueries()->getCategoryIdForThread($currentThread);
+	if($thread_count > 0) {
+		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
+		$currentCategoryId = $this->core->getQueries()->getCategoryIdForThread($currentThread);
+	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 
@@ -223,10 +229,16 @@ HTML;
 HTML;
 		}
 				$categories = $this->core->getQueries()->getCategories();
+				$onChange = '';
+				if($thread_count > 0) {
+					$onChange = <<<HTML
+						onchange="modifyThreadList({$currentThread}, {$currentCategoryId[0]["category_id"]});"
+HTML;
+				}
 				$return .= <<<HTML
 				<div style="display:inline-block;position:relative;top:3px;margin-left:5px;" id="category_wrapper">
 				<label for="thread_category">Category:</label>
-			  	<select id="thread_category" name="thread_category" class="form-control" onchange="modifyThreadList({$currentThread}, {$currentCategoryId[0]["category_id"]});">
+			  	<select id="thread_category" name="thread_category" class="form-control" {$onChange}>
 			  	<option value="" selected>None</option>
 HTML;
 			    for($i = 0; $i < count($categories); $i++){
@@ -252,7 +264,7 @@ HTML;
 		</div>
 
 HTML;
-		if(count($threads) == 0){
+		if($thread_count == 0){
 		$return .= <<<HTML
 					<div style="margin-left:20px;margin-top:10px;margin-right:20px;padding:25px; text-align:center;" class="content">
 						<h4>A thread hasn't been created yet. Be the first to do so!</h4>
