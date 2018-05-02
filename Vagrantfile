@@ -58,4 +58,10 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
 
   config.vm.provision 'shell', inline: $script
+
+  if ARGV.include?('ssh')
+    config.ssh.username = 'root'
+    config.ssh.password = 'vagrant'
+    config.ssh.insert_key = 'true'
+  end
 end
