@@ -213,15 +213,25 @@ class ForumController extends AbstractController {
         $current_user = $this->core->getUser()->getId();
 
         $posts = null;
+        $option = 'tree';
+        if(isset($_REQUEST["option"])){
+            $option = $_REQUEST["option"];
+        }
+        
         if(isset($_REQUEST["thread_id"])){
-            $posts = $this->core->getQueries()->getPostsForThread($current_user, $_REQUEST["thread_id"]);
+            //TODO: Move the tree-mode algorithm into this function instead. 
+            if($option == "alpha"){
+                $posts = $this->core->getQueries()->getPostsForThread($current_user, $_REQUEST["thread_id"], 'alpha');
+            } else {
+                $posts = $this->core->getQueries()->getPostsForThread($current_user, $_REQUEST["thread_id"], 'tree');
+            }
         } else {
             //We are at the "Home page"
             //Show the first post
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1);
-            
         }
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads);
+
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option);
     }
 
     public function showCreateThread(){
