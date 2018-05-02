@@ -160,17 +160,18 @@ HTML;
             Graders:
             <div style="margin-left: 20px">
 HTML;
-
                 foreach ($sections as $key => $section) {
                     if ($key === "NULL") {
                         continue;
                     }
-                    if (count($section['graders']) > 0) {
-                        $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
+                    $valid_graders = array();
+                    foreach($section['graders'] as $valid_grader){
+                        if($valid_grader->getGroup() <= $gradeable->getMinimumGradingGroup()){
+                            $valid_graders[] = $valid_grader->getFirstName();
+                        }
                     }
-                    else {
-                        $graders = "Nobody";
-                    }
+                    $graders = (count($valid_graders) > 0) ? implode(', ', $valid_graders) : 'Nobody';
+
                     $return .= <<<HTML
                 Section {$key}: {$graders}<br />
 HTML;
@@ -963,6 +964,7 @@ HTML;
 
 
 <div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
+    <div class="draggable_content">
     <span class="grading_label">Auto-Grading Testcases</span>
     <button class="btn btn-default" onclick="openAllAutoGrading()">Expand All</button>
     <button class="btn btn-default" onclick="closeAllAutoGrading()">Close All</button>
@@ -983,9 +985,11 @@ HTML;
         }
         $return .= <<<HTML
     </div>
+    </div>
 </div>
 
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
+    <div class="draggable_content">
     <span class="grading_label">Submissions and Results Browser</span>
     <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 HTML;
@@ -1125,6 +1129,7 @@ HTML;
             // });
         </script>
     </div>
+    </div>
 </div>
 HTML;
 
@@ -1133,6 +1138,7 @@ HTML;
             $return .= <<<HTML
 
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
+    <div class="draggable_content">
     <span class="grading_label">Student Information</span>
     <div class="inner-container">
         <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
@@ -1229,6 +1235,7 @@ HTML;
             <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
         </div>
     </div>
+    </div>
 </div>
 HTML;
         }
@@ -1246,6 +1253,7 @@ HTML;
         }
         $return .= <<<HTML
 <div id="grading_rubric" class="draggable rubric_panel {$empty}" style="right:15px; top:140px; width:48%; height:42%;">
+    <div class="draggable_content">
     <span class="grading_label">Grading Rubric</span>
 HTML;
         if($gradeable->useTAGrading()) {
@@ -1571,6 +1579,7 @@ HTML;
         $return .= <<<HTML
             </form>
         </div>
+        </div>
     </div>
 
 HTML;
@@ -1586,34 +1595,6 @@ HTML;
 window.onbeforeunload = function() {
     saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);
 }
-</script>
-<script type="text/javascript">
-    $(document).ready(function() {
-        $( "#autograding_results" ).scroll(function() {
-            updateHandle("#autograding_results");
-        });
-        $( "#autograding_results" ).resize(function() {
-            updateHandle("#autograding_results");
-        });
-        $( "#grading_rubric" ).scroll(function() {
-            updateHandle("#grading_rubric");
-        });
-        $( "#grading_rubric" ).resize(function() {
-            updateHandle("#grading_rubric");
-        });
-        $( "#submission_browser" ).scroll(function() {
-            updateHandle("#submission_browser");
-        });
-        $( "#submission_browser" ).resize(function() {
-            updateHandle("#submission_browser");
-        });
-        $( "#student_info" ).scroll(function() {
-            updateHandle("#student_info");
-        });
-        $( "#student_info" ).resize(function() {
-            updateHandle("#student_info");
-        });
-    });
 </script>
 <script type="text/javascript">
     function openFrame(html_file, url_file, num) {
