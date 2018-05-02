@@ -28,6 +28,7 @@ class ForumThreadView extends AbstractView {
 		
 		//Body Style is necessary to make sure that the forum is still readable...
 		$return = <<<HTML
+<<<<<<< HEAD
 			<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
     		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
     		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/jquery-2.0.3.min.map.js"></script>
@@ -48,6 +49,36 @@ class ForumThreadView extends AbstractView {
 					$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
 				});
 			</script>	
+=======
+
+		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
+    <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
+    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/jquery-2.0.3.min.map.js"></script>
+    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
+    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/clike.js"></script>
+    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/python.js"></script>
+    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
+		<style>body {min-width: 925px;} pre { font-family: inherit; }</style>
+
+
+
+		<script>
+		function openFile(directory, file, path ){
+			window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + file + "&path=" + path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+		}
+
+			$( document ).ready(function() {
+			    enableTabsInTextArea('post_content');
+				saveScrollLocationOnRefresh('thread_list');
+				saveScrollLocationOnRefresh('posts_list');
+				$("form").areYouSure();
+				addCollapsable();
+			});
+
+		</script>
+
+>>>>>>> master
 HTML;
 		if($this->core->getUser()->getGroup() <= 2){
 			$return .= <<<HTML
@@ -78,11 +109,29 @@ HTML;
 				</script>
 HTML;
 	}
+<<<<<<< HEAD
 		$return .= <<<HTML
 			<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 			<div style="margin-left:20px;margin-top:10px; height:50px;  " id="forum_bar">
 				<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Create thread" onclick="resetScrollPosition('thread_list');" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 			</div>
+=======
+	$return .= <<<HTML
+		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
+
+		<div style="margin-left:20px;margin-top:10px; height:50px;  " id="forum_bar">
+
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Create thread" onclick="resetScrollPosition('thread_list');" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
+HTML;
+		if($this->core->getUser()->getGroup() <= 2){
+			$return .= <<<HTML
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
+HTML;
+		}
+		$return .= <<<HTML
+		</div>
+
+>>>>>>> master
 HTML;
 		if(count($threads) == 0){
 		$return .= <<<HTML
@@ -94,6 +143,7 @@ HTML;
 		} else {
 			if($this->core->getUser()->getGroup() <= 2){
 				$return .= <<<HTML
+<<<<<<< HEAD
 					<div class="popup-form" id="edit-user-post">
 						<h3 id="edit_user_prompt"></h3>
 						<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
@@ -108,6 +158,25 @@ HTML;
 							</div>	
 	    				</form>
 					</div>
+=======
+				<div class="popup-form" id="edit-user-post">
+
+				<h3 id="edit_user_prompt"></h3>
+
+				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
+    					<input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
+						<input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
+
+	            		<textarea name="edit_post_content" id="edit_post_content" style="margin-right:10px;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
+	            	
+					<div style="float: right; width: auto; margin-top: 10px">
+	        			<a onclick="$('#edit-user-post').css('display', 'none');$('#edit_post_content').val('');
+	        						$('#edit_post_content').trigger('checkform.areYouSure');" class="btn btn-danger">Cancel</a>
+	       			 	<input class="btn btn-primary" type="submit" value="Submit" />
+	    			</div>	
+	    			</form>
+				</div>
+>>>>>>> master
 HTML;
 			}
 
@@ -309,7 +378,7 @@ HTML;
 						</span>
 
 	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Submit reply to all" class="btn btn-primary" />
+	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/><input type="submit" style="display:inline-block;" name="post" value="Submit reply to all" class="btn btn-primary" />
 	            		</div>
 	            	</form>
 	            	<br/>
@@ -402,6 +471,7 @@ HTML;
             $post_content = $pre_post;
         }
 			
+<<<<<<< HEAD
 		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
         $accepted_schemes = array("https", "http");
@@ -447,6 +517,53 @@ HTML;
 		$return .= <<<HTML
 			<pre><p class="post_content" style="white-space: pre-wrap; ">{$parent_first_name} {$post_content}</p></pre>	
 			<hr style="margin-bottom:3px;">
+=======
+				        $post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+                        preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
+                        $accepted_schemes = array("https", "http");
+                        $pos = 0;
+                        if(count($result) > 0) {
+                        	foreach($result[1] as $url){
+                        		$decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
+                        		$parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
+                        		if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
+                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
+
+                        		} else {
+                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
+                        		}
+                        		if(!empty($pre_post)){
+                        			$post_content = $pre_post;
+                        		} $pre_post = "";
+                        		 $pos++;
+                        	}
+                        }
+
+                        //This code is for legacy posts that had an extra \r per newline
+                        if(strpos($post['content'], "\r") !== false){
+                        	$post_content = str_replace("\r","", $post_content);
+                        }
+
+                        //end link handling
+
+                        //handle converting code segments
+
+                        $codeBracketString = "&lbrack;&sol;code&rsqb;";
+                        if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
+                        	$codeBracketString = "&NewLine;" . $codeBracketString;
+                        }
+
+                        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+
+						//end code segment handling
+						$return .= <<<HTML
+							<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>
+							
+							
+							<hr style="margin-bottom:3px;">
+
+>>>>>>> master
 HTML;
 		if(!$first){
 			$return .= <<<HTML
@@ -456,11 +573,18 @@ HTML;
 			$return .= <<<HTML
 				<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, .posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
+<<<<<<< HEAD
 			$first = false;
 		}
 
 		$return .= <<<HTML
 		<span style="margin-top:8px;margin-left:10px;float:right;">							
+=======
+							}
+
+							$return .= <<<HTML
+								<span style="margin-top:8px;margin-left:10px;float:right;">							
+>>>>>>> master
 HTML;
 
 		if($this->core->getUser()->getGroup() <= 2){
@@ -472,10 +596,28 @@ HTML;
 			$return .= <<<HTML
 				<a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {$info_name}, {$visible_user_json}, {$jscriptAnonFix})' title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
 HTML;
+<<<<<<< HEAD
 		}
 
 		if($this->core->getUser()->getGroup() <= 2){
 			$wrapped_content = json_encode($post['content']);
+=======
+}
+						if(!$first){
+							$return .= <<<HTML
+								<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
+HTML;
+						}
+						if($this->core->getUser()->getGroup() <= 2){
+							$wrapped_content = json_encode($post['content']);
+							$return .= <<<HTML
+
+							<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+							<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
+HTML;
+							} 
+
+>>>>>>> master
 			$return .= <<<HTML
 				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'m/d/Y g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
 				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
@@ -522,7 +664,7 @@ HTML;
 						</span>
 
 	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" /><input type="submit" style="display:inline-block;" name="post" value="Submit reply to {$visible_username}" class="btn btn-primary" />
+	            			<label style="display:inline-block;" for="Anon">Anonymous?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/><input type="submit" style="display:inline-block;" name="post" value="Submit reply to {$visible_username}" class="btn btn-primary" />
 	            		</div>
 	            	</form>
 HTML;
@@ -540,10 +682,12 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
+		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 
 		<script> 
 			$( document ).ready(function() {
 			    enableTabsInTextArea('thread_content');
+				$("form").areYouSure();
 			});
 		 </script>
 
@@ -552,7 +696,13 @@ HTML;
 		<div style="margin-left:20px;margin-top:10px; height:50px;" id="forum_bar">
 
 			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
-		
+HTML;
+		if($this->core->getUser()->getGroup() <= 2){
+			$return .= <<<HTML
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
+HTML;
+		}
+		$return .= <<<HTML
 		</div>
 
 		<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;height:69vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
@@ -585,12 +735,12 @@ HTML;
 				</span>
 
 				<span style="display:inline-block;float:right;">
-            	<label for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" />
+            	<label for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/>
 HTML;
 				
 				if($this->core->getUser()->getGroup() <= 2){
 						$return .= <<<HTML
-						<label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" />
+						<label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" data-ays-ignore="true"/>
 HTML;
 
 				}
@@ -609,4 +759,163 @@ HTML;
 		return $return;
 	}
 
+
+
+	public function statPage($users) {
+
+		if(!$this->forumAccess() || $this->core->getUser()->getGroup() > 2){
+			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+			return;
+		}
+
+		$return = <<<HTML
+		<div style="margin-left:20px;margin-top:10px; height:50px;" id="forum_bar">
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+		</div>
+			<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;">
+				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">
+					<tr>			
+				        <td style = "cursor:pointer;" width="15%" id="user_down">User &darr;</td>
+				        <td style = "cursor:pointer;" width="15%" id="total_posts_down">Total Posts (not deleted)</td>
+				        <td style = "cursor:pointer;" width="15%" id="total_threads_down">Total Threads</td>
+				        <td style = "cursor:pointer;" width="15%" id="total_deleted_down">Total Deleted Posts</td>
+				        <td width="40%">Show Posts</td>
+					</tr>
+HTML;
+		foreach($users as $user => $details){
+			$first_name = $details["first_name"];
+			$last_name = $details["last_name"];
+			$post_count = count($details["posts"]);
+			$posts = htmlspecialchars(json_encode($details["posts"]), ENT_QUOTES, 'UTF-8');
+			$ids = htmlspecialchars(json_encode($details["id"]), ENT_QUOTES, 'UTF-8');
+			$timestamps = htmlspecialchars(json_encode($details["timestamps"]), ENT_QUOTES, 'UTF-8');
+			$thread_ids = htmlspecialchars(json_encode($details["thread_id"]), ENT_QUOTES, 'UTF-8');
+			$thread_titles = htmlspecialchars(json_encode($details["thread_title"]), ENT_QUOTES, 'UTF-8');
+			$num_deleted = ($details["num_deleted_posts"]);
+			$return .= <<<HTML
+			<tbody>
+				<tr>
+					<td>{$last_name}, {$first_name}</td>
+					<td>{$post_count}</td>
+					<td>{$details["total_threads"]}</td>
+					<td>{$num_deleted}</td>
+					<td><button class="btn btn-default" data-action = "expand" data-posts="{$posts}" data-id="{$ids}" data-timestamps="{$timestamps}" data-thread_id="{$thread_ids}" data-thread_titles="{$thread_titles}">Expand</button></td>
+				</tr>
+			</tbody>
+HTML;
+			
+		}
+		
+		$return .= <<<HTML
+				</table>
+			</div>
+
+			<script>
+				$("td").click(function(){
+					if($(this).attr('id')=="user_down"){
+						sortTable(0);
+					}
+					if($(this).attr('id')=="total_posts_down"){
+						sortTable(1);
+					}
+					if($(this).attr('id')=="total_threads_down"){
+						sortTable(2);
+					}
+					if($(this).attr('id')=="total_deleted_down"){
+						sortTable(3);
+					}
+					
+				});
+				$("button").click(function(){
+					
+					var action = $(this).data('action');
+					var posts = $(this).data('posts');
+					var ids = $(this).data('id');
+					var timestamps = $(this).data('timestamps');
+					var thread_ids = $(this).data('thread_id');
+					var thread_titles = $(this).data('thread_titles');
+					if(action=="expand"){
+						
+						
+						for(var i=0;i<posts.length;i++){
+							var post_string = posts[i];
+							post_string = escapeSpecialChars(post_string);
+							var thread_title = thread_titles[i]["title"];
+							thread_title = escapeSpecialChars(thread_title);
+							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
+							
+						}
+						$(this).html("Collapse");
+						$(this).data('action',"collapse");
+						$("td").click(function(){
+						
+							if($(this).data('type')=="post" || $(this).data('type')=="thread"){
+			
+								var id = $(this).data('thread_id');
+								var url = buildUrl({'component' : 'forum', 'page' : 'view_thread', 'thread_id' : id});
+								window.open(url);
+							}
+						
+					});
+					}
+					else{
+						for(var i=0;i<ids.length;i++){
+							var item = document.getElementById(ids[i]);
+							item.remove();
+						}
+						
+						$(this).html("Expand");
+						$(this).data('action',"expand");
+					}
+					
+					
+					return false;
+				});
+
+
+				
+
+				function sortTable(sort_element_index){
+					var table = document.getElementById("forum_stats_table");
+					var switching = true;
+					while(switching){
+						switching=false;
+						var rows = table.getElementsByTagName("TBODY");
+						for(var i=1;i<rows.length-1;i++){
+
+							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+							if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
+								rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+								switching=true;
+							}
+						}
+
+					}
+
+					var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
+					var headers = row0.getElementsByTagName("TD");
+					
+					for(var i = 0;i<headers.length;i++){
+						var index = headers[i].innerHTML.indexOf(' ↓');
+						
+						if(index> -1){
+
+							headers[i].innerHTML = headers[i].innerHTML.substr(0, index);
+							break;
+						}
+					}
+
+					headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
+
+				}
+
+
+			</script>
+HTML;
+		return $return;
+
+	}
+
 }
+
