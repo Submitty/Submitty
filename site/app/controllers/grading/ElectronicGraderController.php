@@ -587,7 +587,7 @@ class ElectronicGraderController extends AbstractController {
                 $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
             }
             else {
-                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections,$orderBy="rotating_section,user_id;");
+                $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections,$orderBy="rotating_section,user_id;");
                 $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
             }
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
