@@ -1847,7 +1847,7 @@ AND gc_id IN (
       return $ar;
     }
 
-    public function getPostsForThread($current_user, $thread_id, $option){
+    public function getPostsForThread($current_user, $thread_id, $option='alpha'){
 
       if($thread_id == -1) {
         $announcement_id = $this->existsAnnouncements();
