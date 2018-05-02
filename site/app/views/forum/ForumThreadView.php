@@ -252,7 +252,6 @@ HTML;
 HTML;
 					$first = true;
 					$first_post_id = 1;
-					if($display_option == "tree"){	
 						$order_array = array();
 						$reply_level_array = array();
 						foreach($posts as $post){
@@ -300,12 +299,7 @@ HTML;
 							}
 							$i++;
 						}
-					} else {
-						foreach($posts as $post){
-							$return .= $this->createPost($post["thread_id"], $post, $function_date, $title_html, $first, 1);
-							if($first) $first = false;
-						}
-					}
+					
 			$return .= <<<HTML
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
@@ -372,7 +366,7 @@ HTML;
 		return $return;
 	}
 
-	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level){
+	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
 		$return = "";
 		$post_html = "";
 		$post_id = $post["id"];
@@ -383,6 +377,11 @@ HTML;
 		$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
+
+
+		if($display_option != 'tree'){
+			$reply_level = 1;
+		}
 
 		if($post["anonymous"]){
 			$visible_username = "Anonymous";
