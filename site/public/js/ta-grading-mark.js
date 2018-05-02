@@ -74,7 +74,25 @@ function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback) {
     })
 }
 
-function ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, successCallback) {
+function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback) {
+    $.ajax({
+        type: "POST",
+        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_gradeable_comment'}),
+        data: {
+            'gradeable_id' : gradeable_id,
+            'anon_id' : user_id
+        },
+        success: function(data) {
+            successCallback(data);
+        },
+        error: function() {
+            console.error("Couldn't get the general gradeable comment");
+            alert("Failed to retrieve the general comment");
+        }
+    })
+}
+
+function ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, sync, successCallback) {
     note = (note ? note : "");
     points = (points ? points : 0);
     if (!note.trim())
@@ -83,7 +101,7 @@ function ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, succes
     $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'add_one_new_mark'}),
-            async: true,
+            async: sync,
             data: {
                 'gradeable_id' : gradeable_id,
                 'anon_id' : user_id,
@@ -171,6 +189,8 @@ function haveMarksChanged(num, data) {
     var marks = $('[name=mark_'+num+']');
     var mark_notes = $('[name^=mark_text_'+num+']');
     var mark_scores = $('[name^=mark_points_'+num+']');
+    var custom_mark_points = $('input[name=mark_points_custom_'+num+']');
+    var custom_mark_text = $('textarea[name=mark_text_custom_'+num+']');
 
     // Check if there were added/removed marks
     //    data['data'].length-1 to account for custom mark
@@ -184,6 +204,12 @@ function haveMarksChanged(num, data) {
             return true;
     }
     
+    // Check to see if custom mark changed
+    if (data['data'][marks.length]['custom_note'] != custom_mark_text.val())
+        return true;
+    if (data['data'][marks.length]['custom_score'] != custom_mark_points.val())
+        return true;
+
     return false;
 }
 
@@ -200,6 +226,23 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
         var marks = $('[name=mark_'+num+']');
         for (var x = 0; x < marks.length; x++)
             marks[x].remove();
+            
+        // Custom mark
+        {
+            var x = data['data'].length-1;
+            var score = data['data'][x]['custom_score'];
+            var note  = data['data'][x]['custom_note'];
+            
+            var score_el = $('input[name=mark_points_custom_'+num+']');
+            var note_el = $('textarea[name=mark_text_custom_'+num+']');
+            score_el.val(parseFloat(score));
+            note_el.val(note);
+            var icon = $('i[name=mark_icon_'+num+'_custom]');
+            if ((note != "" && note != undefined) && icon[0].classList.contains('fa-square-o') ||
+                 (note == "" || note == undefined) && icon[0].classList.contains('fa-square')) {
+                     icon.toggleClass("fa-square-o fa-square");
+            }
+        }
         
         // Add all marks back
         // data['data'].length - 2 to ignore the custom mark
@@ -211,6 +254,14 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
                         
             parent.prepend(getMarkView(num, x, is_publish, hasMark, note, score, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id));
         }
+    });
+}
+
+function updateGeneralComment(gradeable_id, user_id) {
+    ajaxGetGeneralCommentData(gradeable_id, user_id, function(data) {
+        data = JSON.parse(data);
+        
+        $('#comment-id-general').val(data['data']);
     });
 }
 
@@ -527,82 +578,6 @@ function openClose(row_id, num_questions = -1) {
     updateCookies();
 }
 
-//cancelMark gets the data from the database and reinsert its without saving
-function cancelMark(num, gradeable_id, user_id, gc_id) {
-    //-3 means gradeable comment
-    if (num === -3) {
-        var current_question_text = $('#rubric-textarea-custom');
-        $.ajax({
-            type: "POST",
-            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_gradeable_comment'}),
-            data: {
-                'gradeable_id' : gradeable_id,
-                'anon_id' : user_id
-            },
-            success: function(data) {
-                data = JSON.parse(data);
-                $('#comment-id-general').val(data['data']);
-            },
-            error: function() {
-                console.error("Couldn't get the gradeable comment");
-                alert("Failed to cancel the comment");
-            }
-        })
-    } else {
-        //gets the data in the database and applys it back
-        var arr_length = $('tr[name=mark_'+num+']').length;
-        $.ajax({
-            type: "POST",
-            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
-            data: {
-                'gradeable_id' : gradeable_id,
-                'anon_id' : user_id,
-                'gradeable_component_id' : gc_id
-            },
-            success: function(data) {
-                //if success reinput all the data back into the form
-                data = JSON.parse(data);
-                for (var x = 0; x < arr_length; x++) {
-                    current_row = $('#mark_id-'+num+'-'+x);
-                    var is_selected = false;
-                    if (data['data'][x]['has_mark'] === true) {
-                        is_selected = true;
-                    } else {
-                        is_selected = false;
-                    }
-                    current_row.find('input[name=mark_points_'+num+'_'+x+']').val(data['data'][x]['score']);
-                    current_row.find('textarea[name=mark_text_'+num+'_'+x+']').val(data['data'][x]['note']);
-                    if (is_selected === true) {
-                        if (current_row.find('i[name=mark_icon_'+num+'_'+x+']')[0].classList.contains('fa-square-o')) {
-                            current_row.find('i[name=mark_icon_'+num+'_'+x+']').toggleClass("fa-square-o fa-square");
-                        }
-                    } else {
-                        if (current_row.find('i[name=mark_icon_'+num+'_'+x+']')[0].classList.contains('fa-square')) {
-                            current_row.find('i[name=mark_icon_'+num+'_'+x+']').toggleClass("fa-square-o fa-square");
-                        }
-                    }     
-                }
-                current_row = $('#mark_custom_id-'+num);
-                current_row.find('input[name=mark_points_custom_'+num+']').val(data['data'][x]['custom_score']);
-                current_row.find('textarea[name=mark_text_custom_'+num+']').val(data['data'][x]['custom_note']);
-                if (current_row.find('input[name=mark_points_custom_'+num+']').val() == 0 && current_row.find('textarea[name=mark_text_custom_'+num+']').val() == "") {
-                    if (current_row.find('i[name=mark_icon_'+num+'_custom]')[0].classList.contains('fa-square')) {
-                        current_row.find('i[name=mark_icon_'+num+'_custom]').toggleClass("fa-square-o fa-square");
-                    }
-                } else {
-                    if (current_row.find('i[name=mark_icon_'+num+'_custom]')[0].classList.contains('fa-square-o')) {
-                        current_row.find('i[name=mark_icon_'+num+'_custom]').toggleClass("fa-square-o fa-square");
-                    }
-                }
-            },
-            error: function() {
-                console.error("You make me sad. The cancel mark errored out.");
-                alert("Failed to cancel the grade");
-            }
-        })
-    }
-}
-
 // Saves the general comment
 function saveGeneralComment(gradeable_id, user_id, active_version, sync = true) {
     var comment_row = $('#comment-id-general');
@@ -634,7 +609,7 @@ function saveLastOpenedMark(gradeable_id, user_id, active_version, gc_id = -1, y
     saveGeneralComment(gradeable_id, user_id, active_version, sync);
 }
 
-function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "", sync = true) {
+function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "", question_id = -1, sync = true) {
     if ($('#marks-parent-' + num)[0].style.display === "none")
         return;
     
