@@ -2,147 +2,56 @@ language: php
 sudo: true
 dist: trusty
 
-matrix:
+jobs:
   include:
-    - php: 7.0
-      env: AUTH_METHOD=2 INTEGRATION_SUITE=false
+    - stage: lint
+      php: 7.0
+      script:
+        - echo ${TRAVIS_BUILD_STAGE_NAME}
+        - echo ${TRAVIS_PHP_VERSION}
     - php: 7.1
-      env: AUTH_METHOD=2 INTEGRATION_SUITE=false
-    - php: 7.0
-      env: AUTH_METHOD=1 INTEGRATION_SUITE=false
-    - php: 7.0
-      env: AUTH_METHOD=2 INTEGRATION_SUITE=true
+      script:
+        - echo ${TRAVIS_BUILD_STAGE_NAME}
+        - echo ${TRAVIS_PHP_VERSION}
+    - php: 7.2
+      script:
+        - echo ${TRAVIS_BUILD_STAGE_NAME}
+        - echo ${TRAVIS_PHP_VERSION}
+    - stage: unit test
+      php: 7.0
+      script:
+        - echo ${TRAVIS_BUILD_STAGE_NAME}
+        - echo ${TRAVIS_PHP_VERSION}
+    - php: 7.1
+      script:
+        - echo ${TRAVIS_BUILD_STAGE_NAME}
+        - echo ${TRAVIS_PHP_VERSION}
+    - php: 7.2
+      script:
+        - echo ${TRAVIS_BUILD_STAGE_NAME}
+        - echo ${TRAVIS_PHP_VERSION}
+    - stage: e2e test
+      php: 7.0
+      script:
+        - echo ${TRAVIS_BUILD_STAGE_NAME}
+        - echo ${TRAVIS_PHP_VERSION}
+    - php: 7.1
+      script:
+        - echo ${TRAVIS_BUILD_STAGE_NAME}
+        - echo ${TRAVIS_PHP_VERSION}
+    - php: 7.2
+      script:
+        - echo ${TRAVIS_BUILD_STAGE_NAME}
+        - echo ${TRAVIS_PHP_VERSION}
+    - stage: integration test
+      php: 7.0
+      script:
+        - echo ${TRAVIS_BUILD_STAGE_NAME}
+        - echo ${TRAVIS_PHP_VERSION}
 
 cache:
   pip: true
   directories:
     - vendor
-    - $HOME/.composer/cache
-    - $HOME/.cache/pip
-
-addons:
-  postgresql: "9.5"
-  apt:
-    sources:
-      - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
-      - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
-    # You cannot put just any Ubuntu trusty package here and expect to install them and that
-    # they must be in this list: https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-trusty
-    # otherwise you'll have to install it via "sudo apt-get install ..." in the before_install section
-    packages:
-      - apache2
-      - libapache2-mod-fastcgi
-      - build-essential
-      - automake
-      - cmake
-      - clang
-      - g++-multilib
-      - libseccomp2
-      - seccomp
-      - libseccomp-dev
-      - valgrind
-      - pkg-config
-      - flex
-      - bison
-      - poppler-utils
-      - libpcre3
-      - libpcre3-dev
-      - unzip
-      - google-chrome-stable
-      - libpam-passwdqc
-      - libboost-all-dev
-
-before_install:
-  - jdk_switcher use default
-  # we have to unset this as the JVM will print a message on STDERR on any execution if this is set because somehow that makes sense I guess
-  - unset _JAVA_OPTIONS
-  - PY_VERSION_3=$(pyenv versions | grep -oP "3.6.[0-9]" || pyenv versions | grep -oP "3.5.[0-9]")
-  - pyenv global ${PY_VERSION_3}
-  - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
-  - sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
-  - mkdir -p ~/.local/bin
-  - export PATH=$HOME/.local/bin:$PATH
-
-install:
-  - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
-  - sudo apt-get -y install libapache2-mod-php7.0 php7.0-pgsql php7.0-curl; a2enmod php7.0;
-  - wget http://chromedriver.storage.googleapis.com/2.35/chromedriver_linux64.zip
-  - unzip chromedriver_linux64.zip
-  - sudo chmod u+x chromedriver
-  - sudo mv chromedriver /usr/bin/
-  - travis_retry composer install --prefer-dist --no-interaction
-  - pip3 install -U pip
-  - pip3 install python-pam
-  - pip3 install PyYAML
-  - pip3 install psycopg2-binary
-  - pip3 install sqlalchemy
-  - pip3 install pylint_runner
-  - pip3 install psutil
-  - pip3 install python-dateutil
-  - pip3 install watchdog
-  - pip3 install xlsx2csv
-  - pip3 install selenium
-  - pip3 install nose2
-  - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
-  - python3 setup.py install
-  - popd
-  - sudo chmod -R 555 /usr/local/lib/python*/
-  - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
-
-before_script:
-  # Doing this helps chromedriver from hanging for some mysterious reason
-  # https://github.com/SeleniumHQ/docker-selenium/issues/87
-  - export DBUS_SESSION_BUS_ADDRESS=/dev/null
-  - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
-  - PGPASSWORD=hsdbu psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-  - PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${TRAVIS_BUILD_DIR}/site/data/submitty_db.sql
-  - sudo ./.setup/travis/autograder.sh
-  - ./.setup/travis/setup.sh
-  - if [ ${INTEGRATION_SUITE} = false ]; then sudo /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample; fi
-  - sudo ./.setup/travis/setup_test_suite.sh
-  - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
-  - sudo a2enmod include rewrite actions cgi alias headers
-  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - sudo a2dissite 000-default
-  - sudo rm -rf /etc/apache2/sites-available/*
-  - sudo rm -rf /etc/apache2/sites-enabled/*
-  - sudo cp -f .setup/travis/apache.conf /etc/apache2/sites-available/submitty.conf
-  - sudo a2ensite submitty
-  - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
-  - sudo chmod -R 755 /usr/local/submitty
-  - sudo chmod -R 777 /usr/local/submitty/test_suite
-  - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
-  - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
-  - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
-  - sudo service apache2 restart
-  #- ./.setup/travis/start.sh
-  - sudo cat /usr/local/submitty/site/config/master.ini
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
-
-script:
-  # if these fail, travis fails
-  - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-  - vendor/bin/phpunit --version
-  - if [ ${INTEGRATION_SUITE} = false ]; then vendor/bin/phpunit --configuration tests/phpunit.xml; fi
-  - if [ ${INTEGRATION_SUITE} = false ]; then TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"; fi
-  - if [ ${INTEGRATION_SUITE} = true ]; then sudo /usr/local/submitty/test_suite/integrationTests/run.py; fi
-
-# Add more linters to the build process here
-after_script:
-  # Eventually this should be moved into the "script" once we've gotten the build to a point where all contained
-  # python files will actually pass (which a lot right now will not)
-  # - pylint_runner3 -v ${TRAVIS_BUILD_DIR}
-  # - sudo ./.setup/travis/print_debug.sh
-  # if this fails, it only prints, travis does not fail
-  - sudo cat /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh
-  - sudo cat /usr/local/submitty/site/config/master.ini
-  - sudo cat /var/local/submitty/logs/*
-  - sudo /usr/local/submitty/bin/check_everything.py
-
-after_success:
-  - if [ ${INTEGRATION_SUITE} = false ]; then travis_retry php vendor/bin/coveralls -v; fi
-
-notifications:
-  email: false
+    - ${HOME}/.composer/cache
+    - ${HOME}/.cache/pip
