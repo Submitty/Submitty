@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-echo ${TRAVIS_PHP_VERSION}
-echo ${TRAVIS_BUILD_STAGE_NAME}
+# this
+BUILD_STAGE=$(echo ${TRAVIS_BUILD_STAGE_NAME} | tr '[:upper:]' '[:lower:]')
 echo "before install"

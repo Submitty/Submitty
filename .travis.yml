@@ -4,7 +4,33 @@ dist: trusty
 
 jobs:
   include:
-    - stage: Lint
+    - &boostrap
+      stage: Lint
+      php: 7.0
+      before_install: 
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
+      before_script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
+      script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
+      after_script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
+    - <<: *bootstrap
+      php: 7.1
+    - <<: *bootstrap
+      php: 7.2
+
+    - <<: *bootstrap
+      stage: Unit_Test
+      php: 7.0
+    - <<: *bootstrap
+      php: 7.1
+    - <<: *bootstrap
+      php: 7.2
+
+    - stage: E2E_Test
       php: 7.0
       addons:
         postgresql: "9.5"
@@ -19,6 +45,8 @@ jobs:
       after_script:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - php: 7.1
+      addons:
+        postgresql: "9.5"
       before_install: 
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
@@ -30,6 +58,8 @@ jobs:
       after_script:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - php: 7.2
+      addons:
+        postgresql: "9.5"
       before_install: 
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
@@ -40,74 +70,7 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - stage: Unit_Test
-      php: 7.0
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - php: 7.1
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - php: 7.2
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - stage: E2E_Test
-      php: 7.0
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - php: 7.1
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - php: 7.2
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
+
     - stage: Integration_Test
       language: cpp
       addons:
@@ -128,8 +91,7 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - stage: Integration_Test
-      language: cpp
+    - language: cpp
       addons:
         apt:
           sources:
@@ -148,8 +110,7 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - stage: Integration_Test
-      language: cpp
+    - language: cpp
       addons:
         apt:
           sources:
@@ -168,8 +129,7 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - stage: Integration_Test
-      language: cpp
+    - language: cpp
       addons:
         apt:
           sources:
@@ -189,8 +149,7 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - stage: Integration_Test
-      language: cpp
+    - language: cpp
       addons:
         apt:
           sources:
@@ -209,8 +168,7 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - stage: Integration_Test
-      language: cpp
+    - language: cpp
       addons:
         apt:
           sources:
