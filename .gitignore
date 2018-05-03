@@ -9,8 +9,6 @@ selenium*.jar
 *.orig*
 *~
 *.o
-INSTALL.sh
-logs/
 
 *.pyc
 *.aux

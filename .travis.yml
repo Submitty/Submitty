@@ -109,8 +109,15 @@ jobs:
       after_script:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - stage: Integration_Test
-      language: python
-      python: 3.5
+      language: cpp
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       before_install: 
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
@@ -123,9 +130,14 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - stage: Integration_Test
       language: cpp
-      compiler:
-        - clang
-        - gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       before_install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
