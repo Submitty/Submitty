@@ -9,131 +9,133 @@ jobs:
       addons:
         postgresql: "9.5"
       before_install: 
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - php: 7.1
       before_install: 
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - php: 7.2
       before_install: 
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - stage: Unit_Test
       php: 7.0
       before_install: 
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - php: 7.1
       before_install: 
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - php: 7.2
       before_install: 
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - stage: E2E_Test
       php: 7.0
       before_install: 
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - php: 7.1
       before_install: 
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - php: 7.2
       before_install: 
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - stage: Integration_Test
       language: python
       python: 3.5
       before_install: 
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
     - stage: Integration_Test
-      language: python
-      python: 3.6
+      language: cpp
+      compiler:
+        - clang
+        - gcc
       before_install:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/travis/install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
       before_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/before_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
       script:
-        - source ${TRAVIS_BUILD_DIR}/travis/script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
-        - source ${TRAVIS_BUILD_DIR}/travis/after_script.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
 
 cache:
   pip: true
