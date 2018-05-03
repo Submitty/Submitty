@@ -29,6 +29,17 @@ jobs:
     - <<: *00-cache
       php: 7.2
 
+    # Lint the codebase to ensure that the code is compliant to our system
+    - &01-lint
+      stage: 01 lint
+      php: 7.0
+      script:
+        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+    - <<: *01-lint
+      php: 7.1
+    - <<: *01-lint
+      php: 7.2
+
 cache:
   pip: true
   directories:
