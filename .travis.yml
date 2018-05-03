@@ -23,6 +23,7 @@ jobs:
         - pip3 install pylint_runner
         - pip3 install python-dateutil
         - pip3 install selenium
+      script: skip
     - <<: *00-cache
       php: 7.1
     - <<: *00-cache
