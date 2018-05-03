@@ -9,8 +9,8 @@ dist: trusty
 jobs:
   include:
     # Warm up the pip and composer caches to use it for the rest of the build stages
-    - &00_cache
-      stage: Warm up cache
+    - &00-cache
+      stage: 00 warm up cache
       php: 7.0
       install:
         - travis_retry composer install --prefer-dist --no-interaction
@@ -22,113 +22,10 @@ jobs:
         - pip3 install pylint_runner
         - pip3 install python-dateutil
         - pip3 install selenium
-    - <<: *00_cache
+    - <<: *00-cache
       php: 7.1
-    - <<: *00_cache
+    - <<: *00-cache
       php: 7.2
-
-    # Lint the codebase to ensure that the code is compliant to our system
-    - &01_lint
-      stage: Lint
-      php: 7.0
-      script:
-        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-    - <<: *01_lint
-      php: 7.1
-    - <<: *01_lint
-      php: 7.2
-
-    - &02_unit
-      stage: Unit test
-      php: 7.0
-      script:
-        - vendor/bin/phpunit --version
-        - vendor/bin/phpunit --configuration tests/phpunit.xml
-      after_success:
-        - travis_retry php vendor/bin/coveralls -v
-    - <<: *02_unit
-      php: 7.1
-    - <<: *02_unit
-      php: 7.2
-
-    - &03_e2e
-      stage: E2e test
-      php: 7.0
-      addons:
-        postgresql: "9.5"
-      script: skip
-    - <<: *03_e2e
-      php: 7.1
-      addons:
-        postgresql: "9.5"
-    - <<: *03_e2e
-      php: 7.2
-      addons:
-        postgresql: "9.5"
-
-    - &04_integration
-      stage: Integration test
-      language: cpp
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-      env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-      script: skip
-    - <<: 04_integration
-      language: cpp
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
-      env:
-        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-    - <<: 04_integration
-      language: cpp
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-    - <<: 04_integration
-      language: cpp
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
-          packages:
-            - clang-3.8
-      env:
-        - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
-    - <<: 04_integration
-      language: cpp
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-4.0
-          packages:
-            - clang-4.0
-      env:
-        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-    - <<: 04_integration
-      language: cpp
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-5.0
-          packages:
-            - clang-5.0
-      env:
-        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
 cache:
   pip: true
