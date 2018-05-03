@@ -2,13 +2,35 @@ language: php
 sudo: true
 dist: trusty
 
+# We use build stages (https://docs.travis-ci.com/user/build-stages/) to allow us to
+# create a matrix of firstly building and testing various PHP targets in several ways
+# (lint, unit test, e2e test) and then test out various C++ compilers to ensure our
+# best compatibility.
 jobs:
   include:
-    - &01_lint
-      stage: Lint
+    # Warm up the pip and composer caches to use it for the rest of the build stages
+    - &00_cache
+      stage: Warm up cache
       php: 7.0
       install:
         - travis_retry composer install --prefer-dist --no-interaction
+        - pip3 install -U pip
+        - pip3 install python-pam
+        - pip3 install PyYAML
+        - pip3 install psycopg2-binary
+        - pip3 install sqlalchemy
+        - pip3 install pylint_runner
+        - pip3 install python-dateutil
+        - pip3 install selenium
+    - <<: *00_cache
+      php: 7.1
+    - <<: *00_cache
+      php: 7.2
+
+    # Lint the codebase to ensure that the code is compliant to our system
+    - &01_lint
+      stage: Lint
+      php: 7.0
       script:
         - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
     - <<: *01_lint
