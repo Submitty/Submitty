@@ -84,6 +84,11 @@ class HomePageController extends AbstractController {
         $user = $this->core->getUser();
         $submitty_path = $this->core->getConfig()->getSubmittyPath();
         $courses = $this->core->getQueries()->getStudentCoursesById($user->getId(), $submitty_path);
+        //Filter out any courses a student has dropped so they do not appear on the homepage.
+		//Do not filter courses for non-students.
+        $courses = array_filter($courses, function($course) use($user) {
+        	return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
+        });
         $changeNameText = $this->core->getConfig()->getUsernameChangeText();
         $this->core->getOutput()->renderOutput('HomePage', 'showHomePage', $user, $courses, $changeNameText);
     }

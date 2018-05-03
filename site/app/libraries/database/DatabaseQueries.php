@@ -1950,4 +1950,28 @@ AND gc_id IN (
         $this->course_db->query("SELECT anon_id FROM users");
         return $this->course_db->rows();
     }
+
+    /**
+     * Determines if a course is 'active' or if it was dropped.
+     *
+     * This is used to filter out courses displayed on the home screen, for when
+     * a student has dropped a course.  SQL query checks for user_group=4 so
+     * that only students are considered.  Returns false when course is dropped.
+     * Returns true when course is still active, or user is not a student.
+     *
+     * @param string $user_id
+     * @param string $course
+     * @param string $semester
+     * @return boolean
+     */
+    public function checkStudentActiveInCourse($user_id, $course, $semester) {
+        $this->submitty_db->query("
+            SELECT registration_section
+            FROM courses_users
+            WHERE user_id=? AND course=? AND semester=? AND user_group=4", array($user_id, $course, $semester));
+        $result = $this->submitty_db->row();
+        //count === 0 indicates that the user is not a student
+        //return true when registration_section is not null or user is not a student
+        return (count($result) === 0 || !is_null($result['registration_section']));
+    }
 }
