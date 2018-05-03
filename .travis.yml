@@ -115,10 +115,30 @@ jobs:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-7
+            - g++-5
       env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
       before_install: 
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
+      before_script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
+      script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
+      after_script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
+    - stage: Integration_Test
+      language: cpp
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+      before_install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
@@ -148,6 +168,68 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
       after_script:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
+    - stage: Integration_Test
+      language: cpp
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - clang-3.8
+      env:
+        - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
+      before_install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
+      before_script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
+      script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
+      after_script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
+    - stage: Integration_Test
+      language: cpp
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - clang-4.0
+      env:
+        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
+      before_install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
+      before_script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
+      script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
+      after_script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
+    - stage: Integration_Test
+      language: cpp
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+      env:
+        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+      before_install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
+      before_script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
+      script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
+      after_script:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
+
 
 cache:
   pip: true
