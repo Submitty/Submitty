@@ -12,6 +12,7 @@ jobs:
     - &00-cache
       stage: 00 warm up cache
       php: 7.0
+      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - travis_retry composer install --prefer-dist --no-interaction
         - pip3 install -U pip
