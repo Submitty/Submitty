@@ -1966,12 +1966,13 @@ AND gc_id IN (
      */
     public function checkStudentActiveInCourse($user_id, $course, $semester) {
         $this->submitty_db->query("
-            SELECT registration_section
-            FROM courses_users
-            WHERE user_id=? AND course=? AND semester=? AND user_group=4", array($user_id, $course, $semester));
-        $result = $this->submitty_db->row();
-        //count === 0 indicates that the user is not a student
-        //return true when registration_section is not null or user is not a student
-        return (count($result) === 0 || !is_null($result['registration_section']));
+            SELECT
+                CASE WHEN registration_section IS NULL AND user_group=4 THEN FALSE
+                ELSE TRUE
+                END
+            AS active
+            FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
+        return $this->submitty_db->row()['active'];
+
     }
 }
