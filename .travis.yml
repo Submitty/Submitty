@@ -4,50 +4,136 @@ dist: trusty
 
 jobs:
   include:
-    - stage: lint
+    - stage: Lint
       php: 7.0
+      addons:
+        postgresql: "9.5"
+      before_install: 
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
       script:
-        - echo ${TRAVIS_BUILD_STAGE_NAME}
-        - echo ${TRAVIS_PHP_VERSION}
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
     - php: 7.1
+      before_install: 
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
       script:
-        - echo ${TRAVIS_BUILD_STAGE_NAME}
-        - echo ${TRAVIS_PHP_VERSION}
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
     - php: 7.2
+      before_install: 
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
       script:
-        - echo ${TRAVIS_BUILD_STAGE_NAME}
-        - echo ${TRAVIS_PHP_VERSION}
-    - stage: unit test
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
+    - stage: Unit_Test
       php: 7.0
+      before_install: 
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
       script:
-        - echo ${TRAVIS_BUILD_STAGE_NAME}
-        - echo ${TRAVIS_PHP_VERSION}
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
     - php: 7.1
+      before_install: 
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
       script:
-        - echo ${TRAVIS_BUILD_STAGE_NAME}
-        - echo ${TRAVIS_PHP_VERSION}
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
     - php: 7.2
+      before_install: 
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
       script:
-        - echo ${TRAVIS_BUILD_STAGE_NAME}
-        - echo ${TRAVIS_PHP_VERSION}
-    - stage: e2e test
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
+    - stage: E2E_Test
       php: 7.0
+      before_install: 
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
       script:
-        - echo ${TRAVIS_BUILD_STAGE_NAME}
-        - echo ${TRAVIS_PHP_VERSION}
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
     - php: 7.1
+      before_install: 
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
       script:
-        - echo ${TRAVIS_BUILD_STAGE_NAME}
-        - echo ${TRAVIS_PHP_VERSION}
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
     - php: 7.2
+      before_install: 
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
       script:
-        - echo ${TRAVIS_BUILD_STAGE_NAME}
-        - echo ${TRAVIS_PHP_VERSION}
-    - stage: integration test
-      php: 7.0
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
+    - stage: Integration_Test
+      language: python
+      python: 3.5
+      before_install: 
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
       script:
-        - echo ${TRAVIS_BUILD_STAGE_NAME}
-        - echo ${TRAVIS_PHP_VERSION}
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
+    - stage: Integration_Test
+      language: python
+      python: 3.6
+      before_install:
+        - source travis/before_install.sh
+      install:
+        - source travis/install.sh
+      before_script:
+        - source travis/before_script.sh
+      script:
+        - source travis/script.sh
+      after_script:
+        - source travis/after_script.sh
 
 cache:
   pip: true
@@ -55,3 +141,6 @@ cache:
     - vendor
     - ${HOME}/.composer/cache
     - ${HOME}/.cache/pip
+
+notifications:
+  email: false
