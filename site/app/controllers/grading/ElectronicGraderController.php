@@ -565,6 +565,13 @@ class ElectronicGraderController extends AbstractController {
             }
             if ($team) {
                 $teams_to_grade = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+                //order teams first by registration section, then by leader id.
+                usort($teams_to_grade, function($a, $b) {
+                    if($a->getRegistrationSection() == $b->getRegistrationSection())
+                        return $a->getMembers()[0] < $b->getMembers()[0] ? -1 : 1;
+                    return $a->getRegistrationSection() < $b->getRegistrationSection() ? -1 : 1;
+                });
+
             }
             else {
                 $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections,$orderBy="registration_section,user_id;");
@@ -583,6 +590,12 @@ class ElectronicGraderController extends AbstractController {
             }
             if ($team) {
                 $teams_to_grade = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+                //order teams first by rotating section, then by leader id.
+                usort($teams_to_grade, function($a, $b) {
+                    if($a->getRotatingSection() == $b->getRotatingSection())
+                        return $a->getMembers()[0] < $b->getMembers()[0] ? -1 : 1;
+                    return $a->getRotatingSection() < $b->getRotatingSection() ? -1 : 1;
+                });
                 //$total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
                 $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
             }
