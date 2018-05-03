@@ -4,74 +4,48 @@ dist: trusty
 
 jobs:
   include:
-    - &boostrap
+    - &01_lint
       stage: Lint
       php: 7.0
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
+        - travis_retry composer install --prefer-dist --no-interaction
       script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - <<: *bootstrap
+        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+    - <<: *01_lint
       php: 7.1
-    - <<: *bootstrap
+    - <<: *01_lint
       php: 7.2
 
-    - <<: *bootstrap
-      stage: Unit_Test
+    - &02_unit
+      stage: Unit test
       php: 7.0
-    - <<: *bootstrap
+      script:
+        - vendor/bin/phpunit --version
+        - vendor/bin/phpunit --configuration tests/phpunit.xml
+      after_success:
+        - travis_retry php vendor/bin/coveralls -v
+    - <<: *02_unit
       php: 7.1
-    - <<: *bootstrap
+    - <<: *02_unit
       php: 7.2
 
-    - stage: E2E_Test
+    - &03_e2e
+      stage: E2e test
       php: 7.0
       addons:
         postgresql: "9.5"
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - php: 7.1
+      script: skip
+    - <<: *03_e2e
+      php: 7.1
       addons:
         postgresql: "9.5"
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - php: 7.2
+    - <<: *03_e2e
+      php: 7.2
       addons:
         postgresql: "9.5"
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
 
-    - stage: Integration_Test
+    - &04_integration
+      stage: Integration test
       language: cpp
       addons:
         apt:
@@ -81,17 +55,9 @@ jobs:
             - g++-5
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-      before_install: 
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - language: cpp
+      script: skip
+    - <<: 04_integration
+      language: cpp
       addons:
         apt:
           sources:
@@ -100,17 +66,8 @@ jobs:
             - g++-6
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-      before_install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - language: cpp
+    - <<: 04_integration
+      language: cpp
       addons:
         apt:
           sources:
@@ -119,17 +76,8 @@ jobs:
             - g++-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-      before_install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - language: cpp
+    - <<: 04_integration
+      language: cpp
       addons:
         apt:
           sources:
@@ -139,17 +87,8 @@ jobs:
             - clang-3.8
       env:
         - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
-      before_install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - language: cpp
+    - <<: 04_integration
+      language: cpp
       addons:
         apt:
           sources:
@@ -158,17 +97,8 @@ jobs:
             - clang-4.0
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-      before_install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-    - language: cpp
+    - <<: 04_integration
+      language: cpp
       addons:
         apt:
           sources:
@@ -177,17 +107,6 @@ jobs:
             - clang-5.0
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
-      before_install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/install.sh
-      before_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_script.sh
-      script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/script.sh
-      after_script:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/after_script.sh
-
 
 cache:
   pip: true
