@@ -57,6 +57,21 @@ jobs:
     - <<: *02-unit
       php: 7.2
 
+    - &03-e2e
+      stage: E2e test
+      php: 7.0
+      addons:
+        postgresql: "9.5"
+      script: skip
+    - <<: *03-e2e
+      php: 7.1
+      addons:
+        postgresql: "9.5"
+    - <<: *03-e2e
+      php: 7.2
+      addons:
+        postgresql: "9.5"
+
 cache:
   pip: true
   directories:
