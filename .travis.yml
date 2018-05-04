@@ -40,6 +40,19 @@ jobs:
     - <<: *01-lint
       php: 7.2
 
+    - &02-unit
+      stage: 02 unit test
+      php: 7.0
+      script:
+        - vendor/bin/phpunit --version
+        - vendor/bin/phpunit --configuration tests/phpunit.xml
+      after_success:
+        - travis_retry php vendor/bin/coveralls -v
+    - <<: *02-unit
+      php: 7.1
+    - <<: *02-unit
+      php: 7.2
+
 cache:
   pip: true
   directories:
