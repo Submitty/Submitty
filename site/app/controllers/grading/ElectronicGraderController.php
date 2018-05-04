@@ -587,7 +587,7 @@ class ElectronicGraderController extends AbstractController {
                 $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
             }
             else {
-                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections,$orderBy="rotating_section,user_id;");
+                $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections,$orderBy="rotating_section,user_id;");
                 $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
             }
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
@@ -846,25 +846,21 @@ class ElectronicGraderController extends AbstractController {
                 }
                 $index++;
             }
-            // create new marks
-            /*
-            $order_counter = $this->core->getQueries()->getGreatestGradeableComponentMarkOrder($component);
-            $order_counter++;
+            
+            // Create new marks
             for ($i = $index; $i < $_POST['num_mark']; $i++) {
                 $mark = new GradeableComponentMark($this->core);
                 $mark->setGcId($component->getId());
                 $mark->setPoints($_POST['marks'][$i]['points']);
                 $mark->setNote($_POST['marks'][$i]['note']);
-                $mark->setOrder($order_counter);
+                $mark->setOrder($_POST['marks'][$i]['order']);
                 $mark_id = $mark->save();
                 $mark->setId($mark_id);
                 $_POST['marks'][$i]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                 if($all_false === false) {
                     $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
                 }
-                $order_counter++;
             }
-            */
         }
         //generates the HW Report each time a mark is saved
         $hwReport = new HWReport($this->core);

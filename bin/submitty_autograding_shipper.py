@@ -193,7 +193,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
     obj = grade_item.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
-    is_batch = obj["regrade"]
+    is_batch = "regrade" in obj and obj["regrade"]
     grade_items_logging.log_message(JOB_ID, jobname=item_name, which_untrusted=which_untrusted,
                                     is_batch=is_batch, message="Prepared job for " + which_machine)
     return True
@@ -207,7 +207,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
     obj = grade_item.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
-    is_batch = obj["regrade"]
+    is_batch = "regrade" in obj and obj["regrade"]
 
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
