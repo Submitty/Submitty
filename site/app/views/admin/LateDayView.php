@@ -17,13 +17,15 @@ class LateDayView extends AbstractView {
                 Students may use these additional late days for any future homeworks (after the specificed date).<br><br><br>
             </p>
             <div class="option-title">Single Student Entry<br></div>
-            <div class="option" style="width:30%; display:inline-block;">Student ID:<br><input class="option-input" type="text" name="user_id" id="user_id" style="float:left"></div>
-            <div class="option" style="width:30%; display:inline-block;">Datestamp (MM/DD/YY):<br><input class="option-input" type="text" name="datestamp" id="datestamp" style="float:left"></div>
-            <div class="option" style="width:15%; display:inline-block;">Late Days:<br><input class="option-input" type="text" name="late_days" id="late_days" style="float:left"></div>
+            <div class="option" style="width:30%; display:inline-block;"><label for="user_id">Student ID:<br></label><input class="option-input" type="text" name="user_id" id="user_id" style="float:left"></div>
+            <div class="option" style="width:30%; display:inline-block;"><label for="datestamp">Datestamp (MM/DD/YY):<br></label><input class="option-input" type="text" name="datestamp" id="datestamp" style="float:left"></div>
+            <div class="option" style="width:15%; display:inline-block;"><label for="late_days">Late Days:<br></label><input class="option-input" type="text" name="late_days" id="late_days" style="float:left"></div>
             <div class="option" style="width:15%; display:inline-block; float:right;"><br><input class="btn btn-primary" type="submit" style="float:left"></div>
             <div class="option-title"><br><br>Multiple Student Entry Via CSV Upload</div>
             <div>Do not use column headers. CSV must be of the following form: student_id, MM/DD/YY, late_days</div>
-            <div style="padding-bottom:20px;"><input type="file" name="csv_upload" id="csv_upload" onchange="return updateLateDays($(this));"></div>
+            <div style="padding-bottom:10px;"><input type="file" name="csv_upload" id="csv_upload" onchange="return updateLateDays($(this));"></div>
+            <div style="padding-bottom:2px;"><input type="radio" style="margin:-3px 7px 0 0;" name="csv_overwrite" id="overwrite_all" value="overwrite_all" checked><label for="overwrite_all">Upload overwrites <em>all</em> values</label></div>
+            <div><input type="radio" style="margin:-3px 7px 0 0;" name="csv_overwrite" id="use_max" value="use_max"><label for="use_max">Do not overwrite higher values</label></div>
     </form>
     </div>
 
@@ -80,7 +82,7 @@ $return .= <<<HTML
     });
 </script>
 HTML;
-        return $return;
+        return $return . nl2br(str_replace(' ', '&nbsp;', var_export($_POST, true)));
     }
 }
 
