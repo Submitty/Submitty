@@ -24,8 +24,8 @@ class LateDayView extends AbstractView {
             <div class="option-title"><br><br>Multiple Student Entry Via CSV Upload</div>
             <div>Do not use column headers. CSV must be of the following form: student_id, MM/DD/YY, late_days</div>
             <div style="padding-bottom:10px;"><input type="file" name="csv_upload" id="csv_upload" onchange="return updateLateDays($(this));"></div>
-            <div style="padding-bottom:2px;"><input type="radio" style="margin:-3px 7px 0 0;" name="csv_overwrite" id="overwrite_all" value="overwrite_all" checked><label for="overwrite_all">Upload overwrites <em>all</em> values</label></div>
-            <div><input type="radio" style="margin:-3px 7px 0 0;" name="csv_overwrite" id="use_max" value="use_max"><label for="use_max">Do not overwrite higher values</label></div>
+            <div style="padding-bottom:2px;"><input type="radio" style="margin:-3px 7px 0 0;" name="csv_option" id="overwrite_all" value="overwrite_all" checked><label for="overwrite_all">Upload overwrites <em>all</em> values</label></div>
+            <div><input type="radio" style="margin:-3px 7px 0 0;" name="csv_option" id="use_max" value="use_max"><label for="use_max">Do not overwrite higher values</label></div>
     </form>
     </div>
 
@@ -82,7 +82,7 @@ $return .= <<<HTML
     });
 </script>
 HTML;
-        return $return . nl2br(str_replace(' ', '&nbsp;', var_export($_POST, true)));
+        return $return;
     }
 }
 
