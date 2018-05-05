@@ -101,6 +101,18 @@ public:
     assert (maximums.find(id) != maximums.end());
     return maximums.find(id)->second;
   }
+  float getScaleMaximum(const std::string &id) const {
+    if (scale_maximums.find(id) == scale_maximums.end()) {
+      return -1;
+    }
+    return scale_maximums.find(id)->second;
+  }
+  float getItemPercentage(const std::string &id) const {
+    if (item_percentages.find(id) == item_percentages.end())
+      return -1;
+    else
+      return item_percentages.find(id)->second;
+  }
   float getClamp(const std::string &id) const {
     assert (clamps.find(id) != clamps.end());
     return clamps.find(id)->second;
@@ -135,6 +147,16 @@ public:
     assert (maximums.find(id) == maximums.end());
     maximums[id] = maximum;
   }
+  void setScaleMaximum(const std::string&id, float scale_maximum) {
+    assert (hasCorrespondence(id));
+    assert (scale_maximums.find(id) == scale_maximums.end());
+    scale_maximums[id] = scale_maximum;
+  }
+  void setItemPercentage(const std::string&id, float item_percentage) {
+    assert (hasCorrespondence(id));
+    assert (item_percentages.find(id) == item_percentages.end());
+    item_percentages[id] = item_percentage;
+  }
   void setClamp(const std::string&id, float clamp) {
     assert (hasCorrespondence(id));
     assert (clamps.find(id) == clamps.end());
@@ -149,6 +171,8 @@ private:
   int remove_lowest;
   std::map<std::string,std::pair<int,std::string> > correspondences;
   std::map<std::string,float> maximums;
+  std::map<std::string,float> scale_maximums;
+  std::map<std::string,float> item_percentages;
   std::map<std::string,float> clamps;
   std::map<std::string,bool> released;
 };

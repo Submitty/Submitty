@@ -575,10 +575,18 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
       float maximum = grade_id.value("max",0);
       GRADEABLES[g].setMaximum(token_key,maximum);
 
+      if (grade_id.find("scale_max") != grade_id.end()) {
+        float scale_maximum = grade_id.value("scale_max",0);
+        assert (scale_maximum > 0);
+        GRADEABLES[g].setScaleMaximum(token_key,scale_maximum);
+      }
+      if (grade_id.find("percent") != grade_id.end()) {
+        float item_percentage = grade_id.value("percent",-1.0);
+        assert (item_percentage >= 0 && item_percentage <= 1.0);
+        GRADEABLES[g].setItemPercentage(token_key,item_percentage);
+      }
       float clamp = grade_id.value("clamp",-1);
       GRADEABLES[g].setClamp(token_key,clamp);
-      
-      //std::cout << "scores " << p_score << " "<< a_score << " " << b_score <<  " " << c_score << " " << d_score << std::endl;
 
       assert (p_score >= a_score &&
               a_score >= b_score &&
@@ -603,7 +611,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
       int active = exam_data["active"].get<int>();
     if (active == 1) {
 
-                  GLOBAL_ACTIVE_TEST_ZONE = k;
+      GLOBAL_ACTIVE_TEST_ZONE = k;
 
         for (nlohmann::json::iterator itr2 = (exam_data).begin(); itr2 != (exam_data).end(); itr2++) {
           std::string token2 = itr2.key();
@@ -1621,11 +1629,18 @@ void load_student_grades(std::vector<Student*> &students) {
                   }
 
                   std::string other_note = "";
-                  //                  nlohmann::json obj = (*itr2).value("text",nlohmann::json::object());
                   nlohmann::json::iterator itr3 = itr2->find("components");
                   if (itr3 != itr2->end()) {
                     for (std::size_t i = 0; i < itr3->size(); i++) {
-                      std::string component_title = (*itr3)[i].value("title","");
+                      std::string component_title = "placeholder";
+                      assert ((*itr3)[i].find("title") != (*itr3)[i].end());
+                      if ((*itr3)[i].find("title")->is_string()) {
+                        component_title = (*itr3)[i].value("title","");
+                      } else {
+                        // title is sometimes a number...  convert to string
+                        assert ((*itr3)[i].find("title")->is_number());
+                        component_title = std::to_string((*itr3)[i].value("title",0));
+                      }
                       std::string component_comment = (*itr3)[i].value("comment","");
                       if (component_title == "Notes" && component_comment != "") {
                         other_note += " " + component_comment;
