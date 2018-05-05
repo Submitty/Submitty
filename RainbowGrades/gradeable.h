@@ -97,7 +97,7 @@ public:
     assert (released.find(id) != released.end());
     return released.find(id)->second;
   }
-  float getMaximum(const std::string &id) const {
+  float getItemMaximum(const std::string &id) const {
     assert (maximums.find(id) != maximums.end());
     return maximums.find(id)->second;
   }
