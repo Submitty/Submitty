@@ -151,27 +151,35 @@ class ReportController extends AbstractController {
             $entry = [
                 'id' => $gradeable->getId(),
                 'name' => $gradeable->getName(),
+                'gradeable_type' => GradeableType::typeToString($gradeable->getType()),
                 'grade_released_date' => $gradeable->getGradeReleasedDate()->format('Y-m-d H:i:s O'),
                 'autograding_score' => $autograding_score,
                 'tagrading_score' => $ta_grading_score
             ];
 
-            if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
-               $entry['score'] = max(0,floatval($autograding_score) + floatval($ta_grading_score));
+            if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+                $entry['score'] = max(0, $ta_grading_score);
             }
             else {
-                $entry['score'] = 0;
-                if ($gradeable->validateVersions(-1)) {
-                    $entry['note'] = 'This has not been graded yet.';
-                }
-                elseif ($gradeable->getActiveVersion() !== 0) {
-                    $entry['note'] = 'Score is set to 0 because there are version conflicts.';
-                }
-            }
-
-            if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 $entry['overall_comment'] = $gradeable->getOverallComment();
-                $this->addLateDays($gradeable, $entry, $total_late_used);
+
+                if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
+                    $entry['score'] = max(0, $autograding_score + $ta_grading_score);
+                    $this->addLateDays($gradeable, $entry, $total_late_used);
+                }
+                else {
+                    $entry['score'] = 0;
+                    if ($gradeable->validateVersions(-1)) {
+                        $entry['note'] = 'This has not been graded yet.';
+                        // can't be late if not submitted
+                        $entry['days_late'] = 0;
+                        $entry['status'] = 'unsubmitted';
+                    }
+                    elseif ($gradeable->getActiveVersion() !== 0) {
+                        $entry['note'] = 'Score is set to 0 because there are version conflicts.';
+                        $this->addLateDays($gradeable, $entry, $total_late_used);
+                    }
+                }
             }
 
             $entry['components'] = [];
