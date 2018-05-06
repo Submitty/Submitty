@@ -77,6 +77,18 @@ public:
     return "";
   }
 
+  void isResubmit(int index,
+                  std::string &original_id, std::string &resubmit_id,
+                  float &autograde_replacement_percentage) {
+    std::string id = getID(index);
+    if (original_ids.find(id) == original_ids.end()) return;
+    assert (resubmit_ids.find(id) != resubmit_ids.end());
+    assert (autograde_replacement_percentages.find(id) != autograde_replacement_percentages.end());
+    original_id = original_ids.find(id)->second;
+    resubmit_id = resubmit_ids.find(id)->second;
+    autograde_replacement_percentage = autograde_replacement_percentages.find(id)->second;
+  }
+
   bool hasCorrespondence(const std::string &id) const {
     /*
     for (std::map<std::string,std::pair<int,std::string> >::const_iterator itr = correspondences.begin();
@@ -163,6 +175,16 @@ public:
     clamps[id] = clamp;
   }
 
+  void setResubmissionValues(const std::string &id,
+                             const std::string &original_id, const std::string &resubmit_id,
+                             const std::string &title,
+                             float autograde_replacement_percentage) {
+    setCorrespondenceName(id,title);
+    original_ids[id] = original_id;
+    resubmit_ids[id] = resubmit_id;
+    autograde_replacement_percentages[id] = autograde_replacement_percentage;
+  }
+
 private:
 
   // REPRESENTATION
@@ -175,6 +197,9 @@ private:
   std::map<std::string,float> item_percentages;
   std::map<std::string,float> clamps;
   std::map<std::string,bool> released;
+  std::map<std::string,std::string> original_ids;
+  std::map<std::string,std::string> resubmit_ids;
+  std::map<std::string,float> autograde_replacement_percentages;
 };
 
 // ===============================================================================
