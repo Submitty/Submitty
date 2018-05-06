@@ -1418,6 +1418,13 @@ void load_student_grades(std::vector<Student*> &students) {
             }
             if (itr.value()[e].value("id","") == resubmit_id) {
               resubmit_autograde = itr.value()[e].value("autograding_score",0);
+              // SIMILAR WORKAROUND
+              float resubmit_score = itr.value()[e].value("score",0);
+              if (resubmit_score == 0) {
+                resubmit_autograde = 0;
+              }
+              // END WORKAROUND
+
             }
           }
         }
