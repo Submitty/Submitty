@@ -58,7 +58,7 @@ jobs:
       php: 7.2
 
     - &03-e2e
-      stage: E2e test
+      stage: 03 e2e test
       php: 7.0
       addons:
         postgresql: "9.5"
@@ -84,16 +84,6 @@ jobs:
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
       script: skip
-    - <<: 04-integration
-      language: cpp
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
-      env:
-        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
 
 cache:
   pip: true
