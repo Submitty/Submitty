@@ -161,7 +161,7 @@ jobs:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
       after_script:
         # - source .setup/travis/print_debug.sh
-        - ls -la /var/log/apache2
+        - sudo ls -la /var/log/apache2
     - <<: *03-e2e
       php: 7.1
     - <<: *03-e2e
