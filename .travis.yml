@@ -131,7 +131,7 @@ jobs:
         - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
         - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
         - sudo cp ${TRAVIS_BUILD_DIR}/.setup/travis/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf
-        - sudo a2enmod rewrite rewrite actions fastcgi alias headers
+        - sudo a2enmod rewrite rewrite actions fastcgi cgi alias headers
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
         - sudo sed -i -e "s,www-data,travis,g" /etc/apache2/envvars
         - sudo chown -R travis:travis /var/lib/apache2/fastcgi
@@ -143,9 +143,6 @@ jobs:
         - sudo a2ensite submitty
         - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
         - sudo chmod -R 755 /usr/local/submitty
-        - ls -la /usr/local/submitty
-        - ls -la /usr/local/submitty/site
-        - ls -la /usr/local/submitty/site/cgi-bin
         - sudo chmod -R 777 /usr/local/submitty/test_suite
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
         - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
@@ -157,13 +154,7 @@ jobs:
         - "sh -e /etc/init.d/xvfb start"
         - sleep 3 # give xvfb some time to start
       script:
-        - curl http://localhost/cgi-bin/pam_check.cgi
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
-      after_script:
-        # - source .setup/travis/print_debug.sh
-        - sudo ls -la /var/log/apache2
-        - sudo cat /var/log/apache2/error.log
-        - sudo cat /var/log/apache2/submitty.log
     - <<: *03-e2e
       php: 7.1
     - <<: *03-e2e
