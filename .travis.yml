@@ -98,6 +98,14 @@ jobs:
             - libboost-all-dev
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
+        - pip3 install -U pip
+        - pip3 install python-pam
+        - pip3 install PyYAML
+        - pip3 install psycopg2-binary
+        - pip3 install sqlalchemy
+        - pip3 install pylint_runner
+        - pip3 install python-dateutil
+        - pip3 install selenium
         - wget http://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip
         - unzip chromedriver_linux64.zip
         - sudo chmod u+x chromedriver
