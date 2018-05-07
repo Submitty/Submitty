@@ -33,6 +33,7 @@ jobs:
       addons:
         apt:
           sources:
+            - llvm-toolchain-precise-5.0
             - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
             - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
           # You cannot put just any Ubuntu trusty package here and expect to install them and that
@@ -42,7 +43,7 @@ jobs:
             - build-essential
             - automake
             - cmake
-            - clang
+            - clang-5.0
             - g++-multilib
             - libseccomp2
             - seccomp
