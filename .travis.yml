@@ -42,28 +42,28 @@ jobs:
       php: 7.2
 
     # Lint the codebase to ensure that the code is compliant to our system
-    - &01-lint
-      stage: 01 lint
-      php: 7.0
-      script:
-        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-    - <<: *01-lint
-      php: 7.1
-    - <<: *01-lint
-      php: 7.2
+#    - &01-lint
+#      stage: 01 lint
+#      php: 7.0
+#      script:
+#        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+#    - <<: *01-lint
+#      php: 7.1
+#    - <<: *01-lint
+#      php: 7.2
 
-    - &02-unit
-      stage: 02 unit test
-      php: 7.0
-      script:
-        - vendor/bin/phpunit --version
-        - vendor/bin/phpunit --configuration tests/phpunit.xml
-      after_success:
-        - travis_retry php vendor/bin/coveralls -v
-    - <<: *02-unit
-      php: 7.1
-    - <<: *02-unit
-      php: 7.2
+#    - &02-unit
+#      stage: 02 unit test
+#      php: 7.0
+#      script:
+#        - vendor/bin/phpunit --version
+#        - vendor/bin/phpunit --configuration tests/phpunit.xml
+#      after_success:
+#        - travis_retry php vendor/bin/coveralls -v
+#    - <<: *02-unit
+#      php: 7.1
+#    - <<: *02-unit
+#      php: 7.2
 
     - &03-e2e
       stage: 03 e2e test
@@ -143,6 +143,9 @@ jobs:
         - sudo a2ensite submitty
         - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
         - sudo chmod -R 755 /usr/local/submitty
+        - ls -la /usr/local/submitty
+        - ls -la /usr/local/submitty/site
+        - ls -la /usr/local/submitty/site/cgi-bin
         - sudo chmod -R 777 /usr/local/submitty/test_suite
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
         - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
@@ -157,7 +160,8 @@ jobs:
         - curl http://localhost/cgi-bin/pam_check.cgi
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
       after_script:
-        - source .setup/travis/print_debug.sh
+        # - source .setup/travis/print_debug.sh
+        - ls -la /var/log/apache2
     - <<: *03-e2e
       php: 7.1
     - <<: *03-e2e
@@ -170,11 +174,12 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
           packages:
-            - clang
-            - g++-5
+            - clang-3.8
+            - g++-multilib
       env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
       before_install:
         - sudo apt-add-repository "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
         - sudo apt-add-repository "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
@@ -193,39 +198,6 @@ jobs:
         - ./.setup/travis/setup.sh
         - sudo ./.setup/travis/setup_test_suite.sh
       script: sudo /usr/local/submitty/test_suite/integrationTests/run.py
-    - <<: *04-integration
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - clang
-            - g++-6
-      env:
-        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-    - <<: *04-integration
-      language: cpp
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - clang
-            - g++-7
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-    - <<: *04-integration
-      language: cpp
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
-          packages:
-            - clang-3.8
-            - g++-multilib
-      env:
-        - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
     - <<: *04-integration
       language: cpp
       addons:
