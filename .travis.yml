@@ -143,6 +143,9 @@ jobs:
         - sudo a2ensite submitty
         - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
         - sudo chmod -R 755 /usr/local/submitty
+        - ls -la /usr/local/submitty
+        - ls -la /usr/local/submitty/site
+        - ls -la /usr/local/submitty/site/cgi-bin
         - sudo chmod -R 777 /usr/local/submitty/test_suite
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
         - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
@@ -155,7 +158,7 @@ jobs:
         - sleep 3 # give xvfb some time to start
       script:
         - curl http://localhost/cgi-bin/pam_check.cgi
-        # - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
+        - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
       after_script:
         # - source .setup/travis/print_debug.sh
         - sudo ls -la /var/log/apache2
