@@ -39,8 +39,6 @@ jobs:
           # they must be in this list: https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-trusty
           # otherwise you'll have to install it via "sudo apt-get install ..." in the before_install section
           packages:
-            - apache2
-            - libapache2-mod-fastcgi
             - build-essential
             - automake
             - cmake
@@ -57,14 +55,13 @@ jobs:
             - libpcre3
             - libpcre3-dev
             - unzip
-            - google-chrome-stable
-            - libpam-passwdqc
             - libboost-all-dev
-      env:
-        - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
+      env: CLANG_VER="3.8"
       before_install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/setup_llvm.sh
       install:
+        - sudo apt-get install clang-${CLANG_VER}
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
@@ -77,6 +74,8 @@ jobs:
         - ./.setup/travis/setup.sh
         - sudo ./.setup/travis/setup_test_suite.sh
       script: sudo /usr/local/submitty/test_suite/integrationTests/run.py
+    - <<: *04-integration
+      env: CLANG_VER="4.0"
 
 notifications:
   email: false
