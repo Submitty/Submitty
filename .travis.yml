@@ -155,12 +155,8 @@ jobs:
         - TEST_URL="http://localhost" python -m unittest discover -v
     - <<: *03-e2e
       php: 7.1
-      addons:
-        postgresql: "9.5"
     - <<: *03-e2e
       php: 7.2
-      addons:
-        postgresql: "9.5"
 
     - &04-integration
       stage: Integration test
@@ -170,16 +166,30 @@ jobs:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - clang
             - g++-5
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-      script: skip
+      before_install:
+        - sudo apt-add-repository "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
+        - sudo apt-add-repository "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      install:
+        - sudo apt-get install -qqy build-essential automake cmake libseccomp2 seccomp libseccomp-dev valgrind
+        - sudo apt-get install -qqy pkg-config flex bison poppler-utils libpcre3 libpcre3-dev unzip libboost-all-dev
+        - pip3 install -U pip
+        - pip3 install PyYAML
+        - pip3 install python-dateutil
+        - ./.setup/travis/setup.sh
+        - sudo ./.setup/travis/setup_test_suite.sh
+      script: sudo /usr/local/submitty/test_suite/integrationTests/run.py
     - <<: *04-integration
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - clang
             - g++-6
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
@@ -190,6 +200,7 @@ jobs:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - clang
             - g++-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
@@ -202,6 +213,7 @@ jobs:
             - llvm-toolchain-precise-3.8
           packages:
             - clang-3.8
+            - g++-multilib
       env:
         - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
     - <<: *04-integration
@@ -212,6 +224,7 @@ jobs:
             - llvm-toolchain-trusty-4.0
           packages:
             - clang-4.0
+            - g++-multilib
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
     - <<: *04-integration
@@ -222,6 +235,7 @@ jobs:
             - llvm-toolchain-trusty-5.0
           packages:
             - clang-5.0
+            - g++-multilib
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
