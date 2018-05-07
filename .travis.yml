@@ -180,6 +180,11 @@ jobs:
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
+        - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
+        - python3 setup.py install
+        - popd
+        - sudo chmod -R 555 /usr/local/lib/python*/
+        - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
         - ./.setup/travis/setup.sh
         - sudo ./.setup/travis/setup_test_suite.sh
       script: sudo /usr/local/submitty/test_suite/integrationTests/run.py
