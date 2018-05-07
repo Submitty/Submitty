@@ -24,8 +24,6 @@ class BaseTestCase(unittest.TestCase):
     USER_NAME = "Joe"
     USER_PASSWORD = "student"
 
-    """:type : webdriver.Chrome"""
-
     def __init__(self, testname, user_id=None, user_password=None, user_name=None, log_in=True):
         super().__init__(testname)
         if "TEST_URL" in os.environ and os.environ['TEST_URL'] is not None:
@@ -33,6 +31,7 @@ class BaseTestCase(unittest.TestCase):
         else:
             self.test_url = BaseTestCase.TEST_URL
         self.driver = None
+        """ :type driver: webdriver.Chrome """
         self.options = Options()
         self.options.add_argument('--headless')
         self.options.add_argument("--disable-extensions")
