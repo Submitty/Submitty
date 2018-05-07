@@ -98,7 +98,7 @@ jobs:
             - libboost-all-dev
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - wget http://chromedriver.storage.googleapis.com/2.35/chromedriver_linux64.zip
+        - wget http://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip
         - unzip chromedriver_linux64.zip
         - sudo chmod u+x chromedriver
         - sudo mv chromedriver /usr/bin/
@@ -116,11 +116,16 @@ jobs:
         - PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${TRAVIS_BUILD_DIR}/site/data/submitty_db.sql
         - sudo ./.setup/travis/autograder.sh
         - ./.setup/travis/setup.sh
-        - if [ ${INTEGRATION_SUITE} = false ]; then sudo /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample; fi
+        - sudo /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample
         - sudo ./.setup/travis/setup_test_suite.sh
         - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
-        - sudo a2enmod include rewrite actions cgi alias headers
+        - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+        - sudo cp ${TRAVIS_BUILD_DIR}/.setup/travis/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf
+        - sudo a2enmod rewrite rewrite actions fastcgi alias headers
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - sudo sed -i -e "s,www-data,travis,g" /etc/apache2/envvars
+        - sudo chown -R travis:travis /var/lib/apache2/fastcgi
+        - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
         - sudo a2dissite 000-default
         - sudo rm -rf /etc/apache2/sites-available/*
         - sudo rm -rf /etc/apache2/sites-enabled/*
@@ -139,7 +144,7 @@ jobs:
         - "sh -e /etc/init.d/xvfb start"
         - sleep 3 # give xvfb some time to start
       script:
-        - TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"
+        - TEST_URL="http://localhost" python -m unittest discover -v
     - <<: *03-e2e
       php: 7.1
       addons:

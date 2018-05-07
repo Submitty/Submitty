@@ -49,7 +49,7 @@ class BaseTestCase(unittest.TestCase):
         self.use_log_in = log_in
 
     def setUp(self):
-        self.driver = webdriver.Chrome(chrome_options=self.options)
+        self.driver = webdriver.Chrome(options=self.options)
         if self.use_log_in:
             self.log_in()
 
