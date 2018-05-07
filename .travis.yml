@@ -100,6 +100,9 @@ jobs:
             - libboost-all-dev
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
+        - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
+        - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
+        - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl; a2enmod php${PHP_VERSION};
         - pip3 install -U pip
         - pip3 install python-pam
         - pip3 install PyYAML
@@ -127,24 +130,18 @@ jobs:
         - PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${TRAVIS_BUILD_DIR}/site/data/submitty_db.sql
         - sudo ./.setup/travis/autograder.sh
         - ./.setup/travis/setup.sh
-        - sudo /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample
+        - if [ ${INTEGRATION_SUITE} = false ]; then sudo /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample; fi
         - sudo ./.setup/travis/setup_test_suite.sh
         - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
-        - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
-        - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-        - sudo cp ${TRAVIS_BUILD_DIR}/.setup/travis/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf
-        - sudo a2enmod rewrite rewrite actions fastcgi cgi alias headers
+        - sudo a2enmod include rewrite actions cgi alias headers
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-        - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
         - sudo a2dissite 000-default
         - sudo rm -rf /etc/apache2/sites-available/*
         - sudo rm -rf /etc/apache2/sites-enabled/*
         - sudo cp -f .setup/travis/apache.conf /etc/apache2/sites-available/submitty.conf
         - sudo a2ensite submitty
+        - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
         - sudo chmod -R 755 /usr/local/submitty
-        - ls -la /usr/local/submitty
-        - ls -la /usr/local/submitty/site
-        - ls -la /usr/local/submitty/site/cgi-bin
         - sudo chmod -R 777 /usr/local/submitty/test_suite
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
         - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'

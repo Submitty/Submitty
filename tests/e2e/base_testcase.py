@@ -82,7 +82,7 @@ class BaseTestCase(unittest.TestCase):
         self.driver.find_element_by_name('user_id').send_keys(user_id)
         self.driver.find_element_by_name('password').send_keys(user_password)
         self.driver.find_element_by_name('login').click()
-        print(self.driver.page_source)
+        # print(self.driver.page_source)
         self.assertEqual(user_name, self.driver.find_element_by_id("login-id").text)
         self.logged_in = True
 
