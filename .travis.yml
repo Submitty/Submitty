@@ -162,6 +162,8 @@ jobs:
       after_script:
         # - source .setup/travis/print_debug.sh
         - sudo ls -la /var/log/apache2
+        - sudo cat /var/log/apache2/error.log
+        - sudo cat /var/log/apache2/submitty.log
     - <<: *03-e2e
       php: 7.1
     - <<: *03-e2e
