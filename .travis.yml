@@ -34,6 +34,7 @@ jobs:
         - pip3 install pylint_runner
         - pip3 install python-dateutil
         - pip3 install selenium
+        - pip3 install pause
       script: skip
     - <<: *00-cache
       php: 7.1
@@ -106,6 +107,7 @@ jobs:
         - pip3 install pylint_runner
         - pip3 install python-dateutil
         - pip3 install selenium
+        - pip3 install pause
         - wget http://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip
         - unzip chromedriver_linux64.zip
         - sudo chmod u+x chromedriver
