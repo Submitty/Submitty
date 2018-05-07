@@ -78,13 +78,11 @@ class BaseTestCase(unittest.TestCase):
             user_name = self.user_name
 
         self.get(url)
-        print(self.driver.page_source)
 
         self.assertIn(title, self.driver.title)
         self.driver.find_element_by_name('user_id').send_keys(user_id)
         self.driver.find_element_by_name('password').send_keys(user_password)
         self.driver.find_element_by_name('login').click()
-        print(self.driver.page_source)
         self.assertEqual(user_name, self.driver.find_element_by_id("login-id").text)
         self.logged_in = True
 
