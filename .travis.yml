@@ -61,7 +61,7 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/setup_llvm.sh
       install:
         #- sudo apt-get install clang
-        - sudo apt-get install clang-${CLANG_VER}
+        #- sudo apt-get install clang-${CLANG_VER}
         - clang --version
         - pip3 install -U pip
         - pip3 install PyYAML
@@ -75,12 +75,12 @@ jobs:
         - ./.setup/travis/setup.sh
         - sudo ./.setup/travis/setup_test_suite.sh
       script: sudo /usr/local/submitty/test_suite/integrationTests/run.py
-    - <<: *04-integration
-      env: CLANG_VER="4.0"
-    - <<: *04-integration
-      env: CLANG_VER="5.0"
-    - <<: *04-integration
-      env: CLANG_VER="6.0"
+    #- <<: *04-integration
+    #  env: CLANG_VER="4.0"
+    #- <<: *04-integration
+    #  env: CLANG_VER="5.0"
+    #- <<: *04-integration
+    #  env: CLANG_VER="6.0"
 
 notifications:
   email: false
