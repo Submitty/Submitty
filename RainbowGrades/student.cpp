@@ -94,6 +94,19 @@ void Student::setGradeableItemGrade(GRADEABLE_ENUM g, int i, float value,
 // =============================================================================================
 // GRADER CALCULATION HELPER FUNCTIONS
 
+class score_object {
+public:
+  score_object(float s,float m,float p,float sm):score(s),max(m),percentage(p),scale_max(sm){}
+  float score;
+  float max;
+  float percentage;
+  float scale_max;
+};
+
+bool operator<(const score_object &a, const score_object &b) {
+  return a.score < b.score;
+}
+
 float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   if (GRADEABLES[g].getCount() == 0) return 0;
   if (GRADEABLES[g].getMaximum() == 0) return 0;
@@ -115,9 +128,14 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   }
 
   // collect the scores in a vector
-  std::vector<float> scores;
+  std::vector<score_object> scores;
   for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
-    scores.push_back(getGradeableItemGrade(g,i).getValue());
+    float s = getGradeableItemGrade(g,i).getValue();
+    std::string id = GRADEABLES[g].getID(i);
+    float m = GRADEABLES[g].getMaximum(id);
+    float p = GRADEABLES[g].getItemPercentage(id);
+    float sm = GRADEABLES[g].getScaleMaximum(id);
+    scores.push_back(score_object(s,m,p,sm));
   }
 
   // sort the scores (smallest first)
@@ -127,12 +145,29 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
           GRADEABLES[g].getRemoveLowest() < GRADEABLES[g].getCount());
 
   // sum the remaining (higher) scores
-  float sum = 0;
+  float sum_max = 0;
   for (int i = GRADEABLES[g].getRemoveLowest(); i < GRADEABLES[g].getCount(); i++) {
-    sum += scores[i];
+    float m = scores[i].max;
+    sum_max += m;
   }
 
-  return 100*GRADEABLES[g].getPercent()*sum/GRADEABLES[g].getMaximum();
+  // sum the remaining (higher) scores
+  float sum = 0;
+  for (int i = GRADEABLES[g].getRemoveLowest(); i < GRADEABLES[g].getCount(); i++) {
+    float s = scores[i].score;
+    float m = scores[i].max;
+    float p = scores[i].percentage;
+    float sm = scores[i].scale_max;
+    float my_max = std::max(m,sm);
+    if (p < 0) {
+      assert (my_max > 0);
+      assert (sum_max > 0);
+      p = std::max(m,sm) / sum_max;
+    }
+    sum += p * s / my_max;
+  }
+
+  return 100*GRADEABLES[g].getPercent()*sum;
 }
 
 
