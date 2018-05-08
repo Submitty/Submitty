@@ -55,7 +55,7 @@ jobs:
             - libpcre3-dev
             - unzip
             - libboost-all-dev
-      env: CLANG_VER="5.0.2"
+      env: CLANG_VER="5.0.1"
       before_install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
