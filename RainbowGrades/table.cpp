@@ -104,7 +104,7 @@ void Table::output(std::ostream& ostr,
                    std::string last_update) const {
 
   global_details = show_details;
-  global_details = true;
+  //global_details = true;
 
   ostr << "<style>\n";
   ostr << ".rotate {\n";
