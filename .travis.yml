@@ -55,11 +55,15 @@ jobs:
             - libpcre3-dev
             - unzip
             - libboost-all-dev
-      env: CLANG_VER="5.0"
+      env: CLANG_VER="5.0.2"
       before_install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/setup_llvm.sh
       install:
+        - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
+        - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-14.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
+        - mkdir ${HOME}/clang+llvm
+        - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
+        - export PATH=${HOME}/clang+llvm/bin:${PATH}
         - sudo apt-get install clang
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/install_llvm.sh
         - pip3 install -U pip
