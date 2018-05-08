@@ -60,11 +60,8 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/setup_llvm.sh
       install:
-        - clang --version
-        - sudo apt-get install clang
-        - clang --version
-        - sudo apt-get install clang-${CLANG_VER}
-        - clang --version
+        - sudo apt-get install -qqy clang
+        - sudo apt-get install -qqy clang-${CLANG_VER}
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
@@ -77,12 +74,9 @@ jobs:
         - ./.setup/travis/setup.sh
         - sudo ./.setup/travis/setup_test_suite.sh
       script: sudo /usr/local/submitty/test_suite/integrationTests/run.py
-    #- <<: *04-integration
-    #  env: CLANG_VER="4.0"
-    #- <<: *04-integration
-    #  env: CLANG_VER="5.0"
-    #- <<: *04-integration
-    #  env: CLANG_VER="6.0"
+        - ls -la /usr/local/submitty/tests/
+    - <<: *04-integration
+      env: CLANG_VER="6.0"
 
 notifications:
   email: false
