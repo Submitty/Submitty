@@ -73,7 +73,8 @@ jobs:
         - sudo ./.setup/travis/autograder.sh
         - ./.setup/travis/setup.sh
         - sudo ./.setup/travis/setup_test_suite.sh
-      script: sudo /usr/local/submitty/test_suite/integrationTests/run.py
+      script:
+        - sudo /usr/local/submitty/test_suite/integrationTests/run.py
         - ls -la /usr/local/submitty/tests/
     - <<: *04-integration
       env: CLANG_VER="6.0.0"
