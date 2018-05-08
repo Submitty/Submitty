@@ -570,7 +570,10 @@ HTML;
                 <div class="box-title">
                     <span class="badge {$background}">{$score}</span>
                     <h4>{$component->getTitle()} <i>{$componentGrader}</i></h4>
-                    <p style="float:left;">{$component->getGradedTAComments('<br>',true,false)}</p>
+                    <div style="float:left;">
+                        <p style="padding-bottom: 10px;">{$component->getStudentComment()}</p>
+                        <p>{$component->getGradedTAComments('<br>',true,false)}</p>
+                    </div>
                 </div>
             </div>
 HTML;

@@ -202,6 +202,16 @@ function addTeamMemberInput(old, i) {
         Add More Users</span>');
 }
 
+function addCategory(old, i) {
+    old.remove()
+    var form = $("#admin-team-form");
+    $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
+    var members_div = $("#admin-team-members");
+    members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+        Add More Users</span>');
+}
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details
@@ -973,6 +983,28 @@ function saveScrollLocationOnRefresh(id){
     });
 }
 
+function modifyThreadList(currentThreadId, currentCategoryId){
+    var category_value = $( "#thread_category option:selected").val();
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                thread_category: category_value,
+                currentThreadId: currentThreadId,
+                currentCategoryId: currentCategoryId
+            },
+            success: function(r){
+               var x = JSON.parse(r).html;
+               x = `${x}`;
+               $(".thread_list").html(x);
+            },
+            error: function(){
+                window.alert("Something went wrong when trying to filter. Please try again.");
+            }
+    })
+}
+
 function replyPost(post_id){
     if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
         $('#'+ post_id + '-reply').css("display","none");
@@ -981,6 +1013,41 @@ function replyPost(post_id){
         $('#'+ post_id + '-reply').css('display', 'block');
     }
 }
+
+function addNewCategory(){
+    var newCategory = $("#new_category_text").val();
+    var url = buildUrl({'component': 'forum', 'page': 'add_category'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                newCategory: newCategory
+            },
+            success: function(data){
+                console.log(data);
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully created category '+ escape(newCategory) +'.</div>';
+                $('#messages').append(message);
+                $('#new_category_text').val(""); 
+                $('#cat').append('<option value="' + json['categoryId'] + '">' + escape(newCategory) +'</option>');
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to add a new category. Please try again.");
+            }
+    })
+}
+
 /*This function ensures that only one reply box is open at a time*/
 function hideReplies(){
     var hide_replies = document.getElementsByClassName("reply-box");
