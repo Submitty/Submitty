@@ -61,7 +61,7 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/setup_llvm.sh
       install:
         - sudo apt-get install -qqy clang
-        - sudo apt-get install -qqy clang-${CLANG_VER}
+        - sudo apt-get install clang-${CLANG_VER}
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
