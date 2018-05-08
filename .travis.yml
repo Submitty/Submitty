@@ -60,8 +60,8 @@ jobs:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/setup_llvm.sh
       install:
-        #- sudo apt-get install clang
-        #- sudo apt-get install clang-${CLANG_VER}
+        - sudo apt-get install clang
+        - sudo apt-get install clang-${CLANG_VER}
         - clang --version
         - pip3 install -U pip
         - pip3 install PyYAML
