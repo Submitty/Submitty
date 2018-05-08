@@ -77,6 +77,10 @@ jobs:
       script: sudo /usr/local/submitty/test_suite/integrationTests/run.py
     - <<: *04-integration
       env: CLANG_VER="4.0"
+    - <<: *05-integration
+      env: CLANG_VER="5.0"
+    - <<: *04-integration
+      env: CLANG_VER="6.0"
 
 notifications:
   email: false
