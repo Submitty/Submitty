@@ -55,12 +55,14 @@ jobs:
             - libpcre3-dev
             - unzip
             - libboost-all-dev
-      env: CLANG_VER="3.8"
+      env: CLANG_VER="5.0"
       before_install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/setup_llvm.sh
       install:
+        - clang --version
         - sudo apt-get install clang
+        - clang --version
         - sudo apt-get install clang-${CLANG_VER}
         - clang --version
         - pip3 install -U pip
