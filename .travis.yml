@@ -52,7 +52,7 @@ jobs:
     - <<: *01-lint
       php: 7.2
 
-    - &02-unit
+    - &02-php-unit
       stage: 02 unit test
       php: 7.0
       script:
@@ -64,6 +64,18 @@ jobs:
       php: 7.1
     - <<: *02-unit
       php: 7.2
+
+    - &02-python-unit
+      language: python
+      python: 3.4
+      script:
+        - pushd python_submitty_utils
+        - python3 setup.py test
+        - popd
+    - <<: *02-python-unit
+      python: 3.5
+    - <<: *02-python-unit
+      python: 3.6
 
     - &03-e2e
       stage: 03 e2e test
