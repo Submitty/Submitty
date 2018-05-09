@@ -1285,7 +1285,7 @@ function updateLateDays(data) {
             $('#user_id').val(this.defaultValue);
             $('#datestamp').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
-            $('#csv_upload').val(this.defaultValue);
+//            $("input:radio[name=csv_option]:checked").val('csv_overwrite');
             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days have been updated.</div>';
             $('#messages').append(message);
         },

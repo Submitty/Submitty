@@ -1661,18 +1661,43 @@ ORDER BY gt.{$section_key}", $params);
     }
 
     /**
-     * Updates a given user's late days allowed effective at a given time
+     * "Upserts" a given user's late days allowed effective at a given time
+     *
+	 * Upsert will attempt update first, and then insert when update fails.
+     * About $csv_options:
+     * default behavior is to overwrite all late days for user and timestamp.
+     * null value is for updating via form.  Should do default behavior.
+     * 'overwrite_all' invokes default behavior for csv upload.
+     * 'use_max' will preserve higher values when csv upload value is lower.
+     *
      * @param string $user_id
      * @param string $timestamp
      * @param integer $days
+     * @param string $csv_option null default value used for update via form.
      */
-    public function updateLateDays($user_id, $timestamp, $days){
-        $this->course_db->query("
-          UPDATE late_days
-          SET allowed_late_days=?
-          WHERE user_id=?
-            AND since_timestamp=?", array($days, $user_id, $timestamp));
+    public function updateLateDays($user_id, $timestamp, $days, $csv_option=null){
+        //Update query and values list.
+		$query = "
+            UPDATE late_days
+            SET allowed_late_days=?
+            WHERE user_id=? AND since_timestamp=?";
+        $vals = array($days, $user_id, $timestamp);
+
+        switch ($csv_option) {
+        case 'use_max':
+        	//Does NOT overwrite a higher (or same) value of allowed late days.
+        	$query .= "AND allowed_late_days<?";
+        	$vals[] = $days;
+        	break;
+        case 'overwrite_all':
+        default:
+        	//Default behavior: overwrite all late days for user and timestamp.
+        	//No adjustment to SQL query.
+    	}
+
+        $this->course_db->query($query, $vals);
         if ($this->course_db->getRowCount() === 0) {
+        	//Update didn't work, insert data instead.
             $this->course_db->query("
             INSERT INTO late_days
             (user_id, since_timestamp, allowed_late_days)
