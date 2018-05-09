@@ -129,7 +129,7 @@ script:
   - pushd site
   - vendor/bin/phpunit --version
   - if [ ${INTEGRATION_SUITE} = false ]; then vendor/bin/phpunit --configuration tests/phpunit.xml; fi
-  - popd site
+  - popd
   - if [ ${INTEGRATION_SUITE} = false ]; then TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"; fi
   - if [ ${INTEGRATION_SUITE} = true ]; then sudo /usr/local/submitty/test_suite/integrationTests/run.py; fi
 
