@@ -70,7 +70,9 @@ install:
   - unzip chromedriver_linux64.zip
   - sudo chmod u+x chromedriver
   - sudo mv chromedriver /usr/bin/
+  - pushd site
   - travis_retry composer install --prefer-dist --no-interaction
+  - popd
   - pip3 install -U pip
   - pip3 install python-pam
   - pip3 install PyYAML
@@ -124,8 +126,10 @@ before_script:
 script:
   # if these fail, travis fails
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+  - pushd site
   - vendor/bin/phpunit --version
   - if [ ${INTEGRATION_SUITE} = false ]; then vendor/bin/phpunit --configuration tests/phpunit.xml; fi
+  - popd site
   - if [ ${INTEGRATION_SUITE} = false ]; then TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"; fi
   - if [ ${INTEGRATION_SUITE} = true ]; then sudo /usr/local/submitty/test_suite/integrationTests/run.py; fi
 
